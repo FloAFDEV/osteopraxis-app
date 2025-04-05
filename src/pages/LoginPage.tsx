@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, Activity } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { GradientBackground } from "@/components/ui/gradient-background";
 
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -39,69 +40,117 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-primary">Rendez-vous Zen</h1>
-          <p className="mt-2 text-muted-foreground">Connectez-vous à votre compte</p>
+    <div className="min-h-screen flex">
+      {/* Left section - Login form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
+        <div className="mb-6">
+          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+            PatientHub
+          </h1>
         </div>
+        
+        <div className="flex-grow flex items-center justify-center">
+          <div className="w-full max-w-md space-y-8">
+            <div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
+                Votre espace dédié aux ostéopathes
+              </h2>
+              <p className="text-gray-400 text-lg">
+                Connectez-vous pour consulter vos dossiers.
+              </p>
+            </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" placeholder="votre@email.com" {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-[#0d1117] text-gray-400">Connexion</span>
+              </div>
+            </div>
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mot de passe</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input type="password" className="pl-10" placeholder="••••••" {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-300">Email :</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                          <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="votre@email.com" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
-                  Connexion...
-                </>
-              ) : (
-                "Se connecter"
-              )}
-            </Button>
-          </form>
-        </Form>
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-300">Mot de passe :</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                          <Input type="password" className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Votre mot de passe" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-        <div className="mt-4 text-center text-sm text-muted-foreground">
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:opacity-90 transition-opacity" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                      Se connecter...
+                    </>
+                  ) : (
+                    "Se connecter"
+                  )}
+                </Button>
+              </form>
+            </Form>
+
+            <div className="text-center text-sm text-gray-400 mt-6">
+              <p>
+                Pour la démo, utilisez : <br />
+                Email: franck.blanchet@example.com <br />
+                Mot de passe: password
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-8 text-center text-sm text-gray-500">
           <p>
-            Pour la démo, utilisez : <br />
-            Email: franck.blanchet@example.com <br />
-            Mot de passe: password
+            La plateforme conçue pour faciliter la gestion des données médicales.<br />
+            Gérez vos rendez-vous (Bientôt disponible)
+          </p>
+          <p className="mt-4">
+            © 2024 PatientHub. Tous droits réservés.
           </p>
         </div>
+      </div>
+
+      {/* Right section - Spine image */}
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+        <img 
+          src="/lovable-uploads/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png" 
+          alt="Image d'une colonne vertébrale" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 to-transparent"></div>
       </div>
     </div>
   );
