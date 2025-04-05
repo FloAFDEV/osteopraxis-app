@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -39,8 +40,8 @@ export function Layout({ children }: LayoutProps) {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
-              <span className="text-primary">Rendez-vous</span>
-              <span className="text-accent">Zen</span>
+              <span className="text-primary">Patient</span>
+              <span className="text-accent">Hub</span>
             </NavLink>
           </div>
           
@@ -105,6 +106,8 @@ export function Layout({ children }: LayoutProps) {
               <Clock className="h-4 w-4" />
               Planning
             </NavLink>
+
+            <ThemeToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -209,6 +212,12 @@ export function Layout({ children }: LayoutProps) {
               <Building className="h-5 w-5" />
               Paramètres du cabinet
             </NavLink>
+
+            <div className="p-2 flex items-center gap-2">
+              <span>Thème</span>
+              <ThemeToggle />
+            </div>
+
             <div
               className="p-2 rounded-md transition-colors flex items-center gap-2 text-destructive mt-4 cursor-pointer"
               onClick={() => {
@@ -227,7 +236,7 @@ export function Layout({ children }: LayoutProps) {
 
       <footer className="border-t py-6 bg-muted/30">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2025 Rendez-vous Zen. Tous droits réservés.</p>
+          <p>© 2025 PatientHub. Tous droits réservés.</p>
           <div className="flex items-center gap-4">
             <NavLink to="/terms" className="hover:text-primary transition-colors">
               Conditions d&apos;utilisation

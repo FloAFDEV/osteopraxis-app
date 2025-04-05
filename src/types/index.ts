@@ -88,3 +88,27 @@ export interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
 }
+
+export interface DashboardData {
+  totalPatients: number;
+  maleCount: number;
+  femaleCount: number;
+  averageAge: number;
+  averageAgeMale: number;
+  averageAgeFemale: number;
+  newPatientsThisMonth: number;
+  newPatientsThisYear: number;
+  newPatientsLastYear: number;
+  appointmentsToday: number;
+  nextAppointment: string;
+  patientsLastYearEnd: number;
+  newPatientsLast30Days: number;
+  thirtyDayGrowthPercentage: number;
+  annualGrowthPercentage: number;
+  monthlyGrowth: {
+    month: string;
+    patients: number;
+    prevPatients: number;
+    growthText: string;
+  }[];
+}
