@@ -107,6 +107,8 @@ export function Layout({ children }: LayoutProps) {
               Planning
             </NavLink>
 
+            <ThemeToggle />
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="ml-2">
@@ -138,8 +140,6 @@ export function Layout({ children }: LayoutProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            <ThemeToggle />
           </nav>
         </div>
       </header>

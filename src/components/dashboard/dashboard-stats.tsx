@@ -22,12 +22,12 @@ export function DashboardStats({ data }: DashboardStatsProps) {
             {data.thirtyDayGrowthPercentage > 0 ? (
               <span className="flex items-center text-green-500">
                 <ArrowUpIcon className="mr-1 h-3 w-3" />
-                {data.thirtyDayGrowthPercentage}% ce mois-ci
+                <span className="truncate">{data.thirtyDayGrowthPercentage}% ce mois-ci</span>
               </span>
             ) : (
               <span className="flex items-center text-red-500">
                 <ArrowDownIcon className="mr-1 h-3 w-3" />
-                {Math.abs(data.thirtyDayGrowthPercentage)}% ce mois-ci
+                <span className="truncate">{Math.abs(data.thirtyDayGrowthPercentage)}% ce mois-ci</span>
               </span>
             )}
           </p>
@@ -56,7 +56,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{data.appointmentsToday}</div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground truncate">
             Prochain: {data.nextAppointment}
           </p>
         </CardContent>

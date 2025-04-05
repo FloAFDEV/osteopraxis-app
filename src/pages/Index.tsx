@@ -20,7 +20,7 @@ const Index = () => {
               Bienvenue sur votre tableau de bord PatientHub pour ostéopathes
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <div className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
               Version Pro
             </div>
