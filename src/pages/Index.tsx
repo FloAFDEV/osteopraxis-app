@@ -2,12 +2,13 @@
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { Activity } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 const Index = () => {
   return (
     <Layout>
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Activity className="h-8 w-8 text-blue-500" />
@@ -28,6 +29,26 @@ const Index = () => {
             </div>
           </div>
         </div>
+        
+        <div className="relative mb-8 overflow-hidden rounded-xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm"></div>
+          <img 
+            src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=2000&q=80" 
+            alt="Professionnel médical au travail"
+            className="w-full h-48 object-cover object-center rounded-xl opacity-60"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center px-4">
+              <h2 className="text-2xl font-bold text-white drop-shadow-md mb-2">
+                Simplifiez la gestion de votre cabinet
+              </h2>
+              <p className="text-white/90 max-w-lg mx-auto drop-shadow-md">
+                Concentrez-vous sur vos patients pendant que PatientHub s'occupe de tout le reste
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <Dashboard />
       </div>
     </Layout>

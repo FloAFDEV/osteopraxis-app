@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home } from "lucide-react";
+import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -71,18 +71,6 @@ export function Layout({ children }: LayoutProps) {
               Accueil
             </NavLink>
             <NavLink
-              to="/appointments"
-              className={({ isActive }) =>
-                cn(
-                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-purple-500",
-                  isActive ? "text-purple-500" : "text-muted-foreground"
-                )
-              }
-            >
-              <Calendar className="h-4 w-4" />
-              Rendez-vous
-            </NavLink>
-            <NavLink
               to="/patients"
               className={({ isActive }) =>
                 cn(
@@ -93,6 +81,18 @@ export function Layout({ children }: LayoutProps) {
             >
               <User className="h-4 w-4" />
               Patients
+            </NavLink>
+            <NavLink
+              to="/appointments"
+              className={({ isActive }) =>
+                cn(
+                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-purple-500",
+                  isActive ? "text-purple-500" : "text-muted-foreground"
+                )
+              }
+            >
+              <Calendar className="h-4 w-4" />
+              Rendez-vous
             </NavLink>
             <NavLink
               to="/schedule"
@@ -106,8 +106,6 @@ export function Layout({ children }: LayoutProps) {
               <Clock className="h-4 w-4" />
               Planning
             </NavLink>
-
-            <ThemeToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -140,6 +138,8 @@ export function Layout({ children }: LayoutProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -161,19 +161,6 @@ export function Layout({ children }: LayoutProps) {
               Accueil
             </NavLink>
             <NavLink
-              to="/appointments"
-              className={({ isActive }) =>
-                cn(
-                  "p-2 rounded-md transition-colors flex items-center gap-2",
-                  isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground"
-                )
-              }
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Calendar className="h-5 w-5" />
-              Rendez-vous
-            </NavLink>
-            <NavLink
               to="/patients"
               className={({ isActive }) =>
                 cn(
@@ -185,6 +172,19 @@ export function Layout({ children }: LayoutProps) {
             >
               <User className="h-5 w-5" />
               Patients
+            </NavLink>
+            <NavLink
+              to="/appointments"
+              className={({ isActive }) =>
+                cn(
+                  "p-2 rounded-md transition-colors flex items-center gap-2",
+                  isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground"
+                )
+              }
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Calendar className="h-5 w-5" />
+              Rendez-vous
             </NavLink>
             <NavLink
               to="/schedule"
@@ -213,7 +213,7 @@ export function Layout({ children }: LayoutProps) {
               Paramètres du cabinet
             </NavLink>
 
-            <div className="p-2 flex items-center gap-2">
+            <div className="p-2 flex items-center justify-between">
               <span>Thème</span>
               <ThemeToggle />
             </div>

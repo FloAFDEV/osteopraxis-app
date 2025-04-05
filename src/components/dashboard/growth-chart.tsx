@@ -40,8 +40,8 @@ export function GrowthChart({ data }: GrowthChartProps) {
                 }}
               />
               <Legend />
-              <Bar dataKey="patients" name="Cette année" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="prevPatients" name="Année précédente" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="patients" name="Cette année" fill="#2563eb" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="prevPatients" name="Année précédente" fill="#9333ea" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

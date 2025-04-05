@@ -11,7 +11,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="overflow-hidden">
-        <div className="absolute h-1 w-full bg-gradient-to-r from-blue-400 to-blue-600 top-0 left-0"></div>
+        <div className="absolute h-1 w-full bg-gradient-to-r from-blue-500 to-blue-600 top-0 left-0"></div>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Patients totaux</CardTitle>
           <Users className="h-4 w-4 text-blue-500" />
