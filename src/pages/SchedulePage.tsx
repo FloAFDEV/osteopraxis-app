@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -140,8 +139,8 @@ const SchedulePage = () => {
             </div>
           </div>
         ) : (
-          <TabsContent value={view} forceMount={true} className="mt-0">
-            {view === "day" ? (
+          <Tabs value={view} defaultValue={view}>
+            <TabsContent value="day">
               <div className="space-y-4">
                 <div className="flex items-center justify-between mb-4">
                   <Button variant="ghost" size="sm" onClick={navigateToPreviousDay}>
@@ -165,7 +164,9 @@ const SchedulePage = () => {
                   getPatientById={getPatientById}
                 />
               </div>
-            ) : (
+            </TabsContent>
+            
+            <TabsContent value="week">
               <div className="space-y-4">
                 <div className="flex items-center justify-between mb-4">
                   <Button variant="ghost" size="sm" onClick={navigateToPreviousWeek}>
@@ -235,8 +236,8 @@ const SchedulePage = () => {
                   ))}
                 </div>
               </div>
-            )}
-          </TabsContent>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </Layout>
