@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building } from "lucide-react";
+import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -40,8 +40,8 @@ export function Layout({ children }: LayoutProps) {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
-              <Activity className="h-5 w-5 text-primary" />
-              <span className="text-gradient font-bold">PatientHub</span>
+              <Activity className="h-5 w-5 text-blue-500" />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 font-bold">PatientHub</span>
             </NavLink>
           </div>
           
@@ -62,8 +62,8 @@ export function Layout({ children }: LayoutProps) {
               to="/"
               className={({ isActive }) =>
                 cn(
-                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-primary",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500",
+                  isActive ? "text-blue-500" : "text-muted-foreground"
                 )
               }
             >
@@ -74,8 +74,8 @@ export function Layout({ children }: LayoutProps) {
               to="/appointments"
               className={({ isActive }) =>
                 cn(
-                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-primary",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-purple-500",
+                  isActive ? "text-purple-500" : "text-muted-foreground"
                 )
               }
             >
@@ -86,8 +86,8 @@ export function Layout({ children }: LayoutProps) {
               to="/patients"
               className={({ isActive }) =>
                 cn(
-                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-primary",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-pink-500",
+                  isActive ? "text-pink-500" : "text-muted-foreground"
                 )
               }
             >
@@ -98,8 +98,8 @@ export function Layout({ children }: LayoutProps) {
               to="/schedule"
               className={({ isActive }) =>
                 cn(
-                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-primary",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500",
+                  isActive ? "text-blue-500" : "text-muted-foreground"
                 )
               }
             >
@@ -113,7 +113,7 @@ export function Layout({ children }: LayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="ml-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                    <AvatarFallback className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-primary-foreground">
                       {getInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -152,7 +152,7 @@ export function Layout({ children }: LayoutProps) {
               className={({ isActive }) =>
                 cn(
                   "p-2 rounded-md transition-colors flex items-center gap-2",
-                  isActive ? "bg-primary/10 text-primary" : "text-foreground"
+                  isActive ? "bg-blue-500/10 text-blue-500" : "text-foreground"
                 )
               }
               onClick={() => setIsMenuOpen(false)}
@@ -165,7 +165,7 @@ export function Layout({ children }: LayoutProps) {
               className={({ isActive }) =>
                 cn(
                   "p-2 rounded-md transition-colors flex items-center gap-2",
-                  isActive ? "bg-primary/10 text-primary" : "text-foreground"
+                  isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground"
                 )
               }
               onClick={() => setIsMenuOpen(false)}
@@ -178,7 +178,7 @@ export function Layout({ children }: LayoutProps) {
               className={({ isActive }) =>
                 cn(
                   "p-2 rounded-md transition-colors flex items-center gap-2",
-                  isActive ? "bg-primary/10 text-primary" : "text-foreground"
+                  isActive ? "bg-pink-500/10 text-pink-500" : "text-foreground"
                 )
               }
               onClick={() => setIsMenuOpen(false)}
@@ -191,7 +191,7 @@ export function Layout({ children }: LayoutProps) {
               className={({ isActive }) =>
                 cn(
                   "p-2 rounded-md transition-colors flex items-center gap-2",
-                  isActive ? "bg-primary/10 text-primary" : "text-foreground"
+                  isActive ? "bg-blue-500/10 text-blue-500" : "text-foreground"
                 )
               }
               onClick={() => setIsMenuOpen(false)}
@@ -204,7 +204,7 @@ export function Layout({ children }: LayoutProps) {
               className={({ isActive }) =>
                 cn(
                   "p-2 rounded-md transition-colors flex items-center gap-2",
-                  isActive ? "bg-primary/10 text-primary" : "text-foreground"
+                  isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground"
                 )
               }
               onClick={() => setIsMenuOpen(false)}
@@ -238,10 +238,10 @@ export function Layout({ children }: LayoutProps) {
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>© 2025 PatientHub. Tous droits réservés.</p>
           <div className="flex items-center gap-4">
-            <NavLink to="/terms" className="hover:text-primary transition-colors">
+            <NavLink to="/terms" className="hover:text-blue-500 transition-colors">
               Conditions d&apos;utilisation
             </NavLink>
-            <NavLink to="/privacy" className="hover:text-primary transition-colors">
+            <NavLink to="/privacy" className="hover:text-purple-500 transition-colors">
               Politique de confidentialité
             </NavLink>
           </div>
