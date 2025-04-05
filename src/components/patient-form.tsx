@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -81,7 +80,10 @@ export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
     defaultValues: patient ? {
       ...patient,
       birthDate: patient.birthDate ? new Date(patient.birthDate) : undefined,
-      childrenAges: patient.childrenAges ? patient.childrenAges.join(", ") : "",
+      // Convert the array of numbers to a comma-separated string
+      childrenAges: patient.childrenAges && Array.isArray(patient.childrenAges) 
+        ? patient.childrenAges.join(", ") 
+        : "",
     } : {
       firstName: "",
       lastName: "",

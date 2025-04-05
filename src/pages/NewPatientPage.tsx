@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
@@ -14,11 +13,16 @@ const NewPatientPage = () => {
   const handleAddPatient = async (patientData: any) => {
     try {
       setLoading(true);
+      
+      // The childrenAges field is now processed by the zod schema transformation
+      // and should already be an array of numbers, no need for any conversion here
+      
       const newPatient = await api.createPatient({
         ...patientData,
         osteopathId: 1, // Pour la démo, nous utilisons l'ostéopathe ID 1
         cabinetId: 1 // Pour la démo, nous utilisons le cabinet ID 1
       });
+      
       toast.success(`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`);
       navigate(`/patients/${newPatient.id}`);
     } catch (error) {
