@@ -88,8 +88,10 @@ const PatientDetailPage = () => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  const birthDate = parseISO(patient.birthDate);
-  const age = differenceInYears(new Date(), birthDate);
+  // Add null check for birthDate
+  const birthDate = patient.birthDate ? parseISO(patient.birthDate) : new Date();
+  const age = patient.birthDate ? differenceInYears(new Date(), birthDate) : 0;
+  
   const upcomingAppointments = appointments
     .filter(app => app.status === "SCHEDULED" && new Date(app.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -152,7 +154,13 @@ const PatientDetailPage = () => {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
-                  {age} ans • Né(e) le {format(birthDate, "dd/MM/yyyy")}
+                  {patient.birthDate ? (
+                    <>
+                      {age} ans • Né(e) le {format(birthDate, "dd/MM/yyyy")}
+                    </>
+                  ) : (
+                    "Date de naissance non spécifiée"
+                  )}
                 </p>
                 
                 <div className="w-full space-y-3">
@@ -200,7 +208,7 @@ const PatientDetailPage = () => {
                 <div>
                   <dt className="text-sm font-medium text-muted-foreground">Enfants</dt>
                   <dd className="mt-1">
-                    {patient.childrenAges.length > 0 
+                    {patient.childrenAges && patient.childrenAges.length > 0 
                       ? `${patient.childrenAges.length} enfant(s) (${patient.childrenAges.sort((a, b) => a - b).join(", ")} ans)`
                       : "Pas d'enfants"}
                   </dd>
