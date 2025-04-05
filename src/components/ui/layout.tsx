@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Calendar, User, Clock, Home, Menu, X, Settings, LogOut, Building } from "lucide-react";
+import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -40,8 +40,8 @@ export function Layout({ children }: LayoutProps) {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
-              <span className="text-primary">Patient</span>
-              <span className="text-accent">Hub</span>
+              <Activity className="h-5 w-5 text-primary" />
+              <span className="text-gradient font-bold">PatientHub</span>
             </NavLink>
           </div>
           
@@ -67,7 +67,7 @@ export function Layout({ children }: LayoutProps) {
                 )
               }
             >
-              <Home className="h-4 w-4" />
+              <Activity className="h-4 w-4" />
               Accueil
             </NavLink>
             <NavLink

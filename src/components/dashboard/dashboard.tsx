@@ -3,8 +3,9 @@ import { DashboardData } from "@/types";
 import { DashboardStats } from "./dashboard-stats";
 import { DemographicsCard } from "./demographics-card";
 import { GrowthChart } from "./growth-chart";
+import { AppointmentsOverview } from "./appointments-overview";
 
-// Sample data for demo purposes
+// Sample data for demo purposes - more accurate and realistic data
 const sampleData: DashboardData = {
   totalPatients: 475,
   maleCount: 217,
@@ -19,7 +20,7 @@ const sampleData: DashboardData = {
   nextAppointment: "14:30 - Marie Dupont",
   patientsLastYearEnd: 388,
   newPatientsLast30Days: 9,
-  thirtyDayGrowthPercentage: 3.8,
+  thirtyDayGrowthPercentage: 1.9,
   annualGrowthPercentage: 22.4,
   monthlyGrowth: [
     { month: "Jan", patients: 8, prevPatients: 6, growthText: "+33%" },
@@ -31,9 +32,9 @@ const sampleData: DashboardData = {
     { month: "Juil", patients: 6, prevPatients: 7, growthText: "-14%" },
     { month: "Août", patients: 5, prevPatients: 4, growthText: "+25%" },
     { month: "Sep", patients: 9, prevPatients: 8, growthText: "+12%" },
-    { month: "Oct", patients: 12, prevPatients: 9, growthText: "+33%" },
+    { month: "Oct", patients: 7, prevPatients: 9, growthText: "-22%" },
     { month: "Nov", patients: 8, prevPatients: 6, growthText: "+33%" },
-    { month: "Déc", patients: 12, prevPatients: 10, growthText: "+20%" }
+    { month: "Déc", patients: 9, prevPatients: 6, growthText: "+50%" }
   ]
 };
 
@@ -42,9 +43,10 @@ export function Dashboard() {
     <div className="space-y-6">
       <DashboardStats data={sampleData} />
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DemographicsCard data={sampleData} />
         <GrowthChart data={sampleData} />
+        <AppointmentsOverview data={sampleData} className="lg:col-span-2" />
       </div>
     </div>
   );

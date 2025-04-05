@@ -5,25 +5,25 @@
 
 @layer base {
   :root {
-    --background: 180 20% 99%;
-    --foreground: 200 50% 20%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 200 50% 20%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 50% 20%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 160 84% 39%;
+    --primary: 222 80% 53%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
-    --secondary-foreground: 200 50% 20%;
+    --secondary-foreground: 222 47% 11%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 175 84% 32%;
+    --accent: 262 83% 58%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -31,7 +31,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 160 84% 39%;
+    --ring: 222 80% 53%;
 
     --radius: 0.5rem;
   }
@@ -46,7 +46,7 @@
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 160 84% 39%;
+    --primary: 222 80% 53%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 222 47% 15%;
@@ -55,7 +55,7 @@
     --muted: 222 47% 15%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 175 84% 32%;
+    --accent: 262 83% 58%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
@@ -63,7 +63,7 @@
 
     --border: 222 47% 15%;
     --input: 222 47% 15%;
-    --ring: 160 84% 39%;
+    --ring: 222 80% 53%;
   }
 }
 
@@ -82,4 +82,12 @@
 
 .hover-scale {
   @apply hover:scale-105 transition-transform duration-200;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-accent to-pink-500;
+}
+
+.bg-shimmer {
+  @apply bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:500px_100%] animate-shimmer;
 }

@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface GrowthChartProps {
   data: DashboardData;
@@ -9,28 +9,39 @@ interface GrowthChartProps {
 
 export function GrowthChart({ data }: GrowthChartProps) {
   return (
-    <Card className="col-span-1 md:col-span-2">
+    <Card className="col-span-1">
       <CardHeader>
-        <CardTitle>Croissance mensuelle des patients</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          <span>Croissance mensuelle des patients</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            {data.newPatientsThisYear} cette année
+          </span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
+        <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data.monthlyGrowth}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip 
                 formatter={(value, name) => {
                   return [value, name === "patients" ? "Patients" : "Année précédente"];
                 }}
                 labelFormatter={(label) => `Mois: ${label}`} 
+                contentStyle={{ 
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--border)',
+                  borderRadius: '6px'
+                }}
               />
-              <Bar dataKey="patients" fill="hsl(var(--primary))" name="patients" />
-              <Bar dataKey="prevPatients" fill="hsl(var(--muted))" name="prevPatients" />
+              <Legend />
+              <Bar dataKey="patients" name="Cette année" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="prevPatients" name="Année précédente" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
