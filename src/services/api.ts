@@ -1,5 +1,4 @@
-
-import { Appointment, Patient, Osteopath } from "@/types";
+import { Appointment, Patient, Osteopath, Cabinet, User, AuthState } from "@/types";
 
 // Données simulées
 const appointments: Appointment[] = [
@@ -243,11 +242,96 @@ const osteopaths: Osteopath[] = [
   }
 ];
 
+const cabinets: Cabinet[] = [
+  {
+    id: 1,
+    name: "Cabinet d'Ostéopathie Zen",
+    address: "18 Rue Lafayette, Toulouse",
+    phone: "05 61 23 45 67",
+    osteopathId: 1,
+    createdAt: "2024-12-20 22:29:30",
+    updatedAt: "2024-12-20 22:29:30"
+  }
+];
+
+const users: User[] = [
+  {
+    id: "d79c31bc-b1fa-42a2-bbd8-379f03f0d8e9",
+    email: "franck.blanchet@example.com",
+    first_name: "Franck",
+    last_name: "BLANCHET",
+    role: "OSTEOPATH",
+    created_at: "2024-12-20 22:29:30",
+    updated_at: "2024-12-20 22:29:30",
+    osteopathId: 1
+  }
+];
+
+// Variables pour stocker l'état d'authentification
+let authState: AuthState = {
+  user: null,
+  isAuthenticated: false,
+  token: null
+};
+
 // Simule des délais de réseau
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // API Service
 export const api = {
+  // Auth
+  async login(email: string, password: string): Promise<AuthState> {
+    await delay(500);
+    const user = users.find(u => u.email === email);
+    
+    if (!user || password !== "password") { // Simulation de mot de passe pour démo
+      throw new Error("Identifiants incorrects");
+    }
+    
+    const token = "fake-jwt-token-" + Math.random().toString(36).substring(2);
+    
+    authState = {
+      user,
+      isAuthenticated: true,
+      token
+    };
+    
+    localStorage.setItem("authState", JSON.stringify(authState));
+    
+    return authState;
+  },
+  
+  async logout(): Promise<void> {
+    await delay(200);
+    authState = {
+      user: null,
+      isAuthenticated: false,
+      token: null
+    };
+    
+    localStorage.removeItem("authState");
+  },
+  
+  async checkAuth(): Promise<AuthState> {
+    await delay(100);
+    const storedAuth = localStorage.getItem("authState");
+    
+    if (storedAuth) {
+      try {
+        authState = JSON.parse(storedAuth);
+      } catch (e) {
+        console.error("Failed to parse stored auth state", e);
+        authState = {
+          user: null,
+          isAuthenticated: false,
+          token: null
+        };
+      }
+    }
+    
+    return authState;
+  },
+
   // Rendez-vous
   async getAppointments(): Promise<Appointment[]> {
     await delay(300);
@@ -328,6 +412,31 @@ export const api = {
         updatedAt: new Date().toISOString() 
       };
       return patients[index];
+    }
+    return undefined;
+  },
+
+  // Cabinet
+  async getCabinets(): Promise<Cabinet[]> {
+    await delay(300);
+    return [...cabinets];
+  },
+
+  async getCabinetById(id: number): Promise<Cabinet | undefined> {
+    await delay(200);
+    return cabinets.find(cabinet => cabinet.id === id);
+  },
+
+  async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
+    await delay(300);
+    const index = cabinets.findIndex(c => c.id === id);
+    if (index !== -1) {
+      cabinets[index] = { 
+        ...cabinets[index], 
+        ...cabinetData,
+        updatedAt: new Date().toISOString() 
+      };
+      return cabinets[index];
     }
     return undefined;
   },

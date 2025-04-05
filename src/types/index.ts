@@ -1,9 +1,11 @@
 
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED";
-export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "PARTNERED" | "ENGAGED";
+export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "PARTNERED" | "ENGAGED" | "SEPARATED";
 export type Gender = "Homme" | "Femme" | "Autre";
 export type Handedness = "RIGHT" | "LEFT" | "AMBIDEXTROUS";
-export type Contraception = "NONE" | "PILLS" | "PATCH" | "RING" | "IUD" | "IMPLANT" | "CONDOM" | "DIAPHRAGM";
+export type Contraception = "NONE" | "PILLS" | "PATCH" | "RING" | "IUD" | "IMPLANT" | "CONDOM" | "DIAPHRAGM" | "INJECTION" | "NATURAL_METHODS" | "STERILIZATION";
+export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
+export type Role = "ADMIN" | "OSTEOPATH";
 
 export interface Appointment {
   id: number;
@@ -58,4 +60,31 @@ export interface Osteopath {
   createdAt: string;
   name: string;
   updatedAt: string;
+}
+
+export interface Cabinet {
+  id: number;
+  name: string;
+  address: string;
+  phone: string | null;
+  osteopathId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  role: Role;
+  created_at: string;
+  updated_at: string;
+  osteopathId: number | null;
+}
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  token: string | null;
 }

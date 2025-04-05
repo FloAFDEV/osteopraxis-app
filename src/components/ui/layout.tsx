@@ -1,8 +1,12 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Calendar, User, Clock, Home, Menu, X } from "lucide-react";
+import { Calendar, User, Clock, Home, Menu, X, Settings, LogOut, Building } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/auth-context";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,9 +14,23 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { user, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const getInitials = () => {
+    if (!user) return "?";
+    
+    const firstName = user.first_name || "";
+    const lastName = user.last_name || "";
+    
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
   };
 
   return (
@@ -87,6 +105,38 @@ export function Layout({ children }: LayoutProps) {
               <Clock className="h-4 w-4" />
               Planning
             </NavLink>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="ml-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                {user && (
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                    {user.email}
+                  </div>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <NavLink to="/cabinet" className="flex items-center cursor-pointer">
+                    <Building className="mr-2 h-4 w-4" />
+                    <span>Paramètres du cabinet</span>
+                  </NavLink>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Déconnexion</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
       </header>
@@ -146,6 +196,29 @@ export function Layout({ children }: LayoutProps) {
               <Clock className="h-5 w-5" />
               Planning
             </NavLink>
+            <NavLink
+              to="/cabinet"
+              className={({ isActive }) =>
+                cn(
+                  "p-2 rounded-md transition-colors flex items-center gap-2",
+                  isActive ? "bg-primary/10 text-primary" : "text-foreground"
+                )
+              }
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Building className="h-5 w-5" />
+              Paramètres du cabinet
+            </NavLink>
+            <div
+              className="p-2 rounded-md transition-colors flex items-center gap-2 text-destructive mt-4 cursor-pointer"
+              onClick={() => {
+                handleLogout();
+                setIsMenuOpen(false);
+              }}
+            >
+              <LogOut className="h-5 w-5" />
+              Déconnexion
+            </div>
           </nav>
         </div>
       )}
