@@ -1,5 +1,5 @@
 
-import { Invoice } from "@/types";
+import { Invoice, PaymentStatus } from "@/types";
 import { supabase } from "./utils";
 
 export const supabaseInvoiceService = {
@@ -11,7 +11,13 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    return data as Invoice[];
+    // Utiliser un cast plus explicite et sûr
+    return data as Array<Omit<Invoice, 'Patient'> & {
+      Patient?: {
+        firstName: string;
+        lastName: string;
+      }
+    }>;
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
@@ -28,7 +34,13 @@ export const supabaseInvoiceService = {
       throw new Error(error.message);
     }
     
-    return data as Invoice | undefined;
+    // Utiliser un cast plus explicite et sûr
+    return data ? data as (Omit<Invoice, 'Patient'> & {
+      Patient?: {
+        firstName: string;
+        lastName: string;
+      }
+    }) : undefined;
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
@@ -40,7 +52,13 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    return data as Invoice[];
+    // Utiliser un cast plus explicite et sûr
+    return data as Array<Omit<Invoice, 'Patient'> & {
+      Patient?: {
+        firstName: string;
+        lastName: string;
+      }
+    }>;
   },
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
@@ -68,7 +86,7 @@ export const supabaseInvoiceService = {
     return data as Invoice;
   },
   
-  async updatePaymentStatus(id: number, paymentStatus: 'PAID' | 'PENDING' | 'CANCELED'): Promise<Invoice | undefined> {
+  async updatePaymentStatus(id: number, paymentStatus: PaymentStatus): Promise<Invoice | undefined> {
     return this.updateInvoice(id, { paymentStatus });
   }
 };
