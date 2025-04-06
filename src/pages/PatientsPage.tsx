@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Users, Plus, Search, UserPlus, Loader2, AlertCircle } from "lucide-react";
+import { Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -14,6 +14,7 @@ import { debugPatient } from "@/utils/patient-form-helpers";
 
 const PatientsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Utiliser useQuery pour une meilleure gestion de l'état et du cache
   const { data: patients, isLoading, error, refetch } = useQuery({
@@ -42,11 +43,24 @@ const PatientsPage = () => {
     refetchOnWindowFocus: false, // Ne pas requêter à chaque focus de fenêtre
   });
 
-  // Handler pour forcer un rechargement des données
-  const handleRetry = () => {
-    toast.info("Nouvelle tentative de chargement des patients...");
-    refetch();
+  // Handler pour forcer un rechargement des données avec animation
+  const handleRetry = async () => {
+    setIsRefreshing(true);
+    toast.info("Chargement des patients en cours...");
+    try {
+      await refetch();
+      toast.success("Liste des patients mise à jour");
+    } catch (err) {
+      toast.error("Impossible de charger les patients");
+    } finally {
+      setIsRefreshing(false);
+    }
   };
+
+  // Forcer un rechargement au montage du composant
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const filteredPatients = patients 
     ? patients.filter(patient => {
@@ -74,11 +88,23 @@ const PatientsPage = () => {
             Patients
           </h1>
 
-          <Button asChild className="bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600">
-            <Link to="/patients/new">
-              <UserPlus className="mr-2 h-4 w-4" /> Nouveau patient
-            </Link>
-          </Button>
+          <div className="flex gap-2 w-full md:w-auto">
+            <Button 
+              onClick={handleRetry}
+              variant="outline" 
+              className="w-auto"
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Rafraîchir
+            </Button>
+            
+            <Button asChild className="bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 w-full md:w-auto">
+              <Link to="/patients/new">
+                <UserPlus className="mr-2 h-4 w-4" /> Nouveau patient
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="relative mb-6">
@@ -90,15 +116,6 @@ const PatientsPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
-        <Button 
-          onClick={handleRetry} 
-          variant="outline" 
-          className="mb-4 w-full sm:w-auto"
-        >
-          <Loader2 className="mr-2 h-4 w-4" />
-          Rafraîchir la liste
-        </Button>
 
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
