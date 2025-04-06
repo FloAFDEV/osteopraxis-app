@@ -1,6 +1,5 @@
 
 import { format, parseISO, differenceInYears } from "date-fns";
-import { fr } from "date-fns/locale";
 import { MapPin, Mail, Phone, Activity } from "lucide-react";
 import { Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -15,11 +14,15 @@ interface PatientCardProps {
 }
 
 export function PatientCard({ patient, showDetailsButton = true }: PatientCardProps) {
-  const birthDate = parseISO(patient.birthDate);
-  const age = differenceInYears(new Date(), birthDate);
+  // Calculer l'âge uniquement si birthDate est défini
+  const age = patient.birthDate 
+    ? differenceInYears(new Date(), parseISO(patient.birthDate)) 
+    : null;
   
   const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : "?";
+    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : "?";
+    return `${firstInitial}${lastInitial}`;
   };
 
   // Définir les couleurs en fonction du genre
@@ -42,7 +45,7 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
     }
   };
 
-  const genderColors = getGenderColors(patient.gender);
+  const genderColors = getGenderColors(patient.gender || "");
 
   return (
     <Card className="overflow-hidden hover-scale">
@@ -50,7 +53,7 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
         <div className="flex gap-4">
           <Avatar className="h-16 w-16">
             <AvatarFallback className={`text-lg ${genderColors.avatar}`}>
-              {getInitials(patient.firstName, patient.lastName)}
+              {getInitials(patient.firstName || "", patient.lastName || "")}
             </AvatarFallback>
           </Avatar>
           
@@ -59,36 +62,46 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
               <h3 className="text-lg font-medium truncate">
                 {patient.firstName} {patient.lastName}
               </h3>
-              <Badge className={`${genderColors.badge}`}>
-                {patient.gender}
-              </Badge>
+              {patient.gender && (
+                <Badge className={`${genderColors.badge}`}>
+                  {patient.gender}
+                </Badge>
+              )}
             </div>
             
             <p className="text-sm text-muted-foreground truncate">
               {patient.occupation || "Profession non spécifiée"}
             </p>
             
-            <p className="text-sm">
-              {age} ans • Né(e) le {format(birthDate, "dd/MM/yyyy")}
-            </p>
+            {age !== null && patient.birthDate && (
+              <p className="text-sm">
+                {age} ans • Né(e) le {format(parseISO(patient.birthDate), "dd/MM/yyyy")}
+              </p>
+            )}
           </div>
         </div>
         
         <div className="mt-4 space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-            <span className="truncate">{patient.address}</span>
-          </div>
+          {patient.address && (
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="truncate">{patient.address}</span>
+            </div>
+          )}
           
-          <div className="flex items-center gap-2 text-sm">
-            <Phone className="h-4 w-4 text-primary flex-shrink-0" />
-            <span className="truncate">{patient.phone}</span>
-          </div>
+          {patient.phone && (
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="truncate">{patient.phone}</span>
+            </div>
+          )}
           
-          <div className="flex items-center gap-2 text-sm">
-            <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-            <span className="truncate">{patient.email}</span>
-          </div>
+          {patient.email && (
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="truncate">{patient.email}</span>
+            </div>
+          )}
           
           {patient.physicalActivity && (
             <div className="flex items-center gap-2 text-sm">

@@ -28,6 +28,8 @@ const NewPatientPage = () => {
         patientData.birthDate = patientData.birthDate.toISOString();
       }
       
+      console.log("Données patient avant création:", patientData);
+      
       // Ajouter les données par défaut nécessaires
       const patientToCreate = {
         ...patientData,
@@ -39,11 +41,14 @@ const NewPatientPage = () => {
       console.log("Envoi du patient à l'API:", patientToCreate);
       const newPatient = await api.createPatient(patientToCreate);
       
+      console.log("Patient créé avec succès:", newPatient);
       toast.success(`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`);
       navigate(`/patients/${newPatient.id}`);
     } catch (error) {
       console.error("Error adding patient:", error);
-      toast.error("Impossible d'ajouter le patient. Veuillez réessayer.");
+      toast.error(error instanceof Error 
+        ? `Erreur: ${error.message}` 
+        : "Impossible d'ajouter le patient. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }

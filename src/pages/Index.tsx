@@ -1,8 +1,9 @@
 
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
-import { Activity } from "lucide-react";
+import { Activity, InfoCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   return (
@@ -25,10 +26,20 @@ const Index = () => {
               Version Pro
             </div>
             <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
-              Dernière mise à jour: 5 avril
+              Dernière mise à jour: 6 avril
             </div>
           </div>
         </div>
+        
+        <Alert className="bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/30 dark:text-amber-300">
+          <InfoCircle className="h-4 w-4" />
+          <AlertTitle>Note sur les données du dashboard</AlertTitle>
+          <AlertDescription>
+            Ce dashboard affiche actuellement une combinaison de vos données réelles et de données simulées pour démonstration. 
+            Les statistiques présentées incluent à la fois vos patients existants dans la base de données et des données de démonstration 
+            générées automatiquement.
+          </AlertDescription>
+        </Alert>
         
         <div className="relative mb-8 overflow-hidden rounded-xl">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm"></div>

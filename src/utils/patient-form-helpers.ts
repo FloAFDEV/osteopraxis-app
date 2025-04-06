@@ -32,6 +32,28 @@ export const adaptPatientFromSupabase = (patient: any): Patient => {
     console.error("Patient missing required fields:", patient);
   }
   
+  // Assurer que childrenAges est toujours un tableau
+  let childrenAges = [];
+  if (patient.childrenAges) {
+    try {
+      // Si c'est une chaîne JSON, on la parse
+      if (typeof patient.childrenAges === 'string') {
+        childrenAges = JSON.parse(patient.childrenAges);
+      } else if (Array.isArray(patient.childrenAges)) {
+        childrenAges = patient.childrenAges;
+      }
+    } catch (e) {
+      console.error("Error parsing childrenAges:", e);
+      childrenAges = [];
+    }
+  }
+  
+  // Convertir la date de naissance en chaîne si c'est un objet Date
+  let birthDate = patient.birthDate;
+  if (birthDate instanceof Date) {
+    birthDate = birthDate.toISOString();
+  }
+  
   return {
     id: patient.id,
     userId: patient.userId || null,
@@ -41,15 +63,15 @@ export const adaptPatientFromSupabase = (patient: any): Patient => {
     updatedAt: patient.updatedAt || new Date().toISOString(),
     address: patient.address || null,
     avatarUrl: patient.avatarUrl || null,
-    birthDate: patient.birthDate || null,
+    birthDate: birthDate || null,
     email: patient.email || null,
     phone: patient.phone || null,
     maritalStatus: patient.maritalStatus || "SINGLE",
-    childrenAges: Array.isArray(patient.childrenAges) ? patient.childrenAges : [],
+    childrenAges: childrenAges,
     physicalActivity: patient.physicalActivity || null,
     firstName: patient.firstName || '',
     lastName: patient.lastName || '',
-    hasChildren: patient.hasChildren || "false",
+    hasChildren: patient.hasChildren ? patient.hasChildren.toString() : "false",
     contraception: patient.contraception === "IMPLANTS" ? "IMPLANT" : patient.contraception || "NONE",
     currentTreatment: patient.currentTreatment || null,
     digestiveDoctorName: patient.digestiveDoctorName || null,
@@ -123,4 +145,15 @@ export const preparePatientForApi = (patientData: Partial<Patient>) => {
   
   console.log("Prepared patient:", prepared);
   return prepared;
+};
+
+// Fonction debug pour afficher l'état complet d'un patient
+export const debugPatient = (patient: any, label: string = "Patient debug") => {
+  console.log(`==== ${label} ====`);
+  console.log("ID:", patient.id);
+  console.log("Name:", patient.firstName, patient.lastName);
+  console.log("Birth date:", patient.birthDate);
+  console.log("Gender:", patient.gender);
+  console.log("Full object:", patient);
+  console.log("========================");
 };

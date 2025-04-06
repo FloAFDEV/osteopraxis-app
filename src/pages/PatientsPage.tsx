@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Users, Plus, Search, UserPlus, Loader2, AlertCircle } from "lucide-react";
 import { api } from "@/services/api";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { debugPatient } from "@/utils/patient-form-helpers";
 
 const PatientsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,24 +22,27 @@ const PatientsPage = () => {
       console.log("Fetching patients through useQuery...");
       try {
         const data = await api.getPatients();
-        console.log("Patients fetched successfully:", data);
+        console.log(`Patients fetched successfully: ${data.length} patients found`);
+        
+        // Debug logs pour voir le contenu réel des patients
+        if (data.length > 0) {
+          console.log("First patient sample:");
+          debugPatient(data[0], "First patient from API");
+        } else {
+          console.log("No patients returned from API");
+        }
+        
         return data;
       } catch (err) {
         console.error("Error fetching patients:", err);
         throw err;
       }
     },
-    retry: 3, // Réessayer 3 fois en cas d'échec
-    retryDelay: 1000, // Attendre 1 seconde entre chaque tentative
+    retry: 1, // Réduire les tentatives pour ne pas spammer l'API
+    refetchOnWindowFocus: false, // Ne pas requêter à chaque focus de fenêtre
   });
 
-  useEffect(() => {
-    if (error) {
-      console.error("Error in useQuery:", error);
-      toast.error("Impossible de charger les patients. Vérifiez votre connexion.");
-    }
-  }, [error]);
-
+  // Handler pour forcer un rechargement des données
   const handleRetry = () => {
     toast.info("Nouvelle tentative de chargement des patients...");
     refetch();
@@ -46,7 +50,7 @@ const PatientsPage = () => {
 
   const filteredPatients = patients 
     ? patients.filter(patient => {
-        const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+        const fullName = `${patient.firstName || ''} ${patient.lastName || ''}`.toLowerCase();
         const searchLower = searchQuery.toLowerCase();
         
         return (
@@ -56,8 +60,10 @@ const PatientsPage = () => {
           (patient.phone && patient.phone.includes(searchLower)) ||
           (patient.occupation && patient.occupation.toLowerCase().includes(searchLower))
         );
-      }).sort((a, b) => a.lastName.localeCompare(b.lastName))
+      }).sort((a, b) => (a.lastName || '').localeCompare(b.lastName || ''))
     : [];
+
+  console.log(`Filtered patients: ${filteredPatients.length}`);
 
   return (
     <Layout>
@@ -84,6 +90,15 @@ const PatientsPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        
+        <Button 
+          onClick={handleRetry} 
+          variant="outline" 
+          className="mb-4 w-full sm:w-auto"
+        >
+          <Loader2 className="mr-2 h-4 w-4" />
+          Rafraîchir la liste
+        </Button>
 
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
@@ -97,9 +112,15 @@ const PatientsPage = () => {
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-red-800 dark:text-red-300">Erreur de chargement</h3>
             <p className="text-red-600/70 dark:text-red-400/70 mt-2 mb-6">
-              Impossible de récupérer les patients depuis la base de données.
+              {error instanceof Error 
+                ? `${error.message}` 
+                : "Impossible de récupérer les patients depuis la base de données."}
             </p>
-            <Button variant="outline" onClick={handleRetry} className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+            <Button 
+              variant="outline" 
+              onClick={handleRetry} 
+              className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+            >
               Réessayer
             </Button>
           </div>
