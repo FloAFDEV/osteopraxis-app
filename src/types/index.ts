@@ -1,4 +1,3 @@
-
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED";
 export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "PARTNERED" | "ENGAGED" | "SEPARATED";
 export type Gender = "Homme" | "Femme" | "Autre";
@@ -111,4 +110,18 @@ export interface DashboardData {
     prevPatients: number;
     growthText: string;
   }[];
+}
+
+// Add the missing Invoice type
+export interface Invoice {
+  id: number;
+  patientId: number;
+  consultationId: number;
+  date: string;
+  amount: number;
+  paymentStatus: PaymentStatus;
+  Patient?: {
+    firstName: string;
+    lastName: string;
+  };
 }

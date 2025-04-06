@@ -1,4 +1,3 @@
-
 import { patientService } from './patient-service';
 import { appointmentService } from './appointment-service';
 import { cabinetService } from './cabinet-service';
@@ -16,9 +15,14 @@ export const api = {
   ...authService,
   
   // Service de facturation (directement depuis Supabase)
-  getInvoices: () => {
+  getInvoices: async () => {
     if (USE_SUPABASE) {
-      return supabaseInvoiceService.getInvoices();
+      try {
+        return await supabaseInvoiceService.getInvoices();
+      } catch (error) {
+        console.error("Erreur lors de la récupération des factures:", error);
+        throw error;
+      }
     }
     throw new Error("Fonctionnalité de facturation non disponible en mode local");
   },

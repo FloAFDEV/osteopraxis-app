@@ -16,7 +16,7 @@ import {
   UserCog
 } from 'lucide-react';
 import { useAuth } from "@/contexts/auth-context";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile"; // Fixed import name
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -25,7 +25,7 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const { logout, user } = useAuth();
-  const { isMobile } = useMobile();
+  const { isMobile } = useIsMobile(); // Fixed hook usage
   const location = useLocation();
 
   // Rendre l'élément NavLink avec l'état active géré correctement

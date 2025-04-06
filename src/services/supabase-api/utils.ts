@@ -1,6 +1,7 @@
 
 // Utilitaires partagés pour les services Supabase API
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
 // Type générique pour caster les résultats des requêtes Supabase
 export type WithContraception<T> = T & { contraception: any };
@@ -12,7 +13,7 @@ export const supabase = {
   from: (table: string) => {
     console.log(`Accessing Supabase table: ${table}`);
     // Utiliser une assertion de type pour éviter les erreurs de compilation
-    return supabaseClient.from(table as any);
+    return supabaseClient.from(table as keyof Database['public']['Tables']);
   }
 };
 
@@ -28,4 +29,7 @@ export const logSupabaseResponse = (data: any, error: any, operation: string) =>
   } else {
     console.log(`Supabase ${operation} success:`, data);
   }
+  
+  // Return the data for convenience
+  return { data, error };
 };

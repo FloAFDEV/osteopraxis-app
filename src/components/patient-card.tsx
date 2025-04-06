@@ -1,6 +1,6 @@
 
 import { format, parseISO, differenceInYears } from "date-fns";
-import { MapPin, Mail, Phone, Activity, User } from "lucide-react";
+import { MapPin, Mail, Phone, User } from "lucide-react";
 import { Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
