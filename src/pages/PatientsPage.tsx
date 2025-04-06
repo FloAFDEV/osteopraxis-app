@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, Mail } from "lucide-react";
+import { Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, Mail, UserIcon } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -32,9 +32,7 @@ const PatientsPage = () => {
     queryKey: ['patients'],
     queryFn: async () => {
       try {
-        const data = await api.getPatients();
-        // Pas de log avec les données sensibles
-        return data;
+        return await api.getPatients();
       } catch (err) {
         console.error("Error fetching patients:", err);
         throw err;
@@ -241,7 +239,7 @@ const PatientsPage = () => {
                     <Mail className="mr-2 h-4 w-4" /> Par email
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy('gender')} className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" /> Par genre
+                    <UserIcon className="mr-2 h-4 w-4" /> Par genre
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
