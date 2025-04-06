@@ -11,7 +11,7 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    return data as unknown as Invoice[];
+    return data as Invoice[];
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
@@ -28,7 +28,7 @@ export const supabaseInvoiceService = {
       throw new Error(error.message);
     }
     
-    return data as unknown as Invoice | undefined;
+    return data as Invoice | undefined;
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
@@ -40,7 +40,7 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    return data as unknown as Invoice[];
+    return data as Invoice[];
   },
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
@@ -52,7 +52,7 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    return data as unknown as Invoice;
+    return data as Invoice;
   },
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
@@ -65,7 +65,7 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    return data as unknown as Invoice;
+    return data as Invoice;
   },
   
   async updatePaymentStatus(id: number, paymentStatus: 'PAID' | 'PENDING' | 'CANCELED'): Promise<Invoice | undefined> {
