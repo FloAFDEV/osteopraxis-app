@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
-import { Calendar, Clock, User, MapPin, Phone, Shield } from "lucide-react";
+import { Calendar, Clock, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { format, isToday, parseISO } from "date-fns";
@@ -39,6 +39,7 @@ export function AppointmentsOverview({ data, className }: AppointmentsOverviewPr
           .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime())
           .slice(0, 5); // Garder seulement les 5 prochains rendez-vous
 
+        console.log(`Appointments for dashboard: ${filteredAppointments.length}`);
         setUpcomingAppointments(filteredAppointments);
         setPatients(patientsData);
         setLoading(false);

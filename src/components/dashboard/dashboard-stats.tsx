@@ -13,7 +13,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
       <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-blue-500">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Patients totaux</CardTitle>
-          <Users className="h-6 w-6 text-blue-500" />
+          <Users className="h-7 w-7 text-blue-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{data.totalPatients}</div>
@@ -36,7 +36,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
       <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-purple-500">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Nouveaux patients (mois)</CardTitle>
-          <UserPlus className="h-6 w-6 text-purple-500" />
+          <UserPlus className="h-7 w-7 text-purple-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{data.newPatientsThisMonth}</div>
@@ -49,7 +49,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
       <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-pink-500">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Rendez-vous aujourd'hui</CardTitle>
-          <Calendar className="h-6 w-6 text-pink-500" />
+          <Calendar className="h-7 w-7 text-pink-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{data.appointmentsToday}</div>
@@ -62,7 +62,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
       <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-blue-600">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Croissance annuelle</CardTitle>
-          <TrendingUp className="h-6 w-6 text-blue-600" />
+          <TrendingUp className="h-7 w-7 text-blue-600" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{data.annualGrowthPercentage}%</div>

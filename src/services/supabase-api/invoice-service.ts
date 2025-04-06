@@ -12,7 +12,7 @@ export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     const { data, error } = await supabase
       .from("Invoice")
-      .select("*, Patient!Invoice_patientId_fkey(firstName, lastName)")
+      .select("*, Patient(firstName, lastName)")
       .order('date', { ascending: false });
       
     if (error) throw new Error(error.message);
@@ -27,7 +27,7 @@ export const supabaseInvoiceService = {
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
     const { data, error } = await supabase
       .from("Invoice")
-      .select("*, Patient!Invoice_patientId_fkey(firstName, lastName)")
+      .select("*, Patient(firstName, lastName)")
       .eq("id", id)
       .maybeSingle();
       
@@ -49,7 +49,7 @@ export const supabaseInvoiceService = {
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
     const { data, error } = await supabase
       .from("Invoice")
-      .select("*, Patient!Invoice_patientId_fkey(firstName, lastName)")
+      .select("*, Patient(firstName, lastName)")
       .eq("patientId", patientId)
       .order('date', { ascending: false });
       
