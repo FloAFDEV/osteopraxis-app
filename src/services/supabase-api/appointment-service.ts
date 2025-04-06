@@ -13,7 +13,7 @@ export const supabaseAppointmentService = {
     if (error) throw new Error(error.message);
     
     // Adapter les statuts pour l'application
-    return data.map(appointment => ({
+    return (data as any[]).map(appointment => ({
       ...appointment,
       status: adaptAppointmentStatusFromSupabase(appointment.status)
     } as Appointment));
@@ -34,8 +34,8 @@ export const supabaseAppointmentService = {
     }
     
     return {
-      ...data,
-      status: adaptAppointmentStatusFromSupabase(data.status)
+      ...(data as any),
+      status: adaptAppointmentStatusFromSupabase((data as any).status)
     } as Appointment;
   },
 
@@ -48,7 +48,7 @@ export const supabaseAppointmentService = {
       
     if (error) throw new Error(error.message);
     
-    return data.map(appointment => ({
+    return (data as any[]).map(appointment => ({
       ...appointment,
       status: adaptAppointmentStatusFromSupabase(appointment.status)
     } as Appointment));
@@ -70,8 +70,8 @@ export const supabaseAppointmentService = {
     if (error) throw new Error(error.message);
     
     return {
-      ...data,
-      status: adaptAppointmentStatusFromSupabase(data.status)
+      ...(data as any),
+      status: adaptAppointmentStatusFromSupabase((data as any).status)
     } as Appointment;
   },
 
@@ -92,8 +92,8 @@ export const supabaseAppointmentService = {
     if (error) throw new Error(error.message);
     
     return {
-      ...data,
-      status: adaptAppointmentStatusFromSupabase(data.status)
+      ...(data as any),
+      status: adaptAppointmentStatusFromSupabase((data as any).status)
     } as Appointment;
   },
 

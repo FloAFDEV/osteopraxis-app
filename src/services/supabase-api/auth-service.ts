@@ -1,5 +1,5 @@
 
-import { AuthState, User } from "@/types";
+import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 
 export const supabaseAuthService = {
@@ -65,21 +65,23 @@ export const supabaseAuthService = {
       console.error("Erreur lors de la récupération des données utilisateur:", userError);
     }
     
-    const user: User = userData ? {
+    const typedUserData = userData as any;
+    
+    const user: User = typedUserData ? {
       id: data.user.id,
       email: data.user.email || "",
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      role: userData.role,
-      created_at: userData.created_at,
-      updated_at: userData.updated_at,
-      osteopathId: userData.osteopathId
+      first_name: typedUserData.first_name,
+      last_name: typedUserData.last_name,
+      role: typedUserData.role,
+      created_at: typedUserData.created_at,
+      updated_at: typedUserData.updated_at,
+      osteopathId: typedUserData.osteopathId
     } : {
       id: data.user.id,
       email: data.user.email || "",
       first_name: null,
       last_name: null,
-      role: "OSTEOPATH", // Valeur par défaut
+      role: "OSTEOPATH" as Role, // Valeur par défaut
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       osteopathId: null
@@ -137,21 +139,23 @@ export const supabaseAuthService = {
         console.error("Erreur lors de la récupération des données utilisateur:", userError);
       }
       
-      const user: User = userData ? {
+      const typedUserData = userData as any;
+      
+      const user: User = typedUserData ? {
         id: data.session.user.id,
         email: data.session.user.email || "",
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        role: userData.role,
-        created_at: userData.created_at,
-        updated_at: userData.updated_at,
-        osteopathId: userData.osteopathId
+        first_name: typedUserData.first_name,
+        last_name: typedUserData.last_name,
+        role: typedUserData.role,
+        created_at: typedUserData.created_at,
+        updated_at: typedUserData.updated_at,
+        osteopathId: typedUserData.osteopathId
       } : {
         id: data.session.user.id,
         email: data.session.user.email || "",
         first_name: null,
         last_name: null,
-        role: "OSTEOPATH",
+        role: "OSTEOPATH" as Role,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         osteopathId: null

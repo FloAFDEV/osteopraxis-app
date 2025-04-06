@@ -10,7 +10,7 @@ export const supabaseOsteopathService = {
       
     if (error) throw new Error(error.message);
     
-    return data;
+    return data as Osteopath[];
   },
 
   async getOsteopathById(id: number): Promise<Osteopath | undefined> {
@@ -27,6 +27,6 @@ export const supabaseOsteopathService = {
       throw new Error(error.message);
     }
     
-    return data;
+    return data as Osteopath;
   }
 };

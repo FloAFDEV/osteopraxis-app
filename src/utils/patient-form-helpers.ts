@@ -1,5 +1,6 @@
+
 // Ce fichier contient des utilitaires pour le traitement des données des patients
-import { Patient } from "@/types";
+import { Patient, User, AppointmentStatus } from "@/types";
 
 /**
  * Adapte les données d'un patient depuis le format Supabase vers le format interne
@@ -57,4 +58,52 @@ export function debugPatient(patient: Patient | undefined, label: string = "Pati
     createdAt: patient.createdAt,
     updatedAt: patient.updatedAt,
   });
+}
+
+/**
+ * Formate les âges des enfants pour l'affichage
+ */
+export function formatChildrenAges(ages: number[] | undefined): string {
+  if (!ages || ages.length === 0) {
+    return "Aucun";
+  }
+  return ages.sort((a, b) => a - b).join(", ");
+}
+
+/**
+ * Convertit la valeur hasChildren de string à boolean
+ */
+export function convertHasChildrenToBoolean(hasChildren: string | boolean | undefined): boolean {
+  if (typeof hasChildren === "boolean") {
+    return hasChildren;
+  }
+  return hasChildren === "true" || hasChildren === "TRUE";
+}
+
+/**
+ * Vérifie si un utilisateur est administrateur
+ */
+export function isUserAdmin(user: User | null): boolean {
+  return user?.role === "ADMIN";
+}
+
+/**
+ * Adapte le statut d'un rendez-vous depuis Supabase
+ */
+export function adaptAppointmentStatusFromSupabase(status: string): AppointmentStatus {
+  const validStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"];
+  
+  if (validStatuses.includes(status as AppointmentStatus)) {
+    return status as AppointmentStatus;
+  }
+  
+  // Valeur par défaut si le statut n'est pas reconnu
+  return "SCHEDULED";
+}
+
+/**
+ * Adapte le statut d'un rendez-vous pour Supabase
+ */
+export function adaptAppointmentStatusForSupabase(status: AppointmentStatus): string {
+  return status.toString();
 }

@@ -11,7 +11,8 @@ export const supabase = {
   ...supabaseClient,
   from: (table: string) => {
     console.log(`Accessing Supabase table: ${table}`);
-    return supabaseClient.from(table);
+    // Nous utilisons une assertion de type pour corriger l'erreur liée aux paramètres génériques
+    return supabaseClient.from(table as any);
   }
 };
 

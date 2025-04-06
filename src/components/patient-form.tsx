@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { YearPicker } from "@/components/year-picker";
 import { cn } from "@/lib/utils";
-import { formatChildrenAges, convertHasChildrenToBoolean } from "@/utils/patient-form-helpers";
+import { convertHasChildrenToBoolean } from "@/utils/patient-form-helpers";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { Patient } from "@/types";

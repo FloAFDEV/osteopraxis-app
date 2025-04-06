@@ -10,7 +10,7 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return data;
+    return data as Cabinet[];
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
@@ -27,7 +27,7 @@ export const supabaseCabinetService = {
       throw new Error(error.message);
     }
     
-    return data;
+    return data as Cabinet;
   },
 
   async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
@@ -43,6 +43,6 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return data;
+    return data as Cabinet;
   }
 };
