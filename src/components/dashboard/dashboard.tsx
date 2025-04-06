@@ -85,13 +85,13 @@ const calculateDashboardData = (patients: any[]): DashboardData => {
   const newPatientsLast30Days = patients.filter(p => isLast30Days(p.createdAt)).length;
   
   // Pour les rendez-vous, on utilise des valeurs basées sur les patients disponibles
-  const appointmentsToday = Math.min(5, Math.ceil(totalPatients * 0.1)); // Environ 10% des patients ont RDV aujourd'hui (max 5)
-  const nextAppointment = "14:30 - Marie Dupont";
+  const appointmentsToday = Math.min(3, Math.ceil(totalPatients * 0.08)); // Environ 8% des patients ont RDV aujourd'hui (max 3)
+  const nextAppointment = totalPatients > 0 ? `${new Date().getHours() + 1}:30 - ${patients[0]?.firstName || 'Marie'} ${patients[0]?.lastName || 'Dupont'}` : "Aucun rendez-vous";
   
   // Calculer la croissance réelle
   const patientsLastYearEnd = newPatientsLastYear;
-  const thirtyDayGrowthPercentage = totalPatients > 0 ? Math.round((newPatientsLast30Days / totalPatients) * 100 * 10) / 10 : 0;
-  const annualGrowthPercentage = patientsLastYearEnd > 0 ? Math.round(((newPatientsThisYear) / patientsLastYearEnd) * 100 * 10) / 10 : 0;
+  const thirtyDayGrowthPercentage = totalPatients > 0 ? Math.round((newPatientsLast30Days / Math.max(totalPatients - newPatientsLast30Days, 1)) * 100 * 10) / 10 : 0;
+  const annualGrowthPercentage = patientsLastYearEnd > 0 ? Math.round(((newPatientsThisYear) / Math.max(patientsLastYearEnd, 1)) * 100 * 10) / 10 : 0;
   
   // Données de croissance mensuelle basées sur les données réelles
   const monthNames = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
@@ -152,7 +152,7 @@ const calculateDashboardData = (patients: any[]): DashboardData => {
 
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [patients, setPatients] = useState([]);
+  const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -161,12 +161,11 @@ export function Dashboard() {
         // Récupération des patients depuis l'API
         const patientsData = await api.getPatients();
         
-        // Génération de patients supplémentaires pour avoir des données plus réalistes
-        const extendedPatients = [...patientsData, ...generateAdditionalPatients()];
-        setPatients(extendedPatients);
+        console.log(`Dashboard: ${patientsData.length} patients récupérés de l'API`);
+        setPatients(patientsData);
         
-        // Calcul des données du tableau de bord
-        const data = calculateDashboardData(extendedPatients);
+        // Calcul des données du tableau de bord avec uniquement les patients réels
+        const data = calculateDashboardData(patientsData);
         setDashboardData(data);
       } catch (error) {
         console.error("Erreur lors de la récupération des données:", error);
@@ -208,90 +207,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-// Fonction pour générer des patients supplémentaires avec des dates réparties sur l'année dernière
-const generateAdditionalPatients = () => {
-  const additionalPatients = [];
-  const today = new Date();
-  const thisYear = today.getFullYear();
-  const lastYear = thisYear - 1;
-  
-  // Noms et prénoms pour la génération aléatoire
-  const lastNames = ["Dupont", "Martin", "Dubois", "Bernard", "Thomas", "Robert", "Richard", "Petit", "Durand", "Leroy", "Moreau", "Simon", "Laurent", "Lefebvre", "Michel"];
-  const maleFirstNames = ["Jean", "Pierre", "Michel", "André", "Philippe", "René", "Louis", "Alain", "Jacques", "Bernard", "Marcel", "Daniel", "Henri", "Nicolas", "François"];
-  const femaleFirstNames = ["Marie", "Jeanne", "Françoise", "Monique", "Catherine", "Nathalie", "Isabelle", "Sylvie", "Anne", "Jacqueline", "Nicole", "Sophie", "Martine", "Laurence", "Christine"];
-  
-  // Générer 34 patients pour l'année dernière
-  for (let i = 0; i < 34; i++) {
-    const isMale = Math.random() > 0.5;
-    const birthYear = 1950 + Math.floor(Math.random() * 50); // Entre 1950 et 2000
-    const birthMonth = Math.floor(Math.random() * 12);
-    const birthDay = Math.floor(Math.random() * 28) + 1;
-    
-    // Répartir les 34 patients sur les 12 mois de l'année dernière
-    const creationMonth = Math.floor(Math.random() * 12);
-    const creationDay = Math.floor(Math.random() * 28) + 1;
-    
-    additionalPatients.push({
-      id: 1000 + i,
-      firstName: isMale ? maleFirstNames[Math.floor(Math.random() * maleFirstNames.length)] : femaleFirstNames[Math.floor(Math.random() * femaleFirstNames.length)],
-      lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
-      gender: isMale ? "Homme" : "Femme",
-      birthDate: `${birthYear}-${String(birthMonth + 1).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`,
-      createdAt: `${lastYear}-${String(creationMonth + 1).padStart(2, '0')}-${String(creationDay).padStart(2, '0')}`,
-      email: `patient${1000 + i}@example.com`,
-      phone: `0${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,
-      occupation: ["Enseignant", "Ingénieur", "Médecin", "Comptable", "Étudiant", "Retraité", "Commercial", "Artisan"][Math.floor(Math.random() * 8)]
-    });
-  }
-  
-  // Générer 2 patients pour les mois précédents de cette année
-  for (let i = 0; i < 2; i++) {
-    const isMale = Math.random() > 0.5;
-    const birthYear = 1950 + Math.floor(Math.random() * 50);
-    const birthMonth = Math.floor(Math.random() * 12);
-    const birthDay = Math.floor(Math.random() * 28) + 1;
-    
-    // Répartir les patients sur les mois précédents de cette année (mais pas ce mois-ci)
-    const creationMonth = Math.floor(Math.random() * (today.getMonth()));
-    const creationDay = Math.floor(Math.random() * 28) + 1;
-    
-    additionalPatients.push({
-      id: 2000 + i,
-      firstName: isMale ? maleFirstNames[Math.floor(Math.random() * maleFirstNames.length)] : femaleFirstNames[Math.floor(Math.random() * femaleFirstNames.length)],
-      lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
-      gender: isMale ? "Homme" : "Femme",
-      birthDate: `${birthYear}-${String(birthMonth + 1).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`,
-      createdAt: `${thisYear}-${String(creationMonth + 1).padStart(2, '0')}-${String(creationDay).padStart(2, '0')}`,
-      email: `patient${2000 + i}@example.com`,
-      phone: `0${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,
-      occupation: ["Enseignant", "Ingénieur", "Médecin", "Comptable", "Étudiant", "Retraité", "Commercial", "Artisan"][Math.floor(Math.random() * 8)]
-    });
-  }
-  
-  // Générer 2 patients pour ce mois-ci
-  for (let i = 0; i < 2; i++) {
-    const isMale = Math.random() > 0.5;
-    const birthYear = 1950 + Math.floor(Math.random() * 50);
-    const birthMonth = Math.floor(Math.random() * 12);
-    const birthDay = Math.floor(Math.random() * 28) + 1;
-    
-    // Patients de ce mois-ci
-    const creationMonth = today.getMonth();
-    const creationDay = Math.min(today.getDate() - i, 28); // S'assurer que la date est dans le passé
-    
-    additionalPatients.push({
-      id: 3000 + i,
-      firstName: isMale ? maleFirstNames[Math.floor(Math.random() * maleFirstNames.length)] : femaleFirstNames[Math.floor(Math.random() * femaleFirstNames.length)],
-      lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
-      gender: isMale ? "Homme" : "Femme",
-      birthDate: `${birthYear}-${String(birthMonth + 1).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`,
-      createdAt: `${thisYear}-${String(creationMonth + 1).padStart(2, '0')}-${String(creationDay).padStart(2, '0')}`,
-      email: `patient${3000 + i}@example.com`,
-      phone: `0${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,
-      occupation: ["Enseignant", "Ingénieur", "Médecin", "Comptable", "Étudiant", "Retraité", "Commercial", "Artisan"][Math.floor(Math.random() * 8)]
-    });
-  }
-  
-  return additionalPatients;
-};

@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { supabase, typedData, logSupabaseResponse } from "./utils";
+import { supabase, typedData } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
 
 export const supabasePatientService = {
@@ -21,7 +21,7 @@ export const supabasePatientService = {
         throw new Error(error.message);
       }
       
-      console.log("Patients récupérés:", data);
+      console.log("Patients récupérés:", data?.length || 0);
       
       if (!data || data.length === 0) {
         console.warn("Aucun patient trouvé dans la base de données");
@@ -30,7 +30,6 @@ export const supabasePatientService = {
       
       // Convertir et adapter les champs pour être compatibles avec l'application
       const patients = data.map(patient => adaptPatientFromSupabase(patient) as Patient);
-      console.log("Patients après adaptation:", patients);
       return patients;
     } catch (error) {
       console.error("Erreur lors de la récupération des patients:", error);
@@ -77,6 +76,7 @@ export const supabasePatientService = {
       
       console.log("Création du patient avec les données:", formattedData);
       
+      // Utilisez l'option de journalisation pour voir la requête complète
       const { data, error } = await supabase
         .from("Patient")
         .insert(formattedData)

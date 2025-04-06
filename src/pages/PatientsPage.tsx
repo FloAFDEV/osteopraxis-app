@@ -93,9 +93,9 @@ const PatientsPage = () => {
       toast.info("Création d'un patient test...");
       const testPatient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> = {
         firstName: "Test",
-        lastName: "Patient",
+        lastName: `Patient ${new Date().getTime().toString().slice(-4)}`, // Nom unique
         gender: "Homme",
-        email: "test@example.com",
+        email: `test${new Date().getTime()}@example.com`, // Email unique
         phone: "0123456789",
         osteopathId: 1,
         address: "123 Rue Test",
@@ -126,11 +126,16 @@ const PatientsPage = () => {
         avatarUrl: null
       };
       
-      await api.createPatient(testPatient);
-      toast.success("Patient test créé avec succès");
-      refetch();
+      try {
+        const newPatient = await api.createPatient(testPatient);
+        toast.success("Patient test créé avec succès");
+        refetch();
+      } catch (err: any) {
+        toast.error(`Erreur lors de la création du patient test: ${err.message}`);
+        console.error("Erreur lors de la création du patient test:", err);
+      }
     } catch (err) {
-      console.error("Erreur lors de la création du patient test:", err);
+      console.error("Erreur lors de la préparation du patient test:", err);
       toast.error("Impossible de créer le patient test");
     }
   };

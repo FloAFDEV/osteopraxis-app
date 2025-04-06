@@ -6,19 +6,18 @@ export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     const { data, error } = await supabase
       .from("Invoice")
-      .select("*, Patient(firstName, lastName)")
+      .select("*, Patient!Invoice_patientId_fkey(firstName, lastName)")
       .order('date', { ascending: false });
       
     if (error) throw new Error(error.message);
     
-    // Use type assertion with 'as' to tell TypeScript the data matches our Invoice type
-    return data as unknown as Invoice[];
+    return data as Invoice[];
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
     const { data, error } = await supabase
       .from("Invoice")
-      .select("*, Patient(firstName, lastName)")
+      .select("*, Patient!Invoice_patientId_fkey(firstName, lastName)")
       .eq("id", id)
       .maybeSingle();
       
@@ -29,20 +28,19 @@ export const supabaseInvoiceService = {
       throw new Error(error.message);
     }
     
-    return data as unknown as Invoice | undefined;
+    return data as Invoice | undefined;
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
     const { data, error } = await supabase
       .from("Invoice")
-      .select("*, Patient(firstName, lastName)")
+      .select("*, Patient!Invoice_patientId_fkey(firstName, lastName)")
       .eq("patientId", patientId)
       .order('date', { ascending: false });
       
     if (error) throw new Error(error.message);
     
-    // Type assertion to avoid excessive deep and potentially infinite type instantiation
-    return (data || []) as Invoice[];
+    return data as Invoice[];
   },
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
