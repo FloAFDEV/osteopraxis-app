@@ -1,7 +1,7 @@
 
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
-import { Activity, InfoCircle } from "lucide-react";
+import { Activity, Info, CircleInfo } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
@@ -32,7 +32,7 @@ const Index = () => {
         </div>
         
         <Alert className="bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/30 dark:text-amber-300">
-          <InfoCircle className="h-4 w-4" />
+          <CircleInfo className="h-4 w-4" />
           <AlertTitle>Note sur les données du dashboard</AlertTitle>
           <AlertDescription>
             Ce dashboard affiche actuellement une combinaison de vos données réelles et de données simulées pour démonstration. 
