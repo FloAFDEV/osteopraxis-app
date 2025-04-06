@@ -1,5 +1,6 @@
+
 import { Patient } from "@/types";
-import { supabase, WithContraception } from "./utils";
+import { supabase, typedData, WithContraception } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
 
 export const supabasePatientService = {
@@ -7,17 +8,23 @@ export const supabasePatientService = {
     console.log("Récupération des patients depuis Supabase...");
     
     try {
-      // Modification pour s'assurer que tous les patients sont récupérés sans filtrage
+      // Récupération de tous les patients sans filtrage
       const { data, error } = await supabase
         .from("Patient")
-        .select("*");
+        .select("*")
+        .order('lastName', { ascending: true });
         
       if (error) {
         console.error("Erreur lors de la récupération des patients:", error);
         throw new Error(error.message);
       }
       
-      console.log("Patients récupérés:", data);
+      console.log("Patients récupérés de Supabase:", data);
+      
+      if (!data || data.length === 0) {
+        console.warn("Aucun patient trouvé dans la base de données");
+        return [];
+      }
       
       // Convertir et adapter les champs pour être compatibles avec l'application
       return data.map(patient => adaptPatientFromSupabase(patient) as Patient);
@@ -33,7 +40,7 @@ export const supabasePatientService = {
         .from("Patient")
         .select("*")
         .eq("id", id)
-        .maybeSingle(); // Utilisation de maybeSingle au lieu de single pour éviter des erreurs
+        .maybeSingle();
         
       if (error) {
         console.error("Erreur lors de la récupération du patient:", error);

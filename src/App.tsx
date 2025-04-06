@@ -19,6 +19,9 @@ import PatientDetailPage from "./pages/PatientDetailPage";
 import NewPatientPage from "./pages/NewPatientPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 import SchedulePage from "./pages/SchedulePage";
+import InvoicesPage from "./pages/InvoicesPage";
+import NewInvoicePage from "./pages/NewInvoicePage";
+import InvoiceDetailPage from "./pages/InvoiceDetailPage";
 import NotFound from "./pages/NotFound";
 
 // Configuration du client de requêtes avec retry et gestion des erreurs améliorée
@@ -86,12 +89,19 @@ const AppRoutes = () => (
     
     <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminPage /></ProtectedRoute>} />
+    
     <Route path="/appointments" element={<ProtectedRoute><AppointmentsPage /></ProtectedRoute>} />
     <Route path="/appointments/new" element={<ProtectedRoute><NewAppointmentPage /></ProtectedRoute>} />
     <Route path="/appointments/:id/edit" element={<ProtectedRoute><EditAppointmentPage /></ProtectedRoute>} />
+    
     <Route path="/patients" element={<ProtectedRoute><PatientsPage /></ProtectedRoute>} />
     <Route path="/patients/new" element={<ProtectedRoute><NewPatientPage /></ProtectedRoute>} />
     <Route path="/patients/:id" element={<ProtectedRoute><PatientDetailPage /></ProtectedRoute>} />
+    
+    <Route path="/invoices" element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
+    <Route path="/invoices/new" element={<ProtectedRoute><NewInvoicePage /></ProtectedRoute>} />
+    <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetailPage /></ProtectedRoute>} />
+
     <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
     <Route path="/cabinet" element={<ProtectedRoute><CabinetSettingsPage /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />

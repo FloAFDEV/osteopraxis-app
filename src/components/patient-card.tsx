@@ -1,6 +1,6 @@
 
 import { format, parseISO, differenceInYears } from "date-fns";
-import { MapPin, Mail, Phone, Activity } from "lucide-react";
+import { MapPin, Mail, Phone, Activity, User } from "lucide-react";
 import { Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,17 +30,17 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
     if (gender === "Homme") {
       return {
         badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-        avatar: "bg-blue-500 text-primary-foreground"
+        avatar: "bg-blue-600 text-white"
       };
     } else if (gender === "Femme") {
       return {
-        badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-        avatar: "bg-pink-500 text-primary-foreground"
+        badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+        avatar: "bg-purple-600 text-white"
       };
     } else {
       return {
-        badge: "bg-muted text-muted-foreground",
-        avatar: "bg-primary text-primary-foreground"
+        badge: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
+        avatar: "bg-gray-600 text-white"
       };
     }
   };
@@ -48,73 +48,82 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
   const genderColors = getGenderColors(patient.gender || "");
 
   return (
-    <Card className="overflow-hidden hover-scale">
+    <Card className="overflow-hidden hover:shadow-md transition-all duration-200 border-t-4" 
+          style={{ borderTopColor: patient.gender === 'Homme' ? '#2563eb' : 
+                                  patient.gender === 'Femme' ? '#9333ea' : '#6b7280' }}>
       <CardContent className="p-6">
         <div className="flex gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarFallback className={`text-lg ${genderColors.avatar}`}>
-              {getInitials(patient.firstName || "", patient.lastName || "")}
-            </AvatarFallback>
+          <Avatar className="h-16 w-16 shadow-sm">
+            {patient.avatarUrl ? (
+              <img src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} />
+            ) : (
+              <AvatarFallback className={`text-lg ${genderColors.avatar}`}>
+                {getInitials(patient.firstName || "", patient.lastName || "")}
+              </AvatarFallback>
+            )}
           </Avatar>
           
           <div className="space-y-1 flex-1 min-w-0">
+            <h3 className="text-xl font-semibold truncate">
+              {patient.firstName} {patient.lastName}
+            </h3>
+            
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg font-medium truncate">
-                {patient.firstName} {patient.lastName}
-              </h3>
               {patient.gender && (
-                <Badge className={`${genderColors.badge}`}>
+                <Badge variant="outline" className={`${genderColors.badge} font-medium`}>
                   {patient.gender}
+                </Badge>
+              )}
+              
+              {age !== null && (
+                <Badge variant="outline" className="bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 font-medium">
+                  {age} ans
                 </Badge>
               )}
             </div>
             
-            <p className="text-sm text-muted-foreground truncate">
-              {patient.occupation || "Profession non spécifiée"}
-            </p>
-            
-            {age !== null && patient.birthDate && (
-              <p className="text-sm">
-                {age} ans • Né(e) le {format(parseISO(patient.birthDate), "dd/MM/yyyy")}
+            {patient.occupation && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
+                {patient.occupation}
               </p>
             )}
           </div>
         </div>
         
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 space-y-2 text-gray-600 dark:text-gray-400 border-t pt-4 border-gray-100 dark:border-gray-800">
           {patient.address && (
             <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+              <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
               <span className="truncate">{patient.address}</span>
             </div>
           )}
           
           {patient.phone && (
             <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-4 w-4 text-primary flex-shrink-0" />
+              <Phone className="h-4 w-4 text-gray-500 flex-shrink-0" />
               <span className="truncate">{patient.phone}</span>
             </div>
           )}
           
           {patient.email && (
             <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+              <Mail className="h-4 w-4 text-gray-500 flex-shrink-0" />
               <span className="truncate">{patient.email}</span>
             </div>
           )}
           
-          {patient.physicalActivity && (
+          {patient.birthDate && (
             <div className="flex items-center gap-2 text-sm">
-              <Activity className="h-4 w-4 text-primary flex-shrink-0" />
-              <span className="truncate">{patient.physicalActivity}</span>
+              <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
+              <span className="truncate">Né(e) le {format(parseISO(patient.birthDate), "dd/MM/yyyy")}</span>
             </div>
           )}
         </div>
       </CardContent>
       
       {showDetailsButton && (
-        <CardFooter className="px-6 py-4 bg-muted/20">
-          <Button asChild variant="default" size="sm" className="w-full">
+        <CardFooter className="px-6 py-4 bg-gray-50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-800">
+          <Button asChild variant="default" size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
             <Link to={`/patients/${patient.id}`}>
               Voir le dossier complet
             </Link>
