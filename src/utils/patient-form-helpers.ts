@@ -1,7 +1,7 @@
 
 /**
  * Convertit une valeur de type string en boolean pour le champ hasChildren
- * @param value Une valeur qui peut être "true", "false" ou string
+ * @param value Une valeur qui peut être "true", "false" ou boolean
  * @returns boolean
  */
 export const convertHasChildrenToBoolean = (value: string | boolean | undefined): boolean => {
@@ -27,16 +27,14 @@ export const formatChildrenAges = (ages: number[] | null | undefined): string =>
  * @returns Patient formaté pour l'API
  */
 export const preparePatientForApi = (patient: any) => {
-  // Convertir les formats de date si nécessaire
-  // Gérer les valeurs spéciales comme hasChildren
   return {
     ...patient,
-    hasChildren: typeof patient.hasChildren !== 'undefined' 
-      ? convertHasChildrenToBoolean(patient.hasChildren).toString()
-      : 'false',
+    // Convertir hasChildren en string pour Supabase
+    hasChildren: typeof patient.hasChildren === 'boolean' 
+      ? patient.hasChildren.toString() 
+      : (patient.hasChildren || 'false'),
     // Adapter contraception pour correspondre exactement à l'enum Supabase
     contraception: patient.contraception === "IMPLANT" ? "IMPLANTS" : patient.contraception,
-    // Autres conversions si nécessaires...
   };
 };
 
@@ -50,6 +48,8 @@ export const adaptPatientFromSupabase = (patient: any) => {
   
   return {
     ...patient,
+    // Convertir hasChildren de string à boolean pour l'application
+    hasChildren: convertHasChildrenToBoolean(patient.hasChildren),
     // Assurer la compatibilité avec les enums de l'application
     contraception: patient.contraception === "IMPLANTS" ? "IMPLANT" : patient.contraception,
     childrenAges: patient.childrenAges || []
@@ -57,9 +57,7 @@ export const adaptPatientFromSupabase = (patient: any) => {
 };
 
 /**
- * Adapte le statut d'un rendez-vous de Supabase vers l'application
- * @param status Statut provenant de Supabase
- * @returns Statut adapté pour l'application
+ * Convertit les statuts des rendez-vous entre l'application et Supabase
  */
 export const adaptAppointmentStatusFromSupabase = (status: string) => {
   if (status === "CANCELED") return "CANCELLED";
@@ -68,10 +66,17 @@ export const adaptAppointmentStatusFromSupabase = (status: string) => {
 
 /**
  * Adapte le statut d'un rendez-vous de l'application vers Supabase
- * @param status Statut de l'application
- * @returns Statut adapté pour Supabase
  */
 export const adaptAppointmentStatusForSupabase = (status: string) => {
   if (status === "CANCELLED") return "CANCELED";
   return status;
+};
+
+/**
+ * Vérifie si un utilisateur a un rôle admin
+ * @param user Utilisateur à vérifier
+ * @returns boolean indiquant si l'utilisateur est admin
+ */
+export const isUserAdmin = (user: any) => {
+  return user?.role === 'ADMIN';
 };

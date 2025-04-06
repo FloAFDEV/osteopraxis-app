@@ -8,9 +8,52 @@ import {
   adaptAppointmentStatusForSupabase 
 } from "@/utils/patient-form-helpers";
 
+// Type générique pour caster les résultats des requêtes Supabase
+type WithContraception<T> = T & { contraception: any };
+type WithStatus<T> = T & { status: any };
+
 // Service pour gérer les opérations Supabase
 export const supabaseApi = {
   // Auth
+  async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName
+        }
+      }
+    });
+    
+    if (error) throw new Error(error.message);
+    
+    if (!data.user) {
+      throw new Error("Échec lors de la création du compte");
+    }
+    
+    // Créer l'entrée User associée
+    const { error: userError } = await supabase
+      .from("User")
+      .insert({
+        id: data.user.id,
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        role: "OSTEOPATH", // Par défaut, tous les nouveaux utilisateurs sont des ostéopathes
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+    
+    if (userError) {
+      console.error("Erreur lors de la création du profil utilisateur:", userError);
+    }
+    
+    // Si inscription réussie, connecter l'utilisateur
+    return this.login(email, password);
+  },
+  
   async login(email: string, password: string): Promise<AuthState> {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -153,16 +196,15 @@ export const supabaseApi = {
 
   async createPatient(patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
     // Adapter le format pour Supabase
-    const adaptedPatient = {
-      ...patientData,
-      contraception: adaptAppointmentStatusForSupabase(patientData.contraception),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    const formattedData = preparePatientForApi(patientData);
     
     const { data, error } = await supabase
       .from("Patient")
-      .insert(adaptedPatient)
+      .insert({
+        ...formattedData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      } as WithContraception<any>)
       .select()
       .single();
       
@@ -176,16 +218,18 @@ export const supabaseApi = {
     const patientToUpdate = {
       ...patient,
       updatedAt: new Date().toISOString(),
+      // Convertir hasChildren en string si présent
       hasChildren: patient.hasChildren !== undefined 
-        ? convertHasChildrenToBoolean(patient.hasChildren).toString() 
+        ? (typeof patient.hasChildren === 'boolean' ? patient.hasChildren.toString() : patient.hasChildren)
         : undefined,
+      // Adapter contraception si présent
       contraception: patient.contraception ? 
-        adaptAppointmentStatusForSupabase(patient.contraception) : undefined
+        (patient.contraception === "IMPLANT" ? "IMPLANTS" : patient.contraception) : undefined
     };
     
     const { data, error } = await supabase
       .from("Patient")
-      .update(patientToUpdate)
+      .update(patientToUpdate as WithContraception<any>)
       .eq("id", id)
       .select()
       .single();
@@ -248,14 +292,14 @@ export const supabaseApi = {
 
   async createAppointment(appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> {
     // Adapter le format pour Supabase
-    const adaptedAppointment = {
-      ...appointmentData,
-      status: adaptAppointmentStatusForSupabase(appointmentData.status)
-    };
+    const adaptedStatus = adaptAppointmentStatusForSupabase(appointmentData.status);
     
     const { data, error } = await supabase
       .from("Appointment")
-      .insert(adaptedAppointment)
+      .insert({
+        ...appointmentData,
+        status: adaptedStatus
+      } as WithStatus<any>)
       .select()
       .single();
       
@@ -269,15 +313,14 @@ export const supabaseApi = {
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     // Adapter les données pour Supabase
-    const appointmentToUpdate = {
-      ...appointment,
-      status: appointment.status ? 
-        adaptAppointmentStatusForSupabase(appointment.status) : undefined
-    };
+    const adaptedStatus = appointment.status ? adaptAppointmentStatusForSupabase(appointment.status) : undefined;
     
     const { data, error } = await supabase
       .from("Appointment")
-      .update(appointmentToUpdate)
+      .update({
+        ...appointment,
+        status: adaptedStatus
+      } as WithStatus<any>)
       .eq("id", id)
       .select()
       .single();
@@ -371,5 +414,15 @@ export const supabaseApi = {
     }
     
     return data;
+  },
+
+  async promoteToAdmin(userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from("User")
+      .update({ role: "ADMIN" })
+      .eq("id", userId);
+
+    if (error) throw new Error(error.message);
+    return true;
   }
 };

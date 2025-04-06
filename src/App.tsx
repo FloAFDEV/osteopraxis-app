@@ -9,6 +9,8 @@ import { ThemeProvider } from "@/contexts/theme-context";
 
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import AdminPage from "./pages/AdminPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import NewAppointmentPage from "./pages/NewAppointmentPage";
 import EditAppointmentPage from "./pages/EditAppointmentPage";
@@ -22,8 +24,8 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 // Composant pour protéger les routes
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+const ProtectedRoute = ({ children, requireAdmin = false }: { children: JSX.Element, requireAdmin?: boolean }) => {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -40,14 +42,40 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Vérifie les droits d'admin si nécessaire
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+// Composant pour rediriger les utilisateurs connectés depuis les pages de login/register
+const PublicRoute = ({ children }: { children: JSX.Element }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
   return children;
 };
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/login" element={<LoginPage />} />
+    <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+    <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
     
     <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+    <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminPage /></ProtectedRoute>} />
     <Route path="/appointments" element={<ProtectedRoute><AppointmentsPage /></ProtectedRoute>} />
     <Route path="/appointments/new" element={<ProtectedRoute><NewAppointmentPage /></ProtectedRoute>} />
     <Route path="/appointments/:id/edit" element={<ProtectedRoute><EditAppointmentPage /></ProtectedRoute>} />

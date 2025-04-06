@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, Activity, UserPlus } from "lucide-react";
+import { Mail, Lock, Activity, User, UserPlus } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,36 +11,48 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-const loginSchema = z.object({
+const registerSchema = z.object({
+  firstName: z.string().min(1, "Le prénom est requis"),
+  lastName: z.string().min(1, "Le nom est requis"),
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  confirmPassword: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères")
+}).refine((data) => data.password === data.confirmPassword, {
+  path: ["confirmPassword"],
+  message: "Les mots de passe ne correspondent pas",
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const LoginPage = () => {
-  const { login, isLoading } = useAuth();
+const RegisterPage = () => {
+  const { register, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     try {
-      await login(data.email, data.password);
-    } catch (error) {
-      console.error("Login error:", error);
+      await register(data.email, data.password, data.firstName, data.lastName);
+      toast.success("Compte créé avec succès");
+      navigate("/");
+    } catch (error: any) {
+      console.error("Register error:", error);
+      toast.error(error.message || "Erreur lors de la création du compte");
     }
   };
 
   return (
     <div className="min-h-screen flex">
-      {/* Left section - Login form */}
+      {/* Left section - Register form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
         <div className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
@@ -52,10 +64,10 @@ const LoginPage = () => {
           <div className="w-full max-w-md space-y-8">
             <div>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
-                Votre espace dédié aux ostéopathes
+                Créez votre compte
               </h2>
               <p className="text-gray-400 text-lg">
-                Connectez-vous pour consulter vos dossiers.
+                Rejoignez PatientHub pour gérer vos patients efficacement.
               </p>
             </div>
 
@@ -64,18 +76,54 @@ const LoginPage = () => {
                 <div className="w-full border-t border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-[#0d1117] text-gray-400">Connexion</span>
+                <span className="px-2 bg-[#0d1117] text-gray-400">Inscription</span>
               </div>
             </div>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel className="text-gray-300">Prénom</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Prénom" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel className="text-gray-300">Nom</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Nom" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-300">Email :</FormLabel>
+                      <FormLabel className="text-gray-300">Email</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
@@ -92,11 +140,28 @@ const LoginPage = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-300">Mot de passe :</FormLabel>
+                      <FormLabel className="text-gray-300">Mot de passe</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                           <Input type="password" className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Votre mot de passe" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-300">Confirmez le mot de passe</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                          <Input type="password" className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Confirmer votre mot de passe" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -112,35 +177,30 @@ const LoginPage = () => {
                   {isLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
-                      Se connecter...
+                      Création en cours...
                     </>
                   ) : (
-                    "Se connecter"
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      S'inscrire
+                    </>
                   )}
                 </Button>
                 
                 <div className="text-center">
                   <p className="text-gray-400">
-                    Pas encore de compte ? <Link to="/register" className="text-blue-400 hover:underline">S'inscrire</Link>
+                    Déjà inscrit ? <Link to="/login" className="text-blue-400 hover:underline">Se connecter</Link>
                   </p>
                 </div>
               </form>
             </Form>
-
-            <div className="text-center text-sm text-gray-400 mt-6">
-              <p>
-                Pour la démo, utilisez : <br />
-                Email: franck.blanchet@example.com <br />
-                Mot de passe: password
-              </p>
-            </div>
           </div>
         </div>
         
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>
             La plateforme conçue pour faciliter la gestion des données médicales.<br />
-            Gérez vos rendez-vous et suivez efficacement vos patients
+            Gérez vos rendez-vous et suivez efficacement vos patients.
           </p>
           <p className="mt-4">
             © 2024 PatientHub. Tous droits réservés.
@@ -161,4 +221,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

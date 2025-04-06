@@ -284,6 +284,22 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 // API Service
 export const api = {
   // Auth
+  async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.register(email, password, firstName, lastName);
+      } catch (error) {
+        console.error("Erreur Supabase register:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(500);
+    // Simuler une inscription (démo seulement)
+    return this.login(email, password);
+  },
+  
   async login(email: string, password: string): Promise<AuthState> {
     if (USE_SUPABASE) {
       try {
@@ -362,6 +378,21 @@ export const api = {
     }
     
     return authState;
+  },
+
+  async promoteToAdmin(userId: string): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.promoteToAdmin(userId);
+      } catch (error) {
+        console.error("Erreur Supabase promoteToAdmin:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé
+    await delay(300);
+    return true;
   },
 
   // Rendez-vous
