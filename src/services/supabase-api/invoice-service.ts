@@ -11,13 +11,8 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    // Utiliser un cast plus explicite et sûr
-    return data as Array<Omit<Invoice, 'Patient'> & {
-      Patient?: {
-        firstName: string;
-        lastName: string;
-      }
-    }>;
+    // Utiliser un cast plus simple
+    return data as Invoice[];
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
@@ -34,13 +29,7 @@ export const supabaseInvoiceService = {
       throw new Error(error.message);
     }
     
-    // Utiliser un cast plus explicite et sûr
-    return data ? data as (Omit<Invoice, 'Patient'> & {
-      Patient?: {
-        firstName: string;
-        lastName: string;
-      }
-    }) : undefined;
+    return data as Invoice | undefined;
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
@@ -52,13 +41,7 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    // Utiliser un cast plus explicite et sûr
-    return data as Array<Omit<Invoice, 'Patient'> & {
-      Patient?: {
-        firstName: string;
-        lastName: string;
-      }
-    }>;
+    return data as Invoice[];
   },
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {

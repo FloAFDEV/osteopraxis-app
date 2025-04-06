@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, Mail } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -10,30 +10,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { debugPatient } from "@/utils/patient-form-helpers";
 import { Card, CardContent } from "@/components/ui/card";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+
+type SortOption = 'name' | 'date' | 'email' | 'gender';
 
 const PatientsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('name');
 
   // Utiliser useQuery pour une meilleure gestion de l'état et du cache
   const { data: patients, isLoading, error, refetch } = useQuery({
     queryKey: ['patients'],
     queryFn: async () => {
-      console.log("Fetching patients through useQuery...");
       try {
         const data = await api.getPatients();
-        console.log(`Patients fetched successfully: ${data.length} patients found`);
-        
-        // Debug logs pour voir le contenu réel des patients
-        if (data.length > 0) {
-          console.log("First patient sample:", data[0]);
-          debugPatient(data[0], "First patient from API");
-        } else {
-          console.log("No patients returned from API");
-        }
-        
+        // Pas de log avec les données sensibles
         return data;
       } catch (err) {
         console.error("Error fetching patients:", err);
@@ -70,22 +70,42 @@ const PatientsPage = () => {
     refetch();
   }, [refetch]);
 
-  const filteredPatients = patients 
-    ? patients.filter(patient => {
-        const fullName = `${patient.firstName || ''} ${patient.lastName || ''}`.toLowerCase();
-        const searchLower = searchQuery.toLowerCase();
-        
-        return (
-          searchQuery === "" ||
-          fullName.includes(searchLower) ||
-          (patient.email && patient.email.toLowerCase().includes(searchLower)) ||
-          (patient.phone && patient.phone.includes(searchLower)) ||
-          (patient.occupation && patient.occupation.toLowerCase().includes(searchLower))
-        );
-      }).sort((a, b) => (a.lastName || '').localeCompare(b.lastName || ''))
-    : [];
+  const getSortedPatients = () => {
+    if (!patients) return [];
+    
+    // D'abord filtrer les patients
+    const filtered = patients.filter(patient => {
+      const fullName = `${patient.firstName || ''} ${patient.lastName || ''}`.toLowerCase();
+      const searchLower = searchQuery.toLowerCase();
+      
+      return (
+        searchQuery === "" ||
+        fullName.includes(searchLower) ||
+        (patient.email && patient.email.toLowerCase().includes(searchLower)) ||
+        (patient.phone && patient.phone.includes(searchLower)) ||
+        (patient.occupation && patient.occupation.toLowerCase().includes(searchLower))
+      );
+    });
+    
+    // Ensuite trier les patients selon le critère choisi
+    return [...filtered].sort((a, b) => {
+      switch(sortBy) {
+        case 'name':
+          return (a.lastName || '').localeCompare(b.lastName || '');
+        case 'date':
+          // Tri par date de création, du plus récent au plus ancien
+          return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
+        case 'email':
+          return (a.email || '').localeCompare(b.email || '');
+        case 'gender':
+          return (a.gender || '').localeCompare(b.gender || '');
+        default:
+          return (a.lastName || '').localeCompare(b.lastName || '');
+      }
+    });
+  };
 
-  console.log(`Filtered patients: ${filteredPatients.length}`);
+  const filteredPatients = getSortedPatients();
 
   // Fonction pour créer un patient test dans Supabase pour le débogage
   const createTestPatient = async () => {
@@ -185,14 +205,46 @@ const PatientsPage = () => {
 
         <div className="relative mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <Input
-                placeholder="Rechercher un patient par nom, email, téléphone..."
-                className="pl-10 h-12 text-base"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  placeholder="Rechercher un patient par nom, email, téléphone..."
+                  className="pl-10 h-12 text-base"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="px-4 min-w-36 justify-between">
+                    <span className="flex items-center gap-2">
+                      <SortAsc className="h-4 w-4" />
+                      {sortBy === 'name' && 'Trier par nom'}
+                      {sortBy === 'date' && 'Trier par date'}
+                      {sortBy === 'email' && 'Trier par email'}
+                      {sortBy === 'gender' && 'Trier par genre'}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Options de tri</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setSortBy('name')} className="cursor-pointer">
+                    <Users className="mr-2 h-4 w-4" /> Par nom
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('date')} className="cursor-pointer">
+                    <Calendar className="mr-2 h-4 w-4" /> Par date d'ajout
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('email')} className="cursor-pointer">
+                    <Mail className="mr-2 h-4 w-4" /> Par email
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('gender')} className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" /> Par genre
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

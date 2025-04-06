@@ -21,7 +21,7 @@ export const supabasePatientService = {
         throw new Error(error.message);
       }
       
-      console.log("Patients récupérés:", data?.length || 0);
+      console.log(`Patients récupérés: ${data?.length || 0}`);
       
       if (!data || data.length === 0) {
         console.warn("Aucun patient trouvé dans la base de données");
@@ -74,7 +74,7 @@ export const supabasePatientService = {
         updatedAt: now
       });
       
-      console.log("Création du patient avec les données:", formattedData);
+      console.log("Création d'un nouveau patient...");
       
       // Utilisez l'option de journalisation pour voir la requête complète
       const { data, error } = await supabase
@@ -92,6 +92,7 @@ export const supabasePatientService = {
         throw new Error("Aucune donnée retournée lors de la création du patient");
       }
       
+      console.log("Patient créé avec succès");
       return adaptPatientFromSupabase(data) as Patient;
     } catch (error: any) {
       console.error("Erreur lors de la création du patient:", error);
@@ -163,7 +164,7 @@ export const supabasePatientService = {
       
       // Adapter les données pour Supabase
       const patientToUpdate = preparePatientForApi(updatedPatient);
-      console.log("Mise à jour du patient avec les données:", patientToUpdate);
+      console.log("Mise à jour du patient avec ID:", id);
       
       const { data, error } = await supabase
         .from("Patient")
@@ -177,6 +178,7 @@ export const supabasePatientService = {
         throw new Error(error.message);
       }
       
+      console.log("Patient mis à jour avec succès");
       return adaptPatientFromSupabase(data) as Patient;
     } catch (error) {
       console.error("Erreur lors de la mise à jour du patient:", error);
