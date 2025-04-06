@@ -1,8 +1,7 @@
 
-// Configuration et constantes partagées pour l'API
-
-// Variable pour indiquer si on doit utiliser Supabase ou les données simulées
+// Configuration globale des API
 export const USE_SUPABASE = true;
+export const SIMULATE_AUTH = true; // Pour tester en mode développement sans authentification réelle
 
-// Simule des délais de réseau pour les données de test
+// Délai simulé pour les réponses d'API (en ms)
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

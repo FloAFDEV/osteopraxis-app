@@ -1,6 +1,6 @@
 
 import { Appointment } from "@/types";
-import { supabase, WithStatus } from "./utils";
+import { supabase } from "./utils";
 import { adaptAppointmentStatusFromSupabase, adaptAppointmentStatusForSupabase } from "@/utils/patient-form-helpers";
 
 export const supabaseAppointmentService = {
@@ -35,10 +35,15 @@ export const supabaseAppointmentService = {
     
     if (!data) return undefined;
     
+    // Utiliser une conversion de type explicite pour éviter la récursion infinie
     return {
-      ...(data as any),
-      status: adaptAppointmentStatusFromSupabase((data as any).status)
-    } as Appointment;
+      id: data.id,
+      date: data.date,
+      reason: data.reason,
+      patientId: data.patientId,
+      status: adaptAppointmentStatusFromSupabase(data.status),
+      notificationSent: data.notificationSent
+    };
   },
 
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
@@ -65,16 +70,21 @@ export const supabaseAppointmentService = {
       .insert({
         ...appointmentData,
         status: adaptedStatus
-      } as WithStatus<any>)
+      })
       .select()
       .single();
       
     if (error) throw new Error(error.message);
     
+    // Utiliser une conversion de type explicite pour éviter la récursion infinie
     return {
-      ...(data as any),
-      status: adaptAppointmentStatusFromSupabase((data as any).status)
-    } as Appointment;
+      id: data.id,
+      date: data.date,
+      reason: data.reason,
+      patientId: data.patientId,
+      status: adaptAppointmentStatusFromSupabase(data.status),
+      notificationSent: data.notificationSent
+    };
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
@@ -86,7 +96,7 @@ export const supabaseAppointmentService = {
         updateData.status = adaptAppointmentStatusForSupabase(appointment.status);
       }
       
-      // Make sure we're using POST method with .update()
+      // Utiliser le bon verb HTTP pour la mise à jour
       const { data, error } = await supabase
         .from("Appointment")
         .update(updateData)
@@ -96,10 +106,15 @@ export const supabaseAppointmentService = {
         
       if (error) throw new Error(error.message);
       
+      // Utiliser une conversion de type explicite pour éviter la récursion infinie
       return {
-        ...(data as any),
-        status: adaptAppointmentStatusFromSupabase((data as any).status)
-      } as Appointment;
+        id: data.id,
+        date: data.date,
+        reason: data.reason,
+        patientId: data.patientId,
+        status: adaptAppointmentStatusFromSupabase(data.status),
+        notificationSent: data.notificationSent
+      };
     } catch (error) {
       console.error("Erreur Supabase updateAppointment:", error);
       throw error;

@@ -2,18 +2,22 @@
 import { Patient } from "@/types";
 import { supabase, typedData } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
+import { SIMULATE_AUTH } from "../api/config";
 
 export const supabasePatientService = {
   async getPatients(): Promise<Patient[]> {
     console.log("Récupération des patients depuis Supabase...");
     
     try {
-      // Récupération de tous les patients sans filtrage
-      const response = await supabase
-        .from("Patient")
-        .select("*")
-        .order('lastName', { ascending: true });
-        
+      // Si SIMULATE_AUTH est actif, utilisons un rôle authentifié
+      let query = supabase.from("Patient").select("*").order('lastName', { ascending: true });
+      
+      // Si SIMULATE_AUTH est actif, ajoutons un en-tête pour simuler un utilisateur authentifié
+      if (SIMULATE_AUTH) {
+        query = query.setHeader('X-Development-Mode', 'true');
+      }
+      
+      const response = await query;
       const { data, error } = response;
       
       if (error) {
@@ -76,13 +80,15 @@ export const supabasePatientService = {
       
       console.log("Création d'un nouveau patient...");
       
-      // Utilisez l'option de journalisation pour voir la requête complète
-      const { data, error } = await supabase
-        .from("Patient")
-        .insert(formattedData)
-        .select()
-        .single();
-        
+      // Si SIMULATE_AUTH est actif, ajoutons un en-tête pour simuler un utilisateur authentifié
+      let query = supabase.from("Patient").insert(formattedData).select().single();
+      
+      if (SIMULATE_AUTH) {
+        query = query.setHeader('X-Development-Mode', 'true');
+      }
+      
+      const { data, error } = await query;
+      
       if (error) {
         console.error("Erreur Supabase createPatient:", error);
         throw new Error(error.message);

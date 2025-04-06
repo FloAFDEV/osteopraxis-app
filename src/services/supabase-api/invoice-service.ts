@@ -11,11 +11,18 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    // Transform data to ensure proper typing with explicit type casting
-    return (data || []).map(item => ({
-      ...item,
-      Patient: item.Patient || null
-    })) as unknown as Invoice[];
+    // Transformer les données avec un typage explicite pour éviter la récursion
+    return (data || []).map(item => {
+      const patient = item.Patient ? {
+        firstName: item.Patient.firstName || '',
+        lastName: item.Patient.lastName || ''
+      } : null;
+      
+      return {
+        ...item,
+        Patient: patient
+      };
+    }) as unknown as Invoice[];
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
@@ -34,10 +41,15 @@ export const supabaseInvoiceService = {
     
     if (!data) return undefined;
     
-    // Use explicit type casting to avoid deep recursion issues
+    // Transformer les données avec un typage explicite
+    const patient = data.Patient ? {
+      firstName: data.Patient.firstName || '',
+      lastName: data.Patient.lastName || ''
+    } : null;
+    
     return {
       ...data,
-      Patient: data.Patient || null
+      Patient: patient
     } as unknown as Invoice;
   },
 
@@ -50,11 +62,18 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    // Transform data to ensure proper typing
-    return (data || []).map(item => ({
-      ...item,
-      Patient: item.Patient || null
-    })) as unknown as Invoice[];
+    // Transformer les données avec un typage explicite
+    return (data || []).map(item => {
+      const patient = item.Patient ? {
+        firstName: item.Patient.firstName || '',
+        lastName: item.Patient.lastName || ''
+      } : null;
+      
+      return {
+        ...item,
+        Patient: patient
+      };
+    }) as unknown as Invoice[];
   },
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
