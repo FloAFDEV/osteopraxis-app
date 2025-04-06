@@ -2,12 +2,6 @@
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase } from "./utils";
 
-// Define a simplified Patient type just for the join relation to avoid deep recursion
-type SimplePatient = {
-  firstName: string;
-  lastName: string;
-};
-
 export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     const { data, error } = await supabase
@@ -20,7 +14,7 @@ export const supabaseInvoiceService = {
     // Transform data to ensure proper typing
     return (data || []).map(item => ({
       ...item,
-      Patient: item.Patient as SimplePatient
+      Patient: item.Patient || null
     })) as Invoice[];
   },
 
@@ -42,7 +36,7 @@ export const supabaseInvoiceService = {
     
     return {
       ...data,
-      Patient: data.Patient as SimplePatient
+      Patient: data.Patient || null
     } as Invoice;
   },
 
@@ -58,7 +52,7 @@ export const supabaseInvoiceService = {
     // Transform data to ensure proper typing
     return (data || []).map(item => ({
       ...item,
-      Patient: item.Patient as SimplePatient
+      Patient: item.Patient || null
     })) as Invoice[];
   },
 
