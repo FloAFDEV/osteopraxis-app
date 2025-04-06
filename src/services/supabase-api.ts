@@ -1,7 +1,12 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, Appointment, Osteopath, Cabinet, User, AuthState } from "@/types";
-import { convertHasChildrenToBoolean } from "@/utils/patient-form-helpers";
+import { 
+  convertHasChildrenToBoolean, 
+  adaptPatientFromSupabase, 
+  adaptAppointmentStatusFromSupabase, 
+  adaptAppointmentStatusForSupabase 
+} from "@/utils/patient-form-helpers";
 
 // Service pour gérer les opérations Supabase
 export const supabaseApi = {
@@ -125,12 +130,8 @@ export const supabaseApi = {
       
     if (error) throw new Error(error.message);
     
-    // Convertir les champs si nécessaire
-    return data.map(patient => ({
-      ...patient,
-      hasChildren: patient.hasChildren ? patient.hasChildren.toString() : "false",
-      childrenAges: patient.childrenAges || []
-    }));
+    // Convertir et adapter les champs pour être compatibles avec l'application
+    return data.map(patient => adaptPatientFromSupabase(patient) as Patient);
   },
 
   async getPatientById(id: number): Promise<Patient | undefined> {
@@ -147,47 +148,39 @@ export const supabaseApi = {
       throw new Error(error.message);
     }
     
-    return {
-      ...data,
-      hasChildren: data.hasChildren ? data.hasChildren.toString() : "false",
-      childrenAges: data.childrenAges || []
-    };
+    return adaptPatientFromSupabase(data) as Patient;
   },
 
-  async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    // Formater le patient pour Supabase
-    const patientToCreate = {
-      ...patient,
-      hasChildren: patient.hasChildren !== undefined 
-        ? convertHasChildrenToBoolean(patient.hasChildren).toString() 
-        : "false",
+  async createPatient(patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+    // Adapter le format pour Supabase
+    const adaptedPatient = {
+      ...patientData,
+      contraception: adaptAppointmentStatusForSupabase(patientData.contraception),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     
     const { data, error } = await supabase
       .from("Patient")
-      .insert(patientToCreate)
+      .insert(adaptedPatient)
       .select()
       .single();
       
     if (error) throw new Error(error.message);
     
-    return {
-      ...data,
-      hasChildren: data.hasChildren ? data.hasChildren.toString() : "false",
-      childrenAges: data.childrenAges || []
-    };
+    return adaptPatientFromSupabase(data) as Patient;
   },
 
   async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
-    // Formater les données pour Supabase
+    // Adapter les données pour Supabase
     const patientToUpdate = {
       ...patient,
       updatedAt: new Date().toISOString(),
       hasChildren: patient.hasChildren !== undefined 
         ? convertHasChildrenToBoolean(patient.hasChildren).toString() 
-        : undefined
+        : undefined,
+      contraception: patient.contraception ? 
+        adaptAppointmentStatusForSupabase(patient.contraception) : undefined
     };
     
     const { data, error } = await supabase
@@ -199,11 +192,7 @@ export const supabaseApi = {
       
     if (error) throw new Error(error.message);
     
-    return {
-      ...data,
-      hasChildren: data.hasChildren ? data.hasChildren.toString() : "false",
-      childrenAges: data.childrenAges || []
-    };
+    return adaptPatientFromSupabase(data) as Patient;
   },
 
   // Appointments
@@ -215,7 +204,11 @@ export const supabaseApi = {
       
     if (error) throw new Error(error.message);
     
-    return data;
+    // Adapter les statuts pour l'application
+    return data.map(appointment => ({
+      ...appointment,
+      status: adaptAppointmentStatusFromSupabase(appointment.status)
+    } as Appointment));
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
@@ -232,7 +225,10 @@ export const supabaseApi = {
       throw new Error(error.message);
     }
     
-    return data;
+    return {
+      ...data,
+      status: adaptAppointmentStatusFromSupabase(data.status)
+    } as Appointment;
   },
 
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
@@ -244,32 +240,54 @@ export const supabaseApi = {
       
     if (error) throw new Error(error.message);
     
-    return data;
+    return data.map(appointment => ({
+      ...appointment,
+      status: adaptAppointmentStatusFromSupabase(appointment.status)
+    } as Appointment));
   },
 
-  async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
+  async createAppointment(appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> {
+    // Adapter le format pour Supabase
+    const adaptedAppointment = {
+      ...appointmentData,
+      status: adaptAppointmentStatusForSupabase(appointmentData.status)
+    };
+    
     const { data, error } = await supabase
       .from("Appointment")
-      .insert(appointment)
+      .insert(adaptedAppointment)
       .select()
       .single();
       
     if (error) throw new Error(error.message);
     
-    return data;
+    return {
+      ...data,
+      status: adaptAppointmentStatusFromSupabase(data.status)
+    } as Appointment;
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
+    // Adapter les données pour Supabase
+    const appointmentToUpdate = {
+      ...appointment,
+      status: appointment.status ? 
+        adaptAppointmentStatusForSupabase(appointment.status) : undefined
+    };
+    
     const { data, error } = await supabase
       .from("Appointment")
-      .update(appointment)
+      .update(appointmentToUpdate)
       .eq("id", id)
       .select()
       .single();
       
     if (error) throw new Error(error.message);
     
-    return data;
+    return {
+      ...data,
+      status: adaptAppointmentStatusFromSupabase(data.status)
+    } as Appointment;
   },
 
   async deleteAppointment(id: number): Promise<boolean> {

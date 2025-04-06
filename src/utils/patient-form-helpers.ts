@@ -34,6 +34,44 @@ export const preparePatientForApi = (patient: any) => {
     hasChildren: typeof patient.hasChildren !== 'undefined' 
       ? convertHasChildrenToBoolean(patient.hasChildren).toString()
       : 'false',
+    // Adapter contraception pour correspondre exactement à l'enum Supabase
+    contraception: patient.contraception === "IMPLANT" ? "IMPLANTS" : patient.contraception,
     // Autres conversions si nécessaires...
   };
+};
+
+/**
+ * Adapte les données du patient depuis Supabase vers l'application
+ * @param patient Patient récupéré de Supabase
+ * @returns Patient adapté pour l'application
+ */
+export const adaptPatientFromSupabase = (patient: any) => {
+  if (!patient) return null;
+  
+  return {
+    ...patient,
+    // Assurer la compatibilité avec les enums de l'application
+    contraception: patient.contraception === "IMPLANTS" ? "IMPLANT" : patient.contraception,
+    childrenAges: patient.childrenAges || []
+  };
+};
+
+/**
+ * Adapte le statut d'un rendez-vous de Supabase vers l'application
+ * @param status Statut provenant de Supabase
+ * @returns Statut adapté pour l'application
+ */
+export const adaptAppointmentStatusFromSupabase = (status: string) => {
+  if (status === "CANCELED") return "CANCELLED";
+  return status;
+};
+
+/**
+ * Adapte le statut d'un rendez-vous de l'application vers Supabase
+ * @param status Statut de l'application
+ * @returns Statut adapté pour Supabase
+ */
+export const adaptAppointmentStatusForSupabase = (status: string) => {
+  if (status === "CANCELLED") return "CANCELED";
+  return status;
 };

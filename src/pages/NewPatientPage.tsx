@@ -6,6 +6,7 @@ import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { PatientForm } from "@/components/patient-form";
 import { toast } from "sonner";
+import { preparePatientForApi } from "@/utils/patient-form-helpers";
 
 const NewPatientPage = () => {
   const [loading, setLoading] = useState(false);
@@ -15,13 +16,12 @@ const NewPatientPage = () => {
     try {
       setLoading(true);
       
-      // Convert childrenAges from number[] to string for the API
-      const formattedPatientData = {
+      // Préparer les données pour l'API
+      const formattedPatientData = preparePatientForApi({
         ...patientData,
-        childrenAges: patientData.childrenAges?.join(', ') || "",
         osteopathId: 1, // Pour la démo, nous utilisons l'ostéopathe ID 1
         cabinetId: 1 // Pour la démo, nous utilisons le cabinet ID 1
-      };
+      });
       
       const newPatient = await api.createPatient(formattedPatientData);
       
