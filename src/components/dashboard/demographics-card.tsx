@@ -1,121 +1,140 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DashboardData } from "@/types";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import React from 'react';
+import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { Patient } from "@/types";
 
 interface DemographicsCardProps {
-  data: DashboardData;
+  patients: Patient[];
 }
 
-export function DemographicsCard({ data }: DemographicsCardProps) {
-  const genderData = [
-    { name: "Hommes", value: data.maleCount, color: "#3b82f6" },
-    { name: "Femmes", value: data.femaleCount, color: "#8b5cf6" }
-  ];
+export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) => {
+  // Calculate gender distribution
+  const genderCounts = patients.reduce((acc, patient) => {
+    const gender = patient.gender || "Non spécifié";
+    acc[gender] = (acc[gender] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Format data for pie chart
+  const genderData = Object.entries(genderCounts).map(([name, value]) => ({
+    name,
+    value,
+    percentage: Math.round((value / patients.length) * 100)
+  }));
+  
+  // Colors based on gender
+  const GENDER_COLORS = {
+    "Homme": "#3b82f6",
+    "Femme": "#d946ef",
+    "Non spécifié": "#94a3b8"
+  };
+  
+  // Custom tooltip to display percentage with better formatting
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow">
+          <p className="font-medium">{data.name}</p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{data.value}</span> patients
+          </p>
+          <p className="text-sm text-primary font-semibold">
+            {data.percentage}% du total
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+  
+  // Custom label for the pie chart
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    index,
+    name,
+  }: any) => {
+    // Only show label for slices with significant percentage
+    if (percent < 0.05) return null;
+    
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#fff"
+        fontWeight="bold"
+        fontSize="12"
+        dominantBaseline="central"
+        textAnchor="middle"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+  
+  // Custom Legend component with better styling
+  const CustomLegend = ({ payload }: any) => {
+    return (
+      <ul className="flex flex-wrap justify-center gap-4 pt-4">
+        {payload.map((entry: any, index: number) => (
+          <li key={`legend-${index}`} className="flex items-center gap-2">
+            <div
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="text-sm">{entry.value} ({entry.payload.percentage}%)</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   return (
-    <Card className="col-span-1">
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Démographie des patients</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            {data.totalPatients} patients
-          </span>
-        </CardTitle>
+        <CardTitle>Démographie des patients</CardTitle>
+        <CardDescription>
+          Répartition par genre sur un total de {patients.length} patients
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="h-[200px] bg-white dark:bg-slate-900 rounded-lg p-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={genderData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={75}
-                    fill="#8884d8"
-                    paddingAngle={2}
-                    dataKey="value"
-                    labelLine={false}
-                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) => {
-                      const radius = innerRadius + (outerRadius - innerRadius) * 1.1;
-                      const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
-                      const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
-                      return (
-                        <text
-                          x={x}
-                          y={y}
-                          fill={name === "Hommes" ? "#3b82f6" : "#8b5cf6"}
-                          textAnchor={x > cx ? "start" : "end"}
-                          dominantBaseline="central"
-                          className="font-medium"
-                        >
-                          {`${(percent * 100).toFixed(0)}%`}
-                        </text>
-                      );
-                    }}
-                  >
-                    {genderData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Legend 
-                    verticalAlign="bottom" 
-                    height={36} 
-                    formatter={(value, entry, index) => (
-                      <span style={{ color: index === 0 ? "#3b82f6" : "#8b5cf6", fontWeight: 500 }}>
-                        {value}
-                      </span>
-                    )}
+        <div className="h-[250px] mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={genderData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={renderCustomizedLabel}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {genderData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || "#94a3b8"} 
                   />
-                  <Tooltip 
-                    formatter={(value) => [`${value} patients`, "Total"]} 
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      padding: '8px 12px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}
-                    labelStyle={{ fontWeight: 'bold' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Âge moyen (tout)</span>
-                <span className="font-medium">{data.averageAge} ans</span>
-              </div>
-              <div className="w-full h-3 bg-muted rounded-full">
-                <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{ width: `${Math.min((data.averageAge / 100) * 100, 100)}%` }}></div>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Hommes</span>
-                <span className="font-medium">{data.averageAgeMale} ans</span>
-              </div>
-              <div className="w-full h-3 bg-muted rounded-full">
-                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min((data.averageAgeMale / 100) * 100, 100)}%` }}></div>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Femmes</span>
-                <span className="font-medium">{data.averageAgeFemale} ans</span>
-              </div>
-              <div className="w-full h-3 bg-muted rounded-full">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: `${Math.min((data.averageAgeFemale / 100) * 100, 100)}%` }}></div>
-              </div>
-            </div>
-          </div>
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend content={<CustomLegend />} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   );
-}
+};

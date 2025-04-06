@@ -99,13 +99,71 @@ export const supabasePatientService = {
     }
   },
 
-  async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
+  async updatePatient(id: number, patientData: Partial<Patient>): Promise<Patient | undefined> {
     try {
-      // Adapter les données pour Supabase
-      const patientToUpdate = preparePatientForApi({
-        ...patient,
+      // D'abord récupérer les données existantes du patient
+      const existingPatientResponse = await supabase
+        .from("Patient")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+        
+      if (existingPatientResponse.error) {
+        console.error("Erreur lors de la récupération du patient existant:", existingPatientResponse.error);
+        throw new Error(existingPatientResponse.error.message);
+      }
+      
+      if (!existingPatientResponse.data) {
+        console.error("Aucun patient trouvé avec l'id:", id);
+        return undefined;
+      }
+      
+      const existingPatient = existingPatientResponse.data;
+      
+      // Fusionner les nouvelles données avec les données existantes
+      const updatedPatient = {
+        firstName: patientData.firstName || existingPatient.firstName,
+        lastName: patientData.lastName || existingPatient.lastName,
+        email: patientData.email || existingPatient.email,
+        phone: patientData.phone || existingPatient.phone,
+        address: patientData.address || existingPatient.address,
+        gender: patientData.gender || existingPatient.gender,
+        maritalStatus: patientData.maritalStatus || existingPatient.maritalStatus,
+        occupation: patientData.occupation || existingPatient.occupation,
+        hasChildren: patientData.hasChildren !== undefined 
+          ? patientData.hasChildren 
+          : existingPatient.hasChildren,
+        childrenAges: patientData.childrenAges || existingPatient.childrenAges,
+        physicalActivity: patientData.physicalActivity || existingPatient.physicalActivity,
+        isSmoker: patientData.isSmoker !== undefined 
+          ? patientData.isSmoker 
+          : existingPatient.isSmoker,
+        handedness: patientData.handedness || existingPatient.handedness,
+        contraception: patientData.contraception || existingPatient.contraception,
+        currentTreatment: patientData.currentTreatment || existingPatient.currentTreatment,
+        generalPractitioner: patientData.generalPractitioner || existingPatient.generalPractitioner,
+        surgicalHistory: patientData.surgicalHistory || existingPatient.surgicalHistory,
+        digestiveProblems: patientData.digestiveProblems || existingPatient.digestiveProblems,
+        digestiveDoctorName: patientData.digestiveDoctorName || existingPatient.digestiveDoctorName,
+        birthDate: patientData.birthDate
+          ? new Date(patientData.birthDate).toISOString()
+          : existingPatient.birthDate,
+        avatarUrl: patientData.avatarUrl || existingPatient.avatarUrl,
+        traumaHistory: patientData.traumaHistory || existingPatient.traumaHistory,
+        rheumatologicalHistory: patientData.rheumatologicalHistory || existingPatient.rheumatologicalHistory,
+        hasVisionCorrection: patientData.hasVisionCorrection !== undefined
+          ? patientData.hasVisionCorrection
+          : existingPatient.hasVisionCorrection,
+        ophtalmologistName: patientData.ophtalmologistName || existingPatient.ophtalmologistName,
+        entProblems: patientData.entProblems || existingPatient.entProblems,
+        entDoctorName: patientData.entDoctorName || existingPatient.entDoctorName,
+        hdlm: patientData.hdlm || existingPatient.hdlm,
         updatedAt: new Date().toISOString()
-      });
+      };
+      
+      // Adapter les données pour Supabase
+      const patientToUpdate = preparePatientForApi(updatedPatient);
+      console.log("Mise à jour du patient avec les données:", patientToUpdate);
       
       const { data, error } = await supabase
         .from("Patient")
