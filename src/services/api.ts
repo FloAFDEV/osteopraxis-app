@@ -1,3 +1,4 @@
+
 import { Appointment, Patient, Osteopath, Cabinet, User, AuthState } from "@/types";
 import { supabaseApi } from "./supabase-api";
 
@@ -329,6 +330,21 @@ export const api = {
     localStorage.setItem("authState", JSON.stringify(authState));
     
     return authState;
+  },
+  
+  async loginWithMagicLink(email: string): Promise<void> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.loginWithMagicLink(email);
+      } catch (error) {
+        console.error("Erreur Supabase magic link:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé
+    await delay(500);
+    console.log(`Magic link envoyé à ${email} (simulation)`);
   },
   
   async logout(): Promise<void> {

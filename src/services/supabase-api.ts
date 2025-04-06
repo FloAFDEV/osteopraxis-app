@@ -12,6 +12,20 @@ import {
 type WithContraception<T> = T & { contraception: any };
 type WithStatus<T> = T & { status: any };
 
+// Fonction pour préparer les données du patient avant de les envoyer à Supabase
+const preparePatientForApi = (patientData: Partial<Patient>) => {
+  return {
+    ...patientData,
+    // Convertir hasChildren en string si présent
+    hasChildren: patientData.hasChildren !== undefined 
+      ? (typeof patientData.hasChildren === 'boolean' ? patientData.hasChildren.toString() : patientData.hasChildren)
+      : undefined,
+    // Adapter contraception si présent
+    contraception: patientData.contraception ? 
+      (patientData.contraception === "IMPLANT" ? "IMPLANTS" : patientData.contraception) : undefined
+  };
+};
+
 // Service pour gérer les opérations Supabase
 export const supabaseApi = {
   // Auth
@@ -106,6 +120,17 @@ export const supabaseApi = {
     localStorage.setItem("authState", JSON.stringify(authState));
     
     return authState;
+  },
+  
+  async loginWithMagicLink(email: string): Promise<void> {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin,
+      }
+    });
+    
+    if (error) throw new Error(error.message);
   },
   
   async logout(): Promise<void> {
@@ -215,21 +240,14 @@ export const supabaseApi = {
 
   async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
     // Adapter les données pour Supabase
-    const patientToUpdate = {
-      ...patient,
-      updatedAt: new Date().toISOString(),
-      // Convertir hasChildren en string si présent
-      hasChildren: patient.hasChildren !== undefined 
-        ? (typeof patient.hasChildren === 'boolean' ? patient.hasChildren.toString() : patient.hasChildren)
-        : undefined,
-      // Adapter contraception si présent
-      contraception: patient.contraception ? 
-        (patient.contraception === "IMPLANT" ? "IMPLANTS" : patient.contraception) : undefined
-    };
+    const patientToUpdate = preparePatientForApi(patient);
     
     const { data, error } = await supabase
       .from("Patient")
-      .update(patientToUpdate as WithContraception<any>)
+      .update({
+        ...patientToUpdate,
+        updatedAt: new Date().toISOString()
+      } as WithContraception<any>)
       .eq("id", id)
       .select()
       .single();

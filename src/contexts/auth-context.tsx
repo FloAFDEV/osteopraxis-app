@@ -12,6 +12,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithMagicLink: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   promoteToAdmin: (userId: string) => Promise<void>;
@@ -56,6 +57,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Échec de la connexion: identifiants incorrects");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithMagicLink = async (email: string) => {
+    try {
+      setIsLoading(true);
+      await api.loginWithMagicLink(email);
+      toast.success("Un lien de connexion a été envoyé à votre adresse email");
+    } catch (error) {
+      console.error("Magic link sending failed:", error);
+      toast.error("Échec de l'envoi du magic link");
       throw error;
     } finally {
       setIsLoading(false);
@@ -132,6 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: authState.isAuthenticated,
         isLoading,
         login,
+        loginWithMagicLink,
         logout,
         register,
         promoteToAdmin
