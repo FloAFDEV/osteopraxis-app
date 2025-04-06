@@ -1,29 +1,17 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, Appointment, Osteopath, Cabinet, User, AuthState } from "@/types";
 import { 
   convertHasChildrenToBoolean, 
   adaptPatientFromSupabase, 
   adaptAppointmentStatusFromSupabase, 
-  adaptAppointmentStatusForSupabase 
+  adaptAppointmentStatusForSupabase,
+  preparePatientForApi
 } from "@/utils/patient-form-helpers";
 
 // Type générique pour caster les résultats des requêtes Supabase
 type WithContraception<T> = T & { contraception: any };
 type WithStatus<T> = T & { status: any };
-
-// Fonction pour préparer les données du patient avant de les envoyer à Supabase
-const preparePatientForApi = (patientData: Partial<Patient>) => {
-  return {
-    ...patientData,
-    // Convertir hasChildren en string si présent
-    hasChildren: patientData.hasChildren !== undefined 
-      ? (typeof patientData.hasChildren === 'boolean' ? String(patientData.hasChildren) : patientData.hasChildren)
-      : undefined,
-    // Adapter contraception si présent
-    contraception: patientData.contraception ? 
-      (patientData.contraception === "IMPLANT" ? "IMPLANTS" : patientData.contraception) : undefined
-  };
-};
 
 // Service pour gérer les opérations Supabase
 export const supabaseApi = {
@@ -140,52 +128,61 @@ export const supabaseApi = {
   },
   
   async checkAuth(): Promise<AuthState> {
-    const { data } = await supabase.auth.getSession();
-    
-    if (!data.session) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      
+      if (!data.session) {
+        return {
+          user: null,
+          isAuthenticated: false,
+          token: null
+        };
+      }
+      
+      // Récupérer les informations supplémentaires de l'utilisateur depuis la table User
+      const { data: userData, error: userError } = await supabase
+        .from("User")
+        .select("*")
+        .eq("id", data.session.user.id)
+        .maybeSingle();
+      
+      if (userError) {
+        console.error("Erreur lors de la récupération des données utilisateur:", userError);
+      }
+      
+      const user: User = userData ? {
+        id: data.session.user.id,
+        email: data.session.user.email || "",
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        role: userData.role,
+        created_at: userData.created_at,
+        updated_at: userData.updated_at,
+        osteopathId: userData.osteopathId
+      } : {
+        id: data.session.user.id,
+        email: data.session.user.email || "",
+        first_name: null,
+        last_name: null,
+        role: "OSTEOPATH",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        osteopathId: null
+      };
+      
+      return {
+        user,
+        isAuthenticated: true,
+        token: data.session.access_token
+      };
+    } catch (error) {
+      console.error("Erreur lors de la vérification de l'authentification:", error);
       return {
         user: null,
         isAuthenticated: false,
         token: null
       };
     }
-    
-    // Récupérer les informations supplémentaires de l'utilisateur depuis la table User
-    const { data: userData, error: userError } = await supabase
-      .from("User")
-      .select("*")
-      .eq("id", data.session.user.id)
-      .single();
-    
-    if (userError) {
-      console.error("Erreur lors de la récupération des données utilisateur:", userError);
-    }
-    
-    const user: User = userData ? {
-      id: data.session.user.id,
-      email: data.session.user.email || "",
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      role: userData.role,
-      created_at: userData.created_at,
-      updated_at: userData.updated_at,
-      osteopathId: userData.osteopathId
-    } : {
-      id: data.session.user.id,
-      email: data.session.user.email || "",
-      first_name: null,
-      last_name: null,
-      role: "OSTEOPATH",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      osteopathId: null
-    };
-    
-    return {
-      user,
-      isAuthenticated: true,
-      token: data.session.access_token
-    };
   },
 
   async promoteToAdmin(userId: string): Promise<boolean> {
@@ -200,12 +197,18 @@ export const supabaseApi = {
   
   // Patients
   async getPatients(): Promise<Patient[]> {
+    console.log("Récupération des patients depuis Supabase...");
     const { data, error } = await supabase
       .from("Patient")
       .select("*")
       .order("updatedAt", { ascending: false });
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Erreur lors de la récupération des patients:", error);
+      throw new Error(error.message);
+    }
+    
+    console.log("Patients récupérés:", data);
     
     // Convertir et adapter les champs pour être compatibles avec l'application
     return data.map(patient => adaptPatientFromSupabase(patient) as Patient);
@@ -230,33 +233,39 @@ export const supabaseApi = {
 
   async createPatient(patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
     // Adapter le format pour Supabase
-    const formattedData = preparePatientForApi(patientData);
+    const now = new Date().toISOString();
+    const formattedData = preparePatientForApi({
+      ...patientData,
+      createdAt: now,
+      updatedAt: now
+    });
+    
+    console.log("Création du patient avec les données:", formattedData);
     
     const { data, error } = await supabase
       .from("Patient")
-      .insert({
-        ...formattedData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      } as WithContraception<any>)
+      .insert(formattedData as WithContraception<any>)
       .select()
       .single();
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Erreur lors de la création du patient:", error);
+      throw new Error(error.message);
+    }
     
     return adaptPatientFromSupabase(data) as Patient;
   },
 
   async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
     // Adapter les données pour Supabase
-    const patientToUpdate = preparePatientForApi(patient);
+    const patientToUpdate = preparePatientForApi({
+      ...patient,
+      updatedAt: new Date().toISOString()
+    });
     
     const { data, error } = await supabase
       .from("Patient")
-      .update({
-        ...patientToUpdate,
-        updatedAt: new Date().toISOString()
-      } as WithContraception<any>)
+      .update(patientToUpdate as WithContraception<any>)
       .eq("id", id)
       .select()
       .single();
@@ -441,15 +450,5 @@ export const supabaseApi = {
     }
     
     return data;
-  },
-
-  async promoteToAdmin(userId: string): Promise<boolean> {
-    const { error } = await supabase
-      .from("User")
-      .update({ role: "ADMIN" })
-      .eq("id", userId);
-
-    if (error) throw new Error(error.message);
-    return true;
   }
 };

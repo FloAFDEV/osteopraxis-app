@@ -6,24 +6,33 @@ import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { PatientForm } from "@/components/patient-form";
 import { toast } from "sonner";
-import { preparePatientForApi } from "@/utils/patient-form-helpers";
+import { Patient } from "@/types";
 
 const NewPatientPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleAddPatient = async (patientData: any) => {
+  const handleAddPatient = async (patientData: Partial<Patient>) => {
     try {
       setLoading(true);
       
-      // Préparer les données pour l'API
-      const formattedPatientData = preparePatientForApi({
+      // Vérifier les champs obligatoires
+      if (!patientData.firstName || !patientData.lastName) {
+        toast.error("Veuillez remplir au moins le nom et le prénom");
+        setLoading(false);
+        return;
+      }
+      
+      // Ajouter les données par défaut nécessaires
+      const patientToCreate = {
         ...patientData,
         osteopathId: 1, // Pour la démo, nous utilisons l'ostéopathe ID 1
-        cabinetId: 1 // Pour la démo, nous utilisons le cabinet ID 1
-      });
+        cabinetId: 1, // Pour la démo, nous utilisons le cabinet ID 1
+        userId: null  // Requis par le type mais peut être null
+      } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
       
-      const newPatient = await api.createPatient(formattedPatientData);
+      console.log("Envoi du patient à l'API:", patientToCreate);
+      const newPatient = await api.createPatient(patientToCreate);
       
       toast.success(`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`);
       navigate(`/patients/${newPatient.id}`);

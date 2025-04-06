@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Users, Plus, Search, UserPlus, Loader2 } from "lucide-react";
+import { Users, Plus, Search, UserPlus, Loader2, AlertCircle } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -9,40 +9,55 @@ import { PatientCard } from "@/components/patient-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 const PatientsPage = () => {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchPatients = async () => {
+  // Utiliser useQuery pour une meilleure gestion de l'état et du cache
+  const { data: patients, isLoading, error, refetch } = useQuery({
+    queryKey: ['patients'],
+    queryFn: async () => {
+      console.log("Fetching patients through useQuery...");
       try {
         const data = await api.getPatients();
-        setPatients(data);
-      } catch (error) {
-        console.error("Error fetching patients:", error);
-        toast.error("Impossible de charger les patients. Veuillez réessayer.");
-      } finally {
-        setLoading(false);
+        console.log("Patients fetched successfully:", data);
+        return data;
+      } catch (err) {
+        console.error("Error fetching patients:", err);
+        throw err;
       }
-    };
+    },
+    retry: 3, // Réessayer 3 fois en cas d'échec
+    retryDelay: 1000, // Attendre 1 seconde entre chaque tentative
+  });
 
-    fetchPatients();
-  }, []);
+  useEffect(() => {
+    if (error) {
+      console.error("Error in useQuery:", error);
+      toast.error("Impossible de charger les patients. Vérifiez votre connexion.");
+    }
+  }, [error]);
 
-  const filteredPatients = patients.filter(patient => {
-    const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
-    const searchLower = searchQuery.toLowerCase();
-    
-    return (
-      searchQuery === "" ||
-      fullName.includes(searchLower) ||
-      (patient.email && patient.email.toLowerCase().includes(searchLower)) ||
-      (patient.phone && patient.phone.includes(searchLower)) ||
-      (patient.occupation && patient.occupation.toLowerCase().includes(searchLower))
-    );
-  }).sort((a, b) => a.lastName.localeCompare(b.lastName));
+  const handleRetry = () => {
+    toast.info("Nouvelle tentative de chargement des patients...");
+    refetch();
+  };
+
+  const filteredPatients = patients 
+    ? patients.filter(patient => {
+        const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+        const searchLower = searchQuery.toLowerCase();
+        
+        return (
+          searchQuery === "" ||
+          fullName.includes(searchLower) ||
+          (patient.email && patient.email.toLowerCase().includes(searchLower)) ||
+          (patient.phone && patient.phone.includes(searchLower)) ||
+          (patient.occupation && patient.occupation.toLowerCase().includes(searchLower))
+        );
+      }).sort((a, b) => a.lastName.localeCompare(b.lastName))
+    : [];
 
   return (
     <Layout>
@@ -70,12 +85,23 @@ const PatientsPage = () => {
           />
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-500" />
               <p className="text-muted-foreground">Chargement des patients...</p>
             </div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 bg-red-50 dark:bg-red-950/20 rounded-lg border border-dashed border-red-300 dark:border-red-800">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-red-800 dark:text-red-300">Erreur de chargement</h3>
+            <p className="text-red-600/70 dark:text-red-400/70 mt-2 mb-6">
+              Impossible de récupérer les patients depuis la base de données.
+            </p>
+            <Button variant="outline" onClick={handleRetry} className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+              Réessayer
+            </Button>
           </div>
         ) : (
           <>
@@ -87,7 +113,8 @@ const PatientsPage = () => {
                 </div>
                 <h3 className="text-xl font-medium">Aucun patient trouvé</h3>
                 <p className="text-muted-foreground mt-2 mb-6">
-                  Aucun patient ne correspond à vos critères de recherche.
+                  {searchQuery ? "Aucun patient ne correspond à vos critères de recherche." : 
+                   "Aucun patient n'a été ajouté pour le moment."}
                 </p>
                 <Button asChild variant="outline" className="border-pink-500/30 text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-950/30">
                   <Link to="/patients/new">
@@ -107,8 +134,8 @@ const PatientsPage = () => {
                     <div>
                       <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300">Gestion complète de vos patients</h3>
                       <p className="text-blue-600/70 dark:text-blue-400/70 mt-1">
-                        Consultez, modifiez et ajoutez facilement les informations de vos patients. 
-                        Suivez leur historique et planifiez leurs rendez-vous en quelques clics.
+                        {filteredPatients.length} patient{filteredPatients.length > 1 ? 's' : ''} trouvé{filteredPatients.length > 1 ? 's' : ''}. 
+                        Consultez, modifiez et ajoutez facilement les informations de vos patients.
                       </p>
                     </div>
                   </div>
@@ -126,6 +153,6 @@ const PatientsPage = () => {
       </div>
     </Layout>
   );
-}
+};
 
 export default PatientsPage;
