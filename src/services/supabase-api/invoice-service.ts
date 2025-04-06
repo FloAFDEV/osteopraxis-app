@@ -1,5 +1,5 @@
 
-import { Invoice } from "@/types"; // Fixed import
+import { Invoice } from "@/types";
 import { supabase, typedData } from "./utils";
 
 export const supabaseInvoiceService = {

@@ -87,6 +87,39 @@ const PatientsPage = () => {
 
   console.log(`Filtered patients: ${filteredPatients.length}`);
 
+  // Fonction pour créer un patient test dans Supabase pour le débogage
+  const createTestPatient = async () => {
+    try {
+      toast.info("Création d'un patient test...");
+      const testPatient = {
+        firstName: "Test",
+        lastName: "Patient",
+        gender: "Homme" as const,
+        email: "test@example.com",
+        phone: "0123456789",
+        osteopathId: 1,
+        address: "123 Rue Test",
+        cabinetId: 1,
+        maritalStatus: "SINGLE" as const,
+        birthDate: new Date().toISOString(),
+        handedness: "RIGHT" as const,
+        contraception: "NONE" as const,
+        hasVisionCorrection: false,
+        isDeceased: false,
+        isSmoker: false,
+        hasChildren: "false",
+        childrenAges: []
+      };
+      
+      await api.createPatient(testPatient);
+      toast.success("Patient test créé avec succès");
+      refetch();
+    } catch (err) {
+      console.error("Erreur lors de la création du patient test:", err);
+      toast.error("Impossible de créer le patient test");
+    }
+  };
+
   return (
     <Layout>
       <div className="flex flex-col min-h-full">
@@ -110,6 +143,15 @@ const PatientsPage = () => {
               >
                 <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Actualiser
+              </Button>
+              
+              <Button 
+                onClick={createTestPatient} 
+                variant="outline"
+                className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700 w-auto"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Patient test
               </Button>
               
               <Button asChild className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
@@ -180,11 +222,21 @@ const PatientsPage = () => {
                       {searchQuery ? "Aucun patient ne correspond à vos critères de recherche." : 
                        "Aucun patient n'a été ajouté pour le moment."}
                     </p>
-                    <Button asChild variant="outline" className="border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30">
-                      <Link to="/patients/new">
-                        <Plus className="mr-2 h-4 w-4" /> Ajouter un patient
-                      </Link>
-                    </Button>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <Button 
+                        onClick={createTestPatient} 
+                        variant="outline"
+                        className="border-green-500/30 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Ajouter un patient test
+                      </Button>
+                      <Button asChild variant="outline" className="border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30">
+                        <Link to="/patients/new">
+                          <Plus className="mr-2 h-4 w-4" /> Créer un nouveau patient
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

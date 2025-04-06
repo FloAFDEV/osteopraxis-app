@@ -30,6 +30,5 @@ export const logSupabaseResponse = (data: any, error: any, operation: string) =>
     console.log(`Supabase ${operation} success:`, data);
   }
   
-  // Return the data for convenience
   return { data, error };
 };

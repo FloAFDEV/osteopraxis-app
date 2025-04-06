@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { supabase, typedData, logSupabaseResponse } from "./utils";
+import { supabase, typedData, logSupabaseResponse, WithContraception } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
 
 export const supabasePatientService = {
@@ -9,11 +9,13 @@ export const supabasePatientService = {
     
     try {
       // Récupération de tous les patients sans filtrage
-      const { data, error } = await supabase
+      const response = await supabase
         .from("Patient")
         .select("*")
         .order('lastName', { ascending: true });
         
+      const { data, error } = response;
+      
       if (error) {
         console.error("Erreur lors de la récupération des patients:", error);
         throw new Error(error.message);
@@ -23,6 +25,29 @@ export const supabasePatientService = {
       
       if (!data || data.length === 0) {
         console.warn("Aucun patient trouvé dans la base de données");
+        
+        // Pour des fins de test, nous allons créer un patient fictif
+        // Décommenter cette partie pour ajouter un patient test si nécessaire
+        /*
+        console.log("Création d'un patient test...");
+        const testPatient = {
+          firstName: "Test",
+          lastName: "Patient",
+          gender: "Homme",
+          email: "test@example.com",
+          phone: "0123456789",
+          osteopathId: 1,
+          updatedAt: new Date().toISOString()
+        };
+        
+        try {
+          await this.createPatient(testPatient);
+          console.log("Patient test créé avec succès");
+        } catch (e) {
+          console.error("Erreur lors de la création du patient test:", e);
+        }
+        */
+        
         return [];
       }
       
@@ -73,7 +98,7 @@ export const supabasePatientService = {
     
     const { data, error } = await supabase
       .from("Patient")
-      .insert(formattedData as WithContraception<any>)
+      .insert(formattedData)
       .select()
       .single();
       
@@ -94,7 +119,7 @@ export const supabasePatientService = {
     
     const { data, error } = await supabase
       .from("Patient")
-      .update(patientToUpdate as WithContraception<any>)
+      .update(patientToUpdate)
       .eq("id", id)
       .select()
       .single();
