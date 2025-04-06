@@ -11,10 +11,14 @@ export const supabase = {
   ...supabaseClient,
   from: (table: string) => {
     console.log(`Accessing Supabase table: ${table}`);
-    // Nous utilisons une assertion de type pour corriger l'erreur liée aux paramètres génériques
-    return supabaseClient.from(table as any);
+    return supabaseClient.from(table);
   }
 };
+
+// Fonction d'aide pour le typage des résultats Supabase
+export function typedData<T>(data: any): T {
+  return data as T;
+}
 
 // Utilitaires pour le débogage
 export const logSupabaseResponse = (data: any, error: any, operation: string) => {

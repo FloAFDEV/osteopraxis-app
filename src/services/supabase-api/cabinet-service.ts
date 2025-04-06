@@ -1,6 +1,6 @@
 
 import { Cabinet } from "@/types";
-import { supabase } from "./utils";
+import { supabase, typedData } from "./utils";
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
@@ -10,7 +10,7 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return data as Cabinet[];
+    return typedData<Cabinet[]>(data);
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
@@ -27,7 +27,7 @@ export const supabaseCabinetService = {
       throw new Error(error.message);
     }
     
-    return data as Cabinet;
+    return typedData<Cabinet>(data);
   },
 
   async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
@@ -43,6 +43,6 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return data as Cabinet;
+    return typedData<Cabinet>(data);
   }
 };

@@ -1,6 +1,6 @@
 
 import { Osteopath } from "@/types";
-import { supabase } from "./utils";
+import { supabase, typedData } from "./utils";
 
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
@@ -10,7 +10,7 @@ export const supabaseOsteopathService = {
       
     if (error) throw new Error(error.message);
     
-    return data as Osteopath[];
+    return typedData<Osteopath[]>(data);
   },
 
   async getOsteopathById(id: number): Promise<Osteopath | undefined> {
@@ -27,6 +27,6 @@ export const supabaseOsteopathService = {
       throw new Error(error.message);
     }
     
-    return data as Osteopath;
+    return typedData<Osteopath>(data);
   }
 };
