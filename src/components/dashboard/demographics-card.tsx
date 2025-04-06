@@ -16,27 +16,33 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
   const totalPatients = patientsList.length;
   
   // Calculate gender distribution, safely handling empty array
-  const genderCounts = patientsList.reduce((acc, patient) => {
-    const gender = patient.gender || "Non spécifié";
-    acc[gender] = (acc[gender] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const calculateGenderData = () => {
+    if (!patientsList.length) {
+      if (data) {
+        // Use the data prop if available and patients array is empty
+        return [
+          { name: "Homme", value: data.maleCount, percentage: Math.round((data.maleCount / (data.totalPatients || 1)) * 100) },
+          { name: "Femme", value: data.femaleCount, percentage: Math.round((data.femaleCount / (data.totalPatients || 1)) * 100) }
+        ];
+      }
+      return [];
+    }
+    
+    const genderCounts = patientsList.reduce((acc, patient) => {
+      const gender = patient.gender || "Non spécifié";
+      acc[gender] = (acc[gender] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(genderCounts).map(([name, value]) => ({
+      name,
+      value,
+      percentage: Math.round((value / (totalPatients || 1)) * 100) // Avoid division by zero
+    }));
+  };
   
-  // Format data for pie chart
-  const genderData = Object.entries(genderCounts).map(([name, value]) => ({
-    name,
-    value,
-    percentage: Math.round((value / (totalPatients || 1)) * 100) // Avoid division by zero
-  }));
-  
-  // Alternative data source when patients array is empty but dashboard data is available
-  const fallbackData = data && !patients ? [
-    { name: "Homme", value: data.maleCount, percentage: Math.round((data.maleCount / (data.totalPatients || 1)) * 100) },
-    { name: "Femme", value: data.femaleCount, percentage: Math.round((data.femaleCount / (data.totalPatients || 1)) * 100) }
-  ] : [];
-  
-  // Use appropriate data source
-  const chartData = genderData.length > 0 ? genderData : fallbackData;
+  // Get chart data
+  const chartData = calculateGenderData();
   
   // Colors based on gender
   const GENDER_COLORS = {
@@ -146,7 +152,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
   }
 
   return (
-    <Card className="h-full">
+    <Card className="h-full dark:border-gray-700">
       <CardHeader>
         <CardTitle>Démographie des patients</CardTitle>
         <CardDescription>

@@ -1,49 +1,9 @@
-
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
 
-// Données simulées pour les patients
-const patients: Patient[] = [
-  {
-    id: 1,
-    userId: null,
-    osteopathId: 1,
-    cabinetId: 1,
-    createdAt: "2024-01-29 17:39:35.473",
-    updatedAt: "2024-02-20 00:00:00",
-    address: "18 Rue Lafayette, Toulouse",
-    avatarUrl: null,
-    birthDate: "1985-09-30 00:00:00",
-    email: "gabriel.fournier@example.com",
-    phone: "0612345783",
-    maritalStatus: "SINGLE",
-    childrenAges: [],
-    physicalActivity: "Running",
-    firstName: "Gabriel",
-    lastName: "Fournier",
-    hasChildren: "false",
-    contraception: "CONDOM",
-    currentTreatment: "Physiotherapy",
-    digestiveDoctorName: "Dr. Lee",
-    digestiveProblems: "None",
-    entDoctorName: "Dr. Taylor",
-    entProblems: "None",
-    gender: "Homme",
-    generalPractitioner: "Dr. Scott",
-    handedness: "RIGHT",
-    hasVisionCorrection: true,
-    isDeceased: false,
-    isSmoker: false,
-    occupation: "Teacher",
-    ophtalmologistName: "Dr. Adams",
-    rheumatologicalHistory: "Asthma",
-    surgicalHistory: "None",
-    traumaHistory: "Sports injury",
-    hdlm: null
-  },
-  // Les autres patients fictifs sont maintenus mais omis pour plus de lisibilité
-];
+// Empty array for patients to remove fictitious data
+const patients: Patient[] = [];
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {

@@ -98,14 +98,14 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
         <div className="mt-4 space-y-2 text-gray-600 dark:text-gray-400 border-t pt-4 border-gray-100 dark:border-gray-800">
           {patient.address && (
             <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
+              <MapPin className="h-4 w-4 icon-amber flex-shrink-0" />
               <span className="truncate">{patient.address}</span>
             </div>
           )}
           
           {patient.phone && (
             <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-4 w-4 text-gray-500 flex-shrink-0" />
+              <Phone className="h-4 w-4 icon-green flex-shrink-0" />
               <a 
                 href={`tel:${patient.phone}`} 
                 className="truncate hover:text-blue-600 hover:underline transition-colors"
@@ -117,7 +117,7 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
           
           {patient.email && (
             <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 text-gray-500 flex-shrink-0" />
+              <Mail className="h-4 w-4 icon-blue flex-shrink-0" />
               <a 
                 href={`mailto:${patient.email}`} 
                 className="truncate hover:text-blue-600 hover:underline transition-colors"
@@ -129,7 +129,7 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
           
           {patient.birthDate && (
             <div className="flex items-center gap-2 text-sm">
-              <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
+              <User className="h-4 w-4 icon-purple flex-shrink-0" />
               <span className="truncate">Né(e) le {format(parseISO(patient.birthDate), "dd/MM/yyyy")}</span>
             </div>
           )}
@@ -139,12 +139,12 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
       {showDetailsButton && (
         <CardFooter className="px-6 py-4 bg-gray-50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-800">
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Button asChild variant="default" size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+            <Button asChild variant="default" size="sm" className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
               <Link to={`/patients/${patient.id}`}>
                 Voir le dossier
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="w-full">
+            <Button asChild variant="outline" size="sm" className="w-full dark:border-gray-600 dark:hover:bg-gray-800">
               <Link to={`/patients/${patient.id}/edit`}>
                 Modifier
               </Link>

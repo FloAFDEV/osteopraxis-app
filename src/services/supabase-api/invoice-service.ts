@@ -41,7 +41,8 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    return data as unknown as Invoice[];
+    // Type assertion to avoid excessive deep and potentially infinite type instantiation
+    return (data || []) as Invoice[];
   },
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
