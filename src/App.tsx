@@ -21,7 +21,17 @@ import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 import SchedulePage from "./pages/SchedulePage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Configuration du client de requêtes avec retry et gestion des erreurs améliorée
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      retryDelay: 1000,
+      staleTime: 30000,
+      refetchOnWindowFocus: true,
+    },
+  },
+});
 
 // Composant pour protéger les routes
 const ProtectedRoute = ({ children, requireAdmin = false }: { children: JSX.Element, requireAdmin?: boolean }) => {

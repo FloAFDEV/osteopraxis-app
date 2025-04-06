@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { api } from "@/services/api";
-import { AuthState, User } from "@/types";
+import { AuthState, User, Role } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { isUserAdmin } from "@/utils/patient-form-helpers";
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (authState.user && authState.user.id === userId) {
         const updatedUser = {
           ...authState.user,
-          role: "ADMIN"
+          role: "ADMIN" as Role
         };
         setAuthState({
           ...authState,

@@ -1,547 +1,620 @@
-import { useForm } from "react-hook-form";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { format, parse } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Patient } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { formatChildrenAges, convertHasChildrenToBoolean } from "@/utils/patient-form-helpers";
+import { Switch } from "@/components/ui/switch";
+import { useNavigate } from "react-router-dom";
+import { Patient } from "@/types";
+import { useState, useEffect } from "react";
 
+// Schéma de validation pour le formulaire patient
 const patientSchema = z.object({
-  firstName: z.string().min(1, "Le prénom est requis"),
-  lastName: z.string().min(1, "Le nom est requis"),
-  email: z.string().email("Email invalide").or(z.string().length(0)),
-  phone: z.string().min(10, "Numéro de téléphone invalide").max(15),
-  birthDate: z.date({
-    required_error: "La date de naissance est requise",
-  }),
-  gender: z.string().min(1, "Le genre est requis"),
   address: z.string().optional(),
-  city: z.string().optional(),
-  postalCode: z.string().optional(),
-  occupation: z.string().optional(),
-  referral: z.string().optional(),
+  email: z.string().email("Email invalide").optional(),
+  phone: z.string().optional(),
   notes: z.string().optional(),
-  medicalHistory: z.object({
-    allergies: z.string().optional(),
-    medications: z.string().optional(),
-    surgeries: z.string().optional(),
-    conditions: z.string().optional(),
-  }),
-  lifestyle: z.object({
-    physicalActivity: z.string().optional(),
-    smokingStatus: z.string().optional(),
-    alcoholConsumption: z.string().optional(),
-    sleepQuality: z.string().optional(),
-    stressLevel: z.string().optional(),
-  }),
-  familyStatus: z.string().optional(),
-  hasChildren: z.boolean().optional(),
+  birthDate: z.date().optional(),
   childrenAges: z.array(z.number()).optional(),
+  firstName: z.string().min(1, "Prénom requis"),
+  gender: z.string().optional(),
+  hasChildren: z.boolean().optional(),
+  lastName: z.string().min(1, "Nom requis"),
+  occupation: z.string().optional(),
+  maritalStatus: z.string().optional(),
+  contraception: z.string().optional(),
+  physicalActivity: z.string().optional(),
+  isSmoker: z.boolean().optional(),
+  generalPractitioner: z.string().optional(),
+  ophtalmologistName: z.string().optional(),
+  hasVisionCorrection: z.boolean().optional(),
+  entDoctorName: z.string().optional(),
+  entProblems: z.string().optional(),
+  digestiveDoctorName: z.string().optional(),
+  digestiveProblems: z.string().optional(),
+  surgicalHistory: z.string().optional(),
+  traumaHistory: z.string().optional(),
+  rheumatologicalHistory: z.string().optional(),
+  currentTreatment: z.string().optional(),
+  handedness: z.string().optional(),
+  familyStatus: z.string().optional(),
 });
 
-type PatientFormValues = z.infer<typeof patientSchema>;
+export type PatientFormValues = z.infer<typeof patientSchema>;
 
 interface PatientFormProps {
   patient?: Patient;
-  onSubmit: (data: PatientFormValues) => void;
-  isSubmitting?: boolean;
+  onSave: (patient: PatientFormValues) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function PatientForm({ patient, onSubmit, isSubmitting = false }: PatientFormProps) {
-  const [activeTab, setActiveTab] = useState("personal");
-  
-  const defaultValues: Partial<PatientFormValues> = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    birthDate: undefined,
-    gender: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    occupation: "",
-    referral: "",
-    notes: "",
-    medicalHistory: {
-      allergies: "",
-      medications: "",
-      surgeries: "",
-      conditions: "",
-    },
-    lifestyle: {
-      physicalActivity: "",
-      smokingStatus: "",
-      alcoholConsumption: "",
-      sleepQuality: "",
-      stressLevel: "",
-    },
-    familyStatus: "",
-    hasChildren: false,
-    childrenAges: [],
-  };
+export function PatientForm({ patient, onSave, isLoading = false }: PatientFormProps) {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("general");
+  const [childrenCount, setChildrenCount] = useState<number>(0);
+  const [childrenAgesInput, setChildrenAgesInput] = useState<string>("");
 
+  // Initialiser le form avec les valeurs existantes ou valeurs par défaut
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientSchema),
-    defaultValues: patient
-      ? {
-          ...defaultValues,
-          ...patient,
-          birthDate: patient.birthDate ? new Date(patient.birthDate) : undefined,
-        }
-      : defaultValues,
+    defaultValues: patient ? {
+      ...patient,
+      // Convertir hasChildren de string à boolean si nécessaire
+      hasChildren: convertHasChildrenToBoolean(patient.hasChildren),
+      // Assurer que birthDate est un objet Date
+      birthDate: patient.birthDate 
+        ? (typeof patient.birthDate === 'string' 
+            ? new Date(patient.birthDate) 
+            : patient.birthDate)
+        : undefined,
+    } : {
+      firstName: "",
+      lastName: "",
+      hasChildren: false,
+      isSmoker: false,
+      hasVisionCorrection: false
+    },
   });
 
-  const { register, handleSubmit, formState, control, watch, setValue } = form;
-  const { errors } = formState;
-  
-  const hasChildren = watch("hasChildren");
-  
-  // Convert array of numbers to string for the input value
-  const convertChildrenAgesToString = (ages: number[] | undefined) => {
-    return ages ? ages.join(", ") : "";
-  };
-  
-  // When reading from input, parse the string back to an array of numbers
-  const parseChildrenAgesFromString = (agesString: string): number[] => {
-    if (!agesString) return [];
-    return agesString.split(",").map(age => parseInt(age.trim())).filter(age => !isNaN(age));
-  };
-  
-  const childrenAgesValue = convertChildrenAgesToString(watch("childrenAges"));
+  // Mettre à jour le compteur d'enfants et le champ d'âges
+  useEffect(() => {
+    if (patient?.childrenAges && Array.isArray(patient.childrenAges)) {
+      setChildrenCount(patient.childrenAges.length);
+      setChildrenAgesInput(patient.childrenAges.join(", "));
+    }
+  }, [patient]);
 
-  const handleFormSubmit = (data: PatientFormValues) => {
-    onSubmit(data);
+  // Gérer les âges des enfants
+  const handleChildrenAgesChange = (value: string) => {
+    setChildrenAgesInput(value);
+    
+    // Convertir la chaîne en tableau d'âges (nombres)
+    const ages = value
+      .split(",")
+      .map(age => parseInt(age.trim()))
+      .filter(age => !isNaN(age) && age > 0);
+    
+    form.setValue("childrenAges", ages);
+  };
+
+  // Mettre à jour hasChildren quand childrenCount change
+  useEffect(() => {
+    if (childrenCount > 0) {
+      form.setValue("hasChildren", true);
+    } else {
+      form.setValue("hasChildren", false);
+      form.setValue("childrenAges", []);
+      setChildrenAgesInput("");
+    }
+  }, [childrenCount, form]);
+
+  // Gérer la soumission du formulaire
+  const onSubmit = async (values: PatientFormValues) => {
+    try {
+      await onSave(values);
+      toast.success(patient ? "Patient mis à jour avec succès" : "Patient créé avec succès");
+      
+      // Redirection après sauvegarde
+      if (!patient) {
+        navigate("/patients");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde du patient:", error);
+      toast.error("Erreur lors de la sauvegarde du patient");
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="personal">Informations personnelles</TabsTrigger>
-          <TabsTrigger value="medical">Antécédents médicaux</TabsTrigger>
-          <TabsTrigger value="lifestyle">Mode de vie</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="personal" className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">Prénom <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="firstName"
-                    {...register("firstName")}
-                    placeholder="Prénom"
-                    className={errors.firstName ? "border-destructive" : ""}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Card>
+          <CardHeader>
+            <CardTitle>{patient ? "Modifier le patient" : "Nouveau patient"}</CardTitle>
+            <CardDescription>
+              {patient ? "Mettez à jour les informations du patient" : "Entrez les informations du nouveau patient"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="general">Informations générales</TabsTrigger>
+                <TabsTrigger value="medical">Informations médicales</TabsTrigger>
+                <TabsTrigger value="contacts">Contacts médicaux</TabsTrigger>
+              </TabsList>
+              <TabsContent value="general">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Prénom</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Prénom" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {errors.firstName && (
-                    <p className="text-sm text-destructive">{errors.firstName.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Nom <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="lastName"
-                    {...register("lastName")}
-                    placeholder="Nom"
-                    className={errors.lastName ? "border-destructive" : ""}
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nom</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nom" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {errors.lastName && (
-                    <p className="text-sm text-destructive">{errors.lastName.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="birthDate">Date de naissance <span className="text-destructive">*</span></Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
+                  <FormField
+                    control={form.control}
+                    name="birthDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Date de naissance</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "P", { locale: fr })
+                                ) : (
+                                  <span>Sélectionnez une date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date > new Date() || date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Genre</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionnez un genre" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Homme">Homme</SelectItem>
+                            <SelectItem value="Femme">Femme</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Email" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Téléphone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Téléphone" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Adresse</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Adresse" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="occupation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Profession</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Profession" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="maritalStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Statut marital</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionnez un statut" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="SINGLE">Célibataire</SelectItem>
+                            <SelectItem value="MARRIED">Marié(e)</SelectItem>
+                            <SelectItem value="DIVORCED">Divorcé(e)</SelectItem>
+                            <SelectItem value="WIDOWED">Veuf/Veuve</SelectItem>
+                            <SelectItem value="SEPARATED">Séparé(e)</SelectItem>
+                            <SelectItem value="ENGAGED">Fiancé(e)</SelectItem>
+                            <SelectItem value="PARTNERED">Pacsé(e)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="space-y-2">
+                    <FormLabel>Enfants</FormLabel>
+                    <div className="flex items-center space-x-2">
                       <Button
+                        type="button"
                         variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !watch("birthDate") && "text-muted-foreground",
-                          errors.birthDate && "border-destructive"
-                        )}
+                        size="sm"
+                        onClick={() => setChildrenCount(Math.max(0, childrenCount - 1))}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {watch("birthDate") ? (
-                          format(watch("birthDate"), "PPP", { locale: fr })
-                        ) : (
-                          <span>Sélectionner une date</span>
-                        )}
+                        -
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={watch("birthDate")}
-                        onSelect={(date) => setValue("birthDate", date as Date)}
-                        disabled={(date) => date > new Date()}
-                        initialFocus
+                      <span className="w-6 text-center">{childrenCount}</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setChildrenCount(childrenCount + 1)}
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </div>
+                  {childrenCount > 0 && (
+                    <div className="space-y-2">
+                      <FormLabel>Âges des enfants (séparés par des virgules)</FormLabel>
+                      <Input
+                        placeholder="Ex: 3, 5, 7"
+                        value={childrenAgesInput}
+                        onChange={(e) => handleChildrenAgesChange(e.target.value)}
                       />
-                    </PopoverContent>
-                  </Popover>
-                  {errors.birthDate && (
-                    <p className="text-sm text-destructive">{errors.birthDate.message as string}</p>
+                    </div>
                   )}
                 </div>
-                
-                <div className="space-y-2">
-                  <Label>Genre <span className="text-destructive">*</span></Label>
-                  <Select
-                    value={watch("gender")}
-                    onValueChange={(value) => setValue("gender", value)}
-                  >
-                    <SelectTrigger className={errors.gender ? "border-destructive" : ""}>
-                      <SelectValue placeholder="Sélectionner un genre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Homme">Homme</SelectItem>
-                      <SelectItem value="Femme">Femme</SelectItem>
-                      <SelectItem value="Autre">Autre</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.gender && (
-                    <p className="text-sm text-destructive">{errors.gender.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...register("email")}
-                    placeholder="email@exemple.com"
-                    className={errors.email ? "border-destructive" : ""}
+              </TabsContent>
+              <TabsContent value="medical">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="physicalActivity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Activité physique</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: natation, course à pied..." {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="phone"
-                    {...register("phone")}
-                    placeholder="06 12 34 56 78"
-                    className={errors.phone ? "border-destructive" : ""}
+                  <FormField
+                    control={form.control}
+                    name="handedness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Latéralité</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionnez" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="RIGHT">Droitier</SelectItem>
+                            <SelectItem value="LEFT">Gaucher</SelectItem>
+                            <SelectItem value="AMBIDEXTROUS">Ambidextre</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="address">Adresse</Label>
-                  <Input
-                    id="address"
-                    {...register("address")}
-                    placeholder="123 rue de Paris"
+                  <FormField
+                    control={form.control}
+                    name="isSmoker"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>Fumeur</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
                   />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="postalCode">Code postal</Label>
-                    <Input
-                      id="postalCode"
-                      {...register("postalCode")}
-                      placeholder="75001"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Ville</Label>
-                    <Input
-                      id="city"
-                      {...register("city")}
-                      placeholder="Paris"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="occupation">Profession</Label>
-                  <Input
-                    id="occupation"
-                    {...register("occupation")}
-                    placeholder="Profession"
+                  <FormField
+                    control={form.control}
+                    name="contraception"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contraception</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionnez" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="NONE">Aucune</SelectItem>
+                            <SelectItem value="PILLS">Pilule</SelectItem>
+                            <SelectItem value="CONDOM">Préservatif</SelectItem>
+                            <SelectItem value="IMPLANT">Implant</SelectItem>
+                            <SelectItem value="DIAPHRAGM">Diaphragme</SelectItem>
+                            <SelectItem value="IUD">Stérilet</SelectItem>
+                            <SelectItem value="INJECTION">Injection</SelectItem>
+                            <SelectItem value="PATCH">Patch</SelectItem>
+                            <SelectItem value="RING">Anneau</SelectItem>
+                            <SelectItem value="NATURAL_METHODS">Méthodes naturelles</SelectItem>
+                            <SelectItem value="STERILIZATION">Stérilisation</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="referral">Recommandé par</Label>
-                  <Input
-                    id="referral"
-                    {...register("referral")}
-                    placeholder="Comment avez-vous connu le cabinet ?"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div>
-                  <Label>Situation familiale</Label>
-                  <RadioGroup
-                    value={watch("familyStatus") || ""}
-                    onValueChange={(value) => setValue("familyStatus", value)}
-                    className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Célibataire" id="single" />
-                      <Label htmlFor="single" className="cursor-pointer">Célibataire</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Marié(e)" id="married" />
-                      <Label htmlFor="married" className="cursor-pointer">Marié(e)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Divorcé(e)" id="divorced" />
-                      <Label htmlFor="divorced" className="cursor-pointer">Divorcé(e)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Veuf/Veuve" id="widowed" />
-                      <Label htmlFor="widowed" className="cursor-pointer">Veuf/Veuve</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="hasChildren"
-                    checked={watch("hasChildren")}
-                    onCheckedChange={(checked) => {
-                      setValue("hasChildren", checked === true);
-                      if (!checked) setValue("childrenAges", []);
-                    }}
-                  />
-                  <Label htmlFor="hasChildren" className="cursor-pointer">A des enfants</Label>
-                </div>
-                
-                {hasChildren && (
-                  <div className="space-y-2">
-                    <Label htmlFor="childrenAges">Âges des enfants</Label>
-                    <Input
-                      id="childrenAges"
-                      placeholder="Âges séparés par des virgules (ex: 3, 5, 7)"
-                      value={childrenAgesValue}
-                      onChange={(e) => {
-                        setValue("childrenAges", parseChildrenAgesFromString(e.target.value));
-                      }}
-                    />
-                    <p className="text-xs text-muted-foreground">Séparez les âges par des virgules</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="medical" className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="allergies">Allergies</Label>
-                  <Textarea
-                    id="allergies"
-                    {...register("medicalHistory.allergies")}
-                    placeholder="Allergies connues"
-                    className="min-h-[100px]"
+                  <FormField
+                    control={form.control}
+                    name="hasVisionCorrection"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>Correction de la vision</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="medications">Médicaments</Label>
-                  <Textarea
-                    id="medications"
-                    {...register("medicalHistory.medications")}
-                    placeholder="Médicaments actuels"
-                    className="min-h-[100px]"
+                <div className="grid grid-cols-1 gap-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="currentTreatment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Traitement actuel</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Détails du traitement actuel" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="surgicalHistory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Antécédents chirurgicaux</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Interventions chirurgicales passées" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="traumaHistory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Antécédents traumatiques</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Traumatismes, accidents..." {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rheumatologicalHistory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Antécédents rhumatologiques</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Problèmes articulaires, musculaires..." {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="surgeries">Chirurgies</Label>
-                  <Textarea
-                    id="surgeries"
-                    {...register("medicalHistory.surgeries")}
-                    placeholder="Interventions chirurgicales passées"
-                    className="min-h-[100px]"
+              </TabsContent>
+              <TabsContent value="contacts">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="generalPractitioner"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Médecin traitant</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nom du médecin traitant" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="ophtalmologistName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ophtalmologue</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nom de l'ophtalmologue" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="entDoctorName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ORL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nom de l'ORL" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="entProblems"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Problèmes ORL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: acouphènes, sinusites..." {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="digestiveDoctorName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gastro-entérologue</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nom du gastro-entérologue" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="digestiveProblems"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Problèmes digestifs</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: reflux, colopathie..." {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="conditions">Conditions médicales</Label>
-                  <Textarea
-                    id="conditions"
-                    {...register("medicalHistory.conditions")}
-                    placeholder="Conditions médicales existantes"
-                    className="min-h-[100px]"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="lifestyle" className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="physicalActivity">Activité physique</Label>
-                  <Select
-                    value={watch("lifestyle.physicalActivity") || ""}
-                    onValueChange={(value) => setValue("lifestyle.physicalActivity", value)}
-                  >
-                    <SelectTrigger id="physicalActivity">
-                      <SelectValue placeholder="Niveau d'activité" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Sédentaire">Sédentaire</SelectItem>
-                      <SelectItem value="Légère">Légère (1-2 fois/semaine)</SelectItem>
-                      <SelectItem value="Modérée">Modérée (3-4 fois/semaine)</SelectItem>
-                      <SelectItem value="Intense">Intense (5+ fois/semaine)</SelectItem>
-                      <SelectItem value="Athlète">Athlète professionnel</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="smokingStatus">Tabac</Label>
-                  <Select
-                    value={watch("lifestyle.smokingStatus") || ""}
-                    onValueChange={(value) => setValue("lifestyle.smokingStatus", value)}
-                  >
-                    <SelectTrigger id="smokingStatus">
-                      <SelectValue placeholder="Statut tabagique" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Non-fumeur">Non-fumeur</SelectItem>
-                      <SelectItem value="Ancien fumeur">Ancien fumeur</SelectItem>
-                      <SelectItem value="Fumeur occasionnel">Fumeur occasionnel</SelectItem>
-                      <SelectItem value="Fumeur régulier">Fumeur régulier</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="alcoholConsumption">Consommation d'alcool</Label>
-                  <Select
-                    value={watch("lifestyle.alcoholConsumption") || ""}
-                    onValueChange={(value) => setValue("lifestyle.alcoholConsumption", value)}
-                  >
-                    <SelectTrigger id="alcoholConsumption">
-                      <SelectValue placeholder="Consommation d'alcool" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Aucune">Aucune</SelectItem>
-                      <SelectItem value="Occasionnelle">Occasionnelle</SelectItem>
-                      <SelectItem value="Modérée">Modérée</SelectItem>
-                      <SelectItem value="Régulière">Régulière</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="sleepQuality">Qualité du sommeil</Label>
-                  <Select
-                    value={watch("lifestyle.sleepQuality") || ""}
-                    onValueChange={(value) => setValue("lifestyle.sleepQuality", value)}
-                  >
-                    <SelectTrigger id="sleepQuality">
-                      <SelectValue placeholder="Qualité du sommeil" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Excellente">Excellente</SelectItem>
-                      <SelectItem value="Bonne">Bonne</SelectItem>
-                      <SelectItem value="Moyenne">Moyenne</SelectItem>
-                      <SelectItem value="Mauvaise">Mauvaise</SelectItem>
-                      <SelectItem value="Très mauvaise">Très mauvaise</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="stressLevel">Niveau de stress</Label>
-                  <Select
-                    value={watch("lifestyle.stressLevel") || ""}
-                    onValueChange={(value) => setValue("lifestyle.stressLevel", value)}
-                  >
-                    <SelectTrigger id="stressLevel">
-                      <SelectValue placeholder="Niveau de stress" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Très bas">Très bas</SelectItem>
-                      <SelectItem value="Bas">Bas</SelectItem>
-                      <SelectItem value="Modéré">Modéré</SelectItem>
-                      <SelectItem value="Élevé">Élevé</SelectItem>
-                      <SelectItem value="Très élevé">Très élevé</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notes générales</Label>
-                <Textarea
-                  id="notes"
-                  {...register("notes")}
-                  placeholder="Notes supplémentaires sur le patient"
-                  className="min-h-[150px]"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="flex justify-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            // Navigation entre les onglets
-            if (activeTab === "personal") {
-              setActiveTab("medical");
-            } else if (activeTab === "medical") {
-              setActiveTab("lifestyle");
-            } else {
-              setActiveTab("personal");
-            }
-          }}
-        >
-          {activeTab === "lifestyle" ? "Retour aux informations personnelles" : "Onglet suivant"}
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Enregistrement..." : "Enregistrer le patient"}
-        </Button>
-      </div>
-    </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline" type="button" onClick={() => navigate(-1)}>
+              Annuler
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                  Sauvegarde...
+                </>
+              ) : (
+                "Sauvegarder"
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </Form>
   );
 }
