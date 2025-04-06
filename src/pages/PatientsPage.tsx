@@ -91,24 +91,39 @@ const PatientsPage = () => {
   const createTestPatient = async () => {
     try {
       toast.info("Création d'un patient test...");
-      const testPatient = {
+      const testPatient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> = {
         firstName: "Test",
         lastName: "Patient",
-        gender: "Homme" as const,
+        gender: "Homme",
         email: "test@example.com",
         phone: "0123456789",
         osteopathId: 1,
         address: "123 Rue Test",
         cabinetId: 1,
-        maritalStatus: "SINGLE" as const,
+        maritalStatus: "SINGLE",
         birthDate: new Date().toISOString(),
-        handedness: "RIGHT" as const,
-        contraception: "NONE" as const,
+        handedness: "RIGHT",
+        contraception: "NONE",
         hasVisionCorrection: false,
         isDeceased: false,
         isSmoker: false,
         hasChildren: "false",
-        childrenAges: []
+        childrenAges: [],
+        physicalActivity: null,
+        currentTreatment: null,
+        digestiveDoctorName: null,
+        digestiveProblems: null,
+        entDoctorName: null,
+        entProblems: null,
+        generalPractitioner: null,
+        occupation: null,
+        ophtalmologistName: null,
+        rheumatologicalHistory: null,
+        surgicalHistory: null,
+        traumaHistory: null,
+        hdlm: null,
+        userId: null,
+        avatarUrl: null
       };
       
       await api.createPatient(testPatient);
