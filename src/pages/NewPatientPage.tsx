@@ -12,7 +12,7 @@ const NewPatientPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleAddPatient = async (patientData: Partial<Patient>) => {
+  const handleAddPatient = async (patientData: any) => {
     try {
       setLoading(true);
       
@@ -21,6 +21,11 @@ const NewPatientPage = () => {
         toast.error("Veuillez remplir au moins le nom et le prénom");
         setLoading(false);
         return;
+      }
+      
+      // Convertir la date si elle est au format Date
+      if (patientData.birthDate instanceof Date) {
+        patientData.birthDate = patientData.birthDate.toISOString();
       }
       
       // Ajouter les données par défaut nécessaires
