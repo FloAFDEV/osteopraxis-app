@@ -74,7 +74,7 @@ const NewPatientPage = () => {
           </div>
         ) : (
           <div className="bg-card rounded-lg border shadow-sm p-6">
-            <PatientForm onSubmit={handleAddPatient} />
+            <PatientForm onSave={handleAddPatient} />
           </div>
         )}
       </div>

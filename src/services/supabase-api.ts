@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, Appointment, Osteopath, Cabinet, User, AuthState } from "@/types";
 import { 
@@ -18,7 +17,7 @@ const preparePatientForApi = (patientData: Partial<Patient>) => {
     ...patientData,
     // Convertir hasChildren en string si présent
     hasChildren: patientData.hasChildren !== undefined 
-      ? (typeof patientData.hasChildren === 'boolean' ? patientData.hasChildren.toString() : patientData.hasChildren)
+      ? (typeof patientData.hasChildren === 'boolean' ? String(patientData.hasChildren) : patientData.hasChildren)
       : undefined,
     // Adapter contraception si présent
     contraception: patientData.contraception ? 
@@ -189,6 +188,16 @@ export const supabaseApi = {
     };
   },
 
+  async promoteToAdmin(userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from("User")
+      .update({ role: "ADMIN" })
+      .eq("id", userId);
+
+    if (error) throw new Error(error.message);
+    return true;
+  },
+  
   // Patients
   async getPatients(): Promise<Patient[]> {
     const { data, error } = await supabase

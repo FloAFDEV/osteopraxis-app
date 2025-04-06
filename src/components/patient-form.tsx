@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -8,13 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { YearPicker } from "@/components/year-picker";
 import { cn } from "@/lib/utils";
 import { formatChildrenAges, convertHasChildrenToBoolean } from "@/utils/patient-form-helpers";
 import { Switch } from "@/components/ui/switch";
@@ -67,6 +67,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
   const [activeTab, setActiveTab] = useState("general");
   const [childrenCount, setChildrenCount] = useState<number>(0);
   const [childrenAgesInput, setChildrenAgesInput] = useState<string>("");
+  const [showYearPicker, setShowYearPicker] = useState(false);
 
   // Initialiser le form avec les valeurs existantes ou valeurs par défaut
   const form = useForm<PatientFormValues>({
@@ -189,37 +190,75 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Date de naissance</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "P", { locale: fr })
-                                ) : (
-                                  <span>Sélectionnez une date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date > new Date() || date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <div className="flex items-center space-x-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "dd/MM/yyyy", { locale: fr })
+                                  ) : (
+                                    <span>Sélectionnez une date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              {showYearPicker ? (
+                                <div className="p-3">
+                                  <YearPicker
+                                    date={field.value}
+                                    onChange={(date) => {
+                                      field.onChange(date);
+                                      setShowYearPicker(false);
+                                    }}
+                                    minYear={1900}
+                                  />
+                                  <div className="mt-4 text-right">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setShowYearPicker(false)}
+                                    >
+                                      Afficher le calendrier
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    disabled={(date) =>
+                                      date > new Date() || date < new Date("1900-01-01")
+                                    }
+                                    initialFocus
+                                  />
+                                  <div className="p-3 border-t">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setShowYearPicker(true)}
+                                      className="w-full"
+                                    >
+                                      Sélectionner l'année directement
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
