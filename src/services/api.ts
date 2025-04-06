@@ -1,6 +1,10 @@
 import { Appointment, Patient, Osteopath, Cabinet, User, AuthState } from "@/types";
+import { supabaseApi } from "./supabase-api";
 
-// Données simulées
+// Variable pour indiquer si on doit utiliser Supabase ou les données simulées
+const USE_SUPABASE = true;
+
+// Données simulées (conservées pour la compatibilité et comme fallback)
 const appointments: Appointment[] = [
   {
     id: 1,
@@ -281,6 +285,16 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export const api = {
   // Auth
   async login(email: string, password: string): Promise<AuthState> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.login(email, password);
+      } catch (error) {
+        console.error("Erreur Supabase login:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(500);
     const user = users.find(u => u.email === email);
     
@@ -302,6 +316,15 @@ export const api = {
   },
   
   async logout(): Promise<void> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.logout();
+      } catch (error) {
+        console.error("Erreur Supabase logout:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(200);
     authState = {
       user: null,
@@ -313,6 +336,15 @@ export const api = {
   },
   
   async checkAuth(): Promise<AuthState> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.checkAuth();
+      } catch (error) {
+        console.error("Erreur Supabase checkAuth:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(100);
     const storedAuth = localStorage.getItem("authState");
     
@@ -334,21 +366,58 @@ export const api = {
 
   // Rendez-vous
   async getAppointments(): Promise<Appointment[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getAppointments();
+      } catch (error) {
+        console.error("Erreur Supabase getAppointments:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(300);
     return [...appointments];
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getAppointmentById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getAppointmentById:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(200);
     return appointments.find(appointment => appointment.id === id);
   },
 
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getAppointmentsByPatientId(patientId);
+      } catch (error) {
+        console.error("Erreur Supabase getAppointmentsByPatientId:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(200);
     return appointments.filter(appointment => appointment.patientId === patientId);
   },
 
   async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.createAppointment(appointment);
+      } catch (error) {
+        console.error("Erreur Supabase createAppointment:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(400);
     const newAppointment = {
       ...appointment,
@@ -359,6 +428,16 @@ export const api = {
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.updateAppointment(id, appointment);
+      } catch (error) {
+        console.error("Erreur Supabase updateAppointment:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(300);
     const index = appointments.findIndex(a => a.id === id);
     if (index !== -1) {
@@ -369,6 +448,16 @@ export const api = {
   },
 
   async deleteAppointment(id: number): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.deleteAppointment(id);
+      } catch (error) {
+        console.error("Erreur Supabase deleteAppointment:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(300);
     const index = appointments.findIndex(a => a.id === id);
     if (index !== -1) {
@@ -380,16 +469,44 @@ export const api = {
 
   // Patients
   async getPatients(): Promise<Patient[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getPatients();
+      } catch (error) {
+        console.error("Erreur Supabase getPatients:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(300);
     return [...patients];
   },
 
   async getPatientById(id: number): Promise<Patient | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getPatientById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getPatientById:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(200);
     return patients.find(patient => patient.id === id);
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.createPatient(patient);
+      } catch (error) {
+        console.error("Erreur Supabase createPatient:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(400);
     const now = new Date().toISOString();
     const newPatient = {
@@ -403,6 +520,16 @@ export const api = {
   },
 
   async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.updatePatient(id, patient);
+      } catch (error) {
+        console.error("Erreur Supabase updatePatient:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(300);
     const index = patients.findIndex(p => p.id === id);
     if (index !== -1) {
@@ -418,16 +545,44 @@ export const api = {
 
   // Cabinet
   async getCabinets(): Promise<Cabinet[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getCabinets();
+      } catch (error) {
+        console.error("Erreur Supabase getCabinets:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(300);
     return [...cabinets];
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getCabinetById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getCabinetById:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(200);
     return cabinets.find(cabinet => cabinet.id === id);
   },
 
   async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.updateCabinet(id, cabinetData);
+      } catch (error) {
+        console.error("Erreur Supabase updateCabinet:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(300);
     const index = cabinets.findIndex(c => c.id === id);
     if (index !== -1) {
@@ -443,11 +598,29 @@ export const api = {
 
   // Osteopaths
   async getOsteopaths(): Promise<Osteopath[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getOsteopaths();
+      } catch (error) {
+        console.error("Erreur Supabase getOsteopaths:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(200);
     return [...osteopaths];
   },
 
   async getOsteopathById(id: number): Promise<Osteopath | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseApi.getOsteopathById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getOsteopathById:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(200);
     return osteopaths.find(osteopath => osteopath.id === id);
   }

@@ -75,6 +75,13 @@ export type Database = {
             referencedRelation: "Patient"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_appointment_patient"
+            columns: ["patientId"]
+            isOneToOne: false
+            referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
         ]
       }
       Cabinet: {
@@ -108,6 +115,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "Cabinet_osteopathId_fkey"
+            columns: ["osteopathId"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_cabinet_osteopath"
             columns: ["osteopathId"]
             isOneToOne: false
             referencedRelation: "Osteopath"
@@ -158,6 +172,20 @@ export type Database = {
             referencedRelation: "Patient"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_consultation_osteopath"
+            columns: ["osteopathId"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_consultation_patient"
+            columns: ["patientId"]
+            isOneToOne: false
+            referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
         ]
       }
       Invoice: {
@@ -186,6 +214,20 @@ export type Database = {
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_invoice_consultation"
+            columns: ["consultationId"]
+            isOneToOne: false
+            referencedRelation: "Consultation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_invoice_patient"
+            columns: ["patientId"]
+            isOneToOne: false
+            referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "Invoice_consultationId_fkey"
             columns: ["consultationId"]
@@ -223,6 +265,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_medicaldocument_patient"
+            columns: ["patientId"]
+            isOneToOne: false
+            referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "MedicalDocument_patientId_fkey"
             columns: ["patientId"]
             isOneToOne: false
@@ -254,6 +303,13 @@ export type Database = {
           userId?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_osteopath_user"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "User"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "Osteopath_userId_fkey"
             columns: ["userId"]
@@ -377,6 +433,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_patient_cabinet"
+            columns: ["cabinetId"]
+            isOneToOne: false
+            referencedRelation: "Cabinet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_patient_osteopath"
+            columns: ["osteopathId"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "Patient_cabinetId_fkey"
             columns: ["cabinetId"]
             isOneToOne: false
@@ -412,6 +482,13 @@ export type Database = {
           id?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_treatmenthistory_consultation"
+            columns: ["consultationId"]
+            isOneToOne: false
+            referencedRelation: "Consultation"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "TreatmentHistory_consultationId_fkey"
             columns: ["consultationId"]
@@ -452,7 +529,15 @@ export type Database = {
           role?: Database["public"]["Enums"]["Role"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_osteopath"
+            columns: ["osteopathId"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
