@@ -152,16 +152,18 @@ const calculateDashboardData = (patients: any[]): DashboardData => {
 
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Récupération des patients depuis l'API
-        const patients = await api.getPatients();
+        const patientsData = await api.getPatients();
         
         // Génération de patients supplémentaires pour avoir des données plus réalistes
-        const extendedPatients = [...patients, ...generateAdditionalPatients()];
+        const extendedPatients = [...patientsData, ...generateAdditionalPatients()];
+        setPatients(extendedPatients);
         
         // Calcul des données du tableau de bord
         const data = calculateDashboardData(extendedPatients);
@@ -199,7 +201,7 @@ export function Dashboard() {
       <DashboardStats data={dashboardData} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DemographicsCard data={dashboardData} />
+        <DemographicsCard patients={patients} data={dashboardData} />
         <GrowthChart data={dashboardData} />
         <AppointmentsOverview data={dashboardData} className="lg:col-span-2" />
       </div>

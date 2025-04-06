@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { supabase, typedData, logSupabaseResponse, WithContraception } from "./utils";
+import { supabase, typedData, logSupabaseResponse } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
 
 export const supabasePatientService = {
@@ -118,7 +118,7 @@ export const supabasePatientService = {
         return undefined;
       }
       
-      const existingPatient = existingPatientResponse.data;
+      const existingPatient = existingPatientResponse.data as any;
       
       // Fusionner les nouvelles données avec les données existantes
       const updatedPatient = {

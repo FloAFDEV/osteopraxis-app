@@ -2,15 +2,21 @@
 import React from 'react';
 import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { Patient } from "@/types";
+import { Patient, DashboardData } from "@/types";
+import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 interface DemographicsCardProps {
-  patients: Patient[];
+  patients?: Patient[];
+  data?: DashboardData;
 }
 
-export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) => {
-  // Calculate gender distribution
-  const genderCounts = patients.reduce((acc, patient) => {
+export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, data }) => {
+  // Use either patients prop or extract from data prop
+  const patientsList = patients || [];
+  const totalPatients = patientsList.length;
+  
+  // Calculate gender distribution, safely handling empty array
+  const genderCounts = patientsList.reduce((acc, patient) => {
     const gender = patient.gender || "Non spécifié";
     acc[gender] = (acc[gender] || 0) + 1;
     return acc;
@@ -20,8 +26,17 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) 
   const genderData = Object.entries(genderCounts).map(([name, value]) => ({
     name,
     value,
-    percentage: Math.round((value / patients.length) * 100)
+    percentage: Math.round((value / (totalPatients || 1)) * 100) // Avoid division by zero
   }));
+  
+  // Alternative data source when patients array is empty but dashboard data is available
+  const fallbackData = data && !patients ? [
+    { name: "Homme", value: data.maleCount, percentage: Math.round((data.maleCount / (data.totalPatients || 1)) * 100) },
+    { name: "Femme", value: data.femaleCount, percentage: Math.round((data.femaleCount / (data.totalPatients || 1)) * 100) }
+  ] : [];
+  
+  // Use appropriate data source
+  const chartData = genderData.length > 0 ? genderData : fallbackData;
   
   // Colors based on gender
   const GENDER_COLORS = {
@@ -74,7 +89,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) 
         y={y}
         fill="#fff"
         fontWeight="bold"
-        fontSize="12"
+        fontSize="14"
         dominantBaseline="central"
         textAnchor="middle"
       >
@@ -85,6 +100,8 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) 
   
   // Custom Legend component with better styling
   const CustomLegend = ({ payload }: any) => {
+    if (!payload) return null;
+    
     return (
       <ul className="flex flex-wrap justify-center gap-4 pt-4">
         {payload.map((entry: any, index: number) => (
@@ -93,19 +110,47 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) 
               className="h-3 w-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-sm">{entry.value} ({entry.payload.percentage}%)</span>
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-sm cursor-help">
+                    {entry.value} ({entry.payload.percentage}%)
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{entry.payload.value} patients ({entry.payload.percentage}% du total)</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
           </li>
         ))}
       </ul>
     );
   };
 
+  // Handle empty data case
+  if (chartData.length === 0) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Démographie des patients</CardTitle>
+          <CardDescription>
+            Aucune donnée démographique disponible
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-[250px]">
+          <p className="text-muted-foreground text-center">Ajoutez des patients pour voir les statistiques démographiques</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle>Démographie des patients</CardTitle>
         <CardDescription>
-          Répartition par genre sur un total de {patients.length} patients
+          Répartition par genre sur un total de {totalPatients || data?.totalPatients || 0} patients
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -113,7 +158,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) 
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={genderData}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -122,7 +167,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients }) 
                 fill="#8884d8"
                 dataKey="value"
               >
-                {genderData.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || "#94a3b8"} 
