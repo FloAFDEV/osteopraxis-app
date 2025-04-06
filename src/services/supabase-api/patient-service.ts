@@ -25,29 +25,6 @@ export const supabasePatientService = {
       
       if (!data || data.length === 0) {
         console.warn("Aucun patient trouvé dans la base de données");
-        
-        // Pour des fins de test, nous allons créer un patient fictif
-        // Décommenter cette partie pour ajouter un patient test si nécessaire
-        /*
-        console.log("Création d'un patient test...");
-        const testPatient = {
-          firstName: "Test",
-          lastName: "Patient",
-          gender: "Homme",
-          email: "test@example.com",
-          phone: "0123456789",
-          osteopathId: 1,
-          updatedAt: new Date().toISOString()
-        };
-        
-        try {
-          await this.createPatient(testPatient);
-          console.log("Patient test créé avec succès");
-        } catch (e) {
-          console.error("Erreur lors de la création du patient test:", e);
-        }
-        */
-        
         return [];
       }
       
@@ -71,6 +48,9 @@ export const supabasePatientService = {
         
       if (error) {
         console.error("Erreur lors de la récupération du patient:", error);
+        if (error.code === "PGRST116") {
+          return undefined;
+        }
         throw new Error(error.message);
       }
       
@@ -86,46 +66,63 @@ export const supabasePatientService = {
   },
 
   async createPatient(patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    // Adapter le format pour Supabase
-    const now = new Date().toISOString();
-    const formattedData = preparePatientForApi({
-      ...patientData,
-      createdAt: now,
-      updatedAt: now
-    });
-    
-    console.log("Création du patient avec les données:", formattedData);
-    
-    const { data, error } = await supabase
-      .from("Patient")
-      .insert(formattedData)
-      .select()
-      .single();
+    try {
+      // Adapter le format pour Supabase
+      const now = new Date().toISOString();
+      const formattedData = preparePatientForApi({
+        ...patientData,
+        createdAt: now,
+        updatedAt: now
+      });
       
-    if (error) {
+      console.log("Création du patient avec les données:", formattedData);
+      
+      const { data, error } = await supabase
+        .from("Patient")
+        .insert(formattedData)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error("Erreur Supabase createPatient:", error);
+        throw new Error(error.message);
+      }
+      
+      if (!data) {
+        throw new Error("Aucune donnée retournée lors de la création du patient");
+      }
+      
+      return adaptPatientFromSupabase(data) as Patient;
+    } catch (error: any) {
       console.error("Erreur lors de la création du patient:", error);
-      throw new Error(error.message);
+      throw error;
     }
-    
-    return adaptPatientFromSupabase(data) as Patient;
   },
 
   async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
-    // Adapter les données pour Supabase
-    const patientToUpdate = preparePatientForApi({
-      ...patient,
-      updatedAt: new Date().toISOString()
-    });
-    
-    const { data, error } = await supabase
-      .from("Patient")
-      .update(patientToUpdate)
-      .eq("id", id)
-      .select()
-      .single();
+    try {
+      // Adapter les données pour Supabase
+      const patientToUpdate = preparePatientForApi({
+        ...patient,
+        updatedAt: new Date().toISOString()
+      });
       
-    if (error) throw new Error(error.message);
-    
-    return adaptPatientFromSupabase(data) as Patient;
+      const { data, error } = await supabase
+        .from("Patient")
+        .update(patientToUpdate)
+        .eq("id", id)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error("Erreur lors de la mise à jour du patient:", error);
+        throw new Error(error.message);
+      }
+      
+      return adaptPatientFromSupabase(data) as Patient;
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du patient:", error);
+      throw error;
+    }
   }
 };

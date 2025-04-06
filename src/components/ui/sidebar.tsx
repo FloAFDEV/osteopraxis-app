@@ -13,7 +13,9 @@ import {
   FileText,
   ChevronDown,
   LogOut,
-  UserCog
+  UserCog,
+  UserPlus,
+  Building
 } from 'lucide-react';
 import { useAuth } from "@/contexts/auth-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,8 +30,19 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const { isMobile } = useIsMobile();
   const location = useLocation();
 
+  // Définir les couleurs des icônes
+  const iconColors = {
+    dashboard: "text-indigo-600 dark:text-indigo-400",
+    patients: "text-green-600 dark:text-green-400", 
+    addPatient: "text-blue-600 dark:text-blue-400",
+    settings: "text-amber-600 dark:text-amber-400",
+    appointments: "text-red-600 dark:text-red-400",
+    invoices: "text-purple-600 dark:text-purple-400",
+    schedule: "text-cyan-600 dark:text-cyan-400"
+  };
+
   // Rendre l'élément NavLink avec l'état active géré correctement
-  const renderNavLink = ({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) => {
+  const renderNavLink = ({ href, icon: Icon, label, colorClass }: { href: string; icon: React.ElementType; label: string; colorClass?: string }) => {
     const isActive = location.pathname === href || location.pathname.startsWith(`${href}/`);
     
     return (
@@ -43,7 +56,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           isActive && "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50"
         )}
       >
-        <Icon size={18} />
+        <Icon size={18} className={colorClass} />
         {!isCollapsed && <span>{label}</span>}
       </NavLink>
     );
@@ -73,37 +86,50 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           {renderNavLink({ 
             href: "/", 
             icon: LayoutDashboard, 
-            label: "Tableau de bord"
+            label: "Tableau de bord",
+            colorClass: iconColors.dashboard
           })}
           
           {renderNavLink({ 
             href: "/patients", 
             icon: Users, 
-            label: "Patients"
+            label: "Patients",
+            colorClass: iconColors.patients
+          })}
+
+          {renderNavLink({
+            href: "/patients/new",
+            icon: UserPlus,
+            label: "Ajouter un patient",
+            colorClass: iconColors.addPatient
           })}
           
           {renderNavLink({ 
             href: "/appointments", 
             icon: CalendarDays, 
-            label: "Rendez-vous"
+            label: "Rendez-vous",
+            colorClass: iconColors.appointments
           })}
           
           {renderNavLink({ 
             href: "/invoices", 
             icon: FileText, 
-            label: "Factures"
+            label: "Factures",
+            colorClass: iconColors.invoices
           })}
           
           {renderNavLink({ 
             href: "/schedule", 
             icon: Clock, 
-            label: "Agenda"
+            label: "Agenda",
+            colorClass: iconColors.schedule
           })}
           
           {renderNavLink({ 
             href: "/cabinet", 
-            icon: Settings, 
-            label: "Paramètres"
+            icon: Building, 
+            label: "Cabinet",
+            colorClass: iconColors.settings
           })}
         </div>
       </ScrollArea>

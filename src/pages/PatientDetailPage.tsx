@@ -99,6 +99,34 @@ const PatientDetailPage = () => {
     .filter(app => app.status !== "SCHEDULED" || new Date(app.date) < new Date())
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+  // Définir les couleurs en fonction du genre
+  const getGenderColors = (gender: string) => {
+    if (gender === "Homme") {
+      return {
+        badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+        avatar: "bg-blue-600 text-white",
+        border: "border-blue-500",
+        lightBg: "bg-blue-50 dark:bg-blue-900/10"
+      };
+    } else if (gender === "Femme") {
+      return {
+        badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+        avatar: "bg-purple-600 text-white",
+        border: "border-purple-500",
+        lightBg: "bg-purple-50 dark:bg-purple-900/10"
+      };
+    } else {
+      return {
+        badge: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
+        avatar: "bg-gray-600 text-white",
+        border: "border-gray-500",
+        lightBg: "bg-gray-50 dark:bg-gray-900/10"
+      };
+    }
+  };
+
+  const genderColors = getGenderColors(patient.gender || "");
+
   return (
     <Layout>
       <div className="flex justify-between items-start mb-6">
@@ -133,10 +161,10 @@ const PatientDetailPage = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/3 space-y-6">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className={`p-6 ${genderColors.lightBg}`}>
               <div className="flex flex-col items-center text-center">
-                <Avatar className="h-24 w-24 mb-4">
-                  <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                <Avatar className={`h-24 w-24 mb-4 ring-2 ring-offset-2 ${genderColors.border} ring-offset-white dark:ring-offset-gray-950`}>
+                  <AvatarFallback className={`text-2xl ${genderColors.avatar}`}>
                     {getInitials(patient.firstName, patient.lastName)}
                   </AvatarFallback>
                 </Avatar>
@@ -144,7 +172,7 @@ const PatientDetailPage = () => {
                   {patient.firstName} {patient.lastName}
                 </h1>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className={genderColors.badge}>
                     {patient.gender}
                   </Badge>
                   {patient.occupation && (
@@ -166,11 +194,21 @@ const PatientDetailPage = () => {
                 <div className="w-full space-y-3">
                   <div className="flex items-center gap-2 text-sm">
                     <Phone className="h-4 w-4 text-primary" />
-                    <span>{patient.phone}</span>
+                    <a 
+                      href={`tel:${patient.phone}`}
+                      className="hover:text-blue-600 hover:underline transition-colors"
+                    >
+                      {patient.phone}
+                    </a>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Mail className="h-4 w-4 text-primary" />
-                    <span>{patient.email}</span>
+                    <a 
+                      href={`mailto:${patient.email}`}
+                      className="hover:text-blue-600 hover:underline transition-colors"
+                    >
+                      {patient.email}
+                    </a>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="h-4 w-4 text-primary" />
