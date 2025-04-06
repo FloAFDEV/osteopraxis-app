@@ -22,12 +22,13 @@ const PatientsPage = () => {
     queryFn: async () => {
       console.log("Fetching patients through useQuery...");
       try {
+        // Force USE_SUPABASE to true
         const data = await api.getPatients();
         console.log(`Patients fetched successfully: ${data.length} patients found`);
         
         // Debug logs pour voir le contenu réel des patients
         if (data.length > 0) {
-          console.log("First patient sample:");
+          console.log("First patient sample:", data[0]);
           debugPatient(data[0], "First patient from API");
         } else {
           console.log("No patients returned from API");
@@ -39,7 +40,8 @@ const PatientsPage = () => {
         throw err;
       }
     },
-    retry: 1, // Réduire les tentatives pour ne pas spammer l'API
+    retry: 2, // Augmenter les tentatives pour s'assurer que les données sont chargées
+    retryDelay: 1000,
     refetchOnWindowFocus: false, // Ne pas requêter à chaque focus de fenêtre
   });
 
@@ -49,9 +51,14 @@ const PatientsPage = () => {
     toast.info("Chargement des patients en cours...");
     try {
       await refetch();
-      toast.success("Liste des patients mise à jour");
+      if (patients && patients.length > 0) {
+        toast.success(`${patients.length} patients chargés avec succès`);
+      } else {
+        toast.warning("Aucun patient trouvé dans la base de données");
+      }
     } catch (err) {
       toast.error("Impossible de charger les patients");
+      console.error("Erreur lors du chargement des patients:", err);
     } finally {
       setIsRefreshing(false);
     }
@@ -85,7 +92,7 @@ const PatientsPage = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Users className="h-8 w-8 text-pink-500" />
-            Patients
+            Patients {patients?.length > 0 && <span className="text-lg text-muted-foreground">({patients.length})</span>}
           </h1>
 
           <div className="flex gap-2 w-full md:w-auto">

@@ -26,30 +26,31 @@ export function DemographicsCard({ data }: DemographicsCardProps) {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <div className="h-[180px]">
+            <div className="h-[200px] bg-white dark:bg-slate-900 rounded-lg p-2">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={genderData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={70}
+                    innerRadius={55}
+                    outerRadius={75}
                     fill="#8884d8"
                     paddingAngle={2}
                     dataKey="value"
                     labelLine={false}
-                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-                      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) => {
+                      const radius = innerRadius + (outerRadius - innerRadius) * 1.1;
                       const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
                       const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
                       return (
                         <text
                           x={x}
                           y={y}
-                          fill="white"
+                          fill={name === "Hommes" ? "#3b82f6" : "#8b5cf6"}
                           textAnchor={x > cx ? "start" : "end"}
                           dominantBaseline="central"
+                          className="font-medium"
                         >
                           {`${(percent * 100).toFixed(0)}%`}
                         </text>
@@ -60,8 +61,26 @@ export function DemographicsCard({ data }: DemographicsCardProps) {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Legend verticalAlign="bottom" height={36} />
-                  <Tooltip formatter={(value) => [`${value} patients`, "Total"]} />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36} 
+                    formatter={(value, entry, index) => (
+                      <span style={{ color: index === 0 ? "#3b82f6" : "#8b5cf6", fontWeight: 500 }}>
+                        {value}
+                      </span>
+                    )}
+                  />
+                  <Tooltip 
+                    formatter={(value) => [`${value} patients`, "Total"]} 
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      padding: '8px 12px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                    labelStyle={{ fontWeight: 'bold' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -72,8 +91,8 @@ export function DemographicsCard({ data }: DemographicsCardProps) {
                 <span className="text-muted-foreground">Âge moyen (tout)</span>
                 <span className="font-medium">{data.averageAge} ans</span>
               </div>
-              <div className="w-full h-2 bg-muted rounded-full">
-                <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{ width: `${(data.averageAge / 100) * 100}%` }}></div>
+              <div className="w-full h-3 bg-muted rounded-full">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{ width: `${Math.min((data.averageAge / 100) * 100, 100)}%` }}></div>
               </div>
             </div>
             <div className="space-y-1">
@@ -81,8 +100,8 @@ export function DemographicsCard({ data }: DemographicsCardProps) {
                 <span className="text-muted-foreground">Hommes</span>
                 <span className="font-medium">{data.averageAgeMale} ans</span>
               </div>
-              <div className="w-full h-2 bg-muted rounded-full">
-                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(data.averageAgeMale / 100) * 100}%` }}></div>
+              <div className="w-full h-3 bg-muted rounded-full">
+                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min((data.averageAgeMale / 100) * 100, 100)}%` }}></div>
               </div>
             </div>
             <div className="space-y-1">
@@ -90,8 +109,8 @@ export function DemographicsCard({ data }: DemographicsCardProps) {
                 <span className="text-muted-foreground">Femmes</span>
                 <span className="font-medium">{data.averageAgeFemale} ans</span>
               </div>
-              <div className="w-full h-2 bg-muted rounded-full">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: `${(data.averageAgeFemale / 100) * 100}%` }}></div>
+              <div className="w-full h-3 bg-muted rounded-full">
+                <div className="h-full bg-purple-500 rounded-full" style={{ width: `${Math.min((data.averageAgeFemale / 100) * 100, 100)}%` }}></div>
               </div>
             </div>
           </div>

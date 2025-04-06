@@ -1,4 +1,3 @@
-
 import { Patient } from "@/types";
 import { supabase, WithContraception } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
@@ -6,37 +5,50 @@ import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-
 export const supabasePatientService = {
   async getPatients(): Promise<Patient[]> {
     console.log("Récupération des patients depuis Supabase...");
-    const { data, error } = await supabase
-      .from("Patient")
-      .select("*")
-      .order("updatedAt", { ascending: false });
+    
+    try {
+      // Modification pour s'assurer que tous les patients sont récupérés sans filtrage
+      const { data, error } = await supabase
+        .from("Patient")
+        .select("*");
+        
+      if (error) {
+        console.error("Erreur lors de la récupération des patients:", error);
+        throw new Error(error.message);
+      }
       
-    if (error) {
+      console.log("Patients récupérés:", data);
+      
+      // Convertir et adapter les champs pour être compatibles avec l'application
+      return data.map(patient => adaptPatientFromSupabase(patient) as Patient);
+    } catch (error) {
       console.error("Erreur lors de la récupération des patients:", error);
-      throw new Error(error.message);
+      throw error;
     }
-    
-    console.log("Patients récupérés:", data);
-    
-    // Convertir et adapter les champs pour être compatibles avec l'application
-    return data.map(patient => adaptPatientFromSupabase(patient) as Patient);
   },
 
   async getPatientById(id: number): Promise<Patient | undefined> {
-    const { data, error } = await supabase
-      .from("Patient")
-      .select("*")
-      .eq("id", id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("Patient")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle(); // Utilisation de maybeSingle au lieu de single pour éviter des erreurs
+        
+      if (error) {
+        console.error("Erreur lors de la récupération du patient:", error);
+        throw new Error(error.message);
+      }
       
-    if (error) {
-      if (error.code === "PGRST116") { // Code pour "pas de résultat"
+      if (!data) {
         return undefined;
       }
-      throw new Error(error.message);
+      
+      return adaptPatientFromSupabase(data) as Patient;
+    } catch (error) {
+      console.error("Erreur lors de la récupération du patient:", error);
+      throw error;
     }
-    
-    return adaptPatientFromSupabase(data) as Patient;
   },
 
   async createPatient(patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {

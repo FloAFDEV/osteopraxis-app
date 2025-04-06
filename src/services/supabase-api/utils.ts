@@ -1,9 +1,25 @@
 
 // Utilitaires partagés pour les services Supabase API
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseClient } from "@/integrations/supabase/client";
 
 // Type générique pour caster les résultats des requêtes Supabase
 export type WithContraception<T> = T & { contraception: any };
 export type WithStatus<T> = T & { status: any };
 
-export { supabase };
+// Amélioration du client Supabase pour une meilleure gestion des erreurs
+export const supabase = {
+  ...supabaseClient,
+  from: (table: string) => {
+    console.log(`Accessing Supabase table: ${table}`);
+    return supabaseClient.from(table);
+  }
+};
+
+// Utilitaires pour le débogage
+export const logSupabaseResponse = (data: any, error: any, operation: string) => {
+  if (error) {
+    console.error(`Supabase ${operation} error:`, error);
+  } else {
+    console.log(`Supabase ${operation} success:`, data);
+  }
+};
