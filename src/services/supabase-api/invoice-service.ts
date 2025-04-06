@@ -11,11 +11,11 @@ export const supabaseInvoiceService = {
       
     if (error) throw new Error(error.message);
     
-    // Transform data to ensure proper typing
+    // Transform data to ensure proper typing with explicit type casting
     return (data || []).map(item => ({
       ...item,
       Patient: item.Patient || null
-    })) as Invoice[];
+    })) as unknown as Invoice[];
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
@@ -34,10 +34,11 @@ export const supabaseInvoiceService = {
     
     if (!data) return undefined;
     
+    // Use explicit type casting to avoid deep recursion issues
     return {
       ...data,
       Patient: data.Patient || null
-    } as Invoice;
+    } as unknown as Invoice;
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
@@ -53,7 +54,7 @@ export const supabaseInvoiceService = {
     return (data || []).map(item => ({
       ...item,
       Patient: item.Patient || null
-    })) as Invoice[];
+    })) as unknown as Invoice[];
   },
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {

@@ -24,7 +24,7 @@ export const supabaseAppointmentService = {
       .from("Appointment")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
       
     if (error) {
       if (error.code === "PGRST116") { // Code pour "pas de résultat"
@@ -32,6 +32,8 @@ export const supabaseAppointmentService = {
       }
       throw new Error(error.message);
     }
+    
+    if (!data) return undefined;
     
     return {
       ...(data as any),
@@ -76,25 +78,32 @@ export const supabaseAppointmentService = {
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
-    // Adapter les données pour Supabase
-    const adaptedStatus = appointment.status ? adaptAppointmentStatusForSupabase(appointment.status) : undefined;
-    
-    const { data, error } = await supabase
-      .from("Appointment")
-      .update({
-        ...appointment,
-        status: adaptedStatus
-      } as WithStatus<any>)
-      .eq("id", id)
-      .select()
-      .single();
+    try {
+      // Adapter les données pour Supabase
+      const updateData: any = {...appointment};
       
-    if (error) throw new Error(error.message);
-    
-    return {
-      ...(data as any),
-      status: adaptAppointmentStatusFromSupabase((data as any).status)
-    } as Appointment;
+      if (appointment.status) {
+        updateData.status = adaptAppointmentStatusForSupabase(appointment.status);
+      }
+      
+      // Make sure we're using POST method with .update()
+      const { data, error } = await supabase
+        .from("Appointment")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+        
+      if (error) throw new Error(error.message);
+      
+      return {
+        ...(data as any),
+        status: adaptAppointmentStatusFromSupabase((data as any).status)
+      } as Appointment;
+    } catch (error) {
+      console.error("Erreur Supabase updateAppointment:", error);
+      throw error;
+    }
   },
 
   async deleteAppointment(id: number): Promise<boolean> {

@@ -23,6 +23,7 @@ export const appointmentService = {
         return await supabaseAppointmentService.getAppointments();
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
+        throw error; // Make sure we propagate the error properly
       }
     }
     
@@ -37,6 +38,7 @@ export const appointmentService = {
         return await supabaseAppointmentService.getAppointmentById(id);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
+        throw error; // Make sure we propagate the error properly
       }
     }
     
@@ -51,6 +53,7 @@ export const appointmentService = {
         return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentsByPatientId:", error);
+        throw error; // Make sure we propagate the error properly
       }
     }
     
@@ -82,7 +85,10 @@ export const appointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.updateAppointment(id, appointment);
+        console.log("Updating appointment with ID:", id, "Data:", appointment);
+        const result = await supabaseAppointmentService.updateAppointment(id, appointment);
+        console.log("Update result:", result);
+        return result;
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
         throw error;
