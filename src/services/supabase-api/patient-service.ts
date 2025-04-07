@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { supabase } from "./utils";
+import { supabase, addAuthHeaders } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
 import { SIMULATE_AUTH } from "../api/config";
 
@@ -9,16 +9,13 @@ export const supabasePatientService = {
     console.log("Récupération des patients depuis Supabase...");
     
     try {
-      // Si SIMULATE_AUTH est actif, utilisons un rôle authentifié
-      let query = supabase
-        .from("Patient")
-        .select("*")
-        .order('lastName', { ascending: true });
-      
-      // Si SIMULATE_AUTH est actif, ajoutons un en-tête pour simuler un utilisateur authentifié
-      if (SIMULATE_AUTH) {
-        query = query.setHeader('X-Development-Mode', 'true');
-      }
+      // Utiliser la fonction addAuthHeaders pour ajouter les en-têtes
+      const query = addAuthHeaders(
+        supabase
+          .from("Patient")
+          .select("*")
+          .order('lastName', { ascending: true })
+      );
       
       const { data, error } = await query;
       
@@ -48,11 +45,15 @@ export const supabasePatientService = {
 
   async getPatientById(id: number): Promise<Patient | undefined> {
     try {
-      const { data, error } = await supabase
-        .from("Patient")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+      const query = addAuthHeaders(
+        supabase
+          .from("Patient")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle()
+      );
+      
+      const { data, error } = await query;
         
       if (error) {
         console.error("Erreur lors de la récupération du patient:", error);
@@ -86,23 +87,15 @@ export const supabasePatientService = {
       
       console.log("Création d'un nouveau patient...");
       
-      // Créer une nouvelle requête pour éviter les erreurs typographiques
-      let requestOptions = {};
+      const query = addAuthHeaders(
+        supabase
+          .from("Patient")
+          .insert(formattedData)
+          .select()
+          .single()
+      );
       
-      // Si SIMULATE_AUTH est actif, ajoutons un en-tête pour simuler un utilisateur authentifié
-      if (SIMULATE_AUTH) {
-        requestOptions = {
-          headers: {
-            'X-Development-Mode': 'true'
-          }
-        };
-      }
-      
-      const { data, error } = await supabase
-        .from("Patient")
-        .insert(formattedData)
-        .select()
-        .single(requestOptions);
+      const { data, error } = await query;
       
       if (error) {
         console.error("Erreur Supabase createPatient:", error);
@@ -125,11 +118,15 @@ export const supabasePatientService = {
   async updatePatient(id: number, patientData: Partial<Patient>): Promise<Patient | undefined> {
     try {
       // D'abord récupérer les données existantes du patient
-      const existingPatientResponse = await supabase
-        .from("Patient")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+      const existingPatientQuery = addAuthHeaders(
+        supabase
+          .from("Patient")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle()
+      );
+      
+      const existingPatientResponse = await existingPatientQuery;
         
       if (existingPatientResponse.error) {
         console.error("Erreur lors de la récupération du patient existant:", existingPatientResponse.error);
@@ -144,7 +141,7 @@ export const supabasePatientService = {
       const existingPatient = existingPatientResponse.data;
       
       // Fusionner les nouvelles données avec les données existantes
-      const updatedPatient = {
+      const updatedPatientBase = {
         firstName: patientData.firstName || existingPatient.firstName,
         lastName: patientData.lastName || existingPatient.lastName,
         email: patientData.email || existingPatient.email,
@@ -185,27 +182,20 @@ export const supabasePatientService = {
       };
       
       // Adapter les données pour Supabase
-      const patientToUpdate = preparePatientForApi(updatedPatient);
+      const patientToUpdate = preparePatientForApi(updatedPatientBase);
       console.log("Mise à jour du patient avec ID:", id);
       
-      // Créer des options pour la requête
-      let requestOptions = {};
+      // Effectuer la mise à jour
+      const updateQuery = addAuthHeaders(
+        supabase
+          .from("Patient")
+          .update(patientToUpdate)
+          .eq("id", id)
+          .select()
+          .single()
+      );
       
-      // Si SIMULATE_AUTH est actif, ajoutons un en-tête pour simuler un utilisateur authentifié
-      if (SIMULATE_AUTH) {
-        requestOptions = {
-          headers: {
-            'X-Development-Mode': 'true'
-          }
-        };
-      }
-      
-      const { data, error } = await supabase
-        .from("Patient")
-        .update(patientToUpdate)
-        .eq("id", id)
-        .select()
-        .single(requestOptions);
+      const { data, error } = await updateQuery;
         
       if (error) {
         console.error("Erreur lors de la mise à jour du patient:", error);

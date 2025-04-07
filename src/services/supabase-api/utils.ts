@@ -13,7 +13,7 @@ export const supabase = supabaseClient;
 export const typedData = <T>(data: any): T => data as T;
 
 // Fonction utilitaire pour ajouter des en-têtes d'authentification simulés
-export const addAuthHeaders = (query: any) => {
+export const addAuthHeaders = <T extends { setHeader: (name: string, value: string) => T }>(query: T): T => {
   if (SIMULATE_AUTH) {
     return query.setHeader('X-Development-Mode', 'true');
   }
