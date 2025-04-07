@@ -28,8 +28,8 @@ export function getEnumValue<T extends string>(value: string, allowedValues: rea
   throw new Error(`Invalid enum value: ${value}. Allowed values are: ${allowedValues.join(', ')}`);
 }
 
-// AppointmentStatus enum helper
-export const AppointmentStatusValues = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'RESCHEDULED'] as const;
+// AppointmentStatus enum helper - Correction de CANCELLED à CANCELED pour correspondre au type dans types.ts
+export const AppointmentStatusValues = ['SCHEDULED', 'COMPLETED', 'CANCELED', 'NO_SHOW', 'RESCHEDULED'] as const;
 export type AppointmentStatusType = typeof AppointmentStatusValues[number];
 
 // Contraception enum helper
@@ -41,9 +41,17 @@ export type ContraceptionType = typeof ContraceptionValues[number];
 
 // Fonctions de sécurité pour s'assurer que les valeurs correspondent aux enum de Supabase
 export function ensureAppointmentStatus(status: string): AppointmentStatusType {
+  // Correction spéciale pour CANCELLED -> CANCELED
+  if (status === 'CANCELLED') {
+    return 'CANCELED';
+  }
   return getEnumValue(status, AppointmentStatusValues);
 }
 
 export function ensureContraception(contraception: string): ContraceptionType {
+  // Correction spéciale pour IMPLANTS -> IMPLANT
+  if (contraception === 'IMPLANTS') {
+    return 'IMPLANT';
+  }
   return getEnumValue(contraception, ContraceptionValues);
 }

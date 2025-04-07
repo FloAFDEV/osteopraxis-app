@@ -46,7 +46,8 @@
     --popover: 224 71% 4%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 217.2 91.2% 59.8%;
+    /* Nouvelle couleur primaire amber-500 pour le dark mode */
+    --primary: 43 96% 58%; /* amber-500 */
     --primary-foreground: 222.2 47.4% 11.2%;
  
     --secondary: 217.2 32.6% 20%;
@@ -55,7 +56,8 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 70%;
  
-    --accent: 217.2 32.6% 25%;
+    /* Amélioration de l'accent pour correspondre au amber */
+    --accent: 43 100% 50%;
     --accent-foreground: 210 40% 98%;
  
     --destructive: 0 62.8% 50.6%;
@@ -63,7 +65,7 @@
  
     --border: 217.2 32.6% 22%;
     --input: 217.2 32.6% 22%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 43 96% 58%; /* amber-500 */
   }
 }
  
@@ -145,4 +147,45 @@
 
 .icon-red {
   @apply text-red-500 dark:text-red-400;
+}
+
+/* Classes pour les genres */
+.gender-male-icon {
+  @apply text-blue-500 dark:text-blue-400;
+}
+
+.gender-female-icon {
+  @apply text-pink-500 dark:text-pink-400;
+}
+
+/* Nouvelle classe pour les cartes avec ombre */
+.card-with-shadow {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200;
+}
+
+/* Style pour les cartes de cabinets */
+.cabinet-card {
+  @apply bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300;
+}
+
+/* Style spécifique pour le dark mode */
+.dark .amber-highlight {
+  @apply text-amber-500 font-semibold;
+}
+
+/* Pagination styles */
+.pagination-container {
+  @apply flex justify-center items-center gap-1 mt-6;
+}
+
+.pagination-item {
+  @apply w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors;
+}
+
+.pagination-active {
+  @apply bg-amber-500 text-white border-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:text-white dark:border-amber-600 dark:hover:bg-amber-700;
+}
+
+.pagination-disabled {
+  @apply opacity-50 cursor-not-allowed hover:bg-white dark:hover:bg-gray-800;
 }

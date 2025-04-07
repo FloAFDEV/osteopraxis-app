@@ -1,3 +1,4 @@
+
 import { patientService } from './patient-service';
 import { appointmentService } from './appointment-service';
 import { cabinetService } from './cabinet-service';
@@ -8,11 +9,20 @@ import { supabaseInvoiceService } from '../supabase-api/invoice-service';
 
 // API principale
 export const api = {
+  // Services existants
   ...patientService,
   ...appointmentService,
   ...cabinetService,
   ...osteopathService,
   ...authService,
+  
+  // Méthodes de cabinet (ajoutées ou modifiées)
+  getCabinets: cabinetService.getCabinets,
+  getCabinetById: cabinetService.getCabinetById,
+  getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
+  createCabinet: cabinetService.createCabinet,
+  updateCabinet: cabinetService.updateCabinet,
+  deleteCabinet: cabinetService.deleteCabinet,
   
   // Service de facturation (directement depuis Supabase)
   getInvoices: async () => {

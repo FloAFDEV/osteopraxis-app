@@ -23,7 +23,7 @@ export const appointmentService = {
         return await supabaseAppointmentService.getAppointments();
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
-        throw error; // Make sure we propagate the error properly
+        throw error;
       }
     }
     
@@ -38,7 +38,7 @@ export const appointmentService = {
         return await supabaseAppointmentService.getAppointmentById(id);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
-        throw error; // Make sure we propagate the error properly
+        throw error;
       }
     }
     
@@ -53,7 +53,7 @@ export const appointmentService = {
         return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentsByPatientId:", error);
-        throw error; // Make sure we propagate the error properly
+        throw error;
       }
     }
     

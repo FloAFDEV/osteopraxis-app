@@ -1,7 +1,6 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
-import { SIMULATE_AUTH } from "../api/config";
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -181,7 +180,7 @@ export const supabaseAppointmentService = {
     }
   },
   
-  async deleteAppointment(id: number): Promise<void> {
+  async deleteAppointment(id: number): Promise<boolean> {
     try {
       const query = addAuthHeaders(
         supabase
@@ -193,6 +192,8 @@ export const supabaseAppointmentService = {
       const { error } = await query;
       
       if (error) throw new Error(error.message);
+      
+      return true; // Retourne true au lieu de void pour correspondre au type attendu
     } catch (error) {
       console.error("Erreur deleteAppointment:", error);
       throw error;
