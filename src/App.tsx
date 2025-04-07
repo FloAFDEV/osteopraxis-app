@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
@@ -43,7 +44,7 @@ function App() {
           <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/settings/cabinet" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
-          <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage />} : <Navigate to="/login" />} />
+          <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
           <Route path="/cabinets/new" element={isAuthenticated ? <NewCabinetPage /> : <Navigate to="/login" />} />
           <Route path="/cabinets/:id/edit" element={isAuthenticated ? <EditCabinetPage /> : <Navigate to="/login" />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
