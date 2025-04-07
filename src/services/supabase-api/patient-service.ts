@@ -70,6 +70,9 @@ export const patientService = {
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+    // Add current timestamps
+    const now = new Date().toISOString();
+    
     // Map the patient data to match the Supabase column names
     const patientData = {
       firstName: patient.firstName,
@@ -98,12 +101,15 @@ export const patientService = {
       physicalActivity: patient.physicalActivity,
       isSmoker: patient.isSmoker,
       isDeceased: patient.isDeceased,
-      contraception: patient.contraception === "IMPLANT" ? "IMPLANTS" : patient.contraception,
+      // If contraception is IMPLANT in our code, convert it to IMPLANTS for Supabase
+      contraception: patient.contraception,
       hdlm: patient.hdlm,
       avatarUrl: patient.avatarUrl,
       cabinetId: patient.cabinetId,
       userId: patient.userId || null,
       osteopathId: patient.osteopathId || 1, // Using default if not provided
+      updatedAt: now, // Add the updatedAt field
+      createdAt: now  // Add the createdAt field
     };
 
     const { data, error } = await supabase
@@ -121,12 +127,9 @@ export const patientService = {
   },
 
   async updatePatient(id: number, patientUpdates: Partial<Patient>): Promise<Patient> {
-    // Convert contraception from IMPLANT to IMPLANTS if needed
-    let contraceptionValue = patientUpdates.contraception;
-    if (contraceptionValue === "IMPLANT") {
-      contraceptionValue = "IMPLANTS";
-    }
-
+    // Add updatedAt timestamp
+    const now = new Date().toISOString();
+    
     // Map the update data to match Supabase column names
     const updateData = {
       ...(patientUpdates.firstName !== undefined && { firstName: patientUpdates.firstName }),
@@ -155,11 +158,11 @@ export const patientService = {
       ...(patientUpdates.physicalActivity !== undefined && { physicalActivity: patientUpdates.physicalActivity }),
       ...(patientUpdates.isSmoker !== undefined && { isSmoker: patientUpdates.isSmoker }),
       ...(patientUpdates.isDeceased !== undefined && { isDeceased: patientUpdates.isDeceased }),
-      ...(contraceptionValue !== undefined && { contraception: contraceptionValue }),
+      ...(patientUpdates.contraception !== undefined && { contraception: patientUpdates.contraception }),
       ...(patientUpdates.hdlm !== undefined && { hdlm: patientUpdates.hdlm }),
       ...(patientUpdates.avatarUrl !== undefined && { avatarUrl: patientUpdates.avatarUrl }),
       ...(patientUpdates.cabinetId !== undefined && { cabinetId: patientUpdates.cabinetId }),
-      updatedAt: new Date().toISOString()
+      updatedAt: now
     };
 
     const { data, error } = await supabase
