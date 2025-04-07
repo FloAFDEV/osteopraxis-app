@@ -1,6 +1,6 @@
 
-import { Patient } from "@/types";
-import { supabase, addAuthHeaders } from "./utils";
+import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
+import { supabase, addAuthHeaders, ensureContraception } from "./utils";
 import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
 import { SIMULATE_AUTH } from "../api/config";
 
@@ -79,8 +79,18 @@ export const supabasePatientService = {
     try {
       // Adapter le format pour Supabase
       const now = new Date().toISOString();
+      
+      // Ensure contraception value matches the enum
+      let correctedData = { ...patientData };
+      if (patientData.contraception) {
+        // Fix "IMPLANTS" -> "IMPLANT" if needed
+        if (patientData.contraception === "IMPLANTS" as any) {
+          correctedData.contraception = "IMPLANT" as Contraception;
+        }
+      }
+      
       const formattedData = preparePatientForApi({
-        ...patientData,
+        ...correctedData,
         createdAt: now,
         updatedAt: now
       });
@@ -140,6 +150,12 @@ export const supabasePatientService = {
       
       const existingPatient = existingPatientResponse.data;
       
+      // Fix contraception value if it's "IMPLANTS"
+      let updatedContraception = patientData.contraception;
+      if (patientData.contraception === "IMPLANTS" as any) {
+        updatedContraception = "IMPLANT" as Contraception;
+      }
+      
       // Fusionner les nouvelles données avec les données existantes
       const updatedPatientBase = {
         firstName: patientData.firstName || existingPatient.firstName,
@@ -159,7 +175,7 @@ export const supabasePatientService = {
           ? patientData.isSmoker 
           : existingPatient.isSmoker,
         handedness: patientData.handedness || existingPatient.handedness,
-        contraception: patientData.contraception || existingPatient.contraception,
+        contraception: updatedContraception || existingPatient.contraception,
         currentTreatment: patientData.currentTreatment || existingPatient.currentTreatment,
         generalPractitioner: patientData.generalPractitioner || existingPatient.generalPractitioner,
         surgicalHistory: patientData.surgicalHistory || existingPatient.surgicalHistory,

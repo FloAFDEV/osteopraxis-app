@@ -19,3 +19,31 @@ export const addAuthHeaders = <T extends { setHeader: (name: string, value: stri
   }
   return query;
 };
+
+// Récupérer un type enum à partir d'une valeur string
+export function getEnumValue<T extends string>(value: string, allowedValues: readonly T[]): T {
+  if (allowedValues.includes(value as T)) {
+    return value as T;
+  }
+  throw new Error(`Invalid enum value: ${value}. Allowed values are: ${allowedValues.join(', ')}`);
+}
+
+// AppointmentStatus enum helper
+export const AppointmentStatusValues = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'RESCHEDULED'] as const;
+export type AppointmentStatusType = typeof AppointmentStatusValues[number];
+
+// Contraception enum helper
+export const ContraceptionValues = [
+  'NONE', 'PILLS', 'PATCH', 'RING', 'IUD', 'IMPLANT', 
+  'CONDOM', 'DIAPHRAGM', 'INJECTION', 'NATURAL_METHODS', 'STERILIZATION'
+] as const;
+export type ContraceptionType = typeof ContraceptionValues[number];
+
+// Fonctions de sécurité pour s'assurer que les valeurs correspondent aux enum de Supabase
+export function ensureAppointmentStatus(status: string): AppointmentStatusType {
+  return getEnumValue(status, AppointmentStatusValues);
+}
+
+export function ensureContraception(contraception: string): ContraceptionType {
+  return getEnumValue(contraception, ContraceptionValues);
+}

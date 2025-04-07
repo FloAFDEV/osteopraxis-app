@@ -43,7 +43,7 @@ export const supabaseInvoiceService = {
           consultationId: item.consultationId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus,
+          paymentStatus: item.paymentStatus as PaymentStatus,
           Patient: patient
         } as Invoice;
       });
@@ -91,7 +91,7 @@ export const supabaseInvoiceService = {
         consultationId: data.consultationId,
         date: data.date,
         amount: data.amount,
-        paymentStatus: data.paymentStatus,
+        paymentStatus: data.paymentStatus as PaymentStatus,
         Patient: patientData
       } as Invoice;
     } catch (error) {
@@ -132,7 +132,7 @@ export const supabaseInvoiceService = {
           consultationId: item.consultationId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus,
+          paymentStatus: item.paymentStatus as PaymentStatus,
           Patient: patient
         } as Invoice;
       });

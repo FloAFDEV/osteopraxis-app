@@ -1,7 +1,7 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, addAuthHeaders } from "./utils";
-import { adaptAppointmentStatusFromSupabase, adaptAppointmentStatusForSupabase } from "@/utils/patient-form-helpers";
+import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
+import { SIMULATE_AUTH } from "../api/config";
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -10,24 +10,24 @@ export const supabaseAppointmentService = {
         supabase
           .from("Appointment")
           .select("*")
-          .order("date", { ascending: true })
+          .order('date', { ascending: true })
       );
       
       const { data, error } = await query;
       
       if (error) throw new Error(error.message);
       
-      // Type safety - assert that data is array of appointment records
-      const appointments = data || [];
+      if (!data) return [];
       
-      return appointments.map(appointment => ({
-        id: appointment.id,
-        date: appointment.date,
-        reason: appointment.reason,
-        patientId: appointment.patientId,
-        status: adaptAppointmentStatusFromSupabase(appointment.status),
-        notificationSent: appointment.notificationSent
-      } as Appointment));
+      // Transform data with proper typing
+      return data.map(item => ({
+        id: item.id,
+        date: item.date,
+        reason: item.reason,
+        patientId: item.patientId,
+        status: item.status as AppointmentStatus,
+        notificationSent: item.notificationSent
+      }));
     } catch (error) {
       console.error("Erreur getAppointments:", error);
       throw error;
@@ -47,7 +47,7 @@ export const supabaseAppointmentService = {
       const { data, error } = await query;
       
       if (error) {
-        if (error.code === "PGRST116") { // Code pour "pas de résultat"
+        if (error.code === "PGRST116") {
           return undefined;
         }
         throw new Error(error.message);
@@ -55,14 +55,15 @@ export const supabaseAppointmentService = {
       
       if (!data) return undefined;
       
+      // Transform data with proper typing
       return {
         id: data.id,
         date: data.date,
         reason: data.reason,
         patientId: data.patientId,
-        status: adaptAppointmentStatusFromSupabase(data.status),
+        status: data.status as AppointmentStatus,
         notificationSent: data.notificationSent
-      } as Appointment;
+      };
     } catch (error) {
       console.error("Erreur getAppointmentById:", error);
       throw error;
@@ -76,23 +77,24 @@ export const supabaseAppointmentService = {
           .from("Appointment")
           .select("*")
           .eq("patientId", patientId)
-          .order("date", { ascending: true })
+          .order('date', { ascending: true })
       );
       
       const { data, error } = await query;
       
       if (error) throw new Error(error.message);
       
-      const appointments = data || [];
+      if (!data) return [];
       
-      return appointments.map(appointment => ({
-        id: appointment.id,
-        date: appointment.date,
-        reason: appointment.reason,
-        patientId: appointment.patientId,
-        status: adaptAppointmentStatusFromSupabase(appointment.status),
-        notificationSent: appointment.notificationSent
-      } as Appointment));
+      // Transform data with proper typing
+      return data.map(item => ({
+        id: item.id,
+        date: item.date,
+        reason: item.reason,
+        patientId: item.patientId,
+        status: item.status as AppointmentStatus,
+        notificationSent: item.notificationSent
+      }));
     } catch (error) {
       console.error("Erreur getAppointmentsByPatientId:", error);
       throw error;
@@ -101,22 +103,22 @@ export const supabaseAppointmentService = {
 
   async createAppointment(appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> {
     try {
-      // Adapt the status for Supabase
-      const adaptedStatus = adaptAppointmentStatusForSupabase(appointmentData.status);
+      // Make sure the status value is one of the allowed enum values
+      const validStatus = ensureAppointmentStatus(appointmentData.status);
       
-      // Créer un objet d'insertion correctement typé pour Supabase
-      const insertData = {
+      // Create appointment with proper status type
+      const appointmentToCreate = {
         date: appointmentData.date,
         reason: appointmentData.reason,
         patientId: appointmentData.patientId,
-        status: adaptedStatus,
-        notificationSent: appointmentData.notificationSent ?? false
+        status: validStatus,
+        notificationSent: appointmentData.notificationSent
       };
       
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
-          .insert(insertData)
+          .insert(appointmentToCreate)
           .select()
           .single()
       );
@@ -125,36 +127,32 @@ export const supabaseAppointmentService = {
       
       if (error) throw new Error(error.message);
       
-      if (!data) {
-        throw new Error("Aucune donnée retournée lors de la création du rendez-vous");
-      }
-      
       return {
         id: data.id,
         date: data.date,
         reason: data.reason,
         patientId: data.patientId,
-        status: adaptAppointmentStatusFromSupabase(data.status),
+        status: data.status as AppointmentStatus,
         notificationSent: data.notificationSent
-      } as Appointment;
+      };
     } catch (error) {
       console.error("Erreur createAppointment:", error);
       throw error;
     }
   },
 
-  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
+  async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
-      // Create a properly typed update object
       const updateData: Record<string, any> = {};
       
-      if (appointment.date !== undefined) updateData.date = appointment.date;
-      if (appointment.reason !== undefined) updateData.reason = appointment.reason;
-      if (appointment.patientId !== undefined) updateData.patientId = appointment.patientId;
-      if (appointment.notificationSent !== undefined) updateData.notificationSent = appointment.notificationSent;
-      if (appointment.status !== undefined) {
-        updateData.status = adaptAppointmentStatusForSupabase(appointment.status);
+      if ('date' in appointmentData) updateData.date = appointmentData.date;
+      if ('reason' in appointmentData) updateData.reason = appointmentData.reason;
+      if ('patientId' in appointmentData) updateData.patientId = appointmentData.patientId;
+      if ('status' in appointmentData && appointmentData.status) {
+        // Make sure status is a valid enum value
+        updateData.status = ensureAppointmentStatus(appointmentData.status);
       }
+      if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
       const query = addAuthHeaders(
         supabase
@@ -166,28 +164,24 @@ export const supabaseAppointmentService = {
       );
       
       const { data, error } = await query;
-        
-      if (error) throw new Error(error.message);
       
-      if (!data) {
-        return undefined;
-      }
+      if (error) throw new Error(error.message);
       
       return {
         id: data.id,
         date: data.date,
         reason: data.reason,
         patientId: data.patientId,
-        status: adaptAppointmentStatusFromSupabase(data.status),
+        status: data.status as AppointmentStatus,
         notificationSent: data.notificationSent
-      } as Appointment;
+      };
     } catch (error) {
-      console.error("Erreur Supabase updateAppointment:", error);
+      console.error("Erreur updateAppointment:", error);
       throw error;
     }
   },
-
-  async deleteAppointment(id: number): Promise<boolean> {
+  
+  async deleteAppointment(id: number): Promise<void> {
     try {
       const query = addAuthHeaders(
         supabase
@@ -197,10 +191,8 @@ export const supabaseAppointmentService = {
       );
       
       const { error } = await query;
-    
-      if (error) throw new Error(error.message);
       
-      return true;
+      if (error) throw new Error(error.message);
     } catch (error) {
       console.error("Erreur deleteAppointment:", error);
       throw error;
