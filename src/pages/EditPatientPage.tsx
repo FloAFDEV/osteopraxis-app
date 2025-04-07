@@ -40,8 +40,22 @@ const EditPatientPage = () => {
     loadPatient();
   }, [id, navigate]);
 
-  const handleSave = async (updatedPatient: Patient) => {
+  const handleSave = async (updatedData: any) => {
+    if (!patient) return;
+    
     try {
+      // Merge the updated form data with the existing patient data
+      const updatedPatient: Patient = {
+        ...patient,
+        ...updatedData,
+        // Ensure these required fields are present
+        id: patient.id,
+        createdAt: patient.createdAt,
+        updatedAt: new Date().toISOString(),
+        osteopathId: patient.osteopathId,
+        userId: patient.userId,
+      };
+      
       await api.updatePatient(updatedPatient);
       toast.success("Patient mis à jour avec succès");
       navigate('/patients');

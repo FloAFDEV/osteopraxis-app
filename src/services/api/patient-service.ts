@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { delay, USE_SUPABASE, SIMULATE_AUTH } from "./config";
+import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
 
 // Empty array for patients to remove fictitious data
@@ -59,10 +59,10 @@ export const patientService = {
     return newPatient;
   },
 
-  async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
+  async updatePatient(patient: Patient): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        const updatedPatient = await supabasePatientService.updatePatient(id, patient);
+        const updatedPatient = await supabasePatientService.updatePatient(patient.id, patient);
         return updatedPatient;
       } catch (error) {
         console.error("Erreur Supabase updatePatient:", error);
@@ -72,7 +72,7 @@ export const patientService = {
     
     // Fallback: code simulé existant
     await delay(300);
-    const index = patients.findIndex(p => p.id === id);
+    const index = patients.findIndex(p => p.id === patient.id);
     if (index !== -1) {
       patients[index] = { 
         ...patients[index], 
@@ -81,6 +81,6 @@ export const patientService = {
       };
       return patients[index];
     }
-    return undefined;
+    throw new Error(`Patient with id ${patient.id} not found`);
   }
 };
