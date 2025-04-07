@@ -2,20 +2,24 @@
 // Export the supabase client and utility functions
 export * from './utils';
 
-// Export supabase services
-export { default as patientService } from './patient-service';
-export { default as authService } from './auth-service';
+// Export the patientService that already has a proper export
+export { patientService, supabasePatientService } from './patient-service';
 
-// Add these lines if they're missing proper exports
-// We need to ensure all services are exported correctly
-import { default as appointmentService } from './appointment-service';
-import { default as cabinetService } from './cabinet-service';
-import { default as invoiceService } from './invoice-service';
-import { default as osteopathService } from './osteopath-service';
+// Export supabaseAuthService from auth-service
+export { supabaseAuthService as authService } from './auth-service';
 
-export { 
-  appointmentService, 
-  cabinetService, 
-  invoiceService, 
-  osteopathService
+// Export services from their respective files
+export { supabaseAppointmentService as appointmentService } from './appointment-service';
+export { supabaseCabinetService as cabinetService } from './cabinet-service';
+export { supabaseInvoiceService as invoiceService } from './invoice-service';
+export { supabaseOsteopathService as osteopathService } from './osteopath-service';
+
+// Export a convenient single API object with all services
+export const supabaseApi = {
+  auth: authService,
+  patients: patientService,
+  appointments: appointmentService,
+  cabinets: cabinetService,
+  invoices: invoiceService,
+  osteopaths: osteopathService
 };
