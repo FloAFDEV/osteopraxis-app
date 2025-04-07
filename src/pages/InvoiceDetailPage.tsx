@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Loader2, FileText, ArrowLeft, Printer, Download } from "lucide-react";
+import { Loader2, FileText, ArrowLeft, Printer, Download, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { InvoicePrintView } from "@/components/invoice-print-view";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -64,13 +64,13 @@ const InvoiceDetailPage = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PAID':
-        return <Badge className="bg-green-100 text-green-800">Payée</Badge>;
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">Payée</Badge>;
       case 'PENDING':
-        return <Badge className="bg-yellow-100 text-yellow-800">En attente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">En attente</Badge>;
       case 'CANCELED':
-        return <Badge className="bg-red-100 text-red-800">Annulée</Badge>;
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">Annulée</Badge>;
       default:
-        return <Badge className="bg-gray-100 text-gray-800">Inconnue</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400">Inconnue</Badge>;
     }
   };
   
@@ -82,7 +82,7 @@ const InvoiceDetailPage = () => {
     return (
       <Layout>
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
           <span className="ml-3 text-lg">Chargement de la facture...</span>
         </div>
       </Layout>
@@ -94,8 +94,8 @@ const InvoiceDetailPage = () => {
       <Layout>
         <Card className="border-none shadow-sm">
           <CardContent className="pt-6">
-            <div className="text-center py-8 bg-red-50 rounded-lg">
-              <p className="text-red-600 mb-2">Cette facture n'existe pas ou une erreur s'est produite.</p>
+            <div className="text-center py-8 bg-red-50 dark:bg-red-900/10 rounded-lg">
+              <p className="text-red-600 dark:text-red-400 mb-2">Cette facture n'existe pas ou une erreur s'est produite.</p>
               <Button onClick={() => navigate('/invoices')}>Retour aux factures</Button>
             </div>
           </CardContent>
@@ -121,7 +121,7 @@ const InvoiceDetailPage = () => {
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <div className="flex items-center gap-2">
-                    <FileText className="h-6 w-6 text-blue-600" />
+                    <Activity className="h-6 w-6 text-amber-500 dark:text-amber-400" />
                     <CardTitle className="text-2xl">
                       Facture #{invoice.id.toString().padStart(4, '0')}
                     </CardTitle>
@@ -132,7 +132,7 @@ const InvoiceDetailPage = () => {
                     <Printer className="h-4 w-4 mr-2" />
                     Imprimer
                   </Button>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700">
                     <Download className="h-4 w-4 mr-2" />
                     Télécharger PDF
                   </Button>
@@ -143,39 +143,42 @@ const InvoiceDetailPage = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <Card>
+              <Card className="border border-gray-200 dark:border-gray-800">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-xl">Détails de la facture</CardTitle>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                    Détails de la facture
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Numéro</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Numéro</p>
                         <p className="font-medium">#{invoice.id.toString().padStart(4, '0')}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Date</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Date</p>
                         <p>{formattedDate}</p>
                       </div>
                     </div>
                     
                     <div className="pt-2">
-                      <p className="text-sm font-medium text-gray-500">Patient</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Patient</p>
                       <p className="font-medium">
                         {patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${invoice.patientId}`}
                       </p>
                       {patient && (
                         <>
-                          {patient.email && <p className="text-gray-600">{patient.email}</p>}
-                          {patient.address && <p className="text-gray-600">{patient.address}</p>}
+                          {patient.email && <p className="text-gray-600 dark:text-gray-400">{patient.email}</p>}
+                          {patient.address && <p className="text-gray-600 dark:text-gray-400">{patient.address}</p>}
                         </>
                       )}
                     </div>
                     
                     <div className="border-t pt-4 mt-4">
-                      <p className="text-sm font-medium text-gray-500 mb-2">Services</p>
-                      <div className="bg-gray-50 p-4 rounded-md">
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Services</p>
+                      <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-md">
                         <div className="flex justify-between">
                           <span>Consultation d'ostéopathie</span>
                           <span className="font-medium">{formatAmount(invoice.amount)}</span>
@@ -183,7 +186,7 @@ const InvoiceDetailPage = () => {
                       </div>
                       <div className="flex justify-between mt-4 pt-2 border-t font-medium">
                         <span>Total</span>
-                        <span>{formatAmount(invoice.amount)}</span>
+                        <span className="text-amber-600 dark:text-amber-500">{formatAmount(invoice.amount)}</span>
                       </div>
                     </div>
                   </div>
@@ -192,21 +195,21 @@ const InvoiceDetailPage = () => {
             </div>
             
             <div>
-              <Card>
+              <Card className="border border-gray-200 dark:border-gray-800">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-xl">Statut de paiement</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-2">Statut actuel</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Statut actuel</p>
                       <div className="flex items-center">
                         {getStatusBadge(invoice.paymentStatus)}
                       </div>
                     </div>
                     
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-2">Mettre à jour le statut</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Mettre à jour le statut</p>
                       <Select 
                         value={invoice.paymentStatus}
                         onValueChange={(value) => handleStatusChange(
@@ -226,8 +229,8 @@ const InvoiceDetailPage = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col items-start pt-0">
-                  <p className="text-sm font-medium text-gray-500 mb-2">Remarque</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Remarque</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Les factures marquées comme "Payée" sont archivées et ne peuvent plus être modifiées.
                   </p>
                 </CardFooter>

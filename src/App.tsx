@@ -13,6 +13,8 @@ import EditAppointmentPage from './pages/EditAppointmentPage';
 import SchedulePage from './pages/SchedulePage';
 import SettingsPage from './pages/SettingsPage';
 import InvoicesPage from './pages/InvoicesPage';
+import InvoiceDetailPage from './pages/InvoiceDetailPage';
+import NewInvoicePage from './pages/NewInvoicePage';
 import { Toaster } from 'sonner';
 import CabinetsManagementPage from "./pages/CabinetsManagementPage";
 import NewCabinetPage from "./pages/NewCabinetPage";
@@ -41,6 +43,8 @@ function App() {
         <Route path="/schedule" element={isAuthenticated ? <SchedulePage /> : <Navigate to="/login" />} />
         <Route path="/settings" element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" />} />
         <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/:id" element={isAuthenticated ? <InvoiceDetailPage /> : <Navigate to="/login" />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/settings/cabinet" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
         <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />

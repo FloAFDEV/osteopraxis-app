@@ -1,3 +1,4 @@
+
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED";
 export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "PARTNERED" | "ENGAGED" | "SEPARATED";
 export type Gender = "Homme" | "Femme" | "Autre";
@@ -113,7 +114,7 @@ export interface DashboardData {
   }[];
 }
 
-// Add the missing Invoice type
+// Invoice interface with improved typing
 export interface Invoice {
   id: number;
   patientId: number;
@@ -124,5 +125,17 @@ export interface Invoice {
   Patient?: {
     firstName: string;
     lastName: string;
+    email?: string;
+    address?: string;
+    birthDate?: string;
+    phone?: string;
+  };
+  // Informations pour l'ostéopathe, pourraient venir d'un autre endroit dans l'application
+  osteopath?: {
+    name: string;
+    adeli?: string;
+    address?: string;
+    email?: string;
+    phone?: string;
   };
 }

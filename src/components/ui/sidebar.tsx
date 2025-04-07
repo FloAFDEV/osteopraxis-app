@@ -15,7 +15,8 @@ import {
   LogOut,
   UserCog,
   UserPlus,
-  Building
+  Building,
+  Activity
 } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -37,7 +38,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     addPatient: "text-blue-600 dark:text-blue-400",
     settings: "text-amber-600 dark:text-amber-400",
     appointments: "text-red-600 dark:text-red-400",
-    invoices: "text-purple-600 dark:text-purple-400",
+    invoices: "text-amber-600 dark:text-amber-400", // Changé en amber pour les factures
     schedule: "text-cyan-600 dark:text-cyan-400"
   };
 
@@ -53,7 +54,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         className={cn(
           "flex items-center gap-x-2 text-slate-700 dark:text-slate-300 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors",
           "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
-          isActive && "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50"
+          isActive && "bg-slate-100 text-slate-900 dark:bg-amber-900/30 dark:text-amber-50" // Changé en amber pour le focus
         )}
       >
         <Icon size={18} className={colorClass} />
@@ -68,12 +69,18 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       isCollapsed ? "w-[60px]" : "w-[240px]"
     )}>
       <div className="px-3 py-2">
-        <h2 className={cn(
-          "font-bold text-lg mt-2 text-slate-900 dark:text-white text-center transition-all",
-          isCollapsed ? "opacity-0 h-0 mt-0" : "opacity-100 h-auto"
-        )}>
-          PatientHub
-        </h2>
+        <div className="flex items-center justify-center gap-2 mt-2">
+          <Activity className={cn(
+            "h-5 w-5 text-amber-500 dark:text-amber-400 transition-all",
+            !isCollapsed && "mb-1"
+          )} />
+          <h2 className={cn(
+            "font-bold text-lg text-slate-900 dark:text-amber-400 transition-all", // Changé en amber
+            isCollapsed ? "opacity-0 h-0 mt-0 absolute" : "opacity-100 h-auto"
+          )}>
+            PatientHub
+          </h2>
+        </div>
         {!isCollapsed && (
           <p className="text-xs text-center text-muted-foreground mb-2">
             Gestion de cabinet
@@ -141,7 +148,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {!isCollapsed ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 px-2 py-1.5">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium">
+              <div className="w-8 h-8 rounded-full bg-amber-600 dark:bg-amber-600 flex items-center justify-center text-primary-foreground font-medium">
                 {user?.first_name?.charAt(0) || user?.email?.charAt(0) || "?"}
               </div>
               <div className="flex-1 min-w-0">
