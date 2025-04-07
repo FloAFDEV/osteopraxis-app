@@ -40,6 +40,17 @@ const EditPatientPage = () => {
     loadPatient();
   }, [id, navigate]);
 
+  const handleSave = async (updatedPatient: Patient) => {
+    try {
+      await api.updatePatient(updatedPatient);
+      toast.success("Patient mis à jour avec succès");
+      navigate('/patients');
+    } catch (error) {
+      console.error("Error updating patient:", error);
+      toast.error("Impossible de mettre à jour le patient");
+    }
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -85,7 +96,7 @@ const EditPatientPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <PatientForm patient={patient} />
+          <PatientForm patient={patient} onSave={handleSave} />
         </div>
       </div>
     </Layout>

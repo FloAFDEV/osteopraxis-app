@@ -1,229 +1,162 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
-import { supabase, addAuthHeaders, ensureContraception } from "./utils";
-import { adaptPatientFromSupabase, preparePatientForApi } from "@/utils/patient-form-helpers";
-import { SIMULATE_AUTH } from "../api/config";
+import { supabase } from "./utils";
 
-export const supabasePatientService = {
+const adaptPatientFromSupabase = (data: any): Patient => ({
+  id: data.id,
+  createdAt: data.created_at,
+  updatedAt: data.updated_at,
+  firstName: data.firstName,
+  lastName: data.lastName,
+  email: data.email,
+  phone: data.phone,
+  address: data.address,
+  gender: data.gender as Gender,
+  birthDate: data.birthDate,
+  maritalStatus: data.maritalStatus as MaritalStatus,
+  occupation: data.occupation,
+  hasChildren: data.hasChildren,
+  childrenAges: data.childrenAges,
+  generalPractitioner: data.generalPractitioner,
+  surgicalHistory: data.surgicalHistory,
+  traumaHistory: data.traumaHistory,
+  rheumatologicalHistory: data.rheumatologicalHistory,
+  currentTreatment: data.currentTreatment,
+  handedness: data.handedness as Handedness,
+  hasVisionCorrection: data.hasVisionCorrection,
+  ophtalmologistName: data.ophtalmologistName,
+  entProblems: data.entProblems,
+  entDoctorName: data.entDoctorName,
+  digestiveProblems: data.digestiveProblems,
+  digestiveDoctorName: data.digestiveDoctorName,
+  physicalActivity: data.physicalActivity,
+  isSmoker: data.isSmoker,
+  isDeceased: data.isDeceased,
+  contraception: data.contraception as Contraception,
+  hdlm: data.hdlm,
+  avatarUrl: data.avatarUrl,
+  cabinetId: data.cabinetId
+});
+
+export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    console.log("Récupération des patients depuis Supabase...");
-    
-    try {
-      // Utiliser la fonction addAuthHeaders pour ajouter les en-têtes
-      const query = addAuthHeaders(
-        supabase
-          .from("Patient")
-          .select("*")
-          .order('lastName', { ascending: true })
-      );
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error("Erreur lors de la récupération des patients:", error);
-        throw new Error(error.message);
-      }
-      
-      console.log(`Patients récupérés: ${data?.length || 0}`);
-      
-      if (!data || data.length === 0) {
-        console.warn("Aucun patient trouvé dans la base de données");
-        return [];
-      }
-      
-      // Convertir et adapter les champs pour être compatibles avec l'application
-      const patients = data.map(patient => {
-        const adaptedPatient = adaptPatientFromSupabase(patient);
-        return adaptedPatient as Patient;
-      });
-      return patients;
-    } catch (error) {
-      console.error("Erreur lors de la récupération des patients:", error);
+    const { data, error } = await supabase
+      .from('Patient')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching patients:', error);
       throw error;
     }
+
+    return data.map(adaptPatientFromSupabase);
   },
 
-  async getPatientById(id: number): Promise<Patient | undefined> {
-    try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Patient")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle()
-      );
-      
-      const { data, error } = await query;
-        
-      if (error) {
-        console.error("Erreur lors de la récupération du patient:", error);
-        if (error.code === "PGRST116") {
-          return undefined;
-        }
-        throw new Error(error.message);
-      }
-      
-      if (!data) {
-        return undefined;
-      }
-      
-      const adaptedPatient = adaptPatientFromSupabase(data);
-      return adaptedPatient as Patient;
-    } catch (error) {
-      console.error("Erreur lors de la récupération du patient:", error);
+  async getPatientById(id: number): Promise<Patient | null> {
+    const { data, error } = await supabase
+      .from('Patient')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching patient with id ${id}:`, error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
   },
 
-  async createPatient(patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    try {
-      // Adapter le format pour Supabase
-      const now = new Date().toISOString();
-      
-      // Ensure contraception value matches the enum
-      let correctedData = { ...patientData };
-      if (patientData.contraception) {
-        // Fix "IMPLANTS" -> "IMPLANT" if needed
-        if (patientData.contraception === "IMPLANTS" as any) {
-          correctedData.contraception = "IMPLANT" as Contraception;
-        }
-      }
-      
-      const formattedData = preparePatientForApi({
-        ...correctedData,
-        createdAt: now,
-        updatedAt: now
-      });
-      
-      console.log("Création d'un nouveau patient...");
-      
-      const query = addAuthHeaders(
-        supabase
-          .from("Patient")
-          .insert(formattedData)
-          .select()
-          .single()
-      );
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error("Erreur Supabase createPatient:", error);
-        throw new Error(error.message);
-      }
-      
-      if (!data) {
-        throw new Error("Aucune donnée retournée lors de la création du patient");
-      }
-      
-      console.log("Patient créé avec succès");
-      const adaptedPatient = adaptPatientFromSupabase(data);
-      return adaptedPatient as Patient;
-    } catch (error: any) {
-      console.error("Erreur lors de la création du patient:", error);
-      throw error;
-    }
-  },
+  async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+    const { data, error } = await supabase
+      .from('Patient')
+      .insert({
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        phone: patient.phone,
+        address: patient.address,
+        gender: patient.gender,
+        maritalStatus: patient.maritalStatus,
+        occupation: patient.occupation,
+        hasChildren: patient.hasChildren,
+        childrenAges: patient.childrenAges,
+        birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
+        generalPractitioner: patient.generalPractitioner,
+        surgicalHistory: patient.surgicalHistory,
+        traumaHistory: patient.traumaHistory,
+        rheumatologicalHistory: patient.rheumatologicalHistory,
+        currentTreatment: patient.currentTreatment,
+        handedness: patient.handedness,
+        hasVisionCorrection: patient.hasVisionCorrection,
+        ophtalmologistName: patient.ophtalmologistName,
+        entProblems: patient.entProblems,
+        entDoctorName: patient.entDoctorName,
+        digestiveProblems: patient.digestiveProblems,
+        digestiveDoctorName: patient.digestiveDoctorName,
+        physicalActivity: patient.physicalActivity,
+        isSmoker: patient.isSmoker,
+        isDeceased: patient.isDeceased,
+        contraception: patient.contraception,
+        hdlm: patient.hdlm,
+        avatarUrl: patient.avatarUrl,
+        cabinetId: patient.cabinetId
+      })
+      .select()
+      .single();
 
-  async updatePatient(id: number, patientData: Partial<Patient>): Promise<Patient | undefined> {
-    try {
-      // D'abord récupérer les données existantes du patient
-      const existingPatientQuery = addAuthHeaders(
-        supabase
-          .from("Patient")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle()
-      );
-      
-      const existingPatientResponse = await existingPatientQuery;
-        
-      if (existingPatientResponse.error) {
-        console.error("Erreur lors de la récupération du patient existant:", existingPatientResponse.error);
-        throw new Error(existingPatientResponse.error.message);
-      }
-      
-      if (!existingPatientResponse.data) {
-        console.error("Aucun patient trouvé avec l'id:", id);
-        return undefined;
-      }
-      
-      const existingPatient = existingPatientResponse.data;
-      
-      // Fix contraception value if it's "IMPLANTS"
-      let updatedContraception = patientData.contraception;
-      if (patientData.contraception === "IMPLANTS" as any) {
-        updatedContraception = "IMPLANT" as Contraception;
-      }
-      
-      // Fusionner les nouvelles données avec les données existantes
-      const updatedPatientBase = {
-        firstName: patientData.firstName || existingPatient.firstName,
-        lastName: patientData.lastName || existingPatient.lastName,
-        email: patientData.email || existingPatient.email,
-        phone: patientData.phone || existingPatient.phone,
-        address: patientData.address || existingPatient.address,
-        gender: patientData.gender || existingPatient.gender,
-        maritalStatus: patientData.maritalStatus || existingPatient.maritalStatus,
-        occupation: patientData.occupation || existingPatient.occupation,
-        hasChildren: patientData.hasChildren !== undefined 
-          ? patientData.hasChildren 
-          : existingPatient.hasChildren,
-        childrenAges: patientData.childrenAges || existingPatient.childrenAges,
-        physicalActivity: patientData.physicalActivity || existingPatient.physicalActivity,
-        isSmoker: patientData.isSmoker !== undefined 
-          ? patientData.isSmoker 
-          : existingPatient.isSmoker,
-        handedness: patientData.handedness || existingPatient.handedness,
-        contraception: updatedContraception || existingPatient.contraception,
-        currentTreatment: patientData.currentTreatment || existingPatient.currentTreatment,
-        generalPractitioner: patientData.generalPractitioner || existingPatient.generalPractitioner,
-        surgicalHistory: patientData.surgicalHistory || existingPatient.surgicalHistory,
-        digestiveProblems: patientData.digestiveProblems || existingPatient.digestiveProblems,
-        digestiveDoctorName: patientData.digestiveDoctorName || existingPatient.digestiveDoctorName,
-        birthDate: patientData.birthDate
-          ? new Date(patientData.birthDate).toISOString()
-          : existingPatient.birthDate,
-        avatarUrl: patientData.avatarUrl || existingPatient.avatarUrl,
-        traumaHistory: patientData.traumaHistory || existingPatient.traumaHistory,
-        rheumatologicalHistory: patientData.rheumatologicalHistory || existingPatient.rheumatologicalHistory,
-        hasVisionCorrection: patientData.hasVisionCorrection !== undefined
-          ? patientData.hasVisionCorrection
-          : existingPatient.hasVisionCorrection,
-        ophtalmologistName: patientData.ophtalmologistName || existingPatient.ophtalmologistName,
-        entProblems: patientData.entProblems || existingPatient.entProblems,
-        entDoctorName: patientData.entDoctorName || existingPatient.entDoctorName,
-        hdlm: patientData.hdlm || existingPatient.hdlm,
-        updatedAt: new Date().toISOString()
-      };
-      
-      // Adapter les données pour Supabase
-      const patientToUpdate = preparePatientForApi(updatedPatientBase);
-      console.log("Mise à jour du patient avec ID:", id);
-      
-      // Effectuer la mise à jour
-      const updateQuery = addAuthHeaders(
-        supabase
-          .from("Patient")
-          .update(patientToUpdate)
-          .eq("id", id)
-          .select()
-          .single()
-      );
-      
-      const { data, error } = await updateQuery;
-        
-      if (error) {
-        console.error("Erreur lors de la mise à jour du patient:", error);
-        throw new Error(error.message);
-      }
-      
-      console.log("Patient mis à jour avec succès");
-      const adaptedPatient = adaptPatientFromSupabase(data);
-      return adaptedPatient as Patient;
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour du patient:", error);
+    if (error) {
+      console.error('Error creating patient:', error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
+  },
+};
+
+export const updatePatient = async (patient: Patient): Promise<Patient> => {
+  const { data, error } = await supabase
+    .from('Patient')
+    .update({
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      phone: patient.phone,
+      address: patient.address,
+      gender: patient.gender,
+      maritalStatus: patient.maritalStatus,
+      occupation: patient.occupation,
+      hasChildren: patient.hasChildren,
+      childrenAges: patient.childrenAges,
+      birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
+      generalPractitioner: patient.generalPractitioner,
+      surgicalHistory: patient.surgicalHistory,
+      traumaHistory: patient.traumaHistory,
+      rheumatologicalHistory: patient.rheumatologicalHistory,
+      currentTreatment: patient.currentTreatment,
+      handedness: patient.handedness,
+      hasVisionCorrection: patient.hasVisionCorrection,
+      ophtalmologistName: patient.ophtalmologistName,
+      entProblems: patient.entProblems,
+      entDoctorName: patient.entDoctorName,
+      digestiveProblems: patient.digestiveProblems,
+      digestiveDoctorName: patient.digestiveDoctorName,
+      physicalActivity: patient.physicalActivity,
+      isSmoker: patient.isSmoker,
+      isDeceased: patient.isDeceased,
+      contraception: patient.contraception === "IMPLANTS" ? "IMPLANT" : patient.contraception,
+      hdlm: patient.hdlm,
+      avatarUrl: patient.avatarUrl,
+      cabinetId: patient.cabinetId,
+      updatedAt: new Date().toISOString()
+    })
+    .eq('id', patient.id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating patient:', error);
+    throw error;
   }
+
+  return adaptPatientFromSupabase(data);
 };
