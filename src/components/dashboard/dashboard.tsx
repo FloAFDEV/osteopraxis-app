@@ -85,7 +85,7 @@ const calculateDashboardData = (patients: any[], appointments: any[] = []): Dash
   const newPatientsLast30Days = patients.filter(p => isLast30Days(p.createdAt)).length;
   
   // Pour les rendez-vous, on utilise maintenant les données réelles
-  const today = new Date();
+  // Removed duplicate today declaration and using the one declared above
   const todayStr = format(today, 'yyyy-MM-dd');
   
   // Compter les rendez-vous d'aujourd'hui

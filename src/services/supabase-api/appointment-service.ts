@@ -12,11 +12,23 @@ export const supabaseAppointmentService = {
       
     if (error) throw new Error(error.message);
     
-    // Adapter les statuts pour l'application
-    return (data as any[]).map(appointment => ({
-      ...appointment,
-      status: adaptAppointmentStatusFromSupabase(appointment.status)
-    } as Appointment));
+    // Using type assertion to handle the data correctly
+    return (data || []).map(appointment => {
+      // Type guard to ensure we're dealing with appointment objects
+      if (!('status' in appointment)) {
+        console.error("Invalid appointment data:", appointment);
+        return null;
+      }
+      
+      return {
+        id: appointment.id,
+        date: appointment.date,
+        reason: appointment.reason,
+        patientId: appointment.patientId,
+        status: adaptAppointmentStatusFromSupabase(appointment.status),
+        notificationSent: appointment.notificationSent
+      } as Appointment;
+    }).filter(Boolean) as Appointment[]; // Remove any null values
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
@@ -35,7 +47,13 @@ export const supabaseAppointmentService = {
     
     if (!data) return undefined;
     
-    // Utiliser une conversion de type explicite pour éviter la récursion infinie
+    // Type guard to ensure we're dealing with appointment data
+    if (!('status' in data)) {
+      console.error("Invalid appointment data:", data);
+      return undefined;
+    }
+    
+    // Use explicit type conversion for the returned object
     return {
       id: data.id,
       date: data.date,
@@ -43,7 +61,7 @@ export const supabaseAppointmentService = {
       patientId: data.patientId,
       status: adaptAppointmentStatusFromSupabase(data.status),
       notificationSent: data.notificationSent
-    };
+    } as Appointment;
   },
 
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
@@ -55,28 +73,42 @@ export const supabaseAppointmentService = {
       
     if (error) throw new Error(error.message);
     
-    return (data as any[]).map(appointment => ({
-      ...appointment,
-      status: adaptAppointmentStatusFromSupabase(appointment.status)
-    } as Appointment));
+    // Using type assertion to safely handle data
+    return (data || []).map(appointment => {
+      if (!('status' in appointment)) {
+        console.error("Invalid appointment data:", appointment);
+        return null;
+      }
+      
+      return {
+        id: appointment.id,
+        date: appointment.date,
+        reason: appointment.reason,
+        patientId: appointment.patientId,
+        status: adaptAppointmentStatusFromSupabase(appointment.status),
+        notificationSent: appointment.notificationSent
+      } as Appointment;
+    }).filter(Boolean) as Appointment[];
   },
 
   async createAppointment(appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> {
-    // Adapter le format pour Supabase
+    // Adapt the status for Supabase
     const adaptedStatus = adaptAppointmentStatusForSupabase(appointmentData.status);
     
     const { data, error } = await supabase
       .from("Appointment")
       .insert({
-        ...appointmentData,
-        status: adaptedStatus
+        date: appointmentData.date,
+        reason: appointmentData.reason,
+        patientId: appointmentData.patientId,
+        status: adaptedStatus,
+        notificationSent: appointmentData.notificationSent ?? false
       })
       .select()
       .single();
       
     if (error) throw new Error(error.message);
     
-    // Utiliser une conversion de type explicite pour éviter la récursion infinie
     return {
       id: data.id,
       date: data.date,
@@ -84,19 +116,23 @@ export const supabaseAppointmentService = {
       patientId: data.patientId,
       status: adaptAppointmentStatusFromSupabase(data.status),
       notificationSent: data.notificationSent
-    };
+    } as Appointment;
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
-      // Adapter les données pour Supabase
-      const updateData: any = {...appointment};
+      // Create a properly typed update object
+      const updateData: Record<string, any> = {};
       
-      if (appointment.status) {
+      if (appointment.date !== undefined) updateData.date = appointment.date;
+      if (appointment.reason !== undefined) updateData.reason = appointment.reason;
+      if (appointment.patientId !== undefined) updateData.patientId = appointment.patientId;
+      if (appointment.notificationSent !== undefined) updateData.notificationSent = appointment.notificationSent;
+      if (appointment.status !== undefined) {
         updateData.status = adaptAppointmentStatusForSupabase(appointment.status);
       }
       
-      // Utiliser le bon verb HTTP pour la mise à jour
+      // Use the update method instead of POST
       const { data, error } = await supabase
         .from("Appointment")
         .update(updateData)
@@ -106,7 +142,6 @@ export const supabaseAppointmentService = {
         
       if (error) throw new Error(error.message);
       
-      // Utiliser une conversion de type explicite pour éviter la récursion infinie
       return {
         id: data.id,
         date: data.date,
@@ -114,7 +149,7 @@ export const supabaseAppointmentService = {
         patientId: data.patientId,
         status: adaptAppointmentStatusFromSupabase(data.status),
         notificationSent: data.notificationSent
-      };
+      } as Appointment;
     } catch (error) {
       console.error("Erreur Supabase updateAppointment:", error);
       throw error;
