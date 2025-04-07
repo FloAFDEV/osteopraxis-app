@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -274,7 +273,7 @@ const PatientDetailPage = () => {
                     {patient.contraception === "PATCH" && "Patch"}
                     {patient.contraception === "RING" && "Anneau vaginal"}
                     {patient.contraception === "IUD" && "Stérilet"}
-                    {patient.contraception === "IMPLANT" && "Implant"}
+                    {patient.contraception === "IMPLANTS" && "Implant"}
                     {patient.contraception === "CONDOM" && "Préservatif"}
                     {patient.contraception === "DIAPHRAGM" && "Diaphragme"}
                   </dd>

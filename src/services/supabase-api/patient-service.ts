@@ -1,4 +1,3 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -75,7 +74,10 @@ export const patientService = {
     
     // Ensure contraception value is in the format expected by Supabase
     // If it's "IMPLANT" in our code, make it "IMPLANTS" for Supabase
-    const contraceptionValue = patient.contraception === "IMPLANT" ? "IMPLANTS" : patient.contraception;
+    let contraceptionValue = patient.contraception;
+    if (contraceptionValue === "IMPLANT") {
+      contraceptionValue = "IMPLANTS";
+    }
     
     // Map the patient data to match the Supabase column names
     const patientData = {

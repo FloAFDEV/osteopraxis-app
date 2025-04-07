@@ -1,10 +1,9 @@
-
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED";
 export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "PARTNERED" | "ENGAGED" | "SEPARATED";
 export type Gender = "Homme" | "Femme" | "Autre";
 export type Handedness = "RIGHT" | "LEFT" | "AMBIDEXTROUS";
-// Updated to match Supabase's enum values
-export type Contraception = "NONE" | "PILLS" | "PATCH" | "RING" | "IUD" | "IMPLANTS" | "CONDOM" | "DIAPHRAGM" | "INJECTION" | "NATURAL_METHODS" | "STERILIZATION";
+// Update Contraception to include both IMPLANT and IMPLANTS to handle both our code and Supabase
+export type Contraception = "NONE" | "PILLS" | "PATCH" | "RING" | "IUD" | "IMPLANT" | "IMPLANTS" | "CONDOM" | "DIAPHRAGM" | "INJECTION" | "NATURAL_METHODS" | "STERILIZATION";
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 export type Role = "ADMIN" | "OSTEOPATH";
 

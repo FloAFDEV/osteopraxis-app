@@ -17,7 +17,7 @@ import {
   UserPlus,
   Building
 } from 'lucide-react';
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarProps {
