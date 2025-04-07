@@ -1,3 +1,4 @@
+
 import { DashboardData } from "@/types";
 import { DashboardStats } from "./dashboard-stats";
 import { DemographicsCard } from "./demographics-card";
@@ -37,9 +38,9 @@ const calculateDashboardData = (patients: any[], appointments: any[] = []): Dash
   const averageAgeFemale = femaleAges.length ? Math.round(femaleAges.reduce((sum, age) => sum + age, 0) / femaleAges.length) : 0;
   
   // Données sur les nouveaux patients (basé sur createdAt)
-  const today = new Date();
-  const thisMonth = today.getMonth();
-  const thisYear = today.getFullYear();
+  const currentDate = new Date();
+  const thisMonth = currentDate.getMonth();
+  const thisYear = currentDate.getFullYear();
   
   const isThisMonth = (dateStr: string) => {
     try {
@@ -72,8 +73,8 @@ const calculateDashboardData = (patients: any[], appointments: any[] = []): Dash
     try {
       const date = parseISO(dateStr);
       const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(today.getDate() - 30);
-      return date >= thirtyDaysAgo && date <= today;
+      thirtyDaysAgo.setDate(currentDate.getDate() - 30);
+      return date >= thirtyDaysAgo && date <= currentDate;
     } catch (e) {
       return false;
     }
@@ -85,8 +86,7 @@ const calculateDashboardData = (patients: any[], appointments: any[] = []): Dash
   const newPatientsLast30Days = patients.filter(p => isLast30Days(p.createdAt)).length;
   
   // Pour les rendez-vous, on utilise maintenant les données réelles
-  // Removed duplicate today declaration and using the one declared above
-  const todayStr = format(today, 'yyyy-MM-dd');
+  const todayStr = format(currentDate, 'yyyy-MM-dd');
   
   // Compter les rendez-vous d'aujourd'hui
   const appointmentsToday = appointments.filter(apt => {
@@ -104,7 +104,7 @@ const calculateDashboardData = (patients: any[], appointments: any[] = []): Dash
   const futureAppointments = appointments.filter(apt => {
     try {
       const aptDate = parseISO(apt.date);
-      return aptDate >= today && apt.status === 'SCHEDULED';
+      return aptDate >= currentDate && apt.status === 'SCHEDULED';
     } catch (e) {
       return false;
     }

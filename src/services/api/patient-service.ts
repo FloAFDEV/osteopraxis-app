@@ -1,5 +1,6 @@
+
 import { Patient } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
+import { delay, USE_SUPABASE, SIMULATE_AUTH } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
 
 // Empty array for patients to remove fictitious data
@@ -37,7 +38,8 @@ export const patientService = {
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.createPatient(patient);
+        const createdPatient = await supabasePatientService.createPatient(patient);
+        return createdPatient;
       } catch (error) {
         console.error("Erreur Supabase createPatient:", error);
         throw error;
@@ -60,7 +62,8 @@ export const patientService = {
   async updatePatient(id: number, patient: Partial<Patient>): Promise<Patient | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.updatePatient(id, patient);
+        const updatedPatient = await supabasePatientService.updatePatient(id, patient);
+        return updatedPatient;
       } catch (error) {
         console.error("Erreur Supabase updatePatient:", error);
         throw error;

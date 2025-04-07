@@ -19,13 +19,97 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { differenceInYears, parseISO } from "date-fns";
 
 type SortOption = 'name' | 'date' | 'email' | 'gender';
+
+// Nouveau composant pour les patients alphabétiques
+const AlphabetFilter = ({ activeLetter, onLetterChange }: { activeLetter: string; onLetterChange: (letter: string) => void }) => {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  
+  return (
+    <div className="flex flex-wrap justify-center my-4 gap-1">
+      {alphabet.map((letter) => (
+        <Button
+          key={letter}
+          variant={activeLetter === letter ? "default" : "outline"}
+          size="sm"
+          className={`min-w-[2rem] ${activeLetter === letter ? 'bg-blue-600' : ''}`}
+          onClick={() => onLetterChange(letter)}
+        >
+          {letter}
+        </Button>
+      ))}
+      <Button
+        variant={activeLetter === '' ? "default" : "outline"}
+        size="sm"
+        className={`min-w-[4rem] ${activeLetter === '' ? 'bg-blue-600' : ''}`}
+        onClick={() => onLetterChange('')}
+      >
+        Tous
+      </Button>
+    </div>
+  );
+};
+
+// Composant pour afficher un patient en format liste
+const PatientListItem = ({ patient }: { patient: Patient }) => {
+  // Calculer l'âge uniquement si birthDate est défini
+  const age = patient.birthDate 
+    ? differenceInYears(new Date(), parseISO(patient.birthDate)) 
+    : null;
+
+  return (
+    <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+      <Link to={`/patients/${patient.id}`} className="block p-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className={`w-2 h-6 rounded-sm ${patient.gender === 'Homme' ? 'bg-blue-500' : patient.gender === 'Femme' ? 'bg-pink-500' : 'bg-gray-300'}`}></div>
+            
+            <div>
+              <h3 className="font-medium text-base">
+                {patient.lastName} {patient.firstName}
+                {age !== null && <span className="text-sm text-gray-500 ml-2">({age} ans)</span>}
+              </h3>
+              
+              <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
+                {patient.email && (
+                  <span className="flex items-center">
+                    <Mail className="h-3 w-3 mr-1" /> {patient.email}
+                  </span>
+                )}
+                
+                {patient.phone && (
+                  <span>{patient.phone}</span>
+                )}
+                
+                {patient.occupation && (
+                  <span className="text-gray-500 italic">{patient.occupation}</span>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button asChild variant="ghost" size="sm" className="h-8 px-2">
+              <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
+            </Button>
+            <Button asChild variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700">
+              <Link to={`/patients/${patient.id}`}>Voir</Link>
+            </Button>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+};
 
 const PatientsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [activeLetter, setActiveLetter] = useState("");
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
 
   // Utiliser useQuery pour une meilleure gestion de l'état et du cache
   const { data: patients, isLoading, error, refetch } = useQuery({
@@ -68,14 +152,26 @@ const PatientsPage = () => {
     refetch();
   }, [refetch]);
 
+  const handleLetterChange = (letter: string) => {
+    setActiveLetter(letter);
+    setSearchQuery("");
+  };
+
   const getSortedPatients = () => {
     if (!patients) return [];
     
     // D'abord filtrer les patients
-    const filtered = patients.filter(patient => {
+    let filtered = patients.filter(patient => {
       const fullName = `${patient.firstName || ''} ${patient.lastName || ''}`.toLowerCase();
       const searchLower = searchQuery.toLowerCase();
       
+      // Si une lettre est sélectionnée, filtrer par la première lettre du nom
+      if (activeLetter && !searchQuery) {
+        const firstLetter = (patient.lastName || '').charAt(0).toUpperCase();
+        return firstLetter === activeLetter;
+      }
+      
+      // Sinon, filtrer par recherche
       return (
         searchQuery === "" ||
         fullName.includes(searchLower) ||
@@ -243,9 +339,35 @@ const PatientsPage = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant={viewMode === 'list' ? 'default' : 'outline'} 
+                  size="icon" 
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-blue-600' : ''}
+                >
+                  <Users className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant={viewMode === 'cards' ? 'default' : 'outline'} 
+                  size="icon" 
+                  onClick={() => setViewMode('cards')}
+                  className={viewMode === 'cards' ? 'bg-blue-600' : ''}
+                >
+                  <div className="grid grid-cols-2 gap-0.5">
+                    <div className="w-1 h-1 bg-current rounded-sm"></div>
+                    <div className="w-1 h-1 bg-current rounded-sm"></div>
+                    <div className="w-1 h-1 bg-current rounded-sm"></div>
+                    <div className="w-1 h-1 bg-current rounded-sm"></div>
+                  </div>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
+
+        <AlphabetFilter activeLetter={activeLetter} onLetterChange={handleLetterChange} />
 
         {isLoading ? (
           <Card className="w-full p-6">
@@ -289,10 +411,18 @@ const PatientsPage = () => {
                     </div>
                     <h3 className="text-xl font-medium mb-2">Aucun patient trouvé</h3>
                     <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                      {searchQuery ? "Aucun patient ne correspond à vos critères de recherche." : 
+                      {(searchQuery || activeLetter) ? "Aucun patient ne correspond à vos critères de recherche." : 
                        "Aucun patient n'a été ajouté pour le moment."}
                     </p>
                     <div className="flex flex-wrap justify-center gap-3">
+                      {activeLetter && (
+                        <Button 
+                          onClick={() => setActiveLetter('')} 
+                          variant="outline"
+                        >
+                          Afficher tous les patients
+                        </Button>
+                      )}
                       <Button 
                         onClick={createTestPatient} 
                         variant="outline"
@@ -314,7 +444,7 @@ const PatientsPage = () => {
               <>
                 <Card className="w-full mb-6">
                   <CardContent className="pt-6">
-                    <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-4 rounded-lg">
+                    <div className="flex items-center justify-between p-4 rounded-lg">
                       <div className="flex items-center gap-4">
                         <div className="bg-white dark:bg-gray-800 p-3 rounded-full shadow-sm">
                           <Users className="h-6 w-6 text-blue-600" />
@@ -330,11 +460,21 @@ const PatientsPage = () => {
                   </CardContent>
                 </Card>
                 
-                <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredPatients.map(patient => (
-                    <PatientCard key={patient.id} patient={patient} />
-                  ))}
-                </div>
+                {viewMode === 'cards' ? (
+                  <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    {filteredPatients.map(patient => (
+                      <PatientCard key={patient.id} patient={patient} />
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="overflow-hidden">
+                    <div className="divide-y">
+                      {filteredPatients.map(patient => (
+                        <PatientListItem key={patient.id} patient={patient} />
+                      ))}
+                    </div>
+                  </Card>
+                )}
               </>
             )}
           </>
