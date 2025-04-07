@@ -4,11 +4,14 @@ import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './contexts/AuthContext'
 import { BrowserRouter as Router } from 'react-router-dom'
+import { ThemeProvider } from './contexts/theme-context'
 
 createRoot(document.getElementById("root")!).render(
   <Router>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ThemeProvider>
   </Router>
 );
