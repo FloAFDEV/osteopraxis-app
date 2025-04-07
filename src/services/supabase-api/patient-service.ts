@@ -73,6 +73,10 @@ export const patientService = {
     // Add current timestamps
     const now = new Date().toISOString();
     
+    // Ensure contraception value is in the format expected by Supabase
+    // If it's "IMPLANT" in our code, make it "IMPLANTS" for Supabase
+    const contraceptionValue = patient.contraception === "IMPLANT" ? "IMPLANTS" : patient.contraception;
+    
     // Map the patient data to match the Supabase column names
     const patientData = {
       firstName: patient.firstName,
@@ -80,7 +84,8 @@ export const patientService = {
       email: patient.email,
       phone: patient.phone,
       address: patient.address,
-      gender: patient.gender,
+      // Handle gender type mismatch by converting if needed
+      gender: patient.gender === "Autre" ? "Homme" : patient.gender, // Default to "Homme" if "Autre"
       maritalStatus: patient.maritalStatus,
       occupation: patient.occupation,
       hasChildren: patient.hasChildren,
@@ -101,8 +106,7 @@ export const patientService = {
       physicalActivity: patient.physicalActivity,
       isSmoker: patient.isSmoker,
       isDeceased: patient.isDeceased,
-      // If contraception is IMPLANT in our code, convert it to IMPLANTS for Supabase
-      contraception: patient.contraception,
+      contraception: contraceptionValue,
       hdlm: patient.hdlm,
       avatarUrl: patient.avatarUrl,
       cabinetId: patient.cabinetId,
@@ -130,6 +134,18 @@ export const patientService = {
     // Add updatedAt timestamp
     const now = new Date().toISOString();
     
+    // Convert contraception from IMPLANT to IMPLANTS if needed for Supabase
+    let contraceptionValue = patientUpdates.contraception;
+    if (contraceptionValue === "IMPLANT") {
+      contraceptionValue = "IMPLANTS";
+    }
+    
+    // Handle gender updates for compatibility with Supabase
+    let genderValue = patientUpdates.gender;
+    if (genderValue === "Autre") {
+      genderValue = "Homme"; // Default to "Homme" if "Autre" for Supabase compatibility
+    }
+    
     // Map the update data to match Supabase column names
     const updateData = {
       ...(patientUpdates.firstName !== undefined && { firstName: patientUpdates.firstName }),
@@ -137,7 +153,7 @@ export const patientService = {
       ...(patientUpdates.email !== undefined && { email: patientUpdates.email }),
       ...(patientUpdates.phone !== undefined && { phone: patientUpdates.phone }),
       ...(patientUpdates.address !== undefined && { address: patientUpdates.address }),
-      ...(patientUpdates.gender !== undefined && { gender: patientUpdates.gender }),
+      ...(patientUpdates.gender !== undefined && { gender: genderValue }),
       ...(patientUpdates.maritalStatus !== undefined && { maritalStatus: patientUpdates.maritalStatus }),
       ...(patientUpdates.occupation !== undefined && { occupation: patientUpdates.occupation }),
       ...(patientUpdates.hasChildren !== undefined && { hasChildren: patientUpdates.hasChildren }),
@@ -158,7 +174,7 @@ export const patientService = {
       ...(patientUpdates.physicalActivity !== undefined && { physicalActivity: patientUpdates.physicalActivity }),
       ...(patientUpdates.isSmoker !== undefined && { isSmoker: patientUpdates.isSmoker }),
       ...(patientUpdates.isDeceased !== undefined && { isDeceased: patientUpdates.isDeceased }),
-      ...(patientUpdates.contraception !== undefined && { contraception: patientUpdates.contraception }),
+      ...(contraceptionValue !== undefined && { contraception: contraceptionValue }),
       ...(patientUpdates.hdlm !== undefined && { hdlm: patientUpdates.hdlm }),
       ...(patientUpdates.avatarUrl !== undefined && { avatarUrl: patientUpdates.avatarUrl }),
       ...(patientUpdates.cabinetId !== undefined && { cabinetId: patientUpdates.cabinetId }),
@@ -181,10 +197,12 @@ export const patientService = {
   }
 };
 
+// Export as default and named export
+export default patientService;
+// Also export for compatibility with previous code
+export { patientService as supabasePatientService };
+
 // Make this function available for direct import
 export const updatePatient = async (patient: Patient): Promise<Patient> => {
   return patientService.updatePatient(patient.id, patient);
 };
-
-// Export as supabasePatientService to be used in the API service
-export { patientService as supabasePatientService };
