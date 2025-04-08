@@ -36,9 +36,9 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
       };
     } else if (gender === "Femme") {
       return {
-        badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-        avatar: "bg-purple-600 text-white",
-        border: "border-purple-500",
+        badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
+        avatar: "bg-pink-600 text-white",
+        border: "border-pink-500",
         icon: <UserCircle className="ml-1 h-4 w-4 text-pink-600" />
       };
     } else {
@@ -57,7 +57,7 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
     <Card 
       className="overflow-hidden transition-all duration-200 border-t-4 h-full hover:shadow-lg hover:scale-[1.02] flex flex-col" 
       style={{ borderTopColor: patient.gender === 'Homme' ? '#2563eb' : 
-                                patient.gender === 'Femme' ? '#9333ea' : '#6b7280' }}
+                                patient.gender === 'Femme' ? '#ec4899' : '#6b7280' }}
     >
       <CardContent className="p-6 flex-grow">
         <div className="flex gap-4">

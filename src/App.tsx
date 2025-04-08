@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import PatientsPage from './pages/PatientsPage';
 import NewPatientPage from './pages/NewPatientPage';
 import EditPatientPage from './pages/EditPatientPage';
+import PatientDetailPage from './pages/PatientDetailPage'; // Import the PatientDetailPage
 import AppointmentsPage from './pages/AppointmentsPage';
 import NewAppointmentPage from './pages/NewAppointmentPage';
 import EditAppointmentPage from './pages/EditAppointmentPage';
@@ -37,7 +38,7 @@ function App() {
         <Route path="/patients" element={isAuthenticated ? <PatientsPage /> : <Navigate to="/login" />} />
         <Route path="/patients/new" element={isAuthenticated ? <NewPatientPage /> : <Navigate to="/login" />} />
         <Route path="/patients/:id/edit" element={isAuthenticated ? <EditPatientPage /> : <Navigate to="/login" />} />
-        <Route path="/patients/:id" element={isAuthenticated ? <EditPatientPage /> : <Navigate to="/login" />} />
+        <Route path="/patients/:id" element={isAuthenticated ? <PatientDetailPage /> : <Navigate to="/login" />} />
         <Route path="/appointments" element={isAuthenticated ? <AppointmentsPage /> : <Navigate to="/login" />} />
         <Route path="/appointments/new" element={isAuthenticated ? <NewAppointmentPage /> : <Navigate to="/login" />} />
         <Route path="/appointments/:id/edit" element={isAuthenticated ? <EditAppointmentPage /> : <Navigate to="/login" />} />

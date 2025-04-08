@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -77,7 +78,7 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
     } else if (gender === "Femme") {
       return <UserCircle className="h-4 w-4 text-pink-600" />;
     } else {
-      return <UsersIcon className="h-4 w-4 text-purple-600" />;
+      return <Users className="h-4 w-4 text-purple-600" />;
     }
   };
   
@@ -138,9 +139,9 @@ const PatientsPage = () => {
   const [activeLetter, setActiveLetter] = useState("");
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
   
-  // Pagination
+  // Pagination - updated to 25 patients per page
   const [currentPage, setCurrentPage] = useState(1);
-  const patientsPerPage = 10;
+  const patientsPerPage = 25;
 
   // Utiliser useQuery pour une meilleure gestion de l'état et du cache
   const { data: patients, isLoading, error, refetch } = useQuery({
@@ -315,7 +316,7 @@ const PatientsPage = () => {
               }
             </h1>
 
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
               <Button 
                 onClick={handleRetry}
                 variant="outline" 
@@ -529,7 +530,7 @@ const PatientsPage = () => {
                   </Card>
                 )}
                 
-                {/* Pagination */}
+                {/* Pagination - Updated to use French text */}
                 {totalPages > 1 && (
                   <div className="mt-6">
                     <Pagination>
@@ -538,7 +539,9 @@ const PatientsPage = () => {
                           <PaginationPrevious 
                             onClick={() => goToPage(currentPage - 1)}
                             className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                          />
+                          >
+                            Précédent
+                          </PaginationPrevious>
                         </PaginationItem>
                         
                         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -586,7 +589,9 @@ const PatientsPage = () => {
                           <PaginationNext 
                             onClick={() => goToPage(currentPage + 1)}
                             className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                          />
+                          >
+                            Suivant
+                          </PaginationNext>
                         </PaginationItem>
                       </PaginationContent>
                     </Pagination>
