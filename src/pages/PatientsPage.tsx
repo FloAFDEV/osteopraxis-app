@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, 
-  Mail, UserCheck, UserCircle, User, ChevronLeft, ChevronRight 
+  Mail, User, ChevronLeft, ChevronRight, UserCheck, UserCircle
 } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
@@ -32,6 +31,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type SortOption = 'name' | 'date' | 'email' | 'gender';
 
@@ -71,34 +71,57 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
     ? differenceInYears(new Date(), parseISO(patient.birthDate)) 
     : null;
   
-  // Déterminer l'icône de genre
-  const getGenderIcon = (gender: string) => {
-    if (gender === "Homme") {
-      return <UserCheck className="h-4 w-4 text-blue-600" />;
-    } else if (gender === "Femme") {
-      return <UserCircle className="h-4 w-4 text-pink-600" />;
-    } else {
-      return <Users className="h-4 w-4 text-purple-600" />;
-    }
-  };
-  
   // Définir la couleur de l'indicateur en fonction du genre
   const genderIndicatorColor = patient.gender === 'Homme' ? 'bg-blue-500' : 
                                patient.gender === 'Femme' ? 'bg-pink-500' : 'bg-purple-500';
+
+  // Obtenir les initiales du patient pour l'avatar
+  const getInitials = () => {
+    const firstInitial = patient.firstName ? patient.firstName.charAt(0).toUpperCase() : '';
+    const lastInitial = patient.lastName ? patient.lastName.charAt(0).toUpperCase() : '';
+    return `${firstInitial}${lastInitial}`;
+  };
+  
+  // Déterminer la couleur de fond et l'icône en fonction du genre
+  const getAvatarColor = () => {
+    if (patient.gender === 'Homme') {
+      return 'bg-blue-100 text-blue-600';
+    } else if (patient.gender === 'Femme') {
+      return 'bg-pink-100 text-pink-600';
+    } else {
+      return 'bg-purple-100 text-purple-600';
+    }
+  };
 
   return (
     <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
       <div className="p-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 flex-grow">
-            <div className={`w-2 h-6 rounded-sm ${genderIndicatorColor}`}></div>
+            {/* Avatar avec genre */}
+            <Avatar className={`${getAvatarColor()} h-10 w-10`}>
+              {patient.avatarUrl ? (
+                <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} />
+              ) : (
+                <AvatarFallback className={getAvatarColor()}>
+                  {patient.gender === 'Homme' ? (
+                    <UserCheck className="h-5 w-5" />
+                  ) : patient.gender === 'Femme' ? (
+                    <UserCircle className="h-5 w-5" />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
+                </AvatarFallback>
+              )}
+            </Avatar>
             
             <div>
-              <Link to={`/patients/${patient.id}`} className="font-medium text-base flex items-center gap-1 hover:underline">
-                {patient.lastName} {patient.firstName}
+              <div className="font-medium text-base flex items-center gap-1">
+                <Link to={`/patients/${patient.id}`} className="hover:underline">
+                  {patient.lastName} {patient.firstName}
+                </Link>
                 {age !== null && <span className="text-sm text-gray-500 ml-2">({age} ans)</span>}
-                {getGenderIcon(patient.gender)}
-              </Link>
+              </div>
               
               <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
                 {patient.email && (
