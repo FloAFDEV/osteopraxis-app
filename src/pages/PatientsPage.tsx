@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, 
-  Mail, UserIcon, UserCheck, UserCircle, Users as UsersIcon, ChevronLeft, ChevronRight 
+  Mail, UserCheck, UserCircle, Users as UsersIcon, ChevronLeft, ChevronRight 
 } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
@@ -90,15 +90,15 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
     <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
       <div className="p-4">
         <div className="flex justify-between items-center">
-          <Link to={`/patients/${patient.id}`} className="flex items-center gap-3 flex-grow">
+          <div className="flex items-center gap-3 flex-grow">
             <div className={`w-2 h-6 rounded-sm ${genderIndicatorColor}`}></div>
             
             <div>
-              <h3 className="font-medium text-base flex items-center gap-1">
+              <Link to={`/patients/${patient.id}`} className="font-medium text-base flex items-center gap-1 hover:underline">
                 {patient.lastName} {patient.firstName}
                 {age !== null && <span className="text-sm text-gray-500 ml-2">({age} ans)</span>}
                 {getGenderIcon(patient.gender)}
-              </h3>
+              </Link>
               
               <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
                 {patient.email && (
@@ -116,13 +116,13 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
                 )}
               </div>
             </div>
-          </Link>
+          </div>
           
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="h-8 px-2">
+            <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
               <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
             </Button>
-            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700">
+            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700" asChild>
               <Link to={`/patients/${patient.id}`}>Voir</Link>
             </Button>
           </div>

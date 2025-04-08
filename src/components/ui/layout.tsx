@@ -238,10 +238,10 @@ export function Layout({ children }: LayoutProps) {
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>© 2025 PatientHub. Tous droits réservés.</p>
           <div className="flex items-center gap-4">
-            <NavLink to="/terms" className="hover:text-blue-500 transition-colors">
+            <NavLink to="/terms-of-service" className="hover:text-blue-500 transition-colors">
               Conditions d&apos;utilisation
             </NavLink>
-            <NavLink to="/privacy" className="hover:text-purple-500 transition-colors">
+            <NavLink to="/privacy-policy" className="hover:text-purple-500 transition-colors">
               Politique de confidentialité
             </NavLink>
           </div>

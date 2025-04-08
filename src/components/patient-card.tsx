@@ -1,6 +1,6 @@
 
 import { format, parseISO, differenceInYears } from "date-fns";
-import { MapPin, Mail, Phone, User } from "lucide-react";
+import { MapPin, Mail, Phone, User, UserCheck, UserCircle, Users } from "lucide-react";
 import { Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,36 +19,39 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
     ? differenceInYears(new Date(), parseISO(patient.birthDate)) 
     : null;
   
-  const getInitials = (firstName: string, lastName: string) => {
+  const getInitials = (firstName?: string, lastName?: string) => {
     const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : "?";
     const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : "?";
     return `${firstInitial}${lastInitial}`;
   };
 
   // Définir les couleurs en fonction du genre
-  const getGenderColors = (gender: string) => {
+  const getGenderColors = (gender?: string) => {
     if (gender === "Homme") {
       return {
         badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
         avatar: "bg-blue-600 text-white",
-        border: "border-blue-500"
+        border: "border-blue-500",
+        icon: <UserCheck className="ml-1 h-4 w-4 text-blue-600" />
       };
     } else if (gender === "Femme") {
       return {
         badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
         avatar: "bg-purple-600 text-white",
-        border: "border-purple-500"
+        border: "border-purple-500",
+        icon: <UserCircle className="ml-1 h-4 w-4 text-pink-600" />
       };
     } else {
       return {
         badge: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
         avatar: "bg-gray-600 text-white",
-        border: "border-gray-500"
+        border: "border-gray-500",
+        icon: <Users className="ml-1 h-4 w-4 text-purple-600" />
       };
     }
   };
 
-  const genderColors = getGenderColors(patient.gender || "");
+  const genderColors = getGenderColors(patient.gender);
 
   return (
     <Card 
@@ -63,14 +66,15 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
               <img src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} />
             ) : (
               <AvatarFallback className={`text-lg ${genderColors.avatar}`}>
-                {getInitials(patient.firstName || "", patient.lastName || "")}
+                {getInitials(patient.firstName, patient.lastName)}
               </AvatarFallback>
             )}
           </Avatar>
           
           <div className="space-y-1 flex-1 min-w-0">
-            <h3 className="text-xl font-semibold truncate">
+            <h3 className="text-xl font-semibold truncate flex items-center">
               {patient.firstName} {patient.lastName}
+              {genderColors.icon}
             </h3>
             
             <div className="flex items-center gap-2 flex-wrap">
