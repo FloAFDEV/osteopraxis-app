@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, 
-  Mail, UserCheck, UserCircle, Users as UsersIcon, ChevronLeft, ChevronRight 
+  Mail, UserCheck, UserCircle, User, ChevronLeft, ChevronRight 
 } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
@@ -386,7 +385,7 @@ const PatientsPage = () => {
                     <Mail className="mr-2 h-4 w-4" /> Par email
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy('gender')} className="cursor-pointer">
-                    <UserIcon className="mr-2 h-4 w-4" /> Par genre
+                    <User className="mr-2 h-4 w-4" /> Par genre
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
