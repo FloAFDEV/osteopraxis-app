@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
   User, Calendar, FileText, MapPin, Mail, Phone, Activity, 
-  List, Heart, AlertCircle, Loader2, Edit, Plus, Male, Female, MaleFemale
+  List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users
 } from "lucide-react";
 import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -107,7 +107,7 @@ const PatientDetailPage = () => {
         avatar: "bg-blue-600 text-white",
         border: "border-blue-500",
         lightBg: "bg-blue-50 dark:bg-blue-900/10",
-        icon: <Male className="h-5 w-5 text-blue-600" />
+        icon: <UserCheck className="h-5 w-5 text-blue-600" />
       };
     } else if (gender === "Femme") {
       return {
@@ -115,7 +115,7 @@ const PatientDetailPage = () => {
         avatar: "bg-pink-600 text-white",
         border: "border-pink-500",
         lightBg: "bg-pink-50 dark:bg-pink-900/10",
-        icon: <Female className="h-5 w-5 text-pink-600" />
+        icon: <UserCircle className="h-5 w-5 text-pink-600" />
       };
     } else {
       return {
@@ -123,7 +123,7 @@ const PatientDetailPage = () => {
         avatar: "bg-purple-600 text-white",
         border: "border-purple-500",
         lightBg: "bg-purple-50 dark:bg-purple-900/10",
-        icon: <MaleFemale className="h-5 w-5 text-purple-600" />
+        icon: <Users className="h-5 w-5 text-purple-600" />
       };
     }
   };

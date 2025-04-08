@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, 
-  Mail, UserIcon, Male, Female, MaleFemale, ChevronLeft, ChevronRight 
+  Mail, UserIcon, UserCheck, UserCircle, Users as UsersIcon, ChevronLeft, ChevronRight 
 } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
@@ -74,11 +74,11 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
   // Déterminer l'icône de genre
   const getGenderIcon = (gender: string) => {
     if (gender === "Homme") {
-      return <Male className="h-4 w-4 text-blue-600" />;
+      return <UserCheck className="h-4 w-4 text-blue-600" />;
     } else if (gender === "Femme") {
-      return <Female className="h-4 w-4 text-pink-600" />;
+      return <UserCircle className="h-4 w-4 text-pink-600" />;
     } else {
-      return <MaleFemale className="h-4 w-4 text-purple-600" />;
+      return <UsersIcon className="h-4 w-4 text-purple-600" />;
     }
   };
   
@@ -119,10 +119,10 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
           </Link>
           
           <div className="flex gap-2">
-            <Button asChild variant="ghost" size="sm" className="h-8 px-2">
+            <Button variant="ghost" size="sm" className="h-8 px-2">
               <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
             </Button>
-            <Button asChild variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700">
+            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700">
               <Link to={`/patients/${patient.id}`}>Voir</Link>
             </Button>
           </div>

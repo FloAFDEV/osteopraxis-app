@@ -1,97 +1,120 @@
 
 import React from "react";
 import { Layout } from "@/components/ui/layout";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-const PrivacyPolicyPage: React.FC = () => {
+const PrivacyPolicyPage = () => {
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-4 sm:p-6">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 text-gray-900 dark:text-white">
-          Politique de Confidentialité
-        </h1>
+      <div className="container mx-auto py-8 max-w-4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold">Politique de Confidentialité</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[60vh]">
+              <div className="space-y-6">
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
+                  <p>
+                    La protection de vos données personnelles est notre priorité. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations lorsque vous utilisez notre plateforme.
+                  </p>
+                </section>
 
-        <Separator className="my-6" />
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">2. Collecte des Données</h2>
+                  <p>
+                    Nous collectons des informations que vous nous fournissez directement, comme vos coordonnées professionnelles et les données de vos patients. Ces données sont essentielles pour le fonctionnement de notre service.
+                  </p>
+                </section>
 
-        <div className="space-y-6 text-gray-600 dark:text-gray-300">
-          <section>
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              1. Collecte des Données Personnelles
-            </h2>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam viverra euismod odio, gravida pellentesque urna varius vitae. 
-              Sed dui lorem, adipiscing in adipiscing et, interdum nec metus. Mauris ultricies, justo eu convallis placerat, felis enim.
-              Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero.
-            </p>
-          </section>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">3. Utilisation des Données</h2>
+                  <p>
+                    Nous utilisons vos données uniquement pour fournir et améliorer nos services, notamment pour:
+                  </p>
+                  <ul className="list-disc pl-6 mt-2 space-y-2">
+                    <li>Gérer les dossiers patients et les rendez-vous</li>
+                    <li>Vous permettre d'accéder à votre compte et à vos données</li>
+                    <li>Améliorer et optimiser notre plateforme</li>
+                    <li>Vous informer des mises à jour importantes</li>
+                    <li>Se conformer aux obligations légales</li>
+                  </ul>
+                </section>
 
-          <section>
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              2. Utilisation des Données
-            </h2>
-            <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
-            <ul className="list-disc pl-8 pt-2 space-y-2">
-              <li>Suivi médical et soins adaptés</li>
-              <li>Administration de votre dossier médical</li>
-              <li>Communication concernant vos rendez-vous et traitements</li>
-              <li>Amélioration continue de nos services</li>
-            </ul>
-          </section>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">4. Protection des Données Médicales</h2>
+                  <p>
+                    En tant que service destiné aux professionnels de santé, nous sommes particulièrement vigilants quant à la protection des données médicales. Nous mettons en œuvre des mesures de sécurité strictes conformes aux normes du secteur et aux exigences légales.
+                  </p>
+                </section>
 
-          <section>
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              3. Partage des Données
-            </h2>
-            <p>
-              Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est 
-              bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere.
-              Praesent id metus massa, ut blandit odio. Proin quis tortor orci.
-            </p>
-          </section>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">5. Conservation des Données</h2>
+                  <p>
+                    Nous conservons vos données aussi longtemps que nécessaire pour fournir nos services ou conformément aux exigences légales. Vous pouvez demander la suppression de vos données à tout moment, sous réserve des obligations légales de conservation.
+                  </p>
+                </section>
 
-          <section>
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              4. Conservation des Données
-            </h2>
-            <p>
-              Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus.
-              Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in 
-              faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia.
-            </p>
-          </section>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">6. Partage des Données</h2>
+                  <p>
+                    Nous ne partageons pas vos données avec des tiers, sauf dans les cas suivants:
+                  </p>
+                  <ul className="list-disc pl-6 mt-2 space-y-2">
+                    <li>Avec votre consentement explicite</li>
+                    <li>Pour se conformer à une obligation légale</li>
+                    <li>Avec nos prestataires de services qui nous aident à fournir notre service (sous contrat de confidentialité)</li>
+                  </ul>
+                </section>
 
-          <section>
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              5. Vos Droits
-            </h2>
-            <p>
-              Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, 
-              nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat 
-              massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.
-            </p>
-            <ul className="list-disc pl-8 pt-2 space-y-2">
-              <li>Droit d'accès à vos données personnelles</li>
-              <li>Droit de rectification de vos données</li>
-              <li>Droit à l'effacement dans certaines circonstances</li>
-              <li>Droit à la limitation du traitement</li>
-              <li>Droit à la portabilité de vos données</li>
-            </ul>
-          </section>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">7. Vos Droits</h2>
+                  <p>
+                    Conformément au RGPD et autres législations applicables, vous disposez des droits suivants:
+                  </p>
+                  <ul className="list-disc pl-6 mt-2 space-y-2">
+                    <li>Droit d'accès à vos données</li>
+                    <li>Droit de rectification</li>
+                    <li>Droit à l'effacement ("droit à l'oubli")</li>
+                    <li>Droit à la limitation du traitement</li>
+                    <li>Droit à la portabilité des données</li>
+                    <li>Droit d'opposition</li>
+                  </ul>
+                  <p className="mt-2">
+                    Pour exercer ces droits, contactez-nous à dpo@example.com.
+                  </p>
+                </section>
 
-          <section>
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              6. Contact
-            </h2>
-            <p>
-              Pour toute question concernant cette politique de confidentialité ou pour exercer vos droits, 
-              veuillez nous contacter à l'adresse suivante: privacy@example.com
-            </p>
-          </section>
-        </div>
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">8. Sécurité des Données</h2>
+                  <p>
+                    Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre la perte, l'accès non autorisé, la divulgation, l'altération et la destruction.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">9. Modifications de la Politique</h2>
+                  <p>
+                    Nous pouvons modifier cette politique de confidentialité à tout moment. Toute modification sera publiée sur cette page et, si les modifications sont significatives, nous vous en informerons directement.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">10. Contact</h2>
+                  <p>
+                    Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à privacy@example.com.
+                  </p>
+                </section>
+
+                <p className="text-sm text-gray-500 pt-6">
+                  Dernière mise à jour: 8 avril 2025
+                </p>
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
