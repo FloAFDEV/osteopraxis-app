@@ -89,6 +89,8 @@ export type Database = {
           address: string
           createdAt: string
           id: number
+          imageUrl: string | null
+          logoUrl: string | null
           name: string
           osteopathId: number
           phone: string | null
@@ -98,6 +100,8 @@ export type Database = {
           address: string
           createdAt?: string
           id?: number
+          imageUrl?: string | null
+          logoUrl?: string | null
           name: string
           osteopathId: number
           phone?: string | null
@@ -107,6 +111,8 @@ export type Database = {
           address?: string
           createdAt?: string
           id?: number
+          imageUrl?: string | null
+          logoUrl?: string | null
           name?: string
           osteopathId?: number
           phone?: string | null

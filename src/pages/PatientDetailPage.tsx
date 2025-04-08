@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
   User, Calendar, FileText, MapPin, Mail, Phone, Activity, 
-  List, Heart, AlertCircle, Loader2, Edit, Plus 
+  List, Heart, AlertCircle, Loader2, Edit, Plus, Male, Female, MaleFemale
 } from "lucide-react";
 import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -105,21 +106,24 @@ const PatientDetailPage = () => {
         badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
         avatar: "bg-blue-600 text-white",
         border: "border-blue-500",
-        lightBg: "bg-blue-50 dark:bg-blue-900/10"
+        lightBg: "bg-blue-50 dark:bg-blue-900/10",
+        icon: <Male className="h-5 w-5 text-blue-600" />
       };
     } else if (gender === "Femme") {
+      return {
+        badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
+        avatar: "bg-pink-600 text-white",
+        border: "border-pink-500",
+        lightBg: "bg-pink-50 dark:bg-pink-900/10",
+        icon: <Female className="h-5 w-5 text-pink-600" />
+      };
+    } else {
       return {
         badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
         avatar: "bg-purple-600 text-white",
         border: "border-purple-500",
-        lightBg: "bg-purple-50 dark:bg-purple-900/10"
-      };
-    } else {
-      return {
-        badge: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
-        avatar: "bg-gray-600 text-white",
-        border: "border-gray-500",
-        lightBg: "bg-gray-50 dark:bg-gray-900/10"
+        lightBg: "bg-purple-50 dark:bg-purple-900/10",
+        icon: <MaleFemale className="h-5 w-5 text-purple-600" />
       };
     }
   };
@@ -171,8 +175,8 @@ const PatientDetailPage = () => {
                   {patient.firstName} {patient.lastName}
                 </h1>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className={genderColors.badge}>
-                    {patient.gender}
+                  <Badge variant="outline" className={`flex items-center gap-1 ${genderColors.badge}`}>
+                    {genderColors.icon} {patient.gender}
                   </Badge>
                   {patient.occupation && (
                     <Badge variant="outline" className="text-xs">

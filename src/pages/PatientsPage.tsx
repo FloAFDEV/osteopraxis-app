@@ -1,7 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, Mail, UserIcon } from "lucide-react";
+import { 
+  Users, Plus, Search, UserPlus, Loader2, AlertCircle, RefreshCw, SortAsc, Calendar, 
+  Mail, UserIcon, Male, Female, MaleFemale, ChevronLeft, ChevronRight 
+} from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -20,6 +23,15 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { differenceInYears, parseISO } from "date-fns";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type SortOption = 'name' | 'date' | 'email' | 'gender';
 
@@ -58,18 +70,34 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
   const age = patient.birthDate 
     ? differenceInYears(new Date(), parseISO(patient.birthDate)) 
     : null;
+  
+  // Déterminer l'icône de genre
+  const getGenderIcon = (gender: string) => {
+    if (gender === "Homme") {
+      return <Male className="h-4 w-4 text-blue-600" />;
+    } else if (gender === "Femme") {
+      return <Female className="h-4 w-4 text-pink-600" />;
+    } else {
+      return <MaleFemale className="h-4 w-4 text-purple-600" />;
+    }
+  };
+  
+  // Définir la couleur de l'indicateur en fonction du genre
+  const genderIndicatorColor = patient.gender === 'Homme' ? 'bg-blue-500' : 
+                               patient.gender === 'Femme' ? 'bg-pink-500' : 'bg-purple-500';
 
   return (
     <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-      <Link to={`/patients/${patient.id}`} className="block p-4">
+      <div className="p-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className={`w-2 h-6 rounded-sm ${patient.gender === 'Homme' ? 'bg-blue-500' : patient.gender === 'Femme' ? 'bg-pink-500' : 'bg-gray-300'}`}></div>
+          <Link to={`/patients/${patient.id}`} className="flex items-center gap-3 flex-grow">
+            <div className={`w-2 h-6 rounded-sm ${genderIndicatorColor}`}></div>
             
             <div>
-              <h3 className="font-medium text-base">
+              <h3 className="font-medium text-base flex items-center gap-1">
                 {patient.lastName} {patient.firstName}
                 {age !== null && <span className="text-sm text-gray-500 ml-2">({age} ans)</span>}
+                {getGenderIcon(patient.gender)}
               </h3>
               
               <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
@@ -88,7 +116,7 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
                 )}
               </div>
             </div>
-          </div>
+          </Link>
           
           <div className="flex gap-2">
             <Button asChild variant="ghost" size="sm" className="h-8 px-2">
@@ -99,7 +127,7 @@ const PatientListItem = ({ patient }: { patient: Patient }) => {
             </Button>
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };
@@ -110,6 +138,10 @@ const PatientsPage = () => {
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [activeLetter, setActiveLetter] = useState("");
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const patientsPerPage = 10;
 
   // Utiliser useQuery pour une meilleure gestion de l'état et du cache
   const { data: patients, isLoading, error, refetch } = useQuery({
@@ -155,6 +187,7 @@ const PatientsPage = () => {
   const handleLetterChange = (letter: string) => {
     setActiveLetter(letter);
     setSearchQuery("");
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
   const getSortedPatients = () => {
@@ -200,6 +233,21 @@ const PatientsPage = () => {
   };
 
   const filteredPatients = getSortedPatients();
+  
+  // Pagination logic
+  const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
+  const paginatedPatients = filteredPatients.slice(
+    (currentPage - 1) * patientsPerPage,
+    currentPage * patientsPerPage
+  );
+  
+  // Navigation de page
+  const goToPage = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo(0, 0);
+    }
+  };
 
   // Fonction pour créer un patient test dans Supabase pour le débogage
   const createTestPatient = async () => {
@@ -306,7 +354,10 @@ const PatientsPage = () => {
                   placeholder="Rechercher un patient par nom, email, téléphone..."
                   className="pl-10 h-12 text-base"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1); // Reset to first page when search changes
+                  }}
                 />
               </div>
               
@@ -450,7 +501,10 @@ const PatientsPage = () => {
                           <Users className="h-6 w-6 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300">{filteredPatients.length} patient{filteredPatients.length > 1 ? 's' : ''} trouvé{filteredPatients.length > 1 ? 's' : ''}</h3>
+                          <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300">
+                            {filteredPatients.length} patient{filteredPatients.length > 1 ? 's' : ''} trouvé{filteredPatients.length > 1 ? 's' : ''}
+                            {totalPages > 1 && ` (Page ${currentPage}/${totalPages})`}
+                          </h3>
                           <p className="text-blue-600/70 dark:text-blue-400/70">
                             Consultez et gérez vos dossiers patients
                           </p>
@@ -462,18 +516,82 @@ const PatientsPage = () => {
                 
                 {viewMode === 'cards' ? (
                   <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredPatients.map(patient => (
+                    {paginatedPatients.map(patient => (
                       <PatientCard key={patient.id} patient={patient} />
                     ))}
                   </div>
                 ) : (
                   <Card className="overflow-hidden">
                     <div className="divide-y">
-                      {filteredPatients.map(patient => (
+                      {paginatedPatients.map(patient => (
                         <PatientListItem key={patient.id} patient={patient} />
                       ))}
                     </div>
                   </Card>
+                )}
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => goToPage(currentPage - 1)}
+                            className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                        
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          // Logic to show pages around current page
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationLink
+                                onClick={() => goToPage(pageNum)}
+                                isActive={currentPage === pageNum}
+                              >
+                                {pageNum}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        })}
+                        
+                        {totalPages > 5 && currentPage < totalPages - 2 && (
+                          <>
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationLink 
+                                onClick={() => goToPage(totalPages)}
+                                isActive={false}
+                              >
+                                {totalPages}
+                              </PaginationLink>
+                            </PaginationItem>
+                          </>
+                        )}
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => goToPage(currentPage + 1)}
+                            className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
                 )}
               </>
             )}
