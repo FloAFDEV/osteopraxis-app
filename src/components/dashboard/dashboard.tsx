@@ -1,12 +1,204 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AppointmentsOverview } from "@/components/dashboard/appointments-overview";
 import { DemographicsCard } from "@/components/dashboard/demographics-card";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
+import { DashboardData } from "@/types";
+import { api } from "@/services/api";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export function Dashboard() {
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    totalPatients: 0,
+    maleCount: 0,
+    femaleCount: 0,
+    averageAge: 0,
+    averageAgeMale: 0,
+    averageAgeFemale: 0,
+    newPatientsThisMonth: 0,
+    newPatientsThisYear: 0,
+    newPatientsLastYear: 0,
+    appointmentsToday: 0,
+    nextAppointment: "Aucun rendez-vous prévu",
+    patientsLastYearEnd: 0,
+    newPatientsLast30Days: 0,
+    thirtyDayGrowthPercentage: 0,
+    annualGrowthPercentage: 0,
+    monthlyGrowth: [
+      { month: "Jan", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Fév", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Mar", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Avr", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Mai", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Juin", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Juil", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Août", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Sep", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Oct", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Nov", patients: 0, prevPatients: 0, growthText: "0%" },
+      { month: "Déc", patients: 0, prevPatients: 0, growthText: "0%" }
+    ]
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      setLoading(true);
+      try {
+        // Get patients and appointments data
+        const [patients, appointments] = await Promise.all([
+          api.getPatients(),
+          api.getAppointments()
+        ]);
+
+        // Calculate statistics
+        const totalPatients = patients.length;
+        const maleCount = patients.filter(p => p.gender === "Homme").length;
+        const femaleCount = patients.filter(p => p.gender === "Femme").length;
+        
+        // Calculate ages and growth metrics
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+        
+        // Get new patients this month and year
+        const newPatientsThisMonth = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getMonth() === currentMonth && 
+                 createdAt.getFullYear() === currentYear;
+        }).length;
+        
+        const newPatientsThisYear = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getFullYear() === currentYear;
+        }).length;
+        
+        const newPatientsLastYear = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getFullYear() === currentYear - 1;
+        }).length;
+
+        // Appointments today
+        const appointmentsToday = appointments.filter(a => {
+          const appDate = new Date(a.date);
+          return appDate.toDateString() === today.toDateString();
+        }).length;
+
+        // Next appointment
+        const futureAppointments = appointments.filter(a => new Date(a.date) > today)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        
+        const nextAppointment = futureAppointments.length > 0 
+          ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', { locale: fr })
+          : "Aucun rendez-vous prévu";
+        
+        // Calculate 30-day growth
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const newPatientsLast30Days = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt >= thirtyDaysAgo;
+        }).length;
+        
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+        
+        const patientsPrevious30Days = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo;
+        }).length;
+        
+        // Calculate growth rates
+        const thirtyDayGrowthPercentage = patientsPrevious30Days > 0
+          ? Math.round((newPatientsLast30Days - patientsPrevious30Days) / patientsPrevious30Days * 100)
+          : newPatientsLast30Days > 0 ? 100 : 0;
+        
+        const patientsLastYearEnd = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getFullYear() < currentYear;
+        }).length;
+        
+        const annualGrowthPercentage = patientsLastYearEnd > 0
+          ? Math.round((newPatientsThisYear / patientsLastYearEnd) * 100)
+          : newPatientsThisYear > 0 ? 100 : 0;
+        
+        // Generate monthly growth data
+        const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+        const monthlyGrowth = frenchMonths.map((month, index) => {
+          const thisYearPatients = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear;
+          }).length;
+          
+          const lastYearPatients = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear - 1;
+          }).length;
+          
+          const growthRate = lastYearPatients > 0
+            ? Math.round((thisYearPatients - lastYearPatients) / lastYearPatients * 100)
+            : thisYearPatients > 0 ? 100 : 0;
+          
+          return {
+            month,
+            patients: thisYearPatients,
+            prevPatients: lastYearPatients,
+            growthText: `${growthRate}%`
+          };
+        });
+        
+        // Calculate average ages
+        const calculateAverageAge = (patientList) => {
+          const patientsWithBirthDate = patientList.filter(p => p.birthDate);
+          if (patientsWithBirthDate.length === 0) return 0;
+          
+          const totalAge = patientsWithBirthDate.reduce((sum, patient) => {
+            const birthDate = new Date(patient.birthDate);
+            const age = currentYear - birthDate.getFullYear();
+            return sum + age;
+          }, 0);
+          
+          return Math.round(totalAge / patientsWithBirthDate.length);
+        };
+        
+        const averageAge = calculateAverageAge(patients);
+        const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
+        const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
+        
+        // Update dashboard data
+        setDashboardData({
+          totalPatients,
+          maleCount,
+          femaleCount,
+          averageAge,
+          averageAgeMale,
+          averageAgeFemale,
+          newPatientsThisMonth,
+          newPatientsThisYear,
+          newPatientsLastYear,
+          appointmentsToday,
+          nextAppointment,
+          patientsLastYearEnd,
+          newPatientsLast30Days,
+          thirtyDayGrowthPercentage,
+          annualGrowthPercentage,
+          monthlyGrowth
+        });
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
   return (
     <div className="space-y-8">
       {/* Header Image Banner */}
@@ -28,21 +220,29 @@ export function Dashboard() {
         </div>
       </div>
 
-      <DashboardStats />
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        </div>
+      ) : (
+        <>
+          <DashboardStats data={dashboardData} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <AppointmentsOverview />
-        <DemographicsCard />
-      </div>
-
-      <Card>
-        <CardContent className="p-6">
-          <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
-          <div className="h-80">
-            <GrowthChart />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <AppointmentsOverview data={dashboardData} />
+            <DemographicsCard data={dashboardData} />
           </div>
-        </CardContent>
-      </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
+              <div className="h-80">
+                <GrowthChart data={dashboardData} />
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

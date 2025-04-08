@@ -13,32 +13,40 @@ interface DemographicsCardProps {
 export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, data }) => {
   // Use either patients prop or extract from data prop
   const patientsList = patients || [];
-  const totalPatients = patientsList.length;
+  const totalPatients = patientsList.length || (data?.totalPatients || 0);
+  const maleCount = data?.maleCount || 0;
+  const femaleCount = data?.femaleCount || 0;
   
   // Calculate gender distribution, safely handling empty array
   const calculateGenderData = () => {
-    if (!patientsList.length) {
-      if (data) {
-        // Use the data prop if available and patients array is empty
-        return [
-          { name: "Homme", value: data.maleCount, percentage: Math.round((data.maleCount / (data.totalPatients || 1)) * 100) },
-          { name: "Femme", value: data.femaleCount, percentage: Math.round((data.femaleCount / (data.totalPatients || 1)) * 100) }
-        ];
-      }
-      return [];
+    // If we have data from the dashboard data prop
+    if (data && data.maleCount !== undefined && data.femaleCount !== undefined) {
+      return [
+        { name: "Homme", value: data.maleCount, percentage: Math.round((data.maleCount / (data.totalPatients || 1)) * 100) },
+        { name: "Femme", value: data.femaleCount, percentage: Math.round((data.femaleCount / (data.totalPatients || 1)) * 100) }
+      ];
     }
     
-    const genderCounts = patientsList.reduce((acc, patient) => {
-      const gender = patient.gender || "Non spécifié";
-      acc[gender] = (acc[gender] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    // If we have patients data but no dashboard data
+    if (patientsList.length > 0) {
+      const genderCounts = patientsList.reduce((acc, patient) => {
+        const gender = patient.gender || "Non spécifié";
+        acc[gender] = (acc[gender] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      return Object.entries(genderCounts).map(([name, value]) => ({
+        name,
+        value,
+        percentage: Math.round((value / totalPatients) * 100)
+      }));
+    }
     
-    return Object.entries(genderCounts).map(([name, value]) => ({
-      name,
-      value,
-      percentage: Math.round((value / (totalPatients || 1)) * 100) // Avoid division by zero
-    }));
+    // Default data if no real data available
+    return [
+      { name: "Homme", value: 1, percentage: 50 },
+      { name: "Femme", value: 1, percentage: 50 }
+    ];
   };
   
   // Get chart data
@@ -134,18 +142,18 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
     );
   };
 
-  // Handle empty data case
-  if (chartData.length === 0) {
+  // Handle loading or no data
+  if ((patientsList.length === 0 && !data) || (!maleCount && !femaleCount && totalPatients === 0)) {
     return (
       <Card className="h-full">
         <CardHeader>
           <CardTitle>Démographie des patients</CardTitle>
           <CardDescription>
-            Aucune donnée démographique disponible
+            Chargement des données démographiques...
           </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-[250px]">
-          <p className="text-muted-foreground text-center">Ajoutez des patients pour voir les statistiques démographiques</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
         </CardContent>
       </Card>
     );
@@ -156,7 +164,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
       <CardHeader>
         <CardTitle>Démographie des patients</CardTitle>
         <CardDescription>
-          Répartition par genre sur un total de {totalPatients || data?.totalPatients || 0} patients
+          Répartition par genre sur un total de {totalPatients} patients
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -188,4 +196,4 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
       </CardContent>
     </Card>
   );
-};
+}

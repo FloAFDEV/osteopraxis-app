@@ -8,6 +8,24 @@ interface DashboardStatsProps {
 }
 
 export function DashboardStats({ data }: DashboardStatsProps) {
+  if (!data) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((item) => (
+          <Card key={item} className="overflow-hidden shadow-sm border-t-4 border-t-gray-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Chargement...</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="animate-pulse h-6 bg-gray-200 rounded mb-2"></div>
+              <div className="animate-pulse h-4 w-1/2 bg-gray-200 rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-blue-500">

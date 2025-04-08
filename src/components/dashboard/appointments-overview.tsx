@@ -57,6 +57,9 @@ export function AppointmentsOverview({ data, className }: AppointmentsOverviewPr
     return patients.find(p => p.id === patientId);
   };
 
+  // Use default value if data.appointmentsToday is undefined
+  const appointmentsToday = data?.appointmentsToday || 0;
+
   return (
     <Card className={`${className} shadow-sm hover:shadow-md transition-shadow`}>
       <CardHeader className="border-b bg-slate-50 dark:bg-slate-900/50">
