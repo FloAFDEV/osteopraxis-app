@@ -201,11 +201,11 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header Image Banner */}
+      {/* Header Image Banner - Updated with osteopathy-related image without people */}
       <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg mb-8">
         <img 
-          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1600&h=400"
-          alt="Cabinet Médical" 
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400"
+          alt="Cabinet d'ostéopathie" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex items-center">

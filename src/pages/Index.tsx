@@ -44,8 +44,8 @@ const Index = () => {
         <div className="relative mb-8 overflow-hidden rounded-xl">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm"></div>
           <img 
-            src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=2000&q=80" 
-            alt="Professionnel médical au travail"
+            src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=2000&q=80" 
+            alt="Matériel d'ostéopathie"
             className="w-full h-48 object-cover object-center rounded-xl opacity-60"
           />
           <div className="absolute inset-0 flex items-center justify-center">
