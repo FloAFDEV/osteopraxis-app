@@ -79,7 +79,7 @@ const CabinetsManagementPage = () => {
               Gérez vos cabinets d'ostéopathie
             </p>
           </div>
-          <Button asChild className="rounded-xl bg-blue-600 hover:bg-blue-700">
+          <Button asChild className="rounded-md bg-blue-600 hover:bg-blue-700">
             <Link to="/cabinets/new" className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
               Nouveau Cabinet
@@ -94,7 +94,7 @@ const CabinetsManagementPage = () => {
             <p className="mt-2 text-sm text-muted-foreground">
               Commencez par créer votre premier cabinet d'ostéopathie
             </p>
-            <Button asChild className="mt-6 rounded-xl bg-blue-600 hover:bg-blue-700">
+            <Button asChild className="mt-6 rounded-md bg-blue-600 hover:bg-blue-700">
               <Link to="/cabinets/new">
                 Ajouter un cabinet
               </Link>
@@ -104,7 +104,7 @@ const CabinetsManagementPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cabinets.map(cabinet => (
               <Card key={cabinet.id} className="overflow-hidden hover-scale bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700">
-                <CardContent className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                <CardContent className="p-6">
                   <div className="flex justify-between items-start">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                       {cabinet.name}
@@ -112,19 +112,19 @@ const CabinetsManagementPage = () => {
                   </div>
                   <div className="mt-4 space-y-2">
                     <div className="flex items-start gap-2">
-                      <MapPin className="h-5 w-5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <MapPin className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                       <span className="text-gray-700 dark:text-gray-300">{cabinet.address}</span>
                     </div>
                     {cabinet.phone && (
                       <div className="flex items-center gap-2">
-                        <Phone className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+                        <Phone className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                         <span className="text-gray-700 dark:text-gray-300">{cabinet.phone}</span>
                       </div>
                     )}
                   </div>
                 </CardContent>
                 <CardFooter className="bg-gray-50 dark:bg-gray-800/60 p-4 border-t dark:border-gray-700 flex justify-between">
-                  <Button variant="outline" size="sm" asChild className="rounded-xl">
+                  <Button variant="outline" size="sm" asChild className="rounded-md">
                     <Link to={`/cabinets/${cabinet.id}/edit`} className="flex items-center gap-1">
                       <Edit className="h-4 w-4" />
                       Modifier
@@ -133,7 +133,7 @@ const CabinetsManagementPage = () => {
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    className="flex items-center gap-1 rounded-xl"
+                    className="flex items-center gap-1 rounded-md"
                     onClick={() => confirmDelete(cabinet)}
                   >
                     <Trash2 className="h-4 w-4" />

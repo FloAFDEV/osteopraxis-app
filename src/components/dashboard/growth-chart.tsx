@@ -19,32 +19,28 @@ export function GrowthChart({ data }: GrowthChartProps) {
   }
 
   return (
-    <Card className="overflow-hidden bg-white dark:bg-slate-800">
+    <Card className="overflow-hidden">
       <CardHeader className="pb-0">
         <CardTitle className="text-lg font-semibold">Croissance des patients</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] bg-white dark:bg-slate-800">
+        <div className="h-[300px] bg-white dark:bg-slate-800 rounded-xl">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data.monthlyGrowth}
               margin={{ top: 10, right: 20, left: 0, bottom: 40 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.3} />
               <XAxis 
                 dataKey="month" 
-                tick={{ fontSize: 12, fontWeight: 500, fill: 'var(--foreground)' }}
-                tickLine={{ stroke: 'var(--border)' }}
+                tick={{ fontSize: 12, fontWeight: 500 }}
                 height={40}
                 angle={0}
                 textAnchor="middle"
                 interval={0}
-                stroke="var(--border)"
               />
               <YAxis 
-                tick={{ fontSize: 12, fill: 'var(--foreground)' }}
-                tickLine={{ stroke: 'var(--border)' }}
-                stroke="var(--border)"
+                tick={{ fontSize: 12 }}
               />
               <Tooltip 
                 formatter={(value, name) => {
@@ -56,18 +52,13 @@ export function GrowthChart({ data }: GrowthChartProps) {
                   borderColor: 'var(--border)',
                   borderRadius: '12px',
                   padding: '8px 12px',
-                  color: 'var(--foreground)',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                 }}
                 labelStyle={{ fontWeight: 'bold', color: 'var(--primary)' }}
               />
               <Legend
                 formatter={(value) => (
-                  <span style={{ 
-                    fontWeight: 500,
-                    padding: '0 10px',
-                    color: 'var(--foreground)'
-                  }}>
+                  <span style={{ fontWeight: 500, padding: '0 10px' }}>
                     {value}
                   </span>
                 )}

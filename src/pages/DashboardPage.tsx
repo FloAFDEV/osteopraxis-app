@@ -4,7 +4,6 @@ import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
 import { Activity } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const DashboardPage = () => {
   return (
@@ -23,9 +22,6 @@ const DashboardPage = () => {
                 Suivez vos activités et consultez vos statistiques
               </p>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
           </div>
         </div>
         

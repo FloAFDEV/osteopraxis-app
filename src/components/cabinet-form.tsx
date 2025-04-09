@@ -80,7 +80,7 @@ export function CabinetForm({
         toast.success("Cabinet créé avec succès");
       }
       
-      navigate("/settings/cabinet");
+      navigate("/cabinets");
     } catch (error) {
       console.error("Error submitting cabinet form:", error);
       toast.error("Une erreur est survenue. Veuillez réessayer.");
@@ -90,7 +90,7 @@ export function CabinetForm({
   };
 
   return (
-    <Card className="bg-white dark:bg-gray-800/90 border-gray-100 dark:border-gray-700">
+    <Card>
       <CardHeader>
         <CardTitle>{isEditing ? "Modifier le cabinet" : "Ajouter un nouveau cabinet"}</CardTitle>
       </CardHeader>
@@ -107,7 +107,6 @@ export function CabinetForm({
                     <Input 
                       placeholder="Nom du cabinet"
                       disabled={isSubmitting}
-                      className="rounded-xl bg-white dark:bg-gray-800/90"
                       {...field}
                     />
                   </FormControl>
@@ -126,7 +125,6 @@ export function CabinetForm({
                     <Input
                       placeholder="Adresse complète"
                       disabled={isSubmitting}
-                      className="rounded-xl bg-white dark:bg-gray-800/90"
                       {...field}
                     />
                   </FormControl>
@@ -145,7 +143,6 @@ export function CabinetForm({
                     <Input
                       placeholder="Numéro de téléphone"
                       disabled={isSubmitting}
-                      className="rounded-xl bg-white dark:bg-gray-800/90"
                       {...field}
                       value={field.value || ""}
                     />
@@ -161,14 +158,13 @@ export function CabinetForm({
                 variant="outline"
                 onClick={() => navigate(-1)}
                 disabled={isSubmitting}
-                className="rounded-xl"
               >
                 Annuler
               </Button>
               <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="rounded-xl bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 {isSubmitting ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Créer le cabinet"}
               </Button>

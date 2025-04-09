@@ -19,6 +19,8 @@ import NewInvoicePage from './pages/NewInvoicePage';
 import { Toaster } from 'sonner';
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
+import CabinetsManagementPage from "./pages/CabinetsManagementPage";
+import NewCabinetPage from "./pages/NewCabinetPage";
 
 function App() {
   const { isAuthenticated, loadStoredToken } = useAuth();
@@ -44,6 +46,8 @@ function App() {
         <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
         <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />
         <Route path="/invoices/:id" element={isAuthenticated ? <InvoiceDetailPage /> : <Navigate to="/login" />} />
+        <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
+        <Route path="/cabinets/new" element={isAuthenticated ? <NewCabinetPage /> : <Navigate to="/login" />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
