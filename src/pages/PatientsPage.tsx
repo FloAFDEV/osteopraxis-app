@@ -18,22 +18,25 @@ import PatientLoadingState from "@/components/patients/PatientLoadingState";
 import PatientHeader from "@/components/patients/PatientHeader";
 import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
 import PatientPagination from "@/components/patients/PatientPagination";
-
 type SortOption = 'name' | 'date' | 'email' | 'gender';
-
 const PatientsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [activeLetter, setActiveLetter] = useState("");
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
-  
+
   // Pagination - updated to 25 patients per page
   const [currentPage, setCurrentPage] = useState(1);
   const patientsPerPage = 25;
 
   // Use useQuery for better state and cache management
-  const { data: patients, isLoading, error, refetch } = useQuery({
+  const {
+    data: patients,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
     queryKey: ['patients'],
     queryFn: async () => {
       try {
@@ -46,7 +49,7 @@ const PatientsPage = () => {
     retry: 2,
     retryDelay: 1000,
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5 // 5 minutes
   });
 
   // Handler for forcing data reload with animation
@@ -72,50 +75,40 @@ const PatientsPage = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
-
   const handleLetterChange = (letter: string) => {
     setActiveLetter(letter);
     setSearchQuery("");
     setCurrentPage(1); // Reset to first page when filter changes
   };
-  
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1); // Reset to first page when search changes
   };
-
   const handleClearFilter = () => {
     setActiveLetter('');
     setSearchQuery('');
   };
-
   const getSortedPatients = () => {
     if (!patients) return [];
-    
+
     // First filter the patients
     let filtered = patients.filter(patient => {
       const fullName = `${patient.firstName || ''} ${patient.lastName || ''}`.toLowerCase();
       const searchLower = searchQuery.toLowerCase();
-      
+
       // If a letter is selected, filter by the first letter of the name
       if (activeLetter && !searchQuery) {
         const firstLetter = (patient.lastName || '').charAt(0).toUpperCase();
         return firstLetter === activeLetter;
       }
-      
+
       // Otherwise, filter by search
-      return (
-        searchQuery === "" ||
-        fullName.includes(searchLower) ||
-        (patient.email && patient.email.toLowerCase().includes(searchLower)) ||
-        (patient.phone && patient.phone.includes(searchLower)) ||
-        (patient.occupation && patient.occupation.toLowerCase().includes(searchLower))
-      );
+      return searchQuery === "" || fullName.includes(searchLower) || patient.email && patient.email.toLowerCase().includes(searchLower) || patient.phone && patient.phone.includes(searchLower) || patient.occupation && patient.occupation.toLowerCase().includes(searchLower);
     });
-    
+
     // Then sort the patients by the chosen criterion
     return [...filtered].sort((a, b) => {
-      switch(sortBy) {
+      switch (sortBy) {
         case 'name':
           return (a.lastName || '').localeCompare(b.lastName || '');
         case 'date':
@@ -130,16 +123,12 @@ const PatientsPage = () => {
       }
     });
   };
-
   const filteredPatients = getSortedPatients();
-  
+
   // Pagination logic
   const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
-  const paginatedPatients = filteredPatients.slice(
-    (currentPage - 1) * patientsPerPage,
-    currentPage * patientsPerPage
-  );
-  
+  const paginatedPatients = filteredPatients.slice((currentPage - 1) * patientsPerPage, currentPage * patientsPerPage);
+
   // Page navigation
   const goToPage = (page: number) => {
     if (page > 0 && page <= totalPages) {
@@ -154,9 +143,11 @@ const PatientsPage = () => {
       toast.info("Création d'un patient test...");
       const testPatient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> = {
         firstName: "Test",
-        lastName: `Patient ${new Date().getTime().toString().slice(-4)}`, // Unique name
+        lastName: `Patient ${new Date().getTime().toString().slice(-4)}`,
+        // Unique name
         gender: "Homme",
-        email: `test${new Date().getTime()}@example.com`, // Unique email
+        email: `test${new Date().getTime()}@example.com`,
+        // Unique email
         phone: "0123456789",
         osteopathId: 1,
         address: "123 Rue Test",
@@ -186,7 +177,6 @@ const PatientsPage = () => {
         userId: null,
         avatarUrl: null
       };
-      
       try {
         await api.createPatient(testPatient);
         toast.success("Patient test créé avec succès");
@@ -200,27 +190,13 @@ const PatientsPage = () => {
       toast.error("Impossible de créer le patient test");
     }
   };
-
-  return (
-    <Layout>
-      <div className="flex flex-col min-h-full">
+  return <Layout>
+      <div className="flex flex-col min-h-full rounded-md">
         {/* Header section */}
-        <PatientHeader 
-          patientCount={patients?.length || 0}
-          isRefreshing={isRefreshing} 
-          onRefresh={handleRetry}
-          onCreateTestPatient={createTestPatient}
-        />
+        <PatientHeader patientCount={patients?.length || 0} isRefreshing={isRefreshing} onRefresh={handleRetry} onCreateTestPatient={createTestPatient} />
 
         {/* Search and filter section */}
-        <PatientSearch 
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          sortBy={sortBy}
-          onSortChange={(option) => setSortBy(option)}
-          viewMode={viewMode}
-          onViewModeChange={(mode) => setViewMode(mode)}
-        />
+        <PatientSearch searchQuery={searchQuery} onSearchChange={handleSearchChange} sortBy={sortBy} onSortChange={option => setSortBy(option)} viewMode={viewMode} onViewModeChange={mode => setViewMode(mode)} />
 
         {/* Alphabet filter */}
         <AlphabetFilter activeLetter={activeLetter} onLetterChange={handleLetterChange} />
@@ -229,52 +205,23 @@ const PatientsPage = () => {
         <PatientLoadingState isLoading={isLoading} error={error} onRetry={handleRetry} />
 
         {/* Main content - patient list or empty state */}
-        {!isLoading && !error && (
-          <>
-            {filteredPatients.length === 0 ? (
-              <EmptyPatientState 
-                searchQuery={searchQuery} 
-                activeLetter={activeLetter} 
-                onClearFilter={handleClearFilter} 
-                onCreateTestPatient={createTestPatient} 
-              />
-            ) : (
-              <>
-                <PatientResultsSummary 
-                  patientCount={filteredPatients.length}
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                />
+        {!isLoading && !error && <>
+            {filteredPatients.length === 0 ? <EmptyPatientState searchQuery={searchQuery} activeLetter={activeLetter} onClearFilter={handleClearFilter} onCreateTestPatient={createTestPatient} /> : <>
+                <PatientResultsSummary patientCount={filteredPatients.length} currentPage={currentPage} totalPages={totalPages} />
                 
-                {viewMode === 'cards' ? (
-                  <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                    {paginatedPatients.map(patient => (
-                      <PatientCard key={patient.id} patient={patient} />
-                    ))}
-                  </div>
-                ) : (
-                  <Card className="overflow-hidden">
+                {viewMode === 'cards' ? <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    {paginatedPatients.map(patient => <PatientCard key={patient.id} patient={patient} />)}
+                  </div> : <Card className="overflow-hidden">
                     <div className="divide-y">
-                      {paginatedPatients.map((patient, index) => (
-                        <PatientListItem key={patient.id} patient={patient} index={index} />
-                      ))}
+                      {paginatedPatients.map((patient, index) => <PatientListItem key={patient.id} patient={patient} index={index} />)}
                     </div>
-                  </Card>
-                )}
+                  </Card>}
                 
                 {/* Pagination */}
-                <PatientPagination 
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={goToPage}
-                />
-              </>
-            )}
-          </>
-        )}
+                <PatientPagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
+              </>}
+          </>}
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default PatientsPage;
