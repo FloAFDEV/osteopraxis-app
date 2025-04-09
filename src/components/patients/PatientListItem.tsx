@@ -45,14 +45,14 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
 
   return (
     <div 
-      className="relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-3 sm:p-4 border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" 
+      className="relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4 mb-4 border border-gray-100 dark:border-gray-700" 
       onClick={handleRowClick} 
       style={{
         animation: `fadeSlideIn 0.5s ease forwards ${index * 50}ms`,
         opacity: 0
       }}
     >
-      <div className="p-2 rounded-xl">
+      <div className="rounded-xl">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 flex-grow">
             {/* Avatar with gender */}
@@ -97,10 +97,10 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
           </div>
           
           <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-400 hover:bg-blue-500 rounded-xl" asChild>
+            <Button variant="default" size="sm" className="h-8 px-3 rounded-xl" asChild>
               <Link to={`/patients/${patient.id}`}>Voir</Link>
             </Button>
-            <Button variant="outline" size="sm" className="h-8 px-3 rounded-xl hover:bg-blue-50 hover:text-blue-600" asChild>
+            <Button variant="outline" size="sm" className="h-8 px-3 rounded-xl border-gray-200 hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700" asChild>
               <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
             </Button>
           </div>

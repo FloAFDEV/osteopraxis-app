@@ -26,25 +26,25 @@ export const StatCard = ({
   changeDirection = 'neutral'
 }: StatCardProps) => {
   return (
-    <Card className={cn("overflow-hidden bg-card transition-all hover:shadow-md", className)}>
+    <Card className={cn("overflow-hidden bg-card transition-all hover:shadow-lg", className)}>
       <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-2">
+        <div className="flex justify-between items-start mb-3">
           <h3 className="font-medium text-sm text-muted-foreground">{title}</h3>
-          {icon && <div className="p-1 rounded-md">{icon}</div>}
+          {icon && <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">{icon}</div>}
         </div>
         
         <div className="flex flex-col gap-1">
-          <div className="text-2xl font-bold">{value}</div>
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{value}</div>
           
           {subtitle && (
             <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
           )}
           
           {change && (
-            <div className="flex items-center mt-1">
+            <div className="flex items-center mt-2">
               <div 
                 className={cn(
-                  "flex items-center text-xs",
+                  "flex items-center text-xs font-medium",
                   changeDirection === 'up' ? "text-green-500" : 
                   changeDirection === 'down' ? "text-red-500" : 
                   "text-gray-500"

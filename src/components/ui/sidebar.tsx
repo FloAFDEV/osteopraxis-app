@@ -15,7 +15,6 @@ import {
   LogOut,
   UserCog,
   UserPlus,
-  Building,
   Activity
 } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,7 +53,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         className={cn(
           "flex items-center gap-x-2 text-slate-700 dark:text-slate-300 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors",
           "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
-          isActive && "bg-slate-100 text-slate-900 dark:bg-amber-900/30 dark:text-amber-50" // Changé en amber pour le focus
+          isActive && "bg-slate-100 text-slate-900 dark:bg-blue-900/30 dark:text-blue-50"
         )}
       >
         <Icon size={18} className={colorClass} />
@@ -71,11 +70,11 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <div className="px-3 py-2">
         <div className="flex items-center justify-center gap-2 mt-2">
           <Activity className={cn(
-            "h-5 w-5 text-amber-500 dark:text-amber-400 transition-all",
+            "h-5 w-5 text-blue-500 dark:text-blue-400 transition-all",
             !isCollapsed && "mb-1"
           )} />
           <h2 className={cn(
-            "font-bold text-lg text-slate-900 dark:text-amber-400 transition-all", // Changé en amber
+            "font-bold text-lg text-slate-900 dark:text-blue-400 transition-all",
             isCollapsed ? "opacity-0 h-0 mt-0 absolute" : "opacity-100 h-auto"
           )}>
             PatientHub
@@ -91,7 +90,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <ScrollArea className="flex-1 px-3">
         <div className="space-y-1 py-2">
           {renderNavLink({ 
-            href: "/", 
+            href: "/dashboard", 
             icon: LayoutDashboard, 
             label: "Tableau de bord",
             colorClass: iconColors.dashboard
@@ -133,9 +132,9 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           })}
           
           {renderNavLink({ 
-            href: "/cabinet", 
-            icon: Building, 
-            label: "Cabinet",
+            href: "/settings", 
+            icon: Settings, 
+            label: "Paramètres",
             colorClass: iconColors.settings
           })}
         </div>
@@ -148,7 +147,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {!isCollapsed ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 px-2 py-1.5">
-              <div className="w-8 h-8 rounded-full bg-amber-600 dark:bg-amber-600 flex items-center justify-center text-primary-foreground font-medium">
+              <div className="w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-600 flex items-center justify-center text-primary-foreground font-medium">
                 {user?.first_name?.charAt(0) || user?.email?.charAt(0) || "?"}
               </div>
               <div className="flex-1 min-w-0">
@@ -163,7 +162,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Button size="sm" variant="outline" className="w-full justify-start" asChild>
-                <NavLink to="/admin">
+                <NavLink to="/settings">
                   <UserCog size={16} className="mr-2" /> Compte
                 </NavLink>
               </Button>

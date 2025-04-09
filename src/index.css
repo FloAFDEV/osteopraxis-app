@@ -61,6 +61,15 @@
   @apply rounded-xl;
 }
 
+/* Patient cards */
+.patient-card-list {
+  @apply space-y-4;
+}
+
+.patient-card-item {
+  @apply bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300;
+}
+
 /* Stat card components */
 .stat-card {
   @apply bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 hover:shadow-lg transition-all duration-300;

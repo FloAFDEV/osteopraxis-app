@@ -7,7 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import PatientsPage from './pages/PatientsPage';
 import NewPatientPage from './pages/NewPatientPage';
 import EditPatientPage from './pages/EditPatientPage';
-import PatientDetailPage from './pages/PatientDetailPage'; // Import the PatientDetailPage
+import PatientDetailPage from './pages/PatientDetailPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import NewAppointmentPage from './pages/NewAppointmentPage';
 import EditAppointmentPage from './pages/EditAppointmentPage';
@@ -17,9 +17,6 @@ import InvoicesPage from './pages/InvoicesPage';
 import InvoiceDetailPage from './pages/InvoiceDetailPage';
 import NewInvoicePage from './pages/NewInvoicePage';
 import { Toaster } from 'sonner';
-import CabinetsManagementPage from "./pages/CabinetsManagementPage";
-import NewCabinetPage from "./pages/NewCabinetPage";
-import EditCabinetPage from "./pages/EditCabinetPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 
@@ -48,10 +45,6 @@ function App() {
         <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />
         <Route path="/invoices/:id" element={isAuthenticated ? <InvoiceDetailPage /> : <Navigate to="/login" />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/cabinet" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
-        <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
-        <Route path="/cabinets/new" element={isAuthenticated ? <NewCabinetPage /> : <Navigate to="/login" />} />
-        <Route path="/cabinets/:id/edit" element={isAuthenticated ? <EditCabinetPage /> : <Navigate to="/login" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
       </Routes>
