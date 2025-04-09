@@ -255,8 +255,8 @@ const PatientsPage = () => {
                 ) : (
                   <Card className="overflow-hidden">
                     <div className="divide-y">
-                      {paginatedPatients.map(patient => (
-                        <PatientListItem key={patient.id} patient={patient} />
+                      {paginatedPatients.map((patient, index) => (
+                        <PatientListItem key={patient.id} patient={patient} index={index} />
                       ))}
                     </div>
                   </Card>

@@ -9,9 +9,10 @@ import { differenceInYears, parseISO } from "date-fns";
 
 interface PatientListItemProps {
   patient: Patient;
+  index: number;
 }
 
-const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
+const PatientListItem: React.FC<PatientListItemProps> = ({ patient, index }) => {
   const navigate = useNavigate();
   
   // Calculate age only if birthDate is defined
@@ -43,8 +44,12 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 
   return (
     <div 
-      className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in cursor-pointer"
+      className="relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-3 sm:p-2 border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
       onClick={handleRowClick}
+      style={{
+        animation: `fadeSlideIn 0.5s ease forwards ${index * 50}ms`,
+        opacity: 0,
+      }}
     >
       <div className="p-4">
         <div className="flex justify-between items-center">
@@ -93,11 +98,11 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
           </div>
           
           <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700" asChild>
-              <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
-            </Button>
             <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
               <Link to={`/patients/${patient.id}`}>Voir</Link>
+            </Button>
+            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700" asChild>
+              <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
             </Button>
           </div>
         </div>
