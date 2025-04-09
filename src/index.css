@@ -56,18 +56,26 @@
   @apply bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300;
 }
 
-/* Button styles */
+/* Button styles - Updated with modern gradient */
+.btn-primary {
+  @apply bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 shadow-sm hover:shadow;
+}
+
+.btn-secondary {
+  @apply bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-800 font-medium py-2 px-4 rounded-xl transition-all duration-300 border border-gray-200 shadow-sm hover:shadow;
+}
+
 .btn-rounded {
   @apply rounded-xl;
 }
 
-/* Patient cards */
+/* Patient cards - Updated with more spacing */
 .patient-card-list {
-  @apply space-y-4;
+  @apply space-y-6;
 }
 
 .patient-card-item {
-  @apply bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300;
+  @apply bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300;
 }
 
 /* Stat card components */
@@ -93,7 +101,7 @@
 
 /* Patient card styles */
 .patient-card {
-  @apply relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4;
+  @apply relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4 mb-6;
 }
 
 /* Sidebar styles */

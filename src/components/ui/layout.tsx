@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight } from "lucide-react";
+import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -54,11 +54,6 @@ export function Layout({ children }: LayoutProps) {
       name: "Planning",
       path: "/schedule",
       icon: <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-    },
-    {
-      name: "Cabinet",
-      path: "/cabinet",
-      icon: <Building className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
     }
   ];
 
@@ -123,9 +118,9 @@ export function Layout({ children }: LayoutProps) {
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <NavLink to="/cabinet" className="flex items-center cursor-pointer rounded-lg">
-                    <Building className="mr-2 h-4 w-4 text-yellow-600" />
-                    <span>Paramètres du cabinet</span>
+                  <NavLink to="/settings" className="flex items-center cursor-pointer rounded-lg">
+                    <Settings className="mr-2 h-4 w-4 text-amber-600" />
+                    <span>Paramètres</span>
                   </NavLink>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -180,19 +175,13 @@ export function Layout({ children }: LayoutProps) {
         </div>
       )}
 
-      <main className="flex-1 container py-6">{children}</main>
+      <main className="flex-1 container py-6">
+        {children}
+      </main>
 
-      <footer className="border-t py-6 bg-muted/30">
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2025 PatientHub. Tous droits réservés.</p>
-          <div className="flex items-center gap-4">
-            <NavLink to="/terms-of-service" className="hover:text-blue-500 transition-colors rounded-lg px-2 py-1">
-              Conditions d&apos;utilisation
-            </NavLink>
-            <NavLink to="/privacy-policy" className="hover:text-purple-500 transition-colors rounded-lg px-2 py-1">
-              Politique de confidentialité
-            </NavLink>
-          </div>
+      <footer className="border-t py-4 text-center text-sm text-muted-foreground">
+        <div className="container">
+          <p>© {new Date().getFullYear()} PatientHub - Tous droits réservés</p>
         </div>
       </footer>
     </div>
