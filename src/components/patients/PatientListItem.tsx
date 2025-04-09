@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, UserCheck, UserCircle, User } from "lucide-react";
+import { Mail, UserCheck, UserCircle, User, Phone } from "lucide-react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -45,21 +45,21 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
 
   return (
     <div 
-      className="relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-3 sm:p-2 border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" 
+      className="relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-3 sm:p-4 border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" 
       onClick={handleRowClick} 
       style={{
         animation: `fadeSlideIn 0.5s ease forwards ${index * 50}ms`,
         opacity: 0
       }}
     >
-      <div className="p-4 py-[8px] rounded-xl px-[8px]">
+      <div className="p-2 rounded-xl">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 flex-grow">
             {/* Avatar with gender */}
-            <Avatar className={`${getAvatarColor()} h-10 w-10`}>
+            <Avatar className={`${getAvatarColor()} h-10 w-10 rounded-xl`}>
               {patient.avatarUrl ? 
-                <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} /> : 
-                <AvatarFallback className={getAvatarColor()}>
+                <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} className="rounded-xl" /> : 
+                <AvatarFallback className={`${getAvatarColor()} rounded-xl`}>
                   {patient.gender === 'Homme' ? 
                     <UserCheck className="h-5 w-5" /> : 
                     patient.gender === 'Femme' ? 
@@ -85,7 +85,11 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
                   </span>
                 }
                 
-                {patient.phone && <span>{patient.phone}</span>}
+                {patient.phone && 
+                  <span className="flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-green-400" /> {patient.phone}
+                  </span>
+                }
                 
                 {patient.occupation && <span className="text-gray-500 italic">{patient.occupation}</span>}
               </div>
@@ -94,10 +98,10 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
           
           <div className="flex gap-2" onClick={e => e.stopPropagation()}>
             <Button variant="default" size="sm" className="h-8 px-3 bg-blue-400 hover:bg-blue-500 rounded-xl" asChild>
-              <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 px-2 hover:bg-blue-50 rounded-xl" asChild>
               <Link to={`/patients/${patient.id}`}>Voir</Link>
+            </Button>
+            <Button variant="outline" size="sm" className="h-8 px-3 rounded-xl hover:bg-blue-50 hover:text-blue-600" asChild>
+              <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
             </Button>
           </div>
         </div>

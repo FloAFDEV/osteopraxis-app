@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
 import { DashboardData } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
@@ -18,21 +18,21 @@ export function GrowthChart({ data }: GrowthChartProps) {
   }
 
   return (
-    <div className="h-[300px] bg-white dark:bg-slate-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300">
-      <div className="mb-4">
-        <h3 className="text-lg font-medium text-blue-600 dark:text-blue-400">Évolution des patients</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Comparaison avec l'année dernière</p>
-      </div>
+    <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data.monthlyGrowth}
-          margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+          margin={{ top: 10, right: 20, left: 0, bottom: 40 }} // Increased bottom margin
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
           <XAxis 
             dataKey="month" 
             tick={{ fontSize: 12, fontWeight: 500 }}
             tickLine={{ stroke: 'var(--border)' }}
+            height={40} // Increased height
+            angle={0} // No angle
+            textAnchor="middle" // Center text
+            interval={0} // Show all labels
           />
           <YAxis 
             tick={{ fontSize: 12 }}
@@ -45,22 +45,39 @@ export function GrowthChart({ data }: GrowthChartProps) {
             labelFormatter={(label) => `Mois: ${label}`} 
             contentStyle={{ 
               backgroundColor: 'white',
-              borderColor: 'var(--border)',
+              borderColor: '#60a5fa',
               borderRadius: '12px',
               padding: '8px 12px',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
             }}
-            labelStyle={{ fontWeight: 'bold' }}
+            labelStyle={{ fontWeight: 'bold', color: '#2563eb' }}
           />
           <Legend
             formatter={(value) => (
-              <span style={{ color: value === "Cette année" ? "#60a5fa" : "#c084fc", fontWeight: 500 }}>
+              <span style={{ 
+                color: value === "Cette année" ? "#60a5fa" : "#c084fc", 
+                fontWeight: 500,
+                padding: '0 10px'
+              }}>
                 {value}
               </span>
             )}
+            wrapperStyle={{ paddingTop: '15px' }}
           />
-          <Bar dataKey="patients" name="Cette année" fill="#60a5fa" radius={[6, 6, 0, 0]} />
-          <Bar dataKey="prevPatients" name="Année précédente" fill="#c084fc" radius={[6, 6, 0, 0]} />
+          <Bar 
+            dataKey="patients" 
+            name="Cette année" 
+            fill="#60a5fa" 
+            radius={[6, 6, 0, 0]}
+            barSize={20} // Ajustement de la largeur des barres
+          />
+          <Bar 
+            dataKey="prevPatients" 
+            name="Année précédente" 
+            fill="#c084fc" 
+            radius={[6, 6, 0, 0]}
+            barSize={20} // Ajustement de la largeur des barres
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

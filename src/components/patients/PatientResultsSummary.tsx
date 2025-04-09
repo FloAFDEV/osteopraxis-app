@@ -15,19 +15,19 @@ const PatientResultsSummary: React.FC<PatientResultsSummaryProps> = ({
   totalPages
 }) => {
   return (
-    <Card className="w-full mb-6 overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-xl">
+    <Card className="w-full mb-6 overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border-blue-200 dark:border-blue-700/30">
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between p-4 rounded-lg">
+        <div className="flex items-center justify-between p-2 rounded-xl">
           <div className="flex items-center gap-4">
-            <div className="bg-white dark:bg-slate-700 p-3 rounded-full shadow-sm">
-              <Users className="h-6 w-6 text-blue-400" />
+            <div className="bg-blue-100 dark:bg-blue-800/30 p-3 rounded-xl shadow-sm">
+              <Users className="h-6 w-6 text-blue-500 dark:text-blue-400" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-blue-600 dark:text-blue-300">
+              <h3 className="text-lg font-medium text-blue-600 dark:text-blue-400">
                 {patientCount} patient{patientCount > 1 ? 's' : ''} trouvé{patientCount > 1 ? 's' : ''}
                 {totalPages > 1 && ` (Page ${currentPage}/${totalPages})`}
               </h3>
-              <p className="text-blue-400/70 dark:text-blue-300/70">
+              <p className="text-blue-500/70 dark:text-blue-400/70">
                 Consultez et gérez vos dossiers patients
               </p>
             </div>

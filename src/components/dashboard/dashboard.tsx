@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -9,7 +8,8 @@ import { DashboardData } from "@/types";
 import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users, Clock, UserPlus, TrendingUp, BarChart4 } from "lucide-react";
+import { StatCard } from "@/components/dashboard/stat-card";
 
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -200,10 +200,22 @@ export function Dashboard() {
     loadDashboardData();
   }, []);
 
+  // Préparation des données pour les graphiques
+  const ageData = [
+    { name: 'Général', Age: dashboardData.averageAge || 0 },
+    { name: 'Hommes', Age: dashboardData.averageAgeMale || 0 },
+    { name: 'Femmes', Age: dashboardData.averageAgeFemale || 0 },
+  ];
+
+  const genderData = [
+    { name: 'Hommes', value: dashboardData.maleCount },
+    { name: 'Femmes', value: dashboardData.femaleCount },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Header Image Banner - Updated with osteopathy-related image without people */}
-      <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg mb-8 animate-fade-in shadow-lg transform hover:scale-[1.01] transition-all duration-500">
+      <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-xl mb-8 animate-fade-in shadow-lg transform hover:scale-[1.01] transition-all duration-500">
         <img 
           src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400"
           alt="Cabinet d'ostéopathie" 
@@ -230,28 +242,98 @@ export function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="animate-fade-in">
-            <DashboardStats data={dashboardData} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10 animate-fade-in">
+            <StatCard
+              icon={<Users className="h-5 w-5 text-blue-500" />}
+              title="Patients actifs"
+              value={dashboardData.totalPatients}
+              explanation="Vos patients au complet 🎉 (patients archivés ou décédés exclus)."
+              change={`${dashboardData.thirtyDayGrowthPercentage > 0 ? '+' : ''}${dashboardData.thirtyDayGrowthPercentage}% sur 30 jours`}
+              changeDirection={dashboardData.thirtyDayGrowthPercentage > 0 ? 'up' : dashboardData.thirtyDayGrowthPercentage < 0 ? 'down' : 'neutral'}
+            />
+
+            <StatCard
+              icon={<Clock className="h-5 w-5 text-green-500" />}
+              title="Rendez-vous aujourd'hui"
+              value={dashboardData.appointmentsToday}
+              subtitle={`Prochain: ${dashboardData.nextAppointment}`}
+              explanation="Nombre total de rendez-vous pour la journée."
+            />
+
+            <StatCard
+              icon={<UserPlus className="h-5 w-5 text-purple-500" />}
+              title="Nouveaux patients (30 jours)"
+              value={dashboardData.newPatientsLast30Days}
+              explanation="Représente le nombre de nouveaux patients enregistrés ces 30 derniers jours."
+              change={`${dashboardData.thirtyDayGrowthPercentage > 0 ? '+' : ''}${dashboardData.thirtyDayGrowthPercentage}% sur 30 jours`}
+              changeDirection={dashboardData.thirtyDayGrowthPercentage > 0 ? 'up' : dashboardData.thirtyDayGrowthPercentage < 0 ? 'down' : 'neutral'}
+            />
+
+            <StatCard
+              icon={<TrendingUp className="h-5 w-5 text-purple-500" />}
+              title="Nouveaux patients (Cette année)"
+              value={dashboardData.newPatientsThisYear}
+              explanation="Représente le nombre de nouveaux patients enregistrés cette année."
+              change={`${dashboardData.annualGrowthPercentage > 0 ? '+' : ''}${dashboardData.annualGrowthPercentage}% depuis le 1er janvier`}
+              changeDirection={dashboardData.annualGrowthPercentage > 0 ? 'up' : dashboardData.annualGrowthPercentage < 0 ? 'down' : 'neutral'}
+            />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="animate-fade-in animate-delay-100">
+          <section className="rounded-xl p-0 animate-fade-in animate-delay-100">
+            <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-8">
+              Graphiques et visualisations
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+              {/* Age statistics */}
+              <Card className="overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-6 text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                    <BarChart4 className="h-5 w-5" />
+                    Âge moyen des patients
+                  </h3>
+                  <div className="h-[250px]">
+                    {/* The chart visualization code will go here */}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Gender distribution */}
+              <Card className="overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-6 text-pink-600 dark:text-pink-400 flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Répartition Hommes/Femmes
+                  </h3>
+                  <div className="h-[250px]">
+                    {/* PieChart visualization code will go here */}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-8">
+              <Card className="overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-6 text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Croissance mensuelle des patients en {new Date().getFullYear()}
+                  </h3>
+                  <div className="h-[300px]">
+                    {/* The growth chart will be rendered here */}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in animate-delay-200">
+            <div>
               <AppointmentsOverview data={dashboardData} />
             </div>
-            <div className="animate-fade-in animate-delay-200">
+            <div>
               <DemographicsCard data={dashboardData} />
             </div>
-          </div>
-
-          <div className="animate-fade-in animate-delay-300">
-            <Card className="hover-scale">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
-                <div className="h-80">
-                  <GrowthChart data={dashboardData} />
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </>
       )}
