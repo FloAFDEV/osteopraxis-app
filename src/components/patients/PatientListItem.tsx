@@ -42,7 +42,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
     animation: `fadeSlideIn 0.5s ease forwards ${index * 50}ms`,
     opacity: 0
   }}>
-      <div className="p-4 px-[14px] py-[8px] rounded-md">
+      <div className="p-4 py-[8px] rounded-xl px-[8px]">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 flex-grow">
             {/* Avatar with gender */}
