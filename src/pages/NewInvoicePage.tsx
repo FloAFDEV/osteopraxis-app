@@ -25,7 +25,7 @@ const NewInvoicePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   
-  const { data: patients, isLoading: isLoadingPatients } = useQuery({
+  const { data: patients = [], isLoading: isLoadingPatients } = useQuery({
     queryKey: ["patients"],
     queryFn: api.getPatients,
   });
@@ -102,22 +102,22 @@ const NewInvoicePage = () => {
                       variant="outline"
                       role="combobox"
                       aria-expanded={open}
-                      className="w-full justify-between"
+                      className="w-full justify-between bg-background dark:bg-gray-800"
                       disabled={isLoadingPatients}
                     >
-                      {selectedPatientId && patients
+                      {selectedPatientId && patients && patients.length > 0
                         ? patients.find((patient) => patient.id === selectedPatientId)?.firstName + " " +
                           patients.find((patient) => patient.id === selectedPatientId)?.lastName
                         : "Sélectionner un patient"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
+                  <PopoverContent className="w-full p-0 bg-white dark:bg-gray-800 rounded-xl">
                     <Command>
                       <CommandInput placeholder="Rechercher un patient..." />
                       <CommandEmpty>Aucun patient trouvé.</CommandEmpty>
                       <CommandGroup>
-                        {patients?.map((patient) => (
+                        {patients && patients.length > 0 ? patients.map((patient) => (
                           <CommandItem
                             key={patient.id}
                             value={`${patient.firstName} ${patient.lastName}`}
@@ -128,7 +128,11 @@ const NewInvoicePage = () => {
                           >
                             {patient.firstName} {patient.lastName}
                           </CommandItem>
-                        ))}
+                        )) : (
+                          <CommandItem disabled>
+                            Chargement des patients...
+                          </CommandItem>
+                        )}
                       </CommandGroup>
                     </Command>
                   </PopoverContent>
@@ -155,6 +159,7 @@ const NewInvoicePage = () => {
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
+                  className="rounded-xl bg-background dark:bg-gray-800"
                 />
               </div>
               
@@ -168,17 +173,17 @@ const NewInvoicePage = () => {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
-                  className="text-right"
+                  className="text-right rounded-xl bg-background dark:bg-gray-800"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="paymentStatus">Statut de paiement</Label>
                 <Select defaultValue="PENDING">
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-xl bg-background dark:bg-gray-800">
                     <SelectValue placeholder="Sélectionner un statut" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-gray-800 rounded-xl">
                     <SelectItem value="PAID">Payée</SelectItem>
                     <SelectItem value="PENDING">En attente</SelectItem>
                     <SelectItem value="CANCELED">Annulée</SelectItem>
