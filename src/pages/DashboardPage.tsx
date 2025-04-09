@@ -4,6 +4,7 @@ import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
 import { Activity } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const DashboardPage = () => {
   return (
@@ -24,13 +25,13 @@ const DashboardPage = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-           
+            <ThemeToggle />
           </div>
         </div>
         
         <GradientBackground 
           variant="subtle" 
-          className="p-6 rounded-xl shadow-md"
+          className="p-6 rounded-xl shadow-md bg-white dark:bg-slate-800/60"
         >
           <Dashboard />
         </GradientBackground>
