@@ -146,16 +146,16 @@ const PatientDetailPage = () => {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link to={`/patients/${patient.id}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
-              Modifier
-            </Link>
-          </Button>
+         
           <Button asChild>
             <Link to={`/appointments/new?patientId=${patient.id}`}>
               <Plus className="mr-2 h-4 w-4" />
               Nouveau rendez-vous
+            </Link>
+          </Button> <Button variant="outline" asChild>
+            <Link to={`/patients/${patient.id}/edit`}>
+              <Edit className="mr-2 h-4 w-4" />
+              Modifier
             </Link>
           </Button>
         </div>
