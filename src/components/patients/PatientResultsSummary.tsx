@@ -15,7 +15,7 @@ const PatientResultsSummary: React.FC<PatientResultsSummaryProps> = ({
   totalPages
 }) => {
   return (
-    <Card className="w-full mb-6">
+    <Card className="w-full mb-6 overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-700 dark:to-gray-800">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between p-4 rounded-lg">
           <div className="flex items-center gap-4">

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, UserCheck, UserCircle, User } from "lucide-react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ interface PatientListItemProps {
 }
 
 const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
+  const navigate = useNavigate();
+  
   // Calculate age only if birthDate is defined
   const age = patient.birthDate 
     ? differenceInYears(new Date(), parseISO(patient.birthDate)) 
@@ -35,8 +37,15 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
     }
   };
 
+  const handleRowClick = () => {
+    navigate(`/patients/${patient.id}`);
+  };
+
   return (
-    <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
+    <div 
+      className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in cursor-pointer"
+      onClick={handleRowClick}
+    >
       <div className="p-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 flex-grow">
@@ -59,9 +68,9 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
             
             <div>
               <div className="font-medium text-base flex items-center gap-1">
-                <Link to={`/patients/${patient.id}`} className="hover:underline">
+                <span>
                   {patient.lastName} {patient.firstName}
-                </Link>
+                </span>
                 {age !== null && <span className="text-sm text-gray-500 ml-2">({age} ans)</span>}
               </div>
               
@@ -83,11 +92,11 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
             </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
+          <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700" asChild>
               <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
             </Button>
-            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700" asChild>
+            <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
               <Link to={`/patients/${patient.id}`}>Voir</Link>
             </Button>
           </div>
