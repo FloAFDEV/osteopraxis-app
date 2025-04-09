@@ -3,7 +3,6 @@ import React from 'react';
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Activity } from "lucide-react";
 
 const DashboardPage = () => {
@@ -25,7 +24,7 @@ const DashboardPage = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
+           
           </div>
         </div>
         
