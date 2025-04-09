@@ -41,3 +41,46 @@
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+.card-stats {
+  @apply bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+}
+
+.chart-container {
+  @apply bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300;
+}
+
+.btn-rounded {
+  @apply rounded-full;
+}
+
+.stat-card {
+  @apply bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 hover:shadow-lg transition-all duration-300;
+}
+
+.stat-value {
+  @apply text-4xl font-bold text-blue-500;
+}
+
+.stat-label {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.positive-change {
+  @apply text-green-500 font-medium text-sm;
+}
+
+.negative-change {
+  @apply text-red-500 font-medium text-sm;
+}
+
+.patient-card {
+  @apply relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4;
+}
+
+.sidebar-active {
+  @apply bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium;
+}
+
+.sidebar-item {
+  @apply flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20;
+}

@@ -54,8 +54,8 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
   
   // Colors based on gender
   const GENDER_COLORS = {
-    "Homme": "#3b82f6",
-    "Femme": "#d946ef",
+    "Homme": "#60a5fa", // blue-400
+    "Femme": "#f472b6", // pink-400
     "Non spécifié": "#94a3b8"
   };
   
@@ -64,12 +64,12 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow">
+        <div className="bg-white dark:bg-slate-800 p-3 border rounded-xl shadow-lg">
           <p className="font-medium">{data.name}</p>
           <p className="text-sm text-muted-foreground">
             <span className="font-medium text-foreground">{data.value}</span> patients
           </p>
-          <p className="text-sm text-primary font-semibold">
+          <p className="text-sm text-blue-500 dark:text-blue-400 font-semibold">
             {data.percentage}% du total
           </p>
         </div>
@@ -131,7 +131,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
                     {entry.value} ({entry.payload.percentage}%)
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="rounded-xl">
                   <p>{entry.payload.value} patients ({entry.payload.percentage}% du total)</p>
                 </TooltipContent>
               </UITooltip>
@@ -145,24 +145,24 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({ patients, da
   // Handle loading or no data
   if ((patientsList.length === 0 && !data) || (!maleCount && !femaleCount && totalPatients === 0)) {
     return (
-      <Card className="h-full">
+      <Card className="h-full rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle>Démographie des patients</CardTitle>
+          <CardTitle className="text-blue-500 dark:text-blue-400">Démographie des patients</CardTitle>
           <CardDescription>
             Chargement des données démographiques...
           </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-[250px]">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-400"></div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="h-full dark:border-gray-700">
+    <Card className="h-full rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-gray-200 dark:border-slate-700">
       <CardHeader>
-        <CardTitle>Démographie des patients</CardTitle>
+        <CardTitle className="text-blue-500 dark:text-blue-400">Démographie des patients</CardTitle>
         <CardDescription>
           Répartition par genre sur un total de {totalPatients} patients
         </CardDescription>

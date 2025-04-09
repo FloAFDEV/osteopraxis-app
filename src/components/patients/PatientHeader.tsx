@@ -18,12 +18,12 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({
   onCreateTestPatient
 }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mb-6 animate-fade-in">
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-md mb-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Users className="h-8 w-8 text-blue-600" />
+          <Users className="h-8 w-8 text-blue-400" />
           Patients {patientCount > 0 && 
-            <span className="text-lg px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+            <span className="text-lg px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
               {patientCount}
             </span>
           }
@@ -33,23 +33,23 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({
           <Button 
             onClick={onRefresh}
             variant="outline" 
-            className="w-auto"
+            className="w-auto rounded-xl border-blue-200 hover:bg-blue-50"
             disabled={isRefreshing}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin text-blue-400' : 'text-blue-400'}`} />
             Actualiser
           </Button>
           
           <Button 
             onClick={onCreateTestPatient} 
             variant="outline"
-            className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700 w-auto"
+            className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700 w-auto rounded-xl"
           >
             <Plus className="mr-2 h-4 w-4" />
             Patient test
           </Button>
           
-          <Button asChild className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
+          <Button asChild className="bg-blue-400 hover:bg-blue-500 w-full md:w-auto rounded-xl">
             <Link to="/patients/new">
               <Users className="mr-2 h-4 w-4" /> Nouveau patient
             </Link>

@@ -15,19 +15,19 @@ const PatientResultsSummary: React.FC<PatientResultsSummaryProps> = ({
   totalPages
 }) => {
   return (
-    <Card className="w-full mb-6 overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+    <Card className="w-full mb-6 overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-xl">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between p-4 rounded-lg">
           <div className="flex items-center gap-4">
-            <div className="bg-white dark:bg-gray-800 p-3 rounded-full shadow-sm">
-              <Users className="h-6 w-6 text-blue-600" />
+            <div className="bg-white dark:bg-slate-700 p-3 rounded-full shadow-sm">
+              <Users className="h-6 w-6 text-blue-400" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300">
+              <h3 className="text-lg font-medium text-blue-600 dark:text-blue-300">
                 {patientCount} patient{patientCount > 1 ? 's' : ''} trouvé{patientCount > 1 ? 's' : ''}
                 {totalPages > 1 && ` (Page ${currentPage}/${totalPages})`}
               </h3>
-              <p className="text-blue-600/70 dark:text-blue-400/70">
+              <p className="text-blue-400/70 dark:text-blue-300/70">
                 Consultez et gérez vos dossiers patients
               </p>
             </div>
