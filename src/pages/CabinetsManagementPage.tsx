@@ -79,7 +79,7 @@ const CabinetsManagementPage = () => {
               Gérez vos cabinets d'ostéopathie
             </p>
           </div>
-          <Button asChild>
+          <Button asChild className="rounded-xl bg-blue-600 hover:bg-blue-700">
             <Link to="/cabinets/new" className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
               Nouveau Cabinet
@@ -94,7 +94,7 @@ const CabinetsManagementPage = () => {
             <p className="mt-2 text-sm text-muted-foreground">
               Commencez par créer votre premier cabinet d'ostéopathie
             </p>
-            <Button asChild className="mt-6">
+            <Button asChild className="mt-6 rounded-xl bg-blue-600 hover:bg-blue-700">
               <Link to="/cabinets/new">
                 Ajouter un cabinet
               </Link>
@@ -103,7 +103,7 @@ const CabinetsManagementPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cabinets.map(cabinet => (
-              <Card key={cabinet.id} className="overflow-hidden hover-scale">
+              <Card key={cabinet.id} className="overflow-hidden hover-scale bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700">
                 <CardContent className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
                   <div className="flex justify-between items-start">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -123,8 +123,8 @@ const CabinetsManagementPage = () => {
                     )}
                   </div>
                 </CardContent>
-                <CardFooter className="bg-gray-50 dark:bg-gray-800 p-4 border-t flex justify-between">
-                  <Button variant="outline" size="sm" asChild>
+                <CardFooter className="bg-gray-50 dark:bg-gray-800/60 p-4 border-t dark:border-gray-700 flex justify-between">
+                  <Button variant="outline" size="sm" asChild className="rounded-xl">
                     <Link to={`/cabinets/${cabinet.id}/edit`} className="flex items-center gap-1">
                       <Edit className="h-4 w-4" />
                       Modifier
@@ -133,7 +133,7 @@ const CabinetsManagementPage = () => {
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 rounded-xl"
                     onClick={() => confirmDelete(cabinet)}
                   >
                     <Trash2 className="h-4 w-4" />
