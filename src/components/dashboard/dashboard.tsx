@@ -1,15 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AppointmentsOverview } from "@/components/dashboard/appointments-overview";
 import { DemographicsCard } from "@/components/dashboard/demographics-card";
-import { GrowthChart } from "@/components/dashboard/growth-chart";
 import { DashboardData } from "@/types";
 import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2, Users, Clock, UserPlus, TrendingUp, BarChart4 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -214,7 +215,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header Image Banner - Updated with osteopathy-related image without people */}
+      {/* Header Image Banner */}
       <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-xl mb-8 animate-fade-in shadow-lg transform hover:scale-[1.01] transition-all duration-500">
         <img 
           src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400"
@@ -293,7 +294,40 @@ export function Dashboard() {
                     Âge moyen des patients
                   </h3>
                   <div className="h-[250px]">
-                    {/* The chart visualization code will go here */}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={ageData}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 30 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.3} />
+                        <XAxis 
+                          dataKey="name" 
+                          tick={{ fontSize: 12, fill: "#888" }}
+                          height={40} 
+                          angle={0} 
+                          textAnchor="middle" 
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12, fill: "#888" }}
+                          tickFormatter={(value) => `${value} ans`}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`${value} ans`, "Âge moyen"]}
+                          contentStyle={{ 
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                          }}
+                          labelStyle={{ fontWeight: 'bold', color: '#4f46e5' }}
+                        />
+                        <Bar 
+                          dataKey="Age" 
+                          fill="#4f46e5" 
+                          radius={[4, 4, 0, 0]}
+                          barSize={50}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </CardContent>
               </Card>
@@ -306,7 +340,40 @@ export function Dashboard() {
                     Répartition Hommes/Femmes
                   </h3>
                   <div className="h-[250px]">
-                    {/* PieChart visualization code will go here */}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={genderData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={90}
+                          paddingAngle={5}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          <Cell fill="#4f46e5" />
+                          <Cell fill="#db2777" />
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value, name) => [`${value} patients`, name]}
+                          contentStyle={{ 
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <Legend 
+                          layout="horizontal" 
+                          verticalAlign="bottom" 
+                          align="center"
+                          formatter={(value, entry) => {
+                            const { color } = entry;
+                            return <span style={{ color }}>{value}</span>;
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </CardContent>
               </Card>
@@ -320,7 +387,67 @@ export function Dashboard() {
                     Croissance mensuelle des patients en {new Date().getFullYear()}
                   </h3>
                   <div className="h-[300px]">
-                    {/* The growth chart will be rendered here */}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={dashboardData.monthlyGrowth}
+                        margin={{ top: 10, right: 20, left: 0, bottom: 50 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
+                        <XAxis 
+                          dataKey="month" 
+                          tick={{ fontSize: 12, fontWeight: 500 }}
+                          tickLine={{ stroke: 'var(--border)' }}
+                          height={50}
+                          angle={0}
+                          textAnchor="middle"
+                          interval={0}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12 }}
+                          tickLine={{ stroke: 'var(--border)' }}
+                        />
+                        <Tooltip 
+                          formatter={(value, name) => {
+                            return [value, name === "patients" ? "Patients" : "Année précédente"];
+                          }}
+                          labelFormatter={(label) => `Mois: ${label}`} 
+                          contentStyle={{ 
+                            backgroundColor: 'white',
+                            borderColor: '#60a5fa',
+                            borderRadius: '12px',
+                            padding: '8px 12px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                          labelStyle={{ fontWeight: 'bold', color: '#2563eb' }}
+                        />
+                        <Legend
+                          formatter={(value) => (
+                            <span style={{ 
+                              color: value === "patients" ? "#60a5fa" : "#c084fc", 
+                              fontWeight: 500,
+                              padding: '0 10px'
+                            }}>
+                              {value === "patients" ? "Cette année" : "Année précédente"}
+                            </span>
+                          )}
+                          wrapperStyle={{ paddingTop: '15px' }}
+                        />
+                        <Bar 
+                          dataKey="patients" 
+                          name="patients" 
+                          fill="#60a5fa" 
+                          radius={[6, 6, 0, 0]}
+                          barSize={20}
+                        />
+                        <Bar 
+                          dataKey="prevPatients" 
+                          name="prevPatients" 
+                          fill="#c084fc" 
+                          radius={[6, 6, 0, 0]}
+                          barSize={20}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </CardContent>
               </Card>

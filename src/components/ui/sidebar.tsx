@@ -38,7 +38,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     addPatient: "text-blue-600 dark:text-blue-400",
     settings: "text-amber-600 dark:text-amber-400",
     appointments: "text-red-600 dark:text-red-400",
-    invoices: "text-amber-600 dark:text-amber-400", // Changé en amber pour les factures
+    invoices: "text-amber-600 dark:text-amber-400", 
     schedule: "text-cyan-600 dark:text-cyan-400"
   };
 
