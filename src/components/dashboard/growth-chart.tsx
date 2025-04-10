@@ -6,14 +6,13 @@ import {
 } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import {
-  BarChart,
-  Bar,
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  Legend
+  Line
 } from "recharts";
 
 interface GrowthChartProps {
@@ -25,7 +24,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
     return (
       <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg">
         <CardHeader>
-          <CardTitle>Évolution mensuelle</CardTitle>
+          <CardTitle>Croissance mensuelle</CardTitle>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
@@ -34,54 +33,80 @@ export function GrowthChart({ data }: GrowthChartProps) {
     );
   }
 
+  // Traduction des mois
+  const monthMap: Record<string, string> = {
+    January: "Janvier",
+    February: "Février",
+    March: "Mars",
+    April: "Avril",
+    May: "Mai",
+    June: "Juin",
+    July: "Juillet",
+    August: "Août",
+    September: "Septembre",
+    October: "Octobre",
+    November: "Novembre",
+    December: "Décembre"
+  };
+
+  const formattedData = data.monthlyGrowth.map((item) => ({
+    month: monthMap[item.month] || item.month,
+    patients: item.patients,
+    growthText: item.growthText
+  }));
+
   return (
     <Card className="overflow-hidden rounded-lg border-t-4 border-t-blue-500 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
       <CardHeader>
-        <CardTitle className="text-gray-800 dark:text-white">Évolution mensuelle</CardTitle>
+        <CardTitle className="text-gray-800 dark:text-white">
+          Croissance mensuelle des patients
+        </CardTitle>
       </CardHeader>
       <CardContent className="h-[300px] mt-4">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data.monthlyGrowth}
-            margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+          <LineChart
+            data={formattedData}
+            aria-label="Croissance mensuelle des patients"
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 12, fontWeight: 500 }}
-              tickLine={{ stroke: 'var(--border)' }}
+              tick={{ fill: "#64748b", fontSize: 12 }}
             />
             <YAxis
-              tick={{ fontSize: 12 }}
-              tickLine={{ stroke: 'var(--border)' }}
+              tick={{ fill: "#64748b", fontSize: 12 }}
+              domain={[0, "auto"]}
             />
             <Tooltip
-              formatter={(value, name) => {
-                return [value, name === "patients" ? "Patients" : "Année précédente"];
-              }}
-              labelFormatter={(label) => `Mois: ${label}`}
               contentStyle={{
-                backgroundColor: 'white',
-                borderColor: 'var(--border)',
-                borderRadius: '8px',
-                padding: '8px 12px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                backgroundColor: "#0891b2",
+                border: "none",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
               }}
-              labelStyle={{ fontWeight: 'bold' }}
+              itemStyle={{
+                color: "#ffffff",
+                fontSize: "14px"
+              }}
+              formatter={(_, __, props: any) => {
+                const patients = props.payload?.patients ?? 0;
+                const growthText = props.payload?.growthText ?? "";
+                return [
+                  `👥 ${patients} patients`,
+                  growthText || "Pas de comparaison disponible"
+                ];
+              }}
+              labelStyle={{ color: "#ffffff", fontWeight: "bold" }}
             />
-            <Legend
-              formatter={(value) => (
-                <span style={{
-                  color: value === "Cette année" ? "#2563eb" : "#9333ea",
-                  fontWeight: 500
-                }}>
-                  {value}
-                </span>
-              )}
+            <Line
+              type="monotone"
+              dataKey="patients"
+              stroke="#4C51BF"
+              strokeWidth={3}
+              dot={{ stroke: "#4C51BF", strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
             />
-            <Bar dataKey="patients" name="Cette année" fill="#2563eb" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="prevPatients" name="Année précédente" fill="#9333ea" radius={[4, 4, 0, 0]} />
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
