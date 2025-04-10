@@ -32,12 +32,14 @@ const AppointmentDetailPage = () => {
     const fetchAppointment = async () => {
       try {
         if (!id) return;
-        const appointmentData = await api.getAppointment(id);
+        // Fix: Use getAppointmentById instead of getAppointment
+        const appointmentData = await api.getAppointmentById(parseInt(id));
         setAppointment(appointmentData);
         
         // Fetch patient data if available
-        if (appointmentData.patientId) {
-          const patientData = await api.getPatient(appointmentData.patientId);
+        if (appointmentData?.patientId) {
+          // Fix: Use getPatientById instead of getPatient
+          const patientData = await api.getPatientById(appointmentData.patientId);
           setPatient(patientData);
         }
         
@@ -55,7 +57,8 @@ const AppointmentDetailPage = () => {
   const handleDelete = async () => {
     try {
       if (!id) return;
-      await api.deleteAppointment(id);
+      // Fix: Convert string id to number
+      await api.deleteAppointment(parseInt(id));
       toast.success('Rendez-vous supprimé avec succès');
       navigate('/appointments');
     } catch (error) {
@@ -68,14 +71,14 @@ const AppointmentDetailPage = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'scheduled':
+      case 'SCHEDULED':
         return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Programmé</Badge>;
-      case 'confirmed':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Confirmé</Badge>;
-      case 'completed':
-        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Terminé</Badge>;
-      case 'cancelled':
+      case 'COMPLETED':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Terminé</Badge>;
+      case 'CANCELLED':
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Annulé</Badge>;
+      case 'RESCHEDULED':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Reporté</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -154,14 +157,16 @@ const AppointmentDetailPage = () => {
                   <MapPin className="h-4 w-4 mr-2 text-blue-600" />
                   <span className="font-medium mr-2">Cabinet:</span>
                   <span>
-                    {appointment.cabinetName || "Non spécifié"}
+                    {/* Fix: cabinetName doesn't exist on Appointment type */}
+                    Non spécifié
                   </span>
                 </div>
                 <div className="flex items-center text-sm py-2">
                   <FileText className="h-4 w-4 mr-2 text-blue-600" />
                   <span className="font-medium mr-2">Type:</span>
                   <span>
-                    {appointment.type || "Consultation standard"}
+                    {/* Fix: type doesn't exist on Appointment type */}
+                    Consultation standard
                   </span>
                 </div>
               </div>
@@ -227,13 +232,14 @@ const AppointmentDetailPage = () => {
             </CardContent>
           </Card>
           
-          {appointment.comment && (
+          {/* Fix: comment doesn't exist on Appointment type, use reason instead if needed */}
+          {appointment.reason && (
             <Card>
               <CardHeader className="pb-2 pt-6 px-6">
                 <h2 className="text-xl font-semibold">Notes</h2>
               </CardHeader>
               <CardContent className="px-6">
-                <p className="text-sm text-gray-600">{appointment.comment}</p>
+                <p className="text-sm text-gray-600">{appointment.reason}</p>
               </CardContent>
             </Card>
           )}
