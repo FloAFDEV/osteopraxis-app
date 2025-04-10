@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, Activity, UserPlus } from "lucide-react";
@@ -10,15 +11,19 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères")
 });
+
 const magicLinkSchema = z.object({
   email: z.string().email("Email invalide")
 });
+
 type LoginFormValues = z.infer<typeof loginSchema>;
 type MagicLinkFormValues = z.infer<typeof magicLinkSchema>;
+
 const LoginPage = () => {
   const {
     login,
@@ -27,6 +32,7 @@ const LoginPage = () => {
   } = useAuth();
   const [activeTab, setActiveTab] = useState("password");
   const navigate = useNavigate();
+  
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -34,12 +40,14 @@ const LoginPage = () => {
       password: ""
     }
   });
+  
   const magicLinkForm = useForm<MagicLinkFormValues>({
     resolver: zodResolver(magicLinkSchema),
     defaultValues: {
       email: ""
     }
   });
+  
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
       await login(data.email, data.password);
@@ -47,6 +55,7 @@ const LoginPage = () => {
       console.error("Login error:", error);
     }
   };
+  
   const onMagicLinkSubmit = async (data: MagicLinkFormValues) => {
     try {
       await loginWithMagicLink(data.email);
@@ -54,6 +63,7 @@ const LoginPage = () => {
       console.error("Magic link error:", error);
     }
   };
+  
   return <div className="min-h-screen flex">
       {/* Left section - Login form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
@@ -76,8 +86,8 @@ const LoginPage = () => {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-2 mb-6 bg-gray-900">
-                <TabsTrigger value="password">Mot de passe</TabsTrigger>
-                <TabsTrigger value="magiclink">Magic Link</TabsTrigger>
+                <TabsTrigger value="password" className="bg-gray-600 hover:bg-gray-500 text-zinc-100">Mot de passe</TabsTrigger>
+                <TabsTrigger value="magiclink" className="bg-gray-600 hover:bg-gray-500 text-zinc-100">Magic Link</TabsTrigger>
               </TabsList>
               
               <TabsContent value="password">
@@ -204,4 +214,5 @@ const LoginPage = () => {
       </div>
     </div>;
 };
+
 export default LoginPage;
