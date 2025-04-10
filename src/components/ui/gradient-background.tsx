@@ -1,16 +1,13 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
-
 interface GradientBackgroundProps {
   className?: string;
   children: React.ReactNode;
   variant?: "default" | "subtle" | "strong" | "blue" | "purple" | "pink" | "login";
 }
-
-export function GradientBackground({ 
-  className, 
-  children, 
+export function GradientBackground({
+  className,
+  children,
   variant = "default"
 }: GradientBackgroundProps) {
   const variantClasses = {
@@ -22,17 +19,8 @@ export function GradientBackground({
     pink: "from-pink-600/20 to-pink-400/10",
     login: "from-[#0d1117] via-[#131c2b] to-[#1a1a2e]"
   };
-
-  return (
-    <div className={cn(
-      "relative overflow-hidden rounded-xl",
-      className
-    )}>
-      <div className={cn(
-        "absolute inset-0 bg-gradient-to-r backdrop-blur-sm",
-        variantClasses[variant]
-      )}></div>
+  return <div className={cn("relative overflow-hidden rounded-xl", className)}>
+      <div className=""></div>
       <div className="relative z-10">{children}</div>
-    </div>
-  );
+    </div>;
 }
