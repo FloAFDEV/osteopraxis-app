@@ -12,17 +12,21 @@ import PatientsPage from '@/pages/PatientsPage';
 import PatientDetailPage from '@/pages/PatientDetailPage';
 import NewPatientPage from '@/pages/NewPatientPage';
 import AppointmentsPage from '@/pages/AppointmentsPage';
+// Fix import path
 import AppointmentDetailPage from '@/pages/AppointmentDetailPage';
 import NewAppointmentPage from '@/pages/NewAppointmentPage';
 import SettingsPage from '@/pages/SettingsPage';
 import CabinetSettingsPage from '@/pages/CabinetSettingsPage';
+// Fix import path
 import CabinetsPage from '@/pages/CabinetsPage';
+// Fix import path
 import CabinetDetailPage from '@/pages/CabinetDetailPage';
 import NewCabinetPage from '@/pages/NewCabinetPage';
 import InvoicesPage from '@/pages/InvoicesPage';
 import InvoiceDetailPage from '@/pages/InvoiceDetailPage';
 import NewInvoicePage from '@/pages/NewInvoicePage';
 import SchedulePage from '@/pages/SchedulePage';
+// Fix import path
 import NotFoundPage from '@/pages/NotFoundPage';
 
 // Protected route component

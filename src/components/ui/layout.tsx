@@ -28,7 +28,7 @@ export function Layout({ children, className }: LayoutProps) {
   const { user, logout } = useAuth();
   
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground dark:bg-gray-950">
       {!isMobile && (
         <header className="border-b border-border bg-card dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30">
           <div className="flex h-16 items-center px-4 md:px-6">
