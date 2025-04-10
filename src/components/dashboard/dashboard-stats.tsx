@@ -1,6 +1,7 @@
+
 import { DashboardData } from "@/types";
-import StatCard from "@/components/ui/stat-card"; // mets le bon chemin ici
-import { Users, UserPlus, Calendar, TrendingUp } from "lucide-react";
+import StatCard from "@/components/ui/stat-card";
+import { Users, UserPlus, Calendar, TrendingUp, ArrowUp, ArrowDown } from "lucide-react";
 
 interface DashboardStatsProps {
   data: DashboardData;
@@ -34,24 +35,31 @@ export function DashboardStats({ data }: DashboardStatsProps) {
             : `${data.thirtyDayGrowthPercentage}% ce mois-ci`
         }
         color={data.thirtyDayGrowthPercentage > 0 ? "text-green-500" : "text-red-500"}
+        icon={<Users />}
       />
+      
       <StatCard
         title="Nouveaux patients (mois)"
         value={data.newPatientsThisMonth}
         description={`+${data.newPatientsLast30Days} ces 30 derniers jours`}
         color="text-purple-500"
+        icon={<UserPlus />}
       />
+      
       <StatCard
         title="Rendez-vous aujourd'hui"
         value={data.appointmentsToday}
         description={`Prochain : ${data.nextAppointment}`}
         color="text-pink-500"
+        icon={<Calendar />}
       />
+      
       <StatCard
         title="Croissance annuelle"
         value={`${data.annualGrowthPercentage}%`}
         description={`${data.newPatientsThisYear} nouveaux cette année`}
         color="text-blue-600"
+        icon={<TrendingUp />}
       />
     </div>
   );
