@@ -51,7 +51,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
               </div>
               
               <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
-                {patient.email && <span className="flex items-center text-neutral-300">
+                {patient.email && <span className="flex items-center text-neutral-200 bg-blue-500">
                     <Mail className="h-3 w-3 mr-1" /> {patient.email}
                   </span>}
                 
