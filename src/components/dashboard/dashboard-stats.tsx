@@ -21,7 +21,7 @@ export function DashboardStats({
       </div>;
   }
   return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="overflow-hidden \nrounded-lg \nborder-t-4 border-t-blue-500 \nbg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 \np-4 sm:p-6 \nshadow-lg hover:shadow-xl \ntransition-shadow duration-300\n">
+      <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-purple-500">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Patients totaux</CardTitle>
           <Users className="h-7 w-7 text-blue-500" />
