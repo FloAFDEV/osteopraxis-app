@@ -18,7 +18,7 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")} className="flex items-center">
-          <Sun className="mr-2 h-4 w-4 text-indigo-500" />
+          <Sun className="mr-2 h-4 w-4 text-amber-500" />
           <span>Clair</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")} className="flex items-center">
