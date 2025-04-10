@@ -1,3 +1,4 @@
+
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ export function ThemeToggle() {
       size="sm"
       onClick={toggleTheme}
       className="relative w-9 h-9 p-0 rounded-full border border-border transition-colors 
-                 hover:bg-muted/60 dark:hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-blue-500"
+                 hover:bg-accent dark:hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-violet-500"
       aria-label="Changer le thème"
     >
       {/* Soleil : visible en clair */}
@@ -36,7 +37,7 @@ export function ThemeToggle() {
 
       {/* Lune : visible en dark */}
       <Moon
-        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-300 text-blue-400 dark:rotate-0 dark:scale-100"
+        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-300 text-violet-400 dark:text-blue-400 dark:rotate-0 dark:scale-100"
       />
 
       <span className="sr-only">Basculer le thème</span>
