@@ -21,12 +21,12 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <Router>
     <ThemeProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <Toaster position="top-right" richColors closeButton />
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
           <App />
-        </QueryClientProvider>
-      </AuthProvider>
+          <Toaster position="top-right" richColors closeButton />
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   </Router>
 );

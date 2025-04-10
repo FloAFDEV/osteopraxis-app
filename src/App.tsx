@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -27,13 +27,7 @@ import NotFoundPage from '@/pages/NotFoundPage';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, loadStoredToken } = useAuth();
-
-  useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      loadStoredToken();
-    }
-  }, [isAuthenticated, isLoading, loadStoredToken]);
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (

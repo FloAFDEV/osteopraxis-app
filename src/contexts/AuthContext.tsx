@@ -31,6 +31,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Charger le token stocké au démarrage
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const state = await api.checkAuth();
+        setAuthState(state);
+        setIsAdmin(isUserAdmin(state.user));
+      } catch (error) {
+        console.error("Auth check failed:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
   const loadStoredToken = async () => {
     try {
       const state = await api.checkAuth();
