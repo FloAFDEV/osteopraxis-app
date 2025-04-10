@@ -6,8 +6,9 @@ import { AuthProvider } from './contexts/AuthContext'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { ThemeProvider } from './contexts/theme-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
 
-// Create a client
+// Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -19,8 +20,13 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <Router>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <Toaster position="top-right" richColors closeButton />
+          <App />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </Router>
 );
