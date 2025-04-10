@@ -32,7 +32,7 @@ export function Layout({
   };
   return <div className="flex min-h-screen flex-col bg-slate-950">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
-        <div className="container flex h-16 items-center justify-between bg-gray-100">
+        <div className="container flex h-16 items-center justify-between bg-gray-200">
           <div className="flex items-center gap-2">
             <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
               <Activity className="h-5 w-5 text-blue-500" />
