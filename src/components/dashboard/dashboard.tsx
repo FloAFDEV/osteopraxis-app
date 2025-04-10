@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -10,7 +9,6 @@ import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
-
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     totalPatients: 0,
@@ -28,56 +26,95 @@ export function Dashboard() {
     newPatientsLast30Days: 0,
     thirtyDayGrowthPercentage: 0,
     annualGrowthPercentage: 0,
-    monthlyGrowth: [
-      { month: "Jan", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Fév", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Mar", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Avr", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Mai", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Juin", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Juil", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Août", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Sep", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Oct", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Nov", patients: 0, prevPatients: 0, growthText: "0%" },
-      { month: "Déc", patients: 0, prevPatients: 0, growthText: "0%" }
-    ]
+    monthlyGrowth: [{
+      month: "Jan",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Fév",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Mar",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Avr",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Mai",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Juin",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Juil",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Août",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Sep",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Oct",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Nov",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }, {
+      month: "Déc",
+      patients: 0,
+      prevPatients: 0,
+      growthText: "0%"
+    }]
   });
-
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
         // Get patients and appointments data
-        const [patients, appointments] = await Promise.all([
-          api.getPatients(),
-          api.getAppointments()
-        ]);
+        const [patients, appointments] = await Promise.all([api.getPatients(), api.getAppointments()]);
 
         // Calculate statistics
         const totalPatients = patients.length;
         const maleCount = patients.filter(p => p.gender === "Homme").length;
         const femaleCount = patients.filter(p => p.gender === "Femme").length;
-        
+
         // Calculate ages and growth metrics
         const today = new Date();
         const currentYear = today.getFullYear();
         const currentMonth = today.getMonth();
-        
+
         // Get new patients this month and year
         const newPatientsThisMonth = patients.filter(p => {
           const createdAt = new Date(p.createdAt);
-          return createdAt.getMonth() === currentMonth && 
-                 createdAt.getFullYear() === currentYear;
+          return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
         }).length;
-        
         const newPatientsThisYear = patients.filter(p => {
           const createdAt = new Date(p.createdAt);
           return createdAt.getFullYear() === currentYear;
         }).length;
-        
         const newPatientsLastYear = patients.filter(p => {
           const createdAt = new Date(p.createdAt);
           return createdAt.getFullYear() === currentYear - 1;
@@ -90,44 +127,33 @@ export function Dashboard() {
         }).length;
 
         // Next appointment
-        const futureAppointments = appointments.filter(a => new Date(a.date) > today)
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        
-        const nextAppointment = futureAppointments.length > 0 
-          ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', { locale: fr })
-          : "Aucun rendez-vous prévu";
-        
+        const futureAppointments = appointments.filter(a => new Date(a.date) > today).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        const nextAppointment = futureAppointments.length > 0 ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', {
+          locale: fr
+        }) : "Aucun rendez-vous prévu";
+
         // Calculate 30-day growth
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
         const newPatientsLast30Days = patients.filter(p => {
           const createdAt = new Date(p.createdAt);
           return createdAt >= thirtyDaysAgo;
         }).length;
-        
         const sixtyDaysAgo = new Date();
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-        
         const patientsPrevious30Days = patients.filter(p => {
           const createdAt = new Date(p.createdAt);
           return createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo;
         }).length;
-        
+
         // Calculate growth rates
-        const thirtyDayGrowthPercentage = patientsPrevious30Days > 0
-          ? Math.round((newPatientsLast30Days - patientsPrevious30Days) / patientsPrevious30Days * 100)
-          : newPatientsLast30Days > 0 ? 100 : 0;
-        
+        const thirtyDayGrowthPercentage = patientsPrevious30Days > 0 ? Math.round((newPatientsLast30Days - patientsPrevious30Days) / patientsPrevious30Days * 100) : newPatientsLast30Days > 0 ? 100 : 0;
         const patientsLastYearEnd = patients.filter(p => {
           const createdAt = new Date(p.createdAt);
           return createdAt.getFullYear() < currentYear;
         }).length;
-        
-        const annualGrowthPercentage = patientsLastYearEnd > 0
-          ? Math.round((newPatientsThisYear / patientsLastYearEnd) * 100)
-          : newPatientsThisYear > 0 ? 100 : 0;
-        
+        const annualGrowthPercentage = patientsLastYearEnd > 0 ? Math.round(newPatientsThisYear / patientsLastYearEnd * 100) : newPatientsThisYear > 0 ? 100 : 0;
+
         // Generate monthly growth data
         const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
         const monthlyGrowth = frenchMonths.map((month, index) => {
@@ -135,16 +161,11 @@ export function Dashboard() {
             const createdAt = new Date(p.createdAt);
             return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear;
           }).length;
-          
           const lastYearPatients = patients.filter(p => {
             const createdAt = new Date(p.createdAt);
             return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear - 1;
           }).length;
-          
-          const growthRate = lastYearPatients > 0
-            ? Math.round((thisYearPatients - lastYearPatients) / lastYearPatients * 100)
-            : thisYearPatients > 0 ? 100 : 0;
-          
+          const growthRate = lastYearPatients > 0 ? Math.round((thisYearPatients - lastYearPatients) / lastYearPatients * 100) : thisYearPatients > 0 ? 100 : 0;
           return {
             month,
             patients: thisYearPatients,
@@ -152,25 +173,22 @@ export function Dashboard() {
             growthText: `${growthRate}%`
           };
         });
-        
+
         // Calculate average ages
-        const calculateAverageAge = (patientList) => {
+        const calculateAverageAge = patientList => {
           const patientsWithBirthDate = patientList.filter(p => p.birthDate);
           if (patientsWithBirthDate.length === 0) return 0;
-          
           const totalAge = patientsWithBirthDate.reduce((sum, patient) => {
             const birthDate = new Date(patient.birthDate);
             const age = currentYear - birthDate.getFullYear();
             return sum + age;
           }, 0);
-          
           return Math.round(totalAge / patientsWithBirthDate.length);
         };
-        
         const averageAge = calculateAverageAge(patients);
         const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
         const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
-        
+
         // Update dashboard data
         setDashboardData({
           totalPatients,
@@ -196,19 +214,12 @@ export function Dashboard() {
         setLoading(false);
       }
     };
-
     loadDashboardData();
   }, []);
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       {/* Header Image Banner - Updated with osteopathy-related image without people */}
       <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg mb-8 animate-fade-in shadow-lg transform hover:scale-[1.01] transition-all duration-500">
-        <img 
-          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400"
-          alt="Cabinet d'ostéopathie" 
-          className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
-        />
+        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400" alt="Cabinet d'ostéopathie" className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex items-center">
           <div className="px-6 md:px-10 max-w-2xl animate-fade-in animate-delay-100">
             <h1 className="text-2xl md:text-3xl lg:text-4xl text-white font-bold mb-2">
@@ -221,15 +232,12 @@ export function Dashboard() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
+      {loading ? <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
             <p className="text-lg text-gray-600 dark:text-gray-300 animate-pulse">Chargement des données...</p>
           </div>
-        </div>
-      ) : (
-        <>
+        </div> : <>
           <div className="animate-fade-in">
             <DashboardStats data={dashboardData} />
           </div>
@@ -245,7 +253,7 @@ export function Dashboard() {
 
           <div className="animate-fade-in animate-delay-300">
             <Card className="hover-scale">
-              <CardContent className="p-6">
+              <CardContent className="p-6 bg-gray-800">
                 <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
                 <div className="h-80">
                   <GrowthChart data={dashboardData} />
@@ -253,8 +261,6 @@ export function Dashboard() {
               </CardContent>
             </Card>
           </div>
-        </>
-      )}
-    </div>
-  );
+        </>}
+    </div>;
 }
