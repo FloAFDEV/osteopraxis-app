@@ -13,7 +13,7 @@ const Index = () => {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Activity className="h-8 w-8 text-blue-500" />
-              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700">
                 PatientHub
               </h1>
             </div>
@@ -25,13 +25,13 @@ const Index = () => {
             <div className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
               Version Pro
             </div>
-            <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
+            <div className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
               Dernière mise à jour: 6 avril
             </div>
           </div>
         </div>
         
-        <Alert className="bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/30 dark:text-amber-300 animate-fade-in animate-delay-100">
+        <Alert className="bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/30 dark:text-blue-300 animate-fade-in animate-delay-100">
           <Info className="h-4 w-4" />
           <AlertTitle>Note sur les données du dashboard</AlertTitle>
           <AlertDescription>
@@ -42,7 +42,7 @@ const Index = () => {
         </Alert>
         
         <div className="relative mb-8 overflow-hidden rounded-xl shadow-lg transform hover:scale-[1.01] transition-all duration-500 animate-fade-in animate-delay-200">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-blue-500/20 to-blue-500/20 backdrop-blur-sm"></div>
           <img 
             src="https://images.unsplash.com/photo-1581091160550-2173dba999ef?auto=format&fit=crop&w=2000&q=80" 
             alt="Matériel d'ostéopathie"

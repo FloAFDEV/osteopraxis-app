@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight } from "lucide-react";
@@ -7,9 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
+
 export function Layout({
   children
 }: LayoutProps) {
@@ -18,25 +21,29 @@ export function Layout({
     user,
     logout
   } = useAuth();
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+  
   const handleLogout = async () => {
     await logout();
   };
+  
   const getInitials = () => {
     if (!user) return "?";
     const firstName = user.first_name || "";
     const lastName = user.last_name || "";
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
   };
-  return <div className="flex min-h-screen flex-col bg-slate-950">
+  
+  return <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
               <Activity className="h-5 w-5 text-blue-500" />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 font-bold">PatientHub</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 font-bold">PatientHub</span>
             </NavLink>
           </div>
           
@@ -47,25 +54,25 @@ export function Layout({
           <nav className="hidden md:flex items-center gap-6">
             <NavLink to="/" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-indigo-600", isActive ? "text-indigo-600" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-600", isActive ? "text-blue-600" : "text-muted-foreground")}>
               <Activity className="h-4 w-4" />
               Accueil
             </NavLink>
             <NavLink to="/patients" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-green-600", isActive ? "text-green-600" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-600", isActive ? "text-blue-600" : "text-muted-foreground")}>
               <User className="h-4 w-4" />
               Patients
             </NavLink>
             <NavLink to="/appointments" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-purple-600", isActive ? "text-purple-600" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-600", isActive ? "text-blue-600" : "text-muted-foreground")}>
               <Calendar className="h-4 w-4" />
               Rendez-vous
             </NavLink>
             <NavLink to="/schedule" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-amber-500", isActive ? "text-amber-500" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-600", isActive ? "text-blue-600" : "text-muted-foreground")}>
               <Clock className="h-4 w-4" />
               Planning
             </NavLink>
@@ -76,7 +83,7 @@ export function Layout({
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="ml-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-primary-foreground">
+                    <AvatarFallback className="bg-blue-500 text-primary-foreground">
                       {getInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -115,13 +122,13 @@ export function Layout({
             </NavLink>
             <NavLink to="/patients" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-pink-500/10 text-pink-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-blue-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
               <User className="h-5 w-5" />
               Patients
             </NavLink>
             <NavLink to="/appointments" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-blue-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
               <Calendar className="h-5 w-5" />
               Rendez-vous
             </NavLink>
@@ -133,7 +140,7 @@ export function Layout({
             </NavLink>
             <NavLink to="/cabinet" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-blue-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
               <Building className="h-5 w-5" />
               Paramètres du cabinet
             </NavLink>
@@ -162,7 +169,7 @@ export function Layout({
             <NavLink to="/terms-of-service" className="hover:text-blue-500 transition-colors">
               Conditions d&apos;utilisation
             </NavLink>
-            <NavLink to="/privacy-policy" className="hover:text-purple-500 transition-colors">
+            <NavLink to="/privacy-policy" className="hover:text-blue-500 transition-colors">
               Politique de confidentialité
             </NavLink>
           </div>
