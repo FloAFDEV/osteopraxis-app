@@ -76,7 +76,7 @@ const LoginPage = () => {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-2 mb-6 bg-gray-900">
-                <TabsTrigger value="password" className="text-inherit bg-inherit">Mot de passe</TabsTrigger>
+                <TabsTrigger value="password" className="bg-gray-600 hover:bg-gray-500 text-zinc-100">Mot de passe</TabsTrigger>
                 <TabsTrigger value="magiclink">Magic Link</TabsTrigger>
               </TabsList>
               
