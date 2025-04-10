@@ -76,8 +76,8 @@ const LoginPage = () => {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-2 mb-6 bg-gray-900">
-                <TabsTrigger value="password" className="bg-gray-600 hover:bg-gray-500 text-zinc-100">Mot de passe</TabsTrigger>
-                <TabsTrigger value="magiclink className="bg-gray-600 hover:bg-gray-500 text-zinc-100">Magic Link</TabsTrigger>
+                <TabsTrigger value="password">Mot de passe</TabsTrigger>
+                <TabsTrigger value="magiclink">Magic Link</TabsTrigger>
               </TabsList>
               
               <TabsContent value="password">
@@ -176,7 +176,14 @@ const LoginPage = () => {
               </p>
             </div>
 
-                    </div>
+            <div className="text-center text-sm text-gray-400 mt-6">
+              <p>
+                Pour la démo, utilisez : <br />
+                Email: franck.blanchet@example.com <br />
+                Mot de passe: password
+              </p>
+            </div>
+          </div>
         </div>
         
         <div className="mt-8 text-center text-sm text-gray-500">
