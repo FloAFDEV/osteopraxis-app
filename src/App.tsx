@@ -1,86 +1,62 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 
-// Pages
-import LoginPage from '@/pages/LoginPage';
-import RegisterPage from '@/pages/RegisterPage';
-import DashboardPage from '@/pages/DashboardPage';
-import PatientsPage from '@/pages/PatientsPage';
-import PatientDetailPage from '@/pages/PatientDetailPage';
-import NewPatientPage from '@/pages/NewPatientPage';
-import AppointmentsPage from '@/pages/AppointmentsPage';
-import AppointmentDetailPage from '@/pages/AppointmentDetailPage';
-import EditAppointmentPage from '@/pages/EditAppointmentPage';
-import NewAppointmentPage from '@/pages/NewAppointmentPage';
-import SettingsPage from '@/pages/SettingsPage';
-import CabinetSettingsPage from '@/pages/CabinetSettingsPage';
-import CabinetsPage from '@/pages/CabinetsPage';
-import CabinetDetailPage from '@/pages/CabinetDetailPage';
-import EditCabinetPage from '@/pages/EditCabinetPage';
-import NewCabinetPage from '@/pages/NewCabinetPage';
-import InvoicesPage from '@/pages/InvoicesPage';
-import InvoiceDetailPage from '@/pages/InvoiceDetailPage';
-import NewInvoicePage from '@/pages/NewInvoicePage';
-import SchedulePage from '@/pages/SchedulePage';
-import NotFoundPage from '@/pages/NotFoundPage';
-
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-};
+import React, { useEffect } from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import PatientsPage from './pages/PatientsPage';
+import NewPatientPage from './pages/NewPatientPage';
+import EditPatientPage from './pages/EditPatientPage';
+import PatientDetailPage from './pages/PatientDetailPage'; // Import the PatientDetailPage
+import AppointmentsPage from './pages/AppointmentsPage';
+import NewAppointmentPage from './pages/NewAppointmentPage';
+import EditAppointmentPage from './pages/EditAppointmentPage';
+import SchedulePage from './pages/SchedulePage';
+import SettingsPage from './pages/SettingsPage';
+import InvoicesPage from './pages/InvoicesPage';
+import InvoiceDetailPage from './pages/InvoiceDetailPage';
+import NewInvoicePage from './pages/NewInvoicePage';
+import { Toaster } from 'sonner';
+import CabinetsManagementPage from "./pages/CabinetsManagementPage";
+import NewCabinetPage from "./pages/NewCabinetPage";
+import EditCabinetPage from "./pages/EditCabinetPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 
 function App() {
-  return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+  const { isAuthenticated, loadStoredToken } = useAuth();
 
-      {/* Protected routes */}
-      <Route path="/" element={<ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-      
-      {/* Patient routes */}
-      <Route path="/patients" element={<ProtectedRoute><PatientsPage /></ProtectedRoute>} />
-      <Route path="/patients/new" element={<ProtectedRoute><NewPatientPage /></ProtectedRoute>} />
-      <Route path="/patients/:id" element={<ProtectedRoute><PatientDetailPage /></ProtectedRoute>} />
-      
-      {/* Appointment routes */}
-      <Route path="/appointments" element={<ProtectedRoute><AppointmentsPage /></ProtectedRoute>} />
-      <Route path="/appointments/new" element={<ProtectedRoute><NewAppointmentPage /></ProtectedRoute>} />
-      <Route path="/appointments/:id" element={<ProtectedRoute><AppointmentDetailPage /></ProtectedRoute>} />
-      <Route path="/appointments/:id/edit" element={<ProtectedRoute><EditAppointmentPage /></ProtectedRoute>} />
-      
-      {/* Cabinet routes */}
-      <Route path="/cabinets" element={<ProtectedRoute><CabinetsPage /></ProtectedRoute>} />
-      <Route path="/cabinets/new" element={<ProtectedRoute><NewCabinetPage /></ProtectedRoute>} />
-      <Route path="/cabinets/:id" element={<ProtectedRoute><CabinetDetailPage /></ProtectedRoute>} />
-      <Route path="/cabinets/:id/edit" element={<ProtectedRoute><EditCabinetPage /></ProtectedRoute>} />
-      
-      {/* Invoice routes */}
-      <Route path="/invoices" element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
-      <Route path="/invoices/new" element={<ProtectedRoute><NewInvoicePage /></ProtectedRoute>} />
-      <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetailPage /></ProtectedRoute>} />
-      
-      {/* Other routes */}
-      <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-      <Route path="/settings/cabinet" element={<ProtectedRoute><CabinetSettingsPage /></ProtectedRoute>} />
-      
-      {/* 404 route */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+  useEffect(() => {
+    loadStoredToken();
+  }, [loadStoredToken]);
+
+  return (
+    <>
+      <Routes>
+        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />} />
+        <Route path="/dashboard" element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} />
+        <Route path="/patients" element={isAuthenticated ? <PatientsPage /> : <Navigate to="/login" />} />
+        <Route path="/patients/new" element={isAuthenticated ? <NewPatientPage /> : <Navigate to="/login" />} />
+        <Route path="/patients/:id/edit" element={isAuthenticated ? <EditPatientPage /> : <Navigate to="/login" />} />
+        <Route path="/patients/:id" element={isAuthenticated ? <PatientDetailPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments" element={isAuthenticated ? <AppointmentsPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments/new" element={isAuthenticated ? <NewAppointmentPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments/:id/edit" element={isAuthenticated ? <EditAppointmentPage /> : <Navigate to="/login" />} />
+        <Route path="/schedule" element={isAuthenticated ? <SchedulePage /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" />} />
+        <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/:id" element={isAuthenticated ? <InvoiceDetailPage /> : <Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/settings/cabinet" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
+        <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
+        <Route path="/cabinets/new" element={isAuthenticated ? <NewCabinetPage /> : <Navigate to="/login" />} />
+        <Route path="/cabinets/:id/edit" element={isAuthenticated ? <EditCabinetPage /> : <Navigate to="/login" />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+      </Routes>
+      <Toaster position="bottom-right" />
+    </>
   );
 }
 

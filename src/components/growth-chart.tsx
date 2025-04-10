@@ -9,7 +9,7 @@ interface GrowthChartProps {
 
 export function GrowthChart({ data }: GrowthChartProps) {
   return (
-    <Card className="col-span-1 bg-white dark:bg-slate-800">
+    <Card className="col-span-1">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Croissance mensuelle des patients</span>
@@ -19,7 +19,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] bg-white dark:bg-slate-800 rounded-xl">
+        <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data.monthlyGrowth}

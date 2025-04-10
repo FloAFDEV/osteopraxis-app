@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { api } from "@/services/api";
 import { AuthState, User, Role } from "@/types";
@@ -30,37 +31,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Charger le token stocké au démarrage
-  useEffect(() => {
-    console.log("Auth provider initialization");
-    const initAuth = async () => {
-      try {
-        console.log("Checking authentication");
-        const state = await api.checkAuth();
-        console.log("Auth check completed", state);
-        setAuthState(state);
-        setIsAdmin(isUserAdmin(state.user));
-      } catch (error) {
-        console.error("Auth check failed:", error);
-      } finally {
-        console.log("Auth loading complete");
-        setIsLoading(false);
-      }
-    };
-
-    initAuth();
-  }, []);
-
   const loadStoredToken = async () => {
-    console.log("Loading stored token");
     try {
-      setIsLoading(true);
       const state = await api.checkAuth();
       setAuthState(state);
       setIsAdmin(isUserAdmin(state.user));
+      setIsLoading(false);
     } catch (error) {
       console.error("Auth check failed:", error);
-    } finally {
       setIsLoading(false);
     }
   };

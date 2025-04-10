@@ -1,7 +1,7 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Mail, UserCheck, UserCircle, User, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Mail, UserCheck, UserCircle, User } from "lucide-react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -9,25 +9,21 @@ import { differenceInYears, parseISO } from "date-fns";
 
 interface PatientListItemProps {
   patient: Patient;
-  index: number;
 }
 
-const PatientListItem: React.FC<PatientListItemProps> = ({
-  patient,
-  index
-}) => {
-  const navigate = useNavigate();
-
+const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
   // Calculate age only if birthDate is defined
-  const age = patient.birthDate ? differenceInYears(new Date(), parseISO(patient.birthDate)) : null;
-
+  const age = patient.birthDate 
+    ? differenceInYears(new Date(), parseISO(patient.birthDate)) 
+    : null;
+  
   // Get patient initials for avatar
   const getInitials = () => {
     const firstInitial = patient.firstName ? patient.firstName.charAt(0).toUpperCase() : '';
     const lastInitial = patient.lastName ? patient.lastName.charAt(0).toUpperCase() : '';
     return `${firstInitial}${lastInitial}`;
   };
-
+  
   // Determine background color and icon based on gender
   const getAvatarColor = () => {
     if (patient.gender === 'Homme') {
@@ -39,69 +35,60 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
     }
   };
 
-  const handleRowClick = () => {
-    navigate(`/patients/${patient.id}`);
-  };
-
   return (
-    <div 
-      className="relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4 mb-4 border border-gray-100 dark:border-gray-700" 
-      onClick={handleRowClick} 
-      style={{
-        animation: `fadeSlideIn 0.5s ease forwards ${index * 50}ms`,
-        opacity: 0
-      }}
-    >
-      <div className="rounded-xl">
+    <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
+      <div className="p-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 flex-grow">
             {/* Avatar with gender */}
-            <Avatar className={`${getAvatarColor()} h-10 w-10 rounded-xl`}>
-              {patient.avatarUrl ? 
-                <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} className="rounded-xl" /> : 
-                <AvatarFallback className={`${getAvatarColor()} rounded-xl`}>
-                  {patient.gender === 'Homme' ? 
-                    <UserCheck className="h-5 w-5" /> : 
-                    patient.gender === 'Femme' ? 
-                      <UserCircle className="h-5 w-5" /> : 
-                      <User className="h-5 w-5" />
-                  }
+            <Avatar className={`${getAvatarColor()} h-10 w-10`}>
+              {patient.avatarUrl ? (
+                <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} />
+              ) : (
+                <AvatarFallback className={getAvatarColor()}>
+                  {patient.gender === 'Homme' ? (
+                    <UserCheck className="h-5 w-5" />
+                  ) : patient.gender === 'Femme' ? (
+                    <UserCircle className="h-5 w-5" />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
                 </AvatarFallback>
-              }
+              )}
             </Avatar>
             
             <div>
               <div className="font-medium text-base flex items-center gap-1">
-                <span>
+                <Link to={`/patients/${patient.id}`} className="hover:underline">
                   {patient.lastName} {patient.firstName}
-                </span>
+                </Link>
                 {age !== null && <span className="text-sm text-gray-500 ml-2">({age} ans)</span>}
               </div>
               
               <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
-                {patient.email && 
+                {patient.email && (
                   <span className="flex items-center">
-                    <Mail className="h-3 w-3 mr-1 text-blue-400" /> {patient.email}
+                    <Mail className="h-3 w-3 mr-1" /> {patient.email}
                   </span>
-                }
+                )}
                 
-                {patient.phone && 
-                  <span className="flex items-center">
-                    <Phone className="h-3 w-3 mr-1 text-green-400" /> {patient.phone}
-                  </span>
-                }
+                {patient.phone && (
+                  <span>{patient.phone}</span>
+                )}
                 
-                {patient.occupation && <span className="text-gray-500 italic">{patient.occupation}</span>}
+                {patient.occupation && (
+                  <span className="text-gray-500 italic">{patient.occupation}</span>
+                )}
               </div>
             </div>
           </div>
           
-          <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-            <Button variant="default" size="sm" className="h-8 px-3 rounded-xl" asChild>
-              <Link to={`/patients/${patient.id}`}>Voir</Link>
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 px-3 rounded-xl border-gray-200 hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700" asChild>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
               <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
+            </Button>
+            <Button variant="default" size="sm" className="h-8 px-3 bg-blue-600 hover:bg-blue-700" asChild>
+              <Link to={`/patients/${patient.id}`}>Voir</Link>
             </Button>
           </div>
         </div>

@@ -7,8 +7,7 @@ export const DELAY = 300;
 export const delay = (ms: number = DELAY) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Active l'utilisation de Supabase au lieu de l'API simulée
-// Temporairement désactivé pour le débogage
-export const USE_SUPABASE = false;
+export const USE_SUPABASE = true;
 
 // Mode de développement pour simuler l'authentification
 // Ajoute des en-têtes pour contourner l'authentification lors du développement

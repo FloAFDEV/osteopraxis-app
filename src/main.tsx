@@ -6,15 +6,13 @@ import { AuthProvider } from './contexts/AuthContext'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { ThemeProvider } from './contexts/theme-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from 'sonner'
 
-// Create a query client
+// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 60000, // 1 minute
     },
   },
 })
@@ -25,7 +23,6 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <App />
-          <Toaster position="top-right" richColors closeButton />
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>

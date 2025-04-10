@@ -18,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const cabinetFormSchema = z.object({
   name: z.string().min(2, {
@@ -80,7 +79,7 @@ export function CabinetForm({
         toast.success("Cabinet créé avec succès");
       }
       
-      navigate("/cabinets");
+      navigate("/settings/cabinet");
     } catch (error) {
       console.error("Error submitting cabinet form:", error);
       toast.error("Une erreur est survenue. Veuillez réessayer.");
@@ -90,88 +89,77 @@ export function CabinetForm({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{isEditing ? "Modifier le cabinet" : "Ajouter un nouveau cabinet"}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom du Cabinet</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Nom du cabinet"
-                      disabled={isSubmitting}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom du Cabinet</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Nom du cabinet"
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Adresse</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Adresse complète"
-                      disabled={isSubmitting}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Adresse</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Adresse complète"
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Téléphone</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Numéro de téléphone"
-                      disabled={isSubmitting}
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Téléphone</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Numéro de téléphone"
+                  disabled={isSubmitting}
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                disabled={isSubmitting}
-              >
-                Annuler
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isSubmitting ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Créer le cabinet"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+            disabled={isSubmitting}
+          >
+            Annuler
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Créer le cabinet"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
