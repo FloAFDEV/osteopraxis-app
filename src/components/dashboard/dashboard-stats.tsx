@@ -1,18 +1,15 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { ArrowDownIcon, ArrowUpIcon, Users, UserPlus, Calendar, TrendingUp } from "lucide-react";
-
 interface DashboardStatsProps {
   data: DashboardData;
 }
-
-export function DashboardStats({ data }: DashboardStatsProps) {
+export function DashboardStats({
+  data
+}: DashboardStatsProps) {
   if (!data) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((item) => (
-          <Card key={item} className="overflow-hidden shadow-sm border-t-4 border-t-gray-300">
+    return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map(item => <Card key={item} className="overflow-hidden shadow-sm border-t-4 border-t-gray-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Chargement...</CardTitle>
             </CardHeader>
@@ -20,15 +17,11 @@ export function DashboardStats({ data }: DashboardStatsProps) {
               <div className="animate-pulse h-6 bg-gray-200 rounded mb-2"></div>
               <div className="animate-pulse h-4 w-1/2 bg-gray-200 rounded"></div>
             </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
+          </Card>)}
+      </div>;
   }
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-blue-500">
+  return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card className="overflow-hidden \nrounded-lg \nborder-t-4 border-t-blue-500 \nbg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 \np-4 sm:p-6 \nshadow-lg hover:shadow-xl \ntransition-shadow duration-300\n">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Patients totaux</CardTitle>
           <Users className="h-7 w-7 text-blue-500" />
@@ -36,17 +29,13 @@ export function DashboardStats({ data }: DashboardStatsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{data.totalPatients}</div>
           <p className="text-xs text-muted-foreground">
-            {data.thirtyDayGrowthPercentage > 0 ? (
-              <span className="flex items-center text-green-500">
+            {data.thirtyDayGrowthPercentage > 0 ? <span className="flex items-center text-green-500">
                 <ArrowUpIcon className="mr-1 h-3 w-3" />
                 <span className="truncate">{data.thirtyDayGrowthPercentage}% ce mois-ci</span>
-              </span>
-            ) : (
-              <span className="flex items-center text-red-500">
+              </span> : <span className="flex items-center text-red-500">
                 <ArrowDownIcon className="mr-1 h-3 w-3" />
                 <span className="truncate">{Math.abs(data.thirtyDayGrowthPercentage)}% ce mois-ci</span>
-              </span>
-            )}
+              </span>}
           </p>
         </CardContent>
       </Card>
@@ -89,6 +78,5 @@ export function DashboardStats({ data }: DashboardStatsProps) {
           </p>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
