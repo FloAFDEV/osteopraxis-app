@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { Building2, CalendarDays, LayoutDashboard, Settings, Users, Clock, FileText, ChevronDown, UserCog } from 'lucide-react';
+import { CalendarDays, LayoutDashboard, Settings, Users, Clock, FileText, ChevronDown, UserCog } from 'lucide-react';
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -73,16 +73,6 @@ export function Layout({ children, className }: LayoutProps) {
                 Rendez-vous
               </Link>
               <Link 
-                to="/cabinets" 
-                className={cn(
-                  "text-sm font-medium flex items-center gap-1.5 transition-colors hover:text-primary",
-                  location.pathname.includes("/cabinets") ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                <Building2 className="h-4 w-4" />
-                Cabinets
-              </Link>
-              <Link 
                 to="/invoices" 
                 className={cn(
                   "text-sm font-medium flex items-center gap-1.5 transition-colors hover:text-primary",
@@ -130,12 +120,6 @@ export function Layout({ children, className }: LayoutProps) {
                       <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
                         <Settings className="h-4 w-4" />
                         <span>Paramètres</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/cabinets" className="flex items-center gap-2 cursor-pointer">
-                        <Building2 className="h-4 w-4" />
-                        <span>Gestion des cabinets</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

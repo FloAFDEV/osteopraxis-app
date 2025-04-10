@@ -16,7 +16,6 @@ import {
   UserCog,
   UserPlus,
   Activity,
-  Building2,
   Menu,
   X
 } from 'lucide-react';
@@ -49,8 +48,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     settings: "text-amber-600 dark:text-amber-400",
     appointments: "text-purple-600 dark:text-purple-400",
     invoices: "text-rose-600 dark:text-rose-400", 
-    schedule: "text-indigo-600 dark:text-indigo-400",
-    cabinets: "text-orange-600 dark:text-orange-400"
+    schedule: "text-indigo-600 dark:text-indigo-400"
   };
 
   // Toggle mobile menu
@@ -153,13 +151,6 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               icon: CalendarDays, 
               label: "Rendez-vous",
               colorClass: iconColors.appointments
-            })}
-            
-            {renderNavLink({ 
-              href: "/cabinets", 
-              icon: Building2, 
-              label: "Cabinets",
-              colorClass: iconColors.cabinets
             })}
             
             {renderNavLink({ 
