@@ -55,60 +55,47 @@ export function GrowthChart({ data }: GrowthChartProps) {
     growthText: item.growthText
   }));
 
-  return (
-    <Card className="overflow-hidden rounded-lg border-t-4 border-t-blue-500 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
-      <CardHeader>
-        <CardTitle className="text-gray-800 dark:text-white">
-          Croissance mensuelle des patients
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="h-[300px] mt-4">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={formattedData}
-            aria-label="Croissance mensuelle des patients"
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
-            <XAxis
-              dataKey="month"
-              tick={{ fill: "#64748b", fontSize: 12 }}
-            />
-            <YAxis
-              tick={{ fill: "#64748b", fontSize: 12 }}
-              domain={[0, "auto"]}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#0891b2",
-                border: "none",
-                borderRadius: "8px",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
-              }}
-              itemStyle={{
-                color: "#ffffff",
-                fontSize: "14px"
-              }}
-              formatter={(_, __, props: any) => {
-                const patients = props.payload?.patients ?? 0;
-                const growthText = props.payload?.growthText ?? "";
-                return [
-                  `👥 ${patients} patients`,
-                  growthText || "Pas de comparaison disponible"
-                ];
-              }}
-              labelStyle={{ color: "#ffffff", fontWeight: "bold" }}
-            />
-            <Line
-              type="monotone"
-              dataKey="patients"
-              stroke="#4C51BF"
-              strokeWidth={3}
-              dot={{ stroke: "#4C51BF", strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+   return (
+    <div className="w-full h-[300px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={formattedData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+          <XAxis
+            dataKey="month"
+            tick={{ fill: "#64748b", fontSize: 12 }}
+          />
+          <YAxis
+            tick={{ fill: "#64748b", fontSize: 12 }}
+            domain={[0, "auto"]}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#0891b2",
+              border: "none",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+            }}
+            itemStyle={{ color: "#ffffff", fontSize: "14px" }}
+            labelStyle={{ color: "#ffffff", fontWeight: "bold" }}
+            formatter={(_, __, props: any) => {
+              const patients = props.payload?.patients ?? 0;
+              const growthText = props.payload?.growthText ?? "";
+              return [
+                `👥 ${patients} patients`,
+                growthText || "Pas de comparaison disponible"
+              ];
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="patients"
+            stroke="#4C51BF"
+            strokeWidth={3}
+            dot={{ stroke: "#4C51BF", strokeWidth: 2, r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
