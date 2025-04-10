@@ -32,7 +32,7 @@ export function Layout({
   };
   return <div className="flex min-h-screen flex-col bg-slate-950">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
-        <div className="container flex h-16 items-center justify-between">
+        <div className="container flex h-16 items-center justify-between bg-gray-200">
           <div className="flex items-center gap-2">
             <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
               <Activity className="h-5 w-5 text-blue-500" />
@@ -47,7 +47,7 @@ export function Layout({
           <nav className="hidden md:flex items-center gap-6">
             <NavLink to="/" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-indigo-500 dark:indigo-400", isActive ? "text-indigo-600" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500", isActive ? "text-blue-500" : "text-muted-foreground")}>
               <Activity className="h-4 w-4" />
               Accueil
             </NavLink>
@@ -153,7 +153,7 @@ export function Layout({
           </nav>
         </div>}
 
-      <main className="flex-1 container py-6">{children}</main>
+      <main className="flex-1 container py-6 bg-gray-100">{children}</main>
 
       <footer className="border-t py-6 bg-muted/30">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
