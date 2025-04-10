@@ -47,7 +47,7 @@ export function Layout({
           <nav className="hidden md:flex items-center gap-6">
             <NavLink to="/" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-indigo-500 dark:indigo-400", isActive ? "text-indigo-600" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500", isActive ? "text-blue-500" : "text-muted-foreground")}>
               <Activity className="h-4 w-4" />
               Accueil
             </NavLink>
@@ -65,7 +65,7 @@ export function Layout({
             </NavLink>
             <NavLink to="/schedule" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500", isActive ? "text-blue-500" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-amber-500", isActive ? "text-amber-500" : "text-muted-foreground")}>
               <Clock className="h-4 w-4" />
               Planning
             </NavLink>
