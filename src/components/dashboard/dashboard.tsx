@@ -253,7 +253,7 @@ export function Dashboard() {
 
           <div className="animate-fade-in animate-delay-300">
             <Card className="hover-scale">
-              <CardContent className="p-6 bg-gray-800">
+              <CardContent className="p-6 bg-inherit">
                 <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
                 <div className="h-80">
                   <GrowthChart data={dashboardData} />
