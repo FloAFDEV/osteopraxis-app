@@ -1,22 +1,18 @@
-
 import React from "react";
 import { Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
 interface PatientResultsSummaryProps {
   patientCount: number;
   currentPage: number;
   totalPages: number;
 }
-
 const PatientResultsSummary: React.FC<PatientResultsSummaryProps> = ({
   patientCount,
   currentPage,
   totalPages
 }) => {
-  return (
-    <Card className="w-full mb-6">
-      <CardContent className="pt-6">
+  return <Card className="w-full mb-6">
+      <CardContent className="p-2">
         <div className="flex items-center justify-between p-4 rounded-lg">
           <div className="flex items-center gap-4">
             <div className="bg-white dark:bg-gray-800 p-3 rounded-full shadow-sm">
@@ -34,8 +30,6 @@ const PatientResultsSummary: React.FC<PatientResultsSummaryProps> = ({
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default PatientResultsSummary;
