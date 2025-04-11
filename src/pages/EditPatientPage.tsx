@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -28,13 +27,12 @@ const EditPatientPage = () => {
           return;
         }
         
-        // Assurer que tous les champs sont correctement formatés
+        // Ensure data is correctly formatted but maintain string type for hasChildren
         const formattedPatient = {
           ...data,
-          // Convertir les champs booléens pour être sûr qu'ils sont de type boolean
-          hasChildren: typeof data.hasChildren === 'string' 
-            ? data.hasChildren.toLowerCase() === 'true' 
-            : Boolean(data.hasChildren),
+          // Keep hasChildren as a string to match the Patient type
+          hasChildren: data.hasChildren || "false",
+          // These can be boolean as per the Patient type
           isSmoker: Boolean(data.isSmoker),
           hasVisionCorrection: Boolean(data.hasVisionCorrection)
         };
@@ -59,7 +57,7 @@ const EditPatientPage = () => {
       const updatedPatient: Patient = {
         ...patient,
         ...updatedData,
-        // Ensure these required fields are present
+        // Ensure required fields are present
         id: patient.id,
         createdAt: patient.createdAt,
         updatedAt: new Date().toISOString(),
