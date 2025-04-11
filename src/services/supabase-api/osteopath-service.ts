@@ -42,8 +42,8 @@ export const supabaseOsteopathService = {
   },
   
   async updateOsteopath(id: number, osteopathData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath> {
-    // Check authentication before proceeding
-    await checkAuth();
+    // Vérifie l'authentification avant de procéder
+    const session = await checkAuth();
 
     const now = new Date().toISOString();
     
@@ -57,15 +57,24 @@ export const supabaseOsteopathService = {
       .select()
       .single();
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Erreur lors de la mise à jour de l'ostéopathe:", error);
+      throw new Error(error.message);
+    }
     
     return typedData<Osteopath>(data);
   },
   
   async createOsteopath(osteopathData: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
-    // Check authentication before proceeding
+    // Vérifie l'authentification avant de procéder et récupère la session
     const session = await checkAuth();
-    console.log("Creating osteopath with authenticated session:", session.user.id);
+    console.log("Création d'un ostéopathe avec la session authentifiée:", session.user.id);
+    console.log("Données d'ostéopathe à insérer:", osteopathData);
+
+    if (osteopathData.userId !== session.user.id) {
+      console.warn("L'ID utilisateur ne correspond pas à l'ID de session. Ajustement automatique.");
+      osteopathData.userId = session.user.id;
+    }
 
     const now = new Date().toISOString();
     
@@ -81,13 +90,14 @@ export const supabaseOsteopathService = {
         .single();
         
       if (error) {
-        console.error("Supabase createOsteopath error details:", error);
+        console.error("Erreur Supabase createOsteopath:", error);
         throw new Error(error.message);
       }
       
+      console.log("Ostéopathe créé avec succès:", data);
       return typedData<Osteopath>(data);
     } catch (error: any) {
-      console.error("Supabase createOsteopath exception:", error);
+      console.error("Exception Supabase createOsteopath:", error);
       throw error;
     }
   }

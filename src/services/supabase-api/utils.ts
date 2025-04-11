@@ -20,20 +20,20 @@ export const addAuthHeaders = <T extends { setHeader: (name: string, value: stri
   return query;
 };
 
-// Helper function to check auth state before operations
+// Fonction helper pour vérifier l'état d'authentification avant les opérations
 export const checkAuth = async () => {
   const { data, error } = await supabase.auth.getSession();
   if (error) {
-    console.error("Authentication error:", error);
-    throw new Error(`Authentication error: ${error.message}`);
+    console.error("Erreur d'authentification:", error);
+    throw new Error(`Erreur d'authentification: ${error.message}`);
   }
   
   if (!data.session) {
-    console.error("No active session found");
-    throw new Error('Not authenticated');
+    console.error("Aucune session active trouvée");
+    throw new Error('Non authentifié');
   }
   
-  console.log("Authentication verified, user ID:", data.session.user.id);
+  console.log("Authentification vérifiée, ID utilisateur:", data.session.user.id);
   return data.session;
 };
 
@@ -42,7 +42,7 @@ export function getEnumValue<T extends string>(value: string, allowedValues: rea
   if (allowedValues.includes(value as T)) {
     return value as T;
   }
-  throw new Error(`Invalid enum value: ${value}. Allowed values are: ${allowedValues.join(', ')}`);
+  throw new Error(`Valeur enum invalide: ${value}. Les valeurs autorisées sont: ${allowedValues.join(', ')}`);
 }
 
 // AppointmentStatus enum helper - Correction de CANCELLED à CANCELED pour correspondre au type dans types.ts
