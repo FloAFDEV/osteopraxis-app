@@ -109,177 +109,175 @@ const ProfileCheckRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          
-          {/* Auth routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/complete-profile" element={
-            <ProtectedRoute>
-              <OsteopathProfilePage />
-            </ProtectedRoute>
-          } />
-          
-          {/* Protected routes that require authentication and completed profile */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
+    <>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        
+        {/* Auth routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/complete-profile" element={
+          <ProtectedRoute>
+            <OsteopathProfilePage />
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected routes that require authentication and completed profile */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <DashboardPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        
+        {/* Patient routes */}
+        <Route path="/patients" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <PatientsPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/patients/new" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <NewPatientPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/patients/:id" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <PatientDetailPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/patients/:id/edit" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <EditPatientPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        
+        {/* Appointment routes */}
+        <Route path="/appointments" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <AppointmentsPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/schedule" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <SchedulePage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/appointments/new" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <NewAppointmentPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/appointments/:id/edit" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <EditAppointmentPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        
+        {/* Invoice routes */}
+        <Route path="/invoices" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <InvoicesPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/invoices/new" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <NewInvoicePage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/invoices/:id" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <InvoiceDetailPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        
+        {/* Cabinet management routes */}
+        <Route path="/settings/cabinet" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <CabinetSettingsPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/settings/cabinet/new" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <NewCabinetPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/settings/cabinet/:id/edit" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <EditCabinetPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/settings/cabinets" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <CabinetsManagementPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        
+        {/* Settings routes */}
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <ProfileCheckRoute>
+              <SettingsPage />
+            </ProfileCheckRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <OsteopathProfilePage />
+          </ProtectedRoute>
+        } />
+        
+        {/* Admin routes */}
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminRoute>
               <ProfileCheckRoute>
-                <DashboardPage />
+                <AdminPage />
               </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          
-          {/* Patient routes */}
-          <Route path="/patients" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <PatientsPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/patients/new" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <NewPatientPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/patients/:id" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <PatientDetailPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/patients/:id/edit" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <EditPatientPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          
-          {/* Appointment routes */}
-          <Route path="/appointments" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <AppointmentsPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/schedule" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <SchedulePage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/appointments/new" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <NewAppointmentPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/appointments/:id/edit" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <EditAppointmentPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          
-          {/* Invoice routes */}
-          <Route path="/invoices" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <InvoicesPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/invoices/new" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <NewInvoicePage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/invoices/:id" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <InvoiceDetailPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          
-          {/* Cabinet management routes */}
-          <Route path="/settings/cabinet" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <CabinetSettingsPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/settings/cabinet/new" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <NewCabinetPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/settings/cabinet/:id/edit" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <EditCabinetPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/settings/cabinets" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <CabinetsManagementPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          
-          {/* Settings routes */}
-          <Route path="/settings" element={
-            <ProtectedRoute>
-              <ProfileCheckRoute>
-                <SettingsPage />
-              </ProfileCheckRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <OsteopathProfilePage />
-            </ProtectedRoute>
-          } />
-          
-          {/* Admin routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminRoute>
-                <ProfileCheckRoute>
-                  <AdminPage />
-                </ProfileCheckRoute>
-              </AdminRoute>
-            </ProtectedRoute>
-          } />
-          
-          {/* Legal routes */}
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-          
-          {/* 404 route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster position="top-right" richColors />
-      </AuthProvider>
-    </ThemeProvider>
+            </AdminRoute>
+          </ProtectedRoute>
+        } />
+        
+        {/* Legal routes */}
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+        
+        {/* 404 route */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster position="top-right" richColors />
+    </>
   );
 }
 
