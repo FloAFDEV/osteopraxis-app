@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,37 +22,38 @@ import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { Patient } from "@/types";
 import { useState, useEffect } from "react";
+import { DateInput } from "@/components/ui/date-input";
 
 // Schéma de validation pour le formulaire patient
 const patientSchema = z.object({
   address: z.string().optional(),
-  email: z.string().email("Email invalide").optional(),
-  phone: z.string().optional(),
-  notes: z.string().optional(),
-  birthDate: z.date().optional(),
-  childrenAges: z.array(z.number()).optional(),
+  email: z.string().email("Email invalide").optional().nullable(),
+  phone: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  birthDate: z.date().optional().nullable(),
+  childrenAges: z.array(z.number()).optional().nullable(),
   firstName: z.string().min(1, "Prénom requis"),
-  gender: z.string().optional(),
-  hasChildren: z.boolean().optional(),
   lastName: z.string().min(1, "Nom requis"),
-  occupation: z.string().optional(),
-  maritalStatus: z.string().optional(),
-  contraception: z.string().optional(),
-  physicalActivity: z.string().optional(),
-  isSmoker: z.boolean().optional(),
-  generalPractitioner: z.string().optional(),
-  ophtalmologistName: z.string().optional(),
-  hasVisionCorrection: z.boolean().optional(),
-  entDoctorName: z.string().optional(),
-  entProblems: z.string().optional(),
-  digestiveDoctorName: z.string().optional(),
-  digestiveProblems: z.string().optional(),
-  surgicalHistory: z.string().optional(),
-  traumaHistory: z.string().optional(),
-  rheumatologicalHistory: z.string().optional(),
-  currentTreatment: z.string().optional(),
-  handedness: z.string().optional(),
-  familyStatus: z.string().optional(),
+  gender: z.string().optional().nullable(),
+  hasChildren: z.boolean().optional().nullable(),
+  occupation: z.string().optional().nullable(),
+  maritalStatus: z.string().optional().nullable(),
+  contraception: z.string().optional().nullable(),
+  physicalActivity: z.string().optional().nullable(),
+  isSmoker: z.boolean().optional().nullable(),
+  generalPractitioner: z.string().optional().nullable(),
+  ophtalmologistName: z.string().optional().nullable(),
+  hasVisionCorrection: z.boolean().optional().nullable(),
+  entDoctorName: z.string().optional().nullable(),
+  entProblems: z.string().optional().nullable(),
+  digestiveDoctorName: z.string().optional().nullable(),
+  digestiveProblems: z.string().optional().nullable(),
+  surgicalHistory: z.string().optional().nullable(),
+  traumaHistory: z.string().optional().nullable(),
+  rheumatologicalHistory: z.string().optional().nullable(),
+  currentTreatment: z.string().optional().nullable(),
+  handedness: z.string().optional().nullable(),
+  familyStatus: z.string().optional().nullable(),
 });
 
 export type PatientFormValues = z.infer<typeof patientSchema>;
@@ -67,7 +69,6 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
   const [activeTab, setActiveTab] = useState("general");
   const [childrenCount, setChildrenCount] = useState<number>(0);
   const [childrenAgesInput, setChildrenAgesInput] = useState<string>("");
-  const [showYearPicker, setShowYearPicker] = useState(false);
 
   // Initialiser le form avec les valeurs existantes ou valeurs par défaut
   const form = useForm<PatientFormValues>({
@@ -76,20 +77,43 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
       ...patient,
       // Convertir hasChildren de string à boolean si nécessaire
       hasChildren: convertHasChildrenToBoolean(patient.hasChildren),
-      // Assurer que birthDate est un objet Date
+      // Assurer que birthDate est un objet Date s'il existe
       birthDate: patient.birthDate 
         ? (typeof patient.birthDate === 'string' 
             ? new Date(patient.birthDate) 
             : patient.birthDate)
-        : undefined,
+        : null,
+      // S'assurer que les valeurs null sont correctement gérées
+      email: patient.email || "",
+      phone: patient.phone || "",
+      address: patient.address || "",
+      occupation: patient.occupation || "",
+      physicalActivity: patient.physicalActivity || "",
+      generalPractitioner: patient.generalPractitioner || "",
+      ophtalmologistName: patient.ophtalmologistName || "",
+      entDoctorName: patient.entDoctorName || "",
+      entProblems: patient.entProblems || "",
+      digestiveDoctorName: patient.digestiveDoctorName || "",
+      digestiveProblems: patient.digestiveProblems || "",
+      surgicalHistory: patient.surgicalHistory || "",
+      traumaHistory: patient.traumaHistory || "",
+      rheumatologicalHistory: patient.rheumatologicalHistory || "",
+      currentTreatment: patient.currentTreatment || "",
     } : {
       firstName: "",
       lastName: "",
       hasChildren: false,
       isSmoker: false,
-      hasVisionCorrection: false
+      hasVisionCorrection: false,
+      email: "",
+      phone: "",
     },
   });
+
+  // Console log des valeurs du formulaire pour debug
+  useEffect(() => {
+    console.log("Form values:", form.getValues());
+  }, [form]);
 
   // Mettre à jour le compteur d'enfants et le champ d'âges
   useEffect(() => {
@@ -126,6 +150,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
   // Gérer la soumission du formulaire
   const onSubmit = async (values: PatientFormValues) => {
     try {
+      console.log("Submitting values:", values);
       await onSave(values);
       toast.success(patient ? "Patient mis à jour avec succès" : "Patient créé avec succès");
       
@@ -163,7 +188,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Prénom</FormLabel>
+                        <FormLabel>Prénom <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Prénom" {...field} />
                         </FormControl>
@@ -176,7 +201,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nom</FormLabel>
+                        <FormLabel>Nom <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Nom" {...field} />
                         </FormControl>
@@ -190,75 +215,14 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Date de naissance</FormLabel>
-                        <div className="flex items-center space-x-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "dd/MM/yyyy", { locale: fr })
-                                  ) : (
-                                    <span>Sélectionnez une date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              {showYearPicker ? (
-                                <div className="p-3">
-                                  <YearPicker
-                                    date={field.value}
-                                    onChange={(date) => {
-                                      field.onChange(date);
-                                      setShowYearPicker(false);
-                                    }}
-                                    minYear={1900}
-                                  />
-                                  <div className="mt-4 text-right">
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => setShowYearPicker(false)}
-                                    >
-                                      Afficher le calendrier
-                                    </Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <>
-                                  <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) =>
-                                      date > new Date() || date < new Date("1900-01-01")
-                                    }
-                                    initialFocus
-                                  />
-                                  <div className="p-3 border-t">
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => setShowYearPicker(true)}
-                                      className="w-full"
-                                    >
-                                      Sélectionner l'année directement
-                                    </Button>
-                                  </div>
-                                </>
-                              )}
-                            </PopoverContent>
-                          </Popover>
-                        </div>
+                        <FormControl>
+                          <DateInput
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="JJ/MM/AAAA"
+                            format="dd/MM/yyyy"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -269,7 +233,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Genre</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionnez un genre" />
@@ -342,7 +306,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Statut marital</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionnez un statut" />
@@ -417,7 +381,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Latéralité</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionnez" />
@@ -443,7 +407,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                         </div>
                         <FormControl>
                           <Switch
-                            checked={field.value}
+                            checked={field.value || false}
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
@@ -456,7 +420,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Contraception</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionnez" />
@@ -490,7 +454,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                         </div>
                         <FormControl>
                           <Switch
-                            checked={field.value}
+                            checked={field.value || false}
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>

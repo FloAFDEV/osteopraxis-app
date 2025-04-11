@@ -28,7 +28,18 @@ const EditPatientPage = () => {
           return;
         }
         
-        setPatient(data);
+        // Assurer que tous les champs sont correctement formatés
+        const formattedPatient = {
+          ...data,
+          // Convertir les champs booléens pour être sûr qu'ils sont de type boolean
+          hasChildren: typeof data.hasChildren === 'string' 
+            ? data.hasChildren.toLowerCase() === 'true' 
+            : Boolean(data.hasChildren),
+          isSmoker: Boolean(data.isSmoker),
+          hasVisionCorrection: Boolean(data.hasVisionCorrection)
+        };
+        
+        setPatient(formattedPatient);
       } catch (error) {
         console.error("Error loading patient:", error);
         toast.error("Impossible de charger les données du patient");
