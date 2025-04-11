@@ -193,10 +193,12 @@ export const patientService = {
       updatedAt: now
     };
 
-    // Utiliser l'approche upsert qui utilise POST au lieu de PATCH
+    // Remplacer l'approche upsert par une simple mise à jour avec un where
+    console.log("Updating patient with id:", id);
     const { data, error } = await supabase
       .from('Patient')
-      .upsert([{ id, ...patientData }])
+      .update(patientData)
+      .eq('id', id)
       .select()
       .single();
 
