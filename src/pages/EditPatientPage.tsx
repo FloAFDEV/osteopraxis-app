@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
 import { PatientForm } from '@/components/patient-form';
 import { api } from '@/services/api';
-import { Patient } from '@/types';
+import { Patient, Contraception } from '@/types';
 import { toast } from 'sonner';
 import { UserRound } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
@@ -75,7 +75,7 @@ const EditPatientPage = () => {
       }
       
       // Merge the updated form data with the existing patient data
-      const updatedPatient: Patient = {
+      const updatedPatient = {
         ...patient,
         ...updatedData,
         // Ensure required fields are present
@@ -86,10 +86,10 @@ const EditPatientPage = () => {
         userId: patient.userId,
       };
       
-      // Convert IMPLANT to IMPLANTS for Supabase compatibility
+      // Convert IMPLANT to IMPLANTS for Supabase compatibility, ensuring type safety
       let patientDataForSupabase = { ...updatedPatient };
       if (patientDataForSupabase.contraception === "IMPLANT") {
-        patientDataForSupabase.contraception = "IMPLANTS" as any;
+        patientDataForSupabase.contraception = "IMPLANTS" as Contraception;
       }
       
       // Utilisation directe du client Supabase au lieu de l'API
@@ -143,6 +143,12 @@ const EditPatientPage = () => {
     );
   }
 
+  // Affichage des informations sur les enfants si le patient en a
+  const hasChildren = patient.hasChildren === "true";
+  const childrenInfo = hasChildren && patient.childrenAges && patient.childrenAges.length > 0 
+    ? `${patient.childrenAges.length} enfant(s): ${patient.childrenAges.join(', ')} ans` 
+    : null;
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
@@ -154,6 +160,11 @@ const EditPatientPage = () => {
           <p className="text-muted-foreground mt-1">
             Modifiez les informations du patient {patient.firstName} {patient.lastName}
           </p>
+          {childrenInfo && (
+            <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md text-blue-700">
+              <span className="font-medium">Enfants : </span>{childrenInfo}
+            </div>
+          )}
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
