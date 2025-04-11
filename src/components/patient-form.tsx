@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -53,18 +52,19 @@ const patientSchema = z.object({
   rheumatologicalHistory: z.string().optional().nullable(),
   currentTreatment: z.string().optional().nullable(),
   handedness: z.string().optional().nullable(),
-  familyStatus: z.string().optional().nullable(),
+  familyStatus: z.string().optional().nullable()
 });
-
 export type PatientFormValues = z.infer<typeof patientSchema>;
-
 interface PatientFormProps {
   patient?: Patient;
   onSave: (patient: PatientFormValues) => Promise<void>;
   isLoading?: boolean;
 }
-
-export function PatientForm({ patient, onSave, isLoading = false }: PatientFormProps) {
+export function PatientForm({
+  patient,
+  onSave,
+  isLoading = false
+}: PatientFormProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("general");
   const [childrenCount, setChildrenCount] = useState<number>(0);
@@ -78,11 +78,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
       // Convertir hasChildren de string à boolean si nécessaire
       hasChildren: convertHasChildrenToBoolean(patient.hasChildren),
       // Assurer que birthDate est un objet Date s'il existe
-      birthDate: patient.birthDate 
-        ? (typeof patient.birthDate === 'string' 
-            ? new Date(patient.birthDate) 
-            : patient.birthDate)
-        : null,
+      birthDate: patient.birthDate ? typeof patient.birthDate === 'string' ? new Date(patient.birthDate) : patient.birthDate : null,
       // S'assurer que les valeurs null sont correctement gérées
       email: patient.email || "",
       phone: patient.phone || "",
@@ -98,7 +94,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
       surgicalHistory: patient.surgicalHistory || "",
       traumaHistory: patient.traumaHistory || "",
       rheumatologicalHistory: patient.rheumatologicalHistory || "",
-      currentTreatment: patient.currentTreatment || "",
+      currentTreatment: patient.currentTreatment || ""
     } : {
       firstName: "",
       lastName: "",
@@ -106,8 +102,8 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
       isSmoker: false,
       hasVisionCorrection: false,
       email: "",
-      phone: "",
-    },
+      phone: ""
+    }
   });
 
   // Console log des valeurs du formulaire pour debug
@@ -126,13 +122,9 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
   // Gérer les âges des enfants
   const handleChildrenAgesChange = (value: string) => {
     setChildrenAgesInput(value);
-    
+
     // Convertir la chaîne en tableau d'âges (nombres)
-    const ages = value
-      .split(",")
-      .map(age => parseInt(age.trim()))
-      .filter(age => !isNaN(age) && age > 0);
-    
+    const ages = value.split(",").map(age => parseInt(age.trim())).filter(age => !isNaN(age) && age > 0);
     form.setValue("childrenAges", ages);
   };
 
@@ -153,7 +145,7 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
       console.log("Submitting values:", values);
       await onSave(values);
       toast.success(patient ? "Patient mis à jour avec succès" : "Patient créé avec succès");
-      
+
       // Redirection après sauvegarde
       if (!patient) {
         navigate("/patients");
@@ -163,18 +155,11 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
       toast.error("Erreur lors de la sauvegarde du patient");
     }
   };
-
-  return (
-    <Form {...form}>
+  return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Card>
-          <CardHeader>
-            <CardTitle>{patient ? "Modifier le patient" : "Nouveau patient"}</CardTitle>
-            <CardDescription>
-              {patient ? "Mettez à jour les informations du patient" : "Entrez les informations du nouveau patient"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          
+          <CardContent className="mt-8">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="mb-4">
                 <TabsTrigger value="general">Informations générales</TabsTrigger>
@@ -183,55 +168,36 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
               </TabsList>
               <TabsContent value="general">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="firstName" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Prénom <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Prénom" {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="lastName" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Nom <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Nom" {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="birthDate"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                      </FormItem>} />
+                  <FormField control={form.control} name="birthDate" render={({
+                  field
+                }) => <FormItem className="flex flex-col">
                         <FormLabel>Date de naissance</FormLabel>
                         <FormControl>
-                          <DateInput
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="JJ/MM/AAAA"
-                            format="dd/MM/yyyy"
-                          />
+                          <DateInput value={field.value} onChange={field.onChange} placeholder="JJ/MM/AAAA" format="dd/MM/yyyy" />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="gender"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="gender" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Genre</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
@@ -245,66 +211,46 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="email" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input placeholder="Email" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="phone" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Téléphone</FormLabel>
                         <FormControl>
                           <Input placeholder="Téléphone" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
+                      </FormItem>} />
+                  <FormField control={form.control} name="address" render={({
+                  field
+                }) => <FormItem className="col-span-2">
                         <FormLabel>Adresse</FormLabel>
                         <FormControl>
                           <Input placeholder="Adresse" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="occupation"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="occupation" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Profession</FormLabel>
                         <FormControl>
                           <Input placeholder="Profession" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="maritalStatus"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="maritalStatus" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Statut marital</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
@@ -323,63 +269,39 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                   <div className="space-y-2">
                     <FormLabel>Enfants</FormLabel>
                     <div className="flex items-center space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setChildrenCount(Math.max(0, childrenCount - 1))}
-                      >
+                      <Button type="button" variant="outline" size="sm" onClick={() => setChildrenCount(Math.max(0, childrenCount - 1))}>
                         -
                       </Button>
                       <span className="w-6 text-center">{childrenCount}</span>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setChildrenCount(childrenCount + 1)}
-                      >
+                      <Button type="button" variant="outline" size="sm" onClick={() => setChildrenCount(childrenCount + 1)}>
                         +
                       </Button>
                     </div>
                   </div>
-                  {childrenCount > 0 && (
-                    <div className="space-y-2">
+                  {childrenCount > 0 && <div className="space-y-2">
                       <FormLabel>Âges des enfants (séparés par des virgules)</FormLabel>
-                      <Input
-                        placeholder="Ex: 3, 5, 7"
-                        value={childrenAgesInput}
-                        onChange={(e) => handleChildrenAgesChange(e.target.value)}
-                      />
-                    </div>
-                  )}
+                      <Input placeholder="Ex: 3, 5, 7" value={childrenAgesInput} onChange={e => handleChildrenAgesChange(e.target.value)} />
+                    </div>}
                 </div>
               </TabsContent>
               <TabsContent value="medical">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="physicalActivity"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="physicalActivity" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Activité physique</FormLabel>
                         <FormControl>
                           <Input placeholder="Ex: natation, course à pied..." {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="handedness"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="handedness" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Latéralité</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
@@ -394,31 +316,20 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isSmoker"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      </FormItem>} />
+                  <FormField control={form.control} name="isSmoker" render={({
+                  field
+                }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
                           <FormLabel>Fumeur</FormLabel>
                         </div>
                         <FormControl>
-                          <Switch
-                            checked={field.value || false}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Switch checked={field.value || false} onCheckedChange={field.onChange} />
                         </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="contraception"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="contraception" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Contraception</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
@@ -441,162 +352,113 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="hasVisionCorrection"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      </FormItem>} />
+                  <FormField control={form.control} name="hasVisionCorrection" render={({
+                  field
+                }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
                           <FormLabel>Correction de la vision</FormLabel>
                         </div>
                         <FormControl>
-                          <Switch
-                            checked={field.value || false}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Switch checked={field.value || false} onCheckedChange={field.onChange} />
                         </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
                 <div className="grid grid-cols-1 gap-4 mt-4">
-                  <FormField
-                    control={form.control}
-                    name="currentTreatment"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="currentTreatment" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Traitement actuel</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Détails du traitement actuel" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="surgicalHistory"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="surgicalHistory" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Antécédents chirurgicaux</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Interventions chirurgicales passées" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="traumaHistory"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="traumaHistory" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Antécédents traumatiques</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Traumatismes, accidents..." {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="rheumatologicalHistory"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="rheumatologicalHistory" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Antécédents rhumatologiques</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Problèmes articulaires, musculaires..." {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
               </TabsContent>
               <TabsContent value="contacts">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="generalPractitioner"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="generalPractitioner" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Médecin traitant</FormLabel>
                         <FormControl>
                           <Input placeholder="Nom du médecin traitant" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="ophtalmologistName"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="ophtalmologistName" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Ophtalmologue</FormLabel>
                         <FormControl>
                           <Input placeholder="Nom de l'ophtalmologue" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="entDoctorName"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="entDoctorName" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>ORL</FormLabel>
                         <FormControl>
                           <Input placeholder="Nom de l'ORL" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="entProblems"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="entProblems" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Problèmes ORL</FormLabel>
                         <FormControl>
                           <Input placeholder="Ex: acouphènes, sinusites..." {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="digestiveDoctorName"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="digestiveDoctorName" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Gastro-entérologue</FormLabel>
                         <FormControl>
                           <Input placeholder="Nom du gastro-entérologue" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="digestiveProblems"
-                    render={({ field }) => (
-                      <FormItem>
+                      </FormItem>} />
+                  <FormField control={form.control} name="digestiveProblems" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Problèmes digestifs</FormLabel>
                         <FormControl>
                           <Input placeholder="Ex: reflux, colopathie..." {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
               </TabsContent>
             </Tabs>
@@ -606,18 +468,13 @@ export function PatientForm({ patient, onSave, isLoading = false }: PatientFormP
               Annuler
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
+              {isLoading ? <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
                   Sauvegarde...
-                </>
-              ) : (
-                "Sauvegarder"
-              )}
+                </> : "Sauvegarder"}
             </Button>
           </CardFooter>
         </Card>
       </form>
-    </Form>
-  );
+    </Form>;
 }
