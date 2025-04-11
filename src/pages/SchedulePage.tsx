@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -21,21 +23,37 @@ const SchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
   const [view, setView] = useState<"day" | "week">("week");
+  const { isAuthenticated } = useAuth();
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [appointmentsData, patientsData] = await Promise.all([api.getAppointments(), api.getPatients()]);
-        setAppointments(appointmentsData);
-        setPatients(patientsData);
+        if (!isAuthenticated) {
+          return;
+        }
+        
+        console.log("Fetching schedule data...");
+        const [appointmentsData, patientsData] = await Promise.all([
+          api.getAppointments(),
+          api.getPatients()
+        ]);
+        
+        console.log("Appointments fetched:", appointmentsData?.length || 0);
+        console.log("Patients fetched:", patientsData?.length || 0);
+        
+        setAppointments(appointmentsData || []);
+        setPatients(patientsData || []);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching schedule data:", error);
         toast.error("Impossible de charger les données. Veuillez réessayer.");
       } finally {
         setLoading(false);
       }
     };
+    
     fetchData();
-  }, []);
+  }, [isAuthenticated]);
+  
   useEffect(() => {
     // Calculate current week days
     const start = startOfWeek(selectedDate, {
@@ -50,11 +68,19 @@ const SchedulePage = () => {
     });
     setCurrentWeek(days);
   }, [selectedDate]);
+  
   const getPatientById = (patientId: number) => {
     return patients.find(patient => patient.id === patientId);
   };
+  
   const getDayAppointments = (date: Date) => {
+    if (!appointments || appointments.length === 0) {
+      return [];
+    }
+    
     return appointments.filter(appointment => {
+      if (!appointment || !appointment.date) return false;
+      
       const appointmentDate = parseISO(appointment.date);
       return isSameDay(appointmentDate, date) && appointment.status === "SCHEDULED";
     }).sort((a, b) => {
@@ -63,21 +89,27 @@ const SchedulePage = () => {
       return timeA.getTime() - timeB.getTime();
     });
   };
+  
   const navigateToPreviousWeek = () => {
     setSelectedDate(prevDate => addDays(prevDate, -7));
   };
+  
   const navigateToNextWeek = () => {
     setSelectedDate(prevDate => addDays(prevDate, 7));
   };
+  
   const navigateToPreviousDay = () => {
     setSelectedDate(prevDate => addDays(prevDate, -1));
   };
+  
   const navigateToNextDay = () => {
     setSelectedDate(prevDate => addDays(prevDate, 1));
   };
+  
   const navigateToToday = () => {
     setSelectedDate(new Date());
   };
+  
   return <Layout>
       <div className="flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -208,11 +240,13 @@ const SchedulePage = () => {
       </div>
     </Layout>;
 };
+
 interface DayScheduleProps {
   date: Date;
   appointments: Appointment[];
   getPatientById: (id: number) => Patient | undefined;
 }
+
 const DaySchedule = ({
   date,
   appointments,
@@ -226,12 +260,15 @@ const DaySchedule = ({
     const minute = i % 2 * 30; // 0 or 30 minutes
     return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
   });
+
   const getAppointmentForTimeSlot = (timeSlot: string) => {
     return appointments.find(appointment => {
+      if (!appointment || !appointment.date) return false;
       const appointmentTime = format(parseISO(appointment.date), "HH:mm");
       return appointmentTime === timeSlot;
     });
   };
+
   return <div className="rounded-md border">
       {timeSlots.map(timeSlot => {
       const appointment = getAppointmentForTimeSlot(timeSlot);
@@ -269,4 +306,5 @@ const DaySchedule = ({
     })}
     </div>;
 };
+
 export default SchedulePage;
