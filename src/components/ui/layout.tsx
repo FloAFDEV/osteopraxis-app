@@ -30,7 +30,7 @@ export function Layout({
     const lastName = user.last_name || "";
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
   };
-  return <div className="flex min-h-screen flex-col bg-slate-950">
+  return <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
