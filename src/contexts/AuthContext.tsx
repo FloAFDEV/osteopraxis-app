@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { api } from "@/services/api";
 import { AuthState, User, Role } from "@/types";
@@ -155,6 +154,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     }
   };
+
+  // Ajout d'un useEffect pour charger automatiquement le token au démarrage
+  useEffect(() => {
+    console.log("AuthProvider mounted");
+    loadStoredToken().catch(error => {
+      console.error("Failed to load auth token at startup:", error);
+    });
+  }, []);
 
   return (
     <AuthContext.Provider

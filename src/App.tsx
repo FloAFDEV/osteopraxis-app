@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -107,6 +108,15 @@ const ProfileCheckRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  const { loadStoredToken } = useAuth();
+
+  useEffect(() => {
+    // Vérifier et charger le token d'authentification au démarrage de l'application
+    loadStoredToken().catch((error) => {
+      console.error("Erreur lors du chargement du token:", error);
+    });
+  }, [loadStoredToken]);
+
   return (
     <>
       <Routes>

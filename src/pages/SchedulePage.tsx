@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -28,23 +29,32 @@ const SchedulePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("Auth status:", isAuthenticated);
         if (!isAuthenticated) {
+          console.log("Not authenticated, skipping data fetch");
+          setLoading(false);
           return;
         }
         
         console.log("Fetching schedule data...");
-        const [appointmentsData, patientsData] = await Promise.all([
-          api.getAppointments(),
-          api.getPatients()
-        ]);
         
-        console.log("Appointments fetched:", appointmentsData?.length || 0);
-        console.log("Patients fetched:", patientsData?.length || 0);
+        try {
+          const appointmentsData = await api.getAppointments();
+          console.log("Appointments fetched:", appointmentsData?.length || 0);
+          setAppointments(appointmentsData || []);
+        } catch (error) {
+          console.error("Error fetching appointments:", error);
+        }
         
-        setAppointments(appointmentsData || []);
-        setPatients(patientsData || []);
+        try {
+          const patientsData = await api.getPatients();
+          console.log("Patients fetched:", patientsData?.length || 0);
+          setPatients(patientsData || []);
+        } catch (error) {
+          console.error("Error fetching patients:", error);
+        }
       } catch (error) {
-        console.error("Error fetching schedule data:", error);
+        console.error("Error in fetchData:", error);
         toast.error("Impossible de charger les données. Veuillez réessayer.");
       } finally {
         setLoading(false);
