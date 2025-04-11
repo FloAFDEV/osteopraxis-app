@@ -23,9 +23,17 @@ export const addAuthHeaders = <T extends { setHeader: (name: string, value: stri
 // Helper function to check auth state before operations
 export const checkAuth = async () => {
   const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    console.error("Authentication error:", error);
+    throw new Error(`Authentication error: ${error.message}`);
+  }
+  
   if (!data.session) {
+    console.error("No active session found");
     throw new Error('Not authenticated');
   }
+  
+  console.log("Authentication verified, user ID:", data.session.user.id);
   return data.session;
 };
 

@@ -1,6 +1,6 @@
 
 import { Osteopath } from "@/types";
-import { supabase, typedData } from "./utils";
+import { supabase, typedData, checkAuth } from "./utils";
 
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
@@ -42,11 +42,8 @@ export const supabaseOsteopathService = {
   },
   
   async updateOsteopath(id: number, osteopathData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath> {
-    // Make sure user is authenticated before proceeding
-    const session = await supabase.auth.getSession();
-    if (!session.data.session) {
-      throw new Error("Authentication required");
-    }
+    // Check authentication before proceeding
+    await checkAuth();
 
     const now = new Date().toISOString();
     
@@ -66,29 +63,32 @@ export const supabaseOsteopathService = {
   },
   
   async createOsteopath(osteopathData: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
-    // Make sure user is authenticated before proceeding
-    const session = await supabase.auth.getSession();
-    if (!session.data.session) {
-      throw new Error("Authentication required");
-    }
+    // Check authentication before proceeding
+    const session = await checkAuth();
+    console.log("Creating osteopath with authenticated session:", session.user.id);
 
     const now = new Date().toISOString();
     
-    const { data, error } = await supabase
-      .from("Osteopath")
-      .insert({
-        ...osteopathData,
-        createdAt: now,
-        updatedAt: now
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("Osteopath")
+        .insert({
+          ...osteopathData,
+          createdAt: now,
+          updatedAt: now
+        })
+        .select()
+        .single();
+        
+      if (error) {
+        console.error("Supabase createOsteopath error details:", error);
+        throw new Error(error.message);
+      }
       
-    if (error) {
-      console.error("Supabase createOsteopath error:", error);
-      throw new Error(error.message);
+      return typedData<Osteopath>(data);
+    } catch (error: any) {
+      console.error("Supabase createOsteopath exception:", error);
+      throw error;
     }
-    
-    return typedData<Osteopath>(data);
   }
 };

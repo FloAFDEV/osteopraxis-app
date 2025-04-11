@@ -7,18 +7,21 @@ import { Layout } from "@/components/ui/layout";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
 import { UserCog } from "lucide-react";
 import { toast } from "sonner";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const OsteopathProfilePage = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [osteopath, setOsteopath] = useState(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showAuthSheet, setShowAuthSheet] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadOsteopathData = async () => {
       if (!user) {
         setLoading(false);
+        setShowAuthSheet(true);
         return;
       }
 
@@ -39,12 +42,12 @@ const OsteopathProfilePage = () => {
     loadOsteopathData();
   }, [user]);
 
-  if (!user) {
+  if (!user && !showAuthSheet) {
     return <Navigate to="/login" />;
   }
 
   // If user already has an osteopath profile and not in edit mode, redirect to settings
-  if (user.osteopathId && !loading && osteopath) {
+  if (user?.osteopathId && !loading && osteopath) {
     return <Navigate to="/settings" />;
   }
 
@@ -95,6 +98,34 @@ const OsteopathProfilePage = () => {
           )}
         </div>
       </div>
+      
+      {/* Authentication Sheet */}
+      <Sheet open={showAuthSheet} onOpenChange={setShowAuthSheet}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Authentification requise</SheetTitle>
+          </SheetHeader>
+          <div className="py-6">
+            <p className="text-muted-foreground mb-4">
+              Vous devez être connecté pour accéder à cette page.
+            </p>
+            <div className="space-y-2">
+              <button 
+                onClick={() => navigate("/login")}
+                className="w-full bg-primary text-primary-foreground rounded px-4 py-2 hover:bg-primary/90 transition-colors"
+              >
+                Se connecter
+              </button>
+              <button 
+                onClick={() => navigate("/register")}
+                className="w-full bg-secondary text-secondary-foreground rounded px-4 py-2 hover:bg-secondary/90 transition-colors"
+              >
+                S'inscrire
+              </button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </Layout>
   );
 };

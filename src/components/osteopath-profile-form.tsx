@@ -6,6 +6,7 @@ import { Osteopath } from "@/types";
 import { api } from "@/services/api";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const osteopathProfileSchema = z.object({
   name: z.string().min(2, {
@@ -55,6 +57,8 @@ export function OsteopathProfileForm({
   const { user, updateUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const form = useForm<OsteopathProfileFormValues>({
     resolver: zodResolver(osteopathProfileSchema),
@@ -67,9 +71,15 @@ export function OsteopathProfileForm({
     },
   });
 
+  const redirectToLogin = () => {
+    toast.info("Veuillez vous connecter pour continuer");
+    navigate("/login", { state: { returnTo: "/profile/setup" } });
+  };
+
   const onSubmit = async (data: OsteopathProfileFormValues) => {
     if (!user) {
       setError("Vous devez être connecté pour effectuer cette action");
+      setAuthError(true);
       toast.error("Vous devez être connecté pour effectuer cette action");
       return;
     }
@@ -110,7 +120,17 @@ export function OsteopathProfileForm({
       }
     } catch (error: any) {
       console.error("Error submitting osteopath form:", error);
-      setError(error.message || "Une erreur est survenue. Veuillez réessayer.");
+      
+      // Check for auth errors
+      if (error.message?.includes('Not authenticated') || 
+          error.message?.includes('Authentication') ||
+          error.message?.includes('permission denied')) {
+        setAuthError(true);
+        setError("Vous devez être connecté pour effectuer cette action. Veuillez vous connecter à nouveau.");
+      } else {
+        setError(error.message || "Une erreur est survenue. Veuillez réessayer.");
+      }
+      
       toast.error(error.message || "Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
@@ -123,7 +143,33 @@ export function OsteopathProfileForm({
         <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
           <p className="font-medium">Erreur</p>
           <p className="text-sm">{error}</p>
+          {authError && (
+            <Button 
+              variant="outline" 
+              className="mt-2 bg-white" 
+              onClick={redirectToLogin}
+            >
+              Se connecter
+            </Button>
+          )}
         </div>
+      )}
+      
+      {!user && (
+        <Alert className="mb-6" variant="destructive">
+          <AlertTitle>Authentification requise</AlertTitle>
+          <AlertDescription>
+            Vous devez être connecté pour créer ou modifier votre profil.
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-2" 
+              onClick={redirectToLogin}
+            >
+              Se connecter
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
       
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -229,7 +275,11 @@ export function OsteopathProfileForm({
           )}
         />
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button 
+          type="submit" 
+          disabled={isSubmitting || !user} 
+          className="w-full"
+        >
           {isSubmitting 
             ? "Enregistrement..." 
             : isEditing 
