@@ -26,30 +26,30 @@ export const supabaseAuthService = {
       throw new Error("Échec lors de la création du compte");
     }
     
-    // Créer l'entrée User associée
-    const { error: userError } = await supabase
-      .from("User")
-      .insert({
-        id: data.user.id,
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        role: "OSTEOPATH", // Par défaut, tous les nouveaux utilisateurs sont des ostéopathes
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    
-    if (userError) {
-      console.error("Erreur lors de la création du profil utilisateur:", userError);
+    try {
+      // Créer l'entrée User associée
+      const { error: userError } = await supabase
+        .from("User")
+        .insert({
+          id: data.user.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          role: "OSTEOPATH", // Par défaut, tous les nouveaux utilisateurs sont des ostéopathes
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      
+      if (userError) {
+        console.error("Erreur lors de la création du profil utilisateur:", userError);
+      }
+    } catch (insertError) {
+      console.error("Erreur lors de la création du profil utilisateur:", insertError);
     }
     
-    // Si inscription réussie, connecter l'utilisateur
-    try {
-      return this.login(email, password);
-    } catch (loginError) {
-      console.error("Could not automatically login after registration:", loginError);
-      
-      // Return a basic auth state since the user was created but login failed
+    // Si email confirmation est requise, retourner un état spécial avec un message
+    if (data.session === null) {
+      // Email confirmation required
       return {
         user: {
           id: data.user.id,
@@ -61,10 +61,27 @@ export const supabaseAuthService = {
           updated_at: new Date().toISOString(),
           osteopathId: null
         },
-        isAuthenticated: true,
-        token: data.session?.access_token || null
+        isAuthenticated: false,
+        token: null,
+        message: "Veuillez confirmer votre email avant de vous connecter. Un lien de confirmation a été envoyé à votre adresse email."
       };
     }
+    
+    // Si inscription réussie et pas de confirmation d'email requise, connecter l'utilisateur
+    return {
+      user: {
+        id: data.user.id,
+        email: data.user.email || "",
+        first_name: firstName,
+        last_name: lastName,
+        role: "OSTEOPATH" as Role,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        osteopathId: null
+      },
+      isAuthenticated: true,
+      token: data.session?.access_token || null
+    };
   },
   
   async login(email: string, password: string): Promise<AuthState> {
@@ -77,6 +94,12 @@ export const supabaseAuthService = {
     
     if (error) {
       console.error("Supabase login error:", error);
+      
+      // Si l'erreur concerne l'email non confirmé, retourner un message spécifique
+      if (error.message.includes("Email not confirmed") || error.message === "Email not confirmed") {
+        throw new Error("Email non confirmé. Veuillez vérifier votre boîte mail et cliquer sur le lien de confirmation.");
+      }
+      
       throw new Error(error.message);
     }
     

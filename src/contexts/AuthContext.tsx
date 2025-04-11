@@ -51,9 +51,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAdmin(isUserAdmin(state.user));
       navigate("/");
       toast.success("Connexion réussie");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
-      toast.error("Échec de la connexion: identifiants incorrects");
+      toast.error(error.message || "Échec de la connexion: identifiants incorrects");
       throw error;
     } finally {
       setIsLoading(false);
@@ -78,13 +78,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       const state = await api.register(email, password, firstName, lastName);
+      
       setAuthState(state);
+      
+      // Si on a un message, c'est qu'il y a besoin de confirmer l'email
+      if (state.message) {
+        toast.info(state.message);
+        navigate("/login");
+        return;
+      }
+      
       setIsAdmin(isUserAdmin(state.user));
-      navigate("/");
-      toast.success("Compte créé avec succès");
-    } catch (error) {
+      
+      if (state.isAuthenticated) {
+        navigate("/");
+        toast.success("Compte créé avec succès");
+      }
+    } catch (error: any) {
       console.error("Register failed:", error);
-      toast.error("Échec de l'inscription");
+      toast.error(error.message || "Échec de l'inscription");
       throw error;
     } finally {
       setIsLoading(false);

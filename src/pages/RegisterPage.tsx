@@ -27,6 +27,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 const RegisterPage = () => {
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [registerError, setRegisterError] = useState<string | null>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -40,12 +41,13 @@ const RegisterPage = () => {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
+    setRegisterError(null);
     try {
       await register(data.email, data.password, data.firstName, data.lastName);
-      toast.success("Compte créé avec succès");
-      navigate("/");
+      // Ne pas rediriger ici car c'est géré dans le context en fonction de si confirmation email requise ou pas
     } catch (error: any) {
       console.error("Register error:", error);
+      setRegisterError(error.message || "Erreur lors de la création du compte");
       toast.error(error.message || "Erreur lors de la création du compte");
     }
   };
@@ -79,6 +81,12 @@ const RegisterPage = () => {
                 <span className="px-2 bg-[#0d1117] text-gray-400">Inscription</span>
               </div>
             </div>
+
+            {registerError && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-md">
+                {registerError}
+              </div>
+            )}
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
