@@ -43,7 +43,12 @@ const RegisterPage = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     setRegisterError(null);
     try {
-      await register(data.email, data.password, data.firstName, data.lastName);
+      await register({
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName
+      });
       // Ne pas rediriger ici car c'est géré dans le context en fonction de si confirmation email requise ou pas
     } catch (error: any) {
       console.error("Register error:", error);

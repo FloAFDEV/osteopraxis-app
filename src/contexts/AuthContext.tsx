@@ -1,4 +1,3 @@
-
 import React, {
   createContext,
   useContext,
@@ -109,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }) => {
       try {
         setIsLoading(true);
-        const response = await api.register(userData.email, userData.password, userData.firstName, userData.lastName);
+        const response = await api.register(userData);
         
         if (response.token) {
           localStorage.setItem("authState", JSON.stringify(response));
