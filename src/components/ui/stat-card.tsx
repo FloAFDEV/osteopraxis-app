@@ -17,7 +17,7 @@ const StatCard = ({
 }: StatCardProps) => {
   return <Card style={{
     borderTopColor: `var(--${color.replace("text-", "")})`
-  }} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow hover-shadow-md">
+  }} className="overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-[2px] transition-all duration-300 ease-in-out">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {icon && <div className={cn("h-7 w-7 font-medium", color)}>{icon}</div>}
