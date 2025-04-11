@@ -55,6 +55,7 @@ export function OsteopathProfileForm({
 }: OsteopathProfileFormProps) {
   const { user, updateUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<OsteopathProfileFormValues>({
     resolver: zodResolver(osteopathProfileSchema),
@@ -70,12 +71,14 @@ export function OsteopathProfileForm({
   const onSubmit = async (data: OsteopathProfileFormValues) => {
     try {
       setIsSubmitting(true);
+      setError(null);
       
       if (isEditing && osteopathId) {
         // Update existing osteopath
         await api.updateOsteopath(osteopathId, data);
         toast.success("Profil mis à jour avec succès");
       } else if (user) {
+        console.log("Creating osteopath for user:", user.id);
         // Create new osteopath
         const newOsteopath = await api.createOsteopath({
           name: data.name,
@@ -100,9 +103,10 @@ export function OsteopathProfileForm({
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting osteopath form:", error);
-      toast.error("Une erreur est survenue. Veuillez réessayer.");
+      setError(error.message || "Une erreur est survenue. Veuillez réessayer.");
+      toast.error(error.message || "Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
     }
@@ -110,6 +114,13 @@ export function OsteopathProfileForm({
 
   return (
     <Form {...form}>
+      {error && (
+        <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
+          <p className="font-medium">Erreur</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+      
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}

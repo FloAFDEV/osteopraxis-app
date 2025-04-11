@@ -20,6 +20,15 @@ export const addAuthHeaders = <T extends { setHeader: (name: string, value: stri
   return query;
 };
 
+// Helper function to check auth state before operations
+export const checkAuth = () => {
+  const session = supabase.auth.getSession();
+  if (!session) {
+    throw new Error('Not authenticated');
+  }
+  return session;
+};
+
 // Récupérer un type enum à partir d'une valeur string
 export function getEnumValue<T extends string>(value: string, allowedValues: readonly T[]): T {
   if (allowedValues.includes(value as T)) {

@@ -18,16 +18,13 @@ export const supabaseOsteopathService = {
       .from("Osteopath")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
       
     if (error) {
-      if (error.code === "PGRST116") {
-        return undefined;
-      }
       throw new Error(error.message);
     }
     
-    return typedData<Osteopath>(data);
+    return data ? typedData<Osteopath>(data) : undefined;
   },
   
   async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {
@@ -35,16 +32,13 @@ export const supabaseOsteopathService = {
       .from("Osteopath")
       .select("*")
       .eq("userId", userId)
-      .single();
+      .maybeSingle();
       
     if (error) {
-      if (error.code === "PGRST116") {
-        return undefined;
-      }
       throw new Error(error.message);
     }
     
-    return typedData<Osteopath>(data);
+    return data ? typedData<Osteopath>(data) : undefined;
   },
   
   async updateOsteopath(id: number, osteopathData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath> {
@@ -78,7 +72,10 @@ export const supabaseOsteopathService = {
       .select()
       .single();
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Supabase createOsteopath error:", error);
+      throw new Error(error.message);
+    }
     
     return typedData<Osteopath>(data);
   }
