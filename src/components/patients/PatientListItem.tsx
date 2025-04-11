@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Mail, UserCheck, UserCircle, User } from "lucide-react";
+import { Mail, UserCheck, UserCircle, Users } from "lucide-react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -29,9 +29,20 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
     if (patient.gender === 'Homme') {
       return 'bg-blue-100 text-blue-600';
     } else if (patient.gender === 'Femme') {
-      return 'bg-blue-100 text-blue-600';
+      return 'bg-pink-100 text-pink-600';
     } else {
-      return 'bg-blue-100 text-blue-600';
+      return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  // Get the appropriate gender icon
+  const getGenderIcon = () => {
+    if (patient.gender === 'Homme') {
+      return <UserCheck className="h-5 w-5 text-blue-600" />;
+    } else if (patient.gender === 'Femme') {
+      return <UserCircle className="h-5 w-5 text-pink-600" />;
+    } else {
+      return <Users className="h-5 w-5 text-gray-600" />;
     }
   };
   
@@ -42,7 +53,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
             {/* Avatar with gender */}
             <Avatar className={`${getAvatarColor()} h-10 w-10`}>
               {patient.avatarUrl ? <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} /> : <AvatarFallback className={getAvatarColor()}>
-                  {patient.gender === 'Homme' ? <UserCheck className="h-5 w-5" /> : patient.gender === 'Femme' ? <UserCircle className="h-5 w-5" /> : <User className="h-5 w-5" />}
+                  {getGenderIcon()}
                 </AvatarFallback>}
             </Avatar>
             
