@@ -88,7 +88,6 @@ export type Database = {
         Row: {
           address: string
           createdAt: string
-          email: string | null
           id: number
           imageUrl: string | null
           logoUrl: string | null
@@ -100,7 +99,6 @@ export type Database = {
         Insert: {
           address: string
           createdAt?: string
-          email?: string | null
           id?: number
           imageUrl?: string | null
           logoUrl?: string | null
@@ -112,7 +110,6 @@ export type Database = {
         Update: {
           address?: string
           createdAt?: string
-          email?: string | null
           id?: number
           imageUrl?: string | null
           logoUrl?: string | null
@@ -291,35 +288,23 @@ export type Database = {
       }
       Osteopath: {
         Row: {
-          adeli_number: string | null
-          ape_code: string | null
           createdAt: string
           id: number
           name: string
-          professional_title: string | null
-          siret: string | null
           updatedAt: string
           userId: string
         }
         Insert: {
-          adeli_number?: string | null
-          ape_code?: string | null
           createdAt?: string
           id?: number
           name: string
-          professional_title?: string | null
-          siret?: string | null
           updatedAt: string
           userId: string
         }
         Update: {
-          adeli_number?: string | null
-          ape_code?: string | null
           createdAt?: string
           id?: number
           name?: string
-          professional_title?: string | null
-          siret?: string | null
           updatedAt?: string
           userId?: string
         }

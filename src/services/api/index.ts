@@ -1,28 +1,22 @@
 
-import { authService } from './auth-service';
 import { patientService } from './patient-service';
 import { appointmentService } from './appointment-service';
 import { cabinetService } from './cabinet-service';
 import { osteopathService } from './osteopath-service';
-import { userService } from './user-service';
-import { invoiceService } from './invoice-service';
+import { authService } from './auth-service';
+import { USE_SUPABASE } from './config';
+import { supabaseInvoiceService } from '../supabase-api/invoice-service';
 
+// API principale
 export const api = {
-  // Auth
-  register: authService.register,
-  login: authService.login,
-  loginWithMagicLink: authService.loginWithMagicLink,
-  logout: authService.logout,
-  checkAuth: authService.checkAuth,
-  promoteToAdmin: authService.promoteToAdmin,
+  // Services existants
+  ...patientService,
+  ...appointmentService,
+  ...cabinetService,
+  ...osteopathService,
+  ...authService,
   
-  // Patients
-  getPatients: patientService.getPatients,
-  getPatientById: patientService.getPatientById,
-  createPatient: patientService.createPatient,
-  updatePatient: patientService.updatePatient,
-  
-  // Cabinets
+  // Méthodes de cabinet (ajoutées ou modifiées)
   getCabinets: cabinetService.getCabinets,
   getCabinetById: cabinetService.getCabinetById,
   getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
@@ -30,26 +24,51 @@ export const api = {
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
   
-  // Osteopaths
-  getOsteopaths: osteopathService.getOsteopaths,
-  getOsteopathById: osteopathService.getOsteopathById,
-  createOsteopath: osteopathService.createOsteopath,
-  updateOsteopath: osteopathService.updateOsteopath,
+  // Service de facturation (directement depuis Supabase)
+  getInvoices: async () => {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseInvoiceService.getInvoices();
+      } catch (error) {
+        console.error("Erreur lors de la récupération des factures:", error);
+        throw error;
+      }
+    }
+    throw new Error("Fonctionnalité de facturation non disponible en mode local");
+  },
   
-  // Users
-  updateUserOsteopathId: userService.updateUserOsteopathId,
+  getInvoiceById: (id: number) => {
+    if (USE_SUPABASE) {
+      return supabaseInvoiceService.getInvoiceById(id);
+    }
+    throw new Error("Fonctionnalité de facturation non disponible en mode local");
+  },
   
-  // Appointments
-  getAppointments: appointmentService.getAppointments,
-  getAppointmentById: appointmentService.getAppointmentById,
-  getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
-  createAppointment: appointmentService.createAppointment,
-  updateAppointment: appointmentService.updateAppointment,
-  deleteAppointment: appointmentService.deleteAppointment,
+  getInvoicesByPatientId: (patientId: number) => {
+    if (USE_SUPABASE) {
+      return supabaseInvoiceService.getInvoicesByPatientId(patientId);
+    }
+    throw new Error("Fonctionnalité de facturation non disponible en mode local");
+  },
   
-  // Invoices
-  getInvoices: invoiceService.getInvoices,
-  getInvoiceById: invoiceService.getInvoiceById,
-  createInvoice: invoiceService.createInvoice,
-  updatePaymentStatus: invoiceService.updatePaymentStatus
+  createInvoice: (invoiceData: any) => {
+    if (USE_SUPABASE) {
+      return supabaseInvoiceService.createInvoice(invoiceData);
+    }
+    throw new Error("Fonctionnalité de facturation non disponible en mode local");
+  },
+  
+  updateInvoice: (id: number, invoiceData: any) => {
+    if (USE_SUPABASE) {
+      return supabaseInvoiceService.updateInvoice(id, invoiceData);
+    }
+    throw new Error("Fonctionnalité de facturation non disponible en mode local");
+  },
+  
+  updatePaymentStatus: (id: number, paymentStatus: 'PAID' | 'PENDING' | 'CANCELED') => {
+    if (USE_SUPABASE) {
+      return supabaseInvoiceService.updatePaymentStatus(id, paymentStatus);
+    }
+    throw new Error("Fonctionnalité de facturation non disponible en mode local");
+  }
 };

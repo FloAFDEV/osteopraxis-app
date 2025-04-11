@@ -31,15 +31,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Log pour le débogage
-  console.log("AuthProvider rendering, authState:", authState, "isAdmin:", isAdmin, "isLoading:", isLoading);
-
   const loadStoredToken = async () => {
-    console.log("loadStoredToken called");
     try {
       const state = await api.checkAuth();
-      console.log("checkAuth returned:", state);
-      
       setAuthState(state);
       setIsAdmin(isUserAdmin(state.user));
       setIsLoading(false);
@@ -55,10 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const state = await api.login(email, password);
       setAuthState(state);
       setIsAdmin(isUserAdmin(state.user));
-      
-      // Redirigez vers le tableau de bord - la vérification de l'osteopathId est maintenant gérée dans App.tsx
-      navigate("/dashboard");
-      
+      navigate("/");
       toast.success("Connexion réussie");
     } catch (error: any) {
       console.error("Login failed:", error);
@@ -99,9 +90,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       setIsAdmin(isUserAdmin(state.user));
       
-      // Redirigez vers le tableau de bord - la vérification de l'osteopathId est maintenant gérée dans App.tsx
       if (state.isAuthenticated) {
-        navigate("/dashboard");
+        navigate("/");
         toast.success("Compte créé avec succès");
       }
     } catch (error: any) {
@@ -157,14 +147,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     }
   };
-
-  // Ajout d'un useEffect pour charger automatiquement le token au démarrage
-  useEffect(() => {
-    console.log("AuthProvider mounted");
-    loadStoredToken().catch(error => {
-      console.error("Failed to load auth token at startup:", error);
-    });
-  }, []);
 
   return (
     <AuthContext.Provider

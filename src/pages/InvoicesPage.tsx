@@ -42,7 +42,7 @@ const InvoicesPage = () => {
     }
   };
   
-  const filteredInvoices = invoices ? invoices.filter((invoice) => {
+  const filteredInvoices = invoices?.filter((invoice) => {
     const matchesQuery = 
       invoice.Patient?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       invoice.Patient?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -53,8 +53,7 @@ const InvoicesPage = () => {
       invoice.paymentStatus === statusFilter;
     
     return matchesQuery && matchesStatus;
-  }) : [];
-  
+  });
   
   return (
     <Layout>

@@ -1,4 +1,3 @@
-
 import { Cabinet } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseCabinetService } from "../supabase-api/cabinet-service";
@@ -10,7 +9,6 @@ const cabinets: Cabinet[] = [
     name: "Cabinet d'Ostéopathie Zen",
     address: "18 Rue Lafayette, Toulouse",
     phone: "05 61 23 45 67",
-    email: null,
     imageUrl: null,
     logoUrl: null,
     osteopathId: 1,
