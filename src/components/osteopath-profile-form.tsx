@@ -45,7 +45,7 @@ interface OsteopathProfileFormProps {
   defaultValues?: Partial<OsteopathProfileFormValues>;
   osteopathId?: number;
   isEditing?: boolean;
-  onSuccess?: () => void;
+  onSuccess?: (osteopath: Osteopath) => void;
 }
 
 export function OsteopathProfileForm({
@@ -88,14 +88,16 @@ export function OsteopathProfileForm({
       setIsSubmitting(true);
       setError(null);
       
+      let osteopathResult: Osteopath;
+      
       if (isEditing && osteopathId) {
         // Update existing osteopath
-        await api.updateOsteopath(osteopathId, data);
+        osteopathResult = await api.updateOsteopath(osteopathId, data);
         toast.success("Profil mis à jour avec succès");
       } else {
         console.log("Creating osteopath for user:", user.id);
         // Create new osteopath
-        const newOsteopath = await api.createOsteopath({
+        osteopathResult = await api.createOsteopath({
           name: data.name,
           professional_title: data.professional_title || "Ostéopathe D.O.",
           adeli_number: data.adeli_number,
@@ -103,20 +105,12 @@ export function OsteopathProfileForm({
           ape_code: data.ape_code || "8690F",
           userId: user.id
         });
-
-        // Update user with new osteopathId
-        if (updateUser && newOsteopath) {
-          updateUser({
-            ...user,
-            osteopathId: newOsteopath.id
-          });
-        }
         
         toast.success("Profil créé avec succès");
       }
       
       if (onSuccess) {
-        onSuccess();
+        onSuccess(osteopathResult);
       }
     } catch (error: any) {
       console.error("Error submitting osteopath form:", error);

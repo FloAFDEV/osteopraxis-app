@@ -8,11 +8,12 @@ import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
 import { UserCog } from "lucide-react";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Osteopath } from "@/types";
 
 const OsteopathProfilePage = () => {
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [osteopath, setOsteopath] = useState(null);
+  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAuthSheet, setShowAuthSheet] = useState(false);
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const OsteopathProfilePage = () => {
     return <Navigate to="/settings" />;
   }
 
-  const handleSuccess = async (updatedOsteopath) => {
+  const handleSuccess = (updatedOsteopath: Osteopath) => {
     // Si c'est une mise à jour d'un ostéopathe existant
     if (osteopath && osteopath.id) {
       toast.success("Profil mis à jour avec succès");
