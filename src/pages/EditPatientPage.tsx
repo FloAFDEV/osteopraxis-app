@@ -7,20 +7,33 @@ import { api } from '@/services/api';
 import { Patient } from '@/types';
 import { toast } from 'sonner';
 import { UserRound } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 const EditPatientPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!id) return;
 
     const loadPatient = async () => {
       try {
+        setIsLoading(true);
         const patientId = parseInt(id);
-        const data = await api.getPatientById(patientId);
+        
+        // Utilisation directe du client Supabase au lieu de l'API
+        const { data, error } = await supabase
+          .from('Patient')
+          .select('*')
+          .eq('id', patientId)
+          .single();
+
+        if (error) {
+          throw error;
+        }
         
         if (!data) {
           toast.error("Patient non trouvé");
@@ -54,6 +67,8 @@ const EditPatientPage = () => {
     if (!patient) return;
     
     try {
+      setIsSaving(true);
+      
       // Make sure hasChildren is kept as a string to match Patient type
       if (typeof updatedData.hasChildren === 'boolean') {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
@@ -71,12 +86,23 @@ const EditPatientPage = () => {
         userId: patient.userId,
       };
       
-      await api.updatePatient(updatedPatient);
+      // Utilisation directe du client Supabase au lieu de l'API
+      const { error } = await supabase
+        .from('Patient')
+        .update(updatedPatient)
+        .eq('id', patient.id);
+      
+      if (error) {
+        throw error;
+      }
+      
       toast.success("Patient mis à jour avec succès");
       navigate('/patients');
     } catch (error) {
       console.error("Error updating patient:", error);
       toast.error("Impossible de mettre à jour le patient");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -125,7 +151,11 @@ const EditPatientPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <PatientForm patient={patient} onSave={handleSave} />
+          <PatientForm 
+            patient={patient} 
+            onSave={handleSave} 
+            isSubmitting={isSaving}
+          />
         </div>
       </div>
     </Layout>
