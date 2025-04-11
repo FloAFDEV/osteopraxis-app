@@ -38,7 +38,31 @@ export const authService = {
     // Fallback: code simulé existant
     await delay(500);
     // Simuler une inscription (démo seulement)
-    return this.login(email, password);
+    const newUser: User = {
+      id: `user-${Date.now()}`,
+      email,
+      first_name: firstName,
+      last_name: lastName,
+      role: "OSTEOPATH",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      osteopathId: users.length + 1
+    };
+    
+    users.push(newUser);
+    
+    // Créer un token simulé
+    const token = "fake-jwt-token-" + Math.random().toString(36).substring(2);
+    
+    authState = {
+      user: newUser,
+      isAuthenticated: true,
+      token
+    };
+    
+    localStorage.setItem("authState", JSON.stringify(authState));
+    
+    return authState;
   },
   
   async login(email: string, password: string): Promise<AuthState> {

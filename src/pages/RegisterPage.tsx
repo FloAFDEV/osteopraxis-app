@@ -127,7 +127,12 @@ const RegisterPage = () => {
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                          <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="votre@email.com" {...field} />
+                          <Input 
+                            className="pl-10 bg-[#161b22] border-gray-700 text-white" 
+                            placeholder="votre@email.com" 
+                            autoComplete="email"
+                            {...field} 
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -144,7 +149,13 @@ const RegisterPage = () => {
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                          <Input type="password" className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Votre mot de passe" {...field} />
+                          <Input 
+                            type="password" 
+                            className="pl-10 bg-[#161b22] border-gray-700 text-white" 
+                            placeholder="Votre mot de passe" 
+                            autoComplete="new-password"
+                            {...field} 
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -161,7 +172,13 @@ const RegisterPage = () => {
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                          <Input type="password" className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Confirmer votre mot de passe" {...field} />
+                          <Input 
+                            type="password" 
+                            className="pl-10 bg-[#161b22] border-gray-700 text-white" 
+                            placeholder="Confirmer votre mot de passe" 
+                            autoComplete="new-password"
+                            {...field} 
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />

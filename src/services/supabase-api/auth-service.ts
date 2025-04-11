@@ -4,6 +4,8 @@ import { supabase } from "./utils";
 
 export const supabaseAuthService = {
   async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
+    console.log("Registering user with Supabase:", { email, firstName, lastName });
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -15,7 +17,10 @@ export const supabaseAuthService = {
       }
     });
     
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Supabase registration error:", error);
+      throw new Error(error.message);
+    }
     
     if (!data.user) {
       throw new Error("Échec lors de la création du compte");
@@ -39,16 +44,41 @@ export const supabaseAuthService = {
     }
     
     // Si inscription réussie, connecter l'utilisateur
-    return this.login(email, password);
+    try {
+      return this.login(email, password);
+    } catch (loginError) {
+      console.error("Could not automatically login after registration:", loginError);
+      
+      // Return a basic auth state since the user was created but login failed
+      return {
+        user: {
+          id: data.user.id,
+          email: data.user.email || "",
+          first_name: firstName,
+          last_name: lastName,
+          role: "OSTEOPATH" as Role,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          osteopathId: null
+        },
+        isAuthenticated: true,
+        token: data.session?.access_token || null
+      };
+    }
   },
   
   async login(email: string, password: string): Promise<AuthState> {
+    console.log("Logging in with Supabase:", email);
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Supabase login error:", error);
+      throw new Error(error.message);
+    }
     
     if (!data.user) {
       throw new Error("Identifiants incorrects");
