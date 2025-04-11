@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, User, UserRound, Users } from "lucide-react";
@@ -6,11 +5,9 @@ import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { differenceInYears, parseISO } from "date-fns";
-
 interface PatientListItemProps {
   patient: Patient;
 }
-
 const PatientListItem: React.FC<PatientListItemProps> = ({
   patient
 }) => {
@@ -45,7 +42,6 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
       return <Users className="h-5 w-5 text-gray-600" />;
     }
   };
-  
   return <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
       <div className="p-4">
         <div className="flex justify-between items-center">
@@ -62,15 +58,15 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
                 <Link to={`/patients/${patient.id}`} className="hover:underline">
                   {patient.lastName} {patient.firstName}
                 </Link>
-                {age !== null && <span className="text-sm ml-2 text-gray-500">({age} ans)</span>}
+                {age !== null && <span className="text-sm ml-2 text-gray-400">({age} ans)</span>}
               </div>
               
               <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
-                {patient.email && <span className="flex items-center">
+                {patient.email && <span className="flex items-center text-gray-300">
                     <Mail className="h-3 w-3 mr-1 text-blue-500" /> {patient.email}
                   </span>}
                 
-                {patient.phone && <span className="text-gray-500">{patient.phone}</span>}
+                {patient.phone && <span className="text-gray-400">{patient.phone}</span>}
                 
                 {patient.occupation && <span className="text-gray-500 italic">{patient.occupation}</span>}
               </div>
@@ -89,5 +85,4 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
       </div>
     </div>;
 };
-
 export default PatientListItem;
