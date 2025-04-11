@@ -18,13 +18,14 @@ const StatCard = ({
   color = "text-blue-500",
   icon
 }: StatCardProps) => {
+  // Transform the text color (like text-blue-500) to a border color (like border-t-blue-500)
   const borderColor = color.replace("text-", "border-t-");
 
   return (
     <Card
       className={cn(
         "overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-[2px] border-t-4",
-        borderColor // Use the correctly transformed borderColor variable
+        borderColor
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
