@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -7,6 +6,7 @@ import { Patient, Contraception } from '@/types';
 import { toast } from 'sonner';
 import { UserRound } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { patientService } from '@/services/api/patient-service';
 
 const EditPatientPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,34 +74,13 @@ const EditPatientPage = () => {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
       }
       
-      // Merge the updated form data with the existing patient data
-      const updatedPatient = {
+      // Use the patientService instead of direct Supabase calls
+      // This will use the appropriate HTTP method configured in the service
+      const result = await patientService.updatePatient({
         ...patient,
         ...updatedData,
-        // Ensure required fields are present
-        id: patient.id,
-        createdAt: patient.createdAt,
-        updatedAt: new Date().toISOString(),
-        osteopathId: patient.osteopathId,
-        userId: patient.userId,
-      };
-      
-      // Handle contraception value for Supabase compatibility
-      let patientDataForSupabase = { ...updatedPatient };
-      if (patientDataForSupabase.contraception === "IMPLANT") {
-        patientDataForSupabase.contraception = "IMPLANTS" as Contraception;
-      }
-      
-      // Utiliser la méthode .update() du client Supabase - NE PAS utiliser PATCH
-      const { error } = await supabase
-        .from('Patient')
-        .update(patientDataForSupabase)
-        .eq('id', patient.id);
-      
-      if (error) {
-        console.error("Error updating patient:", error);
-        throw error;
-      }
+        updatedAt: new Date().toISOString()
+      });
       
       toast.success("Patient mis à jour avec succès");
       navigate('/patients');

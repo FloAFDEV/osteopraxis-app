@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -78,6 +79,12 @@ export const patientService = {
       contraceptionValue = "IMPLANTS" as Contraception;
     }
     
+    // Handle gender type mismatch by converting if needed
+    let genderValue = patient.gender;
+    if (genderValue && genderValue.toString() === "Autre") {
+      genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
+    }
+    
     // Map the patient data to match the Supabase column names
     const patientData = {
       firstName: patient.firstName,
@@ -86,7 +93,7 @@ export const patientService = {
       phone: patient.phone,
       address: patient.address,
       // Handle gender type mismatch by converting if needed
-      gender: patient.gender && patient.gender.toString() === "Autre" ? "Homme" as Gender : patient.gender,
+      gender: genderValue,
       maritalStatus: patient.maritalStatus,
       occupation: patient.occupation,
       hasChildren: patient.hasChildren,
@@ -182,6 +189,7 @@ export const patientService = {
       updatedAt: now
     };
 
+    // Use the update() method with POST instead of PATCH
     const { data, error } = await supabase
       .from('Patient')
       .update(updateData)
