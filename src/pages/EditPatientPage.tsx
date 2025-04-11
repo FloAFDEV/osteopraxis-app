@@ -23,34 +23,15 @@ const EditPatientPage = () => {
         setIsLoading(true);
         const patientId = parseInt(id);
         
-        // Utilisation directe du client Supabase
-        const { data, error } = await supabase
-          .from('Patient')
-          .select('*')
-          .eq('id', patientId)
-          .single();
-
-        if (error) {
-          throw error;
-        }
+        const patient = await patientService.getPatientById(patientId);
         
-        if (!data) {
+        if (!patient) {
           toast.error("Patient non trouvé");
           navigate('/patients');
           return;
         }
         
-        // Ensure data is correctly formatted but maintain string type for hasChildren
-        const formattedPatient = {
-          ...data,
-          // Keep hasChildren as a string to match the Patient type
-          hasChildren: data.hasChildren || "false",
-          // These can be boolean as per the Patient type
-          isSmoker: Boolean(data.isSmoker),
-          hasVisionCorrection: Boolean(data.hasVisionCorrection)
-        };
-        
-        setPatient(formattedPatient);
+        setPatient(patient as Patient);
       } catch (error) {
         console.error("Error loading patient:", error);
         toast.error("Impossible de charger les données du patient");
@@ -74,8 +55,7 @@ const EditPatientPage = () => {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
       }
       
-      // Use the patientService instead of direct Supabase calls
-      // This will use the appropriate HTTP method configured in the service
+      // Use the patientService updatePatient method
       const result = await patientService.updatePatient({
         ...patient,
         ...updatedData,

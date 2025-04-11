@@ -62,7 +62,7 @@ export const patientService = {
   async updatePatient(patient: Patient): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        // Fixed: Using just the patient object instead of id and patient separately
+        // Use the supabase patient service for update
         const updatedPatient = await supabasePatientService.updatePatient(patient);
         return updatedPatient;
       } catch (error) {
