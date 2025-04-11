@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Building, Phone, MapPin, Save } from "lucide-react";
+import { Building, Phone, MapPin, Save, Mail } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -9,30 +9,41 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Cabinet } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CabinetSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuth();
 
   const form = useForm({
     defaultValues: {
       name: "",
       address: "",
-      phone: ""
+      phone: "",
+      email: ""
     }
   });
 
   useEffect(() => {
     const fetchCabinet = async () => {
+      if (!user?.osteopathId) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const data = await api.getCabinetById(1); // Pour cette démo, nous utilisons le cabinet ID 1
-        if (data) {
-          setCabinet(data);
+        // Fetch cabinets for the current osteopath
+        const cabinets = await api.getCabinetsByOsteopathId(user.osteopathId);
+        if (cabinets && cabinets.length > 0) {
+          const primaryCabinet = cabinets[0]; // Use the first cabinet as primary
+          setCabinet(primaryCabinet);
           form.reset({
-            name: data.name,
-            address: data.address,
-            phone: data.phone || ""
+            name: primaryCabinet.name,
+            address: primaryCabinet.address,
+            phone: primaryCabinet.phone || "",
+            email: primaryCabinet.email || ""
           });
         }
       } catch (error) {
@@ -44,9 +55,9 @@ const CabinetSettingsPage = () => {
     };
 
     fetchCabinet();
-  }, [form]);
+  }, [form, user]);
 
-  const onSubmit = async (data: { name: string; address: string; phone: string }) => {
+  const onSubmit = async (data: { name: string; address: string; phone: string; email: string }) => {
     if (!cabinet) return;
     
     try {
@@ -54,7 +65,8 @@ const CabinetSettingsPage = () => {
       const updatedCabinet = await api.updateCabinet(cabinet.id, {
         name: data.name,
         address: data.address,
-        phone: data.phone
+        phone: data.phone || null,
+        email: data.email || null
       });
       
       if (updatedCabinet) {
@@ -88,6 +100,15 @@ const CabinetSettingsPage = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Chargement des informations...</p>
             </div>
+          </div>
+        ) : !cabinet ? (
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center">
+            <p className="text-amber-800 dark:text-amber-300 mb-4">
+              Vous n'avez pas encore de cabinet configuré.
+            </p>
+            <Button asChild>
+              <a href="/cabinets/new">Créer un cabinet</a>
+            </Button>
           </div>
         ) : (
           <div className="bg-card rounded-lg border shadow-sm p-6">
@@ -135,6 +156,22 @@ const CabinetSettingsPage = () => {
                         <div className="relative">
                           <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input className="pl-10" placeholder="Numéro de téléphone" {...field} />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email (facultatif)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input className="pl-10" placeholder="Email du cabinet" {...field} />
                         </div>
                       </FormControl>
                     </FormItem>

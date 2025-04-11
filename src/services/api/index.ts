@@ -24,6 +24,13 @@ export const api = {
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
   
+  // Méthodes d'ostéopathe (ajoutées ou modifiées)
+  getOsteopaths: osteopathService.getOsteopaths,
+  getOsteopathById: osteopathService.getOsteopathById,
+  getOsteopathByUserId: osteopathService.getOsteopathByUserId,
+  updateOsteopath: osteopathService.updateOsteopath,
+  createOsteopath: osteopathService.createOsteopath,
+  
   // Service de facturation (directement depuis Supabase)
   getInvoices: async () => {
     if (USE_SUPABASE) {

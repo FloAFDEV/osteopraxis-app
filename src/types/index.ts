@@ -107,6 +107,7 @@ export interface Cabinet {
   name: string;
   address: string;
   phone: string | null;
+  email?: string | null;
   imageUrl: string | null;
   logoUrl: string | null;
   osteopathId: number;
@@ -119,6 +120,10 @@ export interface Osteopath {
   id: number;
   name: string;
   userId: string;
+  professional_title: string | null;
+  adeli_number: string | null;
+  siret: string | null;
+  ape_code: string | null;
   createdAt: string;
   updatedAt: string;
 }

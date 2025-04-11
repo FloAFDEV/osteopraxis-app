@@ -1,177 +1,166 @@
-
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
+import { User } from "@/types";
 import { api } from "@/services/api";
-import { AuthState, User, Role } from "@/types";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { isUserAdmin } from "@/utils/patient-form-helpers";
 
-interface AuthContextType {
+interface AuthState {
   user: User | null;
-  isAdmin: boolean;
   isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithMagicLink: (email: string) => Promise<void>;
-  logout: () => Promise<void>;
-  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
-  promoteToAdmin: (userId: string) => Promise<void>;
-  loadStoredToken: () => Promise<void>;
+  token: string | null;
+  message?: string; // Optional message field for auth feedback
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType extends AuthState {
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }) => Promise<boolean>;
+  logout: () => void;
+  loadStoredToken: () => void;
+  updateUser: (updatedUser: User) => boolean;
+}
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAuthenticated: false,
+  token: null,
+  isAdmin: false,
+  login: async () => false,
+  register: async () => false,
+  logout: () => {},
+  loadStoredToken: () => {},
+  updateUser: () => true,
+});
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    token: null
+    token: null,
   });
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const isAdmin = useMemo(() => authState.user?.role === "ADMIN", [authState.user]);
 
-  const loadStoredToken = async () => {
-    try {
-      const state = await api.checkAuth();
-      setAuthState(state);
-      setIsAdmin(isUserAdmin(state.user));
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Auth check failed:", error);
-      setIsLoading(false);
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const state = await api.login(email, password);
-      setAuthState(state);
-      setIsAdmin(isUserAdmin(state.user));
-      navigate("/");
-      toast.success("Connexion réussie");
-    } catch (error: any) {
-      console.error("Login failed:", error);
-      toast.error(error.message || "Échec de la connexion: identifiants incorrects");
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loginWithMagicLink = async (email: string) => {
-    try {
-      setIsLoading(true);
-      await api.loginWithMagicLink(email);
-      toast.success("Un lien de connexion a été envoyé à votre adresse email");
-    } catch (error) {
-      console.error("Magic link sending failed:", error);
-      toast.error("Échec de l'envoi du magic link");
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (email: string, password: string, firstName: string, lastName: string) => {
-    try {
-      setIsLoading(true);
-      const state = await api.register(email, password, firstName, lastName);
-      
-      setAuthState(state);
-      
-      // Si on a un message, c'est qu'il y a besoin de confirmer l'email
-      if (state.message) {
-        toast.info(state.message);
-        navigate("/login");
-        return;
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        // Simulation d'une requête d'authentification
+        const response = await api.login(email, password);
+        
+        if (response.token) {
+          localStorage.setItem("authState", JSON.stringify(response));
+          setAuthState({
+            user: response.user,
+            isAuthenticated: true,
+            token: response.token,
+          });
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Login error:", error);
+        return false;
       }
-      
-      setIsAdmin(isUserAdmin(state.user));
-      
-      if (state.isAuthenticated) {
-        navigate("/");
-        toast.success("Compte créé avec succès");
-      }
-    } catch (error: any) {
-      console.error("Register failed:", error);
-      toast.error(error.message || "Échec de l'inscription");
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    []
+  );
 
-  const logout = async () => {
-    try {
-      setIsLoading(true);
-      await api.logout();
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        token: null
-      });
-      setIsAdmin(false);
-      navigate("/login");
-      toast.info("Vous avez été déconnecté");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const promoteToAdmin = async (userId: string) => {
-    try {
-      setIsLoading(true);
-      await api.promoteToAdmin(userId);
-      toast.success("Utilisateur promu en tant qu'administrateur");
-      
-      // Mettre à jour l'état si l'utilisateur actuel est promu
-      if (authState.user && authState.user.id === userId) {
-        const updatedUser = {
-          ...authState.user,
-          role: "ADMIN" as Role
-        };
-        setAuthState({
-          ...authState,
-          user: updatedUser
-        });
-        setIsAdmin(true);
+  const register = useCallback(
+    async (userData: { 
+      firstName: string; 
+      lastName: string; 
+      email: string; 
+      password: string; 
+    }) => {
+      try {
+        const response = await api.register(userData);
+        
+        if (response.token) {
+          localStorage.setItem("authState", JSON.stringify(response));
+          setAuthState({
+            user: response.user,
+            isAuthenticated: true,
+            token: response.token,
+          });
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Registration error:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Promote to admin failed:", error);
-      toast.error("Échec de la promotion en administrateur");
-    } finally {
-      setIsLoading(false);
+    },
+    []
+  );
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("authState");
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+      token: null,
+    });
+    api.logout();
+  }, []);
+
+  const loadStoredToken = useCallback(() => {
+    const storedAuthState = localStorage.getItem("authState");
+    if (storedAuthState) {
+      try {
+        const parsedState = JSON.parse(storedAuthState);
+        if (parsedState.token) {
+          setAuthState({
+            user: parsedState.user,
+            isAuthenticated: true,
+            token: parsedState.token,
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing auth state:", error);
+        localStorage.removeItem("authState");
+      }
     }
-  };
+  }, []);
+  
+  const updateUser = useCallback((updatedUser: User) => {
+    setAuthState((prev) => {
+      const newState = {
+        ...prev,
+        user: updatedUser,
+      };
+      
+      // Update localStorage
+      localStorage.setItem("authState", JSON.stringify(newState));
+      
+      return newState;
+    });
+    
+    return true;
+  }, []);
 
   return (
     <AuthContext.Provider
-      value={{
-        user: authState.user,
-        isAdmin,
-        isAuthenticated: authState.isAuthenticated,
-        isLoading,
-        login,
-        loginWithMagicLink,
-        logout,
-        register,
-        promoteToAdmin,
-        loadStoredToken
+      value={{ 
+        ...authState, 
+        isAdmin, 
+        login, 
+        register, 
+        logout, 
+        loadStoredToken,
+        updateUser
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

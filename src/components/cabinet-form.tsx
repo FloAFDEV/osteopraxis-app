@@ -27,6 +27,7 @@ const cabinetFormSchema = z.object({
     message: "L'adresse doit contenir au moins 5 caractères",
   }),
   phone: z.string().optional(),
+  email: z.string().email("Format d'email invalide").optional().or(z.literal("")),
   osteopathId: z.number(),
 });
 
@@ -54,6 +55,7 @@ export function CabinetForm({
       name: defaultValues?.name || "",
       address: defaultValues?.address || "",
       phone: defaultValues?.phone || "",
+      email: defaultValues?.email || "",
       osteopathId: defaultValues?.osteopathId || osteopathId,
     },
   });
@@ -66,6 +68,7 @@ export function CabinetForm({
         name: data.name,
         address: data.address,
         phone: data.phone || null,
+        email: data.email || null,
         osteopathId: data.osteopathId,
       };
       
@@ -79,7 +82,7 @@ export function CabinetForm({
         toast.success("Cabinet créé avec succès");
       }
       
-      navigate("/settings/cabinet");
+      navigate("/settings");
     } catch (error) {
       console.error("Error submitting cabinet form:", error);
       toast.error("Une erreur est survenue. Veuillez réessayer.");
@@ -136,6 +139,26 @@ export function CabinetForm({
               <FormControl>
                 <Input
                   placeholder="Numéro de téléphone"
+                  disabled={isSubmitting}
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email (facultatif)</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="Email du cabinet"
                   disabled={isSubmitting}
                   {...field}
                   value={field.value || ""}
