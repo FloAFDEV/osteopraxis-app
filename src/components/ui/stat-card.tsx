@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -17,7 +18,7 @@ const StatCard = ({
   color = "text-blue-500",
   icon
 }: StatCardProps) => {
-  const borderColor = color.replace("text-", "border-t-"); "border-t-blus-500";
+  const borderColor = color.replace("text-", "border-t-");
 
   return (
     <Card
