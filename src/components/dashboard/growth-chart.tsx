@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -79,7 +80,11 @@ export function GrowthChart({ data }: GrowthChartProps) {
             labelStyle={{ color: "#ffffff", fontWeight: "bold" }}
             formatter={(_, __, props: any) => {
               const patients = props.payload?.patients ?? 0;
-              const growthText = props.payload?.growthText ?? "";
+              const growthText =
+                patients === 0
+                  ? "Aucune activité ce mois"
+                  : props.payload?.growthText ?? "";
+
               return [
                 `👥 ${patients} patients`,
                 growthText || "Pas de comparaison disponible"
