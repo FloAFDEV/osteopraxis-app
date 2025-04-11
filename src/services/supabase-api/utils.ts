@@ -22,6 +22,8 @@ export const addAuthHeaders = <T extends { setHeader: (name: string, value: stri
 
 // Fonction helper pour vérifier l'état d'authentification avant les opérations
 export const checkAuth = async () => {
+  console.log("Vérification de l'état d'authentification...");
+  
   const { data, error } = await supabase.auth.getSession();
   if (error) {
     console.error("Erreur d'authentification:", error);

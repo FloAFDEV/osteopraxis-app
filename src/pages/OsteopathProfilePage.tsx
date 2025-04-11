@@ -28,7 +28,7 @@ const OsteopathProfilePage = () => {
       try {
         console.log("Loading osteopath data for user:", user.id);
         const osteopathData = await api.getOsteopathByUserId(user.id);
-        console.log("Osteopath data received:", osteopathData);
+        console.log("Osteopath data received:", osteopathData || "Aucune donnée trouvée");
         setOsteopath(osteopathData || null);
         setLoadError(null);
       } catch (error: any) {
