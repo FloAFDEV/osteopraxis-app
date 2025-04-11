@@ -86,10 +86,16 @@ const EditPatientPage = () => {
         userId: patient.userId,
       };
       
+      // Convert IMPLANT to IMPLANTS for Supabase compatibility
+      let patientDataForSupabase = { ...updatedPatient };
+      if (patientDataForSupabase.contraception === "IMPLANT") {
+        patientDataForSupabase.contraception = "IMPLANTS" as any;
+      }
+      
       // Utilisation directe du client Supabase au lieu de l'API
       const { error } = await supabase
         .from('Patient')
-        .update(updatedPatient)
+        .update(patientDataForSupabase)
         .eq('id', patient.id);
       
       if (error) {
@@ -154,7 +160,7 @@ const EditPatientPage = () => {
           <PatientForm 
             patient={patient} 
             onSave={handleSave} 
-            isSubmitting={isSaving}
+            isLoading={isSaving}
           />
         </div>
       </div>
