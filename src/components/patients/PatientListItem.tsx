@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Mail, UserCheck, UserCircle, Users } from "lucide-react";
+import { Mail, Male, Female, Users } from "lucide-react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -38,9 +38,9 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
   // Get the appropriate gender icon
   const getGenderIcon = () => {
     if (patient.gender === 'Homme') {
-      return <UserCheck className="h-5 w-5 text-blue-600" />;
+      return <Male className="h-5 w-5 text-blue-600" />;
     } else if (patient.gender === 'Femme') {
-      return <UserCircle className="h-5 w-5 text-pink-600" />;
+      return <Female className="h-5 w-5 text-pink-600" />;
     } else {
       return <Users className="h-5 w-5 text-gray-600" />;
     }
