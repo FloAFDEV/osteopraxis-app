@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const OsteopathProfilePage = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [osteopath, setOsteopath] = useState(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -42,19 +42,42 @@ const OsteopathProfilePage = () => {
     loadOsteopathData();
   }, [user]);
 
+  // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
   if (!user && !showAuthSheet) {
     return <Navigate to="/login" />;
   }
 
-  // If user already has an osteopath profile and not in edit mode, redirect to settings
-  if (user?.osteopathId && !loading && osteopath) {
+  // Si l'utilisateur a déjà un profil d'ostéopathe complet, rediriger vers les paramètres
+  if (user?.osteopathId && !loading && osteopath && Object.keys(osteopath).length > 0 && 
+      osteopath.name && osteopath.professional_title) {
     return <Navigate to="/settings" />;
   }
 
-  const handleSuccess = () => {
-    toast.success("Profil créé avec succès");
-    // Redirect to cabinet creation page after profile completion
-    navigate("/cabinets/new");
+  const handleSuccess = async (updatedOsteopath) => {
+    // Si c'est une mise à jour d'un ostéopathe existant
+    if (osteopath && osteopath.id) {
+      toast.success("Profil mis à jour avec succès");
+      
+      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe si nécessaire
+      if (!user.osteopathId && updatedOsteopath.id) {
+        const updatedUser = { ...user, osteopathId: updatedOsteopath.id };
+        updateUser(updatedUser);
+      }
+      
+      navigate("/settings");
+    } else {
+      // Pour un nouveau profil
+      toast.success("Profil créé avec succès");
+      
+      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
+      if (updatedOsteopath && updatedOsteopath.id) {
+        const updatedUser = { ...user, osteopathId: updatedOsteopath.id };
+        updateUser(updatedUser);
+      }
+      
+      // Redirection vers la page de création de cabinet après la création du profil
+      navigate("/cabinets/new");
+    }
   };
 
   return (
@@ -63,7 +86,7 @@ const OsteopathProfilePage = () => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <UserCog className="h-8 w-8 text-primary" />
-            Compléter votre profil professionnel
+            {osteopath && osteopath.id ? "Mettre à jour votre profil professionnel" : "Compléter votre profil professionnel"}
           </h1>
           <p className="text-muted-foreground mt-1">
             Ces informations sont nécessaires pour configurer votre cabinet et générer des factures conformes.
@@ -92,7 +115,7 @@ const OsteopathProfilePage = () => {
             <OsteopathProfileForm 
               defaultValues={osteopath || undefined}
               osteopathId={osteopath?.id}
-              isEditing={!!osteopath}
+              isEditing={!!osteopath?.id}
               onSuccess={handleSuccess}
             />
           )}
