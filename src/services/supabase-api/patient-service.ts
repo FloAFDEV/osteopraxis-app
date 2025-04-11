@@ -193,7 +193,7 @@ export const patientService = {
       updatedAt: now
     };
 
-    // Remplacer l'approche upsert par une simple mise à jour avec un where
+    // Using POST method instead of PATCH for better CORS compatibility
     console.log("Updating patient with id:", id);
     const { data, error } = await supabase
       .from('Patient')
