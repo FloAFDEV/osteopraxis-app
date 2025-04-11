@@ -20,13 +20,12 @@ const StatCard = ({
 }: StatCardProps) => {
   // Extract the color name (like "blue-500") from the class (like "text-blue-500")
   const colorName = color.replace("text-", "");
-  const borderColor = `border-t-${colorName}`;
 
   return (
     <Card
       className={cn(
         "overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-[2px] border-t-4",
-        borderColor
+        `border-t-${colorName}` // Directly apply the border color class
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
