@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -69,6 +68,12 @@ export function OsteopathProfileForm({
   });
 
   const onSubmit = async (data: OsteopathProfileFormValues) => {
+    if (!user) {
+      setError("Vous devez être connecté pour effectuer cette action");
+      toast.error("Vous devez être connecté pour effectuer cette action");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError(null);
@@ -77,7 +82,7 @@ export function OsteopathProfileForm({
         // Update existing osteopath
         await api.updateOsteopath(osteopathId, data);
         toast.success("Profil mis à jour avec succès");
-      } else if (user) {
+      } else {
         console.log("Creating osteopath for user:", user.id);
         // Create new osteopath
         const newOsteopath = await api.createOsteopath({
@@ -91,7 +96,7 @@ export function OsteopathProfileForm({
 
         // Update user with new osteopathId
         if (updateUser && newOsteopath) {
-          await updateUser({
+          updateUser({
             ...user,
             osteopathId: newOsteopath.id
           });

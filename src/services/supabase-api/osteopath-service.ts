@@ -42,6 +42,12 @@ export const supabaseOsteopathService = {
   },
   
   async updateOsteopath(id: number, osteopathData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath> {
+    // Make sure user is authenticated before proceeding
+    const session = await supabase.auth.getSession();
+    if (!session.data.session) {
+      throw new Error("Authentication required");
+    }
+
     const now = new Date().toISOString();
     
     const { data, error } = await supabase
@@ -60,6 +66,12 @@ export const supabaseOsteopathService = {
   },
   
   async createOsteopath(osteopathData: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
+    // Make sure user is authenticated before proceeding
+    const session = await supabase.auth.getSession();
+    if (!session.data.session) {
+      throw new Error("Authentication required");
+    }
+
     const now = new Date().toISOString();
     
     const { data, error } = await supabase

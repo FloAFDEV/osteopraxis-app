@@ -1,34 +1,37 @@
 
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/ui/layout";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
 import { UserCog } from "lucide-react";
+import { toast } from "sonner";
 
 const OsteopathProfilePage = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [osteopath, setOsteopath] = useState(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadOsteopathData = async () => {
-      if (user) {
-        try {
-          console.log("Loading osteopath data for user:", user.id);
-          const osteopathData = await api.getOsteopathByUserId(user.id);
-          console.log("Osteopath data received:", osteopathData);
-          setOsteopath(osteopathData || null);
-          setLoadError(null);
-        } catch (error: any) {
-          console.error("Error fetching osteopath data:", error);
-          setLoadError(error.message || "Erreur lors du chargement des données");
-        } finally {
-          setLoading(false);
-        }
-      } else {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log("Loading osteopath data for user:", user.id);
+        const osteopathData = await api.getOsteopathByUserId(user.id);
+        console.log("Osteopath data received:", osteopathData);
+        setOsteopath(osteopathData || null);
+        setLoadError(null);
+      } catch (error: any) {
+        console.error("Error fetching osteopath data:", error);
+        setLoadError(error.message || "Erreur lors du chargement des données");
+      } finally {
         setLoading(false);
       }
     };
@@ -46,8 +49,9 @@ const OsteopathProfilePage = () => {
   }
 
   const handleSuccess = () => {
+    toast.success("Profil créé avec succès");
     // Redirect to cabinet creation page after profile completion
-    window.location.href = "/cabinets/new";
+    navigate("/cabinets/new");
   };
 
   return (
