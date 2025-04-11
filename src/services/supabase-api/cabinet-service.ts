@@ -1,3 +1,4 @@
+
 // Import des types depuis le fichier des types
 import { Cabinet } from "@/types";
 import { supabase, typedData } from "./utils";
@@ -42,9 +43,18 @@ export const supabaseCabinetService = {
   },
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
+    const now = new Date().toISOString();
+    
+    // Add timestamps required by Supabase schema
+    const cabinetWithTimestamps = {
+      ...cabinet,
+      updatedAt: now,
+      createdAt: now
+    };
+    
     const { data, error } = await supabase
       .from("Cabinet")
-      .insert(cabinet) // Modification ici : cabinet est déjà un objet, pas besoin de l'encadrer dans un tableau supplémentaire
+      .insert(cabinetWithTimestamps)
       .select()
       .single();
       
