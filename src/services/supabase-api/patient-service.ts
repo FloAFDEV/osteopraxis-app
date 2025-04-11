@@ -92,7 +92,6 @@ export const patientService = {
       email: patient.email,
       phone: patient.phone,
       address: patient.address,
-      // Handle gender type mismatch by converting if needed
       gender: genderValue,
       maritalStatus: patient.maritalStatus,
       occupation: patient.occupation,
@@ -138,62 +137,66 @@ export const patientService = {
     return adaptPatientFromSupabase(data);
   },
 
-  async updatePatient(id: number, patientUpdates: Partial<Patient>): Promise<Patient> {
+  async updatePatient(patient: Patient): Promise<Patient> {
+    // Use explicit ID for the update operation
+    const id = patient.id;
+    
     // Add updatedAt timestamp
     const now = new Date().toISOString();
     
     // Convert contraception from IMPLANT to IMPLANTS if needed for Supabase
-    let contraceptionValue = patientUpdates.contraception;
+    let contraceptionValue = patient.contraception;
     if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
       contraceptionValue = "IMPLANTS" as Contraception;
     }
     
     // Handle gender updates for compatibility with Supabase
-    let genderValue = patientUpdates.gender;
+    let genderValue = patient.gender;
     if (genderValue && genderValue.toString() === "Autre") {
       genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
     }
     
-    // Map the update data to match Supabase column names
-    const updateData = {
-      ...(patientUpdates.firstName !== undefined && { firstName: patientUpdates.firstName }),
-      ...(patientUpdates.lastName !== undefined && { lastName: patientUpdates.lastName }),
-      ...(patientUpdates.email !== undefined && { email: patientUpdates.email }),
-      ...(patientUpdates.phone !== undefined && { phone: patientUpdates.phone }),
-      ...(patientUpdates.address !== undefined && { address: patientUpdates.address }),
-      ...(patientUpdates.gender !== undefined && { gender: genderValue }),
-      ...(patientUpdates.maritalStatus !== undefined && { maritalStatus: patientUpdates.maritalStatus }),
-      ...(patientUpdates.occupation !== undefined && { occupation: patientUpdates.occupation }),
-      ...(patientUpdates.hasChildren !== undefined && { hasChildren: patientUpdates.hasChildren }),
-      ...(patientUpdates.childrenAges !== undefined && { childrenAges: patientUpdates.childrenAges }),
-      ...(patientUpdates.birthDate !== undefined && { birthDate: patientUpdates.birthDate ? new Date(patientUpdates.birthDate).toISOString() : null }),
-      ...(patientUpdates.generalPractitioner !== undefined && { generalPractitioner: patientUpdates.generalPractitioner }),
-      ...(patientUpdates.surgicalHistory !== undefined && { surgicalHistory: patientUpdates.surgicalHistory }),
-      ...(patientUpdates.traumaHistory !== undefined && { traumaHistory: patientUpdates.traumaHistory }),
-      ...(patientUpdates.rheumatologicalHistory !== undefined && { rheumatologicalHistory: patientUpdates.rheumatologicalHistory }),
-      ...(patientUpdates.currentTreatment !== undefined && { currentTreatment: patientUpdates.currentTreatment }),
-      ...(patientUpdates.handedness !== undefined && { handedness: patientUpdates.handedness }),
-      ...(patientUpdates.hasVisionCorrection !== undefined && { hasVisionCorrection: patientUpdates.hasVisionCorrection }),
-      ...(patientUpdates.ophtalmologistName !== undefined && { ophtalmologistName: patientUpdates.ophtalmologistName }),
-      ...(patientUpdates.entProblems !== undefined && { entProblems: patientUpdates.entProblems }),
-      ...(patientUpdates.entDoctorName !== undefined && { entDoctorName: patientUpdates.entDoctorName }),
-      ...(patientUpdates.digestiveProblems !== undefined && { digestiveProblems: patientUpdates.digestiveProblems }),
-      ...(patientUpdates.digestiveDoctorName !== undefined && { digestiveDoctorName: patientUpdates.digestiveDoctorName }),
-      ...(patientUpdates.physicalActivity !== undefined && { physicalActivity: patientUpdates.physicalActivity }),
-      ...(patientUpdates.isSmoker !== undefined && { isSmoker: patientUpdates.isSmoker }),
-      ...(patientUpdates.isDeceased !== undefined && { isDeceased: patientUpdates.isDeceased }),
-      ...(contraceptionValue !== undefined && { contraception: contraceptionValue }),
-      ...(patientUpdates.hdlm !== undefined && { hdlm: patientUpdates.hdlm }),
-      ...(patientUpdates.avatarUrl !== undefined && { avatarUrl: patientUpdates.avatarUrl }),
-      ...(patientUpdates.cabinetId !== undefined && { cabinetId: patientUpdates.cabinetId }),
+    // Prepare the complete patient data for update
+    const patientData = {
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      phone: patient.phone,
+      address: patient.address,
+      gender: genderValue,
+      maritalStatus: patient.maritalStatus,
+      occupation: patient.occupation,
+      hasChildren: patient.hasChildren,
+      childrenAges: patient.childrenAges,
+      birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
+      generalPractitioner: patient.generalPractitioner,
+      surgicalHistory: patient.surgicalHistory,
+      traumaHistory: patient.traumaHistory,
+      rheumatologicalHistory: patient.rheumatologicalHistory,
+      currentTreatment: patient.currentTreatment,
+      handedness: patient.handedness,
+      hasVisionCorrection: patient.hasVisionCorrection,
+      ophtalmologistName: patient.ophtalmologistName,
+      entProblems: patient.entProblems,
+      entDoctorName: patient.entDoctorName,
+      digestiveProblems: patient.digestiveProblems,
+      digestiveDoctorName: patient.digestiveDoctorName,
+      physicalActivity: patient.physicalActivity,
+      isSmoker: patient.isSmoker,
+      isDeceased: patient.isDeceased,
+      contraception: contraceptionValue,
+      hdlm: patient.hdlm,
+      avatarUrl: patient.avatarUrl,
+      cabinetId: patient.cabinetId,
+      userId: patient.userId,
+      osteopathId: patient.osteopathId || 1,
       updatedAt: now
     };
 
-    // Use the update() method with POST instead of PATCH
+    // Utiliser l'approche upsert qui utilise POST au lieu de PATCH
     const { data, error } = await supabase
       .from('Patient')
-      .update(updateData)
-      .eq('id', id)
+      .upsert([{ id, ...patientData }])
       .select()
       .single();
 
@@ -213,5 +216,5 @@ export { patientService as supabasePatientService };
 
 // Make this function available for direct import
 export const updatePatient = async (patient: Patient): Promise<Patient> => {
-  return patientService.updatePatient(patient.id, patient);
+  return patientService.updatePatient(patient);
 };
