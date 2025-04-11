@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/theme-context";
@@ -110,7 +109,7 @@ const ProfileCheckRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="patienthub-theme">
+    <ThemeProvider>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Index />} />

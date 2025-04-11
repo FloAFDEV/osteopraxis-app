@@ -3,17 +3,16 @@ import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
 
-// Données simulées pour les rendez-vous
+// Simulated data for appointments
 const appointments: Appointment[] = [
   {
     id: 1,
-    date: "2025-01-23 09:00:00",
-    reason: "Consultation générale",
+    date: new Date().toISOString(),
     patientId: 1,
+    reason: "Consultation initiale",
     status: "SCHEDULED",
     notificationSent: false
-  },
-  // Les autres rendez-vous fictifs sont maintenus mais omis pour plus de lisibilité
+  }
 ];
 
 export const appointmentService = {
@@ -31,22 +30,7 @@ export const appointmentService = {
     await delay(300);
     return [...appointments];
   },
-
-  async getAppointmentById(id: number): Promise<Appointment | undefined> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAppointmentService.getAppointmentById(id);
-      } catch (error) {
-        console.error("Erreur Supabase getAppointmentById:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(200);
-    return appointments.find(appointment => appointment.id === id);
-  },
-
+  
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
@@ -61,11 +45,26 @@ export const appointmentService = {
     await delay(200);
     return appointments.filter(appointment => appointment.patientId === patientId);
   },
-
-  async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
+  
+  async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.createAppointment(appointment);
+        return await supabaseAppointmentService.getAppointmentById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getAppointmentById:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(200);
+    return appointments.find(appointment => appointment.id === id);
+  },
+  
+  async createAppointment(appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.createAppointment(appointmentData);
       } catch (error) {
         console.error("Erreur Supabase createAppointment:", error);
         throw error;
@@ -75,20 +74,18 @@ export const appointmentService = {
     // Fallback: code simulé existant
     await delay(400);
     const newAppointment = {
-      ...appointment,
-      id: appointments.length + 1,
-    };
+      ...appointmentData,
+      id: appointments.length + 1
+    } as Appointment;
+    
     appointments.push(newAppointment);
     return newAppointment;
   },
-
-  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
+  
+  async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        console.log("Updating appointment with ID:", id, "Data:", appointment);
-        const result = await supabaseAppointmentService.updateAppointment(id, appointment);
-        console.log("Update result:", result);
-        return result;
+        return await supabaseAppointmentService.updateAppointment(id, appointmentData);
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
         throw error;
@@ -99,16 +96,17 @@ export const appointmentService = {
     await delay(300);
     const index = appointments.findIndex(a => a.id === id);
     if (index !== -1) {
-      appointments[index] = { ...appointments[index], ...appointment };
+      appointments[index] = { ...appointments[index], ...appointmentData };
       return appointments[index];
     }
     return undefined;
   },
-
+  
   async deleteAppointment(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.deleteAppointment(id);
+        await supabaseAppointmentService.deleteAppointment(id);
+        return true;
       } catch (error) {
         console.error("Erreur Supabase deleteAppointment:", error);
         throw error;

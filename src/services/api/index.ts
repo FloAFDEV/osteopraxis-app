@@ -5,6 +5,7 @@ import { appointmentService } from './appointment-service';
 import { cabinetService } from './cabinet-service';
 import { osteopathService } from './osteopath-service';
 import { userService } from './user-service';
+import { invoiceService } from './invoice-service';
 
 export const api = {
   // Auth
@@ -40,7 +41,15 @@ export const api = {
   
   // Appointments
   getAppointments: appointmentService.getAppointments,
+  getAppointmentById: appointmentService.getAppointmentById,
   getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
   createAppointment: appointmentService.createAppointment,
-  updateAppointment: appointmentService.updateAppointment
+  updateAppointment: appointmentService.updateAppointment,
+  deleteAppointment: appointmentService.deleteAppointment,
+  
+  // Invoices
+  getInvoices: invoiceService.getInvoices,
+  getInvoiceById: invoiceService.getInvoiceById,
+  createInvoice: invoiceService.createInvoice,
+  updatePaymentStatus: invoiceService.updatePaymentStatus
 };
