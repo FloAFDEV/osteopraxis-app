@@ -4,8 +4,7 @@ import { Dashboard } from "@/components/dashboard/dashboard";
 import { Activity, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { format } from "date-fns/locale";
-import { fr } from "date-fns";
+
 
 const Index = () => {
   return (
@@ -28,7 +27,7 @@ const Index = () => {
               Version Pro
             </div>
             <div className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-              Dernière mise à jour: {format(new Date(), "d MMMM", { locale: fr })}
+              Dernière mise à jour: 6 avril 2025
             </div>
           </div>
         </div>
