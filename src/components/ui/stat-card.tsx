@@ -21,10 +21,9 @@ const StatCard = ({
 
   return (
     <Card
-     className={cn(
-    "overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-[2px] border-t-4",
-    color.replace("text-", "border-t-") // 👈 correspond à la couleur du texte
-  )}
+      className={cn(
+        "overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-[2px] border-t-4",
+        borderColor
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
