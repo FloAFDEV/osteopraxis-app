@@ -38,7 +38,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
         title="Nouveaux patients (mois)"
         value={data.newPatientsThisMonth}
         description={`+${data.newPatientsLast30Days} ces 30 derniers jours`}
-        color="text-blue-500"
+        color="text-purple-500"
         icon={<UserPlus />}
       />
       
@@ -46,7 +46,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
         title="Rendez-vous aujourd'hui"
         value={data.appointmentsToday}
         description={`Prochain: ${data.nextAppointment}`}
-        color="text-blue-500"
+        color="text-green-500"
         icon={<Calendar />}
       />
       
@@ -54,7 +54,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
         title="Croissance annuelle"
         value={`${data.annualGrowthPercentage}%`}
         description={`${data.newPatientsThisYear} nouveaux cette année`}
-        color="text-blue-500"
+        color="text-amber-500"
         icon={<TrendingUp />}
       />
     </div>;
