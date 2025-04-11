@@ -54,6 +54,9 @@ function App() {
         <Route path="/cabinets/:id/edit" element={isAuthenticated ? <EditCabinetPage /> : <Navigate to="/login" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+        
+        {/* Ajouter une redirection pour /cabinet vers /cabinets */}
+        <Route path="/cabinet" element={isAuthenticated ? <Navigate to="/cabinets" /> : <Navigate to="/login" />} />
       </Routes>
       <Toaster position="bottom-right" />
     </>

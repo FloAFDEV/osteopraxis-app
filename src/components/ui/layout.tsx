@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight } from "lucide-react";
@@ -7,9 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
+
 export function Layout({
   children
 }: LayoutProps) {
@@ -18,18 +21,22 @@ export function Layout({
     user,
     logout
   } = useAuth();
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+  
   const handleLogout = async () => {
     await logout();
   };
+  
   const getInitials = () => {
     if (!user) return "?";
     const firstName = user.first_name || "";
     const lastName = user.last_name || "";
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
   };
+  
   return <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
         <div className="container flex h-16 items-center justify-between">
@@ -89,7 +96,7 @@ export function Layout({
                   </div>}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <NavLink to="/cabinet" className="flex items-center cursor-pointer">
+                  <NavLink to="/cabinets" className="flex items-center cursor-pointer">
                     <Building className="mr-2 h-4 w-4" />
                     <span>Paramètres du cabinet</span>
                   </NavLink>
@@ -131,7 +138,7 @@ export function Layout({
               <Clock className="h-5 w-5" />
               Planning
             </NavLink>
-            <NavLink to="/cabinet" className={({
+            <NavLink to="/cabinets" className={({
           isActive
         }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
               <Building className="h-5 w-5" />
