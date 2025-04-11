@@ -122,9 +122,7 @@ const EditPatientPage = () => {
             </div>}
         </div>
 
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          <PatientForm patient={patient} onSave={handleSave} isLoading={isSaving} />
-        </div>
+        <PatientForm patient={patient} onSave={handleSave} isLoading={isSaving} />
       </div>
     </Layout>;
 };
