@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -53,6 +54,11 @@ const EditPatientPage = () => {
     if (!patient) return;
     
     try {
+      // Make sure hasChildren is kept as a string to match Patient type
+      if (typeof updatedData.hasChildren === 'boolean') {
+        updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
+      }
+      
       // Merge the updated form data with the existing patient data
       const updatedPatient: Patient = {
         ...patient,

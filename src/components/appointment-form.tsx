@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
+import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon, Clock } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
@@ -35,6 +35,16 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { Input } from "./ui/input";
+
+// Custom validation function to check if appointment time is in the past
+const isAppointmentInPast = (date: Date, timeString: string) => {
+  const [hours, minutes] = timeString.split(':').map(Number);
+  const appointmentDateTime = setMinutes(setHours(new Date(date), hours), minutes);
+  const now = new Date();
+  
+  return isBefore(appointmentDateTime, now);
+};
 
 const appointmentFormSchema = z.object({
   patientId: z.number({
@@ -52,6 +62,15 @@ const appointmentFormSchema = z.object({
   status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"], {
     required_error: "Veuillez sélectionner un statut",
   }),
+}).refine((data) => {
+  // If it's today, ensure the time is not in the past
+  if (isSameDay(data.date, new Date())) {
+    return !isAppointmentInPast(data.date, data.time);
+  }
+  return true;
+}, {
+  message: "Vous ne pouvez pas prendre un rendez-vous dans le passé",
+  path: ["time"],
 });
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
@@ -71,23 +90,44 @@ export function AppointmentForm({
 }: AppointmentFormProps) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customTime, setCustomTime] = useState<string>(defaultValues?.time || "09:00");
+  const [useCustomTime, setUseCustomTime] = useState(false);
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues: {
       patientId: defaultValues?.patientId,
-      date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
+      date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
       time: defaultValues?.time || "09:00",
       reason: defaultValues?.reason || "",
       status: defaultValues?.status || "SCHEDULED",
     },
   });
+  
+  // Generate available time slots (current time onward if today)
+  const generateAvailableTimes = () => {
+    const now = new Date();
+    const selectedDate = form.watch("date");
+    const isToday = isSameDay(selectedDate, now);
+    
+    const currentHour = isToday ? now.getHours() : 8;
+    const currentMinute = isToday ? now.getMinutes() : 0;
+    
+    const startSlot = isToday 
+      ? Math.ceil((currentHour * 60 + currentMinute) / 30) 
+      : 16; // 16 = 8am (slots start at 8am)
+    
+    return Array.from({ length: 28 - startSlot }, (_, i) => {
+      const totalMinutes = (startSlot + i) * 30;
+      const hour = Math.floor(totalMinutes / 60);
+      const minute = totalMinutes % 60;
+      
+      if (hour >= 20) return null; // Don't offer slots past 8pm
+      return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+    }).filter(Boolean) as string[];
+  };
 
-  const availableTimes = Array.from({ length: 20 }, (_, i) => {
-    const hour = Math.floor(i / 2) + 8; // Starting from 8 AM
-    const minute = (i % 2) * 30; // 0 or 30 minutes
-    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-  });
+  const availableTimes = generateAvailableTimes();
 
   const onSubmit = async (data: AppointmentFormValues) => {
     try {
@@ -95,8 +135,16 @@ export function AppointmentForm({
       
       // Combine date and time
       const dateTime = new Date(data.date);
-      const [hours, minutes] = data.time.split(':').map(Number);
+      const timeToUse = useCustomTime ? customTime : data.time;
+      const [hours, minutes] = timeToUse.split(':').map(Number);
       dateTime.setHours(hours, minutes);
+      
+      // Check if appointment is in the past
+      if (isBefore(dateTime, new Date())) {
+        toast.error("Vous ne pouvez pas prendre un rendez-vous dans le passé");
+        setIsSubmitting(false);
+        return;
+      }
       
       const appointmentData = {
         patientId: data.patientId,
@@ -124,6 +172,9 @@ export function AppointmentForm({
       setIsSubmitting(false);
     }
   };
+  
+  // Update available times when date changes
+  form.watch("date");
 
   return (
     <Form {...form}>
@@ -188,7 +239,18 @@ export function AppointmentForm({
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(date) => {
+                        field.onChange(date);
+                        // Reset time selection if date is today and time is in past
+                        if (date && isSameDay(date, new Date())) {
+                          const now = new Date();
+                          const currentTimeSlot = availableTimes[0];
+                          if (currentTimeSlot) {
+                            form.setValue("time", currentTimeSlot);
+                          }
+                        }
+                      }}
+                      disabled={(date) => isBefore(date, new Date()) && !isSameDay(date, new Date())}
                       initialFocus
                       className={cn("p-3 pointer-events-auto")}
                     />
@@ -205,27 +267,62 @@ export function AppointmentForm({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Heure</FormLabel>
-                <Select
-                  disabled={isSubmitting}
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <div className="flex items-center">
-                        <Clock className="mr-2 h-4 w-4 text-primary" />
-                        <SelectValue placeholder="Sélectionner l'heure" />
-                      </div>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {availableTimes.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Select
+                    disabled={isSubmitting || useCustomTime}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <div className="flex items-center">
+                          <Clock className="mr-2 h-4 w-4 text-primary" />
+                          <SelectValue placeholder="Sélectionner l'heure" />
+                        </div>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {availableTimes.length > 0 ? (
+                        availableTimes.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="00:00" disabled>
+                          Aucun horaire disponible
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="useCustomTime"
+                      checked={useCustomTime}
+                      onChange={(e) => setUseCustomTime(e.target.checked)}
+                    />
+                    <label htmlFor="useCustomTime" className="text-sm">
+                      Saisir l'heure manuellement
+                    </label>
+                  </div>
+                  
+                  {useCustomTime && (
+                    <Input
+                      type="time"
+                      value={customTime}
+                      onChange={(e) => {
+                        setCustomTime(e.target.value);
+                        field.onChange(e.target.value);
+                      }}
+                      className="mt-2"
+                      min="08:00"
+                      max="20:00"
+                      disabled={isSubmitting}
+                    />
+                  )}
+                </div>
                 <FormMessage />
               </FormItem>
             )}
