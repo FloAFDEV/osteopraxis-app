@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -117,7 +116,7 @@ const InvoicesPage = () => {
               <InvoiceDetails 
                 key={invoice.id}
                 invoice={invoice}
-                patientName={invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : undefined}
+                patientName={invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : `Patient #${invoice.patientId}`}
                 onEdit={() => navigate(`/invoices/${invoice.id}`)}
                 onDelete={() => {
                   setSelectedInvoiceId(invoice.id);

@@ -1,4 +1,3 @@
-
 import { Cabinet } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseCabinetService } from "../supabase-api/cabinet-service";
@@ -10,6 +9,8 @@ const cabinets: Cabinet[] = [
     name: "Cabinet d'Ostéopathie Zen",
     address: "18 Rue Lafayette, Toulouse",
     phone: "05 61 23 45 67",
+    imageUrl: null,
+    logoUrl: null,
     osteopathId: 1,
     createdAt: "2024-12-20 22:29:30",
     updatedAt: "2024-12-20 22:29:30"
@@ -112,7 +113,8 @@ export const cabinetService = {
   async deleteCabinet(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseCabinetService.deleteCabinet(id);
+        await supabaseCabinetService.deleteCabinet(id);
+        return true;
       } catch (error) {
         console.error("Erreur Supabase deleteCabinet:", error);
         throw error;

@@ -44,7 +44,7 @@ export const supabaseCabinetService = {
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     const { data, error } = await supabase
       .from("Cabinet")
-      .insert([cabinet])
+      .insert(cabinet) // Modification ici : cabinet est déjà un objet, pas besoin de l'encadrer dans un tableau supplémentaire
       .select()
       .single();
       

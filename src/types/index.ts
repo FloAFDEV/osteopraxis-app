@@ -131,6 +131,10 @@ export interface Invoice {
   amount: number;
   date: string;
   paymentStatus: PaymentStatus;
+  Patient?: { // Ajout d'une propriété optionnelle Patient
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";

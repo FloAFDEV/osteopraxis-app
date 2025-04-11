@@ -73,10 +73,9 @@ export const patientService = {
     const now = new Date().toISOString();
     
     // Ensure contraception value is in the format expected by Supabase
-    // If it's "IMPLANT" in our code, make it "IMPLANTS" for Supabase
     let contraceptionValue = patient.contraception;
-    if (contraceptionValue === "IMPLANT") {
-      contraceptionValue = "IMPLANTS";
+    if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
+      contraceptionValue = "IMPLANTS" as Contraception;
     }
     
     // Map the patient data to match the Supabase column names
@@ -87,7 +86,7 @@ export const patientService = {
       phone: patient.phone,
       address: patient.address,
       // Handle gender type mismatch by converting if needed
-      gender: patient.gender === "Autre" ? "Homme" : patient.gender, // Default to "Homme" if "Autre"
+      gender: patient.gender && patient.gender.toString() === "Autre" ? "Homme" as Gender : patient.gender,
       maritalStatus: patient.maritalStatus,
       occupation: patient.occupation,
       hasChildren: patient.hasChildren,
@@ -138,14 +137,14 @@ export const patientService = {
     
     // Convert contraception from IMPLANT to IMPLANTS if needed for Supabase
     let contraceptionValue = patientUpdates.contraception;
-    if (contraceptionValue === "IMPLANT") {
-      contraceptionValue = "IMPLANTS";
+    if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
+      contraceptionValue = "IMPLANTS" as Contraception;
     }
     
     // Handle gender updates for compatibility with Supabase
     let genderValue = patientUpdates.gender;
-    if (genderValue === "Autre") {
-      genderValue = "Homme"; // Default to "Homme" if "Autre" for Supabase compatibility
+    if (genderValue && genderValue.toString() === "Autre") {
+      genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
     }
     
     // Map the update data to match Supabase column names
