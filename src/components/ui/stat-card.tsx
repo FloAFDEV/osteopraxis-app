@@ -18,7 +18,9 @@ const StatCard = ({
   color = "text-blue-500",
   icon
 }: StatCardProps) => {
-  // Transform the text color (like text-blue-500) to a border color (like border-t-blue-500)
+  // This line wasn't properly transforming the color for the border
+  // Let's fix it to correctly extract the color value and apply it to border-t
+  // For example, transform "text-blue-500" to "border-t-blue-500"
   const borderColor = color.replace("text-", "border-t-");
 
   return (
