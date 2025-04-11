@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -31,6 +32,15 @@
     --border: 220 13% 89%; /* #e5e7eb */
     --input: 220 13% 89%; /* #e5e7eb */
     --ring: 222.2 84% 4.9%; /* #0f172a */
+
+    /* Nouvelles variables pour le mode clair */
+    --navbar-bg: 220 70% 97%; /* #f1f6ff - fond navbar plus bleuté */
+    --navbar-fg: 222.2 47.4% 15%; /* #293548 - texte navbar */
+    
+    --main-bg: 210 60% 98%; /* #f8fbff - fond principal */
+    
+    --footer-bg: 220 20% 95%; /* #f1f2f6 - fond footer */
+    --footer-fg: 215 25% 40%; /* #5e6e85 - texte footer */
 
     --radius: 0.5rem;
   }

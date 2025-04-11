@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight } from "lucide-react";
@@ -7,9 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
+
 export function Layout({
   children
 }: LayoutProps) {
@@ -18,20 +21,24 @@ export function Layout({
     user,
     logout
   } = useAuth();
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+  
   const handleLogout = async () => {
     await logout();
   };
+  
   const getInitials = () => {
     if (!user) return "?";
     const firstName = user.first_name || "";
     const lastName = user.last_name || "";
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
   };
+  
   return <div className="flex min-h-screen flex-col bg-slate-950">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
+      <header className="sticky top-0 z-40 bg-[hsl(var(--navbar-bg))] text-[hsl(var(--navbar-fg))] backdrop-blur-sm border-b border-b-blue-100">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
@@ -47,25 +54,25 @@ export function Layout({
           <nav className="hidden md:flex items-center gap-6">
             <NavLink to="/" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500", isActive ? "text-blue-500" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500", isActive ? "text-blue-500" : "text-[hsl(var(--navbar-fg))]")}>
               <Activity className="h-4 w-4" />
               Accueil
             </NavLink>
             <NavLink to="/patients" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-pink-500", isActive ? "text-pink-500" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-pink-500", isActive ? "text-pink-500" : "text-[hsl(var(--navbar-fg))]")}>
               <User className="h-4 w-4" />
               Patients
             </NavLink>
             <NavLink to="/appointments" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-purple-500", isActive ? "text-purple-500" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-purple-500", isActive ? "text-purple-500" : "text-[hsl(var(--navbar-fg))]")}>
               <Calendar className="h-4 w-4" />
               Rendez-vous
             </NavLink>
             <NavLink to="/schedule" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-amber-500", isActive ? "text-amber-500" : "text-muted-foreground")}>
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-amber-500", isActive ? "text-amber-500" : "text-[hsl(var(--navbar-fg))]")}>
               <Clock className="h-4 w-4" />
               Planning
             </NavLink>
@@ -153,10 +160,10 @@ export function Layout({
           </nav>
         </div>}
 
-      <main className="flex-1 container py-6">{children}</main>
+      <main className="flex-1 container py-6 bg-[hsl(var(--main-bg))]">{children}</main>
 
-      <footer className="border-t py-6 bg-muted/30">
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+      <footer className="border-t py-6 bg-[hsl(var(--footer-bg))] text-[hsl(var(--footer-fg))]">
+        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
           <p>© 2025 PatientHub. Tous droits réservés.</p>
           <div className="flex items-center gap-4">
             <NavLink to="/terms-of-service" className="hover:text-blue-500 transition-colors">
