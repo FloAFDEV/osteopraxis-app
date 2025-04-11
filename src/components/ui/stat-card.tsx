@@ -17,7 +17,7 @@ const StatCard = ({
   color = "text-blue-500",
   icon
 }: StatCardProps) => {
-  const borderColor = color.replace("text-", "border-t-");
+  const borderColor = color.replace("text-", "border-t-"); "border-t-blus-500";
 
   return (
     <Card
