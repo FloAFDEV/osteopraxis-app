@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, User, UserRound, Users } from "lucide-react";
@@ -63,10 +64,17 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
               
               <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
                 {patient.email && <span className="flex items-center text-gray-300">
-                    <Mail className="h-3 w-3 mr-1 text-blue-500" /> {patient.email}
+                    <Mail className="h-3 w-3 mr-1 text-blue-500" />
+                    <a href={`mailto:${patient.email}`} className="hover:underline text-blue-500 hover:text-blue-700 transition-colors">
+                      {patient.email}
+                    </a>
                   </span>}
                 
-                {patient.phone && <span className="text-gray-400">{patient.phone}</span>}
+                {patient.phone && <span className="text-gray-400">
+                    <a href={`tel:${patient.phone}`} className="hover:underline text-blue-500 hover:text-blue-700 transition-colors">
+                      {patient.phone}
+                    </a>
+                  </span>}
                 
                 {patient.occupation && <span className="text-gray-500 italic">{patient.occupation}</span>}
               </div>
