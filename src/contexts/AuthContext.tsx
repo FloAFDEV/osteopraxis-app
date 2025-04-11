@@ -49,7 +49,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const state = await api.login(email, password);
       setAuthState(state);
       setIsAdmin(isUserAdmin(state.user));
-      navigate("/");
+      
+      // Redirect to complete profile if user doesn't have an osteopathId
+      if (state.user && !state.user.osteopathId) {
+        navigate("/complete-profile");
+      } else {
+        navigate("/");
+      }
+      
       toast.success("Connexion réussie");
     } catch (error: any) {
       console.error("Login failed:", error);
@@ -91,7 +98,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAdmin(isUserAdmin(state.user));
       
       if (state.isAuthenticated) {
-        navigate("/");
+        // Always redirect to complete profile after registration
+        navigate("/complete-profile");
         toast.success("Compte créé avec succès");
       }
     } catch (error: any) {

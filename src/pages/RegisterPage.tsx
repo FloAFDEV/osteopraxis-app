@@ -44,7 +44,9 @@ const RegisterPage = () => {
     setRegisterError(null);
     try {
       await register(data.email, data.password, data.firstName, data.lastName);
-      // Ne pas rediriger ici car c'est géré dans le context en fonction de si confirmation email requise ou pas
+      // Redirect to complete profile page after registration
+      navigate("/complete-profile");
+      toast.success("Compte créé avec succès. Veuillez compléter votre profil.");
     } catch (error: any) {
       console.error("Register error:", error);
       setRegisterError(error.message || "Erreur lors de la création du compte");
