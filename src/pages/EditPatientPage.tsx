@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
 import { PatientForm } from '@/components/patient-form';
-import { api } from '@/services/api';
 import { Patient, Contraception } from '@/types';
 import { toast } from 'sonner';
 import { UserRound } from 'lucide-react';
@@ -24,7 +23,7 @@ const EditPatientPage = () => {
         setIsLoading(true);
         const patientId = parseInt(id);
         
-        // Utilisation directe du client Supabase au lieu de l'API
+        // Utilisation directe du client Supabase
         const { data, error } = await supabase
           .from('Patient')
           .select('*')
@@ -68,6 +67,7 @@ const EditPatientPage = () => {
     
     try {
       setIsSaving(true);
+      console.info("Submitting values:", updatedData);
       
       // Make sure hasChildren is kept as a string to match Patient type
       if (typeof updatedData.hasChildren === 'boolean') {
@@ -86,25 +86,26 @@ const EditPatientPage = () => {
         userId: patient.userId,
       };
       
-      // Convert IMPLANT to IMPLANTS for Supabase compatibility, ensuring type safety
+      // Handle contraception value for Supabase compatibility
       let patientDataForSupabase = { ...updatedPatient };
       if (patientDataForSupabase.contraception === "IMPLANT") {
         patientDataForSupabase.contraception = "IMPLANTS" as Contraception;
       }
       
-      // Utilisation directe du client Supabase au lieu de l'API
+      // Utiliser la méthode .update() du client Supabase - NE PAS utiliser PATCH
       const { error } = await supabase
         .from('Patient')
         .update(patientDataForSupabase)
         .eq('id', patient.id);
       
       if (error) {
+        console.error("Error updating patient:", error);
         throw error;
       }
       
       toast.success("Patient mis à jour avec succès");
       navigate('/patients');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating patient:", error);
       toast.error("Impossible de mettre à jour le patient");
     } finally {
