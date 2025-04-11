@@ -1,3 +1,4 @@
+
 import React, {
   createContext,
   useContext,
@@ -27,6 +28,9 @@ interface AuthContextType extends AuthState {
   logout: () => void;
   loadStoredToken: () => void;
   updateUser: (updatedUser: User) => boolean;
+  isLoading: boolean;
+  loginWithMagicLink: (email: string) => Promise<void>;
+  promoteToAdmin: (userId: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,11 +38,14 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   token: null,
   isAdmin: false,
+  isLoading: false,
   login: async () => false,
   register: async () => false,
   logout: () => {},
   loadStoredToken: () => {},
   updateUser: () => true,
+  loginWithMagicLink: async () => {},
+  promoteToAdmin: async () => false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -47,11 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
     token: null,
   });
+  const [isLoading, setIsLoading] = useState(false);
   const isAdmin = useMemo(() => authState.user?.role === "ADMIN", [authState.user]);
 
   const login = useCallback(
     async (email: string, password: string) => {
       try {
+        setIsLoading(true);
         // Simulation d'une requête d'authentification
         const response = await api.login(email, password);
         
@@ -68,6 +77,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Login error:", error);
         return false;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const loginWithMagicLink = useCallback(
+    async (email: string) => {
+      try {
+        setIsLoading(true);
+        await api.loginWithMagicLink(email);
+        // Note: We don't set auth state here as the user will need to click the link in their email
+      } catch (error) {
+        console.error("Magic link error:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
       }
     },
     []
@@ -81,7 +108,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password: string; 
     }) => {
       try {
-        const response = await api.register(userData);
+        setIsLoading(true);
+        const response = await api.register(userData.email, userData.password, userData.firstName, userData.lastName);
         
         if (response.token) {
           localStorage.setItem("authState", JSON.stringify(response));
@@ -96,6 +124,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Registration error:", error);
         throw error;
+      } finally {
+        setIsLoading(false);
       }
     },
     []
@@ -146,6 +176,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, []);
 
+  const promoteToAdmin = useCallback(async (userId: string) => {
+    try {
+      setIsLoading(true);
+      const result = await api.promoteToAdmin(userId);
+      return result;
+    } catch (error) {
+      console.error("Error promoting user to admin:", error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{ 
@@ -155,7 +198,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register, 
         logout, 
         loadStoredToken,
-        updateUser
+        updateUser,
+        isLoading,
+        loginWithMagicLink,
+        promoteToAdmin
       }}
     >
       {children}

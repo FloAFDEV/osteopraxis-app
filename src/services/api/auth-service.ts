@@ -25,10 +25,15 @@ let authState: AuthState = {
 };
 
 export const authService = {
-  async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
+  async register(userData: {
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  }): Promise<AuthState> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAuthService.register(email, password, firstName, lastName);
+        return await supabaseAuthService.register(userData.email, userData.password, userData.firstName, userData.lastName);
       } catch (error) {
         console.error("Erreur Supabase register:", error);
         throw error;
@@ -40,9 +45,9 @@ export const authService = {
     // Simuler une inscription (démo seulement)
     const newUser: User = {
       id: `user-${Date.now()}`,
-      email,
-      first_name: firstName,
-      last_name: lastName,
+      email: userData.email,
+      first_name: userData.firstName,
+      last_name: userData.lastName,
       role: "OSTEOPATH",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
