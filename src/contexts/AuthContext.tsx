@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { api } from "@/services/api";
 import { AuthState, User, Role } from "@/types";
@@ -30,9 +31,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Log pour le débogage
+  console.log("AuthProvider rendering, authState:", authState, "isAdmin:", isAdmin, "isLoading:", isLoading);
+
   const loadStoredToken = async () => {
+    console.log("loadStoredToken called");
     try {
       const state = await api.checkAuth();
+      console.log("checkAuth returned:", state);
+      
       setAuthState(state);
       setIsAdmin(isUserAdmin(state.user));
       setIsLoading(false);
@@ -49,12 +56,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAuthState(state);
       setIsAdmin(isUserAdmin(state.user));
       
-      // Redirect to complete profile if user doesn't have an osteopathId
-      if (state.user && !state.user.osteopathId) {
-        navigate("/complete-profile");
-      } else {
-        navigate("/");
-      }
+      // Redirigez vers le tableau de bord - la vérification de l'osteopathId est maintenant gérée dans App.tsx
+      navigate("/dashboard");
       
       toast.success("Connexion réussie");
     } catch (error: any) {
@@ -96,9 +99,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       setIsAdmin(isUserAdmin(state.user));
       
+      // Redirigez vers le tableau de bord - la vérification de l'osteopathId est maintenant gérée dans App.tsx
       if (state.isAuthenticated) {
-        // Always redirect to complete profile after registration
-        navigate("/complete-profile");
+        navigate("/dashboard");
         toast.success("Compte créé avec succès");
       }
     } catch (error: any) {

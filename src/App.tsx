@@ -73,192 +73,134 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const ProfileCheckRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
-  const [checkingProfile, setCheckingProfile] = useState(true);
-  
-  useEffect(() => {
-    // Once auth loading is done, give it a small delay
-    // to check if the user has a complete profile
-    if (!isLoading) {
-      const timer = setTimeout(() => {
-        setCheckingProfile(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-  
-  // Show nothing during loading
-  if (isLoading || checkingProfile) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-muted">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-  
-  // If the user is authenticated but doesn't have an osteopathId yet,
-  // redirect to the profile page to complete their profile
-  if (user && !user.osteopathId) {
-    return <Navigate to="/complete-profile" replace />;
-  }
-  
-  // Render children if profile is complete
-  return <>{children}</>;
-};
-
 function App() {
-  const { loadStoredToken } = useAuth();
-
-  useEffect(() => {
-    // Vérifier et charger le token d'authentification au démarrage de l'application
-    loadStoredToken().catch((error) => {
-      console.error("Erreur lors du chargement du token:", error);
-    });
-  }, [loadStoredToken]);
+  const { user, isLoading, isAuthenticated } = useAuth();
+  console.log("App rendering with user:", user, "isAuthenticated:", isAuthenticated, "isLoading:", isLoading);
+  
+  // Check if user needs to complete their profile
+  const needsProfileCompletion = user && isAuthenticated && !user.osteopathId;
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<Index />} />
+        {/* Public routes */}
+        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Index />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         
-        {/* Auth routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        {/* Profile completion route - only for authenticated users who need to complete profile */}
         <Route path="/complete-profile" element={
           <ProtectedRoute>
-            <OsteopathProfilePage />
+            {needsProfileCompletion ? <OsteopathProfilePage /> : <Navigate to="/dashboard" replace />}
           </ProtectedRoute>
         } />
         
-        {/* Protected routes that require authentication and completed profile */}
+        {/* Protected routes that require profile completion */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <DashboardPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <DashboardPage />}
           </ProtectedRoute>
         } />
         
         {/* Patient routes */}
         <Route path="/patients" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <PatientsPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <PatientsPage />}
           </ProtectedRoute>
         } />
         <Route path="/patients/new" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <NewPatientPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <NewPatientPage />}
           </ProtectedRoute>
         } />
         <Route path="/patients/:id" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <PatientDetailPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <PatientDetailPage />}
           </ProtectedRoute>
         } />
         <Route path="/patients/:id/edit" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <EditPatientPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <EditPatientPage />}
           </ProtectedRoute>
         } />
         
         {/* Appointment routes */}
         <Route path="/appointments" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <AppointmentsPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <AppointmentsPage />}
           </ProtectedRoute>
         } />
         <Route path="/schedule" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <SchedulePage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <SchedulePage />}
           </ProtectedRoute>
         } />
         <Route path="/appointments/new" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <NewAppointmentPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <NewAppointmentPage />}
           </ProtectedRoute>
         } />
         <Route path="/appointments/:id/edit" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <EditAppointmentPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <EditAppointmentPage />}
           </ProtectedRoute>
         } />
         
         {/* Invoice routes */}
         <Route path="/invoices" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <InvoicesPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <InvoicesPage />}
           </ProtectedRoute>
         } />
         <Route path="/invoices/new" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <NewInvoicePage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <NewInvoicePage />}
           </ProtectedRoute>
         } />
         <Route path="/invoices/:id" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <InvoiceDetailPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <InvoiceDetailPage />}
           </ProtectedRoute>
         } />
         
         {/* Cabinet management routes */}
         <Route path="/settings/cabinet" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <CabinetSettingsPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <CabinetSettingsPage />}
           </ProtectedRoute>
         } />
         <Route path="/settings/cabinet/new" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <NewCabinetPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <NewCabinetPage />}
           </ProtectedRoute>
         } />
         <Route path="/settings/cabinet/:id/edit" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <EditCabinetPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <EditCabinetPage />}
           </ProtectedRoute>
         } />
         <Route path="/settings/cabinets" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <CabinetsManagementPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <CabinetsManagementPage />}
+          </ProtectedRoute>
+        } />
+        <Route path="/cabinets" element={
+          <ProtectedRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <CabinetsManagementPage />}
+          </ProtectedRoute>
+        } />
+        <Route path="/cabinet" element={
+          <ProtectedRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <CabinetSettingsPage />}
           </ProtectedRoute>
         } />
         
-        {/* Settings routes */}
+        {/* Profile and settings routes */}
         <Route path="/settings" element={
           <ProtectedRoute>
-            <ProfileCheckRoute>
-              <SettingsPage />
-            </ProfileCheckRoute>
+            {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <SettingsPage />}
           </ProtectedRoute>
         } />
         <Route path="/profile" element={
@@ -271,16 +213,10 @@ function App() {
         <Route path="/admin" element={
           <ProtectedRoute>
             <AdminRoute>
-              <ProfileCheckRoute>
-                <AdminPage />
-              </ProfileCheckRoute>
+              {needsProfileCompletion ? <Navigate to="/complete-profile" replace /> : <AdminPage />}
             </AdminRoute>
           </ProtectedRoute>
         } />
-        
-        {/* Legal routes */}
-        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         
         {/* 404 route */}
         <Route path="*" element={<NotFound />} />

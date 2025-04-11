@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2, // Augmentation du nombre de tentatives
+      retry: 2,
       refetchOnWindowFocus: false,
     },
   },
@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <Router>
-    <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+    <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <App />
