@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight } from "lucide-react";
+import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight, FileText, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -37,6 +37,18 @@ export function Layout({
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
   };
   
+  // Définir les couleurs des icônes pour le menu mobile
+  const iconColors = {
+    dashboard: "text-blue-500",
+    patients: "text-pink-500", 
+    addPatient: "text-blue-500",
+    settings: "text-purple-500",
+    appointments: "text-purple-500",
+    invoices: "text-amber-500",
+    schedule: "text-blue-500",
+    cabinet: "text-purple-500"
+  };
+  
   return <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
         <div className="container flex h-16 items-center justify-between">
@@ -54,26 +66,26 @@ export function Layout({
           <nav className="hidden md:flex items-center gap-6">
             <NavLink to="/" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-blue-500", isActive ? "text-blue-500" : "text-muted-foreground")}>
-              <Activity className="h-4 w-4" />
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1", isActive ? "text-blue-500" : "hover:text-blue-500 text-muted-foreground")}>
+              <Activity className="h-4 w-4 text-blue-500" />
               Accueil
             </NavLink>
             <NavLink to="/patients" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-pink-500", isActive ? "text-pink-500" : "text-muted-foreground")}>
-              <User className="h-4 w-4" />
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1", isActive ? "text-pink-500" : "hover:text-pink-500 text-muted-foreground")}>
+              <User className="h-4 w-4 text-pink-500" />
               Patients
             </NavLink>
             <NavLink to="/appointments" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-purple-500", isActive ? "text-purple-500" : "text-muted-foreground")}>
-              <Calendar className="h-4 w-4" />
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1", isActive ? "text-purple-500" : "hover:text-purple-500 text-muted-foreground")}>
+              <Calendar className="h-4 w-4 text-purple-500" />
               Rendez-vous
             </NavLink>
             <NavLink to="/schedule" className={({
             isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1 hover:text-amber-500", isActive ? "text-amber-500" : "text-muted-foreground")}>
-              <Clock className="h-4 w-4" />
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1", isActive ? "text-amber-500" : "hover:text-amber-500 text-muted-foreground")}>
+              <Clock className="h-4 w-4 text-amber-500" />
               Planning
             </NavLink>
 
@@ -97,7 +109,7 @@ export function Layout({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <NavLink to="/cabinets" className="flex items-center cursor-pointer">
-                    <Building className="mr-2 h-4 w-4" />
+                    <Building className="mr-2 h-4 w-4 text-purple-500" />
                     <span>Paramètres du cabinet</span>
                   </NavLink>
                 </DropdownMenuItem>
@@ -116,32 +128,44 @@ export function Layout({
           <nav className="container py-4 flex flex-col gap-4">
             <NavLink to="/" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-blue-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
-              <Home className="h-5 w-5" />
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+              <Home className="h-5 w-5 text-blue-500" />
               Accueil
             </NavLink>
             <NavLink to="/patients" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-pink-500/10 text-pink-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
-              <User className="h-5 w-5" />
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-pink-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+              <User className="h-5 w-5 text-pink-500" />
               Patients
+            </NavLink>
+            <NavLink to="/patients/new" className={({
+          isActive
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+              <UserPlus className="h-5 w-5 text-blue-500" />
+              Ajouter un patient
             </NavLink>
             <NavLink to="/appointments" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
-              <Calendar className="h-5 w-5" />
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-purple-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+              <Calendar className="h-5 w-5 text-purple-500" />
               Rendez-vous
             </NavLink>
             <NavLink to="/schedule" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-blue-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
-              <Clock className="h-5 w-5" />
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-amber-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+              <Clock className="h-5 w-5 text-amber-500" />
               Planning
+            </NavLink>
+            <NavLink to="/invoices" className={({
+          isActive
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-amber-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+              <FileText className="h-5 w-5 text-amber-500" />
+              Factures
             </NavLink>
             <NavLink to="/cabinets" className={({
           isActive
-        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-purple-500/10 text-purple-500" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
-              <Building className="h-5 w-5" />
+        }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-purple-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+              <Building className="h-5 w-5 text-purple-500" />
               Paramètres du cabinet
             </NavLink>
 

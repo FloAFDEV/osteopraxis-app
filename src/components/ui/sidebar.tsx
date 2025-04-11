@@ -57,6 +57,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           isActive && "bg-slate-100 text-slate-900 dark:bg-amber-900/30 dark:text-amber-50" // Changé en amber pour le focus
         )}
       >
+        {/* Icône toujours colorée, indépendamment de l'état de survol */}
         <Icon size={18} className={colorClass} />
         {!isCollapsed && <span>{label}</span>}
       </NavLink>
@@ -164,17 +165,17 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             <div className="grid grid-cols-2 gap-2">
               <Button size="sm" variant="outline" className="w-full justify-start" asChild>
                 <NavLink to="/admin">
-                  <UserCog size={16} className="mr-2" /> Compte
+                  <UserCog size={16} className="mr-2 text-amber-600 dark:text-amber-400" /> Compte
                 </NavLink>
               </Button>
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={logout}>
-                <LogOut size={16} className="mr-2" /> Déconnexion
+                <LogOut size={16} className="mr-2 text-red-600 dark:text-red-400" /> Déconnexion
               </Button>
             </div>
           </div>
         ) : (
           <Button size="sm" variant="outline" className="w-full p-2 h-auto" onClick={logout}>
-            <LogOut size={16} />
+            <LogOut size={16} className="text-red-600 dark:text-red-400" />
           </Button>
         )}
       </div>
