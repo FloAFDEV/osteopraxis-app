@@ -59,18 +59,32 @@ export function OsteopathProfileForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<boolean>(false);
+  const [authRetryCount, setAuthRetryCount] = useState(0);
   const navigate = useNavigate();
+  const MAX_AUTH_RETRIES = 2;
   
-  // Vérifier l'authentification au chargement du composant
+  // Vérifier l'authentification au chargement du composant et réessayer si nécessaire
   useEffect(() => {
     const verifyAuth = async () => {
-      if (!user) {
-        await loadStoredToken();
+      try {
+        if (!user && authRetryCount < MAX_AUTH_RETRIES) {
+          console.log(`Tentative ${authRetryCount + 1}/${MAX_AUTH_RETRIES} de récupération du token...`);
+          await loadStoredToken();
+          
+          // Si toujours pas d'utilisateur après un délai, réessayer
+          setTimeout(() => {
+            if (!user) {
+              setAuthRetryCount(prev => prev + 1);
+            }
+          }, 800);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification d'authentification:", error);
       }
     };
     
     verifyAuth();
-  }, [loadStoredToken, user]);
+  }, [loadStoredToken, user, authRetryCount]);
 
   const form = useForm<OsteopathProfileFormValues>({
     resolver: zodResolver(osteopathProfileSchema),
@@ -91,10 +105,19 @@ export function OsteopathProfileForm({
 
   const onSubmit = async (data: OsteopathProfileFormValues) => {
     if (!user) {
-      setError("Vous devez être connecté pour effectuer cette action");
-      setAuthError(true);
-      toast.error("Vous devez être connecté pour effectuer cette action");
-      return;
+      // Essayer de recharger le token une dernière fois
+      await loadStoredToken();
+      
+      // Vérifier à nouveau après un délai
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Si toujours pas d'utilisateur, afficher l'erreur
+      if (!user) {
+        setError("Vous devez être connecté pour effectuer cette action");
+        setAuthError(true);
+        toast.error("Vous devez être connecté pour effectuer cette action");
+        return;
+      }
     }
 
     try {
@@ -104,7 +127,7 @@ export function OsteopathProfileForm({
       // Petit délai pour s'assurer que l'authentification est bien établie
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Vérifier que l'authentification est toujours valide
+      // Vérifier que l'authentification est toujours valide avec une tentative de rechargement
       await loadStoredToken();
       
       if (!user) {
@@ -117,12 +140,16 @@ export function OsteopathProfileForm({
       let osteopathResult: Osteopath;
       
       if (isEditing && osteopathId) {
+        console.log(`Mise à jour de l'ostéopathe (ID: ${osteopathId}) avec les données:`, data);
         // Update existing osteopath
         osteopathResult = await api.updateOsteopath(osteopathId, data);
         toast.success("Profil mis à jour avec succès");
+        console.log("Mise à jour réussie:", osteopathResult);
       } else {
-        console.log("Creating osteopath for user:", user.id);
-        // Create new osteopath
+        console.log("Création d'un ostéopathe pour l'utilisateur:", user.id);
+        // Create new osteopath with delay to ensure auth is ready
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
         osteopathResult = await api.createOsteopath({
           name: data.name,
           professional_title: data.professional_title || "Ostéopathe D.O.",
@@ -132,6 +159,7 @@ export function OsteopathProfileForm({
           userId: user.id
         });
         
+        console.log("Création réussie:", osteopathResult);
         toast.success("Profil créé avec succès");
       }
       
@@ -146,9 +174,12 @@ export function OsteopathProfileForm({
           error.message?.includes('Authentication') ||
           error.message?.includes('permission denied') ||
           error.message?.includes('Non authentifié') ||
-          error.message?.includes('Failed to fetch')) {
+          error.message?.includes('Failed to fetch') ||
+          error.status === 401 ||
+          error.status === 403) {
+          
         setAuthError(true);
-        setError("Vous devez être connecté pour effectuer cette action. Veuillez vous connecter à nouveau.");
+        setError("Session expirée. Veuillez vous reconnecter pour continuer.");
         
         // Force un rechargement complet de l'auth
         localStorage.removeItem("authState");
@@ -159,9 +190,8 @@ export function OsteopathProfileForm({
         }, 100);
       } else {
         setError(error.message || "Une erreur est survenue. Veuillez réessayer.");
+        toast.error(error.message || "Une erreur est survenue. Veuillez réessayer.");
       }
-      
-      toast.error(error.message || "Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
     }

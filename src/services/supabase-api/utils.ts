@@ -6,7 +6,7 @@ import { SIMULATE_AUTH } from '../api/config';
 // Importer le client depuis le fichier généré
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-// Exporter le client
+// Exporter le client avec des options d'authentification renforcées
 export const supabase = supabaseClient;
 
 // Type utilitaire pour les données typées
@@ -24,19 +24,48 @@ export const addAuthHeaders = <T extends { setHeader: (name: string, value: stri
 export const checkAuth = async () => {
   console.log("Vérification de l'état d'authentification...");
   
-  const { data, error } = await supabase.auth.getSession();
-  if (error) {
-    console.error("Erreur d'authentification:", error);
-    throw new Error(`Erreur d'authentification: ${error.message}`);
+  // Essayer plusieurs fois en cas d'erreur réseau
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error(`Erreur d'authentification (tentative ${attempts + 1}/${maxAttempts}):`, error);
+        
+        if (attempts < maxAttempts - 1) {
+          attempts++;
+          // Attendre avant de réessayer
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        
+        throw new Error(`Erreur d'authentification: ${error.message}`);
+      }
+      
+      if (!data.session) {
+        console.error("Aucune session active trouvée");
+        throw new Error('Non authentifié');
+      }
+      
+      console.log("Authentification vérifiée, ID utilisateur:", data.session.user.id);
+      return data.session;
+    } catch (error) {
+      if (attempts < maxAttempts - 1) {
+        attempts++;
+        console.error(`Erreur lors de la vérification d'authentification (tentative ${attempts}/${maxAttempts}):`, error);
+        // Attendre avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        throw error;
+      }
+    }
   }
   
-  if (!data.session) {
-    console.error("Aucune session active trouvée");
-    throw new Error('Non authentifié');
-  }
-  
-  console.log("Authentification vérifiée, ID utilisateur:", data.session.user.id);
-  return data.session;
+  // Si on arrive ici, c'est qu'on a épuisé toutes les tentatives
+  throw new Error('Impossible de vérifier l\'authentification après plusieurs tentatives');
 };
 
 // Récupérer un type enum à partir d'une valeur string

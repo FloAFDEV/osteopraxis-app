@@ -19,15 +19,23 @@ const OsteopathProfilePage = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
 
-  // Rechargement du token d'authentification au montage du composant
+  // Rechargement du token d'authentification au montage du composant avec délai
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
+        // Log d'état initial
+        console.log("État initial d'authentification:", user ? "Connecté" : "Non connecté");
+        
+        // Délai initial pour laisser le contexte d'auth se stabiliser
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Recharger le token stocké dans le localStorage
-        loadStoredToken();
+        await loadStoredToken();
+        
+        console.log("Auth après loadStoredToken:", user);
         
         // Petit délai pour s'assurer que l'état est mis à jour
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         setAuthChecked(true);
       } catch (error) {
@@ -37,7 +45,7 @@ const OsteopathProfilePage = () => {
     };
 
     checkAuthentication();
-  }, [loadStoredToken]);
+  }, [loadStoredToken, user]);
 
   // Vérification et chargement des données à chaque changement de l'état d'authentification
   useEffect(() => {
@@ -45,28 +53,38 @@ const OsteopathProfilePage = () => {
 
     const loadOsteopathData = async () => {
       if (!user) {
+        console.log("Utilisateur non authentifié, affichage de la feuille d'authentification");
         setLoading(false);
         setShowAuthSheet(true);
         return;
       }
 
       try {
-        console.log("Loading osteopath data for user:", user.id);
+        console.log("Chargement des données d'ostéopathe pour l'utilisateur:", user.id);
         // Forcer un petit délai pour s'assurer que l'authentification est bien établie
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         const osteopathData = await api.getOsteopathByUserId(user.id);
-        console.log("Osteopath data received:", osteopathData || "Aucune donnée trouvée");
+        console.log("Données d'ostéopathe reçues:", osteopathData || "Aucune donnée trouvée");
         setOsteopath(osteopathData || null);
         setLoadError(null);
         setShowAuthSheet(false);
       } catch (error: any) {
         console.error("Error fetching osteopath data:", error);
         
-        // Vérifier si l'erreur est liée à l'authentification
-        if (error.message?.includes('Not authenticated') || 
+        // Réessayer avec un délai en cas d'erreur réseau ou d'authentification
+        if (error.message?.includes('network') || error.message?.includes('Failed to fetch')) {
+          console.log("Erreur réseau, nouvelle tentative dans 800ms...");
+          setTimeout(() => {
+            // Force un rechargement du token puis réessaie
+            loadStoredToken().then(() => {
+              setAuthChecked(false); // Force une nouvelle vérification
+              setTimeout(() => setAuthChecked(true), 500);
+            });
+          }, 800);
+        }
+        else if (error.message?.includes('Not authenticated') || 
             error.message?.includes('Authentication') ||
-            error.message?.includes('Failed to fetch') ||
             error.message?.includes('permission denied')) {
           
           // Problème d'authentification, afficher la feuille de connexion
@@ -85,7 +103,7 @@ const OsteopathProfilePage = () => {
       setLoading(true);
       loadOsteopathData();
     }
-  }, [user, authChecked]);
+  }, [user, authChecked, loadStoredToken]);
 
   // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
   if (authChecked && !user && !showAuthSheet) {
@@ -106,8 +124,8 @@ const OsteopathProfilePage = () => {
       toast.success("Profil mis à jour avec succès");
       
       // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe si nécessaire
-      if (!user.osteopathId && updatedOsteopath.id) {
-        const updatedUser = { ...user, osteopathId: updatedOsteopath.id };
+      if (!user?.osteopathId && updatedOsteopath.id) {
+        const updatedUser = { ...user!, osteopathId: updatedOsteopath.id };
         updateUser(updatedUser);
       }
       
@@ -128,7 +146,7 @@ const OsteopathProfilePage = () => {
   };
 
   const handleRelogin = () => {
-    // Supprimer les données d'authentification en local
+    // Supprimer les données d'authentification en local et forcer un rechargement complet
     localStorage.removeItem("authState");
     
     // Redirection vers la page de connexion avec le chemin de retour
@@ -205,7 +223,7 @@ const OsteopathProfilePage = () => {
           </SheetHeader>
           <div className="py-6">
             <p className="text-muted-foreground mb-4">
-              Vous devez être connecté pour accéder à cette page.
+              Vous devez être connecté pour accéder à cette page. Il semble que votre session a expiré ou est invalide.
             </p>
             <div className="space-y-2">
               <button 
