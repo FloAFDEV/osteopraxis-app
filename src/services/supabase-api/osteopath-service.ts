@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
@@ -92,7 +93,7 @@ export const supabaseOsteopathService = {
 
       const now = new Date().toISOString();
       
-      // Définition du type pour l'insertion Supabase avec le type correct
+      // Définition des données à insérer avec le type correct
       const dataToInsert: OsteopathInsertData = {
         userId: String(osteopathData.userId), // Conversion explicite en string
         name: osteopathData.name,
