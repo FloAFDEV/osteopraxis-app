@@ -11,15 +11,38 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Osteopath } from "@/types";
 
 const OsteopathProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, loadStoredToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAuthSheet, setShowAuthSheet] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
+
+  // Rechargement du token d'authentification au montage du composant
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        // Recharger le token stocké dans le localStorage
+        loadStoredToken();
+        
+        // Petit délai pour s'assurer que l'état est mis à jour
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        setAuthChecked(true);
+      } catch (error) {
+        console.error("Erreur lors de la vérification d'authentification:", error);
+        setAuthChecked(true);
+      }
+    };
+
+    checkAuthentication();
+  }, [loadStoredToken]);
 
   // Vérification et chargement des données à chaque changement de l'état d'authentification
   useEffect(() => {
+    if (!authChecked) return;
+
     const loadOsteopathData = async () => {
       if (!user) {
         setLoading(false);
@@ -36,23 +59,36 @@ const OsteopathProfilePage = () => {
         console.log("Osteopath data received:", osteopathData || "Aucune donnée trouvée");
         setOsteopath(osteopathData || null);
         setLoadError(null);
+        setShowAuthSheet(false);
       } catch (error: any) {
         console.error("Error fetching osteopath data:", error);
-        setLoadError(error.message || "Erreur lors du chargement des données");
+        
+        // Vérifier si l'erreur est liée à l'authentification
+        if (error.message?.includes('Not authenticated') || 
+            error.message?.includes('Authentication') ||
+            error.message?.includes('Failed to fetch') ||
+            error.message?.includes('permission denied')) {
+          
+          // Problème d'authentification, afficher la feuille de connexion
+          setShowAuthSheet(true);
+          setLoadError("Session expirée ou invalide. Veuillez vous reconnecter.");
+        } else {
+          setLoadError(error.message || "Erreur lors du chargement des données");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     // Si l'utilisateur change, recharger les données
-    if (user) {
+    if (authChecked) {
       setLoading(true);
       loadOsteopathData();
     }
-  }, [user]);
+  }, [user, authChecked]);
 
   // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
-  if (!user && !showAuthSheet) {
+  if (authChecked && !user && !showAuthSheet) {
     console.log("Redirecting to login: No user and auth sheet not shown");
     return <Navigate to="/login" />;
   }
@@ -91,6 +127,14 @@ const OsteopathProfilePage = () => {
     }
   };
 
+  const handleRelogin = () => {
+    // Supprimer les données d'authentification en local
+    localStorage.removeItem("authState");
+    
+    // Redirection vers la page de connexion avec le chemin de retour
+    window.location.href = `/login?returnTo=${encodeURIComponent('/profile/setup')}`;
+  };
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
@@ -116,10 +160,30 @@ const OsteopathProfilePage = () => {
             <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
               <p className="font-medium">Erreur lors du chargement</p>
               <p className="text-sm">{loadError}</p>
-              <div className="mt-4">
-                <OsteopathProfileForm 
-                  onSuccess={handleSuccess}
-                />
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={handleRelogin}
+                  className="px-4 py-2 bg-red-100 hover:bg-red-200 rounded text-red-800 transition-colors"
+                >
+                  Se reconnecter
+                </button>
+                {user && (
+                  <button
+                    onClick={() => {
+                      setLoading(true);
+                      setLoadError(null);
+                      setTimeout(() => {
+                        // Essayer de charger à nouveau les données
+                        loadStoredToken();
+                        // Forcer le rechargement de la page pour s'assurer que tout est frais
+                        window.location.reload();
+                      }, 500);
+                    }}
+                    className="px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
+                  >
+                    Réessayer
+                  </button>
+                )}
               </div>
             </div>
           ) : (
@@ -145,7 +209,7 @@ const OsteopathProfilePage = () => {
             </p>
             <div className="space-y-2">
               <button 
-                onClick={() => navigate("/login")}
+                onClick={handleRelogin}
                 className="w-full bg-primary text-primary-foreground rounded px-4 py-2 hover:bg-primary/90 transition-colors"
               >
                 Se connecter

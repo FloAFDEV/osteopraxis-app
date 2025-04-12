@@ -1,9 +1,11 @@
+
 import React, {
   createContext,
   useContext,
   useState,
   useCallback,
   useMemo,
+  useEffect,
 } from "react";
 import { User } from "@/types";
 import { api } from "@/services/api";
@@ -25,7 +27,7 @@ interface AuthContextType extends AuthState {
     password: string;
   }) => Promise<boolean>;
   logout: () => void;
-  loadStoredToken: () => void;
+  loadStoredToken: () => Promise<boolean>;
   updateUser: (updatedUser: User) => boolean;
   isLoading: boolean;
   loginWithMagicLink: (email: string) => Promise<void>;
@@ -41,7 +43,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => false,
   register: async () => false,
   logout: () => {},
-  loadStoredToken: () => {},
+  loadStoredToken: async () => false,
   updateUser: () => true,
   loginWithMagicLink: async () => {},
   promoteToAdmin: async () => false,
@@ -54,7 +56,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     token: null,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
   const isAdmin = useMemo(() => authState.user?.role === "ADMIN", [authState.user]);
+
+  // Vérifier l'authentification au chargement initial
+  useEffect(() => {
+    const initialAuth = async () => {
+      try {
+        setIsLoading(true);
+        await loadStoredToken();
+      } catch (error) {
+        console.error("Error during initial auth check:", error);
+      } finally {
+        setIsLoading(false);
+        setInitialCheckDone(true);
+      }
+    };
+
+    initialAuth();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -140,23 +160,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     api.logout();
   }, []);
 
-  const loadStoredToken = useCallback(() => {
+  const loadStoredToken = useCallback(async () => {
     const storedAuthState = localStorage.getItem("authState");
     if (storedAuthState) {
       try {
         const parsedState = JSON.parse(storedAuthState);
+        
         if (parsedState.token) {
-          setAuthState({
-            user: parsedState.user,
-            isAuthenticated: true,
-            token: parsedState.token,
-          });
+          // Vérifier si le token est toujours valide
+          try {
+            // Attendre un court moment pour s'assurer que tout est synchronisé
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Vérification de l'état d'authentification auprès de l'API
+            const authCheck = await api.checkAuth();
+            
+            if (authCheck.isAuthenticated && authCheck.user) {
+              // Le token est valide, mettre à jour l'état
+              setAuthState({
+                user: authCheck.user,
+                isAuthenticated: true,
+                token: authCheck.token || parsedState.token,
+              });
+              return true;
+            } else {
+              // Le token n'est plus valide, effacer l'état local
+              localStorage.removeItem("authState");
+              setAuthState({
+                user: null,
+                isAuthenticated: false,
+                token: null,
+              });
+              return false;
+            }
+          } catch (error) {
+            console.error("Error checking auth:", error);
+            // En cas d'erreur de réseau, on fait confiance au token stocké
+            setAuthState({
+              user: parsedState.user,
+              isAuthenticated: true,
+              token: parsedState.token,
+            });
+            return true;
+          }
         }
       } catch (error) {
         console.error("Error parsing auth state:", error);
         localStorage.removeItem("authState");
       }
     }
+    return false;
   }, []);
   
   const updateUser = useCallback((updatedUser: User) => {

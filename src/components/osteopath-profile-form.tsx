@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -55,11 +55,22 @@ export function OsteopathProfileForm({
   isEditing = false,
   onSuccess
 }: OsteopathProfileFormProps) {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, loadStoredToken } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<boolean>(false);
   const navigate = useNavigate();
+  
+  // Vérifier l'authentification au chargement du composant
+  useEffect(() => {
+    const verifyAuth = async () => {
+      if (!user) {
+        await loadStoredToken();
+      }
+    };
+    
+    verifyAuth();
+  }, [loadStoredToken, user]);
 
   const form = useForm<OsteopathProfileFormValues>({
     resolver: zodResolver(osteopathProfileSchema),
@@ -91,7 +102,17 @@ export function OsteopathProfileForm({
       setError(null);
       
       // Petit délai pour s'assurer que l'authentification est bien établie
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Vérifier que l'authentification est toujours valide
+      await loadStoredToken();
+      
+      if (!user) {
+        setError("Session expirée. Veuillez vous reconnecter.");
+        setAuthError(true);
+        redirectToLogin();
+        return;
+      }
       
       let osteopathResult: Osteopath;
       
@@ -124,12 +145,18 @@ export function OsteopathProfileForm({
       if (error.message?.includes('Not authenticated') || 
           error.message?.includes('Authentication') ||
           error.message?.includes('permission denied') ||
-          error.message?.includes('Non authentifié')) {
+          error.message?.includes('Non authentifié') ||
+          error.message?.includes('Failed to fetch')) {
         setAuthError(true);
         setError("Vous devez être connecté pour effectuer cette action. Veuillez vous connecter à nouveau.");
         
         // Force un rechargement complet de l'auth
         localStorage.removeItem("authState");
+        
+        // Attendre un peu avant de rediriger
+        setTimeout(() => {
+          redirectToLogin();
+        }, 100);
       } else {
         setError(error.message || "Une erreur est survenue. Veuillez réessayer.");
       }
@@ -175,7 +202,6 @@ export function OsteopathProfileForm({
         </Alert>
       )}
       
-      {/* Le reste du formulaire reste inchangé */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
