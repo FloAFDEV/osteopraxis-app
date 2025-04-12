@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Osteopath } from "@/types";
 import { FancyLoader } from "@/components/ui/fancy-loader";
+import { Button } from "@/components/ui/button";
 
 const OsteopathProfilePage = () => {
   const { user, updateUser, loadStoredToken } = useAuth();
@@ -18,26 +19,46 @@ const OsteopathProfilePage = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAuthSheet, setShowAuthSheet] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [fetchAttempts, setFetchAttempts] = useState(0);
   const navigate = useNavigate();
+  const MAX_FETCH_ATTEMPTS = 3;
 
-  // Rechargement du token d'authentification au montage du composant avec délai
+  // Fonction pour charger les données de l'ostéopathe (avec limitation des appels)
+  const loadOsteopathData = useCallback(async () => {
+    if (!user || fetchAttempts >= MAX_FETCH_ATTEMPTS) return;
+    
+    setFetchAttempts(prev => prev + 1);
+    
+    try {
+      console.log("Tentative de chargement des données d'ostéopathe:", fetchAttempts + 1);
+      const osteopathData = await api.getOsteopathByUserId(user.id);
+      console.log("Données d'ostéopathe reçues:", osteopathData || "Aucune donnée trouvée");
+      setOsteopath(osteopathData || null);
+      setLoadError(null);
+      setShowAuthSheet(false);
+    } catch (error: any) {
+      console.error("Error fetching osteopath data:", error);
+      
+      if (error.message?.includes('Not authenticated') || 
+          error.message?.includes('Authentication') ||
+          error.message?.includes('permission denied')) {
+        
+        setShowAuthSheet(true);
+        setLoadError("Session expirée ou invalide. Veuillez vous reconnecter.");
+      } else {
+        setLoadError(error.message || "Erreur lors du chargement des données");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [user, fetchAttempts]);
+
+  // Rechargement du token d'authentification au montage du composant
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
-        // Log d'état initial
-        console.log("État initial d'authentification:", user ? "Connecté" : "Non connecté");
-        
-        // Délai initial pour laisser le contexte d'auth se stabiliser
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Recharger le token stocké dans le localStorage
+        console.log("Vérification de l'authentification...");
         await loadStoredToken();
-        
-        console.log("Auth après loadStoredToken:", user);
-        
-        // Petit délai pour s'assurer que l'état est mis à jour
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
         setAuthChecked(true);
       } catch (error) {
         console.error("Erreur lors de la vérification d'authentification:", error);
@@ -46,76 +67,33 @@ const OsteopathProfilePage = () => {
     };
 
     checkAuthentication();
-  }, [loadStoredToken, user]);
+  }, [loadStoredToken]);
 
-  // Vérification et chargement des données à chaque changement de l'état d'authentification
+  // Chargement des données quand l'authentification est vérifiée
   useEffect(() => {
-    if (!authChecked) return;
-
-    const loadOsteopathData = async () => {
-      if (!user) {
-        console.log("Utilisateur non authentifié, affichage de la feuille d'authentification");
-        setLoading(false);
-        setShowAuthSheet(true);
-        return;
-      }
-
-      try {
-        console.log("Chargement des données d'ostéopathe pour l'utilisateur:", user.id);
-        // Forcer un petit délai pour s'assurer que l'authentification est bien établie
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const osteopathData = await api.getOsteopathByUserId(user.id);
-        console.log("Données d'ostéopathe reçues:", osteopathData || "Aucune donnée trouvée");
-        setOsteopath(osteopathData || null);
-        setLoadError(null);
-        setShowAuthSheet(false);
-      } catch (error: any) {
-        console.error("Error fetching osteopath data:", error);
-        
-        // Réessayer avec un délai en cas d'erreur réseau ou d'authentification
-        if (error.message?.includes('network') || error.message?.includes('Failed to fetch')) {
-          console.log("Erreur réseau, nouvelle tentative dans 800ms...");
-          setTimeout(() => {
-            // Force un rechargement du token puis réessaie
-            loadStoredToken().then(() => {
-              setAuthChecked(false); // Force une nouvelle vérification
-              setTimeout(() => setAuthChecked(true), 500);
-            });
-          }, 800);
-        }
-        else if (error.message?.includes('Not authenticated') || 
-            error.message?.includes('Authentication') ||
-            error.message?.includes('permission denied')) {
-          
-          // Problème d'authentification, afficher la feuille de connexion
-          setShowAuthSheet(true);
-          setLoadError("Session expirée ou invalide. Veuillez vous reconnecter.");
-        } else {
-          setLoadError(error.message || "Erreur lors du chargement des données");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Si l'utilisateur change, recharger les données
-    if (authChecked) {
-      setLoading(true);
+    if (authChecked && user && fetchAttempts < MAX_FETCH_ATTEMPTS) {
       loadOsteopathData();
     }
-  }, [user, authChecked, loadStoredToken]);
+  }, [authChecked, user, loadOsteopathData, fetchAttempts]);
+
+  const handleRetry = () => {
+    setLoading(true);
+    setLoadError(null);
+    setFetchAttempts(0);
+    loadStoredToken().then(() => {
+      setTimeout(loadOsteopathData, 500);
+    });
+  };
 
   // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
   if (authChecked && !user && !showAuthSheet) {
-    console.log("Redirecting to login: No user and auth sheet not shown");
+    console.log("Redirection vers login: Utilisateur non connecté");
     return <Navigate to="/login" />;
   }
 
   // Si l'utilisateur a déjà un profil d'ostéopathe complet, rediriger vers les paramètres
-  if (user?.osteopathId && !loading && osteopath && Object.keys(osteopath).length > 0 && 
-      osteopath.name && osteopath.professional_title) {
-    console.log("Redirecting to settings: User has complete osteopath profile");
+  if (user?.osteopathId && !loading && osteopath && osteopath.name && osteopath.professional_title) {
+    console.log("Redirection vers settings: Profil d'ostéopathe complet");
     return <Navigate to="/settings" />;
   }
 
@@ -155,7 +133,7 @@ const OsteopathProfilePage = () => {
   };
 
   if (loading) {
-    return <FancyLoader message="Chargement de votre profil..." />;
+    return <FancyLoader message="Configuration de votre profil professionnel..." />;
   }
 
   return (
@@ -173,33 +151,23 @@ const OsteopathProfilePage = () => {
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
           {loadError ? (
-            <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded mb-6">
               <p className="font-medium">Erreur lors du chargement</p>
               <p className="text-sm">{loadError}</p>
-              <div className="mt-4 flex gap-2">
-                <button
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
                   onClick={handleRelogin}
-                  className="px-4 py-2 bg-red-100 hover:bg-red-200 rounded text-red-800 transition-colors"
+                  variant="secondary"
+                  className="bg-red-100 hover:bg-red-200 dark:bg-red-800/30 dark:hover:bg-red-800/50 text-red-800 dark:text-red-300"
                 >
                   Se reconnecter
-                </button>
-                {user && (
-                  <button
-                    onClick={() => {
-                      setLoading(true);
-                      setLoadError(null);
-                      setTimeout(() => {
-                        // Essayer de charger à nouveau les données
-                        loadStoredToken();
-                        // Forcer le rechargement de la page pour s'assurer que tout est frais
-                        window.location.reload();
-                      }, 500);
-                    }}
-                    className="px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                  >
-                    Réessayer
-                  </button>
-                )}
+                </Button>
+                <Button
+                  onClick={handleRetry}
+                  variant="outline"
+                >
+                  Réessayer
+                </Button>
               </div>
             </div>
           ) : (
@@ -230,18 +198,19 @@ const OsteopathProfilePage = () => {
               Vous devez être connecté pour accéder à cette page. Il semble que votre session a expiré ou est invalide.
             </p>
             <div className="space-y-2">
-              <button 
+              <Button 
                 onClick={handleRelogin}
-                className="w-full bg-primary text-primary-foreground rounded px-4 py-2 hover:bg-primary/90 transition-colors"
+                className="w-full bg-primary text-primary-foreground rounded"
               >
                 Se connecter
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => navigate("/register")}
-                className="w-full bg-secondary text-secondary-foreground rounded px-4 py-2 hover:bg-secondary/90 transition-colors"
+                variant="secondary"
+                className="w-full"
               >
                 S'inscrire
-              </button>
+              </Button>
             </div>
           </div>
         </SheetContent>
