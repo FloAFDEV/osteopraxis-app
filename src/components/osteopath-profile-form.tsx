@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,14 +30,13 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+// Schéma de validation assoupli pour permettre l'enregistrement
 const osteopathProfileSchema = z.object({
   name: z.string().min(2, {
     message: "Le nom doit contenir au moins 2 caractères",
   }),
   professional_title: z.string().optional(),
-  adeli_number: z.string().min(9, {
-    message: "Le numéro ADELI doit contenir au moins 9 caractères",
-  }),
+  adeli_number: z.string().optional(), // Rendu optionnel pour permettre l'enregistrement
   siret: z.string().optional(),
   ape_code: z.string().optional(),
 });
@@ -173,13 +173,26 @@ export function OsteopathProfileForm({
       if (isEditing && osteopathId) {
         console.log(`Mise à jour de l'ostéopathe (ID: ${osteopathId}) avec les données:`, data);
         // Update existing osteopath
-        osteopathResult = await api.updateOsteopath(osteopathId, data);
+        osteopathResult = await api.updateOsteopath(osteopathId, data) as Osteopath;
         toast.success("Profil mis à jour avec succès");
         console.log("Mise à jour réussie:", osteopathResult);
       } else {
         console.log("Création d'un ostéopathe pour l'utilisateur:", user.id);
         // Create new osteopath with delay to ensure auth is ready
         await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // S'assurer que les champs obligatoires ne sont pas vides
+        // Mais ne pas bloquer la création si certains champs sont manquants
+        const osteopathData = {
+          name: data.name,
+          professional_title: data.professional_title || "Ostéopathe D.O.",
+          adeli_number: data.adeli_number || null,
+          siret: data.siret || null,
+          ape_code: data.ape_code || "8690F",
+          userId: user.id
+        };
+        
+        console.log("Données pour création:", osteopathData);
         
         // Vérifier à nouveau la session juste avant l'insertion
         try {
@@ -190,21 +203,24 @@ export function OsteopathProfileForm({
           console.log("Impossible de vérifier la session:", error);
         }
         
-        osteopathResult = await api.createOsteopath({
-          name: data.name,
-          professional_title: data.professional_title || "Ostéopathe D.O.",
-          adeli_number: data.adeli_number,
-          siret: data.siret || null,
-          ape_code: data.ape_code || "8690F",
-          userId: user.id
-        });
+        osteopathResult = await api.createOsteopath(osteopathData);
         
         console.log("Création réussie:", osteopathResult);
         toast.success("Profil créé avec succès");
       }
       
+      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
+      if (!user.osteopathId && osteopathResult && osteopathResult.id) {
+        console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathResult.id);
+        const updatedUser = { ...user, osteopathId: osteopathResult.id };
+        updateUser(updatedUser);
+      }
+      
       if (onSuccess) {
         onSuccess(osteopathResult);
+      } else {
+        // Rediriger vers le dashboard si aucune fonction de succès spécifiée
+        navigate("/dashboard");
       }
     } catch (error: any) {
       console.error("Error submitting osteopath form:", error);
@@ -244,13 +260,13 @@ export function OsteopathProfileForm({
   return (
     <Form {...form}>
       {error && (
-        <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded mb-6">
           <p className="font-medium">Erreur</p>
           <p className="text-sm">{error}</p>
           {authError && (
             <Button 
               variant="outline" 
-              className="mt-2 bg-white" 
+              className="mt-2" 
               onClick={redirectToLogin}
             >
               Se connecter

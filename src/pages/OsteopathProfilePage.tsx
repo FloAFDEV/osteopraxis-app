@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -41,15 +42,6 @@ const OsteopathProfilePage = () => {
     return "";
   }, [user]);
 
-  // Fonction pour vérifier si le profil est complet
-  const isProfileComplete = useCallback((osteopathData: Osteopath | null) => {
-    if (!osteopathData) return false;
-    
-    // Un profil est considéré comme complet s'il a au minimum un ID (déjà créé en DB)
-    // Les champs requis pour les factures sont vérifiés dans NewInvoicePage
-    return true;
-  }, []);
-
   // Fonction pour charger les données de l'ostéopathe
   const loadOsteopathData = useCallback(async () => {
     if (!user) return;
@@ -70,13 +62,14 @@ const OsteopathProfilePage = () => {
           console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathData.id);
           const updatedUser = { ...user, osteopathId: osteopathData.id };
           updateUser(updatedUser);
-        }
-        
-        // Si l'ostéopathe a un profil considéré comme complet, rediriger vers le tableau de bord
-        if (isProfileComplete(osteopathData)) {
-          console.log("Profil d'ostéopathe complet. Redirection vers le tableau de bord.");
+          
+          // Rediriger vers le tableau de bord après la mise à jour
+          console.log("Redirection vers le tableau de bord après mise à jour de l'utilisateur");
           navigate("/dashboard");
-          return;
+        } else if (user.osteopathId) {
+          // Si l'utilisateur a déjà un osteopathId, rediriger vers le tableau de bord
+          console.log("L'utilisateur a déjà un osteopathId, redirection vers le dashboard");
+          navigate("/dashboard");
         }
       } else {
         // Aucun ostéopathe trouvé, rester sur cette page pour création
@@ -98,7 +91,7 @@ const OsteopathProfilePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, navigate, updateUser, isProfileComplete]);
+  }, [user, navigate, updateUser]);
 
   // Rechargement du token d'authentification au montage du composant
   useEffect(() => {
@@ -119,9 +112,16 @@ const OsteopathProfilePage = () => {
   // Chargement des données quand l'authentification est vérifiée
   useEffect(() => {
     if (authChecked && user) {
+      // Si l'utilisateur a déjà un osteopathId, rediriger directement vers le tableau de bord
+      if (user.osteopathId) {
+        console.log("L'utilisateur a déjà un osteopathId, redirection vers le dashboard");
+        navigate("/dashboard");
+        return;
+      }
+      
       loadOsteopathData();
     }
-  }, [authChecked, user, loadOsteopathData]);
+  }, [authChecked, user, loadOsteopathData, navigate]);
 
   const handleRetry = () => {
     setLoading(true);
@@ -135,12 +135,6 @@ const OsteopathProfilePage = () => {
   if (authChecked && !user && !showAuthSheet) {
     console.log("Redirection vers login: Utilisateur non connecté");
     return <Navigate to="/login" />;
-  }
-
-  // Si l'utilisateur a déjà un osteopathId, rediriger vers le dashboard
-  if (user && user.osteopathId) {
-    console.log("L'utilisateur a déjà un osteopathId, redirection vers le dashboard");
-    return <Navigate to="/dashboard" />;
   }
 
   const handleSuccess = (updatedOsteopath: Osteopath) => {
@@ -191,6 +185,12 @@ const OsteopathProfilePage = () => {
         </p>
       </div>
     );
+  }
+
+  // Si l'utilisateur a déjà un osteopathId, rediriger vers le dashboard
+  if (user && user.osteopathId) {
+    console.log("L'utilisateur a déjà un osteopathId, redirection vers le dashboard");
+    return <Navigate to="/dashboard" />;
   }
 
   return (

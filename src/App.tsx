@@ -30,8 +30,17 @@ import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
 
+  // Chargement initial du token stocké au démarrage de l'application
   useEffect(() => {
-    loadStoredToken();
+    const initAuth = async () => {
+      console.log("Chargement initial du token stocké...");
+      try {
+        await loadStoredToken();
+      } catch (error) {
+        console.error("Erreur lors du chargement initial du token:", error);
+      }
+    };
+    initAuth();
   }, [loadStoredToken]);
 
   // Ne rediriger vers le setup QUE si l'utilisateur est authentifié mais n'a pas d'osteopathId
@@ -48,8 +57,8 @@ function App() {
     const checkAgain = async () => {
       if (isAuthenticated && !user?.osteopathId) {
         console.log("Vérification supplémentaire du token avec délai...");
-        await new Promise(resolve => setTimeout(resolve, 300));
-        loadStoredToken();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await loadStoredToken();
       }
     };
     checkAgain();

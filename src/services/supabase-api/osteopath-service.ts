@@ -71,6 +71,8 @@ export const supabaseOsteopathService = {
   async createOsteopath(data: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
     const now = new Date().toISOString();
     
+    console.log("Création d'un ostéopathe avec les données:", data);
+    
     // Ajout des timestamps requis par le schéma Supabase
     const osteopathWithTimestamps = {
       ...data,
@@ -84,8 +86,12 @@ export const supabaseOsteopathService = {
       .select()
       .single();
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Erreur lors de la création de l'ostéopathe:", error);
+      throw new Error(error.message);
+    }
     
+    console.log("Ostéopathe créé avec succès:", newOsteo);
     return typedData<Osteopath>(newOsteo);
   },
   
