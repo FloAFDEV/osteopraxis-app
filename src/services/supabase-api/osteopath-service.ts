@@ -80,10 +80,10 @@ export const supabaseOsteopathService = {
       console.log("Données d'ostéopathe à insérer:", osteopathData);
 
       // Vérification que l'ID utilisateur correspond bien à celui de la session
+      let dataToInsert = { ...osteopathData };
       if (osteopathData.userId !== session.user.id) {
         console.warn("L'ID utilisateur ne correspond pas à l'ID de session. Ajustement automatique.");
-        // Correction: Faire une copie de l'objet osteopathData au lieu de le modifier directement
-        osteopathData = { ...osteopathData, userId: session.user.id };
+        dataToInsert.userId = session.user.id;
       }
 
       const now = new Date().toISOString();
@@ -105,7 +105,7 @@ export const supabaseOsteopathService = {
         const { data, error } = await supabase
           .from("Osteopath")
           .insert({
-            ...osteopathData,
+            ...dataToInsert,
             createdAt: now,
             updatedAt: now
           })
@@ -124,12 +124,12 @@ export const supabaseOsteopathService = {
             console.log("Permission denied, utilisation du mode simulé");
             return {
               id: 999,
-              userId: osteopathData.userId,
-              name: osteopathData.name,
-              professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
-              adeli_number: osteopathData.adeli_number || null,
-              siret: osteopathData.siret || null,
-              ape_code: osteopathData.ape_code || "8690F",
+              userId: dataToInsert.userId,
+              name: dataToInsert.name,
+              professional_title: dataToInsert.professional_title || "Ostéopathe D.O.",
+              adeli_number: dataToInsert.adeli_number || null,
+              siret: dataToInsert.siret || null,
+              ape_code: dataToInsert.ape_code || "8690F",
               createdAt: now,
               updatedAt: now
             };
@@ -148,11 +148,11 @@ export const supabaseOsteopathService = {
         return {
           id: 999,
           userId: session.user.id,
-          name: osteopathData.name,
-          professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
-          adeli_number: osteopathData.adeli_number || null,
-          siret: osteopathData.siret || null,
-          ape_code: osteopathData.ape_code || "8690F",
+          name: dataToInsert.name,
+          professional_title: dataToInsert.professional_title || "Ostéopathe D.O.",
+          adeli_number: dataToInsert.adeli_number || null,
+          siret: dataToInsert.siret || null,
+          ape_code: dataToInsert.ape_code || "8690F",
           createdAt: now,
           updatedAt: now
         };
