@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
@@ -119,10 +120,16 @@ export const supabaseOsteopathService = {
           console.log("Permissions vérifiées avec succès");
         }
         
+        // Nous faisons l'insertion avec un objet clairement typé maintenant
         const { data, error } = await supabase
           .from("Osteopath")
           .insert({
-            ...dataToInsert,
+            userId: dataToInsert.userId,
+            name: dataToInsert.name,
+            professional_title: dataToInsert.professional_title,
+            adeli_number: dataToInsert.adeli_number,
+            siret: dataToInsert.siret,
+            ape_code: dataToInsert.ape_code,
             createdAt: now,
             updatedAt: now
           })
