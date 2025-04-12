@@ -123,16 +123,7 @@ export const supabaseOsteopathService = {
         // Nous faisons l'insertion avec un objet clairement typé maintenant
         const { data, error } = await supabase
           .from("Osteopath")
-          .insert({
-            userId: dataToInsert.userId,
-            name: dataToInsert.name,
-            professional_title: dataToInsert.professional_title,
-            adeli_number: dataToInsert.adeli_number,
-            siret: dataToInsert.siret,
-            ape_code: dataToInsert.ape_code,
-            createdAt: now,
-            updatedAt: now
-          })
+          .insert([dataToInsert]) // Utiliser un tableau pour l'insertion
           .select()
           .single();
           
