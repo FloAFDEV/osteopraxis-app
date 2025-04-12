@@ -45,12 +45,14 @@ const OsteopathProfilePage = () => {
   // Fonction pour vérifier si le profil est complet
   const isProfileComplete = useCallback((osteopathData: Osteopath | null) => {
     if (!osteopathData) return false;
-    return !!(
-      osteopathData.adeli_number &&
-      osteopathData.siret &&
-      osteopathData.name &&
-      osteopathData.professional_title
-    );
+    
+    // Vérifier si les champs principaux sont renseignés
+    const hasName = !!osteopathData.name;
+    const hasTitle = !!osteopathData.professional_title;
+    
+    // Un profil est considéré comme complet s'il a au minimum un nom et un titre
+    // Les numéros ADELI et SIRET sont requis pour les factures mais pas pour naviguer dans l'app
+    return hasName && hasTitle;
   }, []);
 
   // Fonction pour charger les données de l'ostéopathe
@@ -61,12 +63,13 @@ const OsteopathProfilePage = () => {
       console.log("Chargement des données d'ostéopathe...");
       const osteopathData = await api.getOsteopathByUserId(user.id);
       console.log("Données d'ostéopathe reçues:", osteopathData || "Aucune donnée trouvée");
-      setOsteopath(osteopathData || null);
-      setLoadError(null);
-      setShowAuthSheet(false);
       
-      // Si un ostéopathe est trouvé, mettre à jour l'utilisateur avec l'ID de l'ostéopathe
+      // Si un ostéopathe est trouvé
       if (osteopathData && osteopathData.id) {
+        setOsteopath(osteopathData);
+        setLoadError(null);
+        setShowAuthSheet(false);
+        
         // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe s'il n'est pas déjà défini
         if (!user.osteopathId && osteopathData.id) {
           console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathData.id);
@@ -74,12 +77,16 @@ const OsteopathProfilePage = () => {
           updateUser(updatedUser);
         }
         
-        // Si l'ostéopathe a un profil complet, rediriger vers le tableau de bord
+        // Si l'ostéopathe a un profil considéré comme complet, rediriger vers le tableau de bord
         if (isProfileComplete(osteopathData)) {
           console.log("Profil d'ostéopathe complet. Redirection vers le tableau de bord.");
           navigate("/dashboard");
           return;
         }
+      } else {
+        // Aucun ostéopathe trouvé, rester sur cette page pour création
+        console.log("Aucun profil d'ostéopathe trouvé. Création requise.");
+        setOsteopath(null);
       }
     } catch (error: any) {
       console.error("Error fetching osteopath data:", error);

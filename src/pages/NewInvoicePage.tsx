@@ -35,14 +35,26 @@ const NewInvoicePage = () => {
       }
 
       try {
-        const result = await supabaseOsteopathService.getOsteopathById(user.osteopathId);
+        // Récupérer directement l'ostéopathe pour vérifier les champs
+        const result = await api.getOsteopathById(user.osteopathId);
+        console.log("Données ostéopathe récupérées pour vérification facture:", result);
+        
+        // Si aucun résultat, l'ostéopathe n'existe pas
+        if (!result) {
+          setHasRequiredFields(false);
+          setMissingFields(["Profil d'ostéopathe introuvable"]);
+          setValidatingFields(false);
+          return;
+        }
         
         const missing: string[] = [];
         
-        if (!result?.adeli_number) missing.push("Numéro ADELI");
-        if (!result?.siret) missing.push("Numéro SIRET");
-        if (!result?.name) missing.push("Nom professionnel");
-        if (!result?.professional_title) missing.push("Titre professionnel");
+        if (!result.adeli_number) missing.push("Numéro ADELI");
+        if (!result.siret) missing.push("Numéro SIRET");
+        if (!result.name) missing.push("Nom professionnel");
+        if (!result.professional_title) missing.push("Titre professionnel");
+        
+        console.log("Champs manquants pour la facturation:", missing.length > 0 ? missing : "Aucun");
         
         setMissingFields(missing);
         setHasRequiredFields(missing.length === 0);

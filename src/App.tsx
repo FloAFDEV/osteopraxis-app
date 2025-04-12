@@ -35,16 +35,11 @@ function App() {
   }, [loadStoredToken]);
 
   // Ne rediriger vers le setup QUE si l'utilisateur est authentifié mais n'a pas d'osteopathId
+  // On considère qu'un utilisateur qui a déjà un osteopathId a déjà créé un profil
   const needsProfileSetup = isAuthenticated && user && !user.osteopathId;
   
   const publicPaths = ['/profile/setup', '/settings/profile', '/privacy-policy', '/terms-of-service'];
   
-  // Cette logique détermine si l'utilisateur doit être redirigé vers la configuration du profil
-  const shouldRedirectToProfileSetup = (path) => {
-    if (!needsProfileSetup) return false; // Si l'utilisateur a déjà un osteopathId, ne pas rediriger
-    return !publicPaths.some(p => path.startsWith(p)); // Rediriger seulement si pas sur un chemin public
-  };
-
   return (
     <>
       <Routes>
@@ -52,26 +47,26 @@ function App() {
         <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />} />
         
         {/* Routes protégées qui nécessitent une authentification */}
-        <Route path="/dashboard" element={isAuthenticated ? (shouldRedirectToProfileSetup('/dashboard') ? <Navigate to="/profile/setup" /> : <DashboardPage />) : <Navigate to="/login" />} />
-        <Route path="/patients" element={isAuthenticated ? (shouldRedirectToProfileSetup('/patients') ? <Navigate to="/profile/setup" /> : <PatientsPage />) : <Navigate to="/login" />} />
-        <Route path="/patients/new" element={isAuthenticated ? (shouldRedirectToProfileSetup('/patients/new') ? <Navigate to="/profile/setup" /> : <NewPatientPage />) : <Navigate to="/login" />} />
-        <Route path="/patients/:id/edit" element={isAuthenticated ? (shouldRedirectToProfileSetup('/patients/:id/edit') ? <Navigate to="/profile/setup" /> : <EditPatientPage />) : <Navigate to="/login" />} />
-        <Route path="/patients/:id" element={isAuthenticated ? (shouldRedirectToProfileSetup('/patients/:id') ? <Navigate to="/profile/setup" /> : <PatientDetailPage />) : <Navigate to="/login" />} />
-        <Route path="/appointments" element={isAuthenticated ? (shouldRedirectToProfileSetup('/appointments') ? <Navigate to="/profile/setup" /> : <AppointmentsPage />) : <Navigate to="/login" />} />
-        <Route path="/appointments/new" element={isAuthenticated ? (shouldRedirectToProfileSetup('/appointments/new') ? <Navigate to="/profile/setup" /> : <NewAppointmentPage />) : <Navigate to="/login" />} />
-        <Route path="/appointments/:id/edit" element={isAuthenticated ? (shouldRedirectToProfileSetup('/appointments/:id/edit') ? <Navigate to="/profile/setup" /> : <EditAppointmentPage />) : <Navigate to="/login" />} />
-        <Route path="/schedule" element={isAuthenticated ? (shouldRedirectToProfileSetup('/schedule') ? <Navigate to="/profile/setup" /> : <SchedulePage />) : <Navigate to="/login" />} />
-        <Route path="/settings" element={isAuthenticated ? (shouldRedirectToProfileSetup('/settings') ? <Navigate to="/profile/setup" /> : <SettingsPage />) : <Navigate to="/login" />} />
+        <Route path="/dashboard" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <DashboardPage />) : <Navigate to="/login" />} />
+        <Route path="/patients" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <PatientsPage />) : <Navigate to="/login" />} />
+        <Route path="/patients/new" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <NewPatientPage />) : <Navigate to="/login" />} />
+        <Route path="/patients/:id/edit" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <EditPatientPage />) : <Navigate to="/login" />} />
+        <Route path="/patients/:id" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <PatientDetailPage />) : <Navigate to="/login" />} />
+        <Route path="/appointments" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <AppointmentsPage />) : <Navigate to="/login" />} />
+        <Route path="/appointments/new" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <NewAppointmentPage />) : <Navigate to="/login" />} />
+        <Route path="/appointments/:id/edit" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <EditAppointmentPage />) : <Navigate to="/login" />} />
+        <Route path="/schedule" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <SchedulePage />) : <Navigate to="/login" />} />
+        <Route path="/settings" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <SettingsPage />) : <Navigate to="/login" />} />
         <Route path="/settings/profile" element={isAuthenticated ? <OsteopathSettingsPage /> : <Navigate to="/login" />} />
         <Route path="/profile/setup" element={isAuthenticated ? <OsteopathProfilePage /> : <Navigate to="/login" />} />
-        <Route path="/settings/cabinet" element={isAuthenticated ? (shouldRedirectToProfileSetup('/settings/cabinet') ? <Navigate to="/profile/setup" /> : <CabinetSettingsPage />) : <Navigate to="/login" />} />
-        <Route path="/invoices" element={isAuthenticated ? (shouldRedirectToProfileSetup('/invoices') ? <Navigate to="/profile/setup" /> : <InvoicesPage />) : <Navigate to="/login" />} />
-        <Route path="/invoices/new" element={isAuthenticated ? (shouldRedirectToProfileSetup('/invoices/new') ? <Navigate to="/profile/setup" /> : <NewInvoicePage />) : <Navigate to="/login" />} />
-        <Route path="/invoices/:id" element={isAuthenticated ? (shouldRedirectToProfileSetup('/invoices/:id') ? <Navigate to="/profile/setup" /> : <InvoiceDetailPage />) : <Navigate to="/login" />} />
+        <Route path="/settings/cabinet" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <CabinetSettingsPage />) : <Navigate to="/login" />} />
+        <Route path="/invoices" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <InvoicesPage />) : <Navigate to="/login" />} />
+        <Route path="/invoices/new" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <NewInvoicePage />) : <Navigate to="/login" />} />
+        <Route path="/invoices/:id" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <InvoiceDetailPage />) : <Navigate to="/login" />} />
         <Route path="/" element={<Navigate to={isAuthenticated ? (needsProfileSetup ? "/profile/setup" : "/dashboard") : "/login"} />} />
-        <Route path="/cabinets" element={isAuthenticated ? (shouldRedirectToProfileSetup('/cabinets') ? <Navigate to="/profile/setup" /> : <CabinetsManagementPage />) : <Navigate to="/login" />} />
+        <Route path="/cabinets" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <CabinetsManagementPage />) : <Navigate to="/login" />} />
         <Route path="/cabinets/new" element={isAuthenticated ? <NewCabinetPage /> : <Navigate to="/login" />} />
-        <Route path="/cabinets/:id/edit" element={isAuthenticated ? (shouldRedirectToProfileSetup('/cabinets/:id/edit') ? <Navigate to="/profile/setup" /> : <EditCabinetPage />) : <Navigate to="/login" />} />
+        <Route path="/cabinets/:id/edit" element={isAuthenticated ? (needsProfileSetup ? <Navigate to="/profile/setup" /> : <EditCabinetPage />) : <Navigate to="/login" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         
