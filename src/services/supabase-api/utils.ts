@@ -31,6 +31,7 @@ export const checkAuth = async () => {
   while (attempts < maxAttempts) {
     try {
       const { data, error } = await supabase.auth.getSession();
+      console.log("Résultat getSession:", data ? "Données reçues" : "Aucune donnée", error ? `Erreur: ${error.message}` : "Pas d'erreur");
       
       if (error) {
         console.error(`Erreur d'authentification (tentative ${attempts + 1}/${maxAttempts}):`, error);
@@ -46,13 +47,15 @@ export const checkAuth = async () => {
       }
       
       if (!data.session) {
+        console.log("Aucune session active trouvée, vérification du token local");
         // Avant d'échouer, essayons de récupérer le token du localStorage
         try {
           const storedAuthState = localStorage.getItem("authState");
           if (storedAuthState) {
+            console.log("État d'authentification trouvé dans le localStorage");
             const parsedState = JSON.parse(storedAuthState);
             if (parsedState.token) {
-              console.log("Aucune session active trouvée, mais token local disponible. Tentative de réutilisation.");
+              console.log("Token local disponible. Tentative de réutilisation.");
               
               // Tenter de définir manuellement le token d'accès dans la session Supabase
               await supabase.auth.setSession({
@@ -62,10 +65,13 @@ export const checkAuth = async () => {
               
               // Vérifier à nouveau la session
               const { data: refreshedData, error: refreshError } = await supabase.auth.getSession();
+              console.log("Après tentative avec token local:", refreshedData?.session ? "Session active" : "Pas de session", refreshError ? `Erreur: ${refreshError.message}` : "Pas d'erreur");
               
               if (!refreshError && refreshedData.session) {
                 console.log("Réutilisation du token local réussie, session active:", refreshedData.session.user.id);
                 return refreshedData.session;
+              } else {
+                console.log("Échec de la réutilisation du token local");
               }
             }
           }
