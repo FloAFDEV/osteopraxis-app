@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 const OsteopathProfilePage = () => {
   const { user, updateUser, loadStoredToken } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [checkingCabinets, setCheckingCabinets] = useState(false);
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAuthSheet, setShowAuthSheet] = useState(false);
@@ -58,6 +58,31 @@ const OsteopathProfilePage = () => {
       setOsteopath(osteopathData || null);
       setLoadError(null);
       setShowAuthSheet(false);
+      
+      // Si un ostéopathe est trouvé, vérifier s'il a des cabinets
+      if (osteopathData && osteopathData.id) {
+        setCheckingCabinets(true);
+        try {
+          const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+          console.log("Cabinets trouvés pour l'ostéopathe:", cabinets.length);
+          
+          // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe
+          if (!user.osteopathId && osteopathData.id) {
+            const updatedUser = { ...user, osteopathId: osteopathData.id };
+            updateUser(updatedUser);
+          }
+          
+          // Si l'ostéopathe a déjà des cabinets, rediriger vers le tableau de bord
+          if (cabinets && cabinets.length > 0) {
+            toast.success("Cabinet existant trouvé. Redirection vers le tableau de bord.");
+            navigate("/dashboard");
+          }
+        } catch (cabinetError) {
+          console.error("Erreur lors de la vérification des cabinets:", cabinetError);
+        } finally {
+          setCheckingCabinets(false);
+        }
+      }
     } catch (error: any) {
       console.error("Error fetching osteopath data:", error);
       
@@ -73,7 +98,7 @@ const OsteopathProfilePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, fetchAttempts]);
+  }, [user, fetchAttempts, navigate, updateUser]);
 
   // Rechargement du token d'authentification au montage du composant
   useEffect(() => {
@@ -130,7 +155,23 @@ const OsteopathProfilePage = () => {
         updateUser(updatedUser);
       }
       
-      navigate("/settings");
+      // Vérifier si l'ostéopathe a déjà des cabinets
+      api.getCabinetsByOsteopathId(updatedOsteopath.id)
+        .then(cabinets => {
+          if (cabinets && cabinets.length > 0) {
+            console.log("Cabinets existants trouvés, redirection vers le tableau de bord");
+            toast.success("Cabinet existant trouvé. Redirection vers le tableau de bord.");
+            navigate("/dashboard");
+          } else {
+            // Redirection vers la page de création de cabinet seulement s'il n'a pas de cabinet
+            navigate("/cabinets/new");
+          }
+        })
+        .catch(error => {
+          console.error("Erreur lors de la vérification des cabinets:", error);
+          // En cas d'erreur, on suppose qu'il n'y a pas de cabinet et on redirige vers la création
+          navigate("/cabinets/new");
+        });
     } else {
       // Pour un nouveau profil
       toast.success("Profil créé avec succès");
@@ -139,10 +180,25 @@ const OsteopathProfilePage = () => {
       if (updatedOsteopath && updatedOsteopath.id && user) {
         const updatedUser = { ...user, osteopathId: updatedOsteopath.id };
         updateUser(updatedUser);
+        
+        // Vérifier si l'ostéopathe a déjà des cabinets
+        api.getCabinetsByOsteopathId(updatedOsteopath.id)
+          .then(cabinets => {
+            if (cabinets && cabinets.length > 0) {
+              console.log("Cabinets existants trouvés, redirection vers le tableau de bord");
+              toast.success("Cabinet existant trouvé. Redirection vers le tableau de bord.");
+              navigate("/dashboard");
+            } else {
+              // Redirection vers la page de création de cabinet seulement s'il n'a pas de cabinet
+              navigate("/cabinets/new");
+            }
+          })
+          .catch(error => {
+            console.error("Erreur lors de la vérification des cabinets:", error);
+            // En cas d'erreur, on suppose qu'il n'y a pas de cabinet et on redirige vers la création
+            navigate("/cabinets/new");
+          });
       }
-      
-      // Redirection vers la page de création de cabinet après la création du profil
-      navigate("/cabinets/new");
     }
   };
 
@@ -154,7 +210,7 @@ const OsteopathProfilePage = () => {
     window.location.href = `/login?returnTo=${encodeURIComponent('/profile/setup')}`;
   };
 
-  if (loading) {
+  if (loading || checkingCabinets) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -162,7 +218,7 @@ const OsteopathProfilePage = () => {
           PatientHub
         </span>
         <p className="mt-2 text-muted-foreground text-center">
-          Configuration de votre profil professionnel...
+          {checkingCabinets ? "Recherche de vos cabinets existants..." : "Configuration de votre profil professionnel..."}
         </p>
       </div>
     );

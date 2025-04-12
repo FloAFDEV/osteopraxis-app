@@ -79,24 +79,18 @@ export const supabaseOsteopathService = {
       console.log("Création d'un ostéopathe avec la session authentifiée:", session.user.id);
       console.log("Données d'ostéopathe à insérer:", osteopathData);
 
-      // Définition explicite du type pour éviter les erreurs "never"
-      interface OsteopathInsertData {
-        userId: string;
-        name: string;
-        professional_title: string | null;
-        adeli_number: string | null;
-        siret: string | null;
-        ape_code: string | null;
-      }
-
-      // Création de l'objet en spécifiant explicitement le type
-      const dataToInsert: OsteopathInsertData = {
+      const now = new Date().toISOString();
+      
+      // Définition du type pour l'insertion Supabase
+      const dataToInsert = {
         userId: String(osteopathData.userId), // Conversion explicite en string
         name: osteopathData.name,
-        professional_title: osteopathData.professional_title,
-        adeli_number: osteopathData.adeli_number,
-        siret: osteopathData.siret,
-        ape_code: osteopathData.ape_code
+        professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
+        adeli_number: osteopathData.adeli_number || null,
+        siret: osteopathData.siret || null,
+        ape_code: osteopathData.ape_code || "8690F",
+        updatedAt: now,
+        createdAt: now
       };
       
       if (dataToInsert.userId !== session.user.id) {
@@ -104,8 +98,6 @@ export const supabaseOsteopathService = {
         dataToInsert.userId = session.user.id;
       }
 
-      const now = new Date().toISOString();
-      
       // Utiliser un try-catch supplémentaire pour mieux diagnostiquer les erreurs d'insertion
       try {
         // Vérifier d'abord les permissions
@@ -120,10 +112,10 @@ export const supabaseOsteopathService = {
           console.log("Permissions vérifiées avec succès");
         }
         
-        // Nous faisons l'insertion avec un objet clairement typé maintenant
+        // Faire l'insertion avec les données correctement typées
         const { data, error } = await supabase
           .from("Osteopath")
-          .insert([dataToInsert]) // Utiliser un tableau pour l'insertion
+          .insert([dataToInsert])
           .select()
           .single();
           
@@ -141,10 +133,10 @@ export const supabaseOsteopathService = {
               id: 999,
               userId: dataToInsert.userId,
               name: dataToInsert.name,
-              professional_title: dataToInsert.professional_title || "Ostéopathe D.O.",
-              adeli_number: dataToInsert.adeli_number || null,
-              siret: dataToInsert.siret || null,
-              ape_code: dataToInsert.ape_code || "8690F",
+              professional_title: dataToInsert.professional_title,
+              adeli_number: dataToInsert.adeli_number,
+              siret: dataToInsert.siret,
+              ape_code: dataToInsert.ape_code,
               createdAt: now,
               updatedAt: now
             };
@@ -164,10 +156,10 @@ export const supabaseOsteopathService = {
           id: 999,
           userId: session.user.id,
           name: dataToInsert.name,
-          professional_title: dataToInsert.professional_title || "Ostéopathe D.O.",
-          adeli_number: dataToInsert.adeli_number || null,
-          siret: dataToInsert.siret || null,
-          ape_code: dataToInsert.ape_code || "8690F",
+          professional_title: dataToInsert.professional_title,
+          adeli_number: dataToInsert.adeli_number,
+          siret: dataToInsert.siret,
+          ape_code: dataToInsert.ape_code,
           createdAt: now,
           updatedAt: now
         };
