@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 const OsteopathProfilePage = () => {
   const { user, updateUser, loadStoredToken } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [checkingCabinets, setCheckingCabinets] = useState(false);
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAuthSheet, setShowAuthSheet] = useState(false);
@@ -43,6 +42,17 @@ const OsteopathProfilePage = () => {
     return "";
   }, [user]);
 
+  // Fonction pour vérifier si le profil est complet
+  const isProfileComplete = useCallback((osteopathData: Osteopath | null) => {
+    if (!osteopathData) return false;
+    return !!(
+      osteopathData.adeli_number &&
+      osteopathData.siret &&
+      osteopathData.name &&
+      osteopathData.professional_title
+    );
+  }, []);
+
   // Fonction pour charger les données de l'ostéopathe
   const loadOsteopathData = useCallback(async () => {
     if (!user) return;
@@ -65,7 +75,7 @@ const OsteopathProfilePage = () => {
         }
         
         // Si l'ostéopathe a un profil complet, rediriger vers le tableau de bord
-        if (osteopathData.adeli_number && osteopathData.siret && osteopathData.name && osteopathData.professional_title) {
+        if (isProfileComplete(osteopathData)) {
           console.log("Profil d'ostéopathe complet. Redirection vers le tableau de bord.");
           navigate("/dashboard");
           return;
@@ -86,7 +96,7 @@ const OsteopathProfilePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, navigate, updateUser]);
+  }, [user, navigate, updateUser, isProfileComplete]);
 
   // Rechargement du token d'authentification au montage du composant
   useEffect(() => {

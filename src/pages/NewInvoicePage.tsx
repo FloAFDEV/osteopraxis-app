@@ -22,22 +22,34 @@ const NewInvoicePage = () => {
   const [loading, setLoading] = useState(false);
   const [validatingFields, setValidatingFields] = useState(true);
   const [hasRequiredFields, setHasRequiredFields] = useState(true);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   // Vérifier si l'ostéopathe a tous les champs requis pour générer des factures
   useEffect(() => {
     const checkRequiredFields = async () => {
       if (!user?.osteopathId) {
         setHasRequiredFields(false);
+        setMissingFields(["Profil d'ostéopathe incomplet"]);
         setValidatingFields(false);
         return;
       }
 
       try {
-        const hasFields = await supabaseOsteopathService.hasRequiredFields(user.osteopathId);
-        setHasRequiredFields(hasFields);
+        const result = await supabaseOsteopathService.getOsteopathById(user.osteopathId);
+        
+        const missing: string[] = [];
+        
+        if (!result?.adeli_number) missing.push("Numéro ADELI");
+        if (!result?.siret) missing.push("Numéro SIRET");
+        if (!result?.name) missing.push("Nom professionnel");
+        if (!result?.professional_title) missing.push("Titre professionnel");
+        
+        setMissingFields(missing);
+        setHasRequiredFields(missing.length === 0);
       } catch (error) {
         console.error("Erreur lors de la vérification des champs obligatoires:", error);
         setHasRequiredFields(false);
+        setMissingFields(["Erreur lors de la vérification des champs"]);
       } finally {
         setValidatingFields(false);
       }
@@ -71,10 +83,9 @@ const NewInvoicePage = () => {
                 Pour pouvoir générer des factures, vous devez compléter votre profil professionnel avec les informations suivantes :
               </p>
               <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
-                <li>Votre numéro ADELI</li>
-                <li>Votre numéro SIRET</li>
-                <li>Votre nom professionnel</li>
-                <li>Votre titre professionnel</li>
+                {missingFields.map((field, index) => (
+                  <li key={index}>{field}</li>
+                ))}
               </ul>
               <div className="mt-4">
                 <Button asChild>
