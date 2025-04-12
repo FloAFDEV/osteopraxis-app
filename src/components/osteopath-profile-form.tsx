@@ -151,6 +151,23 @@ export function OsteopathProfileForm({
         return;
       }
       
+      // Force le rechargement du token d'authentification depuis le localStorage
+      const storedAuthState = localStorage.getItem("authState");
+      if (storedAuthState) {
+        try {
+          const parsedState = JSON.parse(storedAuthState);
+          if (parsedState.token) {
+            console.log("Définition manuelle du token d'accès pour Supabase avant l'opération");
+            await supabase.auth.setSession({
+              access_token: parsedState.token,
+              refresh_token: ""
+            });
+          }
+        } catch (error) {
+          console.error("Erreur lors de la définition manuelle du token:", error);
+        }
+      }
+      
       let osteopathResult: Osteopath;
       
       if (isEditing && osteopathId) {
@@ -163,6 +180,15 @@ export function OsteopathProfileForm({
         console.log("Création d'un ostéopathe pour l'utilisateur:", user.id);
         // Create new osteopath with delay to ensure auth is ready
         await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Vérifier à nouveau la session juste avant l'insertion
+        try {
+          const { data: sessionData } = await supabase.auth.getSession();
+          console.log("État de la session juste avant création:", 
+            sessionData.session ? `Authentifié (${sessionData.session.user.id})` : "Non authentifié");
+        } catch (error) {
+          console.log("Impossible de vérifier la session:", error);
+        }
         
         osteopathResult = await api.createOsteopath({
           name: data.name,

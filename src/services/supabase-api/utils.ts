@@ -46,7 +46,34 @@ export const checkAuth = async () => {
       }
       
       if (!data.session) {
-        console.error("Aucune session active trouvée");
+        // Avant d'échouer, essayons de récupérer le token du localStorage
+        try {
+          const storedAuthState = localStorage.getItem("authState");
+          if (storedAuthState) {
+            const parsedState = JSON.parse(storedAuthState);
+            if (parsedState.token) {
+              console.log("Aucune session active trouvée, mais token local disponible. Tentative de réutilisation.");
+              
+              // Tenter de définir manuellement le token d'accès dans la session Supabase
+              await supabase.auth.setSession({
+                access_token: parsedState.token,
+                refresh_token: ""
+              });
+              
+              // Vérifier à nouveau la session
+              const { data: refreshedData, error: refreshError } = await supabase.auth.getSession();
+              
+              if (!refreshError && refreshedData.session) {
+                console.log("Réutilisation du token local réussie, session active:", refreshedData.session.user.id);
+                return refreshedData.session;
+              }
+            }
+          }
+        } catch (localAuthError) {
+          console.error("Erreur lors de la récupération du token local:", localAuthError);
+        }
+        
+        console.error("Aucune session active trouvée et impossible de récupérer un token valide");
         throw new Error('Non authentifié');
       }
       

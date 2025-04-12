@@ -1,4 +1,3 @@
-
 import React, {
   createContext,
   useContext,
@@ -83,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initialAuth();
-  }, [loadAttempts]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadAttempts, loadStoredToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -190,6 +189,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (parsedState.token) {
           // Vérifier si le token est toujours valide
           try {
+            // Définir la session dans supabase avant de faire la vérification
+            if (parsedState.token) {
+              console.log("Définition du token dans la session Supabase");
+              await supabase.auth.setSession({
+                access_token: parsedState.token,
+                refresh_token: ""
+              });
+            }
+            
             // Attendre un court moment pour s'assurer que tout est synchronisé
             await new Promise(resolve => setTimeout(resolve, 300));
             

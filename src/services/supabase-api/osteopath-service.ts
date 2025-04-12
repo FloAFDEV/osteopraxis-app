@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
@@ -67,6 +66,85 @@ export const supabaseOsteopathService = {
     }
   },
   
+  async createOsteopath(osteopathData: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
+    try {
+      // Vérifie l'authentification avant de procéder et récupère la session
+      const session = await checkAuth();
+      console.log("Création d'un ostéopathe avec la session authentifiée:", session.user.id);
+      console.log("Données d'ostéopathe à insérer:", osteopathData);
+
+      // Vérification que l'ID utilisateur correspond bien à celui de la session
+      if (osteopathData.userId !== session.user.id) {
+        console.warn("L'ID utilisateur ne correspond pas à l'ID de session. Ajustement automatique.");
+        osteopathData.userId = session.user.id;
+      }
+
+      const now = new Date().toISOString();
+      
+      // Utiliser un try-catch supplémentaire pour mieux diagnostiquer les erreurs d'insertion
+      try {
+        const { data, error } = await supabase
+          .from("Osteopath")
+          .insert({
+            ...osteopathData,
+            createdAt: now,
+            updatedAt: now
+          })
+          .select()
+          .single();
+          
+        if (error) {
+          console.error("Erreur Supabase createOsteopath:", error);
+          console.error("Code:", error.code);
+          console.error("Details:", error.details);
+          console.error("Hint:", error.hint);
+          console.error("Message:", error.message);
+          throw new Error(error.message);
+        }
+        
+        console.log("Ostéopathe créé avec succès:", data);
+        return typedData<Osteopath>(data);
+      } catch (insertError: any) {
+        console.error("Exception lors de l'insertion dans Osteopath:", insertError);
+        
+        // Vérifier si c'est une erreur de permission RLS
+        if (insertError.message?.includes('permission denied')) {
+          console.error("Erreur de permission, détails:", {
+            userId: osteopathData.userId,
+            sessionUserId: session.user.id,
+            isAuthenticated: !!session
+          });
+          
+          // Tenter une approche alternative avec directement l'ID utilisateur de la session
+          console.log("Tentative alternative avec l'ID utilisateur de la session");
+          const { data, error } = await supabase
+            .from("Osteopath")
+            .insert({
+              ...osteopathData,
+              userId: session.user.id, // Force l'utilisation de l'ID utilisateur de la session
+              createdAt: now,
+              updatedAt: now
+            })
+            .select()
+            .single();
+            
+          if (error) {
+            console.error("Erreur lors de la tentative alternative:", error);
+            throw error;
+          }
+          
+          console.log("Création réussie avec la tentative alternative:", data);
+          return typedData<Osteopath>(data);
+        }
+        
+        throw insertError;
+      }
+    } catch (error: any) {
+      console.error("Exception Supabase createOsteopath:", error);
+      throw error;
+    }
+  },
+  
   async updateOsteopath(id: number, osteopathData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath> {
     try {
       // Vérifie l'authentification avant de procéder
@@ -97,42 +175,4 @@ export const supabaseOsteopathService = {
       throw error;
     }
   },
-  
-  async createOsteopath(osteopathData: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
-    try {
-      // Vérifie l'authentification avant de procéder et récupère la session
-      const session = await checkAuth();
-      console.log("Création d'un ostéopathe avec la session authentifiée:", session.user.id);
-      console.log("Données d'ostéopathe à insérer:", osteopathData);
-
-      // Vérification que l'ID utilisateur correspond bien à celui de la session
-      if (osteopathData.userId !== session.user.id) {
-        console.warn("L'ID utilisateur ne correspond pas à l'ID de session. Ajustement automatique.");
-        osteopathData.userId = session.user.id;
-      }
-
-      const now = new Date().toISOString();
-      
-      const { data, error } = await supabase
-        .from("Osteopath")
-        .insert({
-          ...osteopathData,
-          createdAt: now,
-          updatedAt: now
-        })
-        .select()
-        .single();
-        
-      if (error) {
-        console.error("Erreur Supabase createOsteopath:", error);
-        throw new Error(error.message);
-      }
-      
-      console.log("Ostéopathe créé avec succès:", data);
-      return typedData<Osteopath>(data);
-    } catch (error: any) {
-      console.error("Exception Supabase createOsteopath:", error);
-      throw error;
-    }
-  }
 };
