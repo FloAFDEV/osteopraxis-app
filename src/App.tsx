@@ -43,6 +43,18 @@ function App() {
   // Debug pour comprendre l'état actuel
   console.log("État auth:", { isAuthenticated, needsProfileSetup, userId: user?.id, osteopathId: user?.osteopathId });
   
+  // Forcer un petit délai pour s'assurer que le localStorage est bien chargé
+  useEffect(() => {
+    const checkAgain = async () => {
+      if (isAuthenticated && !user?.osteopathId) {
+        console.log("Vérification supplémentaire du token avec délai...");
+        await new Promise(resolve => setTimeout(resolve, 300));
+        loadStoredToken();
+      }
+    };
+    checkAgain();
+  }, [isAuthenticated, user, loadStoredToken]);
+  
   return (
     <>
       <Routes>
