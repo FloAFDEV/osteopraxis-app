@@ -46,13 +46,9 @@ const OsteopathProfilePage = () => {
   const isProfileComplete = useCallback((osteopathData: Osteopath | null) => {
     if (!osteopathData) return false;
     
-    // Vérifier si les champs principaux sont renseignés
-    const hasName = !!osteopathData.name;
-    const hasTitle = !!osteopathData.professional_title;
-    
-    // Un profil est considéré comme complet s'il a au minimum un nom et un titre
-    // Les numéros ADELI et SIRET sont requis pour les factures mais pas pour naviguer dans l'app
-    return hasName && hasTitle;
+    // Un profil est considéré comme complet s'il a au minimum un ID (déjà créé en DB)
+    // Les champs requis pour les factures sont vérifiés dans NewInvoicePage
+    return true;
   }, []);
 
   // Fonction pour charger les données de l'ostéopathe
@@ -140,6 +136,12 @@ const OsteopathProfilePage = () => {
   if (authChecked && !user && !showAuthSheet) {
     console.log("Redirection vers login: Utilisateur non connecté");
     return <Navigate to="/login" />;
+  }
+
+  // Si l'utilisateur a déjà un osteopathId, rediriger vers le dashboard
+  if (user && user.osteopathId) {
+    console.log("L'utilisateur a déjà un osteopathId, redirection vers le dashboard");
+    return <Navigate to="/dashboard" />;
   }
 
   const handleSuccess = (updatedOsteopath: Osteopath) => {

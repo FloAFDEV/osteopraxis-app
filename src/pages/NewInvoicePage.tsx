@@ -47,6 +47,14 @@ const NewInvoicePage = () => {
           return;
         }
         
+        // Vérifier que result est bien défini et contient les champs attendus
+        console.log("Vérification des champs pour la facturation:", {
+          adeli_number: result.adeli_number,
+          siret: result.siret,
+          name: result.name,
+          professional_title: result.professional_title
+        });
+        
         const missing: string[] = [];
         
         if (!result.adeli_number) missing.push("Numéro ADELI");

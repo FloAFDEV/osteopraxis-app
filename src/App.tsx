@@ -35,10 +35,13 @@ function App() {
   }, [loadStoredToken]);
 
   // Ne rediriger vers le setup QUE si l'utilisateur est authentifié mais n'a pas d'osteopathId
-  // On considère qu'un utilisateur qui a déjà un osteopathId a déjà créé un profil
+  // Si l'utilisateur a un osteopathId, on considère qu'il a déjà créé un profil
   const needsProfileSetup = isAuthenticated && user && !user.osteopathId;
   
   const publicPaths = ['/profile/setup', '/settings/profile', '/privacy-policy', '/terms-of-service'];
+  
+  // Debug pour comprendre l'état actuel
+  console.log("État auth:", { isAuthenticated, needsProfileSetup, userId: user?.id, osteopathId: user?.osteopathId });
   
   return (
     <>
