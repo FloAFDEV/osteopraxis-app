@@ -78,10 +78,19 @@ export const supabaseOsteopathService = {
       console.log("Création d'un ostéopathe avec la session authentifiée:", session.user.id);
       console.log("Données d'ostéopathe à insérer:", osteopathData);
 
-      // Vérification que l'ID utilisateur correspond bien à celui de la session
-      // Créer une copie typée correctement avec userId explicitement défini comme string
-      const dataToInsert = {
-        userId: osteopathData.userId as string,
+      // Définition explicite du type pour éviter les erreurs "never"
+      interface OsteopathInsertData {
+        userId: string;
+        name: string;
+        professional_title: string | null;
+        adeli_number: string | null;
+        siret: string | null;
+        ape_code: string | null;
+      }
+
+      // Création de l'objet en spécifiant explicitement le type
+      const dataToInsert: OsteopathInsertData = {
+        userId: String(osteopathData.userId), // Conversion explicite en string
         name: osteopathData.name,
         professional_title: osteopathData.professional_title,
         adeli_number: osteopathData.adeli_number,
