@@ -59,18 +59,26 @@ const OsteopathProfilePage = () => {
       setLoadError(null);
       setShowAuthSheet(false);
       
-      // Si un ostéopathe est trouvé, vérifier s'il a des cabinets
+      // Si un ostéopathe est trouvé, vérifier s'il a des cabinets et mettre à jour l'utilisateur
       if (osteopathData && osteopathData.id) {
+        // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe s'il n'est pas déjà défini
+        if (!user.osteopathId && osteopathData.id) {
+          console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathData.id);
+          const updatedUser = { ...user, osteopathId: osteopathData.id };
+          updateUser(updatedUser);
+          
+          // Redirection automatique vers le tableau de bord si l'ostéopathe a déjà un profil complet
+          if (osteopathData.adeli_number && osteopathData.name && osteopathData.professional_title) {
+            console.log("Profil d'ostéopathe complet. Redirection vers le tableau de bord.");
+            navigate("/dashboard");
+            return;
+          }
+        }
+      
         setCheckingCabinets(true);
         try {
           const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
           console.log("Cabinets trouvés pour l'ostéopathe:", cabinets.length);
-          
-          // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe
-          if (!user.osteopathId && osteopathData.id) {
-            const updatedUser = { ...user, osteopathId: osteopathData.id };
-            updateUser(updatedUser);
-          }
           
           // Si l'ostéopathe a déjà des cabinets, rediriger vers le tableau de bord
           if (cabinets && cabinets.length > 0) {
@@ -138,10 +146,10 @@ const OsteopathProfilePage = () => {
     return <Navigate to="/login" />;
   }
 
-  // Si l'utilisateur a déjà un profil d'ostéopathe complet, rediriger vers les paramètres
+  // Si l'utilisateur a déjà un profil d'ostéopathe complet, rediriger vers le tableau de bord
   if (user?.osteopathId && !loading && osteopath && osteopath.name && osteopath.professional_title) {
-    console.log("Redirection vers settings: Profil d'ostéopathe complet");
-    return <Navigate to="/settings" />;
+    console.log("Redirection vers dashboard: Profil d'ostéopathe complet");
+    return <Navigate to="/dashboard" />;
   }
 
   const handleSuccess = (updatedOsteopath: Osteopath) => {

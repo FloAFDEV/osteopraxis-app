@@ -48,37 +48,6 @@ export const supabaseOsteopathService = {
     // Vérifier si nous avons des données
     if (!data || data.length === 0) {
       console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
-      
-      // Si aucun ostéopathe n'est trouvé, vérifions s'il y a un seul ostéopathe dans la table
-      const { data: allOsteopaths, error: allError } = await supabase
-        .from("Osteopath")
-        .select("*");
-      
-      if (allError) {
-        console.error("Erreur lors de la récupération de tous les ostéopathes:", allError);
-        return undefined;
-      }
-      
-      if (allOsteopaths && allOsteopaths.length === 1) {
-        console.log("Un seul ostéopathe trouvé dans la base, on l'associe automatiquement");
-        
-        // Mettre à jour l'ostéopathe avec l'ID utilisateur
-        const osteopathToUpdate = allOsteopaths[0];
-        const { data: updatedOsteo, error: updateError } = await supabase
-          .from("Osteopath")
-          .update({ userId: userId })
-          .eq("id", osteopathToUpdate.id)
-          .select();
-        
-        if (updateError) {
-          console.error("Erreur lors de la mise à jour de l'ostéopathe:", updateError);
-          return undefined;
-        }
-        
-        // Retourner l'ostéopathe mis à jour
-        return typedData<Osteopath>(updatedOsteo[0]);
-      }
-      
       return undefined;
     }
     
@@ -118,5 +87,24 @@ export const supabaseOsteopathService = {
     if (error) throw new Error(error.message);
     
     return typedData<Osteopath>(newOsteo);
+  },
+  
+  async hasRequiredFields(osteopathId: number): Promise<boolean> {
+    try {
+      const osteopath = await supabaseOsteopathService.getOsteopathById(osteopathId);
+      
+      if (!osteopath) return false;
+      
+      // Vérifier si les champs obligatoires pour les factures sont présents
+      return (
+        !!osteopath.adeli_number && 
+        !!osteopath.siret && 
+        !!osteopath.name && 
+        !!osteopath.professional_title
+      );
+    } catch (error) {
+      console.error("Erreur lors de la vérification des champs obligatoires:", error);
+      return false;
+    }
   }
 };

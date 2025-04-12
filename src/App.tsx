@@ -34,11 +34,11 @@ function App() {
     loadStoredToken();
   }, [loadStoredToken]);
 
-  // Check if the user needs to complete their profile
+  // Rediriger uniquement si l'utilisateur n'a aucun ID d'ostéopathe
+  // Cela évite de rediriger constamment vers la page de configuration si l'utilisateur est déjà un ostéopathe
   const needsProfileSetup = isAuthenticated && user && !user.osteopathId;
-
-  // If the user needs to complete their profile, redirect them to the profile setup page
-  // except if they're already on the profile setup page or certain public pages
+  
+  // Déterminer si l'on doit rediriger vers la page de configuration du profil
   const shouldRedirectToProfileSetup = (path: string) => {
     const publicPaths = ['/settings/profile', '/profile/setup', '/privacy-policy', '/terms-of-service'];
     return needsProfileSetup && !publicPaths.some(p => path.startsWith(p));
@@ -49,6 +49,8 @@ function App() {
       <Routes>
         <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />} />
         <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />} />
+        
+        {/* Routes protégées qui nécessitent une authentification */}
         <Route path="/dashboard" element={isAuthenticated ? (shouldRedirectToProfileSetup('/dashboard') ? <Navigate to="/profile/setup" /> : <DashboardPage />) : <Navigate to="/login" />} />
         <Route path="/patients" element={isAuthenticated ? (shouldRedirectToProfileSetup('/patients') ? <Navigate to="/profile/setup" /> : <PatientsPage />) : <Navigate to="/login" />} />
         <Route path="/patients/new" element={isAuthenticated ? (shouldRedirectToProfileSetup('/patients/new') ? <Navigate to="/profile/setup" /> : <NewPatientPage />) : <Navigate to="/login" />} />
@@ -72,7 +74,7 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         
-        {/* Redirect cabinet to cabinets */}
+        {/* Redirect cabinet à cabinets */}
         <Route path="/cabinet" element={isAuthenticated ? <Navigate to="/cabinets" /> : <Navigate to="/login" />} />
       </Routes>
       <Toaster position="bottom-right" />
