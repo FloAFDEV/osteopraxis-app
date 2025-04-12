@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +8,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { FancyLoader } from "@/components/ui/fancy-loader";
+import { supabase } from "@/services/supabase-api/utils";
 
 import { Button } from "@/components/ui/button";
 import {

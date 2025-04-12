@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { User } from "@/types";
 import { api } from "@/services/api";
+import { supabase } from "@/services/supabase-api/utils";
 
 interface AuthState {
   user: User | null;
@@ -60,6 +61,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loadAttempts, setLoadAttempts] = useState(0);
   const MAX_LOAD_ATTEMPTS = 3;
 
+  // Define loadStoredToken first before using it in useEffect
+  const loadStoredToken = useCallback(async () => {
+    const storedAuthState = localStorage.getItem("authState");
+    if (storedAuthState) {
+      try {
+        const parsedState = JSON.parse(storedAuthState);
+        
+        if (parsedState.token) {
+          // Vérifier si le token est toujours valide
+          try {
+            // Définir la session dans supabase avant de faire la vérification
+            if (parsedState.token) {
+              console.log("Définition du token dans la session Supabase");
+              await supabase.auth.setSession({
+                access_token: parsedState.token,
+                refresh_token: ""
+              });
+            }
+            
+            // Attendre un court moment pour s'assurer que tout est synchronisé
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Vérification de l'état d'authentification auprès de l'API
+            const authCheck = await api.checkAuth();
+            
+            if (authCheck.isAuthenticated && authCheck.user) {
+              // Le token est valide, mettre à jour l'état
+              setAuthState({
+                user: authCheck.user,
+                isAuthenticated: true,
+                token: authCheck.token || parsedState.token,
+              });
+              
+              // Log pour débogage
+              console.log("✅ Authentication réussie:", authCheck.user.id);
+              
+              return true;
+            } else {
+              // Le token n'est plus valide, effacer l'état local
+              console.warn("Token invalide, suppression de l'état d'authentification");
+              localStorage.removeItem("authState");
+              setAuthState({
+                user: null,
+                isAuthenticated: false,
+                token: null,
+              });
+              return false;
+            }
+          } catch (error) {
+            console.error("Error checking auth:", error);
+            
+            // En cas d'erreur réseau, on fait confiance au token stocké temporairement
+            // mais on renvoie false pour indiquer que la vérification a échoué
+            console.warn("Erreur de vérification d'authentification, utilisation du token local comme fallback");
+            setAuthState({
+              user: parsedState.user,
+              isAuthenticated: true,
+              token: parsedState.token,
+            });
+            
+            return true; // Considérer que l'auth est OK pour éviter les redirections en boucle
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing auth state:", error);
+        localStorage.removeItem("authState");
+      }
+    }
+    return false;
+  }, []);
+
   // Vérifier l'authentification au chargement initial avec retries
   useEffect(() => {
     const initialAuth = async () => {
@@ -82,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initialAuth();
-  }, [loadAttempts, loadStoredToken]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadAttempts, loadStoredToken]);
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -180,75 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     api.logout();
   }, []);
 
-  const loadStoredToken = useCallback(async () => {
-    const storedAuthState = localStorage.getItem("authState");
-    if (storedAuthState) {
-      try {
-        const parsedState = JSON.parse(storedAuthState);
-        
-        if (parsedState.token) {
-          // Vérifier si le token est toujours valide
-          try {
-            // Définir la session dans supabase avant de faire la vérification
-            if (parsedState.token) {
-              console.log("Définition du token dans la session Supabase");
-              await supabase.auth.setSession({
-                access_token: parsedState.token,
-                refresh_token: ""
-              });
-            }
-            
-            // Attendre un court moment pour s'assurer que tout est synchronisé
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            // Vérification de l'état d'authentification auprès de l'API
-            const authCheck = await api.checkAuth();
-            
-            if (authCheck.isAuthenticated && authCheck.user) {
-              // Le token est valide, mettre à jour l'état
-              setAuthState({
-                user: authCheck.user,
-                isAuthenticated: true,
-                token: authCheck.token || parsedState.token,
-              });
-              
-              // Log pour débogage
-              console.log("✅ Authentication réussie:", authCheck.user.id);
-              
-              return true;
-            } else {
-              // Le token n'est plus valide, effacer l'état local
-              console.warn("Token invalide, suppression de l'état d'authentification");
-              localStorage.removeItem("authState");
-              setAuthState({
-                user: null,
-                isAuthenticated: false,
-                token: null,
-              });
-              return false;
-            }
-          } catch (error) {
-            console.error("Error checking auth:", error);
-            
-            // En cas d'erreur réseau, on fait confiance au token stocké temporairement
-            // mais on renvoie false pour indiquer que la vérification a échoué
-            console.warn("Erreur de vérification d'authentification, utilisation du token local comme fallback");
-            setAuthState({
-              user: parsedState.user,
-              isAuthenticated: true,
-              token: parsedState.token,
-            });
-            
-            return true; // Considérer que l'auth est OK pour éviter les redirections en boucle
-          }
-        }
-      } catch (error) {
-        console.error("Error parsing auth state:", error);
-        localStorage.removeItem("authState");
-      }
-    }
-    return false;
-  }, []);
+  
   
   const updateUser = useCallback((updatedUser: User) => {
     setAuthState((prev) => {
