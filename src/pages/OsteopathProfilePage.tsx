@@ -23,6 +23,28 @@ const OsteopathProfilePage = () => {
   const navigate = useNavigate();
   const MAX_FETCH_ATTEMPTS = 3;
 
+  // Générer un nom par défaut si first_name et last_name sont manquants
+  const getDefaultName = useCallback(() => {
+    if (user) {
+      if (user.first_name && user.last_name) {
+        return `${user.first_name} ${user.last_name}`;
+      } else if (user.first_name) {
+        return user.first_name;
+      } else if (user.last_name) {
+        return user.last_name;
+      } else if (user.email) {
+        // Extraire un nom à partir de l'email
+        const emailName = user.email.split('@')[0];
+        // Capitaliser le nom extrait de l'email et remplacer les points/tirets par des espaces
+        return emailName
+          .split(/[._-]/)
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+          .join(' ');
+      }
+    }
+    return "";
+  }, [user]);
+
   // Fonction pour charger les données de l'ostéopathe (avec limitation des appels)
   const loadOsteopathData = useCallback(async () => {
     if (!user || fetchAttempts >= MAX_FETCH_ATTEMPTS) return;
@@ -133,7 +155,17 @@ const OsteopathProfilePage = () => {
   };
 
   if (loading) {
-    return <FancyLoader message="Configuration de votre profil professionnel..." />;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <span className="mt-4 text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse">
+          PatientHub
+        </span>
+        <p className="mt-2 text-muted-foreground text-center">
+          Configuration de votre profil professionnel...
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -174,10 +206,8 @@ const OsteopathProfilePage = () => {
             <OsteopathProfileForm 
               defaultValues={{
                 ...osteopath,
-                // Pré-remplir le nom si l'utilisateur a des informations de profil
-                name: osteopath?.name || (user?.first_name && user?.last_name 
-                  ? `${user.first_name} ${user.last_name}` 
-                  : "")
+                // Pré-remplir le nom si l'ostéopathe n'en a pas déjà un
+                name: osteopath?.name || getDefaultName()
               }}
               osteopathId={osteopath?.id}
               isEditing={!!osteopath?.id}
