@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
+import { Building, Phone, MapPin, Save, Mail, Image, FileImage, FileText, CreditCard } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,10 @@ const CabinetSettingsPage = () => {
       phone: "",
       email: "",
       imageUrl: "",
-      logoUrl: ""
+      logoUrl: "",
+      siret: "",
+      adeliNumber: "",
+      apeCode: ""
     }
   });
 
@@ -45,14 +49,35 @@ const CabinetSettingsPage = () => {
           const primaryCabinet = cabinets[0]; // Use the first cabinet as primary
           console.log("Cabinet principal trouvé:", primaryCabinet);
           setCabinet(primaryCabinet);
-          form.reset({
-            name: primaryCabinet.name || "",
-            address: primaryCabinet.address || "",
-            phone: primaryCabinet.phone || "",
-            email: primaryCabinet.email || "",
-            imageUrl: primaryCabinet.imageUrl || "",
-            logoUrl: primaryCabinet.logoUrl || ""
-          });
+          
+          // Récupérer les données de l'ostéopathe pour les infos de facturation
+          if (primaryCabinet.osteopathId) {
+            const osteopath = await api.getOsteopathById(primaryCabinet.osteopathId);
+            
+            form.reset({
+              name: primaryCabinet.name || "",
+              address: primaryCabinet.address || "",
+              phone: primaryCabinet.phone || "",
+              email: primaryCabinet.email || "",
+              imageUrl: primaryCabinet.imageUrl || "",
+              logoUrl: primaryCabinet.logoUrl || "",
+              siret: osteopath?.siret || "",
+              adeliNumber: osteopath?.adeli_number || "",
+              apeCode: osteopath?.ape_code || "8690F"
+            });
+          } else {
+            form.reset({
+              name: primaryCabinet.name || "",
+              address: primaryCabinet.address || "",
+              phone: primaryCabinet.phone || "",
+              email: primaryCabinet.email || "",
+              imageUrl: primaryCabinet.imageUrl || "",
+              logoUrl: primaryCabinet.logoUrl || "",
+              siret: "",
+              adeliNumber: "",
+              apeCode: "8690F"
+            });
+          }
         } else {
           console.log("Aucun cabinet trouvé pour l'utilisateur");
         }
@@ -67,11 +92,23 @@ const CabinetSettingsPage = () => {
     fetchCabinet();
   }, [form, user]);
 
-  const onSubmit = async (data: { name: string; address: string; phone: string; email: string; imageUrl: string; logoUrl: string }) => {
-    if (!cabinet) return;
+  const onSubmit = async (data: { 
+    name: string; 
+    address: string; 
+    phone: string; 
+    email: string; 
+    imageUrl: string; 
+    logoUrl: string;
+    siret: string;
+    adeliNumber: string;
+    apeCode: string;
+  }) => {
+    if (!cabinet || !user?.id) return;
     
     try {
       setIsSaving(true);
+      
+      // Mettre à jour le cabinet
       const updatedCabinet = await api.updateCabinet(cabinet.id, {
         name: data.name,
         address: data.address,
@@ -80,6 +117,18 @@ const CabinetSettingsPage = () => {
         imageUrl: data.imageUrl || null,
         logoUrl: data.logoUrl || null
       });
+      
+      // Récupérer l'ostéopathe associé
+      const osteopath = await api.getOsteopathByUserId(user.id);
+      
+      if (osteopath) {
+        // Mettre à jour l'ostéopathe avec les infos de facturation
+        await api.updateOsteopath(osteopath.id, {
+          siret: data.siret || null,
+          adeli_number: data.adeliNumber || null,
+          ape_code: data.apeCode || "8690F"
+        });
+      }
       
       if (updatedCabinet) {
         setCabinet(updatedCabinet);
@@ -126,107 +175,176 @@ const CabinetSettingsPage = () => {
           <div className="bg-card rounded-lg border shadow-sm p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom du cabinet</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="Nom du cabinet" {...field} />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <div className="border-b pb-4 mb-4">
+                  <h2 className="text-xl font-semibold mb-2">Informations générales</h2>
+                  
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nom du cabinet</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="Nom du cabinet" {...field} />
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Adresse</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="Adresse complète" {...field} />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adresse</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="Adresse complète" {...field} />
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Numéro de téléphone</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="Numéro de téléphone" {...field} />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Numéro de téléphone</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="Numéro de téléphone" {...field} />
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email (facultatif)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="Email du cabinet" {...field} />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email (facultatif)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="Email du cabinet" {...field} />
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="border-b pb-4 mb-4">
+                  <h2 className="text-xl font-semibold mb-2">Informations de facturation</h2>
+                  
+                  <FormField
+                    control={form.control}
+                    name="siret"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Numéro SIRET</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="Numéro SIRET" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Numéro SIRET nécessaire pour la facturation
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="adeliNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Numéro ADELI</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="Numéro ADELI" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Numéro ADELI nécessaire pour la facturation
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="apeCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Code APE</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="Code APE (par défaut: 8690F)" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Code APE/NAF de votre activité (par défaut: 8690F pour les activités de santé humaine)
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>URL de l'image (facultatif)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        URL d'une image représentant votre cabinet (façade ou intérieur)
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">Images</h2>
+                  
+                  <FormField
+                    control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL de l'image (facultatif)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          URL d'une image représentant votre cabinet (façade ou intérieur)
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="logoUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>URL du logo (facultatif)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="URL du logo du cabinet" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        URL de votre logo professionnel
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="logoUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL du logo (facultatif)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="URL du logo du cabinet" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          URL de votre logo professionnel
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <Button type="submit" className="flex gap-2" disabled={isSaving}>
                   <Save className="h-4 w-4" />

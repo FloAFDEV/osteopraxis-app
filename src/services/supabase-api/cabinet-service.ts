@@ -128,7 +128,6 @@ export const supabaseCabinetService = {
   async updateTimestamps(cabinetId: number): Promise<void> {
     const now = new Date().toISOString();
     
-    // Correction: Assurez-vous que tous les champs requis sont présents
     const { error } = await supabase
       .from("Cabinet")
       .update({ 

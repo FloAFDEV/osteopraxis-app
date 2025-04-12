@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,9 @@ const cabinetFormSchema = z.object({
   imageUrl: z.string().url("Format d'URL invalide").optional().or(z.literal("")),
   logoUrl: z.string().url("Format d'URL invalide").optional().or(z.literal("")),
   osteopathId: z.number(),
+  siret: z.string().optional().or(z.literal("")),
+  adeliNumber: z.string().optional().or(z.literal("")),
+  apeCode: z.string().optional().or(z.literal("")),
 });
 
 type CabinetFormValues = z.infer<typeof cabinetFormSchema>;
@@ -53,6 +56,25 @@ export function CabinetForm({
 }: CabinetFormProps) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [osteopathData, setOsteopathData] = useState<any>(null);
+
+  useEffect(() => {
+    // Récupérer les données de l'ostéopathe si on est en mode édition
+    const fetchOsteopathData = async () => {
+      if (isEditing && osteopathId) {
+        try {
+          const data = await api.getOsteopathById(osteopathId);
+          if (data) {
+            setOsteopathData(data);
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération des données de l'ostéopathe:", error);
+        }
+      }
+    };
+    
+    fetchOsteopathData();
+  }, [isEditing, osteopathId]);
 
   const form = useForm<CabinetFormValues>({
     resolver: zodResolver(cabinetFormSchema),
@@ -64,8 +86,20 @@ export function CabinetForm({
       imageUrl: defaultValues?.imageUrl || "",
       logoUrl: defaultValues?.logoUrl || "",
       osteopathId: defaultValues?.osteopathId || osteopathId,
+      siret: defaultValues?.siret || osteopathData?.siret || "",
+      adeliNumber: defaultValues?.adeliNumber || osteopathData?.adeli_number || "",
+      apeCode: defaultValues?.apeCode || osteopathData?.ape_code || "8690F",
     },
   });
+
+  // Mettre à jour le formulaire quand les données de l'ostéopathe sont chargées
+  useEffect(() => {
+    if (osteopathData) {
+      form.setValue("siret", osteopathData.siret || "");
+      form.setValue("adeliNumber", osteopathData.adeli_number || "");
+      form.setValue("apeCode", osteopathData.ape_code || "8690F");
+    }
+  }, [osteopathData, form]);
 
   const onSubmit = async (data: CabinetFormValues) => {
     try {
@@ -84,10 +118,30 @@ export function CabinetForm({
       if (isEditing && cabinetId) {
         // Update existing cabinet
         await api.updateCabinet(cabinetId, cabinetData);
+        
+        // Mettre à jour les informations de l'ostéopathe
+        if (osteopathId) {
+          await api.updateOsteopath(osteopathId, {
+            siret: data.siret || null,
+            adeli_number: data.adeliNumber || null,
+            ape_code: data.apeCode || "8690F"
+          });
+        }
+        
         toast.success("Cabinet mis à jour avec succès");
       } else {
         // Create new cabinet
-        await api.createCabinet(cabinetData as Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>);
+        const newCabinet = await api.createCabinet(cabinetData as Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>);
+        
+        // Mise à jour des informations de facturation de l'ostéopathe
+        if (newCabinet && newCabinet.osteopathId) {
+          await api.updateOsteopath(newCabinet.osteopathId, {
+            siret: data.siret || null,
+            adeli_number: data.adeliNumber || null,
+            ape_code: data.apeCode || "8690F"
+          });
+        }
+        
         toast.success("Cabinet créé avec succès");
       }
       
@@ -107,126 +161,204 @@ export function CabinetForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom du Cabinet</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Nom du cabinet"
-                  disabled={isSubmitting}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="border-b pb-4 mb-2">
+          <h3 className="text-lg font-medium mb-4">Informations du cabinet</h3>
+          
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom du Cabinet</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Nom du cabinet"
+                    disabled={isSubmitting}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Adresse complète"
-                  disabled={isSubmitting}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adresse</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Adresse complète"
+                    disabled={isSubmitting}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Numéro de téléphone"
-                  disabled={isSubmitting}
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Numéro de téléphone"
+                    disabled={isSubmitting}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email (facultatif)</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="Email du cabinet"
-                  disabled={isSubmitting}
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email (facultatif)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="Email du cabinet"
+                    disabled={isSubmitting}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <div className="border-b pb-4 mb-2">
+          <h3 className="text-lg font-medium mb-4">Informations de facturation</h3>
+          
+          <FormField
+            control={form.control}
+            name="siret"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Numéro SIRET</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Numéro SIRET"
+                    disabled={isSubmitting}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Numéro SIRET nécessaire pour la facturation
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="adeliNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Numéro ADELI</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Numéro ADELI"
+                    disabled={isSubmitting}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Numéro ADELI nécessaire pour la facturation
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="apeCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Code APE</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Code APE (par défaut: 8690F)"
+                    disabled={isSubmitting}
+                    {...field}
+                    value={field.value || "8690F"}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Code APE/NAF de votre activité (par défaut: 8690F pour les activités de santé humaine)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <FormField
-          control={form.control}
-          name="imageUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL de l'image (facultatif)</FormLabel>
-              <FormControl>
-                <Input
-                  type="url"
-                  placeholder="URL de l'image du cabinet"
-                  disabled={isSubmitting}
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormDescription>
-                Insérez l'URL d'une image pour la façade ou l'intérieur de votre cabinet
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div>
+          <h3 className="text-lg font-medium mb-4">Images</h3>
+          
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL de l'image (facultatif)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    placeholder="URL de l'image du cabinet"
+                    disabled={isSubmitting}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Insérez l'URL d'une image pour la façade ou l'intérieur de votre cabinet
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="logoUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL du logo (facultatif)</FormLabel>
-              <FormControl>
-                <Input
-                  type="url"
-                  placeholder="URL du logo du cabinet"
-                  disabled={isSubmitting}
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormDescription>
-                Insérez l'URL de votre logo professionnel
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="logoUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL du logo (facultatif)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    placeholder="URL du logo du cabinet"
+                    disabled={isSubmitting}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Insérez l'URL de votre logo professionnel
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="flex justify-end gap-2">
           <Button

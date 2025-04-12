@@ -13,6 +13,7 @@ const EditCabinetPage = () => {
   const { id } = useParams<{ id: string }>();
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
+  const [osteopathData, setOsteopathData] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,6 +27,14 @@ const EditCabinetPage = () => {
         }
         
         setCabinet(cabinetData);
+        
+        // Récupérer les données de l'ostéopathe pour les infos de facturation
+        if (cabinetData.osteopathId) {
+          const osteopathInfo = await api.getOsteopathById(cabinetData.osteopathId);
+          if (osteopathInfo) {
+            setOsteopathData(osteopathInfo);
+          }
+        }
       } catch (error) {
         console.error("Error fetching cabinet:", error);
         toast.error("Impossible de charger les données du cabinet. Veuillez réessayer.");
@@ -91,7 +100,10 @@ const EditCabinetPage = () => {
               email: cabinet.email || undefined,
               imageUrl: cabinet.imageUrl || undefined,
               logoUrl: cabinet.logoUrl || undefined,
-              osteopathId: cabinet.osteopathId
+              osteopathId: cabinet.osteopathId,
+              siret: osteopathData?.siret || undefined,
+              adeliNumber: osteopathData?.adeli_number || undefined,
+              apeCode: osteopathData?.ape_code || "8690F"
             }}
             cabinetId={cabinet.id}
             isEditing={true}
