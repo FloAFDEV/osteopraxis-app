@@ -82,7 +82,8 @@ export const supabaseOsteopathService = {
       // Vérification que l'ID utilisateur correspond bien à celui de la session
       if (osteopathData.userId !== session.user.id) {
         console.warn("L'ID utilisateur ne correspond pas à l'ID de session. Ajustement automatique.");
-        osteopathData.userId = session.user.id;
+        // Correction: Faire une copie de l'objet osteopathData au lieu de le modifier directement
+        osteopathData = { ...osteopathData, userId: session.user.id };
       }
 
       const now = new Date().toISOString();
