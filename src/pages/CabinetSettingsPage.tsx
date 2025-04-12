@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
 import { api } from "@/services/api";
@@ -30,25 +29,32 @@ const CabinetSettingsPage = () => {
 
   useEffect(() => {
     const fetchCabinet = async () => {
-      if (!user?.osteopathId) {
+      if (!user?.id) {
         setLoading(false);
         return;
       }
 
       try {
-        // Fetch cabinets for the current osteopath
-        const cabinets = await api.getCabinetsByOsteopathId(user.osteopathId);
+        console.log("Chargement des cabinets pour l'utilisateur:", user.id);
+        
+        // Utiliser la méthode getCabinetsByUserId directement
+        const cabinets = await api.getCabinetsByUserId(user.id);
+        console.log("Cabinets récupérés:", cabinets);
+        
         if (cabinets && cabinets.length > 0) {
           const primaryCabinet = cabinets[0]; // Use the first cabinet as primary
+          console.log("Cabinet principal trouvé:", primaryCabinet);
           setCabinet(primaryCabinet);
           form.reset({
-            name: primaryCabinet.name,
-            address: primaryCabinet.address,
+            name: primaryCabinet.name || "",
+            address: primaryCabinet.address || "",
             phone: primaryCabinet.phone || "",
             email: primaryCabinet.email || "",
             imageUrl: primaryCabinet.imageUrl || "",
             logoUrl: primaryCabinet.logoUrl || ""
           });
+        } else {
+          console.log("Aucun cabinet trouvé pour l'utilisateur");
         }
       } catch (error) {
         console.error("Error fetching cabinet:", error);

@@ -39,7 +39,7 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return typedData<Cabinet[]>(data);
+    return typedData<Cabinet[]>(data || []);
   },
   
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
@@ -105,7 +105,7 @@ export const supabaseCabinetService = {
   async updateCabinet(id: number, cabinet: Partial<Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Cabinet> {
     const { data, error } = await supabase
       .from("Cabinet")
-      .update(cabinet)
+      .update({ ...cabinet, updatedAt: new Date().toISOString() })
       .eq("id", id)
       .select()
       .single();
