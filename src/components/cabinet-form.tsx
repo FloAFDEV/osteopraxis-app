@@ -16,6 +16,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
@@ -28,6 +29,8 @@ const cabinetFormSchema = z.object({
   }),
   phone: z.string().optional(),
   email: z.string().email("Format d'email invalide").optional().or(z.literal("")),
+  imageUrl: z.string().url("Format d'URL invalide").optional().or(z.literal("")),
+  logoUrl: z.string().url("Format d'URL invalide").optional().or(z.literal("")),
   osteopathId: z.number(),
 });
 
@@ -56,6 +59,8 @@ export function CabinetForm({
       address: defaultValues?.address || "",
       phone: defaultValues?.phone || "",
       email: defaultValues?.email || "",
+      imageUrl: defaultValues?.imageUrl || "",
+      logoUrl: defaultValues?.logoUrl || "",
       osteopathId: defaultValues?.osteopathId || osteopathId,
     },
   });
@@ -69,6 +74,8 @@ export function CabinetForm({
         address: data.address,
         phone: data.phone || null,
         email: data.email || null,
+        imageUrl: data.imageUrl || null,
+        logoUrl: data.logoUrl || null,
         osteopathId: data.osteopathId,
       };
       
@@ -164,6 +171,52 @@ export function CabinetForm({
                   value={field.value || ""}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL de l'image (facultatif)</FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="URL de l'image du cabinet"
+                  disabled={isSubmitting}
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormDescription>
+                Insérez l'URL d'une image pour la façade ou l'intérieur de votre cabinet
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="logoUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL du logo (facultatif)</FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="URL du logo du cabinet"
+                  disabled={isSubmitting}
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormDescription>
+                Insérez l'URL de votre logo professionnel
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

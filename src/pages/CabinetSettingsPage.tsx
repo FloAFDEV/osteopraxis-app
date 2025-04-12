@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Building, Phone, MapPin, Save, Mail } from "lucide-react";
+import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Cabinet } from "@/types";
@@ -22,7 +22,9 @@ const CabinetSettingsPage = () => {
       name: "",
       address: "",
       phone: "",
-      email: ""
+      email: "",
+      imageUrl: "",
+      logoUrl: ""
     }
   });
 
@@ -43,7 +45,9 @@ const CabinetSettingsPage = () => {
             name: primaryCabinet.name,
             address: primaryCabinet.address,
             phone: primaryCabinet.phone || "",
-            email: primaryCabinet.email || ""
+            email: primaryCabinet.email || "",
+            imageUrl: primaryCabinet.imageUrl || "",
+            logoUrl: primaryCabinet.logoUrl || ""
           });
         }
       } catch (error) {
@@ -57,7 +61,7 @@ const CabinetSettingsPage = () => {
     fetchCabinet();
   }, [form, user]);
 
-  const onSubmit = async (data: { name: string; address: string; phone: string; email: string }) => {
+  const onSubmit = async (data: { name: string; address: string; phone: string; email: string; imageUrl: string; logoUrl: string }) => {
     if (!cabinet) return;
     
     try {
@@ -66,7 +70,9 @@ const CabinetSettingsPage = () => {
         name: data.name,
         address: data.address,
         phone: data.phone || null,
-        email: data.email || null
+        email: data.email || null,
+        imageUrl: data.imageUrl || null,
+        logoUrl: data.logoUrl || null
       });
       
       if (updatedCabinet) {
@@ -174,6 +180,44 @@ const CabinetSettingsPage = () => {
                           <Input className="pl-10" placeholder="Email du cabinet" {...field} />
                         </div>
                       </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL de l'image (facultatif)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        URL d'une image représentant votre cabinet (façade ou intérieur)
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="logoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL du logo (facultatif)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input className="pl-10" placeholder="URL du logo du cabinet" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        URL de votre logo professionnel
+                      </FormDescription>
                     </FormItem>
                   )}
                 />

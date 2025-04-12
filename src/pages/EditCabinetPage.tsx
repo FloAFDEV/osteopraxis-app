@@ -88,6 +88,9 @@ const EditCabinetPage = () => {
               name: cabinet.name,
               address: cabinet.address,
               phone: cabinet.phone || undefined,
+              email: cabinet.email || undefined,
+              imageUrl: cabinet.imageUrl || undefined,
+              logoUrl: cabinet.logoUrl || undefined,
               osteopathId: cabinet.osteopathId
             }}
             cabinetId={cabinet.id}
