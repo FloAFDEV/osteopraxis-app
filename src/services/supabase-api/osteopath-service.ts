@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
@@ -81,16 +80,13 @@ export const supabaseOsteopathService = {
 
       // Vérification que l'ID utilisateur correspond bien à celui de la session
       // Créer une copie typée correctement avec userId explicitement défini comme string
-      const dataToInsert: {
-        userId: string;
-        name: string;
-        professional_title: string | null;
-        adeli_number: string | null;
-        siret: string | null;
-        ape_code: string | null;
-      } = {
-        ...osteopathData,
-        userId: osteopathData.userId
+      const dataToInsert = {
+        userId: osteopathData.userId as string,
+        name: osteopathData.name,
+        professional_title: osteopathData.professional_title,
+        adeli_number: osteopathData.adeli_number,
+        siret: osteopathData.siret,
+        ape_code: osteopathData.ape_code
       };
       
       if (dataToInsert.userId !== session.user.id) {
