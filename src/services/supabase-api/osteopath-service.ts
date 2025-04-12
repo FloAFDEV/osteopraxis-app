@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
@@ -60,6 +59,12 @@ export const supabaseOsteopathService = {
   async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {
     try {
       console.log(`Tentative de récupération de l'ostéopathe pour l'utilisateur: ${userId}`);
+      console.log(`Détails complets de la requête:`, { 
+        userId, 
+        userIdType: typeof userId,
+        supabaseClientInitialized: !!supabase 
+      });
+
       const { data, error } = await supabase
         .from("Osteopath")
         .select("*")
