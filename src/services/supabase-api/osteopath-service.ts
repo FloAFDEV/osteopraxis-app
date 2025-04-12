@@ -80,8 +80,18 @@ export const supabaseOsteopathService = {
       console.log("Données d'ostéopathe à insérer:", osteopathData);
 
       // Vérification que l'ID utilisateur correspond bien à celui de la session
-      // Créer une copie typée explicitement pour éviter les problèmes de type
-      const dataToInsert: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'> = { ...osteopathData };
+      // Créer une copie typée correctement avec userId explicitement défini comme string
+      const dataToInsert: {
+        userId: string;
+        name: string;
+        professional_title: string | null;
+        adeli_number: string | null;
+        siret: string | null;
+        ape_code: string | null;
+      } = {
+        ...osteopathData,
+        userId: osteopathData.userId
+      };
       
       if (dataToInsert.userId !== session.user.id) {
         console.warn("L'ID utilisateur ne correspond pas à l'ID de session. Ajustement automatique.");
