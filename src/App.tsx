@@ -27,7 +27,6 @@ import OsteopathProfilePage from "./pages/OsteopathProfilePage";
 import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 import { api } from './services/api';
-import { toast } from "sonner";
 
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
@@ -47,9 +46,9 @@ function App() {
     };
     initAuth();
   }, [loadStoredToken]);
-
-  // Modification importante: nous ne vérifions plus le setup de l'ostéopathe et du cabinet
-  // pour la redirection. Nous permettons l'accès direct au tableau de bord.
+  
+  // IMPORTANT: Always allow access to the dashboard when authenticated
+  // Don't check for osteopath or cabinet existence here
   
   console.log("État auth:", { isAuthenticated, userId: user?.id });
   

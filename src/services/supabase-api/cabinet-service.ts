@@ -32,6 +32,11 @@ export const supabaseCabinetService = {
   },
 
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
+    if (!osteopathId) {
+      console.log("OsteopathId invalide fourni à getCabinetsByOsteopathId");
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from("Cabinet")
       .select("*")
@@ -44,6 +49,11 @@ export const supabaseCabinetService = {
   
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
     console.log("Recherche des cabinets pour l'userId:", userId);
+    
+    if (!userId) {
+      console.log("UserId invalide fourni à getCabinetsByUserId");
+      return [];
+    }
     
     try {
       // First get the osteopath ID for this user

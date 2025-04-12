@@ -35,6 +35,11 @@ export const supabaseOsteopathService = {
   async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {
     console.log("Recherche d'un ostéopathe avec l'userId:", userId);
     
+    if (!userId) {
+      console.log("UserId invalide fourni à getOsteopathByUserId");
+      return undefined;
+    }
+    
     try {
       // Utiliser maybeSingle au lieu de single pour éviter l'erreur si aucun résultat n'est trouvé
       const { data, error } = await supabase
