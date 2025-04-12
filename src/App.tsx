@@ -34,13 +34,15 @@ function App() {
     loadStoredToken();
   }, [loadStoredToken]);
 
-  // Rediriger uniquement si l'utilisateur n'a aucun ID d'ostéopathe
-  // Cela évite de rediriger constamment vers la page de configuration si l'utilisateur est déjà un ostéopathe
+  // On redirige vers le setup uniquement si l'utilisateur est authentifié 
+  // mais n'a pas encore d'ID d'ostéopathe
   const needsProfileSetup = isAuthenticated && user && !user.osteopathId;
   
-  // Déterminer si l'on doit rediriger vers la page de configuration du profil
-  const shouldRedirectToProfileSetup = (path: string) => {
-    const publicPaths = ['/settings/profile', '/profile/setup', '/privacy-policy', '/terms-of-service'];
+  const publicPaths = ['/profile/setup', '/settings/profile', '/privacy-policy', '/terms-of-service'];
+  
+  // Si l'utilisateur a besoin de configurer son profil et n'est pas déjà
+  // sur une page publique ou de configuration, rediriger vers /profile/setup
+  const shouldRedirectToProfileSetup = (path) => {
     return needsProfileSetup && !publicPaths.some(p => path.startsWith(p));
   };
 
