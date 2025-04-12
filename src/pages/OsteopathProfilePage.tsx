@@ -9,6 +9,7 @@ import { UserCog } from "lucide-react";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Osteopath } from "@/types";
+import { FancyLoader } from "@/components/ui/fancy-loader";
 
 const OsteopathProfilePage = () => {
   const { user, updateUser, loadStoredToken } = useAuth();
@@ -153,6 +154,10 @@ const OsteopathProfilePage = () => {
     window.location.href = `/login?returnTo=${encodeURIComponent('/profile/setup')}`;
   };
 
+  if (loading) {
+    return <FancyLoader message="Chargement de votre profil..." />;
+  }
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
@@ -167,14 +172,7 @@ const OsteopathProfilePage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Chargement des informations...</p>
-              </div>
-            </div>
-          ) : loadError ? (
+          {loadError ? (
             <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
               <p className="font-medium">Erreur lors du chargement</p>
               <p className="text-sm">{loadError}</p>
@@ -206,7 +204,13 @@ const OsteopathProfilePage = () => {
             </div>
           ) : (
             <OsteopathProfileForm 
-              defaultValues={osteopath || undefined}
+              defaultValues={{
+                ...osteopath,
+                // Pré-remplir le nom si l'utilisateur a des informations de profil
+                name: osteopath?.name || (user?.first_name && user?.last_name 
+                  ? `${user.first_name} ${user.last_name}` 
+                  : "")
+              }}
               osteopathId={osteopath?.id}
               isEditing={!!osteopath?.id}
               onSuccess={handleSuccess}

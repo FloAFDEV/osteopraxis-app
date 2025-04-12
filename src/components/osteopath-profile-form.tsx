@@ -8,6 +8,7 @@ import { api } from "@/services/api";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { FancyLoader } from "@/components/ui/fancy-loader";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -86,6 +87,7 @@ export function OsteopathProfileForm({
     verifyAuth();
   }, [loadStoredToken, user, authRetryCount]);
 
+  // Initialiser le formulaire avec les valeurs par défaut, incluant le nom depuis le profil utilisateur si disponible
   const form = useForm<OsteopathProfileFormValues>({
     resolver: zodResolver(osteopathProfileSchema),
     defaultValues: {
@@ -96,6 +98,18 @@ export function OsteopathProfileForm({
       ape_code: defaultValues?.ape_code || "8690F",
     },
   });
+  
+  // Mettre à jour les valeurs du formulaire si les props defaultValues changent ou si l'utilisateur est chargé
+  useEffect(() => {
+    if ((defaultValues?.name || (user && (user.first_name || user.last_name))) && !form.getValues('name')) {
+      const fullName = defaultValues?.name || 
+        `${user?.first_name || ''} ${user?.last_name || ''}`.trim();
+      
+      if (fullName) {
+        form.setValue('name', fullName);
+      }
+    }
+  }, [defaultValues, user, form]);
 
   const redirectToLogin = () => {
     toast.info("Veuillez vous connecter pour continuer");
@@ -196,6 +210,10 @@ export function OsteopathProfileForm({
       setIsSubmitting(false);
     }
   };
+
+  if (isSubmitting) {
+    return <FancyLoader message="Enregistrement de votre profil..." />;
+  }
 
   return (
     <Form {...form}>

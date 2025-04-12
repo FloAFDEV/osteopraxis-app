@@ -1,8 +1,9 @@
 
 import React from "react";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import PatientFancyLoader from "./PatientFancyLoader";
 
 interface PatientLoadingStateProps {
   isLoading: boolean;
@@ -18,12 +19,7 @@ const PatientLoadingState: React.FC<PatientLoadingStateProps> = ({
   if (isLoading) {
     return (
       <Card className="w-full p-6">
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4 text-blue-600" />
-            <p className="text-lg">Chargement des patients...</p>
-          </div>
-        </div>
+        <PatientFancyLoader message="Chargement des patients..." />
       </Card>
     );
   }

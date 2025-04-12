@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { FancyLoader } from "@/components/ui/fancy-loader";
 
 const OsteopathSettingsPage = () => {
   const { user } = useAuth();
@@ -43,6 +44,10 @@ const OsteopathSettingsPage = () => {
     return null; // Will be handled by route protection
   }
 
+  if (loading) {
+    return <FancyLoader message="Chargement de votre profil..." />;
+  }
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
@@ -57,14 +62,7 @@ const OsteopathSettingsPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Chargement des informations...</p>
-              </div>
-            </div>
-          ) : osteopath ? (
+          {osteopath ? (
             <OsteopathProfileForm 
               defaultValues={osteopath}
               osteopathId={osteopath.id}
@@ -78,6 +76,11 @@ const OsteopathSettingsPage = () => {
               </p>
               <OsteopathProfileForm 
                 onSuccess={handleSuccess}
+                defaultValues={{
+                  name: user?.first_name && user?.last_name 
+                    ? `${user.first_name} ${user.last_name}` 
+                    : ""
+                }}
               />
             </div>
           )}
