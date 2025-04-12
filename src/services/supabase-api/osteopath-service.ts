@@ -35,24 +35,31 @@ export const supabaseOsteopathService = {
   async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {
     console.log("Recherche d'un ostéopathe avec l'userId:", userId);
     
-    const { data, error } = await supabase
-      .from("Osteopath")
-      .select("*")
-      .eq("userId", userId);
+    try {
+      // Utiliser maybeSingle au lieu de single pour éviter l'erreur si aucun résultat n'est trouvé
+      const { data, error } = await supabase
+        .from("Osteopath")
+        .select("*")
+        .eq("userId", userId)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Erreur lors de la recherche de l'ostéopathe:", error);
+        throw new Error(error.message);
+      }
       
-    if (error) {
-      console.error("Erreur lors de la recherche de l'ostéopathe:", error);
-      throw new Error(error.message);
+      // Vérifier si nous avons des données
+      if (!data) {
+        console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
+        return undefined;
+      }
+      
+      console.log("Ostéopathe trouvé:", data);
+      return typedData<Osteopath>(data);
+    } catch (error) {
+      console.error("Exception lors de la recherche de l'ostéopathe:", error);
+      throw error;
     }
-    
-    // Vérifier si nous avons des données
-    if (!data || data.length === 0) {
-      console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
-      return undefined;
-    }
-    
-    console.log("Ostéopathe trouvé:", data[0]);
-    return typedData<Osteopath>(data[0]);
   },
   
   async updateOsteopath(id: number, data: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {

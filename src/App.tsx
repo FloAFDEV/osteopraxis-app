@@ -27,10 +27,12 @@ import OsteopathProfilePage from "./pages/OsteopathProfilePage";
 import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 import { api } from './services/api';
+import { toast } from "sonner";
 
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
   const [hasCabinet, setHasCabinet] = useState<boolean | null>(null);
+  const [hasOsteopath, setHasOsteopath] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Chargement initial du token stocké au démarrage de l'application
@@ -48,33 +50,44 @@ function App() {
     initAuth();
   }, [loadStoredToken]);
 
-  // Vérifier l'existence d'un cabinet lorsque l'utilisateur est authentifié
+  // Vérifier l'existence d'un ostéopathe et d'un cabinet lorsque l'utilisateur est authentifié
   useEffect(() => {
-    const checkCabinet = async () => {
+    const checkUserSetup = async () => {
       if (isAuthenticated && user) {
         try {
-          console.log("Vérification de l'existence d'un cabinet...");
-          const cabinets = await api.getCabinetsByUserId(user.id);
-          const hasExistingCabinet = cabinets && cabinets.length > 0;
-          console.log("Cabinet existant:", hasExistingCabinet);
-          setHasCabinet(hasExistingCabinet);
+          console.log("Vérification de l'existence d'un ostéopathe...");
+          const osteopath = await api.getOsteopathByUserId(user.id);
+          const hasExistingOsteopath = !!osteopath;
+          setHasOsteopath(hasExistingOsteopath);
+          console.log("Ostéopathe existant:", hasExistingOsteopath);
+
+          if (hasExistingOsteopath && osteopath.id) {
+            console.log("Vérification de l'existence d'un cabinet pour l'ostéopathe ID:", osteopath.id);
+            const cabinets = await api.getCabinetsByOsteopathId(osteopath.id);
+            const hasExistingCabinet = cabinets && cabinets.length > 0;
+            console.log("Cabinet existant:", hasExistingCabinet, "Nombre:", cabinets?.length);
+            setHasCabinet(hasExistingCabinet);
+          } else {
+            setHasCabinet(false);
+          }
         } catch (error) {
-          console.error("Erreur lors de la vérification du cabinet:", error);
+          console.error("Erreur lors de la vérification du setup:", error);
+          setHasOsteopath(false);
           setHasCabinet(false);
+          toast.error("Erreur de chargement des données du profil");
         }
       }
     };
 
-    checkCabinet();
+    checkUserSetup();
   }, [isAuthenticated, user]);
 
-  // Ne rediriger vers le setup QUE si l'utilisateur est authentifié mais n'a pas de cabinet
-  const needsProfileSetup = isAuthenticated && user && hasCabinet === false;
-  
-  const publicPaths = ['/profile/setup', '/settings/profile', '/privacy-policy', '/terms-of-service'];
-  
   // Debug pour comprendre l'état actuel
-  console.log("État auth:", { isAuthenticated, needsProfileSetup, userId: user?.id, hasCabinet });
+  console.log("État auth:", { isAuthenticated, hasOsteopath, hasCabinet, userId: user?.id });
+  
+  // Ne rediriger vers le setup QUE si l'utilisateur est authentifié mais n'a ni ostéopathe ni cabinet
+  const needsProfileSetup = isAuthenticated && ((hasOsteopath === false) || (hasOsteopath === true && hasCabinet === false));
+  const publicPaths = ['/profile/setup', '/settings/profile', '/privacy-policy', '/terms-of-service'];
   
   if (loading) {
     return (
