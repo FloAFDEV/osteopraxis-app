@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loadAttempts, setLoadAttempts] = useState(0);
   const MAX_LOAD_ATTEMPTS = 3;
 
-  // Define loadStoredToken first before using it in useEffect
+  // Define loadStoredToken FIRST
   const loadStoredToken = useCallback(async () => {
     const storedAuthState = localStorage.getItem("authState");
     if (storedAuthState) {
@@ -69,9 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const parsedState = JSON.parse(storedAuthState);
         
         if (parsedState.token) {
-          // Vérifier si le token est toujours valide
           try {
-            // Définir la session dans supabase avant de faire la vérification
             if (parsedState.token) {
               console.log("Définition du token dans la session Supabase");
               await supabase.auth.setSession({
@@ -80,26 +78,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               });
             }
             
-            // Attendre un court moment pour s'assurer que tout est synchronisé
             await new Promise(resolve => setTimeout(resolve, 300));
             
-            // Vérification de l'état d'authentification auprès de l'API
             const authCheck = await api.checkAuth();
             
             if (authCheck.isAuthenticated && authCheck.user) {
-              // Le token est valide, mettre à jour l'état
               setAuthState({
                 user: authCheck.user,
                 isAuthenticated: true,
                 token: authCheck.token || parsedState.token,
               });
               
-              // Log pour débogage
               console.log("✅ Authentication réussie:", authCheck.user.id);
               
               return true;
             } else {
-              // Le token n'est plus valide, effacer l'état local
               console.warn("Token invalide, suppression de l'état d'authentification");
               localStorage.removeItem("authState");
               setAuthState({
@@ -112,8 +105,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (error) {
             console.error("Error checking auth:", error);
             
-            // En cas d'erreur réseau, on fait confiance au token stocké temporairement
-            // mais on renvoie false pour indiquer que la vérification a échoué
             console.warn("Erreur de vérification d'authentification, utilisation du token local comme fallback");
             setAuthState({
               user: parsedState.user,
@@ -121,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               token: parsedState.token,
             });
             
-            return true; // Considérer que l'auth est OK pour éviter les redirections en boucle
+            return true;
           }
         }
       } catch (error) {
@@ -132,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false;
   }, []);
 
-  // Vérifier l'authentification au chargement initial avec retries
+  // Then use useEffect with loadStoredToken
   useEffect(() => {
     const initialAuth = async () => {
       try {
@@ -140,7 +131,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const success = await loadStoredToken();
         
         if (!success && loadAttempts < MAX_LOAD_ATTEMPTS) {
-          // Si l'authentification échoue, réessayer après un délai
           console.log(`Tentative d'authentification ${loadAttempts + 1}/${MAX_LOAD_ATTEMPTS} échouée, nouvel essai dans 1s...`);
           setTimeout(() => setLoadAttempts(prev => prev + 1), 1000);
           return;
