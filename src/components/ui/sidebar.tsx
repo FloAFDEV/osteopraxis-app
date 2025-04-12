@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   CalendarDays,
   LayoutDashboard,
@@ -20,6 +21,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { api } from "@/services/api";
+import { Cabinet } from "@/types";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -30,6 +33,25 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const { logout, user } = useAuth();
   const { isMobile } = useIsMobile();
   const location = useLocation();
+  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
+
+  useEffect(() => {
+    // Récupérer les informations du cabinet si l'utilisateur est connecté
+    if (user?.osteopathId) {
+      const fetchCabinet = async () => {
+        try {
+          const cabinets = await api.getCabinetsByOsteopathId(user.osteopathId);
+          if (cabinets && cabinets.length > 0) {
+            setCabinet(cabinets[0]);
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération du cabinet:", error);
+        }
+      };
+      
+      fetchCabinet();
+    }
+  }, [user]);
 
   // Définir les couleurs des icônes
   const iconColors = {
@@ -149,9 +171,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {!isCollapsed ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 px-2 py-1.5">
-              <div className="w-8 h-8 rounded-full bg-amber-600 dark:bg-amber-600 flex items-center justify-center text-primary-foreground font-medium">
-                {user?.first_name?.charAt(0) || user?.email?.charAt(0) || "?"}
-              </div>
+              <Avatar className="w-8 h-8">
+                {cabinet && cabinet.logoUrl ? (
+                  <AvatarImage src={cabinet.logoUrl} alt={cabinet.name} />
+                ) : null}
+                <AvatarFallback className="bg-amber-600 dark:bg-amber-600 text-primary-foreground font-medium">
+                  {user?.first_name?.charAt(0) || user?.email?.charAt(0) || "?"}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {user?.first_name || user?.email || "Utilisateur"}
