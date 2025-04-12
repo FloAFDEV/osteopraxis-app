@@ -20,6 +20,7 @@ export const api = {
   getCabinets: cabinetService.getCabinets,
   getCabinetById: cabinetService.getCabinetById,
   getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
+  getCabinetsByUserId: cabinetService.getCabinetsByUserId,
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,

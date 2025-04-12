@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
@@ -26,9 +26,12 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import OsteopathProfilePage from "./pages/OsteopathProfilePage";
 import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
+import { api } from './services/api';
 
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
+  const [hasCabinet, setHasCabinet] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Chargement initial du token stocké au démarrage de l'application
   useEffect(() => {
@@ -38,31 +41,48 @@ function App() {
         await loadStoredToken();
       } catch (error) {
         console.error("Erreur lors du chargement initial du token:", error);
+      } finally {
+        setLoading(false);
       }
     };
     initAuth();
   }, [loadStoredToken]);
 
-  // Ne rediriger vers le setup QUE si l'utilisateur est authentifié mais n'a pas d'osteopathId
-  // Si l'utilisateur a un osteopathId, on considère qu'il a déjà créé un profil
-  const needsProfileSetup = isAuthenticated && user && !user.osteopathId;
+  // Vérifier l'existence d'un cabinet lorsque l'utilisateur est authentifié
+  useEffect(() => {
+    const checkCabinet = async () => {
+      if (isAuthenticated && user) {
+        try {
+          console.log("Vérification de l'existence d'un cabinet...");
+          const cabinets = await api.getCabinetsByUserId(user.id);
+          const hasExistingCabinet = cabinets && cabinets.length > 0;
+          console.log("Cabinet existant:", hasExistingCabinet);
+          setHasCabinet(hasExistingCabinet);
+        } catch (error) {
+          console.error("Erreur lors de la vérification du cabinet:", error);
+          setHasCabinet(false);
+        }
+      }
+    };
+
+    checkCabinet();
+  }, [isAuthenticated, user]);
+
+  // Ne rediriger vers le setup QUE si l'utilisateur est authentifié mais n'a pas de cabinet
+  const needsProfileSetup = isAuthenticated && user && hasCabinet === false;
   
   const publicPaths = ['/profile/setup', '/settings/profile', '/privacy-policy', '/terms-of-service'];
   
   // Debug pour comprendre l'état actuel
-  console.log("État auth:", { isAuthenticated, needsProfileSetup, userId: user?.id, osteopathId: user?.osteopathId });
+  console.log("État auth:", { isAuthenticated, needsProfileSetup, userId: user?.id, hasCabinet });
   
-  // Forcer un petit délai pour s'assurer que le localStorage est bien chargé
-  useEffect(() => {
-    const checkAgain = async () => {
-      if (isAuthenticated && !user?.osteopathId) {
-        console.log("Vérification supplémentaire du token avec délai...");
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await loadStoredToken();
-      }
-    };
-    checkAgain();
-  }, [isAuthenticated, user, loadStoredToken]);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
   
   return (
     <>

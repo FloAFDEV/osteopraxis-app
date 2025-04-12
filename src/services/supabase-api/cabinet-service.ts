@@ -1,4 +1,3 @@
-
 // Import des types depuis le fichier des types
 import { Cabinet } from "@/types";
 import { supabase, typedData } from "./utils";
@@ -40,6 +39,42 @@ export const supabaseCabinetService = {
     if (error) throw new Error(error.message);
     
     return typedData<Cabinet[]>(data);
+  },
+  
+  async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
+    console.log("Recherche des cabinets pour l'userId:", userId);
+    
+    // First get the osteopath ID for this user
+    const { data: osteopathData, error: osteopathError } = await supabase
+      .from("Osteopath")
+      .select("id")
+      .eq("userId", userId)
+      .single();
+      
+    if (osteopathError) {
+      if (osteopathError.code === "PGRST116") { // No rows returned
+        console.log("Aucun ostéopathe trouvé pour l'userId:", userId);
+        return [];
+      }
+      throw new Error(osteopathError.message);
+    }
+    
+    if (!osteopathData) {
+      return [];
+    }
+    
+    console.log("Ostéopathe trouvé avec l'ID:", osteopathData.id);
+    
+    // Now get cabinets with this osteopath ID
+    const { data: cabinets, error: cabinetsError } = await supabase
+      .from("Cabinet")
+      .select("*")
+      .eq("osteopathId", osteopathData.id);
+      
+    if (cabinetsError) throw new Error(cabinetsError.message);
+    
+    console.log(`${cabinets?.length || 0} cabinet(s) trouvé(s) pour l'ostéopathe`);
+    return typedData<Cabinet[]>(cabinets || []);
   },
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {

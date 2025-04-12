@@ -41,6 +41,7 @@ interface CabinetFormProps {
   cabinetId?: number;
   isEditing?: boolean;
   osteopathId: number;
+  onSuccess?: () => void;
 }
 
 export function CabinetForm({
@@ -48,6 +49,7 @@ export function CabinetForm({
   cabinetId,
   isEditing = false,
   osteopathId,
+  onSuccess,
 }: CabinetFormProps) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,7 +91,11 @@ export function CabinetForm({
         toast.success("Cabinet créé avec succès");
       }
       
-      navigate("/settings");
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate("/settings");
+      }
     } catch (error) {
       console.error("Error submitting cabinet form:", error);
       toast.error("Une erreur est survenue. Veuillez réessayer.");

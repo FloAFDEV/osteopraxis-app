@@ -33,6 +33,21 @@ export const cabinetService = {
     return [...cabinets];
   },
 
+  async getCabinetById(id: number): Promise<Cabinet | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseCabinetService.getCabinetById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getCabinetById:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(200);
+    return cabinets.find(cabinet => cabinet.id === id);
+  },
+
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
     if (USE_SUPABASE) {
       try {
@@ -48,19 +63,19 @@ export const cabinetService = {
     return cabinets.filter(cabinet => cabinet.osteopathId === osteopathId);
   },
 
-  async getCabinetById(id: number): Promise<Cabinet | undefined> {
+  async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseCabinetService.getCabinetById(id);
+        return await supabaseCabinetService.getCabinetsByUserId(userId);
       } catch (error) {
-        console.error("Erreur Supabase getCabinetById:", error);
+        console.error("Erreur Supabase getCabinetsByUserId:", error);
         throw error;
       }
     }
     
     // Fallback: code simulé existant
-    await delay(200);
-    return cabinets.find(cabinet => cabinet.id === id);
+    await delay(300);
+    return [...cabinets]; // Simulation: return all cabinets for demo
   },
 
   async createCabinet(cabinetData: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
