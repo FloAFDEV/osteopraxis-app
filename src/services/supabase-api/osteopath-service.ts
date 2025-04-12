@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
@@ -127,7 +126,7 @@ export const supabaseOsteopathService = {
         // Faire l'insertion avec les données correctement typées
         const { data, error } = await supabase
           .from("Osteopath")
-          .insert([dataToInsert]) // Passer un tableau d'objets correctement typés
+          .insert(dataToInsert)
           .select()
           .single();
           
