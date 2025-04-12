@@ -18,6 +18,7 @@ const OsteopathProfilePage = () => {
   const [showAuthSheet, setShowAuthSheet] = useState(false);
   const navigate = useNavigate();
 
+  // Vérification et chargement des données à chaque changement de l'état d'authentification
   useEffect(() => {
     const loadOsteopathData = async () => {
       if (!user) {
@@ -28,6 +29,9 @@ const OsteopathProfilePage = () => {
 
       try {
         console.log("Loading osteopath data for user:", user.id);
+        // Forcer un petit délai pour s'assurer que l'authentification est bien établie
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         const osteopathData = await api.getOsteopathByUserId(user.id);
         console.log("Osteopath data received:", osteopathData || "Aucune donnée trouvée");
         setOsteopath(osteopathData || null);
@@ -40,17 +44,23 @@ const OsteopathProfilePage = () => {
       }
     };
 
-    loadOsteopathData();
+    // Si l'utilisateur change, recharger les données
+    if (user) {
+      setLoading(true);
+      loadOsteopathData();
+    }
   }, [user]);
 
   // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
   if (!user && !showAuthSheet) {
+    console.log("Redirecting to login: No user and auth sheet not shown");
     return <Navigate to="/login" />;
   }
 
   // Si l'utilisateur a déjà un profil d'ostéopathe complet, rediriger vers les paramètres
   if (user?.osteopathId && !loading && osteopath && Object.keys(osteopath).length > 0 && 
       osteopath.name && osteopath.professional_title) {
+    console.log("Redirecting to settings: User has complete osteopath profile");
     return <Navigate to="/settings" />;
   }
 
@@ -71,7 +81,7 @@ const OsteopathProfilePage = () => {
       toast.success("Profil créé avec succès");
       
       // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
-      if (updatedOsteopath && updatedOsteopath.id) {
+      if (updatedOsteopath && updatedOsteopath.id && user) {
         const updatedUser = { ...user, osteopathId: updatedOsteopath.id };
         updateUser(updatedUser);
       }

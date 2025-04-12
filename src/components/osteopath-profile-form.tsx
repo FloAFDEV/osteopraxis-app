@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,7 +74,8 @@ export function OsteopathProfileForm({
 
   const redirectToLogin = () => {
     toast.info("Veuillez vous connecter pour continuer");
-    navigate("/login", { state: { returnTo: "/profile/setup" } });
+    // Force un rechargement de la page vers login pour s'assurer que l'état d'authentification est bien réinitialisé
+    window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname);
   };
 
   const onSubmit = async (data: OsteopathProfileFormValues) => {
@@ -87,6 +89,9 @@ export function OsteopathProfileForm({
     try {
       setIsSubmitting(true);
       setError(null);
+      
+      // Petit délai pour s'assurer que l'authentification est bien établie
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       let osteopathResult: Osteopath;
       
@@ -118,9 +123,13 @@ export function OsteopathProfileForm({
       // Check for auth errors
       if (error.message?.includes('Not authenticated') || 
           error.message?.includes('Authentication') ||
-          error.message?.includes('permission denied')) {
+          error.message?.includes('permission denied') ||
+          error.message?.includes('Non authentifié')) {
         setAuthError(true);
         setError("Vous devez être connecté pour effectuer cette action. Veuillez vous connecter à nouveau.");
+        
+        // Force un rechargement complet de l'auth
+        localStorage.removeItem("authState");
       } else {
         setError(error.message || "Une erreur est survenue. Veuillez réessayer.");
       }
@@ -166,6 +175,7 @@ export function OsteopathProfileForm({
         </Alert>
       )}
       
+      {/* Le reste du formulaire reste inchangé */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
