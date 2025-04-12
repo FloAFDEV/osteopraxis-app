@@ -2,6 +2,18 @@
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
+// Define proper types for the insert data
+type OsteopathInsertData = {
+  userId: string;
+  name: string;
+  professional_title: string | null;
+  adeli_number: string | null;
+  siret: string | null;
+  ape_code: string | null;
+  updatedAt: string;
+  createdAt: string;
+};
+
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
     try {
@@ -81,8 +93,8 @@ export const supabaseOsteopathService = {
 
       const now = new Date().toISOString();
       
-      // Définition du type pour l'insertion Supabase
-      const dataToInsert = {
+      // Définition du type pour l'insertion Supabase avec le type correct
+      const dataToInsert: OsteopathInsertData = {
         userId: String(osteopathData.userId), // Conversion explicite en string
         name: osteopathData.name,
         professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
@@ -115,7 +127,7 @@ export const supabaseOsteopathService = {
         // Faire l'insertion avec les données correctement typées
         const { data, error } = await supabase
           .from("Osteopath")
-          .insert([dataToInsert])
+          .insert([dataToInsert]) // Passer un tableau d'objets correctement typés
           .select()
           .single();
           
