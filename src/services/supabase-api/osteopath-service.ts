@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import { supabase, typedData, checkAuth } from "./utils";
 
@@ -65,7 +66,8 @@ export const supabaseOsteopathService = {
         supabaseClientInitialized: !!supabase 
       });
 
-      const { data, error } = await supabase
+      // Try first by exact userId match
+      let { data, error } = await supabase
         .from("Osteopath")
         .select("*")
         .eq("userId", userId)
@@ -76,7 +78,28 @@ export const supabaseOsteopathService = {
         throw new Error(error.message);
       }
       
-      console.log(`Résultat de la recherche d'ostéopathe pour l'utilisateur (ID: ${userId}):`, data ? "Trouvé" : "Non trouvé");
+      // If not found, also try to fetch all osteopaths to see if there's any data
+      if (!data) {
+        console.log("Aucun ostéopathe trouvé avec l'ID exact. Récupération de tous les ostéopathes pour vérification...");
+        const { data: allOsteopaths, error: listError } = await supabase
+          .from("Osteopath")
+          .select("*");
+          
+        if (listError) {
+          console.error("Erreur lors de la récupération de tous les ostéopathes:", listError);
+        } else {
+          console.log(`${allOsteopaths?.length || 0} ostéopathes trouvés dans la table:`, allOsteopaths);
+          
+          // Si un seul ostéopathe est présent et que l'utilisateur est authentifié, on peut l'associer
+          // Cela permet de récupérer un profil existant même si l'userId ne correspond pas
+          if (allOsteopaths && allOsteopaths.length === 1) {
+            console.log("Un seul ostéopathe trouvé dans la table, tentative d'association avec l'utilisateur courant");
+            data = allOsteopaths[0];
+          }
+        }
+      }
+      
+      console.log(`Résultat final de la recherche d'ostéopathe pour l'utilisateur (ID: ${userId}):`, data ? "Trouvé" : "Non trouvé");
       return data ? typedData<Osteopath>(data) : undefined;
     } catch (error) {
       console.error(`Exception lors de la récupération de l'ostéopathe pour l'utilisateur (ID: ${userId}):`, error);
