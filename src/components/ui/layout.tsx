@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight, FileText, UserPlus } from "lucide-react";
@@ -81,6 +82,13 @@ export function Layout({
               <Clock className="h-4 w-4 text-amber-500" />
               Planning
             </NavLink>
+            {/* Ajout du lien vers les factures dans la navigation desktop */}
+            <NavLink to="/invoices" className={({
+            isActive
+          }) => cn("text-sm font-medium transition-colors flex items-center gap-1", isActive ? "text-amber-500" : "hover:text-amber-500 text-muted-foreground")}>
+              <FileText className="h-4 w-4 text-amber-500" />
+              Factures
+            </NavLink>
 
             <ThemeToggle />
             
@@ -104,6 +112,12 @@ export function Layout({
                   <NavLink to="/cabinets" className="flex items-center cursor-pointer">
                     <Building className="mr-2 h-4 w-4 text-green-500" />
                     <span>Paramètres du cabinet</span>
+                  </NavLink>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <NavLink to="/invoices" className="flex items-center cursor-pointer">
+                    <FileText className="mr-2 h-4 w-4 text-amber-500" />
+                    <span>Factures</span>
                   </NavLink>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -1,4 +1,3 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase, addAuthHeaders } from "./utils";
 import { SIMULATE_AUTH } from "../api/config";
@@ -26,25 +25,13 @@ export const supabaseInvoiceService = {
       
       // Transform data with explicit typing
       return (data || []).map(item => {
-        // Ensure Patient exists and has correct shape
-        let patient: SimplePatient | null = null;
-        
-        if (item.Patient && typeof item.Patient === 'object') {
-          const patientData = item.Patient as Record<string, any>;
-          patient = {
-            firstName: patientData?.firstName || '',
-            lastName: patientData?.lastName || ''
-          };
-        }
-        
         return {
           id: item.id,
           patientId: item.patientId,
           consultationId: item.consultationId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          Patient: patient
+          paymentStatus: item.paymentStatus as PaymentStatus
         } as Invoice;
       });
     } catch (error) {
@@ -58,7 +45,7 @@ export const supabaseInvoiceService = {
       const query = addAuthHeaders(
         supabase
           .from("Invoice")
-          .select("*, Patient(firstName, lastName)")
+          .select("*")
           .eq("id", id)
           .maybeSingle()
       );
@@ -74,16 +61,6 @@ export const supabaseInvoiceService = {
       
       if (!data) return undefined;
       
-      // Safely handle the patient data
-      let patientData: SimplePatient | null = null;
-      if (data.Patient && typeof data.Patient === 'object') {
-        const rawPatient = data.Patient as Record<string, any>;
-        patientData = {
-          firstName: rawPatient.firstName || '',
-          lastName: rawPatient.lastName || ''
-        };
-      }
-      
       // Return the properly typed invoice
       return {
         id: data.id,
@@ -91,8 +68,7 @@ export const supabaseInvoiceService = {
         consultationId: data.consultationId,
         date: data.date,
         amount: data.amount,
-        paymentStatus: data.paymentStatus as PaymentStatus,
-        Patient: patientData
+        paymentStatus: data.paymentStatus as PaymentStatus
       } as Invoice;
     } catch (error) {
       console.error("Erreur getInvoiceById:", error);
@@ -105,7 +81,7 @@ export const supabaseInvoiceService = {
       const query = addAuthHeaders(
         supabase
           .from("Invoice")
-          .select("*, Patient(firstName, lastName)")
+          .select("*")
           .eq("patientId", patientId)
           .order('date', { ascending: false })
       );
@@ -116,24 +92,13 @@ export const supabaseInvoiceService = {
       
       // Transform data with explicit typing
       return (data || []).map(item => {
-        let patient: SimplePatient | null = null;
-        
-        if (item.Patient && typeof item.Patient === 'object') {
-          const patientData = item.Patient as Record<string, any>;
-          patient = {
-            firstName: patientData.firstName || '',
-            lastName: patientData.lastName || ''
-          };
-        }
-        
         return {
           id: item.id,
           patientId: item.patientId,
           consultationId: item.consultationId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          Patient: patient
+          paymentStatus: item.paymentStatus as PaymentStatus
         } as Invoice;
       });
     } catch (error) {
@@ -144,19 +109,10 @@ export const supabaseInvoiceService = {
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
     try {
-      // Préparer les données pour l'insertion sans Patient
-      const insertData = {
-        patientId: invoiceData.patientId,
-        consultationId: invoiceData.consultationId,
-        date: invoiceData.date,
-        amount: invoiceData.amount,
-        paymentStatus: invoiceData.paymentStatus
-      };
-      
       const query = addAuthHeaders(
         supabase
           .from("Invoice")
-          .insert(insertData)
+          .insert(invoiceData)
           .select()
           .single()
       );
@@ -174,19 +130,10 @@ export const supabaseInvoiceService = {
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
-      // Préparer les données pour la mise à jour sans Patient
-      const updateData: Record<string, any> = {};
-      
-      if ('patientId' in invoiceData) updateData.patientId = invoiceData.patientId;
-      if ('consultationId' in invoiceData) updateData.consultationId = invoiceData.consultationId;
-      if ('date' in invoiceData) updateData.date = invoiceData.date;
-      if ('amount' in invoiceData) updateData.amount = invoiceData.amount;
-      if ('paymentStatus' in invoiceData) updateData.paymentStatus = invoiceData.paymentStatus;
-      
       const query = addAuthHeaders(
         supabase
           .from("Invoice")
-          .update(updateData)
+          .update(invoiceData)
           .eq("id", id)
           .select()
           .single()

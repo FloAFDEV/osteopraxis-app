@@ -4,62 +4,60 @@ import { Layout } from '@/components/ui/layout';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
+import { Osteopath, Cabinet } from '@/types';
 
-// Nous gardons votre NewInvoicePage.tsx existant, mais nous ajoutons la récupération des données de cabinet
 const NewInvoicePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [validatingFields, setValidatingFields] = useState(true);
   const [hasRequiredFields, setHasRequiredFields] = useState(true);
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const [cabinetData, setCabinetData] = useState<any>(null);
+  const [cabinetData, setCabinetData] = useState<Cabinet | null>(null);
+  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
 
   // Vérifier si l'ostéopathe a tous les champs requis pour générer des factures
   // et récupérer les informations du cabinet principal
   useEffect(() => {
     const checkRequiredFields = async () => {
-      if (!user?.osteopathId) {
-        setHasRequiredFields(false);
-        setMissingFields(["Profil d'ostéopathe incomplet"]);
+      if (!user) {
         setValidatingFields(false);
         return;
       }
 
       try {
-        // Récupérer directement l'ostéopathe pour vérifier les champs
-        const result = await api.getOsteopathById(user.osteopathId);
-        console.log("Données ostéopathe récupérées pour vérification facture:", result);
-        
-        // Si aucun résultat, l'ostéopathe n'existe pas
-        if (!result) {
+        // Récupérer l'ostéopathe lié à l'utilisateur
+        const osteopathData = await api.getOsteopathByUserId(user.id);
+        console.log("Données ostéopathe récupérées via userId:", osteopathData);
+
+        if (!osteopathData) {
           setHasRequiredFields(false);
           setMissingFields(["Profil d'ostéopathe introuvable"]);
           setValidatingFields(false);
           return;
         }
-        
+
+        // Stocker l'ostéopathe pour utilisation ultérieure
+        setOsteopath(osteopathData);
+
         // Vérifier que result est bien défini et contient les champs attendus
         console.log("Vérification des champs pour la facturation:", {
-          adeli_number: result.adeli_number,
-          siret: result.siret,
-          name: result.name,
-          professional_title: result.professional_title
+          adeli_number: osteopathData.adeli_number,
+          siret: osteopathData.siret,
+          name: osteopathData.name,
+          professional_title: osteopathData.professional_title
         });
         
         const missing: string[] = [];
         
-        if (!result.adeli_number) missing.push("Numéro ADELI");
-        if (!result.siret) missing.push("Numéro SIRET");
-        if (!result.name) missing.push("Nom professionnel");
-        if (!result.professional_title) missing.push("Titre professionnel");
+        if (!osteopathData.adeli_number) missing.push("Numéro ADELI");
+        if (!osteopathData.siret) missing.push("Numéro SIRET");
+        if (!osteopathData.name) missing.push("Nom professionnel");
+        if (!osteopathData.professional_title) missing.push("Titre professionnel");
         
         console.log("Champs manquants pour la facturation:", missing.length > 0 ? missing : "Aucun");
         
@@ -70,10 +68,12 @@ const NewInvoicePage = () => {
         if (missing.length === 0) {
           try {
             // Récupérer le premier cabinet associé à cet ostéopathe
-            const cabinets = await api.getCabinetsByOsteopathId(user.osteopathId);
+            const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
             if (cabinets && cabinets.length > 0) {
               setCabinetData(cabinets[0]);
               console.log("Données du cabinet récupérées pour la facturation:", cabinets[0]);
+            } else {
+              console.log("Aucun cabinet trouvé pour l'ostéopathe");
             }
           } catch (error) {
             console.error("Erreur lors de la récupération des données du cabinet:", error);
@@ -85,13 +85,19 @@ const NewInvoicePage = () => {
         setMissingFields(["Erreur lors de la vérification des champs"]);
       } finally {
         setValidatingFields(false);
+        setLoading(false);
       }
     };
 
-    checkRequiredFields();
-  }, [user?.osteopathId]);
+    if (user) {
+      checkRequiredFields();
+    } else {
+      setValidatingFields(false);
+      setLoading(false);
+    }
+  }, [user]);
 
-  if (validatingFields) {
+  if (validatingFields || loading) {
     return (
       <Layout>
         <div className="flex justify-center items-center py-12">
@@ -105,7 +111,7 @@ const NewInvoicePage = () => {
   }
 
   // Si l'ostéopathe n'a pas les champs requis, afficher une alerte
-  if (!hasRequiredFields) {
+  if (!hasRequiredFields || !osteopath) {
     return (
       <Layout>
         <div className="max-w-3xl mx-auto py-6">
