@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { InvoicePrintView } from "@/components/invoice-print-view";
-import { useReactToPrint } from "react-to-print";
+import { useReactToPrint } from 'react-to-print';  // Ensure this import is correct
 import { FileText, Printer, ArrowLeft, AlertCircle, Check, Clock, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -24,10 +23,9 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
-  // Correction de l'implémentation de useReactToPrint
+  // Update the handlePrint hook to use the correct type
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // Correction: utiliser content au lieu de documentRef
     content: () => printRef.current,
     onPrintError: (error) => {
       console.error("Erreur d'impression:", error);
@@ -177,7 +175,6 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              // Correction: Use an anonymous function to call handlePrint
               onClick={() => handlePrint()}
               className="flex items-center gap-2"
             >
