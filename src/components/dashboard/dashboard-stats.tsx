@@ -30,7 +30,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
         description={data.thirtyDayGrowthPercentage > 0 
           ? `+${data.thirtyDayGrowthPercentage}% ce mois-ci` 
           : `${data.thirtyDayGrowthPercentage}% ce mois-ci`}
-        color={data.thirtyDayGrowthPercentage > 0 ? "text-green-500" : "text-red-500"}
+        color={data.thirtyDayGrowthPercentage > 0 ? "text-blue-500" : "text-red-500"}
         icon={<Users />}
       />
       
