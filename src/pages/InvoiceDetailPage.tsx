@@ -9,31 +9,46 @@ import { useReactToPrint } from "react-to-print";
 import { FileText, Printer, ArrowLeft, AlertCircle, Check, Clock, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Invoice, Patient, PaymentStatus, Osteopath, Cabinet } from "@/types";
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
 
 const InvoiceDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
-  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
-  const printRef = useRef<HTMLDivElement>(null);
-
+  const [invoice, setInvoice] = useState(null);
+  const [patient, setPatient] = useState(null);
+  const [osteopath, setOsteopath] = useState(null);
+  const [cabinet, setCabinet] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  
+  const printRef = useRef(null);
+  
+  // Correction de useReactToPrint pour éliminer l'erreur TypeScript
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
     documentTitle: `Facture-${id}`,
+    // Utilisation correcte en accord avec les types de react-to-print
+    onBeforeGetContent: () => {
+      return new Promise((resolve) => {
+        resolve();
+      });
+    },
+    onPrintError: () => {
+      toast.error("Erreur lors de l'impression");
+    },
+    removeAfterPrint: true,
+    // Content doit être une fonction qui renvoie la référence
+    content: () => printRef.current,
   });
 
-  const updatePaymentStatus = async (status: PaymentStatus) => {
+  const updatePaymentStatus = async (status) => {
     try {
       if (!invoice) return;
       await api.updatePaymentStatus(invoice.id, status);
-      setInvoice({ ...invoice, paymentStatus: status });
+      setInvoice({
+        ...invoice,
+        paymentStatus: status
+      });
       toast.success("Statut de paiement mis à jour");
     } catch (error) {
       console.error("Erreur lors de la mise à jour du statut:", error);
@@ -44,6 +59,7 @@ const InvoiceDetailPage = () => {
   useEffect(() => {
     const fetchInvoiceData = async () => {
       if (!id) return;
+      
       try {
         setLoading(true);
         const invoiceData = await api.getInvoiceById(parseInt(id));
@@ -100,10 +116,8 @@ const InvoiceDetailPage = () => {
   const handleDelete = async () => {
     try {
       if (!invoice) return;
-      
       // À implémenter: suppression de la facture via l'API
       // await api.deleteInvoice(invoice.id);
-      
       toast.success("Facture supprimée avec succès");
       navigate("/invoices");
     } catch (error) {
@@ -135,6 +149,7 @@ const InvoiceDetailPage = () => {
               {error || "Facture non trouvée. Vérifiez l'identifiant de la facture."}
             </AlertDescription>
           </Alert>
+          
           <div className="mt-6">
             <Button asChild>
               <Link to="/invoices">
@@ -163,10 +178,11 @@ const InvoiceDetailPage = () => {
               Facture #{invoice.id.toString().padStart(4, '0')}
             </h1>
           </div>
+          
           <div className="flex gap-2">
             <Button 
               variant="outline" 
-              onClick={handlePrint}
+              onClick={handlePrint} 
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
@@ -180,8 +196,8 @@ const InvoiceDetailPage = () => {
             <h2 className="text-lg font-medium">Statut de paiement</h2>
             <div className="mt-4 flex gap-2">
               <Button 
-                size="sm"
-                variant={invoice.paymentStatus === "PAID" ? "default" : "outline"} 
+                size="sm" 
+                variant={invoice.paymentStatus === "PAID" ? "default" : "outline"}
                 className={invoice.paymentStatus === "PAID" ? "bg-green-600 hover:bg-green-700" : ""}
                 onClick={() => updatePaymentStatus("PAID")}
               >
@@ -189,7 +205,7 @@ const InvoiceDetailPage = () => {
                 Payée
               </Button>
               <Button 
-                size="sm"
+                size="sm" 
                 variant={invoice.paymentStatus === "PENDING" ? "default" : "outline"}
                 onClick={() => updatePaymentStatus("PENDING")}
               >
@@ -197,7 +213,7 @@ const InvoiceDetailPage = () => {
                 En attente
               </Button>
               <Button 
-                size="sm"
+                size="sm" 
                 variant={invoice.paymentStatus === "CANCELED" ? "default" : "outline"}
                 className={invoice.paymentStatus === "CANCELED" ? "bg-red-600 hover:bg-red-700" : ""}
                 onClick={() => updatePaymentStatus("CANCELED")}
@@ -208,7 +224,7 @@ const InvoiceDetailPage = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white border rounded-lg shadow-sm">
           <div className="p-4 border-b bg-gray-50 rounded-t-lg">
             <h2 className="text-lg font-medium">Aperçu de la facture</h2>
@@ -239,10 +255,10 @@ const InvoiceDetailPage = () => {
       </div>
 
       <ConfirmDeleteInvoiceModal 
-        isOpen={deleteModalOpen} 
-        invoiceNumber={invoice.id.toString().padStart(4, '0')} 
-        onCancel={() => setDeleteModalOpen(false)} 
-        onDelete={handleDelete} 
+        isOpen={deleteModalOpen}
+        invoiceNumber={invoice.id.toString().padStart(4, '0')}
+        onCancel={() => setDeleteModalOpen(false)}
+        onDelete={handleDelete}
       />
     </Layout>
   );

@@ -41,6 +41,11 @@ export const supabaseOsteopathService = {
     }
     
     try {
+      console.log("Exécution de la requête avec userId:", userId);
+      // Log de la session actuelle pour voir si nous sommes authentifiés
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("Session actuelle:", sessionData.session ? "Authentifié" : "Non authentifié");
+      
       // Utiliser maybeSingle au lieu de single pour éviter l'erreur si aucun résultat n'est trouvé
       const { data, error } = await supabase
         .from("Osteopath")
@@ -56,6 +61,17 @@ export const supabaseOsteopathService = {
       // Vérifier si nous avons des données
       if (!data) {
         console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
+        
+        // Si aucun résultat, faire une recherche directe dans la DB pour voir s'il y a des ostéopathes
+        const { data: allOsteos, error: allOsteosError } = await supabase
+          .from("Osteopath")
+          .select("id, userId")
+          .limit(5);
+          
+        if (!allOsteosError && allOsteos) {
+          console.log("Voici les 5 premiers ostéopathes dans la base:", allOsteos);
+        }
+        
         return undefined;
       }
       
