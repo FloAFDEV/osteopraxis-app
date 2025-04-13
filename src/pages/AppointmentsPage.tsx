@@ -130,7 +130,7 @@ const AppointmentsPage = () => {
             </div>
           </div> : <>
             {Object.keys(groupedAppointments).length === 0 ? <div className="text-center py-12 bg-muted/30 rounded-lg">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-3 text-purple-500" />
                 <h3 className="text-xl font-medium">Aucun rendez-vous trouvé</h3>
                 <p className="text-muted-foreground mt-2 mb-6">
                   Aucun rendez-vous ne correspond à vos critères de recherche.
