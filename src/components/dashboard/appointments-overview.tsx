@@ -81,7 +81,7 @@ export function AppointmentsOverview({
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <Link to={`/patients/${appointment.patientId}`} className="font-medium text-blue-600 hover:underline text-base truncate block">
+                    <Link to={`/patients/${appointment.patientId}`} className="font-medium text-white hover:underline text-base truncate block">
                       {patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
                     </Link>
                     <p className="text-sm text-muted-foreground truncate">{appointment.reason}</p>
