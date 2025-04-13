@@ -24,12 +24,12 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
-  // Fix the useReactToPrint hook using the proper typing
+  // Correction du hook useReactToPrint avec les bonnes propriétés selon sa définition de type
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // Use the react-to-print hook with the proper property name according to its types
-    content: () => printRef.current,
-    onPrintError: (error) => {
+    // La propriété correcte est "contentRef" pour les versions récentes de react-to-print
+    contentRef: printRef,
+    onError: (error) => {
       console.error("Erreur d'impression:", error);
       toast.error("Erreur lors de l'impression");
     },
@@ -57,6 +57,7 @@ const InvoiceDetailPage = () => {
       
       try {
         setLoading(true);
+        console.log("Récupération de la facture avec ID:", id);
         const invoiceData = await api.getInvoiceById(parseInt(id));
         
         if (!invoiceData) {
@@ -64,26 +65,36 @@ const InvoiceDetailPage = () => {
           return;
         }
         
+        console.log("Facture récupérée:", invoiceData);
         setInvoice(invoiceData);
         
         // Charger les données du patient
         if (invoiceData.patientId) {
           try {
+            console.log("Récupération du patient avec ID:", invoiceData.patientId);
             const patientData = await api.getPatientById(invoiceData.patientId);
+            console.log("Patient récupéré:", patientData);
             setPatient(patientData || null);
             
             // Une fois que nous avons le patient, nous pouvons récupérer l'ostéopathe
             if (patientData && patientData.osteopathId) {
               try {
+                console.log("Récupération de l'ostéopathe avec ID:", patientData.osteopathId);
                 const osteopathData = await api.getOsteopathById(patientData.osteopathId);
+                console.log("Ostéopathe récupéré:", osteopathData);
                 setOsteopath(osteopathData || null);
                 
                 // Maintenant que nous avons l'ostéopathe, récupérons le cabinet principal
                 if (osteopathData) {
                   try {
+                    console.log("Récupération des cabinets pour l'ostéopathe ID:", osteopathData.id);
                     const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+                    console.log("Cabinets récupérés:", cabinets);
                     if (cabinets && cabinets.length > 0) {
+                      console.log("Cabinet principal sélectionné:", cabinets[0]);
                       setCabinet(cabinets[0]);
+                    } else {
+                      console.log("Aucun cabinet trouvé pour cet ostéopathe");
                     }
                   } catch (cabinetError) {
                     console.error("Erreur lors de la récupération du cabinet:", cabinetError);
@@ -177,7 +188,6 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              // Fixed: wrap the handlePrint in another function to use it as onClick handler
               onClick={() => {
                 if (handlePrint) {
                   handlePrint();
