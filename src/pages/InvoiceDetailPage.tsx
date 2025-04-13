@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -24,21 +23,15 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
-  // Correction de useReactToPrint pour éliminer l'erreur TypeScript
+  // Correct implementation of useReactToPrint
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // Utilisation correcte en accord avec les types de react-to-print
-    onBeforeGetContent: () => {
-      return new Promise((resolve) => {
-        resolve();
-      });
-    },
+    // content is the only required property
+    content: () => printRef.current,
     onPrintError: () => {
       toast.error("Erreur lors de l'impression");
     },
     removeAfterPrint: true,
-    // Content doit être une fonction qui renvoie la référence
-    content: () => printRef.current,
   });
 
   const updatePaymentStatus = async (status) => {
@@ -181,8 +174,8 @@ const InvoiceDetailPage = () => {
           
           <div className="flex gap-2">
             <Button 
-              variant="outline" 
-              onClick={handlePrint} 
+              variant="outline"
+              onClick={() => handlePrint()}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />

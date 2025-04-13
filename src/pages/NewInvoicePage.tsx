@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate } from 'react-router-dom';
@@ -56,18 +55,19 @@ const NewInvoicePage = () => {
           console.log("Aucun ostéopathe trouvé, création d'un nouveau profil");
           
           try {
-            // Créer un profil d'ostéopathe minimal
+            // Créer un profil d'ostéopathe minimal avec tous les champs requis
             const newOsteopath = {
               userId: user.id,
               name: user.email || "Ostéopathe",
-              professional_title: "Ostéopathe D.O."
+              professional_title: "Ostéopathe D.O.",
+              adeli_number: null,
+              siret: null,
+              ape_code: "8690F"
             };
             
             osteopathData = await api.createOsteopath(newOsteopath);
             console.log("Nouveau profil d'ostéopathe créé:", osteopathData);
             
-            // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe
-            // Cette partie nécessiterait une API pour mettre à jour l'utilisateur
           } catch (createError) {
             console.error("Erreur lors de la création du profil d'ostéopathe:", createError);
           }
@@ -127,12 +127,14 @@ const NewInvoicePage = () => {
           console.log("Aucun cabinet trouvé pour l'ostéopathe, création d'un cabinet par défaut");
           
           try {
-            // Créer un cabinet par défaut si aucun n'existe
+            // Créer un cabinet par défaut avec tous les champs requis
             const newCabinet = {
               name: "Cabinet par défaut",
               address: "Adresse à compléter",
               osteopathId: osteopathData.id,
-              phone: ""
+              phone: "",
+              imageUrl: null,
+              logoUrl: null
             };
             
             const createdCabinet = await api.createCabinet(newCabinet);
@@ -228,9 +230,9 @@ const NewInvoicePage = () => {
       <div className="max-w-3xl mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Nouvelle Facture</h1>
         <div className="bg-green-50 p-4 border border-green-200 rounded-md shadow mb-6">
-          <p className="font-medium text-green-800">Cabinet: {cabinetData.name}</p>
-          <p className="text-green-700">Ostéopathe: {osteopath.name}</p>
-          <p className="text-green-700">{osteopath.professional_title}</p>
+          <p className="font-medium text-green-800">Cabinet: {cabinetData?.name}</p>
+          <p className="text-green-700">Ostéopathe: {osteopath?.name}</p>
+          <p className="text-green-700">{osteopath?.professional_title}</p>
         </div>
         {/* Votre formulaire de facture */}
         {/* ... */}
