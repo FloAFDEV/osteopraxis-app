@@ -240,7 +240,7 @@ const InvoiceDetailPage = () => {
 
       <ConfirmDeleteInvoiceModal 
         isOpen={deleteModalOpen} 
-        invoiceId={invoice.id.toString().padStart(4, '0')} 
+        invoiceNumber={invoice.id.toString().padStart(4, '0')} 
         onCancel={() => setDeleteModalOpen(false)} 
         onDelete={handleDelete} 
       />
