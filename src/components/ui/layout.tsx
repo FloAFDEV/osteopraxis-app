@@ -1,4 +1,3 @@
-
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight, FileText, UserPlus } from "lucide-react";
@@ -8,11 +7,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-
 interface LayoutProps {
   children: React.ReactNode;
 }
-
 export function Layout({
   children
 }: LayoutProps) {
@@ -21,26 +18,23 @@ export function Layout({
     user,
     logout
   } = useAuth();
-  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
   const handleLogout = async () => {
     await logout();
   };
-  
   const getInitials = () => {
     if (!user) return "?";
     const firstName = user.first_name || "";
     const lastName = user.last_name || "";
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
   };
-  
+
   // Définir les couleurs des icônes pour le menu mobile
   const iconColors = {
     dashboard: "text-blue-500",
-    patients: "text-pink-500", 
+    patients: "text-pink-500",
     addPatient: "text-blue-500",
     settings: "text-purple-500",
     appointments: "text-purple-500",
@@ -48,7 +42,6 @@ export function Layout({
     schedule: "text-blue-500",
     cabinet: "text-purple-500"
   };
-  
   return <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
         <div className="container flex h-16 items-center justify-between">
@@ -109,7 +102,7 @@ export function Layout({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <NavLink to="/cabinets" className="flex items-center cursor-pointer">
-                    <Building className="mr-2 h-4 w-4 text-purple-500" />
+                    <Building className="mr-2 h-4 w-4 text-green-500" />
                     <span>Paramètres du cabinet</span>
                   </NavLink>
                 </DropdownMenuItem>
