@@ -23,15 +23,17 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
-  // Correct implementation of useReactToPrint
+  // Fixed implementation of useReactToPrint based on correct type definitions
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // content is the only required property
-    content: () => printRef.current,
+    // The content is specified through the props.content callback
+    onBeforeGetContent: () => Promise.resolve(),
     onPrintError: () => {
       toast.error("Erreur lors de l'impression");
     },
     removeAfterPrint: true,
+    bodyClass: "print-body",
+    contentRef: printRef,
   });
 
   const updatePaymentStatus = async (status) => {
@@ -175,7 +177,7 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              onClick={() => handlePrint()}
+              onClick={handlePrint}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />

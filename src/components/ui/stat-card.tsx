@@ -30,7 +30,7 @@ const StatCard = ({
           "border-green-500": colorName === "green-500",
           "border-purple-500": colorName === "purple-500",
           "border-amber-500": colorName === "amber-500",
-          "border-blue-500": colorName === "blue-500",
+          "border-blue-500": colorName === "blue-500"
           // Removed duplicate "border-blue-500" entry
         }
       )}
