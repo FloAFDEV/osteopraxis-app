@@ -1,21 +1,21 @@
+
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Building2, AlertCircle } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+
 const EditCabinetPage = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
   const [osteopathData, setOsteopathData] = useState<any>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
@@ -42,6 +42,7 @@ const EditCabinetPage = () => {
     };
     fetchData();
   }, [id]);
+
   if (loading) {
     return <Layout>
         <div className="flex justify-center items-center py-12">
@@ -52,6 +53,7 @@ const EditCabinetPage = () => {
         </div>
       </Layout>;
   }
+
   if (!cabinet) {
     return <Layout>
         <div className="text-center py-12">
@@ -61,16 +63,27 @@ const EditCabinetPage = () => {
             Le cabinet que vous recherchez n&apos;existe pas ou a été supprimé.
           </p>
           <Button asChild>
-            <Link to="/settings/cabinet">
+            <Link to="/cabinets">
               Retour aux cabinets
             </Link>
           </Button>
         </div>
       </Layout>;
   }
+
   return <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mb-2" 
+            onClick={() => navigate("/cabinets")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour aux cabinets
+          </Button>
+          
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Building2 className="h-8 w-8 text-green-500" />
             Modifier le Cabinet
@@ -81,20 +94,26 @@ const EditCabinetPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <CabinetForm defaultValues={{
-          name: cabinet.name,
-          address: cabinet.address,
-          phone: cabinet.phone || undefined,
-          email: cabinet.email || undefined,
-          imageUrl: cabinet.imageUrl || undefined,
-          logoUrl: cabinet.logoUrl || undefined,
-          osteopathId: cabinet.osteopathId,
-          siret: osteopathData?.siret || undefined,
-          adeliNumber: osteopathData?.adeli_number || undefined,
-          apeCode: osteopathData?.ape_code || "8690F"
-        }} cabinetId={cabinet.id} isEditing={true} osteopathId={cabinet.osteopathId} />
+          <CabinetForm 
+            defaultValues={{
+              name: cabinet.name,
+              address: cabinet.address,
+              phone: cabinet.phone || undefined,
+              email: cabinet.email || undefined,
+              imageUrl: cabinet.imageUrl || undefined,
+              logoUrl: cabinet.logoUrl || undefined,
+              osteopathId: cabinet.osteopathId,
+              siret: osteopathData?.siret || undefined,
+              adeliNumber: osteopathData?.adeli_number || undefined,
+              apeCode: osteopathData?.ape_code || "8690F"
+            }} 
+            cabinetId={cabinet.id} 
+            isEditing={true} 
+            osteopathId={cabinet.osteopathId} 
+          />
         </div>
       </div>
     </Layout>;
 };
+
 export default EditCabinetPage;

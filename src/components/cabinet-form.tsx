@@ -7,6 +7,7 @@ import { z } from "zod";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { toast } from "sonner";
+import { Image, FileImage } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 
 const cabinetFormSchema = z.object({
   name: z.string().min(2, {
@@ -57,8 +59,18 @@ export function CabinetForm({
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [osteopathData, setOsteopathData] = useState<any>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [previewLogoUrl, setPreviewLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    // Initialiser les prévisualisations d'image avec les valeurs par défaut
+    if (defaultValues?.imageUrl) {
+      setPreviewImageUrl(defaultValues.imageUrl);
+    }
+    if (defaultValues?.logoUrl) {
+      setPreviewLogoUrl(defaultValues.logoUrl);
+    }
+    
     // Récupérer les données de l'ostéopathe si on est en mode édition
     const fetchOsteopathData = async () => {
       if (isEditing && osteopathId) {
@@ -74,7 +86,7 @@ export function CabinetForm({
     };
     
     fetchOsteopathData();
-  }, [isEditing, osteopathId]);
+  }, [isEditing, osteopathId, defaultValues]);
 
   const form = useForm<CabinetFormValues>({
     resolver: zodResolver(cabinetFormSchema),
@@ -100,6 +112,35 @@ export function CabinetForm({
       form.setValue("apeCode", osteopathData.ape_code || "8690F");
     }
   }, [osteopathData, form]);
+
+  // Fonction pour vérifier si une URL est valide
+  const isValidUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Gestionnaires pour la prévisualisation des images
+  const handleImageUrlChange = (url: string) => {
+    form.setValue("imageUrl", url);
+    if (isValidUrl(url)) {
+      setPreviewImageUrl(url);
+    } else {
+      setPreviewImageUrl(null);
+    }
+  };
+
+  const handleLogoUrlChange = (url: string) => {
+    form.setValue("logoUrl", url);
+    if (isValidUrl(url)) {
+      setPreviewLogoUrl(url);
+    } else {
+      setPreviewLogoUrl(null);
+    }
+  };
 
   const onSubmit = async (data: CabinetFormValues) => {
     try {
@@ -148,7 +189,7 @@ export function CabinetForm({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate("/settings");
+        navigate("/cabinets");
       }
     } catch (error) {
       console.error("Error submitting cabinet form:", error);
@@ -313,58 +354,110 @@ export function CabinetForm({
         <div>
           <h3 className="text-lg font-medium mb-4">Images</h3>
           
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL de l'image (facultatif)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="url"
-                    placeholder="URL de l'image du cabinet"
-                    disabled={isSubmitting}
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Insérez l'URL d'une image pour la façade ou l'intérieur de votre cabinet
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="logoUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL du logo (facultatif)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="url"
-                    placeholder="URL du logo du cabinet"
-                    disabled={isSubmitting}
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Insérez l'URL de votre logo professionnel
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL de l'image du cabinet</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="url"
+                          className="pl-10"
+                          placeholder="URL de l'image du cabinet"
+                          disabled={isSubmitting}
+                          value={field.value || ""}
+                          onChange={(e) => handleImageUrlChange(e.target.value)}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Insérez l'URL d'une image pour la façade ou l'intérieur de votre cabinet
+                    </FormDescription>
+                    <FormMessage />
+                    
+                    {previewImageUrl && (
+                      <div className="mt-2">
+                        <Card>
+                          <CardContent className="p-2">
+                            <div className="aspect-video w-full relative bg-muted rounded-sm overflow-hidden">
+                              <img 
+                                src={previewImageUrl} 
+                                alt="Aperçu du cabinet" 
+                                className="w-full h-full object-cover"
+                                onError={() => setPreviewImageUrl(null)}
+                              />
+                            </div>
+                            <p className="text-xs text-center mt-2 text-muted-foreground">Aperçu de l'image du cabinet</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div>
+              <FormField
+                control={form.control}
+                name="logoUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL du logo du cabinet</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="url"
+                          className="pl-10"
+                          placeholder="URL du logo du cabinet"
+                          disabled={isSubmitting}
+                          value={field.value || ""}
+                          onChange={(e) => handleLogoUrlChange(e.target.value)}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Insérez l'URL de votre logo professionnel
+                    </FormDescription>
+                    <FormMessage />
+                    
+                    {previewLogoUrl && (
+                      <div className="mt-2">
+                        <Card>
+                          <CardContent className="p-2">
+                            <div className="h-24 w-full flex items-center justify-center bg-muted/30 rounded-sm">
+                              <div className="w-16 h-16 overflow-hidden">
+                                <img 
+                                  src={previewLogoUrl} 
+                                  alt="Aperçu du logo" 
+                                  className="w-full h-full object-contain"
+                                  onError={() => setPreviewLogoUrl(null)}
+                                />
+                              </div>
+                            </div>
+                            <p className="text-xs text-center mt-2 text-muted-foreground">Aperçu du logo</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/cabinets")}
             disabled={isSubmitting}
           >
             Annuler
