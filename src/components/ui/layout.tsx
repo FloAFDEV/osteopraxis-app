@@ -1,4 +1,3 @@
-
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Calendar, User, Clock, Activity, Menu, X, Settings, LogOut, Building, Home, ChevronRight, FileText, UserPlus } from "lucide-react";
@@ -83,12 +82,7 @@ export function Layout({
               Planning
             </NavLink>
             {/* Ajout du lien vers les factures dans la navigation desktop */}
-            <NavLink to="/invoices" className={({
-            isActive
-          }) => cn("text-sm font-medium transition-colors flex items-center gap-1", isActive ? "text-amber-500" : "hover:text-amber-500 text-muted-foreground")}>
-              <FileText className="h-4 w-4 text-amber-500" />
-              Factures
-            </NavLink>
+            
 
             <ThemeToggle />
             
