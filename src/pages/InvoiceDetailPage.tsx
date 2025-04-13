@@ -24,10 +24,10 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
+  // Fix: Correct implementation of useReactToPrint hook
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // Using contentRef instead of content to match the correct API
-    contentRef: () => printRef.current,
+    content: () => printRef.current,
     onError: (error) => {
       console.error("Erreur d'impression:", error);
       toast.error("Erreur lors de l'impression");
@@ -176,7 +176,8 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              onClick={handlePrint}
+              // Fix: Proper way to use the print function
+              onClick={() => handlePrint()}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
