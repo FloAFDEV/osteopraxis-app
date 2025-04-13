@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -25,7 +26,8 @@ const InvoiceDetailPage = () => {
   
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    content: () => printRef.current,
+    // Using contentRef instead of content to match the correct API
+    contentRef: () => printRef.current,
     onError: (error) => {
       console.error("Erreur d'impression:", error);
       toast.error("Erreur lors de l'impression");
@@ -174,7 +176,7 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              onClick={() => handlePrint()}
+              onClick={handlePrint}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
