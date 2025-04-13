@@ -101,7 +101,7 @@ const InvoicesPage = () => {
           }, 500);
         }} />)}
           </div> : <div className="text-center py-20">
-            <FileText className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600" />
+            <FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
             <h3 className="mt-4 text-xl font-medium">Aucune facture trouvée</h3>
             <p className="mt-2 text-gray-500 dark:text-gray-400">
               {searchQuery || statusFilter !== "ALL" ? "Essayez de modifier vos critères de recherche." : "Commencez par créer votre première facture."}
