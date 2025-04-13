@@ -177,11 +177,7 @@ const LoginPage = () => {
             </div>
 
             <div className="text-center text-sm text-gray-400 mt-6">
-              <p>
-                Pour la démo, utilisez : <br />
-                Email: franck.blanchet@example.com <br />
-                Mot de passe: password
-              </p>
+              
             </div>
           </div>
         </div>
