@@ -1,14 +1,16 @@
 
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Invoice, Patient } from "@/types";
+import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
 
 interface InvoicePrintViewProps {
   invoice: Invoice;
   patient?: Patient;
+  osteopath?: Osteopath;
+  cabinet?: Cabinet;
 }
 
-export const InvoicePrintView = ({ invoice, patient }: InvoicePrintViewProps) => {
+export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: InvoicePrintViewProps) => {
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
   };
@@ -29,12 +31,31 @@ export const InvoicePrintView = ({ invoice, patient }: InvoicePrintViewProps) =>
     <div className="bg-white p-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-start mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-blue-800">PatientHub</h1>
-          <p className="text-gray-600">Gestion de cabinet d'ostéopathie</p>
+          {cabinet && cabinet.logoUrl ? (
+            <img 
+              src={cabinet.logoUrl} 
+              alt={`Logo ${cabinet.name}`} 
+              className="h-16 mb-3"
+              style={{ maxWidth: '200px', objectFit: 'contain' }}
+            />
+          ) : (
+            <h1 className="text-3xl font-bold text-blue-800">{cabinet?.name || "PatientHub"}</h1>
+          )}
+          <p className="text-gray-600">{osteopath?.professional_title || "Gestion de cabinet d'ostéopathie"}</p>
           <p className="text-gray-600 mt-2">
-            123 Rue de la Santé<br />
-            75001 Paris, France<br />
-            Tél: 01 23 45 67 89
+            {cabinet ? (
+              <>
+                {cabinet.address}<br />
+                {cabinet.phone && <>{cabinet.phone}<br /></>}
+                {cabinet.email && <>{cabinet.email}<br /></>}
+              </>
+            ) : (
+              <>
+                123 Rue de la Santé<br />
+                75001 Paris, France<br />
+                Tél: 01 23 45 67 89
+              </>
+            )}
           </p>
         </div>
         <div className="text-right">
@@ -62,10 +83,11 @@ export const InvoicePrintView = ({ invoice, patient }: InvoicePrintViewProps) =>
           )}
         </div>
         <div className="text-right">
-          <h3 className="font-medium text-gray-800 mb-2">Paiement à:</h3>
-          <p className="font-medium">Cabinet d'ostéopathie</p>
-          <p>IBAN: FR76 1234 5678 9101 1121 3141</p>
-          <p>BIC: AABBCCDDEEF</p>
+          <h3 className="font-medium text-gray-800 mb-2">Informations professionnelles:</h3>
+          <p className="font-medium">{osteopath?.name || "Cabinet d'ostéopathie"}</p>
+          {osteopath?.siret && <p>SIRET: {osteopath.siret}</p>}
+          {osteopath?.adeli_number && <p>ADELI: {osteopath.adeli_number}</p>}
+          {osteopath?.ape_code && <p>Code APE: {osteopath.ape_code}</p>}
         </div>
       </div>
 

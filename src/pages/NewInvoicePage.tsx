@@ -12,10 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 
-// Importer le service pour vérifier les champs obligatoires
-import { supabaseOsteopathService } from '@/services/supabase-api/osteopath-service';
-
-// Nous gardons votre InvoicePage.tsx existant, mais nous ajoutons la vérification des champs obligatoires
+// Nous gardons votre NewInvoicePage.tsx existant, mais nous ajoutons la récupération des données de cabinet
 const NewInvoicePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -23,8 +20,10 @@ const NewInvoicePage = () => {
   const [validatingFields, setValidatingFields] = useState(true);
   const [hasRequiredFields, setHasRequiredFields] = useState(true);
   const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [cabinetData, setCabinetData] = useState<any>(null);
 
   // Vérifier si l'ostéopathe a tous les champs requis pour générer des factures
+  // et récupérer les informations du cabinet principal
   useEffect(() => {
     const checkRequiredFields = async () => {
       if (!user?.osteopathId) {
@@ -66,6 +65,20 @@ const NewInvoicePage = () => {
         
         setMissingFields(missing);
         setHasRequiredFields(missing.length === 0);
+
+        // Récupérer les données du cabinet principal
+        if (missing.length === 0) {
+          try {
+            // Récupérer le premier cabinet associé à cet ostéopathe
+            const cabinets = await api.getCabinetsByOsteopathId(user.osteopathId);
+            if (cabinets && cabinets.length > 0) {
+              setCabinetData(cabinets[0]);
+              console.log("Données du cabinet récupérées pour la facturation:", cabinets[0]);
+            }
+          } catch (error) {
+            console.error("Erreur lors de la récupération des données du cabinet:", error);
+          }
+        }
       } catch (error) {
         console.error("Erreur lors de la vérification des champs obligatoires:", error);
         setHasRequiredFields(false);
@@ -111,6 +124,30 @@ const NewInvoicePage = () => {
                 <Button asChild>
                   <Link to="/settings/profile">
                     Compléter mon profil
+                  </Link>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!cabinetData) {
+    return (
+      <Layout>
+        <div className="max-w-3xl mx-auto py-6">
+          <Alert className="mb-6">
+            <AlertTitle className="text-lg font-semibold">Cabinet non configuré</AlertTitle>
+            <AlertDescription className="mt-2">
+              <p className="mb-4">
+                Pour générer des factures, vous devez d'abord créer un cabinet avec vos informations professionnelles.
+              </p>
+              <div className="mt-4">
+                <Button asChild>
+                  <Link to="/cabinets/new">
+                    Créer un cabinet
                   </Link>
                 </Button>
               </div>
