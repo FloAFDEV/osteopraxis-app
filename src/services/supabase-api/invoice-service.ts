@@ -1,25 +1,15 @@
 import { Invoice, PaymentStatus } from "@/types";
-import { supabase, addAuthHeaders } from "./utils";
-import { SIMULATE_AUTH } from "../api/config";
-
-// Define a simple interface for the patient data we need
-interface SimplePatient {
-  firstName: string;
-  lastName: string;
-}
+import { supabase, typedData } from "./utils";
 
 export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     try {
-      // Utiliser la fonction addAuthHeaders pour gérer l'authentification
-      const query = addAuthHeaders(
-        supabase
-          .from("Invoice")
-          .select("*, Patient(firstName, lastName)")
-          .order('date', { ascending: false })
-      );
-      
-      const { data, error } = await query;
+      // Correction: suppression de l'embed "*, Patient(firstName, lastName)" qui cause l'erreur
+      // quand plusieurs relations existent entre Invoice et Patient
+      const { data, error } = await supabase
+        .from("Invoice")
+        .select("*")
+        .order('date', { ascending: false });
       
       if (error) throw new Error(error.message);
       
@@ -42,13 +32,11 @@ export const supabaseInvoiceService = {
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Invoice")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle()
-      );
+      const query = supabase
+        .from("Invoice")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
       
       const { data, error } = await query;
       
@@ -78,13 +66,11 @@ export const supabaseInvoiceService = {
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Invoice")
-          .select("*")
-          .eq("patientId", patientId)
-          .order('date', { ascending: false })
-      );
+      const query = supabase
+        .from("Invoice")
+        .select("*")
+        .eq("patientId", patientId)
+        .order('date', { ascending: false });
       
       const { data, error } = await query;
       
@@ -109,13 +95,12 @@ export const supabaseInvoiceService = {
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Invoice")
-          .insert(invoiceData)
-          .select()
-          .single()
-      );
+      console.log("Création d'une facture avec les données:", invoiceData);
+      const query = supabase
+        .from("Invoice")
+        .insert(invoiceData)
+        .select()
+        .single();
       
       const { data, error } = await query;
       
@@ -130,14 +115,12 @@ export const supabaseInvoiceService = {
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Invoice")
-          .update(invoiceData)
-          .eq("id", id)
-          .select()
-          .single()
-      );
+      const query = supabase
+        .from("Invoice")
+        .update(invoiceData)
+        .eq("id", id)
+        .select()
+        .single();
       
       const { data, error } = await query;
       

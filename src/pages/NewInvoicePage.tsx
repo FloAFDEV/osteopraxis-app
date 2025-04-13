@@ -37,24 +37,51 @@ const NewInvoicePage = () => {
       console.log("Vérification des champs pour l'utilisateur:", user.id);
       
       try {
-        // 1. Vérifier si l'utilisateur a un osteopathId
+        // Créer un ostéopathe pour l'utilisateur si aucun n'existe
+        // Cela résout le problème où l'ostéopathe n'est pas trouvé
+        let osteopathData = null;
+        
         if (user.osteopathId) {
           console.log("L'utilisateur a un osteopathId:", user.osteopathId);
-          
-          // Récupérer directement l'ostéopathe via son ID
-          const osteopathData = await api.getOsteopathById(user.osteopathId);
+          osteopathData = await api.getOsteopathById(user.osteopathId);
           console.log("Données ostéopathe récupérées via osteopathId:", osteopathData);
-          
-          if (osteopathData) {
-            setOsteopath(osteopathData);
-            processOsteopathData(osteopathData);
-          } else {
-            console.log("Ostéopathe non trouvé avec l'ID:", user.osteopathId);
-            tryGetOsteopathByUserId();
-          }
         } else {
           console.log("L'utilisateur n'a pas d'osteopathId, recherche par userId");
-          tryGetOsteopathByUserId();
+          osteopathData = await api.getOsteopathByUserId(user.id);
+          console.log("Résultat de la recherche par userId:", osteopathData);
+        }
+        
+        // Si aucun ostéopathe n'est trouvé, créer un nouveau profil d'ostéopathe
+        if (!osteopathData) {
+          console.log("Aucun ostéopathe trouvé, création d'un nouveau profil");
+          
+          try {
+            // Créer un profil d'ostéopathe minimal
+            const newOsteopath = {
+              userId: user.id,
+              name: user.email || "Ostéopathe",
+              professional_title: "Ostéopathe D.O."
+            };
+            
+            osteopathData = await api.createOsteopath(newOsteopath);
+            console.log("Nouveau profil d'ostéopathe créé:", osteopathData);
+            
+            // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe
+            // Cette partie nécessiterait une API pour mettre à jour l'utilisateur
+          } catch (createError) {
+            console.error("Erreur lors de la création du profil d'ostéopathe:", createError);
+          }
+        }
+        
+        if (osteopathData) {
+          setOsteopath(osteopathData);
+          processOsteopathData(osteopathData);
+        } else {
+          console.log("Impossible de créer ou récupérer un profil d'ostéopathe");
+          setHasRequiredFields(false);
+          setMissingFields(["Problème avec le profil d'ostéopathe"]);
+          setLoading(false);
+          setValidatingFields(false);
         }
       } catch (error) {
         console.error("Erreur lors de la vérification des champs obligatoires:", error);
@@ -65,33 +92,8 @@ const NewInvoicePage = () => {
       }
     };
     
-    const tryGetOsteopathByUserId = async () => {
-      try {
-        console.log("Tentative de récupération de l'ostéopathe via userId:", user.id);
-        const osteopathData = await api.getOsteopathByUserId(user.id);
-        console.log("Résultat de la recherche par userId:", osteopathData);
-        
-        if (osteopathData) {
-          setOsteopath(osteopathData);
-          processOsteopathData(osteopathData);
-        } else {
-          console.log("Aucun ostéopathe trouvé pour l'utilisateur");
-          setHasRequiredFields(false);
-          setMissingFields(["Profil d'ostéopathe introuvable"]);
-          setLoading(false);
-          setValidatingFields(false);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération de l'ostéopathe par userId:", error);
-        setHasRequiredFields(false);
-        setMissingFields(["Erreur lors de la recherche du profil"]);
-        setLoading(false);
-        setValidatingFields(false);
-      }
-    };
-    
     const processOsteopathData = async (osteopathData: Osteopath) => {
-      // Vérifier que result est bien défini et contient les champs attendus
+      // Vérifier que l'ostéopathe contient les champs attendus
       console.log("Vérification des champs pour la facturation:", {
         adeli_number: osteopathData.adeli_number,
         siret: osteopathData.siret,
@@ -112,19 +114,36 @@ const NewInvoicePage = () => {
       setHasRequiredFields(missing.length === 0);
 
       // Récupérer les données du cabinet principal
-      if (missing.length === 0) {
-        try {
-          // Récupérer le premier cabinet associé à cet ostéopathe
-          const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
-          if (cabinets && cabinets.length > 0) {
-            setCabinetData(cabinets[0]);
-            console.log("Données du cabinet récupérées pour la facturation:", cabinets[0]);
-          } else {
-            console.log("Aucun cabinet trouvé pour l'ostéopathe");
+      try {
+        // Récupérer les cabinets associés à cet ostéopathe
+        console.log("Récupération des cabinets pour l'ostéopathe ID:", osteopathData.id);
+        const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+        console.log("Cabinets récupérés:", cabinets);
+        
+        if (cabinets && cabinets.length > 0) {
+          setCabinetData(cabinets[0]);
+          console.log("Données du cabinet récupérées pour la facturation:", cabinets[0]);
+        } else {
+          console.log("Aucun cabinet trouvé pour l'ostéopathe, création d'un cabinet par défaut");
+          
+          try {
+            // Créer un cabinet par défaut si aucun n'existe
+            const newCabinet = {
+              name: "Cabinet par défaut",
+              address: "Adresse à compléter",
+              osteopathId: osteopathData.id,
+              phone: ""
+            };
+            
+            const createdCabinet = await api.createCabinet(newCabinet);
+            console.log("Cabinet par défaut créé:", createdCabinet);
+            setCabinetData(createdCabinet);
+          } catch (cabinetError) {
+            console.error("Erreur lors de la création du cabinet par défaut:", cabinetError);
           }
-        } catch (error) {
-          console.error("Erreur lors de la récupération des données du cabinet:", error);
         }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données du cabinet:", error);
       }
       
       setLoading(false);
@@ -208,7 +227,12 @@ const NewInvoicePage = () => {
     <Layout>
       <div className="max-w-3xl mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Nouvelle Facture</h1>
-        {/* Votre formulaire de facture existant */}
+        <div className="bg-green-50 p-4 border border-green-200 rounded-md shadow mb-6">
+          <p className="font-medium text-green-800">Cabinet: {cabinetData.name}</p>
+          <p className="text-green-700">Ostéopathe: {osteopath.name}</p>
+          <p className="text-green-700">{osteopath.professional_title}</p>
+        </div>
+        {/* Votre formulaire de facture */}
         {/* ... */}
       </div>
     </Layout>
