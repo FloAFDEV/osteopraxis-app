@@ -27,8 +27,8 @@ const InvoiceDetailPage = () => {
   // Fix the useReactToPrint hook by using the correct property name
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // The correct property is "printRef" which accepts a ref to the component to print
-    printRef: () => printRef.current,
+    // Use 'content' property which is the correct property for the component to print
+    content: () => printRef.current,
     onPrintError: (error) => {
       console.error("Erreur d'impression:", error);
       toast.error("Erreur lors de l'impression");
