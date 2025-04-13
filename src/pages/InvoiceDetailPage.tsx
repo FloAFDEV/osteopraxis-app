@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -23,10 +24,10 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
-  // Fix the useReactToPrint hook by using the correct property name according to the library
+  // Fix the useReactToPrint hook using the proper typing
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // The correct property is "content" - this is the function that returns the element to print
+    // Use the react-to-print hook with the proper property name according to its types
     content: () => printRef.current,
     onPrintError: (error) => {
       console.error("Erreur d'impression:", error);
@@ -176,8 +177,12 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              // Use handlePrint correctly - it needs to be called without arguments
-              onClick={handlePrint}
+              // Fixed: wrap the handlePrint in another function to use it as onClick handler
+              onClick={() => {
+                if (handlePrint) {
+                  handlePrint();
+                }
+              }}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
