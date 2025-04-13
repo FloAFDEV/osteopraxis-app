@@ -27,8 +27,8 @@ const InvoiceDetailPage = () => {
   // Correction de l'implémentation de useReactToPrint
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // Correction: utiliser documentRef comme option valide
-    documentRef: printRef,
+    // Correction: utiliser content au lieu de documentRef
+    content: () => printRef.current,
     onPrintError: (error) => {
       console.error("Erreur d'impression:", error);
       toast.error("Erreur lors de l'impression");
@@ -177,8 +177,8 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              // Correction: Utiliser correctement handlePrint
-              onClick={handlePrint}
+              // Correction: Use an anonymous function to call handlePrint
+              onClick={() => handlePrint()}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
