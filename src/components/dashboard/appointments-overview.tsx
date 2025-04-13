@@ -113,7 +113,7 @@ export function AppointmentsOverview({
         })}
             
             <div className="p-4 bg-slate-50 dark:bg-slate-900/20 text-center">
-              <Link to="/appointments" className="text-blue-600 hover:text-white text-sm font-medium flex items-center justify-center">
+              <Link to="/appointments" className="text-blue-600 hover:text-gray-400 text-sm font-medium flex items-center justify-center">
                 Voir tous les rendez-vous
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
                   <path d="m9 18 6-6-6-6" />
