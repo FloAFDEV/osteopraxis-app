@@ -26,14 +26,11 @@ const InvoiceDetailPage = () => {
   // Fixed implementation of useReactToPrint based on correct type definitions
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // The content is specified through the props.content callback
-    onBeforeGetContent: () => Promise.resolve(),
-    onPrintError: () => {
+    content: () => printRef.current,
+    onError: () => {
       toast.error("Erreur lors de l'impression");
     },
     removeAfterPrint: true,
-    bodyClass: "print-body",
-    contentRef: printRef,
   });
 
   const updatePaymentStatus = async (status) => {
