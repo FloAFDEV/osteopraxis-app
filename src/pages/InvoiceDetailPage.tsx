@@ -23,11 +23,11 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
-  // Fixed implementation of useReactToPrint based on correct type definitions
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
     content: () => printRef.current,
-    onError: () => {
+    onError: (error) => {
+      console.error("Erreur d'impression:", error);
       toast.error("Erreur lors de l'impression");
     },
     removeAfterPrint: true,
@@ -108,8 +108,8 @@ const InvoiceDetailPage = () => {
   const handleDelete = async () => {
     try {
       if (!invoice) return;
-      // À implémenter: suppression de la facture via l'API
-      // await api.deleteInvoice(invoice.id);
+      // Utiliser l'API pour supprimer la facture
+      await api.deleteInvoice(invoice.id);
       toast.success("Facture supprimée avec succès");
       navigate("/invoices");
     } catch (error) {
@@ -174,7 +174,7 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              onClick={handlePrint}
+              onClick={() => handlePrint()}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />

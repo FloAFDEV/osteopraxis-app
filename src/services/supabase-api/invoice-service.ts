@@ -1,3 +1,4 @@
+
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase, typedData } from "./utils";
 
@@ -135,5 +136,21 @@ export const supabaseInvoiceService = {
   
   async updatePaymentStatus(id: number, paymentStatus: PaymentStatus): Promise<Invoice | undefined> {
     return this.updateInvoice(id, { paymentStatus });
+  },
+  
+  async deleteInvoice(id: number): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("Invoice")
+        .delete()
+        .eq("id", id);
+      
+      if (error) throw new Error(error.message);
+      
+      return true;
+    } catch (error) {
+      console.error("Erreur deleteInvoice:", error);
+      throw error;
+    }
   }
 };

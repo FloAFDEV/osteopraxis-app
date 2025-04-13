@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate } from 'react-router-dom';
@@ -37,7 +38,6 @@ const NewInvoicePage = () => {
       
       try {
         // Créer un ostéopathe pour l'utilisateur si aucun n'existe
-        // Cela résout le problème où l'ostéopathe n'est pas trouvé
         let osteopathData = null;
         
         if (user.osteopathId) {
@@ -134,7 +134,8 @@ const NewInvoicePage = () => {
               osteopathId: osteopathData.id,
               phone: "",
               imageUrl: null,
-              logoUrl: null
+              logoUrl: null,
+              email: null
             };
             
             const createdCabinet = await api.createCabinet(newCabinet);

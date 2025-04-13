@@ -78,5 +78,12 @@ export const api = {
       return supabaseInvoiceService.updatePaymentStatus(id, paymentStatus);
     }
     throw new Error("Fonctionnalité de facturation non disponible en mode local");
+  },
+  
+  deleteInvoice: (id: number) => {
+    if (USE_SUPABASE) {
+      return supabaseInvoiceService.deleteInvoice(id);
+    }
+    throw new Error("Fonctionnalité de facturation non disponible en mode local");
   }
 };
