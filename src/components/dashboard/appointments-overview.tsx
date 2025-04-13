@@ -76,7 +76,7 @@ export function AppointmentsOverview({
           const isLastItem = index === upcomingAppointments.length - 1;
           return <div key={appointment.id} className={`flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-900/20 transition-colors relative ${!isLastItem ? 'border-b' : ''}`}>
                   <div className="flex-shrink-0 mr-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
                       <User className="h-6 w-6 text-orange-500" />
                     </div>
                   </div>
