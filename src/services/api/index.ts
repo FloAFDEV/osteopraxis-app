@@ -6,6 +6,7 @@ import { osteopathService } from './osteopath-service';
 import { authService } from './auth-service';
 import { USE_SUPABASE } from './config';
 import { supabaseInvoiceService } from '../supabase-api/invoice-service';
+import { supabase } from '@/integrations/supabase/client';
 
 // API principale
 export const api = {
@@ -15,6 +16,9 @@ export const api = {
   ...cabinetService,
   ...osteopathService,
   ...authService,
+  
+  // Session Supabase
+  getSession: () => supabase.auth.getSession(),
   
   // Méthodes de cabinet (ajoutées ou modifiées)
   getCabinets: cabinetService.getCabinets,

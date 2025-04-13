@@ -1,15 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/ui/layout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { api } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Link } from 'react-router-dom';
-import { Osteopath, Cabinet } from '@/types';
 import { FancyLoader } from '@/components/ui/fancy-loader';
+import { Osteopath, Cabinet } from '@/types';
 
 const NewInvoicePage = () => {
   const { user } = useAuth();
@@ -52,24 +51,47 @@ const NewInvoicePage = () => {
         
         // Si aucun ostéopathe n'est trouvé, créer un nouveau profil d'ostéopathe
         if (!osteopathData) {
-          console.log("Aucun ostéopathe trouvé, création d'un nouveau profil");
+          console.log("Aucun ostéopathe trouvé, tentative d'utiliser la fonction edge");
           
           try {
-            // Créer un profil d'ostéopathe minimal avec tous les champs requis
-            const newOsteopath = {
-              userId: user.id,
-              name: user.email || "Ostéopathe",
-              professional_title: "Ostéopathe D.O.",
-              adeli_number: null,
-              siret: null,
-              ape_code: "8690F"
-            };
+            // Tenter de créer un profil d'ostéopathe via la fonction edge
+            const response = await fetch(
+              "https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${(await api.getSession()).data.session?.access_token}`
+                },
+                body: JSON.stringify({
+                  osteopathData: {
+                    name: user.email || "Ostéopathe",
+                    professional_title: "Ostéopathe D.O.",
+                    adeli_number: null,
+                    siret: null,
+                    ape_code: "8690F"
+                  }
+                })
+              }
+            );
             
-            osteopathData = await api.createOsteopath(newOsteopath);
-            console.log("Nouveau profil d'ostéopathe créé:", osteopathData);
-            
+            if (response.ok) {
+              const result = await response.json();
+              osteopathData = result.osteopath;
+              console.log("Nouveau profil d'ostéopathe créé via edge function:", osteopathData);
+            } else {
+              const errorData = await response.json();
+              console.error("Erreur de la fonction edge:", errorData);
+            }
           } catch (createError) {
-            console.error("Erreur lors de la création du profil d'ostéopathe:", createError);
+            console.error("Erreur lors de l'appel à la fonction edge:", createError);
+            
+            // Si la fonction edge échoue, rediriger vers la page de profil
+            setHasRequiredFields(false);
+            setMissingFields(["Problème avec le profil d'ostéopathe"]);
+            setLoading(false);
+            setValidatingFields(false);
+            return;
           }
         }
         

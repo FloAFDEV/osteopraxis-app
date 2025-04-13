@@ -101,26 +101,35 @@ export const supabaseOsteopathService = {
     
     console.log("Création d'un ostéopathe avec les données:", data);
     
-    // Ajout des timestamps requis par le schéma Supabase
-    const osteopathWithTimestamps = {
-      ...data,
-      updatedAt: now,
-      createdAt: now
-    };
-    
-    const { data: newOsteo, error } = await supabase
-      .from("Osteopath")
-      .insert(osteopathWithTimestamps)
-      .select()
-      .single();
+    try {
+      // Plutôt que d'utiliser directement l'API Supabase, utiliser la fonction edge
+      // qui a les droits d'administration pour créer l'ostéopathe
+      const response = await fetch(
+        "https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({ osteopathData: data })
+        }
+      );
       
-    if (error) {
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Erreur de la fonction edge:", errorData);
+        throw new Error(`Erreur lors de la création de l'ostéopathe: ${errorData.error}`);
+      }
+      
+      const result = await response.json();
+      console.log("Résultat de la création via fonction edge:", result);
+      
+      return result.osteopath;
+    } catch (error) {
       console.error("Erreur lors de la création de l'ostéopathe:", error);
-      throw new Error(error.message);
+      throw error;
     }
-    
-    console.log("Ostéopathe créé avec succès:", newOsteo);
-    return typedData<Osteopath>(newOsteo);
   },
   
   async hasRequiredFields(osteopathId: number): Promise<boolean> {
