@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, Activity, UserPlus } from "lucide-react";
@@ -11,19 +10,15 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères")
 });
-
 const magicLinkSchema = z.object({
   email: z.string().email("Email invalide")
 });
-
 type LoginFormValues = z.infer<typeof loginSchema>;
 type MagicLinkFormValues = z.infer<typeof magicLinkSchema>;
-
 const LoginPage = () => {
   const {
     login,
@@ -32,7 +27,6 @@ const LoginPage = () => {
   } = useAuth();
   const [activeTab, setActiveTab] = useState("password");
   const navigate = useNavigate();
-  
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -40,14 +34,12 @@ const LoginPage = () => {
       password: ""
     }
   });
-  
   const magicLinkForm = useForm<MagicLinkFormValues>({
     resolver: zodResolver(magicLinkSchema),
     defaultValues: {
       email: ""
     }
   });
-  
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
       await login(data.email, data.password);
@@ -55,7 +47,6 @@ const LoginPage = () => {
       console.error("Login error:", error);
     }
   };
-  
   const onMagicLinkSubmit = async (data: MagicLinkFormValues) => {
     try {
       await loginWithMagicLink(data.email);
@@ -63,12 +54,11 @@ const LoginPage = () => {
       console.error("Magic link error:", error);
     }
   };
-  
   return <div className="min-h-screen flex">
       {/* Left section - Login form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
         <div className="mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
             PatientHub
           </h1>
         </div>
@@ -109,12 +99,7 @@ const LoginPage = () => {
                           <FormControl>
                             <div className="relative">
                               <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                              <Input 
-                                className="pl-10 bg-[#161b22] border-gray-700 text-white" 
-                                placeholder="votre@email.com" 
-                                autoComplete="email"
-                                {...field} 
-                              />
+                              <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="votre@email.com" autoComplete="email" {...field} />
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -127,13 +112,7 @@ const LoginPage = () => {
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                              <Input 
-                                type="password" 
-                                className="pl-10 bg-[#161b22] border-gray-700 text-white" 
-                                placeholder="Votre mot de passe" 
-                                autoComplete="current-password"
-                                {...field} 
-                              />
+                              <Input type="password" className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Votre mot de passe" autoComplete="current-password" {...field} />
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -168,12 +147,7 @@ const LoginPage = () => {
                           <FormControl>
                             <div className="relative">
                               <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                              <Input 
-                                className="pl-10 bg-[#161b22] border-gray-700 text-white" 
-                                placeholder="votre@email.com"
-                                autoComplete="email"
-                                {...field} 
-                              />
+                              <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="votre@email.com" autoComplete="email" {...field} />
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -230,5 +204,4 @@ const LoginPage = () => {
       </div>
     </div>;
 };
-
 export default LoginPage;
