@@ -24,11 +24,12 @@ const InvoiceDetailPage = () => {
   
   const printRef = useRef(null);
   
-  // Fix the useReactToPrint hook by using the correct property name
+  // Fix the useReactToPrint hook by using the correct property name according to the library
   const handlePrint = useReactToPrint({
     documentTitle: `Facture-${id}`,
-    // Use 'content' property which is the correct property for the component to print
-    content: () => printRef.current,
+    // The correct property is "content" but we need to pass a function that returns the ref
+    // See: https://github.com/gregnb/react-to-print#basic-usage
+    documentContent: () => printRef.current,
     onPrintError: (error) => {
       console.error("Erreur d'impression:", error);
       toast.error("Erreur lors de l'impression");
@@ -177,7 +178,8 @@ const InvoiceDetailPage = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              onClick={handlePrint}
+              // Fix: properly use handlePrint - it's already a function, not an event handler
+              onClick={() => handlePrint()}
               className="flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
