@@ -10,27 +10,23 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { adaptAppointmentStatusFromSupabase } from "@/utils/patient-form-helpers";
-
 const EditAppointmentPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
-      
       try {
-        const [appointmentData, patientsData] = await Promise.all([
-          api.getAppointmentById(parseInt(id)),
-          api.getPatients()
-        ]);
-        
+        const [appointmentData, patientsData] = await Promise.all([api.getAppointmentById(parseInt(id)), api.getPatients()]);
         if (!appointmentData) {
           throw new Error("Rendez-vous non trouvé");
         }
-        
         setAppointment(appointmentData);
         setPatients(patientsData);
       } catch (error) {
@@ -40,26 +36,20 @@ const EditAppointmentPage = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [id]);
-
   if (loading) {
-    return (
-      <Layout>
+    return <Layout>
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Chargement des données...</p>
           </div>
         </div>
-      </Layout>
-    );
+      </Layout>;
   }
-
   if (!appointment) {
-    return (
-      <Layout>
+    return <Layout>
         <div className="text-center py-12">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
           <h3 className="text-xl font-medium">Rendez-vous non trouvé</h3>
@@ -72,21 +62,18 @@ const EditAppointmentPage = () => {
             </Link>
           </Button>
         </div>
-      </Layout>
-    );
+      </Layout>;
   }
 
   // Extract date and time from appointment date
   const appointmentDate = new Date(appointment.date);
   const date = appointmentDate;
   const time = format(appointmentDate, "HH:mm");
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Calendar className="h-8 w-8 text-primary" />
+            <Calendar className="h-8 w-8 text-purple-500" />
             Modifier le rendez-vous
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -95,22 +82,15 @@ const EditAppointmentPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <AppointmentForm 
-            patients={patients} 
-            defaultValues={{ 
-              patientId: appointment.patientId,
-              date,
-              time,
-              reason: appointment.reason,
-              status: appointment.status
-            }}
-            appointmentId={appointment.id}
-            isEditing={true}
-          />
+          <AppointmentForm patients={patients} defaultValues={{
+          patientId: appointment.patientId,
+          date,
+          time,
+          reason: appointment.reason,
+          status: appointment.status
+        }} appointmentId={appointment.id} isEditing={true} />
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default EditAppointmentPage;
