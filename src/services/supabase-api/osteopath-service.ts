@@ -41,11 +41,9 @@ export const supabaseOsteopathService = {
     
     try {
       console.log("Exécution de la requête avec userId:", userId);
-      // Log de la session actuelle pour voir si nous sommes authentifiés
       const { data: sessionData } = await supabase.auth.getSession();
       console.log("Session actuelle:", sessionData.session ? "Authentifié" : "Non authentifié");
       
-      // Utiliser maybeSingle au lieu de single pour éviter l'erreur si aucun résultat n'est trouvé
       const { data, error } = await supabase
         .from("Osteopath")
         .select("*")
@@ -57,11 +55,9 @@ export const supabaseOsteopathService = {
         throw new Error(error.message);
       }
       
-      // Vérifier si nous avons des données
       if (!data) {
         console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
-        
-        // Si aucun résultat, faire une recherche directe dans la DB pour voir s'il y a des ostéopathes
+        // Afficher les ostéopathes existants pour le débogage
         const { data: allOsteos, error: allOsteosError } = await supabase
           .from("Osteopath")
           .select("id, userId")
@@ -108,7 +104,6 @@ export const supabaseOsteopathService = {
     console.log("Création d'un ostéopathe avec les données:", data);
     
     try {
-      // Essayer d'abord l'insertion directe via l'API Supabase
       const { data: newOsteopath, error } = await supabase
         .from("Osteopath")
         .insert({
@@ -120,7 +115,7 @@ export const supabaseOsteopathService = {
         .single();
 
       if (error) {
-        console.error("Erreur lors de l'insertion directe de l'ostéopathe:", error);
+        console.error("Erreur lors de l'insertion de l'ostéopathe:", error);
         throw error;
       }
       

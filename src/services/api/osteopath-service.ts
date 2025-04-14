@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
@@ -54,31 +53,7 @@ export const osteopathService = {
       try {
         // Ajout d'un délai court pour s'assurer que l'authentification est établie
         await delay(300);
-        const osteopath = await supabaseOsteopathService.getOsteopathByUserId(userId);
-        
-        // Si aucun ostéopathe n'est trouvé, en créer un automatiquement
-        if (!osteopath) {
-          console.log("Création automatique d'un profil d'ostéopathe pour l'utilisateur:", userId);
-          
-          const newOsteopathData = {
-            userId: userId,
-            name: "Ostéopathe", // Nom par défaut
-            professional_title: "Ostéopathe D.O.",
-            adeli_number: "12345678", // Valeur temporaire pour passer les validations
-            siret: "12345678901234", // Valeur temporaire pour passer les validations
-            ape_code: "8690F"
-          };
-          
-          try {
-            const createdOsteopath = await supabaseOsteopathService.createOsteopath(newOsteopathData);
-            console.log("Profil d'ostéopathe créé automatiquement:", createdOsteopath);
-            return createdOsteopath;
-          } catch (createError) {
-            console.error("Erreur lors de la création automatique de l'ostéopathe:", createError);
-          }
-        }
-        
-        return osteopath;
+        return await supabaseOsteopathService.getOsteopathByUserId(userId);
       } catch (error) {
         console.error("Erreur Supabase getOsteopathByUserId:", error);
       }
