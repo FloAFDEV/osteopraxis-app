@@ -1,4 +1,3 @@
-
 // Import des types depuis le fichier des types
 import { Osteopath } from "@/types";
 import { supabase, typedData } from "./utils";
@@ -122,64 +121,14 @@ export const supabaseOsteopathService = {
 
       if (error) {
         console.error("Erreur lors de l'insertion directe de l'ostéopathe:", error);
-        
-        // Si l'insertion directe échoue, essayer avec la fonction edge
-        console.log("Tentative d'utiliser la fonction edge comme fallback");
-        const response = await fetch(
-          "https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-            },
-            body: JSON.stringify({ osteopathData: data })
-          }
-        );
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Erreur de la fonction edge:", errorData);
-          throw new Error(`Erreur lors de la création de l'ostéopathe: ${errorData.error || 'Fonction edge échouée'}`);
-        }
-        
-        const result = await response.json();
-        console.log("Résultat de la création via fonction edge:", result);
-        
-        return result.osteopath;
+        throw error;
       }
       
       console.log("Ostéopathe créé avec succès via insertion directe:", newOsteopath);
       return newOsteopath;
     } catch (error) {
       console.error("Erreur lors de la création de l'ostéopathe:", error);
-      
-      // Dernière tentative - créer un ostéopathe minimal avec les données essentielles
-      try {
-        console.log("Tentative de création d'un ostéopathe minimal");
-        const { data: minimalOsteopath, error: minError } = await supabase
-          .from("Osteopath")
-          .insert({
-            name: data.name || "Ostéopathe",
-            userId: data.userId,
-            professional_title: "Ostéopathe D.O.",
-            createdAt: now,
-            updatedAt: now
-          })
-          .select()
-          .single();
-          
-        if (minError) {
-          console.error("Échec de la création d'un ostéopathe minimal:", minError);
-          throw minError;
-        }
-        
-        console.log("Ostéopathe minimal créé avec succès:", minimalOsteopath);
-        return minimalOsteopath;
-      } catch (finalError) {
-        console.error("Toutes les tentatives de création d'ostéopathe ont échoué:", finalError);
-        throw error;
-      }
+      throw error;
     }
   },
   
