@@ -58,6 +58,12 @@ serve(async (req: Request) => {
     try {
       const requestData = await req.json();
       osteopathData = requestData.osteopathData;
+      
+      // Si aucun nom n'est fourni, utiliser l'email comme valeur par défaut
+      if (osteopathData && !osteopathData.name && user.email) {
+        osteopathData.name = user.email;
+      }
+      
       console.log("Données reçues:", osteopathData);
     } catch (jsonError) {
       console.error("Erreur lors de la lecture du corps de la requête:", jsonError);
@@ -75,7 +81,7 @@ serve(async (req: Request) => {
       )
     }
     
-    console.log("Tentative de création d'ostéopathe pour l'utilisateur:", user.id);
+    console.log("Tentative de création/récupération d'ostéopathe pour l'utilisateur:", user.id);
     
     // Accéder à la base de données avec des privilèges élevés
     const adminClient = createClient(
@@ -94,6 +100,20 @@ serve(async (req: Request) => {
       
     if (findError) {
       console.error("Erreur lors de la recherche d'un ostéopathe existant:", findError);
+      
+      // Vérifier si l'erreur est liée aux permissions
+      if (findError.code === "42501") {
+        console.error("Erreur de permission. Vérification des paramètres du service_role_key.");
+        
+        return new Response(
+          JSON.stringify({ 
+            error: 'Erreur de permission lors de l\'accès à la base de données',
+            details: findError,
+            suggestion: 'Vérifiez que le SERVICE_ROLE_KEY est correctement configuré'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        )
+      }
     }
 
     let result;
@@ -101,10 +121,19 @@ serve(async (req: Request) => {
     if (existingOsteopath) {
       // Mettre à jour l'ostéopathe existant
       console.log("Mise à jour de l'ostéopathe existant:", existingOsteopath.id);
+      
+      // Ne pas écraser les champs existants si vides
+      const updatedData = { ...osteopathData };
+      Object.keys(updatedData).forEach(key => {
+        if (updatedData[key] === null && existingOsteopath[key]) {
+          updatedData[key] = existingOsteopath[key];
+        }
+      });
+      
       const { data, error: updateError } = await adminClient
         .from('Osteopath')
         .update({
-          ...osteopathData,
+          ...updatedData,
           updatedAt: new Date().toISOString()
         })
         .eq('id', existingOsteopath.id)

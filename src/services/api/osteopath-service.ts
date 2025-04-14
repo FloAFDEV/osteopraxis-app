@@ -2,6 +2,7 @@
 import { Osteopath } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
+import { supabase } from '@/integrations/supabase/client';
 
 // Données simulées pour les ostéopathes
 const osteopaths: Osteopath[] = [
@@ -56,7 +57,7 @@ export const osteopathService = {
         await delay(300);
         
         // Debug log de la session actuelle
-        const { data: sessionData, error } = await supabaseOsteopathService.supabase.auth.getSession();
+        const { data: sessionData, error } = await supabase.auth.getSession();
         if (sessionData && sessionData.session) {
           console.log("Utilisateur authentifié:", sessionData.session.user.id);
           console.log("Token d'accès présent:", !!sessionData.session.access_token);
@@ -71,7 +72,7 @@ export const osteopathService = {
         // En cas d'échec, essayer via la fonction edge
         try {
           console.log("Tentative via la fonction edge completer-profil");
-          const { data: sessionData } = await supabaseOsteopathService.supabase.auth.getSession();
+          const { data: sessionData } = await supabase.auth.getSession();
           
           if (!sessionData || !sessionData.session) {
             console.error("Pas de session pour appeler la fonction edge");
@@ -149,7 +150,7 @@ export const osteopathService = {
         await delay(300);
         
         // Vérifier l'état de la session
-        const { data: sessionData } = await supabaseOsteopathService.supabase.auth.getSession();
+        const { data: sessionData } = await supabase.auth.getSession();
         console.log("Session avant création:", sessionData.session ? "Authentifié" : "Non authentifié");
         
         let result;

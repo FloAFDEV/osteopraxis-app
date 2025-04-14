@@ -49,11 +49,11 @@ export const supabaseOsteopathService = {
         return undefined;
       }
       
-      // Log pour comparer l'userId de la session avec celui passé en paramètre
       console.log("ID utilisateur de la session:", sessionData.session.user.id);
       console.log("ID utilisateur passé en paramètre:", userId);
+      console.log("Exécution de la requête avec userId:", userId);
       
-      // Rechercher par l'userId exact correspondant à celui de la base de données
+      // Recherche exacte avec le userId
       const { data, error } = await supabase
         .from("Osteopath")
         .select("*")
@@ -65,6 +65,8 @@ export const supabaseOsteopathService = {
         throw new Error(error.message);
       }
       
+      console.log("Session actuelle:", sessionData.session ? "Authentifié" : "Non authentifié");
+      
       if (!data) {
         console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
         
@@ -75,25 +77,7 @@ export const supabaseOsteopathService = {
           .limit(5);
           
         if (!allOsteosError && allOsteos) {
-          console.log("Ostéopathes existants dans la base:", allOsteos);
-          
-          // Essayer de correspondre avec un ostéopathe en ignorant la casse
-          const matchedOsteo = allOsteos.find(
-            o => o.userId && o.userId.toLowerCase() === userId.toLowerCase()
-          );
-          
-          if (matchedOsteo) {
-            console.log("Ostéopathe trouvé en ignorant la casse, ID:", matchedOsteo.id);
-            
-            // Récupérer l'ostéopathe complet
-            const { data: fullOsteo } = await supabase
-              .from("Osteopath")
-              .select("*")
-              .eq("id", matchedOsteo.id)
-              .single();
-              
-            return typedData<Osteopath>(fullOsteo);
-          }
+          console.log("Voici les 5 premiers ostéopathes dans la base:", allOsteos);
         }
         
         return undefined;
@@ -158,38 +142,6 @@ export const supabaseOsteopathService = {
 
       if (error) {
         console.error("Erreur lors de l'insertion de l'ostéopathe:", error);
-        
-        // Tenter d'utiliser la fonction edge comme alternative
-        console.log("Tentative d'utilisation de la fonction edge pour création d'ostéopathe");
-        const edgeFunctionUrl = "https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil";
-        
-        const response = await fetch(edgeFunctionUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${sessionData.session.access_token}`
-          },
-          body: JSON.stringify({
-            osteopathData: {
-              ...data,
-              userId: userId
-            }
-          })
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Erreur de la fonction edge:", errorText);
-          throw new Error(`Fonction edge a échoué: ${response.status} - ${errorText}`);
-        }
-        
-        const result = await response.json();
-        console.log("Résultat de la création via fonction edge:", result);
-        
-        if (result && result.osteopath) {
-          return result.osteopath;
-        }
-        
         throw error;
       }
       
@@ -203,7 +155,7 @@ export const supabaseOsteopathService = {
   
   async hasRequiredFields(osteopathId: number): Promise<boolean> {
     try {
-      const osteopath = await supabaseOsteopathService.getOsteopathById(osteopathId);
+      const osteopath = await this.getOsteopathById(osteopathId);
       
       if (!osteopath) return false;
       
