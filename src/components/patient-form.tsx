@@ -360,7 +360,7 @@ export function PatientForm({
                           <FormLabel>Correction de la vision</FormLabel>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value || false} onCheckedChange={field.onChange} />
+                          <Switch checked={field.value || false} onCheckedChange={field.onChange} className="bg-blue-500 hover:bg-blue-400 dark:bg-amber-500" />
                         </FormControl>
                       </FormItem>} />
                 </div>
