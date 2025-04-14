@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -138,34 +137,20 @@ export function OsteopathProfileForm({
       setIsSubmitting(true);
       setError(null);
       
-      // Petit délai pour s'assurer que l'authentification est bien établie
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Log détaillé de l'état d'authentification
+      console.log("État de l'authentification avant soumission:");
+      console.log("- User présent:", !!user);
+      if (user) console.log("- User ID:", user.id);
       
-      // Vérifier que l'authentification est toujours valide avec une tentative de rechargement
-      await loadStoredToken();
+      // Vérifier que la session Supabase est valide
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("- Session Supabase:", sessionData.session ? "Valide" : "Invalide");
       
-      if (!user) {
-        setError("Session expirée. Veuillez vous reconnecter.");
-        setAuthError(true);
-        redirectToLogin();
-        return;
-      }
-      
-      // Force le rechargement du token d'authentification depuis le localStorage
-      const storedAuthState = localStorage.getItem("authState");
-      if (storedAuthState) {
-        try {
-          const parsedState = JSON.parse(storedAuthState);
-          if (parsedState.token) {
-            console.log("Définition manuelle du token d'accès pour Supabase avant l'opération");
-            await supabase.auth.setSession({
-              access_token: parsedState.token,
-              refresh_token: ""
-            });
-          }
-        } catch (error) {
-          console.error("Erreur lors de la définition manuelle du token:", error);
-        }
+      if (!sessionData.session) {
+        console.log("Session invalide, tentative de rechargement du token");
+        await loadStoredToken();
+        const { data: newSessionData } = await supabase.auth.getSession();
+        console.log("- Nouvelle session après rechargement:", newSessionData.session ? "Valide" : "Invalide");
       }
       
       let osteopathResult: Osteopath;
@@ -178,11 +163,8 @@ export function OsteopathProfileForm({
         console.log("Mise à jour réussie:", osteopathResult);
       } else {
         console.log("Création d'un ostéopathe pour l'utilisateur:", user.id);
-        // Create new osteopath with delay to ensure auth is ready
-        await new Promise(resolve => setTimeout(resolve, 200));
         
         // S'assurer que les champs obligatoires ne sont pas vides
-        // Mais ne pas bloquer la création si certains champs sont manquants
         const osteopathData = {
           name: data.name,
           professional_title: data.professional_title || "Ostéopathe D.O.",
@@ -194,19 +176,52 @@ export function OsteopathProfileForm({
         
         console.log("Données pour création:", osteopathData);
         
-        // Vérifier à nouveau la session juste avant l'insertion
         try {
-          const { data: sessionData } = await supabase.auth.getSession();
-          console.log("État de la session juste avant création:", 
-            sessionData.session ? `Authentifié (${sessionData.session.user.id})` : "Non authentifié");
-        } catch (error) {
-          console.log("Impossible de vérifier la session:", error);
+          osteopathResult = await api.createOsteopath(osteopathData);
+          console.log("Création réussie:", osteopathResult);
+          toast.success("Profil créé avec succès");
+        } catch (createError: any) {
+          console.error("Erreur lors de la création de l'ostéopathe:", createError);
+          
+          // Si l'erreur est liée à l'authentification, réessayer avec la fonction edge
+          if (createError.message?.includes('auth') || createError.message?.includes('permission') || 
+              createError.status === 401 || createError.status === 403) {
+            
+            console.log("Tentative alternative via la fonction edge");
+            
+            // Vérifier à nouveau la session
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData.session || !sessionData.session.access_token) {
+              throw new Error("Token d'authentification manquant");
+            }
+            
+            const response = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${sessionData.session.access_token}`
+              },
+              body: JSON.stringify({ osteopathData })
+            });
+            
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Erreur de la fonction edge: ${errorText}`);
+            }
+            
+            const result = await response.json();
+            console.log("Résultat de la fonction edge:", result);
+            
+            if (!result.success || !result.osteopath) {
+              throw new Error("Échec de la création du profil");
+            }
+            
+            osteopathResult = result.osteopath;
+            toast.success("Profil créé avec succès (via fonction alternative)");
+          } else {
+            throw createError;
+          }
         }
-        
-        osteopathResult = await api.createOsteopath(osteopathData);
-        
-        console.log("Création réussie:", osteopathResult);
-        toast.success("Profil créé avec succès");
       }
       
       // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe

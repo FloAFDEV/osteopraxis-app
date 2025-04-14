@@ -76,10 +76,17 @@ serve(async (req: Request) => {
     }
     
     console.log("Tentative de création d'ostéopathe pour l'utilisateur:", user.id);
+    
+    // Accéder à la base de données avec des privilèges élevés
+    const adminClient = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
+      { auth: { persistSession: false } }
+    );
 
     // Vérifier si un ostéopathe existe déjà pour cet utilisateur
     console.log("Recherche d'un ostéopathe existant...");
-    const { data: existingOsteopath, error: findError } = await supabaseClient
+    const { data: existingOsteopath, error: findError } = await adminClient
       .from('Osteopath')
       .select('*')
       .eq('userId', user.id)
@@ -94,7 +101,7 @@ serve(async (req: Request) => {
     if (existingOsteopath) {
       // Mettre à jour l'ostéopathe existant
       console.log("Mise à jour de l'ostéopathe existant:", existingOsteopath.id);
-      const { data, error: updateError } = await supabaseClient
+      const { data, error: updateError } = await adminClient
         .from('Osteopath')
         .update({
           ...osteopathData,
@@ -112,9 +119,9 @@ serve(async (req: Request) => {
       result = { osteopath: data, operation: 'mise à jour', success: true };
     } else {
       // Créer un nouvel ostéopathe
-      console.log("Création d'un nouvel ostéopathe");
+      console.log("Création d'un nouvel ostéopathe avec le service_role");
       const now = new Date().toISOString();
-      const { data, error: insertError } = await supabaseClient
+      const { data, error: insertError } = await adminClient
         .from('Osteopath')
         .insert({
           ...osteopathData,
@@ -127,41 +134,16 @@ serve(async (req: Request) => {
         
       if (insertError) {
         console.error("Erreur lors de l'insertion de l'ostéopathe:", insertError);
-        
-        // Tenter une insertion avec les permissions du service_role
-        console.log("Tentative d'utiliser service_role pour l'insertion");
-        const adminClient = createClient(
-          Deno.env.get('SUPABASE_URL') || '',
-          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
-          { auth: { persistSession: false } }
-        );
-        
-        const { data: adminData, error: adminError } = await adminClient
-          .from('Osteopath')
-          .insert({
-            ...osteopathData,
-            userId: user.id,
-            createdAt: now,
-            updatedAt: now
-          })
-          .select()
-          .single();
-          
-        if (adminError) {
-          console.error("Erreur avec service_role:", adminError);
-          throw adminError;
-        }
-        
-        result = { osteopath: adminData, operation: 'création (admin)', success: true };
-      } else {
-        result = { osteopath: data, operation: 'création', success: true };
+        throw insertError;
       }
+        
+      result = { osteopath: data, operation: 'création', success: true };
     }
 
     // Mettre à jour le profil utilisateur avec l'ID de l'ostéopathe si nécessaire
     if (result.osteopath && result.osteopath.id) {
       console.log("Mise à jour du profil utilisateur avec l'ID de l'ostéopathe:", result.osteopath.id);
-      const { error: userUpdateError } = await supabaseClient
+      const { error: userUpdateError } = await adminClient
         .from('User')
         .update({ osteopathId: result.osteopath.id })
         .eq('id', user.id);

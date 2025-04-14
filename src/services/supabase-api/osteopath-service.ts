@@ -1,4 +1,4 @@
-// Import des types depuis le fichier des types
+
 import { Osteopath } from "@/types";
 import { supabase, typedData } from "./utils";
 
@@ -40,10 +40,20 @@ export const supabaseOsteopathService = {
     }
     
     try {
-      console.log("Exécution de la requête avec userId:", userId);
+      // Vérifier l'état de la session avant d'exécuter la requête
       const { data: sessionData } = await supabase.auth.getSession();
-      console.log("Session actuelle:", sessionData.session ? "Authentifié" : "Non authentifié");
+      console.log("État de la session:", sessionData.session ? "Authentifié" : "Non authentifié");
       
+      if (!sessionData.session) {
+        console.log("Utilisateur non authentifié, impossible de récupérer l'ostéopathe");
+        return undefined;
+      }
+      
+      // Log pour comparer l'userId de la session avec celui passé en paramètre
+      console.log("ID utilisateur de la session:", sessionData.session.user.id);
+      console.log("ID utilisateur passé en paramètre:", userId);
+      
+      // Rechercher par l'userId exact correspondant à celui de la base de données
       const { data, error } = await supabase
         .from("Osteopath")
         .select("*")
@@ -57,6 +67,7 @@ export const supabaseOsteopathService = {
       
       if (!data) {
         console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
+        
         // Afficher les ostéopathes existants pour le débogage
         const { data: allOsteos, error: allOsteosError } = await supabase
           .from("Osteopath")
@@ -64,7 +75,25 @@ export const supabaseOsteopathService = {
           .limit(5);
           
         if (!allOsteosError && allOsteos) {
-          console.log("Voici les 5 premiers ostéopathes dans la base:", allOsteos);
+          console.log("Ostéopathes existants dans la base:", allOsteos);
+          
+          // Essayer de correspondre avec un ostéopathe en ignorant la casse
+          const matchedOsteo = allOsteos.find(
+            o => o.userId && o.userId.toLowerCase() === userId.toLowerCase()
+          );
+          
+          if (matchedOsteo) {
+            console.log("Ostéopathe trouvé en ignorant la casse, ID:", matchedOsteo.id);
+            
+            // Récupérer l'ostéopathe complet
+            const { data: fullOsteo } = await supabase
+              .from("Osteopath")
+              .select("*")
+              .eq("id", matchedOsteo.id)
+              .single();
+              
+            return typedData<Osteopath>(fullOsteo);
+          }
         }
         
         return undefined;
@@ -104,10 +133,23 @@ export const supabaseOsteopathService = {
     console.log("Création d'un ostéopathe avec les données:", data);
     
     try {
+      // Vérifier l'état de la session avant d'exécuter la requête
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("État de la session pour création:", sessionData.session ? "Authentifié" : "Non authentifié");
+      
+      if (!sessionData.session) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      
+      // S'assurer que l'userId est cohérent avec celui de la session
+      const userId = data.userId || sessionData.session.user.id;
+      console.log("Utilisation de l'userId pour création:", userId);
+      
       const { data: newOsteopath, error } = await supabase
         .from("Osteopath")
         .insert({
           ...data,
+          userId: userId,
           createdAt: now,
           updatedAt: now
         })
@@ -116,6 +158,38 @@ export const supabaseOsteopathService = {
 
       if (error) {
         console.error("Erreur lors de l'insertion de l'ostéopathe:", error);
+        
+        // Tenter d'utiliser la fonction edge comme alternative
+        console.log("Tentative d'utilisation de la fonction edge pour création d'ostéopathe");
+        const edgeFunctionUrl = "https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil";
+        
+        const response = await fetch(edgeFunctionUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({
+            osteopathData: {
+              ...data,
+              userId: userId
+            }
+          })
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Erreur de la fonction edge:", errorText);
+          throw new Error(`Fonction edge a échoué: ${response.status} - ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log("Résultat de la création via fonction edge:", result);
+        
+        if (result && result.osteopath) {
+          return result.osteopath;
+        }
+        
         throw error;
       }
       
