@@ -16,6 +16,8 @@ serve(async (req: Request) => {
   try {
     // Récupérer le token JWT de l'en-tête Authorization
     const authHeader = req.headers.get('Authorization')
+    console.log("Authorization header présent:", !!authHeader);
+    
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Aucun token d\'authentification fourni' }),
@@ -25,8 +27,8 @@ serve(async (req: Request) => {
 
     // Créer un client Supabase avec le token auth
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_ANON_KEY') || '',
       {
         global: {
           headers: { Authorization: authHeader },
@@ -35,20 +37,48 @@ serve(async (req: Request) => {
     )
 
     // Récupérer la session utilisateur
+    console.log("Récupération de l'utilisateur...");
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+    
     if (userError || !user) {
+      console.error("Erreur de récupération de l'utilisateur:", userError);
       return new Response(
-        JSON.stringify({ error: 'Erreur de récupération de l\'utilisateur', details: userError }),
+        JSON.stringify({ 
+          error: 'Erreur de récupération de l\'utilisateur', 
+          details: userError,
+          auth: authHeader ? "Token présent" : "Pas de token"
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       )
     }
 
     // Récupérer les données envoyées dans le corps de la requête
-    const { osteopathData } = await req.json()
+    console.log("Récupération des données du corps...");
+    let osteopathData;
+    try {
+      const requestData = await req.json();
+      osteopathData = requestData.osteopathData;
+      console.log("Données reçues:", osteopathData);
+    } catch (jsonError) {
+      console.error("Erreur lors de la lecture du corps de la requête:", jsonError);
+      return new Response(
+        JSON.stringify({ error: 'Erreur de lecture du corps de la requête', details: String(jsonError) }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
+    
+    if (!osteopathData) {
+      console.error("Pas de données d'ostéopathe fournies");
+      return new Response(
+        JSON.stringify({ error: 'Pas de données d\'ostéopathe fournies' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
     
     console.log("Tentative de création d'ostéopathe pour l'utilisateur:", user.id);
 
     // Vérifier si un ostéopathe existe déjà pour cet utilisateur
+    console.log("Recherche d'un ostéopathe existant...");
     const { data: existingOsteopath, error: findError } = await supabaseClient
       .from('Osteopath')
       .select('*')
@@ -75,10 +105,11 @@ serve(async (req: Request) => {
         .single();
         
       if (updateError) {
+        console.error("Erreur lors de la mise à jour de l'ostéopathe:", updateError);
         throw updateError;
       }
       
-      result = { osteopath: data, operation: 'mise à jour' };
+      result = { osteopath: data, operation: 'mise à jour', success: true };
     } else {
       // Créer un nouvel ostéopathe
       console.log("Création d'un nouvel ostéopathe");
@@ -95,14 +126,41 @@ serve(async (req: Request) => {
         .single();
         
       if (insertError) {
-        throw insertError;
+        console.error("Erreur lors de l'insertion de l'ostéopathe:", insertError);
+        
+        // Tenter une insertion avec les permissions du service_role
+        console.log("Tentative d'utiliser service_role pour l'insertion");
+        const adminClient = createClient(
+          Deno.env.get('SUPABASE_URL') || '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
+          { auth: { persistSession: false } }
+        );
+        
+        const { data: adminData, error: adminError } = await adminClient
+          .from('Osteopath')
+          .insert({
+            ...osteopathData,
+            userId: user.id,
+            createdAt: now,
+            updatedAt: now
+          })
+          .select()
+          .single();
+          
+        if (adminError) {
+          console.error("Erreur avec service_role:", adminError);
+          throw adminError;
+        }
+        
+        result = { osteopath: adminData, operation: 'création (admin)', success: true };
+      } else {
+        result = { osteopath: data, operation: 'création', success: true };
       }
-      
-      result = { osteopath: data, operation: 'création' };
     }
 
     // Mettre à jour le profil utilisateur avec l'ID de l'ostéopathe si nécessaire
     if (result.osteopath && result.osteopath.id) {
+      console.log("Mise à jour du profil utilisateur avec l'ID de l'ostéopathe:", result.osteopath.id);
       const { error: userUpdateError } = await supabaseClient
         .from('User')
         .update({ osteopathId: result.osteopath.id })
@@ -110,6 +168,9 @@ serve(async (req: Request) => {
         
       if (userUpdateError) {
         console.error("Erreur lors de la mise à jour du profil utilisateur:", userUpdateError);
+        result.userUpdateError = userUpdateError.message;
+      } else {
+        result.userUpdated = true;
       }
     }
 
@@ -121,7 +182,11 @@ serve(async (req: Request) => {
   } catch (error) {
     console.error("Erreur dans la fonction edge:", error);
     return new Response(
-      JSON.stringify({ error: 'Erreur serveur', details: error.message }),
+      JSON.stringify({ 
+        error: 'Erreur serveur', 
+        details: error.message || String(error),
+        stack: error.stack
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }

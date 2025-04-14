@@ -1,275 +1,212 @@
 
-import React, { useState, useEffect, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { api } from "@/services/api";
-import { Layout } from "@/components/ui/layout";
-import { Button } from "@/components/ui/button";
-import { InvoicePrintView } from "@/components/invoice-print-view";
+import React, { useState, useEffect, useRef } from 'react';
+import { Layout } from '@/components/ui/layout';
+import { useNavigate, useParams } from 'react-router-dom';
+import { api } from '@/services/api';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, Printer, ArrowLeft, AlertCircle, Check, Clock, XCircle } from "lucide-react";
-import { toast } from "sonner";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { FancyLoader } from '@/components/ui/fancy-loader';
+import { InvoicePrintView } from '@/components/invoice-print-view';
+import { InvoiceDetails } from '@/components/invoice-details';
+import { toast } from 'sonner';
+import { Invoice, Patient, Osteopath, Cabinet } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 const InvoiceDetailPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [invoice, setInvoice] = useState(null);
-  const [patient, setPatient] = useState(null);
-  const [osteopath, setOsteopath] = useState(null);
-  const [cabinet, setCabinet] = useState(null);
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
+  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  
-  const printRef = useRef(null);
-  
-  // Correction du hook useReactToPrint avec les bonnes propriétés selon sa définition de type
+  const printRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  // Configuration pour l'impression
   const handlePrint = useReactToPrint({
-    documentTitle: `Facture-${id}`,
-    // La propriété correcte est "contentRef" pour les versions récentes de react-to-print
-    contentRef: printRef,
-    onError: (error) => {
-      console.error("Erreur d'impression:", error);
-      toast.error("Erreur lors de l'impression");
-    },
-    removeAfterPrint: true,
+    documentTitle: `Facture_${id}`,
+    // Utiliser contentRef au lieu de content ou documentContent
+    contentRef: printRef
   });
-
-  const updatePaymentStatus = async (status) => {
-    try {
-      if (!invoice) return;
-      await api.updatePaymentStatus(invoice.id, status);
-      setInvoice({
-        ...invoice,
-        paymentStatus: status
-      });
-      toast.success("Statut de paiement mis à jour");
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour du statut:", error);
-      toast.error("Impossible de mettre à jour le statut de paiement");
-    }
-  };
-
+  
+  // Charger les données de la facture
   useEffect(() => {
-    const fetchInvoiceData = async () => {
+    const loadInvoiceData = async () => {
       if (!id) return;
       
       try {
+        console.log(`Chargement des données de la facture ID: ${id}`);
         setLoading(true);
-        console.log("Récupération de la facture avec ID:", id);
+        
         const invoiceData = await api.getInvoiceById(parseInt(id));
+        console.log("Données de facture récupérées:", invoiceData);
         
-        if (!invoiceData) {
-          setError("Facture non trouvée");
-          return;
-        }
-        
-        console.log("Facture récupérée:", invoiceData);
-        setInvoice(invoiceData);
-        
-        // Charger les données du patient
-        if (invoiceData.patientId) {
-          try {
-            console.log("Récupération du patient avec ID:", invoiceData.patientId);
-            const patientData = await api.getPatientById(invoiceData.patientId);
-            console.log("Patient récupéré:", patientData);
-            setPatient(patientData || null);
-            
-            // Une fois que nous avons le patient, nous pouvons récupérer l'ostéopathe
-            if (patientData && patientData.osteopathId) {
-              try {
-                console.log("Récupération de l'ostéopathe avec ID:", patientData.osteopathId);
-                const osteopathData = await api.getOsteopathById(patientData.osteopathId);
-                console.log("Ostéopathe récupéré:", osteopathData);
-                setOsteopath(osteopathData || null);
-                
-                // Maintenant que nous avons l'ostéopathe, récupérons le cabinet principal
-                if (osteopathData) {
-                  try {
-                    console.log("Récupération des cabinets pour l'ostéopathe ID:", osteopathData.id);
-                    const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
-                    console.log("Cabinets récupérés:", cabinets);
-                    if (cabinets && cabinets.length > 0) {
-                      console.log("Cabinet principal sélectionné:", cabinets[0]);
-                      setCabinet(cabinets[0]);
-                    } else {
-                      console.log("Aucun cabinet trouvé pour cet ostéopathe");
+        if (invoiceData) {
+          setInvoice(invoiceData);
+          
+          // Charger les données du patient associé
+          if (invoiceData.patientId) {
+            try {
+              console.log(`Chargement des données du patient ID: ${invoiceData.patientId}`);
+              const patientData = await api.getPatientById(invoiceData.patientId);
+              console.log("Données de patient récupérées:", patientData);
+              setPatient(patientData || null);
+              
+              // Si le patient a un osteopathId, utiliser celui-ci pour charger l'ostéopathe
+              if (patientData?.osteopathId) {
+                try {
+                  console.log(`Chargement des données de l'ostéopathe ID: ${patientData.osteopathId}`);
+                  const osteopathData = await api.getOsteopathById(patientData.osteopathId);
+                  console.log("Données d'ostéopathe récupérées:", osteopathData);
+                  setOsteopath(osteopathData || null);
+                  
+                  // Charger les données du cabinet associé à l'ostéopathe
+                  if (osteopathData?.id) {
+                    try {
+                      console.log(`Chargement des données du cabinet pour l'ostéopathe ID: ${osteopathData.id}`);
+                      const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+                      console.log("Données de cabinets récupérées:", cabinets);
+                      
+                      if (cabinets && cabinets.length > 0) {
+                        setCabinet(cabinets[0]);
+                      }
+                    } catch (cabinetError) {
+                      console.error("Erreur lors du chargement du cabinet:", cabinetError);
                     }
-                  } catch (cabinetError) {
-                    console.error("Erreur lors de la récupération du cabinet:", cabinetError);
                   }
+                } catch (osteopathError) {
+                  console.error("Erreur lors du chargement de l'ostéopathe:", osteopathError);
                 }
-              } catch (osteopathError) {
-                console.error("Erreur lors de la récupération de l'ostéopathe:", osteopathError);
               }
+              // Si l'utilisateur est connecté mais que le patient n'a pas d'osteopathId
+              else if (user?.osteopathId) {
+                try {
+                  console.log(`Utilisation de l'osteopathId de l'utilisateur: ${user.osteopathId}`);
+                  const osteopathData = await api.getOsteopathById(user.osteopathId);
+                  console.log("Données d'ostéopathe récupérées via user:", osteopathData);
+                  setOsteopath(osteopathData || null);
+                  
+                  if (osteopathData?.id) {
+                    const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+                    if (cabinets && cabinets.length > 0) {
+                      setCabinet(cabinets[0]);
+                    }
+                  }
+                } catch (error) {
+                  console.error("Erreur lors du chargement de l'ostéopathe via userId:", error);
+                }
+              }
+              
+            } catch (patientError) {
+              console.error("Erreur lors du chargement du patient:", patientError);
             }
-          } catch (patientError) {
-            console.error("Erreur lors de la récupération du patient:", patientError);
           }
+        } else {
+          toast.error("Facture non trouvée");
+          navigate('/invoices');
         }
       } catch (error) {
         console.error("Erreur lors du chargement de la facture:", error);
-        setError("Impossible de charger les données de la facture");
+        toast.error("Erreur lors du chargement de la facture");
       } finally {
         setLoading(false);
       }
     };
     
-    fetchInvoiceData();
-  }, [id]);
-
+    loadInvoiceData();
+  }, [id, user, navigate]);
+  
   const handleDelete = async () => {
+    if (!invoice) return;
+    
     try {
-      if (!invoice) return;
-      // Utiliser l'API pour supprimer la facture
       await api.deleteInvoice(invoice.id);
       toast.success("Facture supprimée avec succès");
-      navigate("/invoices");
+      navigate('/invoices');
     } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
-      toast.error("Impossible de supprimer la facture");
-    } finally {
-      setDeleteModalOpen(false);
+      console.error("Erreur lors de la suppression de la facture:", error);
+      toast.error("Erreur lors de la suppression de la facture");
     }
+  };
+  
+  const handleDownload = () => {
+    // Pour le téléchargement, on utilise la même fonction que pour l'impression
+    handlePrint();
+  };
+  
+  const getPatientName = () => {
+    if (patient) {
+      return `${patient.firstName} ${patient.lastName}`;
+    }
+    if (invoice?.Patient) {
+      return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
+    }
+    return `Patient #${invoice?.patientId || ""}`;
   };
 
   if (loading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="max-w-4xl mx-auto py-6">
+          <FancyLoader message="Chargement de la facture..." />
         </div>
       </Layout>
     );
   }
-
-  if (error || !invoice) {
-    return (
-      <Layout>
-        <div className="max-w-3xl mx-auto py-8">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Erreur</AlertTitle>
-            <AlertDescription>
-              {error || "Facture non trouvée. Vérifiez l'identifiant de la facture."}
-            </AlertDescription>
-          </Alert>
-          
-          <div className="mt-6">
-            <Button asChild>
-              <Link to="/invoices">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Retour aux factures
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
+  
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <Button variant="ghost" size="sm" className="mb-2" asChild>
-              <Link to="/invoices">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour aux factures
-              </Link>
-            </Button>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <FileText className="h-6 w-6 text-primary" />
-              Facture #{invoice.id.toString().padStart(4, '0')}
-            </h1>
-          </div>
-          
-          <div className="flex gap-2">
+      <div className="max-w-4xl mx-auto py-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">
+            Facture #{invoice?.id.toString().padStart(4, "0")}
+          </h1>
+          <div className="space-x-2">
             <Button 
+              onClick={() => handlePrint()} 
               variant="outline"
-              onClick={() => {
-                if (handlePrint) {
-                  handlePrint();
-                }
-              }}
-              className="flex items-center gap-2"
             >
-              <Printer className="h-4 w-4" />
               Imprimer
             </Button>
+            <Button 
+              onClick={handleDownload} 
+              variant="default"
+            >
+              Télécharger
+            </Button>
           </div>
         </div>
-
-        <div className="bg-card rounded-lg border shadow-sm mb-6">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-medium">Statut de paiement</h2>
-            <div className="mt-4 flex gap-2">
-              <Button 
-                size="sm" 
-                variant={invoice.paymentStatus === "PAID" ? "default" : "outline"}
-                className={invoice.paymentStatus === "PAID" ? "bg-green-600 hover:bg-green-700" : ""}
-                onClick={() => updatePaymentStatus("PAID")}
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Payée
-              </Button>
-              <Button 
-                size="sm" 
-                variant={invoice.paymentStatus === "PENDING" ? "default" : "outline"}
-                onClick={() => updatePaymentStatus("PENDING")}
-              >
-                <Clock className="mr-2 h-4 w-4" />
-                En attente
-              </Button>
-              <Button 
-                size="sm" 
-                variant={invoice.paymentStatus === "CANCELED" ? "default" : "outline"}
-                className={invoice.paymentStatus === "CANCELED" ? "bg-red-600 hover:bg-red-700" : ""}
-                onClick={() => updatePaymentStatus("CANCELED")}
-              >
-                <XCircle className="mr-2 h-4 w-4" />
-                Annulée
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border rounded-lg shadow-sm">
-          <div className="p-4 border-b bg-gray-50 rounded-t-lg">
-            <h2 className="text-lg font-medium">Aperçu de la facture</h2>
-          </div>
-          <div className="p-4">
-            <div ref={printRef}>
-              <InvoicePrintView 
-                invoice={invoice} 
-                patient={patient || undefined} 
-                osteopath={osteopath || undefined} 
-                cabinet={cabinet || undefined} 
+        
+        <Separator className="mb-6" />
+        
+        {invoice && (
+          <>
+            <div className="mb-6">
+              <InvoiceDetails 
+                invoice={invoice}
+                patientName={getPatientName()}
+                onEdit={() => {}} 
+                onDelete={handleDelete}
+                onPrint={() => handlePrint()}
+                onDownload={handleDownload}
               />
             </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-between">
-          <Button variant="outline" asChild>
-            <Link to="/invoices">Retour</Link>
-          </Button>
-          <Button 
-            variant="destructive" 
-            onClick={() => setDeleteModalOpen(true)}
-          >
-            Supprimer
-          </Button>
-        </div>
+            
+            <div className="hidden">
+              <div ref={printRef}>
+                <InvoicePrintView 
+                  invoice={invoice}
+                  patient={patient}
+                  osteopath={osteopath}
+                  cabinet={cabinet}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
-
-      <ConfirmDeleteInvoiceModal 
-        isOpen={deleteModalOpen}
-        invoiceNumber={invoice.id.toString().padStart(4, '0')}
-        onCancel={() => setDeleteModalOpen(false)}
-        onDelete={handleDelete}
-      />
     </Layout>
   );
 };
