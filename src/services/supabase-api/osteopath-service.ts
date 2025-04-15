@@ -36,7 +36,7 @@ export const supabaseOsteopathService = {
     
     if (!userId) {
       console.log("UserId invalide fourni à getOsteopathByUserId");
-      return undefined;
+      throw new Error("UserId invalide fourni");
     }
     
     try {
@@ -46,7 +46,7 @@ export const supabaseOsteopathService = {
       
       if (!sessionData.session) {
         console.log("Utilisateur non authentifié, impossible de récupérer l'ostéopathe");
-        return undefined;
+        throw new Error("Utilisateur non authentifié");
       }
       
       console.log("ID utilisateur de la session:", sessionData.session.user.id);

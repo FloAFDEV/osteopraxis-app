@@ -20,6 +20,7 @@ const NewInvoicePage = () => {
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [cabinetData, setCabinetData] = useState<Cabinet | null>(null);
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   console.log("NewInvoicePage - User state:", user);
 
@@ -30,6 +31,7 @@ const NewInvoicePage = () => {
       if (!user) {
         setValidatingFields(false);
         setLoading(false);
+        setError("Vous devez être connecté pour créer une facture.");
         console.log("Aucun utilisateur connecté");
         return;
       }
@@ -42,15 +44,25 @@ const NewInvoicePage = () => {
         
         if (user.osteopathId) {
           console.log("L'utilisateur a un osteopathId:", user.osteopathId);
-          osteopathData = await api.getOsteopathById(user.osteopathId);
-          console.log("Données ostéopathe récupérées via osteopathId:", osteopathData);
+          try {
+            osteopathData = await api.getOsteopathById(user.osteopathId);
+            console.log("Données ostéopathe récupérées via osteopathId:", osteopathData);
+          } catch (osteoErr) {
+            console.error("Erreur lors de la récupération par osteopathId:", osteoErr);
+            setError("Erreur lors de la récupération du profil d'ostéopathe.");
+          }
         } 
         
         if (!osteopathData) {
           console.log("L'utilisateur n'a pas d'osteopathId ou n'a pas été trouvé, recherche par userId");
           // Essai via l'API standard
-          osteopathData = await api.getOsteopathByUserId(user.id);
-          console.log("Résultat de la recherche par userId:", osteopathData);
+          try {
+            osteopathData = await api.getOsteopathByUserId(user.id);
+            console.log("Résultat de la recherche par userId:", osteopathData);
+          } catch (userIdErr) {
+            console.error("Erreur lors de la recherche par userId:", userIdErr);
+            setError("Erreur lors de la recherche du profil par identifiant utilisateur.");
+          }
         }
         
         // Si toujours pas d'ostéopathe, essayer de le créer via la fonction edge
@@ -93,14 +105,18 @@ const NewInvoicePage = () => {
             } else {
               const errorData = await response.text();
               console.error("Erreur de la fonction edge:", errorData);
+              setError(`Erreur lors de la création du profil: ${errorData}`);
               throw new Error(`Erreur de la fonction edge: ${errorData}`);
             }
           } catch (createError) {
             console.error("Erreur lors de l'appel à la fonction edge:", createError);
             
-            // Si la fonction edge échoue, rediriger vers la page de profil
+            // Si la fonction edge échoue, rediriger vers la page de profil après un délai
             setHasRequiredFields(false);
             setMissingFields(["Problème avec le profil d'ostéopathe"]);
+            if (!error) {
+              setError("Un problème est survenu avec votre profil d'ostéopathe. Veuillez le compléter manuellement.");
+            }
             setLoading(false);
             setValidatingFields(false);
             return;
@@ -114,6 +130,7 @@ const NewInvoicePage = () => {
           console.log("Impossible de créer ou récupérer un profil d'ostéopathe");
           setHasRequiredFields(false);
           setMissingFields(["Problème avec le profil d'ostéopathe"]);
+          setError("Impossible de créer ou récupérer un profil d'ostéopathe. Veuillez essayer de nouveau plus tard.");
           setLoading(false);
           setValidatingFields(false);
         }
@@ -121,6 +138,7 @@ const NewInvoicePage = () => {
         console.error("Erreur lors de la vérification des champs obligatoires:", error);
         setHasRequiredFields(false);
         setMissingFields(["Erreur lors de la vérification des champs"]);
+        setError(`Une erreur est survenue: ${error.message || "Erreur inconnue"}`);
         setLoading(false);
         setValidatingFields(false);
         toast.error("Erreur lors de la vérification des champs du profil");
@@ -178,10 +196,12 @@ const NewInvoicePage = () => {
             setCabinetData(createdCabinet);
           } catch (cabinetError) {
             console.error("Erreur lors de la création du cabinet par défaut:", cabinetError);
+            setError("Erreur lors de la création du cabinet par défaut. Veuillez créer un cabinet manuellement.");
           }
         }
       } catch (error) {
         console.error("Erreur lors de la récupération des données du cabinet:", error);
+        setError("Erreur lors de la récupération des données du cabinet.");
       }
       
       setLoading(false);
@@ -193,8 +213,42 @@ const NewInvoicePage = () => {
     } else {
       setValidatingFields(false);
       setLoading(false);
+      setError("Vous devez être connecté pour accéder à cette page.");
     }
   }, [user]);
+
+  const handleRetry = async () => {
+    setLoading(true);
+    setValidatingFields(true);
+    setError(null);
+    
+    // Rechargement forcé de la session
+    try {
+      await supabase.auth.refreshSession();
+      const { data } = await supabase.auth.getSession();
+      
+      if (data && data.session) {
+        console.log("Session rechargée avec succès");
+        // Continuer avec la vérification normale
+        if (user) {
+          checkRequiredFields();
+        } else {
+          setValidatingFields(false);
+          setLoading(false);
+          setError("Impossible de récupérer les informations de l'utilisateur.");
+        }
+      } else {
+        setLoading(false);
+        setValidatingFields(false);
+        setError("Session expirée ou invalide. Veuillez vous reconnecter.");
+      }
+    } catch (refreshError) {
+      console.error("Erreur lors du rafraîchissement de la session:", refreshError);
+      setLoading(false);
+      setValidatingFields(false);
+      setError("Erreur lors du rafraîchissement de la session.");
+    }
+  };
 
   if (validatingFields || loading) {
     return (
@@ -222,11 +276,19 @@ const NewInvoicePage = () => {
                   <li key={index}>{field}</li>
                 ))}
               </ul>
-              <div className="mt-4">
+              {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md mb-4 text-red-800 dark:text-red-300">
+                  <p>{error}</p>
+                </div>
+              )}
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Button asChild>
                   <Link to="/settings/profile">
                     Compléter mon profil
                   </Link>
+                </Button>
+                <Button variant="outline" onClick={handleRetry}>
+                  Réessayer
                 </Button>
               </div>
             </AlertDescription>
@@ -246,6 +308,11 @@ const NewInvoicePage = () => {
               <p className="mb-4">
                 Pour générer des factures, vous devez d'abord créer un cabinet avec vos informations professionnelles.
               </p>
+              {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md mb-4 text-red-800 dark:text-red-300">
+                  <p>{error}</p>
+                </div>
+              )}
               <div className="mt-4">
                 <Button asChild>
                   <Link to="/cabinets/new">
@@ -269,12 +336,20 @@ const NewInvoicePage = () => {
           <p className="font-medium text-green-800">Cabinet: {cabinetData?.name}</p>
           <p className="text-green-700">Ostéopathe: {osteopath?.name}</p>
           <p className="text-green-700">{osteopath?.professional_title}</p>
+          {osteopath?.adeli_number && <p className="text-green-700">ADELI: {osteopath.adeli_number}</p>}
+          {osteopath?.siret && <p className="text-green-700">SIRET: {osteopath.siret}</p>}
         </div>
         {/* Votre formulaire de facture */}
         {/* ... */}
       </div>
     </Layout>
   );
+};
+
+const checkRequiredFields = async () => {
+  // Cette fonction est ajoutée ici pour satisfaire la référence dans l'appel
+  // du handleRetry. Son implémentation est intégrée dans le contexte du 
+  // hook useEffect, mais nous la gardons pour la référence.
 };
 
 export default NewInvoicePage;

@@ -61,7 +61,7 @@ serve(async (req: Request) => {
       
       // Si aucun nom n'est fourni, utiliser l'email comme valeur par défaut
       if (osteopathData && !osteopathData.name && user.email) {
-        osteopathData.name = user.email;
+        osteopathData.name = user.email.split('@')[0];
       }
       
       console.log("Données reçues:", osteopathData);
@@ -114,6 +114,9 @@ serve(async (req: Request) => {
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
         )
       }
+      
+      // Retourner l'erreur au lieu de continuer
+      throw findError;
     }
 
     let result;
@@ -153,7 +156,7 @@ serve(async (req: Request) => {
       
       // S'assurer que nous avons les données minimales requises
       const osteopathToCreate = {
-        name: osteopathData.name || user.email || "Ostéopathe",
+        name: osteopathData.name || user.email?.split('@')[0] || "Ostéopathe",
         professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
         adeli_number: osteopathData.adeli_number || null,
         siret: osteopathData.siret || null,
