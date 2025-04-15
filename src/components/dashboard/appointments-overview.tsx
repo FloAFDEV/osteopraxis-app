@@ -5,13 +5,15 @@ import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { format, isToday, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Appointment } from "@/types";
+
 interface AppointmentsOverviewProps {
   data: DashboardData;
   className?: string;
 }
+
 export function AppointmentsOverview({
   data,
   className
@@ -19,6 +21,8 @@ export function AppointmentsOverview({
   const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,6 +51,10 @@ export function AppointmentsOverview({
   // Obtenir les informations sur un patient par ID
   const getPatientById = (patientId: number) => {
     return patients.find(p => p.id === patientId);
+  };
+
+  const handleAppointmentClick = (appointmentId: number) => {
+    navigate(`/appointments/${appointmentId}`);
   };
 
   // Use default value if data.appointmentsToday is undefined
@@ -106,9 +114,12 @@ export function AppointmentsOverview({
                     </div>
                   </div>
                   
-                  <Link to={`/appointments/${appointment.id}`} className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-xs font-medium transition-colors">
+                  <button
+                    onClick={() => handleAppointmentClick(appointment.id)}
+                    className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-xs font-medium transition-colors"
+                  >
                     Détails
-                  </Link>
+                  </button>
                 </div>;
         })}
             
