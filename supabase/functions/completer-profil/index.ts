@@ -150,14 +150,24 @@ serve(async (req: Request) => {
       // Créer un nouvel ostéopathe
       console.log("Création d'un nouvel ostéopathe avec le service_role");
       const now = new Date().toISOString();
+      
+      // S'assurer que nous avons les données minimales requises
+      const osteopathToCreate = {
+        name: osteopathData.name || user.email || "Ostéopathe",
+        professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
+        adeli_number: osteopathData.adeli_number || null,
+        siret: osteopathData.siret || null,
+        ape_code: osteopathData.ape_code || "8690F",
+        userId: user.id,
+        createdAt: now,
+        updatedAt: now
+      };
+      
+      console.log("Tentative d'insertion avec:", osteopathToCreate);
+      
       const { data, error: insertError } = await adminClient
         .from('Osteopath')
-        .insert({
-          ...osteopathData,
-          userId: user.id,
-          createdAt: now,
-          updatedAt: now
-        })
+        .insert(osteopathToCreate)
         .select()
         .single();
         

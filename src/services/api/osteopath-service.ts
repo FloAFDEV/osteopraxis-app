@@ -65,20 +65,20 @@ export const osteopathService = {
           console.log("Pas de session active:", error || "Aucune erreur");
         }
         
-        return await supabaseOsteopathService.getOsteopathByUserId(userId);
-      } catch (error) {
-        console.error("Erreur Supabase getOsteopathByUserId:", error);
+        // Première tentative via l'API directe
+        const result = await supabaseOsteopathService.getOsteopathByUserId(userId);
+        if (result) return result;
         
-        // En cas d'échec, essayer via la fonction edge
+        console.log("Aucun résultat via l'API directe, tentative via la fonction edge");
+        
+        // En cas d'absence de résultat, essayer via la fonction edge
         try {
-          console.log("Tentative via la fonction edge completer-profil");
-          const { data: sessionData } = await supabase.auth.getSession();
-          
           if (!sessionData || !sessionData.session) {
             console.error("Pas de session pour appeler la fonction edge");
             return undefined;
           }
           
+          console.log("Tentative via la fonction edge completer-profil");
           const response = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil", {
             method: "POST",
             headers: {
@@ -109,6 +109,8 @@ export const osteopathService = {
         } catch (edgeError) {
           console.error("Erreur lors de l'appel à la fonction edge:", edgeError);
         }
+      } catch (error) {
+        console.error("Erreur Supabase getOsteopathByUserId:", error);
       }
     }
     
@@ -153,12 +155,10 @@ export const osteopathService = {
         const { data: sessionData } = await supabase.auth.getSession();
         console.log("Session avant création:", sessionData.session ? "Authentifié" : "Non authentifié");
         
-        let result;
-        
         // Premier essai: utilisation directe du service Supabase
         try {
           console.log("Tentative de création via API Supabase");
-          result = await supabaseOsteopathService.createOsteopath(data);
+          const result = await supabaseOsteopathService.createOsteopath(data);
           console.log("Création réussie via API Supabase:", result);
           return result;
         } catch (error) {

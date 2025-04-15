@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { FancyLoader } from '@/components/ui/fancy-loader';
 import { Osteopath, Cabinet } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const NewInvoicePage = () => {
   const { user } = useAuth();
@@ -36,24 +37,34 @@ const NewInvoicePage = () => {
       console.log("Vérification des champs pour l'utilisateur:", user.id);
       
       try {
-        // Créer un ostéopathe pour l'utilisateur si aucun n'existe
+        // Récupérer l'ostéopathe existant ou en créer un nouveau si nécessaire
         let osteopathData = null;
         
         if (user.osteopathId) {
           console.log("L'utilisateur a un osteopathId:", user.osteopathId);
           osteopathData = await api.getOsteopathById(user.osteopathId);
           console.log("Données ostéopathe récupérées via osteopathId:", osteopathData);
-        } else {
-          console.log("L'utilisateur n'a pas d'osteopathId, recherche par userId");
+        } 
+        
+        if (!osteopathData) {
+          console.log("L'utilisateur n'a pas d'osteopathId ou n'a pas été trouvé, recherche par userId");
+          // Essai via l'API standard
           osteopathData = await api.getOsteopathByUserId(user.id);
           console.log("Résultat de la recherche par userId:", osteopathData);
         }
         
-        // Si aucun ostéopathe n'est trouvé, créer un nouveau profil d'ostéopathe
+        // Si toujours pas d'ostéopathe, essayer de le créer via la fonction edge
         if (!osteopathData) {
           console.log("Aucun ostéopathe trouvé, tentative d'utiliser la fonction edge");
           
           try {
+            // Vérifier que nous avons une session valide
+            const { data: sessionData } = await supabase.auth.getSession();
+            
+            if (!sessionData.session || !sessionData.session.access_token) {
+              throw new Error("Session non disponible pour appeler la fonction edge");
+            }
+            
             // Tenter de créer un profil d'ostéopathe via la fonction edge
             const response = await fetch(
               "https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil",
@@ -61,7 +72,7 @@ const NewInvoicePage = () => {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
-                  "Authorization": `Bearer ${(await api.getSession()).data.session?.access_token}`
+                  "Authorization": `Bearer ${sessionData.session.access_token}`
                 },
                 body: JSON.stringify({
                   osteopathData: {
@@ -80,8 +91,9 @@ const NewInvoicePage = () => {
               osteopathData = result.osteopath;
               console.log("Nouveau profil d'ostéopathe créé via edge function:", osteopathData);
             } else {
-              const errorData = await response.json();
+              const errorData = await response.text();
               console.error("Erreur de la fonction edge:", errorData);
+              throw new Error(`Erreur de la fonction edge: ${errorData}`);
             }
           } catch (createError) {
             console.error("Erreur lors de l'appel à la fonction edge:", createError);
@@ -111,6 +123,7 @@ const NewInvoicePage = () => {
         setMissingFields(["Erreur lors de la vérification des champs"]);
         setLoading(false);
         setValidatingFields(false);
+        toast.error("Erreur lors de la vérification des champs du profil");
       }
     };
     
