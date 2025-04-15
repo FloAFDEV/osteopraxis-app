@@ -249,13 +249,15 @@ const NewInvoicePage = () => {
       console.log("Création rapide d'un profil avec les valeurs:", values);
       
       // Créer manuellement l'ostéopathe sans passer par la fonction edge
+      const now = new Date().toISOString();
       const osteopathData = {
         name: values.name,
         professional_title: values.professional_title,
         adeli_number: values.adeli_number,
         siret: values.siret,
         ape_code: "8690F",
-        userId: user?.id
+        userId: user?.id,
+        updatedAt: now,  // Ajout du champ updatedAt manquant
       };
       
       // Utiliser le client Supabase directement pour contourner le problème de la fonction edge
