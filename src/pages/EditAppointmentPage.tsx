@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
@@ -9,45 +10,57 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { adaptAppointmentStatusFromSupabase } from "@/utils/patient-form-helpers";
+
 const EditAppointmentPage = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
+      
       try {
-        const [appointmentData, patientsData] = await Promise.all([api.getAppointmentById(parseInt(id)), api.getPatients()]);
+        // Log pour debug
+        console.log(`Chargement du rendez-vous avec l'ID: ${id}`);
+        
+        const [appointmentData, patientsData] = await Promise.all([
+          api.getAppointmentById(parseInt(id)), 
+          api.getPatients()
+        ]);
+        
         if (!appointmentData) {
+          console.error("Rendez-vous non trouvé avec l'ID:", id);
           throw new Error("Rendez-vous non trouvé");
         }
+        
+        console.log("Rendez-vous chargé avec succès:", appointmentData);
         setAppointment(appointmentData);
         setPatients(patientsData);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Impossible de charger les données. Veuillez réessayer.");
+        console.error("Error fetching appointment data:", error);
+        toast.error("Impossible de charger les données du rendez-vous. Veuillez réessayer.");
       } finally {
         setLoading(false);
       }
     };
+    
     fetchData();
   }, [id]);
+
   if (loading) {
     return <Layout>
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement des données...</p>
+            <p className="text-muted-foreground">Chargement des données du rendez-vous...</p>
           </div>
         </div>
       </Layout>;
   }
+  
   if (!appointment) {
     return <Layout>
         <div className="text-center py-12">
@@ -69,6 +82,7 @@ const EditAppointmentPage = () => {
   const appointmentDate = new Date(appointment.date);
   const date = appointmentDate;
   const time = format(appointmentDate, "HH:mm");
+  
   return <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
@@ -82,15 +96,21 @@ const EditAppointmentPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <AppointmentForm patients={patients} defaultValues={{
-          patientId: appointment.patientId,
-          date,
-          time,
-          reason: appointment.reason,
-          status: appointment.status
-        }} appointmentId={appointment.id} isEditing={true} />
+          <AppointmentForm 
+            patients={patients} 
+            defaultValues={{
+              patientId: appointment.patientId,
+              date,
+              time,
+              reason: appointment.reason,
+              status: appointment.status
+            }} 
+            appointmentId={appointment.id} 
+            isEditing={true} 
+          />
         </div>
       </div>
     </Layout>;
 };
+
 export default EditAppointmentPage;

@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { Calendar, Clock, User } from "lucide-react";
@@ -8,6 +9,7 @@ import { fr } from "date-fns/locale";
 import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Appointment } from "@/types";
+import { toast } from "sonner";
 
 interface AppointmentsOverviewProps {
   data: DashboardData;
@@ -54,7 +56,15 @@ export function AppointmentsOverview({
   };
 
   const handleAppointmentClick = (appointmentId: number) => {
-    navigate(`/appointments/${appointmentId}`);
+    try {
+      console.log(`Navigation vers le rendez-vous #${appointmentId}`);
+      navigate(`/appointments/${appointmentId}`);
+      // Afficher un toast pour confirmer l'action
+      toast.info(`Chargement des détails du rendez-vous #${appointmentId}`);
+    } catch (error) {
+      console.error("Erreur lors de la navigation:", error);
+      toast.error("Impossible d'afficher les détails de ce rendez-vous");
+    }
   };
 
   // Use default value if data.appointmentsToday is undefined

@@ -10,6 +10,31 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { FancyLoader } from '@/components/ui/fancy-loader';
 import { Osteopath, Cabinet } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+// Schéma de validation pour le formulaire rapide de profil
+const osteopathFormSchema = z.object({
+  name: z.string().min(2, {
+    message: 'Le nom doit contenir au moins 2 caractères'
+  }),
+  professional_title: z.string().min(2, {
+    message: 'Le titre professionnel doit contenir au moins 2 caractères'
+  }),
+  adeli_number: z.string().min(1, {
+    message: 'Le numéro ADELI est obligatoire'
+  }),
+  siret: z.string().min(1, {
+    message: 'Le numéro SIRET est obligatoire'
+  })
+});
+
+type OsteopathFormValues = z.infer<typeof osteopathFormSchema>;
 
 const NewInvoicePage = () => {
   const { user } = useAuth();
@@ -21,7 +46,19 @@ const NewInvoicePage = () => {
   const [cabinetData, setCabinetData] = useState<Cabinet | null>(null);
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const [showQuickProfile, setShowQuickProfile] = useState(false);
+
+  // Initialiser react-hook-form avec le schéma zod
+  const form = useForm<OsteopathFormValues>({
+    resolver: zodResolver(osteopathFormSchema),
+    defaultValues: {
+      name: user?.email?.split('@')[0] || "Ostéopathe",
+      professional_title: "Ostéopathe D.O.",
+      adeli_number: "",
+      siret: "",
+    }
+  });
+
   console.log("NewInvoicePage - User state:", user);
 
   // Vérifier si l'ostéopathe a tous les champs requis pour générer des factures
@@ -65,62 +102,16 @@ const NewInvoicePage = () => {
           }
         }
         
-        // Si toujours pas d'ostéopathe, essayer de le créer via la fonction edge
+        // Si toujours pas d'ostéopathe, proposer de créer un profil temporaire
         if (!osteopathData) {
-          console.log("Aucun ostéopathe trouvé, tentative d'utiliser la fonction edge");
-          
-          try {
-            // Vérifier que nous avons une session valide
-            const { data: sessionData } = await supabase.auth.getSession();
-            
-            if (!sessionData.session || !sessionData.session.access_token) {
-              throw new Error("Session non disponible pour appeler la fonction edge");
-            }
-            
-            // Tenter de créer un profil d'ostéopathe via la fonction edge
-            const response = await fetch(
-              "https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${sessionData.session.access_token}`
-                },
-                body: JSON.stringify({
-                  osteopathData: {
-                    name: user.email || "Ostéopathe",
-                    professional_title: "Ostéopathe D.O.",
-                    adeli_number: null,
-                    siret: null,
-                    ape_code: "8690F"
-                  }
-                })
-              }
-            );
-            
-            if (response.ok) {
-              const result = await response.json();
-              osteopathData = result.osteopath;
-              console.log("Nouveau profil d'ostéopathe créé via edge function:", osteopathData);
-            } else {
-              const errorData = await response.text();
-              console.error("Erreur de la fonction edge:", errorData);
-              setError(`Erreur lors de la création du profil: ${errorData}`);
-              throw new Error(`Erreur de la fonction edge: ${errorData}`);
-            }
-          } catch (createError) {
-            console.error("Erreur lors de l'appel à la fonction edge:", createError);
-            
-            // Si la fonction edge échoue, rediriger vers la page de profil après un délai
-            setHasRequiredFields(false);
-            setMissingFields(["Problème avec le profil d'ostéopathe"]);
-            if (!error) {
-              setError("Un problème est survenu avec votre profil d'ostéopathe. Veuillez le compléter manuellement.");
-            }
-            setLoading(false);
-            setValidatingFields(false);
-            return;
-          }
+          console.log("Aucun ostéopathe trouvé, offrir l'option de création rapide de profil");
+          setHasRequiredFields(false);
+          setMissingFields(["Profil ostéopathe non trouvé"]);
+          setError("Nous n'avons pas pu créer ou récupérer automatiquement votre profil d'ostéopathe. Vous pouvez utiliser le formulaire rapide ci-dessous pour créer un profil temporaire et continuer vers la création de facture.");
+          setLoading(false);
+          setValidatingFields(false);
+          setShowQuickProfile(true);
+          return;
         }
         
         if (osteopathData) {
@@ -221,6 +212,7 @@ const NewInvoicePage = () => {
     setLoading(true);
     setValidatingFields(true);
     setError(null);
+    setShowQuickProfile(false);
     
     // Rechargement forcé de la session
     try {
@@ -250,11 +242,187 @@ const NewInvoicePage = () => {
     }
   };
 
+  // Gestion du formulaire de création rapide de profil
+  const handleQuickProfileSubmit = async (values: OsteopathFormValues) => {
+    try {
+      setLoading(true);
+      console.log("Création rapide d'un profil avec les valeurs:", values);
+      
+      // Créer manuellement l'ostéopathe sans passer par la fonction edge
+      const osteopathData = {
+        name: values.name,
+        professional_title: values.professional_title,
+        adeli_number: values.adeli_number,
+        siret: values.siret,
+        ape_code: "8690F",
+        userId: user?.id
+      };
+      
+      // Utiliser le client Supabase directement pour contourner le problème de la fonction edge
+      const { data: newOsteo, error: insertError } = await supabase
+        .from("Osteopath")
+        .insert(osteopathData)
+        .select()
+        .single();
+        
+      if (insertError) {
+        throw new Error(`Erreur lors de la création du profil: ${insertError.message}`);
+      }
+      
+      console.log("Profil créé avec succès:", newOsteo);
+      toast.success("Profil créé avec succès!");
+      
+      // Utiliser le nouveau profil
+      setOsteopath(newOsteo);
+      setHasRequiredFields(true);
+      setMissingFields([]);
+      setError(null);
+      setShowQuickProfile(false);
+      
+      // Créer un cabinet par défaut
+      const newCabinet = {
+        name: "Cabinet par défaut",
+        address: "Adresse à compléter",
+        osteopathId: newOsteo.id,
+        phone: "",
+        imageUrl: null,
+        logoUrl: null,
+        email: null
+      };
+      
+      const createdCabinet = await api.createCabinet(newCabinet);
+      setCabinetData(createdCabinet);
+      
+      // Mettre à jour le profil utilisateur avec l'ID de l'ostéopathe
+      await supabase
+        .from("User")
+        .update({ osteopathId: newOsteo.id })
+        .eq("id", user?.id);
+        
+    } catch (error) {
+      console.error("Erreur lors de la création du profil:", error);
+      toast.error(`Erreur: ${error.message || "Impossible de créer le profil"}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (validatingFields || loading) {
     return (
       <Layout>
         <div className="max-w-3xl mx-auto py-6">
           <FancyLoader message="Vérification des informations..." />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Formulaire de création rapide de profil
+  if (showQuickProfile) {
+    return (
+      <Layout>
+        <div className="max-w-3xl mx-auto py-6">
+          <Card className="mb-6 border-orange-200 shadow-md">
+            <CardHeader className="bg-orange-50 border-b border-orange-100">
+              <CardTitle className="text-xl font-semibold text-orange-800">
+                Création rapide de profil
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <p className="mb-4 text-gray-600">
+                Pour générer des factures, complétez ces informations professionnelles obligatoires.
+                Vous pourrez modifier ces informations plus tard dans les paramètres de votre profil.
+              </p>
+              
+              {error && (
+                <Alert variant="default" className="mb-6 bg-amber-50 text-amber-800 border-amber-200">
+                  <AlertDescription className="text-sm">{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleQuickProfileSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nom professionnel</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Votre nom professionnel" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="professional_title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Titre professionnel</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ostéopathe D.O." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="adeli_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Numéro ADELI</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Votre numéro ADELI" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="siret"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Numéro SIRET</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Votre numéro SIRET" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="pt-4 flex gap-2 justify-end">
+                    <Button onClick={handleRetry} variant="outline" type="button">
+                      Annuler
+                    </Button>
+                    <Button type="submit" disabled={loading}>
+                      {loading ? "Création..." : "Créer mon profil"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+          
+          <div className="flex justify-between">
+            <Button variant="outline" asChild>
+              <Link to="/dashboard">
+                Retour au tableau de bord
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/settings/profile">
+                Gérer mon profil complet
+              </Link>
+            </Button>
+          </div>
         </div>
       </Layout>
     );
@@ -282,9 +450,15 @@ const NewInvoicePage = () => {
                 </div>
               )}
               <div className="mt-4 flex flex-wrap gap-2">
+                <Button 
+                  onClick={() => setShowQuickProfile(true)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  Compléter rapidement mon profil
+                </Button>
                 <Button asChild>
                   <Link to="/settings/profile">
-                    Compléter mon profil
+                    Gérer mon profil complet
                   </Link>
                 </Button>
                 <Button variant="outline" onClick={handleRetry}>
@@ -339,17 +513,35 @@ const NewInvoicePage = () => {
           {osteopath?.adeli_number && <p className="text-green-700">ADELI: {osteopath.adeli_number}</p>}
           {osteopath?.siret && <p className="text-green-700">SIRET: {osteopath.siret}</p>}
         </div>
-        {/* Votre formulaire de facture */}
-        {/* ... */}
+        {/* Formulaire de facture à implémenter */}
+        <Card className="shadow-sm">
+          <CardHeader className="bg-slate-50">
+            <CardTitle>Informations de facturation</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="text-muted-foreground mb-4">
+              Pour créer une facture, sélectionnez un patient et complétez les informations requises.
+            </p>
+            <div className="mb-8">
+              <Button asChild>
+                <Link to="/patients">
+                  Sélectionner un patient
+                </Link>
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p>Le module de facturation sera bientôt disponible.</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
 };
 
-const checkRequiredFields = async () => {
-  // Cette fonction est ajoutée ici pour satisfaire la référence dans l'appel
-  // du handleRetry. Son implémentation est intégrée dans le contexte du 
-  // hook useEffect, mais nous la gardons pour la référence.
-};
+// Cette fonction est ajoutée pour satisfaire la référence dans l'appel
+// du handleRetry. Son implémentation est intégrée dans le contexte du 
+// hook useEffect, mais nous la gardons ici par cohérence de code.
+const checkRequiredFields = async () => {};
 
 export default NewInvoicePage;
