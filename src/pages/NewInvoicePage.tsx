@@ -4,11 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/ui/layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 import { Osteopath, Cabinet } from '@/types';
+
+// Schema de validation pour le formulaire de facture
+const invoiceFormSchema = z.object({
+  includeTVA: z.boolean().default(false),
+});
+
+type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
 
 const NewInvoicePage = () => {
   const navigate = useNavigate();
@@ -17,6 +29,14 @@ const NewInvoicePage = () => {
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [cabinetData, setCabinetData] = useState<Cabinet | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize form with default values
+  const form = useForm<InvoiceFormValues>({
+    resolver: zodResolver(invoiceFormSchema),
+    defaultValues: {
+      includeTVA: false,
+    },
+  });
 
   useEffect(() => {
     const fetchOsteopathData = async () => {
@@ -27,28 +47,43 @@ const NewInvoicePage = () => {
         }
 
         console.log("Tentative de récupération des données de l'ostéopathe...");
-        // Essayer d'abord de récupérer par l'ID de l'ostéopathe s'il existe
-        let osteopathData = null;
         
-        if (user.osteopathId) {
-          osteopathData = await api.getOsteopathById(user.osteopathId);
+        // Récupération directe depuis la table Osteopath
+        const { data: osteoResult, error: osteoError } = await supabase
+          .from("Osteopath")
+          .select("*")
+          .eq("userId", user.id)
+          .maybeSingle();
+        
+        if (osteoError && osteoError.code !== 'PGRST116') {
+          console.error("Erreur lors de la récupération de l'ostéopathe:", osteoError);
+          throw osteoError;
         }
         
-        // Si on ne trouve pas par ID, chercher par userId
-        if (!osteopathData) {
-          const { data: osteoResult, error: osteoError } = await supabase
+        let osteopathData = osteoResult;
+        
+        // Si on ne trouve pas par userId, essayer par l'ID de l'ostéopathe
+        if (!osteopathData && user.osteopathId) {
+          const { data: osteoByIdResult, error: osteoByIdError } = await supabase
             .from("Osteopath")
             .select("*")
-            .eq("userId", user.id)
+            .eq("id", user.osteopathId)
             .single();
             
-          if (osteoError) {
-            console.error("Erreur lors de la récupération de l'ostéopathe:", osteoError);
-            throw osteoError;
+          if (osteoByIdError) {
+            console.error("Erreur lors de la récupération de l'ostéopathe par ID:", osteoByIdError);
+          } else {
+            osteopathData = osteoByIdResult;
           }
-          
-          if (osteoResult) {
-            osteopathData = osteoResult;
+        }
+
+        // Dernière tentative via l'API si les méthodes directes ont échoué
+        if (!osteopathData) {
+          try {
+            console.log("Tentative via l'API...");
+            osteopathData = await api.getOsteopathByUserId(user.id);
+          } catch (apiError) {
+            console.error("Erreur API getOsteopathByUserId:", apiError);
           }
         }
 
@@ -67,7 +102,10 @@ const NewInvoicePage = () => {
           .eq("osteopathId", osteopathData.id)
           .maybeSingle();
 
-        if (cabinetError) throw cabinetError;
+        if (cabinetError && cabinetError.code !== 'PGRST116') {
+          console.error("Erreur lors de la récupération du cabinet:", cabinetError);
+          throw cabinetError;
+        }
         
         if (cabinetResult) {
           setCabinetData(cabinetResult);
@@ -106,6 +144,12 @@ const NewInvoicePage = () => {
 
     fetchOsteopathData();
   }, [user]);
+
+  const onSubmit = (data: InvoiceFormValues) => {
+    console.log("Données du formulaire:", data);
+    // Ici, on pourra ajouter la logique pour créer la facture
+    toast.success("Paramètres de facture enregistrés");
+  };
 
   // Render loading state
   if (loading) {
@@ -176,15 +220,46 @@ const NewInvoicePage = () => {
           </div>
         </Card>
         
+        <Card className="p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Options de facturation</h2>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="includeTVA"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">TVA</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Activer la TVA sur cette facture
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Enregistrer les options</Button>
+            </form>
+          </Form>
+        </Card>
+        
         <Card className="p-6">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Créer une nouvelle facture</h2>
             <p className="text-gray-600">
               Cette fonctionnalité est en cours de développement. Vous pourrez bientôt créer des factures pour vos patients.
             </p>
-            <Button onClick={() => navigate('/invoices')}>
-              Retour aux factures
-            </Button>
+            <div className="flex space-x-4">
+              <Button onClick={() => navigate('/invoices')}>
+                Retour aux factures
+              </Button>
+            </div>
           </div>
         </Card>
       </div>
