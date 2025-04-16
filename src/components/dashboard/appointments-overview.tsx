@@ -57,8 +57,17 @@ export function AppointmentsOverview({
 
   const handleAppointmentClick = (appointmentId: number) => {
     try {
+      // Fix: Assurons-nous que l'ID est un nombre valide
+      if (!appointmentId || isNaN(appointmentId)) {
+        toast.error("ID de rendez-vous invalide");
+        return;
+      }
+      
       console.log(`Navigation vers le rendez-vous #${appointmentId}`);
+      
+      // Naviguer vers la page de détail du rendez-vous avec l'ID
       navigate(`/appointments/${appointmentId}`);
+      
       // Afficher un toast pour confirmer l'action
       toast.info(`Chargement des détails du rendez-vous #${appointmentId}`);
     } catch (error) {

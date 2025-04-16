@@ -20,7 +20,10 @@ export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.getAppointments();
+        const result = await supabaseAppointmentService.getAppointments();
+        // Log pour debugging
+        console.log(`Récupération de ${result?.length || 0} rendez-vous`);
+        return result;
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
         throw error;
@@ -35,7 +38,10 @@ export const appointmentService = {
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.getAppointmentById(id);
+        console.log(`Recherche du rendez-vous avec l'ID: ${id}`);
+        const result = await supabaseAppointmentService.getAppointmentById(id);
+        console.log(`Résultat de la recherche:`, result);
+        return result;
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
         throw error;

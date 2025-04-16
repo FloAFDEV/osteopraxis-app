@@ -55,11 +55,28 @@ const NewInvoicePage = () => {
       // Try to find an existing osteopath for this user
       let existingOsteopath = null;
       try {
-        existingOsteopath = await api.getOsteopathByUserId(user.id);
-        console.log("Résultat de la recherche d'ostéopathe:", existingOsteopath);
+        // Essayons d'abord par osteopathId s'il existe
+        if (user.osteopathId) {
+          existingOsteopath = await api.getOsteopathById(user.osteopathId);
+        } 
+        
+        // Si on ne trouve pas par osteopathId, essayons par userId
+        if (!existingOsteopath) {
+          existingOsteopath = await supabase
+            .from("Osteopath")
+            .select("*")
+            .eq("userId", user.id)
+            .single()
+            .then(({ data, error }) => {
+              if (error) throw error;
+              return data;
+            });
+            
+          console.log("Résultat de la recherche d'ostéopathe par userId:", existingOsteopath);
+        }
       } catch (error) {
-        console.error("Erreur lors de la recherche par userId:", error);
-        // We'll handle this below - we'll offer to create a profile
+        console.error("Erreur lors de la recherche d'ostéopathe:", error);
+        // Nous allons offrir de créer un profil
       }
 
       if (existingOsteopath) {
@@ -82,15 +99,23 @@ const NewInvoicePage = () => {
         
         setMissingFields(missing);
         
-        // If we have the required fields, proceed to get or create a cabinet
+        // Si nous avons les champs requis, récupérer ou créer un cabinet
         if (hasAll) {
           try {
-            const cabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
+            // Récupérer les cabinets de l'ostéopathe
+            const cabinets = await supabase
+              .from("Cabinet")
+              .select("*")
+              .eq("osteopathId", existingOsteopath.id)
+              .then(({ data, error }) => {
+                if (error) throw error;
+                return data;
+              });
             
             if (cabinets && cabinets.length > 0) {
               setCabinetData(cabinets[0]);
             } else {
-              // Create a default cabinet if none exists
+              // Créer un cabinet par défaut si aucun n'existe
               const newCabinet = {
                 name: "Cabinet par défaut",
                 address: "Adresse à compléter",
@@ -98,10 +123,18 @@ const NewInvoicePage = () => {
                 phone: "",
                 imageUrl: null,
                 logoUrl: null,
-                email: null
+                email: null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
               };
               
-              const createdCabinet = await api.createCabinet(newCabinet);
+              const { data: createdCabinet, error } = await supabase
+                .from("Cabinet")
+                .insert(newCabinet)
+                .select()
+                .single();
+              
+              if (error) throw error;
               setCabinetData(createdCabinet);
             }
           } catch (cabinetError) {
@@ -142,18 +175,57 @@ const NewInvoicePage = () => {
       console.log("Vérification du profil existant avec les valeurs:", formValues);
       
       // Rechercher l'ostéopathe existant par userId
-      const existingOsteopath = await api.getOsteopathByUserId(user?.id || '');
+      let existingOsteopath = null;
+      try {
+        const { data, error } = await supabase
+          .from("Osteopath")
+          .select("*")
+          .eq("userId", user?.id || '')
+          .maybeSingle();
+        
+        if (!error && data) {
+          existingOsteopath = data;
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification d'ostéopathe existant:", error);
+      }
       
       if (existingOsteopath) {
-        console.log("Ostéopathe existant trouvé:", existingOsteopath);
-        setOsteopath(existingOsteopath);
+        console.log("Mise à jour de l'ostéopathe existant:", existingOsteopath);
+        
+        // Mettre à jour l'ostéopathe existant
+        const now = new Date().toISOString();
+        const updatedData = {
+          name: formValues.name || existingOsteopath.name,
+          professional_title: formValues.professional_title || existingOsteopath.professional_title,
+          adeli_number: formValues.adeli_number || existingOsteopath.adeli_number,
+          siret: formValues.siret || existingOsteopath.siret,
+          ape_code: formValues.ape_code || existingOsteopath.ape_code,
+          updatedAt: now
+        };
+        
+        const { data: updatedOsteo, error } = await supabase
+          .from("Osteopath")
+          .update(updatedData)
+          .eq("id", existingOsteopath.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setOsteopath(updatedOsteo);
         setHasRequiredFields(true);
         setMissingFields([]);
         setError(null);
         setShowQuickProfile(false);
         
         // Récupérer ou créer un cabinet par défaut
-        const cabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
+        const { data: cabinets, error: cabinetError } = await supabase
+          .from("Cabinet")
+          .select("*")
+          .eq("osteopathId", existingOsteopath.id);
+        
+        if (cabinetError) throw cabinetError;
         
         if (cabinets && cabinets.length > 0) {
           setCabinetData(cabinets[0]);
@@ -165,13 +237,22 @@ const NewInvoicePage = () => {
             phone: "",
             imageUrl: null,
             logoUrl: null,
-            email: null
+            email: null,
+            createdAt: now,
+            updatedAt: now
           };
           
-          const createdCabinet = await api.createCabinet(newCabinet);
+          const { data: createdCabinet, error } = await supabase
+            .from("Cabinet")
+            .insert(newCabinet)
+            .select()
+            .single();
+          
+          if (error) throw error;
           setCabinetData(createdCabinet);
         }
         
+        toast.success("Profil mis à jour avec succès!");
         return;
       }
 
@@ -184,6 +265,7 @@ const NewInvoicePage = () => {
         siret: formValues.siret,
         ape_code: formValues.ape_code,
         userId: user?.id,
+        createdAt: now,
         updatedAt: now
       };
       
@@ -214,11 +296,19 @@ const NewInvoicePage = () => {
         phone: "",
         imageUrl: null,
         logoUrl: null,
-        email: null
+        email: null,
+        createdAt: now,
+        updatedAt: now
       };
       
-      const createdCabinet = await api.createCabinet(newCabinet);
-      setCabinetData(createdCabinet);
+      const createdCabinet = await supabase
+        .from("Cabinet")
+        .insert(newCabinet)
+        .select()
+        .single();
+      
+      if (createdCabinet.error) throw createdCabinet.error;
+      setCabinetData(createdCabinet.data);
       
       // Mettre à jour le profil utilisateur avec l'ID de l'ostéopathe
       await supabase
