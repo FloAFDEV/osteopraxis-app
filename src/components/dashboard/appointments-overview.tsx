@@ -65,8 +65,8 @@ export function AppointmentsOverview({
       
       console.log(`Navigation vers le rendez-vous #${appointmentId}`);
       
-      // Naviguer vers la page de détail du rendez-vous avec l'ID
-      navigate(`/appointments/${appointmentId}`);
+      // Naviguer vers la page d'édition du rendez-vous avec l'ID
+      navigate(`/appointments/${appointmentId}/edit`);
       
       // Afficher un toast pour confirmer l'action
       toast.info(`Chargement des détails du rendez-vous #${appointmentId}`);

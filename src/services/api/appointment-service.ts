@@ -1,4 +1,3 @@
-
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -20,6 +19,7 @@ export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
+        console.log("Tentative de récupération des rendez-vous depuis Supabase...");
         const result = await supabaseAppointmentService.getAppointments();
         // Log pour debugging
         console.log(`Récupération de ${result?.length || 0} rendez-vous`);

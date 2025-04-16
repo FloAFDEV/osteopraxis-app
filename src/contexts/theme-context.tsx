@@ -11,15 +11,24 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Initialize state with a function instead of a direct value
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check for saved theme preference or use system preference
-    const savedTheme = localStorage.getItem("theme") as Theme;
-    if (savedTheme) return savedTheme;
-    
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    // Use window check to avoid SSR issues
+    if (typeof window !== "undefined") {
+      // Check for saved theme preference or use system preference
+      const savedTheme = localStorage.getItem("theme") as Theme;
+      if (savedTheme) return savedTheme;
+      
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    // Default to light if window is not available
+    return "light";
   });
 
   useEffect(() => {
+    // Only run this effect on the client side
+    if (typeof window === "undefined") return;
+    
     // Update localStorage and document class when theme changes
     localStorage.setItem("theme", theme);
     
