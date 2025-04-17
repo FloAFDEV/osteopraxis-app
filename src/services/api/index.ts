@@ -36,6 +36,10 @@ export const api = {
   updateOsteopath: osteopathService.updateOsteopath,
   createOsteopath: osteopathService.createOsteopath,
   
+  // Méthodes pour supprimer des entités
+  deletePatient: patientService.deletePatient,
+  deleteAppointment: appointmentService.deleteAppointment,
+  
   // Service de facturation (directement depuis Supabase)
   getInvoices: async () => {
     if (USE_SUPABASE) {
@@ -91,3 +95,5 @@ export const api = {
     throw new Error("Fonctionnalité de facturation non disponible en mode local");
   }
 };
+
+export { supabaseInvoiceService };

@@ -83,5 +83,29 @@ export const patientService = {
       return patients[index];
     }
     throw new Error(`Patient with id ${patient.id} not found`);
+  },
+
+  async deletePatient(id: number): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        const { error } = await supabasePatientService.deletePatient(id);
+        if (error) {
+          throw error;
+        }
+        return true;
+      } catch (error) {
+        console.error("Erreur Supabase deletePatient:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(300);
+    const index = patients.findIndex(p => p.id === id);
+    if (index !== -1) {
+      patients.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 };

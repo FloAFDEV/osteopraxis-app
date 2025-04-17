@@ -1,4 +1,3 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -208,6 +207,25 @@ export const patientService = {
     }
 
     return adaptPatientFromSupabase(data);
+  },
+  
+  async deletePatient(id: number): Promise<{ error: any | null }> {
+    try {
+      const { error } = await supabase
+        .from('Patient')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        console.error('Error deleting patient:', error);
+        return { error };
+      }
+      
+      return { error: null };
+    } catch (error) {
+      console.error('Exception while deleting patient:', error);
+      return { error };
+    }
   }
 };
 

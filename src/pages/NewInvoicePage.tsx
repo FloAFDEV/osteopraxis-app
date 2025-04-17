@@ -44,17 +44,20 @@ const NewInvoicePage = () => {
   });
 
   useEffect(() => {
+    // Fonction pour récupérer les données professionnelles
     const fetchProfessionalData = async () => {
+      if (loading === false) return; // Éviter les appels multiples
+
       try {
         if (!user?.id) {
           setError("Utilisateur non authentifié");
+          setLoading(false);
           return;
         }
 
-        setLoading(true);
         setError(null);
         
-        // Récupérer d'abord les informations du cabinet, qui sont souvent plus complètes
+        // Récupérer d'abord les informations du cabinet
         const { data: cabinets, error: cabinetError } = await supabase
           .from("Cabinet")
           .select("*")
@@ -82,21 +85,6 @@ const NewInvoicePage = () => {
             }
           }
         }
-        
-        // Si nous n'avons pas trouvé d'ostéopathe via le cabinet, essayons directement
-        if (!osteopath) {
-          const { data: osteopathData, error: osteoError } = await supabase
-            .from("Osteopath")
-            .select("*")
-            .limit(1);
-          
-          if (osteoError) {
-            console.warn("Erreur lors de la récupération directe de l'ostéopathe:", osteoError);
-          } else if (osteopathData && osteopathData.length > 0) {
-            console.log("Ostéopathe trouvé directement:", osteopathData[0]);
-            setOsteopath(osteopathData[0]);
-          }
-        }
 
       } catch (error) {
         console.error("Erreur lors de la récupération des données:", error);
@@ -108,7 +96,7 @@ const NewInvoicePage = () => {
     };
 
     fetchProfessionalData();
-  }, [user, osteopath]);
+  }, [user, loading]); // Ne pas inclure osteopath dans les dépendances pour éviter la boucle
 
   const onSubmit = async (data: InvoiceFormValues) => {
     console.log("Données du formulaire:", data);
@@ -174,6 +162,7 @@ const NewInvoicePage = () => {
     setOsteopath(null);
     setCabinetData(null);
     setError(null);
+    setLoading(true); // Réactiver le chargement pour déclencher le useEffect
   };
 
   // Render loading state

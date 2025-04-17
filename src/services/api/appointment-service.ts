@@ -1,29 +1,13 @@
-import { Appointment } from "@/types";
+import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-
-// Données simulées pour les rendez-vous
-const appointments: Appointment[] = [
-  {
-    id: 1,
-    date: "2025-01-23 09:00:00",
-    reason: "Consultation générale",
-    patientId: 1,
-    status: "SCHEDULED",
-    notificationSent: false
-  },
-  // Les autres rendez-vous fictifs sont maintenus mais omis pour plus de lisibilité
-];
+import { supabase } from "@/integrations/supabase/client";
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        console.log("Tentative de récupération des rendez-vous depuis Supabase...");
-        const result = await supabaseAppointmentService.getAppointments();
-        // Log pour debugging
-        console.log(`Récupération de ${result?.length || 0} rendez-vous`);
-        return result;
+        return await supabaseAppointmentService.getAppointments();
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
         throw error;
@@ -32,16 +16,13 @@ export const appointmentService = {
     
     // Fallback: code simulé existant
     await delay(300);
-    return [...appointments];
+    return [];
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        console.log(`Recherche du rendez-vous avec l'ID: ${id}`);
-        const result = await supabaseAppointmentService.getAppointmentById(id);
-        console.log(`Résultat de la recherche:`, result);
-        return result;
+        return await supabaseAppointmentService.getAppointmentById(id);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
         throw error;
@@ -50,7 +31,7 @@ export const appointmentService = {
     
     // Fallback: code simulé existant
     await delay(200);
-    return appointments.find(appointment => appointment.id === id);
+    return undefined;
   },
 
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
@@ -64,8 +45,8 @@ export const appointmentService = {
     }
     
     // Fallback: code simulé existant
-    await delay(200);
-    return appointments.filter(appointment => appointment.patientId === patientId);
+    await delay(300);
+    return [];
   },
 
   async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
@@ -80,21 +61,18 @@ export const appointmentService = {
     
     // Fallback: code simulé existant
     await delay(400);
-    const newAppointment = {
+    const now = new Date().toISOString();
+    return {
       ...appointment,
-      id: appointments.length + 1,
-    };
-    appointments.push(newAppointment);
-    return newAppointment;
+      id: Math.floor(Math.random() * 1000),
+      notificationSent: false
+    } as Appointment;
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        console.log("Updating appointment with ID:", id, "Data:", appointment);
-        const result = await supabaseAppointmentService.updateAppointment(id, appointment);
-        console.log("Update result:", result);
-        return result;
+        return await supabaseAppointmentService.updateAppointment(id, appointment);
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
         throw error;
@@ -103,31 +81,47 @@ export const appointmentService = {
     
     // Fallback: code simulé existant
     await delay(300);
-    const index = appointments.findIndex(a => a.id === id);
-    if (index !== -1) {
-      appointments[index] = { ...appointments[index], ...appointment };
-      return appointments[index];
-    }
     return undefined;
   },
 
-  async deleteAppointment(id: number): Promise<boolean> {
+  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.deleteAppointment(id);
+        return await supabaseAppointmentService.updateAppointmentStatus(id, status);
       } catch (error) {
-        console.error("Erreur Supabase deleteAppointment:", error);
+        console.error("Erreur Supabase updateAppointmentStatus:", error);
         throw error;
       }
     }
     
     // Fallback: code simulé existant
     await delay(300);
-    const index = appointments.findIndex(a => a.id === id);
-    if (index !== -1) {
-      appointments.splice(index, 1);
-      return true;
+    return undefined;
+  },
+  
+  async deleteAppointment(id: number): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        // Utiliser le service Supabase pour la suppression
+        const { error } = await supabase
+          .from("Appointment")
+          .delete()
+          .eq("id", id);
+          
+        if (error) {
+          console.error("Erreur lors de la suppression du rendez-vous:", error);
+          throw error;
+        }
+        
+        return true;
+      } catch (error) {
+        console.error("Erreur deleteAppointment:", error);
+        throw error;
+      }
     }
-    return false;
-  }
+    
+    // Fallback: simuler la suppression locale
+    await delay(300);
+    return true;
+  },
 };
