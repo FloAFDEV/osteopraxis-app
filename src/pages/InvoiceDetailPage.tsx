@@ -160,9 +160,13 @@ const InvoiceDetailPage = () => {
     <Layout>
       <div className="max-w-4xl mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">
-            Facture #{invoice?.id.toString().padStart(4, "0")}
-          </h1>
+           <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
+               Facture #{invoice?.id.toString().padStart(4, "0")}
+            </span>
+          </h1>          
+         
           <div className="space-x-2">
             <Button 
               onClick={() => handlePrint()} 
