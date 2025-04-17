@@ -209,12 +209,8 @@ const NewInvoicePage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto py-6 md:py-10 px-2 md:px-0">
-<h1 className="text-3xl font-bold flex items-center gap-3">
-  <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
-    Factures
-  </span>
-</h1>        
+        <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">Nouvelle Facture</h1>
+        
         <Card className="p-4 md:p-6 mb-4 md:mb-6">
           <h2 className="text-xl font-semibold mb-3 md:mb-4">Information du praticien</h2>
           <div className="grid md:grid-cols-2 gap-3 md:gap-4">
