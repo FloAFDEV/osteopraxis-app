@@ -9,7 +9,7 @@ const DashboardPage = () => {
     <Layout>
       <GradientBackground 
         variant="subtle" 
-        className="p-6 rounded-xl animate-fade-in"
+        className="p-3 md:p-6 rounded-xl animate-fade-in"
       >
         <Dashboard />
       </GradientBackground>

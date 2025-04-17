@@ -69,6 +69,7 @@ const NewInvoicePage = () => {
         
         if (!osteopathData) {
           // Créer un profil ostéopathe par défaut si aucun n'est trouvé
+          const now = new Date().toISOString();
           const defaultOsteoData = {
             name: user.email?.split('@')[0] || "Ostéopathe",
             professional_title: "Ostéopathe D.O.",
@@ -76,6 +77,8 @@ const NewInvoicePage = () => {
             siret: null,
             ape_code: "8690F",
             userId: user.id,
+            updatedAt: now,
+            createdAt: now
           };
           
           const { data: newOsteo, error: createError } = await supabase
@@ -97,12 +100,12 @@ const NewInvoicePage = () => {
         }
 
         // Récupérer les données du cabinet
-        if (osteopath?.id) {
+        if (osteopathData?.id) {
           try {
             const { data: cabinetResults, error: cabinetError } = await supabase
               .from("Cabinet")
               .select("*")
-              .eq("osteopathId", osteopath.id)
+              .eq("osteopathId", osteopathData.id)
               .maybeSingle();
               
             if (cabinetError) {
@@ -236,12 +239,12 @@ const NewInvoicePage = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-6">Nouvelle Facture</h1>
+      <div className="max-w-4xl mx-auto py-6 md:py-10 px-2 md:px-0">
+        <h1 className="text-3xl font-bold mb-4 md:mb-6">Nouvelle Facture</h1>
         
-        <Card className="p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Information du praticien</h2>
-          <div className="grid md:grid-cols-2 gap-4">
+        <Card className="p-4 md:p-6 mb-4 md:mb-6">
+          <h2 className="text-xl font-semibold mb-3 md:mb-4">Information du praticien</h2>
+          <div className="grid md:grid-cols-2 gap-3 md:gap-4">
             <div>
               <label className="text-sm text-gray-500">Nom / Raison sociale</label>
               <p className="font-medium">{osteopath?.name}</p>
@@ -277,10 +280,10 @@ const NewInvoicePage = () => {
           </div>
         </Card>
         
-        <Card className="p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Création de facture</h2>
+        <Card className="p-4 md:p-6 mb-4 md:mb-6">
+          <h2 className="text-xl font-semibold mb-3 md:mb-4">Création de facture</h2>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
               <FormField
                 control={form.control}
                 name="amount"
@@ -305,7 +308,7 @@ const NewInvoicePage = () => {
                 control={form.control}
                 name="includeTVA"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 md:p-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base">TVA</FormLabel>
                       <FormDescription>
