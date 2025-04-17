@@ -55,25 +55,61 @@ const NewInvoicePage = () => {
         setLoading(true);
         setError(null);
         
-        // Utilisation directe de l'API
-        const osteopathResult = await api.getOsteopathByUserId(user.id);
+        // Récupération directe via Supabase plutôt que via l'edge function
+        const { data: osteopathData, error: osteoError } = await supabase
+          .from("Osteopath")
+          .select("*")
+          .eq("userId", user.id)
+          .maybeSingle();
         
-        if (!osteopathResult) {
-          setError("Aucun profil ostéopathe trouvé pour cet utilisateur");
-          setLoading(false);
-          return;
+        if (osteoError) {
+          console.error("Erreur lors de la récupération de l'ostéopathe:", osteoError);
+          throw new Error("Erreur lors de la récupération des données");
         }
         
-        console.log("Données ostéopathe trouvées:", osteopathResult);
-        setOsteopath(osteopathResult);
+        if (!osteopathData) {
+          // Créer un profil ostéopathe par défaut si aucun n'est trouvé
+          const defaultOsteoData = {
+            name: user.email?.split('@')[0] || "Ostéopathe",
+            professional_title: "Ostéopathe D.O.",
+            adeli_number: null,
+            siret: null,
+            ape_code: "8690F",
+            userId: user.id,
+          };
+          
+          const { data: newOsteo, error: createError } = await supabase
+            .from("Osteopath")
+            .insert(defaultOsteoData)
+            .select()
+            .single();
+            
+          if (createError) {
+            console.error("Erreur lors de la création de l'ostéopathe:", createError);
+            throw new Error("Impossible de créer le profil ostéopathe");
+          }
+          
+          console.log("Nouveau profil ostéopathe créé:", newOsteo);
+          setOsteopath(newOsteo);
+        } else {
+          console.log("Données ostéopathe trouvées:", osteopathData);
+          setOsteopath(osteopathData);
+        }
 
         // Récupérer les données du cabinet
-        if (osteopathResult.id) {
+        if (osteopath?.id) {
           try {
-            const cabinetResult = await api.getCabinetsByOsteopathId(osteopathResult.id);
-            if (cabinetResult && cabinetResult.length > 0) {
-              console.log("Cabinet trouvé:", cabinetResult[0]);
-              setCabinetData(cabinetResult[0]);
+            const { data: cabinetResults, error: cabinetError } = await supabase
+              .from("Cabinet")
+              .select("*")
+              .eq("osteopathId", osteopath.id)
+              .maybeSingle();
+              
+            if (cabinetError) {
+              console.error("Erreur lors de la récupération du cabinet:", cabinetError);
+            } else if (cabinetResults) {
+              console.log("Cabinet trouvé:", cabinetResults);
+              setCabinetData(cabinetResults);
             } else {
               console.log("Aucun cabinet trouvé pour cet ostéopathe");
             }
@@ -134,7 +170,16 @@ const NewInvoicePage = () => {
         paymentStatus: "PENDING"
       } as Omit<Invoice, 'id'>;
       
-      const invoice = await api.createInvoice(invoiceData);
+      // Utilisation directe de Supabase pour la création de facture
+      const { data: invoice, error: invoiceError } = await supabase
+        .from("Invoice")
+        .insert(invoiceData)
+        .select()
+        .single();
+        
+      if (invoiceError) {
+        throw new Error(`Erreur lors de la création de la facture: ${invoiceError.message}`);
+      }
       
       toast.success("Facture créée avec succès");
       

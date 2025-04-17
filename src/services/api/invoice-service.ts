@@ -2,7 +2,7 @@
 import { Invoice, PaymentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
-import { supabase } from '@/integrations/supabase/client'; // Add this import
+import { supabase } from '@/integrations/supabase/client';
 
 export const invoiceService = {
   async getInvoices(): Promise<Invoice[]> {
