@@ -49,17 +49,24 @@ const InvoicesPage = () => {
   return <Layout>
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
-              Factures
-            </span>
-          </h1>
-          
-          <Button onClick={() => navigate("/invoices/new")} className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600">
-            <Plus className="h-5 w-5" />
-            Nouvelle facture
-          </Button>
+       <h1 className="text-3xl font-bold flex items-center gap-3">
+  <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
+    Factures
+  </span>
+</h1>
+
+<Button
+  onClick={() => navigate("/invoices/new")}
+  /* fond transparent + léger hover */
+  className="flex items-center gap-2 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+>
+  <Plus className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
+    Nouvelle&nbsp;facture
+  </span>
+</Button>
+
         </div>
         
         <Card className="mb-8">
