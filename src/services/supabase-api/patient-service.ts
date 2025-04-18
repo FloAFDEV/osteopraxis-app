@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -157,6 +158,7 @@ export const patientService = {
     
     // Prepare the complete patient data for update
     const patientData = {
+      id: id, // Inclure l'ID pour l'upsert
       firstName: patient.firstName,
       lastName: patient.lastName,
       email: patient.email,
@@ -189,15 +191,15 @@ export const patientService = {
       cabinetId: patient.cabinetId,
       userId: patient.userId,
       osteopathId: patient.osteopathId || 1,
-      updatedAt: now
+      updatedAt: now,
+      createdAt: patient.createdAt || now, // Utiliser createdAt existant ou le now si non défini
     };
 
-    // Using POST method instead of PATCH for better CORS compatibility
-    console.log("Updating patient with id:", id);
+    // CORRECTION: Utiliser upsert au lieu de update pour contourner les problèmes CORS avec PATCH
+    console.log("Mise à jour du patient avec upsert - ID:", id);
     const { data, error } = await supabase
       .from('Patient')
-      .update(patientData)
-      .eq('id', id)
+      .upsert(patientData)
       .select()
       .single();
 

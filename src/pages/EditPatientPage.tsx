@@ -58,12 +58,15 @@ const EditPatientPage = () => {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
       }
 
-      // Use the patientService updatePatient method
-      const result = await patientService.updatePatient({
+      // Ensure we're sending all required data for the patient
+      const patientToUpdate = {
         ...patient,
         ...updatedData,
         updatedAt: new Date().toISOString()
-      });
+      };
+
+      console.log("Sending patient data to API:", patientToUpdate);
+      const result = await patientService.updatePatient(patientToUpdate);
 
       toast.success("Patient mis à jour avec succès");
       navigate('/patients');
