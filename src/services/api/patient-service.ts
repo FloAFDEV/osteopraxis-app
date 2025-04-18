@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
+import { delay, USE_SUPABASE, SIMULATE_AUTH } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
 
 // Empty array for patients to remove fictitious data
@@ -13,7 +13,12 @@ export const patientService = {
         return await supabasePatientService.getPatients();
       } catch (error) {
         console.error("Erreur Supabase getPatients:", error);
-        throw error; // Let the error propagate up for proper handling
+        if (SIMULATE_AUTH) {
+          console.warn("Mode développement activé: utilisation des données simulées");
+          await delay(300);
+          return [...patients];
+        }
+        throw error;
       }
     }
     
@@ -28,7 +33,12 @@ export const patientService = {
         return await supabasePatientService.getPatientById(id);
       } catch (error) {
         console.error("Erreur Supabase getPatientById:", error);
-        throw error; // Let the error propagate up for proper handling
+        if (SIMULATE_AUTH) {
+          console.warn("Mode développement activé: utilisation des données simulées");
+          await delay(200);
+          return patients.find(patient => patient.id === id);
+        }
+        throw error;
       }
     }
     
@@ -44,6 +54,19 @@ export const patientService = {
         return createdPatient;
       } catch (error) {
         console.error("Erreur Supabase createPatient:", error);
+        if (SIMULATE_AUTH) {
+          console.warn("Mode développement activé: création simulée du patient");
+          await delay(400);
+          const now = new Date().toISOString();
+          const newPatient = {
+            ...patient,
+            id: patients.length + 1,
+            createdAt: now,
+            updatedAt: now,
+          } as Patient;
+          patients.push(newPatient);
+          return newPatient;
+        }
         throw error;
       }
     }
@@ -91,8 +114,30 @@ export const patientService = {
           }
         }
         
-        const updatedPatient = await supabasePatientService.updatePatient(patient);
-        return updatedPatient;
+        try {
+          const updatedPatient = await supabasePatientService.updatePatient(patient);
+          return updatedPatient;
+        } catch (error: any) {
+          // Check for permission error in development mode
+          if (SIMULATE_AUTH && error?.code === '42501') {
+            console.warn("Mode développement activé: mise à jour simulée du patient");
+            // Fallback in dev mode when permission error occurs
+            const index = patients.findIndex(p => p.id === patient.id);
+            const updatedPatient = { 
+              ...patient,
+              updatedAt: new Date().toISOString() 
+            };
+            
+            if (index !== -1) {
+              patients[index] = updatedPatient;
+            } else {
+              patients.push(updatedPatient);
+            }
+            
+            return updatedPatient;
+          }
+          throw error;
+        }
       } catch (error) {
         console.error("Erreur Supabase updatePatient:", error);
         throw error;
@@ -118,6 +163,16 @@ export const patientService = {
       try {
         const { error } = await supabasePatientService.deletePatient(id);
         if (error) {
+          // Check for permission error in development mode
+          if (SIMULATE_AUTH && error?.code === '42501') {
+            console.warn("Mode développement activé: suppression simulée du patient");
+            const index = patients.findIndex(p => p.id === id);
+            if (index !== -1) {
+              patients.splice(index, 1);
+              return true;
+            }
+            return false;
+          }
           throw error;
         }
         return true;
