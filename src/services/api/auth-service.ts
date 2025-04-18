@@ -21,9 +21,7 @@ const users: User[] = [
 let authState: AuthState = {
   user: null,
   isAuthenticated: false,
-  token: null,
-  loading: false,
-  message: null
+  token: null
 };
 
 export const authService = {
@@ -64,9 +62,7 @@ export const authService = {
     authState = {
       user: newUser,
       isAuthenticated: true,
-      token,
-      loading: false,
-      message: null
+      token
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));
@@ -97,9 +93,7 @@ export const authService = {
     authState = {
       user,
       isAuthenticated: true,
-      token,
-      loading: false,
-      message: null
+      token
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));
@@ -136,9 +130,7 @@ export const authService = {
     authState = {
       user: null,
       isAuthenticated: false,
-      token: null,
-      loading: false,
-      message: null
+      token: null
     };
     
     localStorage.removeItem("authState");
@@ -159,21 +151,13 @@ export const authService = {
     
     if (storedAuth) {
       try {
-        const parsedState = JSON.parse(storedAuth);
-        // Ensure loading and message properties exist
-        authState = {
-          ...parsedState,
-          loading: false,
-          message: parsedState.message || null
-        };
+        authState = JSON.parse(storedAuth);
       } catch (e) {
         console.error("Failed to parse stored auth state", e);
         authState = {
           user: null,
           isAuthenticated: false,
-          token: null,
-          loading: false,
-          message: null
+          token: null
         };
       }
     }

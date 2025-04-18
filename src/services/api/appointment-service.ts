@@ -1,59 +1,23 @@
-import { Appointment } from "@/types";
-import { delay, USE_SUPABASE, USE_FALLBACK } from "./config";
-import { supabaseAppointmentService } from "../supabase-api/appointment-service";
 
-// Données simulées pour les rendez-vous
-const simulatedAppointments: Appointment[] = [
-  {
-    id: 1,
-    date: new Date().toISOString(),
-    reason: "Douleur lombaire",
-    status: "SCHEDULED",
-    notificationSent: true,
-    patientId: 1
-  },
-  {
-    id: 2,
-    date: new Date(Date.now() + 86400000).toISOString(), // demain
-    reason: "Suivi général",
-    status: "SCHEDULED",
-    notificationSent: false,
-    patientId: 2
-  },
-  {
-    id: 3,
-    date: new Date(Date.now() + 172800000).toISOString(), // après-demain
-    reason: "Douleurs cervicales",
-    status: "SCHEDULED",
-    notificationSent: false,
-    patientId: 3
-  }
-];
+import { Appointment, AppointmentStatus } from "@/types";
+import { delay, USE_SUPABASE } from "./config";
+import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+import { supabase } from "@/integrations/supabase/client";
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        const appointments = await supabaseAppointmentService.getAppointments();
-        console.log("Retrieved appointments from Supabase:", appointments.length);
-        return appointments;
+        return await supabaseAppointmentService.getAppointments();
       } catch (error) {
-        console.error("Error in getAppointments from Supabase:", error);
-        
-        // Si le mode fallback est activé, utiliser les données simulées
-        if (USE_FALLBACK) {
-          console.log("Fallback: Returning simulated appointments data");
-          await delay(300);
-          return [...simulatedAppointments];
-        }
+        console.error("Erreur Supabase getAppointments:", error);
         throw error;
       }
     }
     
-    // Mode local: utiliser directement les données simulées
-    console.log("Using local simulated appointment data");
+    // Fallback: code simulé existant
     await delay(300);
-    return [...simulatedAppointments];
+    return [];
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
@@ -62,75 +26,104 @@ export const appointmentService = {
         return await supabaseAppointmentService.getAppointmentById(id);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
-        if (USE_FALLBACK) {
-          await delay(200);
-          return simulatedAppointments.find(appointment => appointment.id === id);
-        }
         throw error;
       }
     }
+    
+    // Fallback: code simulé existant
     await delay(200);
-    return simulatedAppointments.find(appointment => appointment.id === id);
+    return undefined;
   },
 
-  async createAppointment(appointment: Omit<Appointment, 'id' | 'notificationSent'>): Promise<Appointment> {
+  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        const createdAppointment = await supabaseAppointmentService.createAppointment(appointment);
-        return createdAppointment;
+        return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
+      } catch (error) {
+        console.error("Erreur Supabase getAppointmentsByPatientId:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(300);
+    return [];
+  },
+
+  async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.createAppointment(appointment);
       } catch (error) {
         console.error("Erreur Supabase createAppointment:", error);
         throw error;
       }
     }
+    
+    // Fallback: code simulé existant
     await delay(400);
-    const newAppointment = {
+    const now = new Date().toISOString();
+    return {
       ...appointment,
-      id: simulatedAppointments.length + 1,
+      id: Math.floor(Math.random() * 1000),
       notificationSent: false
     } as Appointment;
-    simulatedAppointments.push(newAppointment);
-    return newAppointment;
   },
 
-  async updateAppointment(appointment: Appointment): Promise<Appointment> {
+  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        const updatedAppointment = await supabaseAppointmentService.updateAppointment(appointment);
-        return updatedAppointment;
+        return await supabaseAppointmentService.updateAppointment(id, appointment);
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
         throw error;
       }
     }
+    
+    // Fallback: code simulé existant
     await delay(300);
-    const index = simulatedAppointments.findIndex(a => a.id === appointment.id);
-    if (index !== -1) {
-      simulatedAppointments[index] = { ...simulatedAppointments[index], ...appointment };
-      return simulatedAppointments[index];
-    }
-    throw new Error(`Appointment with id ${appointment.id} not found`);
+    return undefined;
   },
 
-  async deleteAppointment(id: number): Promise<boolean> {
+  // Méthode mise à jour pour utiliser updateAppointment au lieu de updateAppointmentStatus
+  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        const { error } = await supabaseAppointmentService.deleteAppointment(id);
-        if (error) {
-          throw error;
-        }
-        return true;
+        return await this.updateAppointment(id, { status });
       } catch (error) {
-        console.error("Erreur Supabase deleteAppointment:", error);
+        console.error("Erreur Supabase updateAppointmentStatus:", error);
         throw error;
       }
     }
+    
+    // Fallback: code simulé existant
     await delay(300);
-    const index = simulatedAppointments.findIndex(a => a.id === id);
-    if (index !== -1) {
-      simulatedAppointments.splice(index, 1);
-      return true;
+    return undefined;
+  },
+  
+  async deleteAppointment(id: number): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        // Utiliser le service Supabase pour la suppression
+        const { error } = await supabase
+          .from("Appointment")
+          .delete()
+          .eq("id", id);
+          
+        if (error) {
+          console.error("Erreur lors de la suppression du rendez-vous:", error);
+          throw error;
+        }
+        
+        return true;
+      } catch (error) {
+        console.error("Erreur deleteAppointment:", error);
+        throw error;
+      }
     }
-    return false;
-  }
+    
+    // Fallback: simuler la suppression locale
+    await delay(300);
+    return true;
+  },
 };

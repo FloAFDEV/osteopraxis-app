@@ -1,64 +1,26 @@
+
 import { Osteopath } from "@/types";
-import { delay, USE_SUPABASE, USE_FALLBACK } from "./config";
+import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
 import { supabase } from '@/integrations/supabase/client';
 
-// Données simulées pour les ostéopathes
-const simulatedOsteopaths: Osteopath[] = [
-  {
-    id: 1,
-    name: "Dr. Martin Dubois",
-    professional_title: "Ostéopathe D.O.",
-    adeli_number: "123456789",
-    siret: "12345678901234",
-    ape_code: "8690F",
-    userId: "user-123",
-    createdAt: "2023-01-01T00:00:00Z",
-    updatedAt: "2023-01-01T00:00:00Z"
-  }
-];
-
 export const osteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseOsteopathService.getOsteopaths();
-      } catch (error) {
-        console.error("Erreur Supabase getOsteopaths:", error);
-        
-        // Fallback sur données simulées
-        if (USE_FALLBACK) {
-          await delay(200);
-          return [...simulatedOsteopaths];
-        }
-        throw error;
-      }
+    try {
+      return await supabaseOsteopathService.getOsteopaths();
+    } catch (error) {
+      console.error("Erreur Supabase getOsteopaths:", error);
+      throw error; // Propagation de l'erreur au lieu de fallback
     }
-    
-    // Mode local
-    await delay(200);
-    return [...simulatedOsteopaths];
   },
 
   async getOsteopathById(id: number): Promise<Osteopath | undefined> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseOsteopathService.getOsteopathById(id);
-      } catch (error) {
-        console.error("Erreur Supabase getOsteopathById:", error);
-        
-        // Fallback sur données simulées
-        if (USE_FALLBACK) {
-          await delay(200);
-          return simulatedOsteopaths.find(o => o.id === id);
-        }
-        throw error;
-      }
+    try {
+      return await supabaseOsteopathService.getOsteopathById(id);
+    } catch (error) {
+      console.error("Erreur Supabase getOsteopathById:", error);
+      throw error; // Propagation de l'erreur au lieu de fallback
     }
-    
-    // Mode local
-    await delay(200);
-    return simulatedOsteopaths.find(o => o.id === id);
   },
   
   async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {

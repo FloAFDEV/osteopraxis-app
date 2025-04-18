@@ -7,7 +7,6 @@ import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 
 const NewAppointmentPage = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -17,7 +16,6 @@ const NewAppointmentPage = () => {
   const patientId = queryParams.get('patientId') ? parseInt(queryParams.get('patientId')!) : undefined;
   const dateParam = queryParams.get('date');
   const timeParam = queryParams.get('time');
-  const { user } = useAuth();
 
   // Parse date from URL parameters if provided
   let defaultDate = new Date();
@@ -32,13 +30,7 @@ const NewAppointmentPage = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        console.log("Fetching patients for current user:", user?.id);
         const data = await api.getPatients();
-        if (data && data.length > 0) {
-          console.log(`Loaded ${data.length} patients successfully`);
-        } else {
-          console.log("No patients found or empty array returned");
-        }
         setPatients(data);
       } catch (error) {
         console.error("Error fetching patients:", error);
@@ -49,7 +41,7 @@ const NewAppointmentPage = () => {
     };
 
     fetchPatients();
-  }, [user]);
+  }, []);
 
   return (
     <Layout>

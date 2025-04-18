@@ -131,8 +131,8 @@ const NewInvoicePage = () => {
         consultationId: consultation.id,
         amount: data.amount,
         date: today,
-        paymentStatus: "PENDING" as const
-      };
+        paymentStatus: "PENDING"
+      } as Omit<Invoice, 'id'>;
       
       // Utilisation directe de Supabase pour la création de facture
       const { data: invoice, error: invoiceError } = await supabase

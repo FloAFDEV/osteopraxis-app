@@ -59,7 +59,7 @@ const appointmentFormSchema = z.object({
   reason: z.string().min(3, {
     message: "La raison doit contenir au moins 3 caractères",
   }),
-  status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED", "NO_SHOW"], {
+  status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"], {
     required_error: "Veuillez sélectionner un statut",
   }),
 }).refine((data) => {

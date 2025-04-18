@@ -1,3 +1,4 @@
+
 import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 
@@ -62,7 +63,6 @@ export const supabaseAuthService = {
         },
         isAuthenticated: false,
         token: null,
-        loading: false,
         message: "Veuillez confirmer votre email avant de vous connecter. Un lien de confirmation a été envoyé à votre adresse email."
       };
     }
@@ -80,8 +80,7 @@ export const supabaseAuthService = {
         osteopathId: null
       },
       isAuthenticated: true,
-      token: data.session?.access_token || null,
-      loading: false
+      token: data.session?.access_token || null
     };
   },
   
@@ -144,8 +143,7 @@ export const supabaseAuthService = {
     const authState: AuthState = {
       user,
       isAuthenticated: true,
-      token: data.session?.access_token || null,
-      loading: false
+      token: data.session?.access_token || null
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));
@@ -179,8 +177,7 @@ export const supabaseAuthService = {
         return {
           user: null,
           isAuthenticated: false,
-          token: null,
-          loading: false
+          token: null
         };
       }
       
@@ -220,16 +217,14 @@ export const supabaseAuthService = {
       return {
         user,
         isAuthenticated: true,
-        token: data.session.access_token,
-        loading: false
+        token: data.session.access_token
       };
     } catch (error) {
       console.error("Erreur lors de la vérification de l'authentification:", error);
       return {
         user: null,
         isAuthenticated: false,
-        token: null,
-        loading: false
+        token: null
       };
     }
   },
