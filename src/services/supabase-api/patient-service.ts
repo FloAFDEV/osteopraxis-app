@@ -51,35 +51,49 @@ export const patientService = {
         return [];
       }
       
+      console.log("User authenticated:", user.id);
+      
       let osteopathId: number | null = null;
       
-      // Récupérer l'osteopathId de deux façons: d'abord depuis la table User, puis en secours depuis Osteopath
-      const { data: userData, error: userError } = await supabase
-        .from('User')
-        .select('osteopathId')
-        .eq('id', user.id)
-        .single();
+      // CORRECTION: Récupérer l'osteopathId directement depuis la table Osteopath sans passer par User
+      console.log("Trying to fetch osteopath info directly from Osteopath table");
+      const { data: osteopath, error: osteoError } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('userId', user.id)
+        .maybeSingle();
       
-      if (userData && userData.osteopathId) {
-        console.log(`Found osteopathId ${userData.osteopathId} from User table`);
-        osteopathId = userData.osteopathId;
+      if (osteopath) {
+        console.log(`Found osteopathId ${osteopath.id} directly from Osteopath table`);
+        osteopathId = osteopath.id;
       } else {
-        console.log('OsteopathId not found in User table, trying Osteopath table');
-        // Fallback: essayer de récupérer depuis la table Osteopath
-        const { data: osteopath, error: osteoError } = await supabase
-          .from('Osteopath')
-          .select('id')
-          .eq('userId', user.id)
-          .maybeSingle(); // Use maybeSingle instead of single to avoid error when no rows
+        console.log('No osteopath record found for this user. Error:', osteoError?.message);
         
-        if (osteopath) {
-          console.log(`Found osteopathId ${osteopath.id} from Osteopath table`);
-          osteopathId = osteopath.id;
+        // Fallback: Si ce n'est pas encore créé, créer automatiquement un enregistrement ostéopathe
+        if (SIMULATE_AUTH) {
+          console.log("Development mode: Creating a default osteopath record");
+          const { data: newOsteo, error: createError } = await supabase
+            .from('Osteopath')
+            .insert({
+              userId: user.id,
+              name: user.user_metadata?.name || 'Default Osteopath',
+              professional_title: 'Ostéopathe D.O.',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            })
+            .select();
+          
+          if (newOsteo && newOsteo.length > 0) {
+            console.log(`Created new osteopath with ID ${newOsteo[0].id}`);
+            osteopathId = newOsteo[0].id;
+          } else {
+            console.error('Failed to create default osteopath:', createError);
+          }
         }
       }
       
       if (!osteopathId) {
-        console.error('No osteopath info found for this user');
+        console.error('No osteopath info found or created for this user');
         return [];
       }
       
