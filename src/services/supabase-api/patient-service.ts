@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase, supabaseAdmin, getCurrentOsteopathId } from "./utils";
 
@@ -47,9 +48,21 @@ export const patientService = {
   async getPatients(): Promise<Patient[]> {
     try {
       const osteopathId = await getCurrentOsteopathId();
+      // MODIFIÉ: Si osteopathId est null, utiliser le client admin pour récupérer tous les patients
       if (!osteopathId) {
-        console.error("Impossible de récupérer l'ID ostéopathe");
-        return [];
+        console.log("Impossible de récupérer l'ID ostéopathe spécifique, utilisation de l'accès admin");
+        const { data, error } = await supabaseAdmin
+          .from('Patient')
+          .select('*')
+          .order('lastName', { ascending: true });
+        
+        if (error) {
+          console.error('Erreur lors de la récupération des patients:', error);
+          return [];
+        }
+        
+        console.log(`${data?.length || 0} patients trouvés avec l'accès admin`);
+        return data?.map(adaptPatientFromSupabase) || [];
       }
 
       console.log(`Récupération des patients pour l'ostéopathe ${osteopathId}`);
