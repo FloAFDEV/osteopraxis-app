@@ -77,7 +77,7 @@ export const patientService = {
         return (data || []).map(adaptPatientFromSupabase);
       }
 
-      // Si l'utilisateur a directement un osteopathId dans son profil, utiliser celui-ci
+      // If the user has directly an osteopathId in their profile, use that
       if (userData && userData.osteopathId) {
         console.log(`User has direct osteopathId: ${userData.osteopathId}, using it to fetch patients`);
         const { data, error } = await supabase
@@ -95,73 +95,117 @@ export const patientService = {
         return (data || []).map(adaptPatientFromSupabase);
       }
 
-      // Try to get osteopath ID
+      // Try to get osteopath ID from the Osteopath table
       const { data: osteopathData, error: osteopathError } = await supabase
         .from('Osteopath')
         .select('id')
         .eq('userId', session.user.id)
         .maybeSingle();
 
-      // If no osteopath found, automatically create one
+      // If no osteopath found, use edge function to create one
       if (!osteopathData) {
-        console.log('No osteopath found for this user, creating one now...');
+        console.log('No osteopath found for this user, using edge function to create one...');
         
-        const now = new Date().toISOString();
-        const { data: newOsteopath, error: createError } = await supabase
-          .from('Osteopath')
-          .insert({
-            name: 'Nouvel Ostéopathe',
-            userId: session.user.id,
-            createdAt: now,
-            updatedAt: now,
-            professional_title: 'Ostéopathe D.O.',
-            ape_code: '8690F'
-          })
-          .select()
-          .single();
+        try {
+          // Get the current session for the access token
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (!sessionData || !sessionData.session) {
+            throw new Error("No active session");
+          }
           
-        if (createError) {
-          console.error('Error creating osteopath:', createError);
-          throw createError;
-        }
-        
-        // Update user with new osteopathId
-        const { error: updateError } = await supabase
-          .from('User')
-          .update({ osteopathId: newOsteopath.id })
-          .eq('id', session.user.id);
+          console.log("Calling edge function completer-profil");
+          const response = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({
+              osteopathData: {
+                name: "Nouvel Ostéopathe",
+                professional_title: "Ostéopathe D.O.",
+                ape_code: "8690F"
+              }
+            })
+          });
           
-        if (updateError) {
-          console.error('Error updating user with osteopathId:', updateError);
-        }
-        
-        // Create test patient for new osteopath
-        const testPatient = {
-          firstName: "Patient",
-          lastName: "Test",
-          gender: "Homme" as Gender,
-          osteopathId: newOsteopath.id,
-          createdAt: now,
-          updatedAt: now,
-          isSmoker: false,
-          isDeceased: false,
-          hasVisionCorrection: false
-        };
-        
-        const { data: newPatient, error: patientError } = await supabase
-          .from('Patient')
-          .insert(testPatient)
-          .select()
-          .single();
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Edge function error:", errorText);
+            throw new Error(`Edge function error: ${errorText}`);
+          }
           
-        if (patientError) {
-          console.error('Error creating test patient:', patientError);
-        } else {
-          console.log('Created test patient for new osteopath:', newPatient);
-          return [adaptPatientFromSupabase(newPatient)];
+          const result = await response.json();
+          console.log("Edge function result:", result);
+          
+          if (result && result.osteopath && result.osteopath.id) {
+            // Now try to fetch patients for this new osteopath
+            const { data: patients, error: patientsError } = await supabase
+              .from('Patient')
+              .select('*')
+              .eq('osteopathId', result.osteopath.id)
+              .order('lastName', { ascending: true });
+              
+            if (patientsError) {
+              console.error('Error fetching patients for new osteopath:', patientsError);
+              throw patientsError;
+            }
+            
+            // If no patients found, create a test patient
+            if (!patients || patients.length === 0) {
+              console.log('No patients found for new osteopath, creating a test patient');
+              
+              const testPatient = {
+                firstName: "Patient",
+                lastName: "Test",
+                gender: "Homme" as Gender,
+                osteopathId: result.osteopath.id,
+                cabinetId: result.cabinet ? result.cabinet.id : null,
+                isSmoker: false,
+                isDeceased: false,
+                hasVisionCorrection: false
+              };
+              
+              // Try to create a test patient using the edge function
+              try {
+                const createPatientResponse = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/create-test-data", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionData.session.access_token}`
+                  },
+                  body: JSON.stringify({
+                    type: "patient",
+                    data: testPatient
+                  })
+                });
+                
+                if (!createPatientResponse.ok) {
+                  const errorText = await createPatientResponse.text();
+                  console.error("Error creating test patient:", errorText);
+                  return [];
+                }
+                
+                const createPatientResult = await createPatientResponse.json();
+                if (createPatientResult && createPatientResult.patient) {
+                  console.log('Created test patient:', createPatientResult.patient);
+                  return [adaptPatientFromSupabase(createPatientResult.patient)];
+                }
+              } catch (createError) {
+                console.error('Error creating test patient:', createError);
+                return [];
+              }
+            }
+            
+            console.log(`Successfully fetched ${patients?.length || 0} patients for new osteopath`);
+            return (patients || []).map(adaptPatientFromSupabase);
+          }
+          
+          return [];
+        } catch (edgeError) {
+          console.error('Error using edge function:', edgeError);
+          throw edgeError;
         }
-        
-        return [];
       }
 
       if (osteopathError && osteopathError.code !== 'PGRST116') {

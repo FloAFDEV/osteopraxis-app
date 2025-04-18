@@ -1,4 +1,3 @@
-
 // Specific fix for the cabinet-service.ts file where we need to ensure the right type is being used
 import { checkAuth, supabase } from "./utils";
 import { Cabinet } from "@/types";
@@ -62,7 +61,6 @@ export const supabaseCabinetService = {
     }
   },
 
-  // Renamed from getCabinetByOsteopathId to getCabinetsByOsteopathId for consistency
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
     try {
       const { data, error } = await supabase
@@ -82,10 +80,9 @@ export const supabaseCabinetService = {
     }
   },
   
-  // Adding getCabinetsByUserId method to fetch cabinets related to a user
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
     try {
-      // D'abord vérifier si l'utilisateur a un osteopathId directement dans son profil
+      // First check if the user has an osteopathId directly in their profile
       const { data: userData, error: userError } = await supabase
         .from('User')
         .select('osteopathId')
@@ -102,84 +99,60 @@ export const supabaseCabinetService = {
         return this.getCabinetsByOsteopathId(userData.osteopathId);
       }
       
-      // Sinon, chercher l'osteopath associé
+      // Otherwise, look for the associated osteopath
       const { data: osteopathData, error: osteopathError } = await supabase
         .from('Osteopath')
         .select('id')
         .eq('userId', userId)
         .maybeSingle();
 
-      // If no osteopath found, create one automatically
+      // If no osteopath found, use the edge function to create one
       if (!osteopathData) {
         console.log('No osteopath found for userId:', userId);
-        console.log('Creating a default osteopath profile...');
+        console.log('Trying to create profile using edge function...');
         
-        const now = new Date().toISOString();
-        const { data: userData } = await supabase
-          .from('User')
-          .select('first_name, last_name')
-          .eq('id', userId)
-          .maybeSingle();
+        try {
+          // Get the current session for the access token
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (!sessionData || !sessionData.session) {
+            throw new Error("No active session");
+          }
           
-        const name = userData ? 
-          `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : 
-          'Nouvel Ostéopathe';
+          console.log("Calling edge function completer-profil");
+          const response = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({
+              osteopathData: {
+                name: "Nouvel Ostéopathe",
+                professional_title: "Ostéopathe D.O.",
+                ape_code: "8690F"
+              }
+            })
+          });
           
-        // Create a new osteopath record
-        const { data: newOsteopath, error: createError } = await supabase
-          .from('Osteopath')
-          .insert({
-            name: name || 'Nouvel Ostéopathe',
-            userId: userId,
-            createdAt: now,
-            updatedAt: now,
-            professional_title: 'Ostéopathe D.O.',
-            ape_code: '8690F'
-          })
-          .select()
-          .single();
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Edge function error:", errorText);
+            throw new Error(`Edge function error: ${errorText}`);
+          }
           
-        if (createError) {
-          console.error('Error creating osteopath profile:', createError);
-          throw createError;
+          const result = await response.json();
+          console.log("Edge function result:", result);
+          
+          if (result && result.osteopath && result.osteopath.id) {
+            // Now retrieve cabinets for this new osteopath
+            return await this.getCabinetsByOsteopathId(result.osteopath.id);
+          } else {
+            throw new Error("Invalid edge function response");
+          }
+        } catch (edgeError) {
+          console.error("Error using edge function:", edgeError);
+          throw edgeError;
         }
-        
-        console.log('Created default osteopath profile:', newOsteopath);
-        
-        // Create a default cabinet for the new osteopath
-        const { data: newCabinet, error: cabinetError } = await supabase
-          .from('Cabinet')
-          .insert({
-            name: 'Mon Cabinet',
-            address: 'Adresse à définir',
-            osteopathId: newOsteopath.id,
-            createdAt: now,
-            updatedAt: now
-          })
-          .select()
-          .single();
-          
-        if (cabinetError) {
-          console.error('Error creating default cabinet:', cabinetError);
-          // Continue even if cabinet creation fails
-        } else {
-          console.log('Created default cabinet:', newCabinet);
-          return [adaptCabinetFromSupabase(newCabinet)];
-        }
-        
-        // Update the User record with the new osteopathId
-        const { error: updateUserError } = await supabase
-          .from('User')
-          .update({ osteopathId: newOsteopath.id })
-          .eq('id', userId);
-          
-        if (updateUserError) {
-          console.error('Error updating user with osteopathId:', updateUserError);
-          // Continue anyway
-        }
-        
-        // Return empty array if cabinet creation failed
-        return [];
       }
       
       if (osteopathError && osteopathError.code !== 'PGRST116') {
@@ -188,7 +161,11 @@ export const supabaseCabinetService = {
       }
       
       // Now get cabinets for this osteopath
-      return await this.getCabinetsByOsteopathId(osteopathData.id);
+      if (osteopathData && osteopathData.id) {
+        return await this.getCabinetsByOsteopathId(osteopathData.id);
+      }
+      
+      return [];
     } catch (error) {
       console.error('Error in getCabinetsByUserId:', error);
       throw error;
