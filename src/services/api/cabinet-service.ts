@@ -66,9 +66,4 @@ export const cabinetService = {
       throw error;
     }
   },
-  
-  // Pour compatibilité avec le code existant
-  getCabinetsByOsteopathId: function(osteopathId: number) {
-    return this.getCabinetsByProfessionalProfileId(osteopathId);
-  }
 };
