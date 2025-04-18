@@ -1,4 +1,3 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 import { checkAuth } from "./utils";
@@ -48,44 +47,59 @@ export const patientService = {
       const session = await checkAuth();
       console.log("Fetching patients with authenticated user:", session.user.id);
       
-      // Get the osteopath ID for the current user
+      // Check if the user is an admin first
+      const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('role')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (userError && userError.code !== 'PGRST116') {
+        console.error('Error fetching user role:', userError);
+        throw userError;
+      }
+
+      // If the user is an admin, return all patients
+      if (userData && userData.role === 'ADMIN') {
+        console.log("Admin user detected, fetching all patients");
+        const { data, error } = await supabase
+          .from('Patient')
+          .select('*')
+          .order('lastName', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching patients as admin:', error);
+          throw error;
+        }
+
+        console.log(`Successfully fetched ${data?.length || 0} patients as admin`);
+        return (data || []).map(adaptPatientFromSupabase);
+      }
+
+      // If not admin, try to get osteopath ID
       const { data: osteopathData, error: osteopathError } = await supabase
         .from('Osteopath')
         .select('id')
         .eq('userId', session.user.id)
-        .single();
+        .maybeSingle();
 
+      // If no osteopath found, return empty array
       if (osteopathError) {
         if (osteopathError.code === 'PGRST116') {
-          // User might be an admin, try to get their role
-          const { data: userData } = await supabase
-            .from('User')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-
-          if (userData && userData.role === 'ADMIN') {
-            // Admin user can see all patients
-            console.log("Admin user detected, fetching all patients");
-            const { data, error } = await supabase
-              .from('Patient')
-              .select('*')
-              .order('lastName', { ascending: true });
-
-            if (error) {
-              console.error('Error fetching patients as admin:', error);
-              throw error;
-            }
-
-            console.log(`Successfully fetched ${data?.length || 0} patients as admin`);
-            return (data || []).map(adaptPatientFromSupabase);
-          }
+          console.log('No osteopath found for this user, returning empty patients list');
+          return [];
         }
         console.error('Error fetching osteopath id:', osteopathError);
         throw osteopathError;
       }
 
+      if (!osteopathData || !osteopathData.id) {
+        console.log('No osteopath ID found, returning empty patients list');
+        return [];
+      }
+
       // Regular osteopath user - fetch only their patients
+      console.log(`Fetching patients for osteopath ID ${osteopathData.id}`);
       const { data, error } = await supabase
         .from('Patient')
         .select('*')
@@ -140,19 +154,19 @@ export const patientService = {
         .from('Osteopath')
         .select('id')
         .eq('userId', session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (osteopathError) {
+      if (osteopathError && osteopathError.code !== 'PGRST116') {
         console.error('Error fetching osteopath id:', osteopathError);
         throw osteopathError;
       }
 
       const now = new Date().toISOString();
       
-      // Prepare patient data with the current osteopath's ID
+      // Prepare patient data with the current osteopath's ID or default if not found
       const patientData = {
         ...patient,
-        osteopathId: osteopathData.id,
+        osteopathId: osteopathData?.id || 1, // Use default if not found
         createdAt: now,
         updatedAt: now
       };
