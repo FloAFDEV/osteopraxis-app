@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -47,8 +48,8 @@ const InvoicesPage = () => {
   const filteredInvoices = invoices?.filter(invoice => {
     // Use optional chaining to safely access the Patient property
     const matchesQuery = invoice.Patient?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         invoice.Patient?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         invoice.id.toString().includes(searchQuery);
+                       invoice.Patient?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                       invoice.id.toString().includes(searchQuery);
     const matchesStatus = statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
     return matchesQuery && matchesStatus;
   });
@@ -97,56 +98,57 @@ const InvoicesPage = () => {
         </Card>
         
         {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-        </div>
-      ) : filteredInvoices && filteredInvoices.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredInvoices.map(invoice => (
-            <InvoiceDetails 
-              key={invoice.id} 
-              invoice={invoice} 
-              patientName={
-                // Use optional chaining to safely access the Patient property
-                invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : `Patient #${invoice.patientId}`
-              } 
-              onEdit={() => navigate(`/invoices/${invoice.id}`)} 
-              onDelete={() => {
-                setSelectedInvoiceId(invoice.id);
-                setIsDeleteModalOpen(true);
-              }}
-              onDownload={() => toast.success("Téléchargement de la facture (fonctionnalité à venir)")} 
-              onPrint={() => {
-                navigate(`/invoices/${invoice.id}`);
-                setTimeout(() => {
-                  window.print();
-                }, 500);
-              }}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-20">
-          <FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
-          <h3 className="mt-4 text-xl font-medium">Aucune facture trouvée</h3>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            {searchQuery || statusFilter !== "ALL" ? "Essayez de modifier vos critères de recherche." : "Commencez par créer votre première facture."}
-          </p>
-          <Button onClick={() => navigate("/invoices/new")} className="mt-6 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600">
-            <Plus className="h-4 w-4 mr-2" />
-            Créer une facture
-          </Button>
-        </div>
-      )}
-      
-      {isDeleteModalOpen && selectedInvoiceId && (
-        <ConfirmDeleteInvoiceModal 
-          isOpen={isDeleteModalOpen} 
-          invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")} 
-          onCancel={() => setIsDeleteModalOpen(false)} 
-          onDelete={handleDeleteInvoice} 
-        />
-      )}
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+          </div>
+        ) : filteredInvoices && filteredInvoices.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredInvoices.map(invoice => (
+              <InvoiceDetails 
+                key={invoice.id} 
+                invoice={invoice} 
+                patientName={
+                  // Use optional chaining to safely access the Patient property
+                  invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : `Patient #${invoice.patientId}`
+                } 
+                onEdit={() => navigate(`/invoices/${invoice.id}`)} 
+                onDelete={() => {
+                  setSelectedInvoiceId(invoice.id);
+                  setIsDeleteModalOpen(true);
+                }}
+                onDownload={() => toast.success("Téléchargement de la facture (fonctionnalité à venir)")} 
+                onPrint={() => {
+                  navigate(`/invoices/${invoice.id}`);
+                  setTimeout(() => {
+                    window.print();
+                  }, 500);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
+            <h3 className="mt-4 text-xl font-medium">Aucune facture trouvée</h3>
+            <p className="mt-2 text-gray-500 dark:text-gray-400">
+              {searchQuery || statusFilter !== "ALL" ? "Essayez de modifier vos critères de recherche." : "Commencez par créer votre première facture."}
+            </p>
+            <Button onClick={() => navigate("/invoices/new")} className="mt-6 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600">
+              <Plus className="h-4 w-4 mr-2" />
+              Créer une facture
+            </Button>
+          </div>
+        )}
+        
+        {isDeleteModalOpen && selectedInvoiceId && (
+          <ConfirmDeleteInvoiceModal 
+            isOpen={isDeleteModalOpen} 
+            invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")} 
+            onCancel={() => setIsDeleteModalOpen(false)} 
+            onDelete={handleDeleteInvoice} 
+          />
+        )}
+      </div>
     </Layout>
   );
 };
