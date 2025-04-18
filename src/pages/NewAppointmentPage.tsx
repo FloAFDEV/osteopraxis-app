@@ -14,18 +14,6 @@ const NewAppointmentPage = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const patientId = queryParams.get('patientId') ? parseInt(queryParams.get('patientId')!) : undefined;
-  const dateParam = queryParams.get('date');
-  const timeParam = queryParams.get('time');
-
-  // Parse date from URL parameters if provided
-  let defaultDate = new Date();
-  if (dateParam) {
-    try {
-      defaultDate = new Date(dateParam);
-    } catch (e) {
-      console.error("Invalid date parameter:", dateParam);
-    }
-  }
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -69,8 +57,8 @@ const NewAppointmentPage = () => {
               patients={patients} 
               defaultValues={{ 
                 patientId,
-                date: defaultDate,
-                time: timeParam || "09:00",
+                date: new Date(),
+                time: "09:00",
                 status: "SCHEDULED"
               }}
             />

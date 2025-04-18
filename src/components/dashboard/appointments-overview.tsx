@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { Calendar, Clock, User } from "lucide-react";
@@ -8,7 +7,7 @@ import { format, isToday, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Appointment, Patient } from "@/types";
+import { Appointment } from "@/types";
 import { toast } from "sonner";
 
 interface AppointmentsOverviewProps {
@@ -21,7 +20,7 @@ export function AppointmentsOverview({
   className
 }: AppointmentsOverviewProps) {
   const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -53,25 +52,6 @@ export function AppointmentsOverview({
   // Obtenir les informations sur un patient par ID
   const getPatientById = (patientId: number) => {
     return patients.find(p => p.id === patientId);
-  };
-
-  // Obtenir la classe de couleur en fonction du genre
-  const getGenderColorClass = (gender?: string) => {
-    if (gender === "Femme") {
-      return {
-        icon: "text-pink-500",
-        text: "text-pink-700 dark:text-pink-300"
-      };
-    } else if (gender === "Homme") {
-      return {
-        icon: "text-blue-500",
-        text: "text-blue-700 dark:text-blue-300"
-      };
-    }
-    return {
-      icon: "text-gray-500",
-      text: "text-slate-800 dark:text-white"
-    };
   };
 
   const handleAppointmentClick = (appointmentId: number) => {
@@ -125,7 +105,6 @@ export function AppointmentsOverview({
               const patient = getPatientById(appointment.patientId);
               const appointmentDate = parseISO(appointment.date);
               const isLastItem = index === upcomingAppointments.length - 1;
-              const genderColor = getGenderColorClass(patient?.gender);
               
               return (
                 <div 
@@ -134,13 +113,27 @@ export function AppointmentsOverview({
                 >
                   <div className="flex-shrink-0 mr-4">
                     <div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
-                      <User className={`h-6 w-6 ${genderColor.icon}`} />
+                      <User 
+                        className={`h-6 w-6 ${
+                          patient?.gender === "Femme" 
+                            ? "text-pink-500" 
+                            : patient?.gender === "Homme" 
+                              ? "text-blue-500" 
+                              : "text-gray-500"
+                        }`} 
+                      />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <Link 
                       to={`/patients/${appointment.patientId}`} 
-                      className={`font-medium hover:underline text-base truncate block ${genderColor.text}`}
+                      className={`font-medium hover:underline text-base truncate block ${
+                        patient?.gender === "Femme"
+                          ? "text-pink-700 dark:text-pink-300"
+                          : patient?.gender === "Homme"
+                            ? "text-blue-700 dark:text-blue-300"
+                            : "text-slate-800 dark:text-white"
+                      }`}
                     >
                       {patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
                     </Link>

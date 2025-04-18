@@ -110,32 +110,21 @@ export function AppointmentForm({
     const selectedDate = form.watch("date");
     const isToday = isSameDay(selectedDate, now);
     
-    // Heures de travail: 8h00 - 20h00 (8am - 8pm)
-    const businessStartHour = 8; // 8am
-    const businessEndHour = 20; // 8pm
-    
-    const currentHour = isToday ? now.getHours() : businessStartHour;
+    const currentHour = isToday ? now.getHours() : 8;
     const currentMinute = isToday ? now.getMinutes() : 0;
     
-    // Calculate start slot based on business hours or current time if today
     const startSlot = isToday 
-      ? Math.max(
-          businessStartHour * 2, // 8am in 30 min slots = 16
-          Math.ceil((currentHour * 60 + currentMinute) / 30)
-        )
-      : businessStartHour * 2; // Start at 8am (16th 30-min slot)
+      ? Math.ceil((currentHour * 60 + currentMinute) / 30) 
+      : 16; // 16 = 8am (slots start at 8am)
     
-    // Calculate end slot based on business end time (8pm = 20 * 2 = 40th 30-min slot)
-    const endSlot = businessEndHour * 2;
-    
-    // Generate all possible slots between start and end
-    return Array.from({ length: Math.max(0, endSlot - startSlot) }, (_, i) => {
+    return Array.from({ length: 28 - startSlot }, (_, i) => {
       const totalMinutes = (startSlot + i) * 30;
       const hour = Math.floor(totalMinutes / 60);
       const minute = totalMinutes % 60;
       
+      if (hour >= 20) return null; // Don't offer slots past 8pm
       return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-    });
+    }).filter(Boolean) as string[];
   };
 
   const availableTimes = generateAvailableTimes();
