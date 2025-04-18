@@ -73,7 +73,7 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
           
           <div className="space-y-1 flex-1 min-w-0">
             <h3 className="text-xl font-semibold truncate flex items-center">
-              {patient.firstName} {patient.lastName}
+             {patient.lastName} {patient.firstName} 
               {genderColors.icon}
             </h3>
             
