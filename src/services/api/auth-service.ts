@@ -1,3 +1,4 @@
+
 import { User, AuthState } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAuthService } from "../supabase-api/auth-service";
@@ -21,7 +22,8 @@ let authState: AuthState = {
   user: null,
   isAuthenticated: false,
   token: null,
-  loading: false // Add the loading property
+  loading: false,
+  message: null
 };
 
 export const authService = {
@@ -63,7 +65,8 @@ export const authService = {
       user: newUser,
       isAuthenticated: true,
       token,
-      loading: false
+      loading: false,
+      message: null
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));
@@ -95,7 +98,8 @@ export const authService = {
       user,
       isAuthenticated: true,
       token,
-      loading: false // Add the loading property
+      loading: false,
+      message: null
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));
@@ -133,7 +137,8 @@ export const authService = {
       user: null,
       isAuthenticated: false,
       token: null,
-      loading: false
+      loading: false,
+      message: null
     };
     
     localStorage.removeItem("authState");
@@ -154,18 +159,21 @@ export const authService = {
     
     if (storedAuth) {
       try {
-        authState = JSON.parse(storedAuth);
-        // Ensure loading property exists
-        if (authState && !('loading' in authState)) {
-          authState.loading = false;
-        }
+        const parsedState = JSON.parse(storedAuth);
+        // Ensure loading and message properties exist
+        authState = {
+          ...parsedState,
+          loading: false,
+          message: parsedState.message || null
+        };
       } catch (e) {
         console.error("Failed to parse stored auth state", e);
         authState = {
           user: null,
           isAuthenticated: false,
           token: null,
-          loading: false // Add the loading property
+          loading: false,
+          message: null
         };
       }
     }

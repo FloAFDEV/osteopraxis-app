@@ -1,3 +1,4 @@
+
 export type AppointmentStatus = 
   | 'SCHEDULED'
   | 'COMPLETED'
@@ -171,7 +172,7 @@ export interface AuthState {
   loading: boolean;
   error?: string;
   token?: string;
-  message?: string; // Add optional message property
+  message?: string | null; // Add optional message property
 }
 
 export interface DashboardData {

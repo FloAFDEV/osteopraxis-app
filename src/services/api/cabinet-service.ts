@@ -1,3 +1,4 @@
+
 import { Cabinet } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseCabinetService } from "../supabase-api/cabinet-service";
@@ -78,7 +79,7 @@ export const cabinetService = {
     return cabinets.filter(cabinet => cabinet.osteopathId === osteopathId);
   },
   
-  // Adding the missing getCabinetsByUserId method
+  // Adding the getCabinetsByUserId method
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
     if (USE_SUPABASE) {
       try {
@@ -137,7 +138,8 @@ export const cabinetService = {
   async deleteCabinet(id: number): Promise<void> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseCabinetService.deleteCabinet(id);
+        await supabaseCabinetService.deleteCabinet(id);
+        return;
       } catch (error) {
         console.error('Error deleteCabinet:', error);
         throw error;

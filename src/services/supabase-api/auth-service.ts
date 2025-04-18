@@ -1,4 +1,3 @@
-
 import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 
@@ -63,7 +62,7 @@ export const supabaseAuthService = {
         },
         isAuthenticated: false,
         token: null,
-        loading: false, // Add the loading property
+        loading: false,
         message: "Veuillez confirmer votre email avant de vous connecter. Un lien de confirmation a été envoyé à votre adresse email."
       };
     }
@@ -82,7 +81,7 @@ export const supabaseAuthService = {
       },
       isAuthenticated: true,
       token: data.session?.access_token || null,
-      loading: false // Add the loading property
+      loading: false
     };
   },
   
@@ -145,7 +144,8 @@ export const supabaseAuthService = {
     const authState: AuthState = {
       user,
       isAuthenticated: true,
-      token: data.session?.access_token || null
+      token: data.session?.access_token || null,
+      loading: false
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));
@@ -180,7 +180,7 @@ export const supabaseAuthService = {
           user: null,
           isAuthenticated: false,
           token: null,
-          loading: false // Add the loading property
+          loading: false
         };
       }
       
@@ -221,7 +221,7 @@ export const supabaseAuthService = {
         user,
         isAuthenticated: true,
         token: data.session.access_token,
-        loading: false // Add the loading property
+        loading: false
       };
     } catch (error) {
       console.error("Erreur lors de la vérification de l'authentification:", error);
@@ -229,7 +229,7 @@ export const supabaseAuthService = {
         user: null,
         isAuthenticated: false,
         token: null,
-        loading: false // Add the loading property
+        loading: false
       };
     }
   },
