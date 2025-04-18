@@ -60,17 +60,41 @@ export const patientService = {
       console.log("ID Utilisateur:", session.session.user.id);
       
       // Vérification du rôle et de l'ostéopathe associé
+      // Utilisation de maybeSingle() au lieu de single() pour éviter l'erreur 406
       const { data: userData, error: userError } = await supabase
         .from('User')
         .select('role, osteopathId')
         .eq('id', session.session.user.id)
-        .single();
+        .maybeSingle();
       
       if (userError) {
         console.error("Erreur lors de la récupération des données utilisateur:", userError);
       } else if (userData) {
         console.log("Rôle utilisateur:", userData.role);
         console.log("ID Ostéopathe associé:", userData.osteopathId);
+      } else {
+        console.warn("Utilisateur authentifié mais non trouvé dans la table User");
+        console.log("Création d'un profil utilisateur par défaut...");
+        
+        // Option: Créer une entrée utilisateur si elle n'existe pas encore
+        // Ce bloc est optionnel et peut être commenté si une autre partie de l'app gère cette création
+        try {
+          const { error: createError } = await supabase
+            .from('User')
+            .insert({
+              id: session.session.user.id,
+              email: session.session.user.email,
+              role: 'OSTEOPATH',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+            
+          if (createError) {
+            console.error("Erreur lors de la création du profil utilisateur:", createError);
+          }
+        } catch (insertError) {
+          console.error("Exception lors de la création du profil utilisateur:", insertError);
+        }
       }
       
       // Récupération des patients
