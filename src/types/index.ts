@@ -1,171 +1,123 @@
+export type UserRole = 'USER' | 'ADMIN';
+export type PaymentStatus = 'PAID' | 'UNPAID' | 'PARTIALLY_PAID';
+export type AppointmentStatus = 'PLANNED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
 
+export interface Invoice {
+  id: number;
+  patientId: number;
+  cabinetId: number;
+  date: string;
+  amount: number;
+  paymentStatus: PaymentStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Appointment {
+  id: number;
+  patientId: number;
+  cabinetId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  notes?: string;
+  status: AppointmentStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type Gender = 'Homme' | 'Femme' | 'Autre';
+export type MaritalStatus = 'Célibataire' | 'Marié(e)' | 'Divorcé(e)' | 'Veuf(ve)';
+export type Handedness = 'Droite' | 'Gauche';
+export type Contraception = 'Aucun' | 'Pilule' | 'DIU' | 'IMPLANTS';
+
+// Modifier le type Osteopath en ProfessionalProfile
+export type ProfessionType = 'osteopathe' | 'chiropracteur' | 'autre';
+
+export interface ProfessionalProfile {
+  id: number;
+  name: string;
+  title: string; // Anciennement professional_title
+  userId: string;
+  adeli_number?: string;
+  siret?: string;
+  ape_code?: string;
+  createdAt: string;
+  updatedAt: string;
+  profession_type: ProfessionType;
+}
+
+// Pour la compatibilité, aliasez Osteopath à ProfessionalProfile
+export type Osteopath = ProfessionalProfile;
+
+// Utilisez professionalProfileId au lieu de osteopathId dans User
 export interface User {
   id: string;
   email: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: "ADMIN" | "OSTEOPATH";
+  first_name?: string;
+  last_name?: string;
+  role: UserRole;
   created_at: string;
   updated_at: string;
-  osteopathId: number | null;
+  professionalProfileId?: number; // Modifié de osteopathId
 }
 
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   token: string | null;
-  message?: string; // Optional message field for auth feedback
 }
 
-export type Role = "ADMIN" | "OSTEOPATH";
-
-// Interfaces pour les patients
+// Mettre à jour Patient pour utiliser professionalProfileId
 export interface Patient {
   id: number;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  birthDate: string | null;
-  gender: Gender | null;
-  avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;
-  osteopathId: number;
-  cabinetId: number | null;
-  occupation: string | null;
-  maritalStatus: MaritalStatus | null;
-  hasChildren: string | null;
-  childrenAges: number[] | null;
-  generalPractitioner: string | null;
-  currentTreatment: string | null;
-  isSmoker: boolean;
-  physicalActivity: string | null;
-  hasVisionCorrection: boolean;
-  contraception: Contraception | null;
-  handedness: Handedness | null;
-  isDeceased: boolean;
-  digestiveProblems: string | null;
-  digestiveDoctorName: string | null;
-  entProblems: string | null;
-  entDoctorName: string | null;
-  ophtalmologistName: string | null;
-  surgicalHistory: string | null;
-  traumaHistory: string | null;
-  rheumatologicalHistory: string | null;
-  hdlm: string | null;
-  userId: string | null;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  gender: Gender;
+  birthDate?: string;
+  maritalStatus?: MaritalStatus;
+  occupation?: string;
+  hasChildren?: boolean;
+  childrenAges?: string;
+  generalPractitioner?: string;
+  surgicalHistory?: string;
+  traumaHistory?: string;
+  rheumatologicalHistory?: string;
+  currentTreatment?: string;
+  handedness?: Handedness;
+  hasVisionCorrection?: boolean;
+  ophtalmologistName?: string;
+  entProblems?: string;
+  entDoctorName?: string;
+  digestiveProblems?: string;
+  digestiveDoctorName?: string;
+  physicalActivity?: string;
+  isSmoker?: boolean;
+  isDeceased?: boolean;
+  contraception?: Contraception;
+  hdlm?: string;
+  avatarUrl?: string;
+  cabinetId?: number;
+  userId?: string;
+  professionalProfileId: number; // Modifié de osteopathId
 }
 
-// Enums pour les patients
-export type Gender = "Homme" | "Femme";
-
-export type MaritalStatus = 
-  | "SINGLE" 
-  | "MARRIED" 
-  | "DIVORCED" 
-  | "WIDOWED" 
-  | "SEPARATED" 
-  | "ENGAGED" 
-  | "PARTNERED";
-
-export type Handedness = "LEFT" | "RIGHT" | "AMBIDEXTROUS";
-
-export type Contraception =
-  | "NONE"
-  | "PILLS"
-  | "CONDOM"
-  | "IMPLANTS"
-  | "DIAPHRAGM"
-  | "IUD"
-  | "INJECTION"
-  | "PATCH"
-  | "RING"
-  | "NATURAL_METHODS"
-  | "STERILIZATION";
-
-// Interface pour les rendez-vous
-export interface Appointment {
-  id: number;
-  date: string;
-  patientId: number;
-  reason: string;
-  status: AppointmentStatus;
-  notificationSent: boolean;
-}
-
-export type AppointmentStatus = 
-  | "SCHEDULED" 
-  | "COMPLETED" 
-  | "CANCELED" 
-  | "NO_SHOW"
-  | "RESCHEDULED";
-
-// Interface pour les cabinets
+// Mettre à jour Cabinet pour utiliser professionalProfileId
 export interface Cabinet {
   id: number;
   name: string;
   address: string;
-  phone: string | null;
-  email?: string | null;
-  imageUrl: string | null;
-  logoUrl: string | null;
-  osteopathId: number;
+  phone?: string;
+  email?: string;
+  logoUrl?: string;
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-// Interface pour les ostéopathes
-export interface Osteopath {
-  id: number;
-  name: string;
-  userId: string;
-  professional_title: string | null;
-  adeli_number: string | null;
-  siret: string | null;
-  ape_code: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Interface pour les factures
-export interface Invoice {
-  id: number;
-  patientId: number;
-  consultationId: number;
-  amount: number;
-  date: string;
-  paymentStatus: PaymentStatus;
-  Patient?: { // Ajout d'une propriété optionnelle Patient
-    firstName: string;
-    lastName: string;
-  };
-}
-
-export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
-
-// Interface pour les données du dashboard
-export interface DashboardData {
-  totalPatients: number;
-  maleCount: number;
-  femaleCount: number;
-  averageAge: number;
-  averageAgeMale: number;
-  averageAgeFemale: number;
-  newPatientsThisMonth: number;
-  newPatientsThisYear: number;
-  newPatientsLastYear: number;
-  appointmentsToday: number;
-  nextAppointment: string;
-  patientsLastYearEnd: number;
-  newPatientsLast30Days: number;
-  thirtyDayGrowthPercentage: number;
-  annualGrowthPercentage: number;
-  monthlyGrowth: {
-    month: string;
-    patients: number;
-    prevPatients: number;
-    growthText: string;
-  }[];
+  professionalProfileId: number; // Modifié de osteopathId
 }

@@ -2,7 +2,7 @@
 import { patientService } from "./patient-service";
 import { appointmentService } from "./appointment-service";
 import { cabinetService } from "./cabinet-service";
-import { osteopathService } from "./osteopath-service";
+import { professionalProfileService } from "./professional-profile-service"; // Renommé
 import { invoiceService } from "./invoice-service";
 import { authService } from "./auth-service";
 
@@ -35,18 +35,26 @@ export const api = {
   // Cabinets
   getCabinets: cabinetService.getCabinets,
   getCabinetById: cabinetService.getCabinetById,
-  getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
+  getCabinetsByProfessionalProfileId: cabinetService.getCabinetsByProfessionalProfileId,
   getCabinetsByUserId: cabinetService.getCabinetsByUserId,
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
   
-  // Osteopaths
-  getOsteopaths: osteopathService.getOsteopaths,
-  getOsteopathById: osteopathService.getOsteopathById,
-  getOsteopathByUserId: osteopathService.getOsteopathByUserId,
-  updateOsteopath: osteopathService.updateOsteopath,
-  createOsteopath: osteopathService.createOsteopath,
+  // Professional Profiles (anciennement Osteopaths)
+  getProfessionalProfiles: professionalProfileService.getProfessionalProfiles,
+  getProfessionalProfileById: professionalProfileService.getProfessionalProfileById,
+  getProfessionalProfileByUserId: professionalProfileService.getProfessionalProfileByUserId,
+  updateProfessionalProfile: professionalProfileService.updateProfessionalProfile,
+  createProfessionalProfile: professionalProfileService.createProfessionalProfile,
+  hasRequiredFields: professionalProfileService.hasRequiredFields,
+  
+  // Pour la compatibilité
+  getOsteopaths: professionalProfileService.getProfessionalProfiles,
+  getOsteopathById: professionalProfileService.getProfessionalProfileById,
+  getOsteopathByUserId: professionalProfileService.getProfessionalProfileByUserId,
+  updateOsteopath: professionalProfileService.updateProfessionalProfile,
+  createOsteopath: professionalProfileService.createProfessionalProfile,
   
   // Invoices
   getInvoices: invoiceService.getInvoices,

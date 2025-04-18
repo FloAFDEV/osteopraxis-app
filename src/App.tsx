@@ -23,8 +23,8 @@ import NewCabinetPage from "./pages/NewCabinetPage";
 import EditCabinetPage from "./pages/EditCabinetPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
-import OsteopathProfilePage from "./pages/OsteopathProfilePage";
-import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
+import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
+import ProfessionalSettingsPage from "./pages/ProfessionalSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 import { api } from './services/api';
 
@@ -48,7 +48,7 @@ function App() {
   }, [loadStoredToken]);
   
   // IMPORTANT: Always allow access to the dashboard when authenticated
-  // Don't check for osteopath or cabinet existence here
+  // Don't check for professional profile or cabinet existence here
   
   console.log("État auth:", { isAuthenticated, userId: user?.id });
   
@@ -80,9 +80,9 @@ function App() {
         <Route path="/appointments/:id/edit" element={isAuthenticated ? <EditAppointmentPage /> : <Navigate to="/login" />} />
         <Route path="/schedule" element={isAuthenticated ? <SchedulePage /> : <Navigate to="/login" />} />
         <Route path="/settings" element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" />} />
-        <Route path="/settings/profile" element={isAuthenticated ? <OsteopathSettingsPage /> : <Navigate to="/login" />} />
-        <Route path="/profile/setup" element={isAuthenticated ? <OsteopathProfilePage /> : <Navigate to="/login" />} />
-        <Route path="/osteopath-profile" element={isAuthenticated ? <OsteopathProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/settings/profile" element={isAuthenticated ? <ProfessionalSettingsPage /> : <Navigate to="/login" />} />
+        <Route path="/profile/setup" element={isAuthenticated ? <ProfessionalProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/professional-profile" element={isAuthenticated ? <ProfessionalProfilePage /> : <Navigate to="/login" />} />
         <Route path="/settings/cabinet" element={isAuthenticated ? <CabinetSettingsPage /> : <Navigate to="/login" />} />
         <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
         <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />

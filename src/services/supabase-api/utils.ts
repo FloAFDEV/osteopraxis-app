@@ -1,82 +1,68 @@
-import { supabase as supabaseClient } from "@/integrations/supabase/client";
+
 import { createClient } from '@supabase/supabase-js';
-import { SIMULATE_AUTH } from "../api/config";
 
-// URL et clé Supabase
-const SUPABASE_URL = "https://jpjuvzpqfirymtjwnier.supabase.co";
-// Créer un client admin avec la clé de service si disponible
-const adminKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
+// URL et clé API de Supabase
+const SUPABASE_URL = 'https://jpjuvzpqfirymtjwnier.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ';
 
-// Export du client standard
-export const supabase = supabaseClient;
+// Création du client Supabase
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Export d'un client admin pour contourner les RLS et accéder directement aux tables
-export const supabaseAdmin = createClient(SUPABASE_URL, adminKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+// Client Supabase avec accès administrateur pour les opérations spéciales
+// NOTE: cette clé devrait être gérée de manière sécurisée, idéalement via des variables d'environnement
+export const supabaseAdmin = createClient(
+  SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY || SUPABASE_KEY
+);
 
-// Récupérer l'ID ostéopathe associé à l'utilisateur courant
-export async function getCurrentOsteopathId(): Promise<number | null> {
+// Fonction d'aide pour typer correctement les données
+export function typedData<T>(data: any): T {
+  return data as T;
+}
+
+// Fonction utilitaire pour récupérer l'ID du profil professionnel de l'utilisateur actuellement connecté
+export async function getCurrentProfileId(): Promise<number | null> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      console.log("Aucune session utilisateur active");
+    // Vérifier l'authentification
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session) {
+      console.log("Pas de session utilisateur active");
       return null;
     }
     
-    const userId = session.user.id;
-    console.log("Recherche d'ostéopathe pour l'utilisateur:", userId);
+    const userId = sessionData.session.user.id;
     
-    // Essayer de récupérer l'ID ostéopathe
-    const { data: osteopath, error } = await supabase
-      .from('Osteopath')
-      .select('id')
-      .eq('userId', userId)
-      .maybeSingle();
-    
-    if (error) {
-      console.error("Erreur lors de la récupération de l'ostéopathe:", error);
+    // Récupérer l'utilisateur depuis la table User
+    const { data: userData, error: userError } = await supabase
+      .from("User")
+      .select("professionalProfileId")
+      .eq("id", userId)
+      .single();
+      
+    if (userError || !userData?.professionalProfileId) {
+      console.log("Pas de professionalProfileId trouvé pour l'utilisateur", userId);
+      
+      // Essayer de trouver directement le profil associé
+      const { data: profileData } = await supabase
+        .from("ProfessionalProfile")
+        .select("id")
+        .eq("userId", userId)
+        .maybeSingle();
+        
+      if (profileData?.id) {
+        console.log("Profil trouvé directement:", profileData.id);
+        return profileData.id;
+      }
+      
       return null;
     }
     
-    if (!osteopath) {
-      console.log("Aucun ostéopathe trouvé pour cet utilisateur");
-      // Ne pas créer d'ostéopathe par défaut, retourner null
-      // L'application devra rediriger l'utilisateur vers une page de configuration
-      return null;
-    }
-    
-    console.log("Ostéopathe trouvé avec l'ID:", osteopath.id);
-    return osteopath.id;
-    
-  } catch (err) {
-    console.error("Erreur lors de la récupération de l'ID ostéopathe:", err);
+    return userData.professionalProfileId;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du profil:", error);
     return null;
   }
 }
 
-// Ajouter des en-têtes d'authentification aux requêtes pour contourner les restrictions RLS en développement
-export function addAuthHeaders(query: any) {
-  // La fonction ne doit pas essayer d'ajouter des headers à la requête Supabase
-  // car cette approche n'est pas compatible avec la façon dont les requêtes Supabase fonctionnent
-  // Nous retournons simplement la requête telle quelle
-  return query;
-}
-
-// Fonction utilitaire pour garantir que le statut de l'appointement est une valeur d'enum valide
-export const AppointmentStatusValues = ["SCHEDULED", "COMPLETED", "CANCELED", "NO_SHOW", "RESCHEDULED"];
-export function ensureAppointmentStatus(status: any) {
-  if (typeof status === 'string' && AppointmentStatusValues.includes(status)) {
-    return status;
-  }
-  // Valeur par défaut si le statut n'est pas valide
-  return "SCHEDULED";
-}
-
-// Fonction utilitaire pour typer correctement les données de Supabase
-export function typedData<T>(data: any): T {
-  return data as T;
-}
+// Pour compatibilité avec le code existant
+export const getCurrentOsteopathId = getCurrentProfileId;
