@@ -46,59 +46,59 @@ export const patientService = {
   
   async getPatients(): Promise<Patient[]> {
     try {
-      console.log("=== Début getPatients ===");
+      console.log("=== Début getPatients avec méthode directe ===");
       
-      // Vérification de la session d'authentification
-      const { data: session } = await supabase.auth.getSession();
-      console.log("État de la session:", session?.session ? "Active" : "Inactive");
-      
-      if (!session?.session) {
-        console.error("Pas de session Supabase active");
-        return [];
-      }
-      
-      console.log("ID Utilisateur:", session.session.user.id);
-      
-      // MODIFICATION IMPORTANTE: Récupération directe de tous les patients sans filtre
-      // En mode développement, on ignore le rôle et l'ostéopathe 
-      console.log("Mode développement activé: Récupération de TOUS les patients sans filtrage");
-      
-      const { data, error } = await supabase.from('Patient').select('*');
+      // Requête directe sans filtres ou vérifications - maximum de simplicité
+      const { data, error } = await supabase
+        .from('Patient')
+        .select('*')
+        .order('lastName', { ascending: true });
       
       if (error) {
         console.error('Erreur lors de la récupération des patients:', error);
         throw error;
       }
 
-      console.log(`${data?.length || 0} patients récupérés`);
+      console.log(`SUCCÈS: ${data?.length || 0} patients récupérés directement`);
+      
+      // Débogage détaillé des données récupérées
       if (data && data.length > 0) {
         console.log('Premier patient:', data[0]);
+        console.log(`Liste complète: ${data.length} patients trouvés`);
       } else {
         console.log('Aucun patient trouvé dans la base de données');
       }
       
-      console.log("=== Fin getPatients ===");
+      console.log("=== Fin getPatients avec méthode directe ===");
       return data?.map(adaptPatientFromSupabase) || [];
       
     } catch (err) {
-      console.error("Erreur dans getPatients:", err);
+      console.error("Erreur critique dans getPatients:", err);
       throw err;
     }
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
-    const { data, error } = await supabase
-      .from('Patient')
-      .select('*')
-      .eq('id', id)
-      .single();
+    try {
+      console.log(`Récupération directe du patient ID ${id}`);
+      
+      const { data, error } = await supabase
+        .from('Patient')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (error) {
-      console.error(`Error fetching patient with id ${id}:`, error);
-      throw error;
+      if (error) {
+        console.error(`Error fetching patient with id ${id}:`, error);
+        throw error;
+      }
+
+      console.log(`Patient ID ${id} trouvé:`, data);
+      return adaptPatientFromSupabase(data);
+    } catch (err) {
+      console.error(`Erreur lors de la récupération du patient ID ${id}:`, err);
+      throw err;
     }
-
-    return adaptPatientFromSupabase(data);
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
