@@ -74,6 +74,7 @@ export const appointmentService = {
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
+    console.log(`API: Appel à updateAppointment(${id})`, appointment);
     if (USE_SUPABASE) {
       try {
         console.log(`API: Appel à supabaseAppointmentService.updateAppointment(${id})`, appointment);

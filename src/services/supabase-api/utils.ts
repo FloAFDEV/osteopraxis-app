@@ -123,9 +123,16 @@ export function getEnumValue<T extends string>(value: string, allowedValues: rea
   throw new Error(`Valeur enum invalide: ${value}. Les valeurs autorisées sont: ${allowedValues.join(', ')}`);
 }
 
-// AppointmentStatus enum helper - Correction de CANCELLED à CANCELED pour correspondre au type dans types.ts
+// AppointmentStatus enum helper pour mapper entre nos types et ceux de Supabase
+// Note: CANCELLED dans notre code doit être CANCELED pour Supabase
 export const AppointmentStatusValues = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'] as const;
 export type AppointmentStatusType = typeof AppointmentStatusValues[number];
+
+// Map pour convertir entre notre format et celui de Supabase
+export const appointmentStatusMap: Record<string, string> = {
+  'CANCELLED': 'CANCELED',  // Mapping pour conversion
+  'CANCELED': 'CANCELLED'   // Pour conversion inverse
+};
 
 // Contraception enum helper
 export const ContraceptionValues = [
@@ -135,14 +142,14 @@ export const ContraceptionValues = [
 export type ContraceptionType = typeof ContraceptionValues[number];
 
 // Fonctions de sécurité pour s'assurer que les valeurs correspondent aux enum de Supabase
-export function ensureAppointmentStatus(status: string): AppointmentStatusType {
+export function ensureAppointmentStatus(status: string): string {
   console.log("Validation du statut:", status);
   // Correction spéciale pour CANCELLED -> CANCELED
-  if (status === 'CANCELED') {
-    console.log("Correction de CANCELED à CANCELLED pour Supabase");
-    return 'CANCELLED';
+  if (status === 'CANCELLED') {
+    console.log("Correction de CANCELLED à CANCELED pour Supabase");
+    return 'CANCELED';
   }
-  return getEnumValue(status, AppointmentStatusValues);
+  return status;
 }
 
 export function ensureContraception(contraception: string): ContraceptionType {

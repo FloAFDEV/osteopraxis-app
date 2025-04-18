@@ -1,14 +1,32 @@
 
-import { Appointment, AppointmentStatus } from "@/types";
+import { Appointment, AppointmentStatus, SupabaseAppointmentStatus } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   addAuthHeaders, 
-  ensureAppointmentStatus, 
-  AppointmentStatusValues,
+  ensureAppointmentStatus,
+  appointmentStatusMap,
   checkAuth
 } from "./utils";
 
 export const supabaseAppointmentService = {
+  // Convertit le statut de notre format à celui de Supabase
+  toSupabaseStatus(status: AppointmentStatus): SupabaseAppointmentStatus {
+    console.log(`Conversion du statut: ${status} vers format Supabase`);
+    if (status === 'CANCELLED') {
+      return 'CANCELED' as SupabaseAppointmentStatus;
+    }
+    return status as SupabaseAppointmentStatus;
+  },
+
+  // Convertit le statut du format de Supabase au notre
+  fromSupabaseStatus(status: string): AppointmentStatus {
+    console.log(`Conversion du statut Supabase: ${status} vers notre format`);
+    if (status === 'CANCELED') {
+      return 'CANCELLED' as AppointmentStatus;
+    }
+    return status as AppointmentStatus;
+  },
+
   async getAppointments(): Promise<Appointment[]> {
     try {
       console.log("Tentative de récupération des rendez-vous...");
@@ -46,7 +64,7 @@ export const supabaseAppointmentService = {
         date: item.date,
         reason: item.reason,
         patientId: item.patientId,
-        status: item.status as AppointmentStatus,
+        status: this.fromSupabaseStatus(item.status),
         notificationSent: item.notificationSent
       }));
     } catch (error) {
@@ -90,7 +108,7 @@ export const supabaseAppointmentService = {
         date: data.date,
         reason: data.reason,
         patientId: data.patientId,
-        status: data.status as AppointmentStatus,
+        status: this.fromSupabaseStatus(data.status),
         notificationSent: data.notificationSent
       };
     } catch (error) {
@@ -121,7 +139,7 @@ export const supabaseAppointmentService = {
         date: item.date,
         reason: item.reason,
         patientId: item.patientId,
-        status: item.status as AppointmentStatus,
+        status: this.fromSupabaseStatus(item.status),
         notificationSent: item.notificationSent
       }));
     } catch (error) {
@@ -142,15 +160,15 @@ export const supabaseAppointmentService = {
         console.error("Erreur d'authentification lors de la création:", authError);
       }
       
-      // Make sure the status value is one of the allowed enum values
-      const validStatus = ensureAppointmentStatus(appointmentData.status);
+      // Convertir le statut pour Supabase
+      const supabaseStatus = this.toSupabaseStatus(appointmentData.status);
       
       // Create appointment with proper status type
       const appointmentToCreate = {
         date: appointmentData.date,
         reason: appointmentData.reason,
         patientId: appointmentData.patientId,
-        status: validStatus,
+        status: supabaseStatus,
         notificationSent: appointmentData.notificationSent
       };
       
@@ -179,7 +197,7 @@ export const supabaseAppointmentService = {
         date: data.date,
         reason: data.reason,
         patientId: data.patientId,
-        status: data.status as AppointmentStatus,
+        status: this.fromSupabaseStatus(data.status),
         notificationSent: data.notificationSent
       };
     } catch (error) {
@@ -206,16 +224,14 @@ export const supabaseAppointmentService = {
       if ('reason' in appointmentData) updateData.reason = appointmentData.reason;
       if ('patientId' in appointmentData) updateData.patientId = appointmentData.patientId;
       if ('status' in appointmentData && appointmentData.status) {
-        // Make sure status is a valid enum value
-        updateData.status = ensureAppointmentStatus(appointmentData.status);
+        // Convertir notre statut au format de Supabase
+        updateData.status = this.toSupabaseStatus(appointmentData.status);
       }
       if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
       console.log("Données formatées pour la mise à jour:", updateData);
       
-      console.log("Tentative de récupération des données existantes...");
-      
-      // Format update data to ensure it includes the ID and all required fields
+      // Essayer de récupérer l'enregistrement existant d'abord
       const existingAppointment = await this.getAppointmentById(id);
       
       if (!existingAppointment) {
@@ -225,15 +241,8 @@ export const supabaseAppointmentService = {
       
       console.log("Données existantes récupérées:", existingAppointment);
       
-      // Fusionner l'existant avec les nouvelles données
-      const mergedData = {
-        ...existingAppointment,
-        ...updateData
-      };
-      
-      console.log("Données fusionnées pour l'upsert:", mergedData);
-      
-      // Essayons d'utiliser update au lieu de upsert
+      // Utiliser la méthode update au lieu de upsert
+      console.log("Utilisation de la méthode .update() pour mise à jour");
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
@@ -258,7 +267,7 @@ export const supabaseAppointmentService = {
         date: data.date,
         reason: data.reason,
         patientId: data.patientId,
-        status: data.status as AppointmentStatus,
+        status: this.fromSupabaseStatus(data.status),
         notificationSent: data.notificationSent
       };
     } catch (error) {

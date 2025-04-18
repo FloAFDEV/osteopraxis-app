@@ -95,10 +95,19 @@ export interface Appointment {
   notificationSent: boolean;
 }
 
+// IMPORTANT: Supabase utilise "CANCELED" mais notre application utilise "CANCELLED"
 export type AppointmentStatus = 
   | "SCHEDULED" 
   | "COMPLETED" 
   | "CANCELLED" 
+  | "RESCHEDULED";
+
+// Type côté Supabase (pour la compatibilité avec l'API)
+export type SupabaseAppointmentStatus =
+  | "SCHEDULED"
+  | "COMPLETED"
+  | "CANCELED"
+  | "NO_SHOW"
   | "RESCHEDULED";
 
 // Interface pour les cabinets
