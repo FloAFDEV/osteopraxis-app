@@ -46,109 +46,30 @@ export const patientService = {
   
   async getPatients(): Promise<Patient[]> {
     try {
-      console.log("=== Début getPatients: RÉCUPÉRATION FORCÉE DE TOUS LES PATIENTS ===");
-      
-      // Récupérer ou créer l'ID ostéopathe associé à l'utilisateur authentifié
       const osteopathId = await getCurrentOsteopathId();
-      console.log(`Tentative récupération patients pour osteopathId: ${osteopathId}`);
-      
-      if (osteopathId) {
-        // Essayons d'abord avec le client Supabase standard en filtrant par osteopathId
-        console.log("Tentative avec client standard et filtrage par osteopathId...");
-        let result = await supabase
-          .from('Patient')
-          .select('*')
-          .eq('osteopathId', osteopathId)
-          .order('lastName', { ascending: true });
-        
-        // Si aucune donnée ou erreur, essayons avec le client admin
-        if (result.error || !result.data || result.data.length === 0) {
-          console.log("Tentative avec client admin et filtrage par osteopathId...");
-          result = await supabaseAdmin
-            .from('Patient')
-            .select('*')
-            .eq('osteopathId', osteopathId)
-            .order('lastName', { ascending: true });
-        }
-        
-        const { data, error } = result;
-        
-        if (error) {
-          console.error('Erreur lors de la récupération des patients:', error);
-          throw error;
-        }
-
-        console.log(`RÉSULTAT DE LA REQUÊTE: ${data?.length || 0} patients trouvés pour osteopathId ${osteopathId}`);
-        
-        // Si des patients sont trouvés
-        if (data && data.length > 0) {
-          console.log('Premier patient trouvé:', data[0]);
-          console.log('Nombre total de patients:', data.length);
-          return data.map(adaptPatientFromSupabase);
-        } 
-        
-        // Si aucun patient n'est trouvé, en créer un automatiquement
-        console.log('Aucun patient trouvé pour cet ostéopathe. Création d\'un patient de démo...');
-        const testPatient = await this.createTestPatient(osteopathId);
-        return [testPatient];
+      if (!osteopathId) {
+        console.error("Impossible de récupérer l'ID ostéopathe");
+        return [];
       }
-      
-      // Aucun ostéopathe trouvé ou création échouée
-      console.log('ATTENTION: Impossible de récupérer ou créer un ostéopathe pour l\'utilisateur courant');
-      console.log('Création d\'un patient fictif en mémoire...');
-      
-      // Retourner un patient fictif en mémoire
-      return [this.createMockPatient()];
+
+      console.log(`Récupération des patients pour l'ostéopathe ${osteopathId}`);
+      const { data, error } = await supabase
+        .from('Patient')
+        .select('*')
+        .eq('osteopathId', osteopathId)
+        .order('lastName', { ascending: true });
+
+      if (error) {
+        console.error('Erreur lors de la récupération des patients:', error);
+        return [];
+      }
+
+      console.log(`${data?.length || 0} patients trouvés`);
+      return data?.map(adaptPatientFromSupabase) || [];
     } catch (err) {
       console.error("Erreur critique dans getPatients:", err);
-      
-      // Fallback: retourner un patient en mémoire pour ne pas bloquer l'interface
-      console.log("Création d'un patient fictif en mémoire...");
-      
-      return [this.createMockPatient()];
+      return [];
     }
-  },
-
-  createMockPatient(): Patient {
-    const now = new Date().toISOString();
-    
-    return {
-      id: 999,
-      firstName: "Patient",
-      lastName: "Démo",
-      email: "demo@example.com",
-      phone: "0123456789",
-      gender: "Homme" as Gender,
-      birthDate: "1990-01-01T00:00:00.000Z",
-      maritalStatus: "SINGLE" as MaritalStatus,
-      occupation: "Démo",
-      osteopathId: 1,
-      cabinetId: 1,
-      userId: null,
-      createdAt: now,
-      updatedAt: now,
-      hasChildren: "false",
-      handedness: "RIGHT" as Handedness,
-      contraception: "NONE" as Contraception,
-      hasVisionCorrection: false,
-      isDeceased: false,
-      isSmoker: false,
-      address: "123 Rue Démo",
-      childrenAges: [],
-      generalPractitioner: "Dr. Démo",
-      surgicalHistory: null,
-      traumaHistory: null,
-      rheumatologicalHistory: null,
-      currentTreatment: null,
-      ophtalmologistName: null,
-      entProblems: null,
-      entDoctorName: null,
-      digestiveProblems: null,
-      digestiveDoctorName: null,
-      physicalActivity: null,
-      hdlm: null,
-      avatarUrl: null
-    };
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
@@ -273,76 +194,6 @@ export const patientService = {
     }
 
     return adaptPatientFromSupabase(data);
-  },
-
-  async createTestPatient(osteopathId?: number): Promise<Patient> {
-    try {
-      console.log("Création d'un patient test...");
-      
-      // Get osteopathId if not provided
-      const finalOsteopathId = osteopathId || await getCurrentOsteopathId();
-      if (!finalOsteopathId) {
-        throw new Error("ID ostéopathe manquant pour la création du patient test");
-      }
-      
-      const now = new Date().toISOString();
-      const testPatient = {
-        firstName: "Jean",
-        lastName: "Dupont",
-        email: `patient.test.${new Date().getTime()}@example.com`,
-        phone: "0123456789",
-        address: "123 Rue de Test",
-        gender: "Homme" as Gender,
-        birthDate: "1985-05-15T00:00:00.000Z",
-        maritalStatus: "MARRIED" as MaritalStatus,
-        occupation: "Ingénieur",
-        hasChildren: "true",
-        childrenAges: [8, 12],
-        generalPractitioner: "Dr. Martin",
-        surgicalHistory: "Appendicectomie 2015",
-        traumaHistory: "Fracture cheville gauche 2018",
-        rheumatologicalHistory: null,
-        currentTreatment: null,
-        handedness: "RIGHT" as Handedness,
-        hasVisionCorrection: true,
-        ophtalmologistName: "Dr. Blanc",
-        entProblems: null,
-        entDoctorName: null,
-        digestiveProblems: null,
-        digestiveDoctorName: null,
-        physicalActivity: "Course à pied 2x/semaine",
-        isSmoker: false,
-        isDeceased: false,
-        contraception: "NONE" as Contraception,
-        hdlm: null,
-        avatarUrl: null,
-        cabinetId: 1,
-        userId: null,
-        osteopathId: finalOsteopathId,
-        createdAt: now,
-        updatedAt: now
-      };
-      
-      // Utiliser le client admin pour contourner les RLS
-      const { data, error } = await supabaseAdmin
-        .from('Patient')
-        .insert(testPatient)
-        .select()
-        .single();
-        
-      if (error) {
-        console.error("Erreur lors de la création du patient test:", error);
-        throw error;
-      }
-      
-      console.log("Patient test créé avec succès:", data);
-      return adaptPatientFromSupabase(data);
-    } catch (err) {
-      console.error("Erreur lors de la création du patient test:", err);
-      
-      // En cas d'échec, retourner un patient fictif
-      return this.createMockPatient();
-    }
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {

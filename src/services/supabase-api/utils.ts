@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
 import { createClient } from '@supabase/supabase-js';
 import { SIMULATE_AUTH } from "../api/config";
@@ -19,7 +18,7 @@ export const supabaseAdmin = createClient(SUPABASE_URL, adminKey, {
   }
 });
 
-// Récupérer ou créer un ID ostéopathe associé à l'utilisateur courant
+// Récupérer l'ID ostéopathe associé à l'utilisateur courant
 export async function getCurrentOsteopathId(): Promise<number | null> {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -38,39 +37,21 @@ export async function getCurrentOsteopathId(): Promise<number | null> {
       .eq('userId', userId)
       .maybeSingle();
     
-    // Si l'ostéopathe existe déjà, retourner son ID
-    if (osteopath && osteopath.id) {
-      console.log("Ostéopathe trouvé avec l'ID:", osteopath.id);
-      return osteopath.id;
-    }
-    
-    // Si non trouvé ou erreur, créer un nouvel ostéopathe
-    console.log("Aucun ostéopathe trouvé. Création d'un nouveau profil...");
-    
-    // Ajouter un nouvel enregistrement d'ostéopathe pour cet utilisateur
-    const now = new Date().toISOString();
-    const { data: newOsteopath, error: insertError } = await supabaseAdmin
-      .from('Osteopath')
-      .insert({
-        userId: userId,
-        name: "Nouvel Ostéopathe",
-        professional_title: "Ostéopathe D.O.",
-        ape_code: "8690F",
-        createdAt: now,
-        updatedAt: now
-      })
-      .select('id')
-      .single();
-    
-    if (insertError || !newOsteopath) {
-      console.error("Erreur lors de la création d'un nouvel ostéopathe:", insertError);
+    if (error) {
+      console.error("Erreur lors de la récupération de l'ostéopathe:", error);
       return null;
     }
     
-    console.log("Nouvel ostéopathe créé avec succès, ID:", newOsteopath.id);
-    return newOsteopath.id;
+    if (!osteopath) {
+      console.log("Aucun ostéopathe trouvé pour cet utilisateur");
+      return null;
+    }
+    
+    console.log("Ostéopathe trouvé avec l'ID:", osteopath.id);
+    return osteopath.id;
+    
   } catch (err) {
-    console.error("Erreur lors de la récupération/création de l'ID ostéopathe:", err);
+    console.error("Erreur lors de la récupération de l'ID ostéopathe:", err);
     return null;
   }
 }
