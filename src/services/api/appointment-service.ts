@@ -73,6 +73,7 @@ export const appointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
+        // Utilise supabaseAppointmentService.updateAppointment qui a été modifié pour utiliser upsert
         return await supabaseAppointmentService.updateAppointment(id, appointment);
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
@@ -105,17 +106,7 @@ export const appointmentService = {
     if (USE_SUPABASE) {
       try {
         // Utiliser le service Supabase pour la suppression
-        const { error } = await supabase
-          .from("Appointment")
-          .delete()
-          .eq("id", id);
-          
-        if (error) {
-          console.error("Erreur lors de la suppression du rendez-vous:", error);
-          throw error;
-        }
-        
-        return true;
+        return await supabaseAppointmentService.deleteAppointment(id);
       } catch (error) {
         console.error("Erreur deleteAppointment:", error);
         throw error;

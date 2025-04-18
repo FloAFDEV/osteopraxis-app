@@ -1,6 +1,13 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
+import { delay, USE_SUPABASE } from "./config";
+import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  addAuthHeaders, 
+  ensureAppointmentStatus, 
+  AppointmentStatusValues
+} from "./utils";
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -140,6 +147,7 @@ export const supabaseAppointmentService = {
     }
   },
 
+  // Modification importante ici : utiliser POST au lieu de PATCH pour éviter les problèmes CORS
   async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
       const updateData: Record<string, any> = {};
@@ -153,11 +161,11 @@ export const supabaseAppointmentService = {
       }
       if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
+      // Utiliser upsert avec prefer:resolution=merge-duplicates au lieu de PATCH
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
-          .update(updateData)
-          .eq("id", id)
+          .upsert({ id, ...updateData })
           .select()
           .single()
       );
