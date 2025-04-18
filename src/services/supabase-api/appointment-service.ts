@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 import { checkAuth } from "./utils";
@@ -13,15 +12,18 @@ const adaptAppointmentFromSupabase = (data: any): Appointment => ({
   status: convertDbStatusToAppStatus(data.status)
 });
 
-// Convert Supabase status (CANCELED) to our app status (CANCELLED)
-const convertAppStatusToDbStatus = (status: AppointmentStatus): string => {
+// Define the Supabase AppointmentStatus type that matches exactly what's in the DB
+type SupabaseAppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
+
+// Convert our app status (CANCELLED) to Supabase status (CANCELED)
+const convertAppStatusToDbStatus = (status: AppointmentStatus): SupabaseAppointmentStatus => {
   if (status === "CANCELLED") {
     return "CANCELED";
   }
-  return status;
+  return status as SupabaseAppointmentStatus;
 };
 
-// Convert our app status (CANCELLED) to Supabase status (CANCELED)
+// Convert Supabase status (CANCELED) to our app status (CANCELLED)
 const convertDbStatusToAppStatus = (status: string): AppointmentStatus => {
   if (status === "CANCELED") {
     return "CANCELLED";
