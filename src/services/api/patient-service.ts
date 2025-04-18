@@ -13,6 +13,16 @@ export const patientService = {
         console.log("API getPatients: Using Supabase");
         console.log("Making direct request to Supabase API");
         
+        // Ajout de logs sur l'état d'authentification
+        const { data: sessionData } = await supabasePatientService.getAuthSession();
+        console.log("Session active:", sessionData?.session ? "Oui" : "Non");
+        if (sessionData?.session) {
+          console.log("ID Utilisateur:", sessionData.session.user.id);
+          console.log("Auth Cookie:", document.cookie.includes("sb-") ? "Présent" : "Absent");
+        } else {
+          console.warn("Aucune session d'authentification détectée");
+        }
+        
         const patientsData = await supabasePatientService.getPatients();
         
         console.log(`API getPatients: Récupéré ${patientsData.length} patients depuis Supabase`);

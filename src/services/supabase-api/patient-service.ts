@@ -40,9 +40,43 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 });
 
 export const patientService = {
+  async getAuthSession() {
+    return await supabase.auth.getSession();
+  },
+  
   async getPatients(): Promise<Patient[]> {
     try {
       console.log("Fetching patients from Supabase...");
+      
+      // Vérification de la session d'authentification
+      const { data: session } = await supabase.auth.getSession();
+      if (!session || !session.session) {
+        console.error("Pas de session Supabase active - l'accès aux patients échouera");
+      } else {
+        console.log("Session Supabase active:", session.session.user.id);
+      }
+      
+      // Vérification du rôle et de l'ostéopathe associé
+      if (session?.session) {
+        try {
+          const { data: userData, error: userError } = await supabase
+            .from('User')
+            .select('role, osteopathId')
+            .eq('id', session.session.user.id)
+            .maybeSingle();
+          
+          if (userError) {
+            console.error("Erreur lors de la récupération des données utilisateur:", userError);
+          } else if (userData) {
+            console.log("Rôle utilisateur:", userData.role);
+            console.log("ID Ostéopathe associé:", userData.osteopathId);
+          } else {
+            console.warn("Utilisateur authentifié mais pas trouvé dans la table User");
+          }
+        } catch (e) {
+          console.error("Exception lors de la récupération des données utilisateur:", e);
+        }
+      }
       
       // Ajout d'un log pour afficher le schéma actuellement utilisé
       const { data: schemaInfo, error: schemaError } = await supabase

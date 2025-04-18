@@ -80,8 +80,6 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
 
   const avatarStyle = getAvatarColor();
 
-  console.log(`Rendering patient: ${patient.id} - ${patient.firstName} ${patient.lastName}`);
-
   return (
     <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
       <div className="p-4">
