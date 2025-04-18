@@ -1,7 +1,5 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
-import { supabaseAppointmentService } from "../supabase-api/appointment-service";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   addAuthHeaders, 
@@ -162,10 +160,23 @@ export const supabaseAppointmentService = {
       if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
       // Utiliser upsert avec prefer:resolution=merge-duplicates au lieu de PATCH
+      // Nous devons fournir les champs obligatoires pour l'upsert, ou récupérer d'abord les données existantes
+      const existingAppointment = await this.getAppointmentById(id);
+      
+      if (!existingAppointment) {
+        throw new Error(`Appointment with ID ${id} not found`);
+      }
+      
+      // Fusionner l'existant avec les nouvelles données
+      const mergedData = {
+        ...existingAppointment,
+        ...updateData
+      };
+      
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
-          .upsert({ id, ...updateData })
+          .upsert(mergedData)
           .select()
           .single()
       );
