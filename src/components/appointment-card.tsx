@@ -12,6 +12,22 @@ interface AppointmentCardProps {
   onEdit?: () => void;
   onCancel?: () => void;
 }
+const getStatusBadge = (status: Appointment["status"]) => {
+  switch (status) {
+    case "SCHEDULED":
+      return <Badge className="bg-blue-500">Planifié</Badge>;
+    case "COMPLETED":
+      return <Badge className="bg-green-500">Terminé</Badge>;
+    case "CANCELED":
+      return <Badge className="bg-red-500">Annulé</Badge>;
+    case "RESCHEDULED":
+      return <Badge className="bg-amber-500">Reporté</Badge>;
+    case "NO_SHOW":
+      return <Badge className="bg-gray-500">Absent</Badge>;
+    default:
+      return null;
+  }
+};
 export function AppointmentCard({
   appointment,
   patient,
@@ -23,20 +39,7 @@ export function AppointmentCard({
     locale: fr
   });
   const formattedTime = format(appointmentDate, "HH:mm");
-  const getStatusBadge = (status: Appointment["status"]) => {
-    switch (status) {
-      case "SCHEDULED":
-        return <Badge className="bg-blue-500">Planifié</Badge>;
-      case "COMPLETED":
-        return <Badge className="bg-green-500">Terminé</Badge>;
-      case "CANCELLED":
-        return <Badge className="bg-red-500">Annulé</Badge>;
-      case "RESCHEDULED":
-        return <Badge className="bg-amber-500">Reporté</Badge>;
-      default:
-        return null;
-    }
-  };
+  
   return <Card className="overflow-hidden hover-scale">
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">

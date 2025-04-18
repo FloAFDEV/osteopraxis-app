@@ -1,109 +1,90 @@
+import { AppointmentStatus } from "@/types";
 
-// Ce fichier contient des utilitaires pour le traitement des données des patients
-import { Patient, User, AppointmentStatus } from "@/types";
+// Fonction pour valider et convertir la date
+export const validateAndConvertDate = (dateString: string): string | null => {
+  if (!dateString) return null;
 
-/**
- * Adapte les données d'un patient depuis le format Supabase vers le format interne
- */
-export function adaptPatientFromSupabase(supabasePatient: any): Patient {
-  // Assure-toi de logger les données brutes pour le débogage
-  console.log("Adapting patient from Supabase:", supabasePatient);
-  
-  // Vérifie que l'objet patient existe
-  if (!supabasePatient) {
-    console.warn("Patient data is null or undefined");
-    return {} as Patient;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return null; // Retourne null si la date est invalide
   }
 
-  // Retourne un objet patient adapté
-  return {
-    ...supabasePatient,
-    // Assure-toi que les dates sont correctement formatées
-    birthDate: supabasePatient.birthDate || null,
-    createdAt: supabasePatient.createdAt || new Date().toISOString(),
-    updatedAt: supabasePatient.updatedAt || new Date().toISOString(),
-    // Assure-toi que les tableaux sont correctement initialisés
-    childrenAges: Array.isArray(supabasePatient.childrenAges) ? supabasePatient.childrenAges : [],
-  };
-}
+  return date.toISOString(); // Convertit en format ISO pour Supabase
+};
 
-/**
- * Prépare les données d'un patient pour l'API
- */
-export function preparePatientForApi(patient: Partial<Patient>): any {
-  return {
-    ...patient,
-    // Transforme les booléens en chaînes si nécessaire pour la compatibilité
-    hasChildren: patient.hasChildren?.toString() || "false",
-  };
-}
-
-/**
- * Affiche les informations d'un patient pour le débogage
- */
-export function debugPatient(patient: Patient | undefined, label: string = "Patient"): void {
-  if (!patient) {
-    console.log(`${label}: undefined`);
-    return;
+// Fonction pour valider et convertir le statut marital
+export const validateMaritalStatus = (status: string): string | null => {
+  const allowedStatuses = ["SINGLE", "MARRIED", "DIVORCED", "WIDOWED", "SEPARATED", "ENGAGED", "PARTNERED"];
+  if (!status) return null;
+  if (allowedStatuses.includes(status)) {
+    return status;
   }
-  
-  console.log(`${label}:`, {
-    id: patient.id,
-    name: `${patient.firstName} ${patient.lastName}`,
-    gender: patient.gender,
-    birthDate: patient.birthDate,
-    email: patient.email,
-    phone: patient.phone,
-    address: patient.address,
-    createdAt: patient.createdAt,
-    updatedAt: patient.updatedAt,
-  });
-}
+  return null;
+};
 
-/**
- * Formate les âges des enfants pour l'affichage
- */
-export function formatChildrenAges(ages: number[] | undefined): string {
-  if (!ages || ages.length === 0) {
-    return "Aucun";
+// Fonction pour valider et convertir la latéralité
+export const validateHandedness = (handedness: string): string | null => {
+  const allowedHandedness = ["LEFT", "RIGHT", "AMBIDEXTROUS"];
+  if (!handedness) return null;
+  if (allowedHandedness.includes(handedness)) {
+    return handedness;
   }
-  return ages.sort((a, b) => a - b).join(", ");
-}
+  return null;
+};
 
-/**
- * Convertit la valeur hasChildren de string à boolean
- */
-export function convertHasChildrenToBoolean(hasChildren: string | boolean | undefined): boolean {
-  if (typeof hasChildren === "boolean") {
-    return hasChildren;
+// Fonction pour valider et convertir la contraception
+export const validateContraception = (contraception: string): string | null => {
+  const allowedContraceptions = ["NONE", "PILLS", "CONDOM", "IMPLANTS", "DIAPHRAGM", "IUD", "INJECTION", "PATCH", "RING", "NATURAL_METHODS", "STERILIZATION"];
+  if (!contraception) return null;
+  if (allowedContraceptions.includes(contraception)) {
+    return contraception;
   }
-  return hasChildren === "true" || hasChildren === "TRUE";
-}
+  return null;
+};
 
-/**
- * Vérifie si un utilisateur est administrateur
- */
-export function isUserAdmin(user: User | null): boolean {
-  return user?.role === "ADMIN";
-}
+// Fonction pour valider et convertir le genre
+export const validateGender = (gender: string): string | null => {
+  const allowedGenders = ["Homme", "Femme"];
+  if (!gender) return null;
+  if (allowedGenders.includes(gender)) {
+    return gender;
+  }
+  return null;
+};
 
-/**
- * Adapte le statut d'un rendez-vous depuis Supabase
- */
-export function adaptAppointmentStatusFromSupabase(status: string): AppointmentStatus {
-  const validStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"];
-  
-  if (validStatuses.includes(status as AppointmentStatus)) {
+// Fonction pour valider et convertir les âges des enfants
+export const validateChildrenAges = (ages: string): number[] | null => {
+  if (!ages) return null;
+
+  try {
+    const parsedAges = JSON.parse(ages);
+
+    if (!Array.isArray(parsedAges)) {
+      return null;
+    }
+
+    const validatedAges = parsedAges.map((age: any) => {
+      const parsedAge = Number(age);
+      return isNaN(parsedAge) || parsedAge < 0 ? null : parsedAge;
+    }).filter(age => age !== null);
+
+    if (validatedAges.length === 0) {
+      return null;
+    }
+
+    return validatedAges as number[];
+  } catch (error) {
+    console.error("Erreur lors de la validation des âges des enfants:", error);
+    return null;
+  }
+};
+
+// Fonction pour valider et convertir le statut du rendez-vous
+export const validateAppointmentStatus = (status: string): AppointmentStatus | null => {
+  const allowedStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELED", "NO_SHOW", "RESCHEDULED"];
+  if (!status) return null;
+  if (allowedStatuses.includes(status as AppointmentStatus)) {
     return status as AppointmentStatus;
   }
-  
-  // Valeur par défaut si le statut n'est pas reconnu
-  return "SCHEDULED";
-}
-
-/**
- * Adapte le statut d'un rendez-vous pour Supabase
- */
-export function adaptAppointmentStatusForSupabase(status: AppointmentStatus): string {
-  return status.toString();
-}
+  return null;
+};

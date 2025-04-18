@@ -1,4 +1,3 @@
-
 import { patientService } from "./patient-service";
 import { appointmentService } from "./appointment-service";
 import { cabinetService } from "./cabinet-service";
