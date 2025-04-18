@@ -25,6 +25,33 @@ let authState: AuthState = {
 };
 
 export const authService = {
+  // Ajout explicite de la fonction getSession
+  async getSession(): Promise<AuthState | null> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAuthService.checkAuth();
+      } catch (error) {
+        console.error("Erreur Supabase getSession:", error);
+        return null;
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(100);
+    const storedAuth = localStorage.getItem("authState");
+    
+    if (storedAuth) {
+      try {
+        return JSON.parse(storedAuth);
+      } catch (e) {
+        console.error("Failed to parse stored auth state", e);
+        return null;
+      }
+    }
+    
+    return null;
+  },
+  
   async register(userData: {
     firstName: string,
     lastName: string,

@@ -7,14 +7,9 @@ export const supabase = supabaseClient;
 
 // Ajouter des en-têtes d'authentification aux requêtes pour contourner les restrictions RLS en développement
 export function addAuthHeaders(query: any) {
-  if (SIMULATE_AUTH) {
-    // Simuler un utilisateur authentifié avec le rôle 'authenticated'
-    // Ceci ne fonctionne qu'en développement local avec RLS désactivé
-    query.headers({
-      Authorization: "Bearer simulated-jwt-token",
-      "x-supabase-auth": "simulated-auth"
-    });
-  }
+  // La fonction ne doit pas essayer d'ajouter des headers à la requête Supabase
+  // car cette approche n'est pas compatible avec la façon dont les requêtes Supabase fonctionnent
+  // Nous retournons simplement la requête telle quelle
   return query;
 }
 

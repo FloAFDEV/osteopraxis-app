@@ -8,7 +8,7 @@ import { authService } from "./auth-service";
 
 export const api = {
   // Auth
-  getSession: authService.getSession || (() => Promise.resolve(null)),
+  getSession: authService.getSession,
   login: authService.login,
   register: authService.register,
   logout: authService.logout, 
