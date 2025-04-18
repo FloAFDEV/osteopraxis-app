@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
 import { api } from "@/services/api";
-import { Cabinet } from "@/types";
+import { Cabinet, ProfessionalProfile } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
 import { toast } from "sonner";
@@ -13,7 +14,7 @@ const EditCabinetPage = () => {
   const { id } = useParams<{ id: string }>();
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
-  const [professionalData, setProfessionalData] = useState<any>(null);
+  const [professionalData, setProfessionalData] = useState<ProfessionalProfile | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {

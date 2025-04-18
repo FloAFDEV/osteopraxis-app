@@ -57,9 +57,13 @@ export function CabinetForm({
       }
 
       const cabinetData = {
-        ...values,
+        name: values.name,
+        address: values.address || "", 
+        phone: values.phone,
+        email: values.email,
+        logoUrl: values.logoUrl,
+        imageUrl: values.imageUrl,
         professionalProfileId,
-        address: values.address || "", // S'assurer que l'adresse n'est pas undefined
       };
 
       let result;

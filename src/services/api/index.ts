@@ -2,7 +2,7 @@
 import { patientService } from "./patient-service";
 import { appointmentService } from "./appointment-service";
 import { cabinetService } from "./cabinet-service";
-import { professionalProfileService } from "./professional-profile-service"; // Renommé
+import { professionalProfileService } from "./professional-profile-service";
 import { invoiceService } from "./invoice-service";
 import { authService } from "./auth-service";
 
@@ -40,6 +40,7 @@ export const api = {
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
+  getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
   
   // Professional Profiles (anciennement Osteopaths)
   getProfessionalProfiles: professionalProfileService.getProfessionalProfiles,

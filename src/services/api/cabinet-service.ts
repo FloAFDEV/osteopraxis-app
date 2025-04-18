@@ -40,6 +40,11 @@ export const cabinetService = {
     }
   },
   
+  // Pour compatibilité avec le code existant
+  async getCabinetsByOsteopathId(professionalProfileId: number): Promise<Cabinet[]> {
+    return this.getCabinetsByProfessionalProfileId(professionalProfileId);
+  },
+  
   async createCabinet(data: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     try {
       return await supabaseCabinetService.createCabinet(data);

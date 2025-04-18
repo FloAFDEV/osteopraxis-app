@@ -49,7 +49,12 @@ export interface ProfessionalProfile {
 // Pour la rétrocompatibilité
 export interface Osteopath extends ProfessionalProfile {}
 
-// Patient types 
+// Patient types
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+export type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
+export type Handedness = 'RIGHT' | 'LEFT' | 'AMBIDEXTROUS';
+export type Contraception = 'PILL' | 'IUD' | 'IMPLANT' | 'CONDOM' | 'OTHER' | 'NONE';
+
 export interface Patient {
   id: number;
   firstName: string;
@@ -58,7 +63,7 @@ export interface Patient {
   phone?: string;
   birthDate?: string;
   address?: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  gender?: Gender;
   professionalProfileId: number;
   cabinetId?: number;
   currentTreatment?: string;
@@ -78,6 +83,14 @@ export interface Patient {
   avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
+  maritalStatus?: MaritalStatus;
+  handedness?: Handedness;
+  hasVisionCorrection?: boolean;
+  isSmoker?: boolean;
+  isDeceased?: boolean;
+  contraception?: Contraception;
+  hdlm?: string;
+  userId?: string;
 }
 
 // User types
@@ -137,4 +150,11 @@ export interface GenderChartData {
   value: number;
   percentage: number;
   icon: JSX.Element;
+}
+
+// Pour l'authentification
+export interface AuthState {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: User | null;
 }

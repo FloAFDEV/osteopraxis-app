@@ -13,9 +13,8 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Osteopath, Cabinet, Invoice } from '@/types';
+import { ProfessionalProfile, Cabinet, Invoice } from '@/types';
 import PatientFancyLoader from '@/components/patients/PatientFancyLoader';
-// Importation correcte de l'icône Activity de lucide-react
 import { Activity } from 'lucide-react';
 
 // Schema de validation pour le formulaire de facture
@@ -31,7 +30,7 @@ const NewInvoicePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
+  const [professionalProfile, setProfessionalProfile] = useState<ProfessionalProfile | null>(null);
   const [cabinetData, setCabinetData] = useState<Cabinet | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,19 +70,19 @@ const NewInvoicePage = () => {
           console.log("Cabinet trouvé:", cabinets[0]);
           setCabinetData(cabinets[0]);
           
-          // Si nous avons un cabinet, récupérons l'ostéopathe associé
-          if (cabinets[0].osteopathId) {
-            const { data: osteoData, error: osteoError } = await supabase
-              .from("Osteopath")
+          // Si nous avons un cabinet, récupérons le profil professionnel associé
+          if (cabinets[0].professionalProfileId) {
+            const { data: profileData, error: profileError } = await supabase
+              .from("ProfessionalProfile")
               .select("*")
-              .eq("id", cabinets[0].osteopathId)
+              .eq("id", cabinets[0].professionalProfileId)
               .maybeSingle();
               
-            if (osteoError) {
-              console.warn("Erreur lors de la récupération de l'ostéopathe:", osteoError);
-            } else if (osteoData) {
-              console.log("Ostéopathe trouvé via cabinet:", osteoData);
-              setOsteopath(osteoData);
+            if (profileError) {
+              console.warn("Erreur lors de la récupération du profil professionnel:", profileError);
+            } else if (profileData) {
+              console.log("Profil professionnel trouvé via cabinet:", profileData);
+              setProfessionalProfile(profileData);
             }
           }
         }
@@ -98,7 +97,7 @@ const NewInvoicePage = () => {
     };
 
     fetchProfessionalData();
-  }, [user, loading]); // Ne pas inclure osteopath dans les dépendances pour éviter la boucle
+  }, [user, loading]);
 
   const onSubmit = async (data: InvoiceFormValues) => {
     console.log("Données du formulaire:", data);
@@ -108,7 +107,7 @@ const NewInvoicePage = () => {
       const today = new Date().toISOString();
       const consultationData = {
         date: today,
-        osteopathId: osteopath?.id || null,
+        professionalProfileId: professionalProfile?.id || null,
         patientId: data.patientId ? parseInt(data.patientId) : 1, // Patient par défaut si non spécifié
         notes: "Consultation pour facturation",
         isCancelled: false
@@ -131,8 +130,8 @@ const NewInvoicePage = () => {
         consultationId: consultation.id,
         amount: data.amount,
         date: today,
-        paymentStatus: "PENDING"
-      } as Omit<Invoice, 'id'>;
+        paymentStatus: "PENDING" as const
+      };
       
       // Utilisation directe de Supabase pour la création de facture
       const { data: invoice, error: invoiceError } = await supabase
@@ -161,7 +160,7 @@ const NewInvoicePage = () => {
   const handleRetry = () => {
     toast.info("Nouvelle tentative de récupération des données...");
     // Réinitialiser l'état pour déclencher un nouveau useEffect
-    setOsteopath(null);
+    setProfessionalProfile(null);
     setCabinetData(null);
     setError(null);
     setLoading(true); // Réactiver le chargement pour déclencher le useEffect
@@ -200,25 +199,25 @@ const NewInvoicePage = () => {
     );
   }
 
-  // Si nous n'avons pas d'ostéopathe ni de cabinet, mais pas d'erreur,
+  // Si nous n'avons pas de profil professionnel ni de cabinet, mais pas d'erreur,
   // permettons quand même la création d'une facture simple
-  const professionalInfo = osteopath || {
+  const professionalInfo = professionalProfile || {
     name: "Praticien",
-    professional_title: "Ostéopathe D.O.",
+    title: "Ostéopathe D.O.",
     ape_code: "8690F"
   };
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto py-6 md:py-10 px-2 md:px-0">
-     <h1 className="flex items-center gap-3 text-3xl font-bold mb-4 md:mb-6">
-  <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-  <span className="inline-block text-transparent bg-clip-text
-                   bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
-                   dark:from-blue-500 dark:via-purple-500 dark:to-pink-500">
-    Nouvelle Facture
-  </span>
-</h1>
+        <h1 className="flex items-center gap-3 text-3xl font-bold mb-4 md:mb-6">
+          <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
+          <span className="inline-block text-transparent bg-clip-text
+                           bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
+                           dark:from-blue-500 dark:via-purple-500 dark:to-pink-500">
+            Nouvelle Facture
+          </span>
+        </h1>
 
         <Card className="p-4 md:p-6 mb-4 md:mb-6">
           <h2 className="text-xl font-semibold mb-3 md:mb-4">Information du praticien</h2>
@@ -229,15 +228,15 @@ const NewInvoicePage = () => {
             </div>
             <div>
               <label className="text-sm text-gray-500">Titre professionnel</label>
-              <p className="font-medium">{professionalInfo.professional_title}</p>
+              <p className="font-medium">{professionalInfo.title}</p>
             </div>
             <div>
               <label className="text-sm text-gray-500">Numéro ADELI</label>
-              <p className="font-medium">{osteopath?.adeli_number || "Non renseigné"}</p>
+              <p className="font-medium">{professionalProfile?.adeli_number || "Non renseigné"}</p>
             </div>
             <div>
               <label className="text-sm text-gray-500">SIRET</label>
-              <p className="font-medium">{osteopath?.siret || "Non renseigné"}</p>
+              <p className="font-medium">{professionalProfile?.siret || "Non renseigné"}</p>
             </div>
             <div>
               <label className="text-sm text-gray-500">Code APE</label>
@@ -302,8 +301,6 @@ const NewInvoicePage = () => {
                   </FormItem>
                 )}
               />
-              
-              {/* Choix du patient - À implémenter dans une version future */}
               
               <div className="flex justify-between">
                 <Button type="button" variant="outline" onClick={() => navigate('/invoices')}>

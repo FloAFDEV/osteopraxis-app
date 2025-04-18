@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/ui/layout";
@@ -12,12 +13,16 @@ import { InvoiceDetails } from "@/components/invoice-details";
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+  const [patientNames, setPatientNames] = useState<Record<number, string>>({});
+  
+  // Charger les factures
   const {
     data: invoices,
     isLoading,
@@ -26,11 +31,40 @@ const InvoicesPage = () => {
     queryKey: ["invoices"],
     queryFn: api.getInvoices
   });
+
+  // Charger les noms des patients pour chaque facture
+  useEffect(() => {
+    if (invoices && invoices.length > 0) {
+      const fetchPatientNames = async () => {
+        const names: Record<number, string> = {};
+        
+        for (const invoice of invoices) {
+          if (!names[invoice.patientId]) {
+            try {
+              const patient = await api.getPatientById(invoice.patientId);
+              if (patient) {
+                names[invoice.patientId] = `${patient.firstName} ${patient.lastName}`;
+              } else {
+                names[invoice.patientId] = `Patient #${invoice.patientId}`;
+              }
+            } catch (error) {
+              console.error(`Erreur lors de la récupération du patient ${invoice.patientId}:`, error);
+              names[invoice.patientId] = `Patient #${invoice.patientId}`;
+            }
+          }
+        }
+        
+        setPatientNames(names);
+      };
+      
+      fetchPatientNames();
+    }
+  }, [invoices]);
+  
   const handleDeleteInvoice = async () => {
     if (!selectedInvoiceId) return;
     try {
-      // Cette fonctionnalité n'est pas encore implémentée dans l'API
-      // await api.deleteInvoice(selectedInvoiceId);
+      await api.deleteInvoice(selectedInvoiceId);
       toast.success("Facture supprimée avec succès");
       refetch();
     } catch (error) {
@@ -41,12 +75,21 @@ const InvoicesPage = () => {
       setSelectedInvoiceId(null);
     }
   };
+  
+  const getPatientName = (patientId: number) => {
+    return patientNames[patientId] || `Patient #${patientId}`;
+  };
+  
   const filteredInvoices = invoices?.filter(invoice => {
-    const matchesQuery = invoice.Patient?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) || invoice.Patient?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) || invoice.id.toString().includes(searchQuery);
+    const patientName = getPatientName(invoice.patientId);
+    const matchesQuery = patientName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         invoice.id.toString().includes(searchQuery);
     const matchesStatus = statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
     return matchesQuery && matchesStatus;
   });
-  return <Layout>
+
+  return (
+    <Layout>
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -80,7 +123,7 @@ const InvoicesPage = () => {
                     <SelectItem value="ALL">Tous les statuts</SelectItem>
                     <SelectItem value="PAID">Payée</SelectItem>
                     <SelectItem value="PENDING">En attente</SelectItem>
-                    <SelectItem value="CANCELED">Annulée</SelectItem>
+                    <SelectItem value="CANCELLED">Annulée</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -88,19 +131,34 @@ const InvoicesPage = () => {
           </CardContent>
         </Card>
         
-        {isLoading ? <div className="flex justify-center items-center py-20">
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-          </div> : filteredInvoices && filteredInvoices.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredInvoices.map(invoice => <InvoiceDetails key={invoice.id} invoice={invoice} patientName={invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : `Patient #${invoice.patientId}`} onEdit={() => navigate(`/invoices/${invoice.id}`)} onDelete={() => {
-          setSelectedInvoiceId(invoice.id);
-          setIsDeleteModalOpen(true);
-        }} onDownload={() => toast.success("Téléchargement de la facture (fonctionnalité à venir)")} onPrint={() => {
-          navigate(`/invoices/${invoice.id}`);
-          setTimeout(() => {
-            window.print();
-          }, 500);
-        }} />)}
-          </div> : <div className="text-center py-20">
+          </div>
+        ) : filteredInvoices && filteredInvoices.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredInvoices.map(invoice => (
+              <InvoiceDetails 
+                key={invoice.id} 
+                invoice={invoice}
+                patientName={getPatientName(invoice.patientId)}
+                onEdit={() => navigate(`/invoices/${invoice.id}`)}
+                onDelete={() => {
+                  setSelectedInvoiceId(invoice.id);
+                  setIsDeleteModalOpen(true);
+                }}
+                onDownload={() => toast.success("Téléchargement de la facture (fonctionnalité à venir)")}
+                onPrint={() => {
+                  navigate(`/invoices/${invoice.id}`);
+                  setTimeout(() => {
+                    window.print();
+                  }, 500);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
             <FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
             <h3 className="mt-4 text-xl font-medium">Aucune facture trouvée</h3>
             <p className="mt-2 text-gray-500 dark:text-gray-400">
@@ -110,10 +168,20 @@ const InvoicesPage = () => {
               <Plus className="h-4 w-4 mr-2" />
               Créer une facture
             </Button>
-          </div>}
+          </div>
+        )}
       </div>
       
-      {isDeleteModalOpen && selectedInvoiceId && <ConfirmDeleteInvoiceModal isOpen={isDeleteModalOpen} invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")} onCancel={() => setIsDeleteModalOpen(false)} onDelete={handleDeleteInvoice} />}
-    </Layout>;
+      {isDeleteModalOpen && selectedInvoiceId && (
+        <ConfirmDeleteInvoiceModal 
+          isOpen={isDeleteModalOpen} 
+          invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")} 
+          onCancel={() => setIsDeleteModalOpen(false)} 
+          onDelete={handleDeleteInvoice} 
+        />
+      )}
+    </Layout>
+  );
 };
+
 export default InvoicesPage;
