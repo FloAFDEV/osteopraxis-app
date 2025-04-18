@@ -10,6 +10,14 @@ interface DemographicsCardProps {
   data?: DashboardData;
 }
 
+// Define a proper type for our chart data that always includes the icon property
+interface GenderChartData {
+  name: string;
+  value: number;
+  percentage: number;
+  icon: React.ReactNode;
+}
+
 export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   patients,
   data
@@ -19,7 +27,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   const maleCount = data?.maleCount || 0;
   const femaleCount = data?.femaleCount || 0;
 
-  const calculateGenderData = () => {
+  const calculateGenderData = (): GenderChartData[] => {
     if (data && data.maleCount !== undefined && data.femaleCount !== undefined) {
       return [{
         name: "Homme",
@@ -42,17 +50,24 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       return Object.entries(genderCounts).map(([name, value]) => ({
         name,
         value,
-        percentage: Math.round((value / totalPatients) * 100)
+        percentage: Math.round((value / totalPatients) * 100),
+        icon: name === "Homme" ? 
+          <User className="h-5 w-5 text-blue-600" /> : 
+          name === "Femme" ? 
+            <UserRound className="h-5 w-5 text-pink-600" /> : 
+            <UserCircle className="h-5 w-5 text-gray-600" />
       }));
     }
     return [{
       name: "Homme",
       value: 1,
-      percentage: 50
+      percentage: 50,
+      icon: <User className="h-5 w-5 text-blue-600" />
     }, {
       name: "Femme",
       value: 1,
-      percentage: 50
+      percentage: 50,
+      icon: <UserRound className="h-5 w-5 text-pink-600" />
     }];
   };
 
