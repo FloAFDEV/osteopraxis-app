@@ -73,34 +73,28 @@ export const patientService = {
         console.log("Rôle utilisateur:", userData.role);
         console.log("ID Ostéopathe associé:", userData.osteopathId);
       } else {
+        // Si l'utilisateur est authentifié mais son profil n'est pas dans la table User,
+        // afficher un message informatif mais ne pas essayer de créer automatiquement
         console.warn("Utilisateur authentifié mais non trouvé dans la table User");
-        console.log("Création d'un profil utilisateur par défaut...");
+        console.log("Redirection vers la configuration du profil nécessaire");
         
-        // Option: Créer une entrée utilisateur si elle n'existe pas encore
-        // Ce bloc est optionnel et peut être commenté si une autre partie de l'app gère cette création
-        try {
-          const { error: createError } = await supabase
-            .from('User')
-            .insert({
-              id: session.session.user.id,
-              email: session.session.user.email,
-              role: 'OSTEOPATH',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-            
-          if (createError) {
-            console.error("Erreur lors de la création du profil utilisateur:", createError);
-          }
-        } catch (insertError) {
-          console.error("Exception lors de la création du profil utilisateur:", insertError);
-        }
+        // Note: La création du profil devrait être gérée par le processus d'inscription
+        // ou par une page de configuration de profil dédiée, et non dans le service patient
       }
       
-      // Récupération des patients
-      const { data, error } = await supabase
-        .from('Patient')
-        .select('*');
+      // Récupération des patients - Utiliser l'ID de l'ostéopathe de l'utilisateur si disponible
+      let query = supabase.from('Patient').select('*');
+      
+      if (userData?.osteopathId) {
+        console.log(`Filtrage des patients pour l'ostéopathe ID: ${userData.osteopathId}`);
+        query = query.eq('osteopathId', userData.osteopathId);
+      } else if (userData?.role !== 'ADMIN') {
+        // Si ce n'est pas un admin et qu'il n'a pas d'ID d'ostéopathe, ne retourner aucun patient
+        console.log("Utilisateur sans ID d'ostéopathe associé et non admin, aucun patient retourné");
+        return [];
+      }
+      
+      const { data, error } = await query;
 
       if (error) {
         console.error('Erreur lors de la récupération des patients:', error);
@@ -256,7 +250,7 @@ export const patientService = {
       avatarUrl: patient.avatarUrl,
       cabinetId: patient.cabinetId,
       userId: patient.userId,
-      osteopathId: patient.osteopathId || 1,
+      osteopathId: patient.osteopathId,
       updatedAt: now
     };
 
