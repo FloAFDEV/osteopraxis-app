@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
@@ -95,21 +94,12 @@ const EditCabinetPage = () => {
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
           <CabinetForm 
-            defaultValues={{
-              name: cabinet.name,
-              address: cabinet.address,
-              phone: cabinet.phone || undefined,
-              email: cabinet.email || undefined,
-              imageUrl: cabinet.imageUrl || undefined,
-              logoUrl: cabinet.logoUrl || undefined,
-              professionalProfileId: cabinet.professionalProfileId,
-              siret: professionalData?.siret || undefined,
-              adeliNumber: professionalData?.adeli_number || undefined,
-              apeCode: professionalData?.ape_code || "8690F"
-            }} 
-            cabinetId={cabinet.id} 
-            isEditing={true} 
-            professionalProfileId={cabinet.professionalProfileId} 
+            cabinet={cabinet}
+            professionalProfileId={cabinet.professionalProfileId}
+            onSuccess={() => {
+              toast.success("Cabinet mis à jour avec succès");
+              navigate("/cabinets");
+            }}
           />
         </div>
       </div>

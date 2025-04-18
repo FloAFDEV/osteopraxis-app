@@ -1,15 +1,22 @@
+
 import React from 'react';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Invoice, Patient, ProfessionalProfile } from '@/types';
+import { Invoice, Patient, ProfessionalProfile, Cabinet } from '@/types';
 
 interface InvoicePrintViewProps {
   invoice: Invoice;
   patient: Patient;
-  osteopath?: ProfessionalProfile;
+  professionalProfile?: ProfessionalProfile;
+  cabinet?: Cabinet;
 }
 
-export const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({ invoice, patient, osteopath }) => {
+export const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({ 
+  invoice, 
+  patient, 
+  professionalProfile,
+  cabinet
+}) => {
   const invoiceDate = parseISO(invoice.date);
   const formattedDate = format(invoiceDate, 'dd MMMM yyyy', { locale: fr });
 
@@ -21,10 +28,9 @@ export const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({ invoice, pat
           <p>Date: {formattedDate}</p>
         </div>
         <div>
-          {/* Replace with your cabinet logo or name */}
-          <p className="font-bold">Cabinet d'Ostéopathie</p>
-          <p>Adresse du cabinet</p>
-          <p>Téléphone: Numéro de téléphone</p>
+          {cabinet?.name && <p className="font-bold">{cabinet.name}</p>}
+          {cabinet?.address && <p>{cabinet.address}</p>}
+          {cabinet?.phone && <p>Téléphone: {cabinet.phone}</p>}
         </div>
       </div>
 
@@ -48,17 +54,18 @@ export const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({ invoice, pat
         <p>Statut: {invoice.paymentStatus}</p>
       </div>
 
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold">Informations du professionnel de santé</h2>
-        
+      {professionalProfile && (
         <div className="mt-4">
-          <p className="font-bold">{osteopath?.name}</p>
-          <p>{osteopath?.title || "Ostéopathe D.O."}</p>
-          <p>N° ADELI: {osteopath?.adeli_number || "-"}</p>
-          <p>N° SIRET: {osteopath?.siret || "-"}</p>
-          <p>Code APE: {osteopath?.ape_code || "8690F"}</p>
+          <h2 className="text-xl font-semibold">Informations du professionnel de santé</h2>
+          <div className="mt-4">
+            <p className="font-bold">{professionalProfile.name}</p>
+            <p>{professionalProfile.title}</p>
+            <p>N° ADELI: {professionalProfile.adeli_number || "-"}</p>
+            <p>N° SIRET: {professionalProfile.siret || "-"}</p>
+            <p>Code APE: {professionalProfile.ape_code || "8690F"}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-8 text-center">
         <p>Merci de votre confiance !</p>

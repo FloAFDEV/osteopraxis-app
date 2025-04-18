@@ -46,7 +46,7 @@ export interface ProfessionalProfile {
   updatedAt: string;
 }
 
-// For backward compatibility
+// Pour la rétrocompatibilité
 export interface Osteopath extends ProfessionalProfile {}
 
 // Patient types 

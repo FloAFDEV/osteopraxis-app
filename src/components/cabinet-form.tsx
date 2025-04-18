@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/services/api";
 import { toast } from "sonner";
 import { Building } from "lucide-react";
+import { Cabinet } from "@/types";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Le nom doit comporter au moins 2 caractères" }),
@@ -19,8 +20,8 @@ const formSchema = z.object({
 });
 
 interface CabinetFormProps {
-  cabinet?: any;
-  onSuccess?: (data: any) => void;
+  cabinet?: Cabinet;
+  onSuccess?: (data: Cabinet) => void;
   onCancel?: () => void;
   professionalProfileId: number;
 }
@@ -57,21 +58,19 @@ export function CabinetForm({
 
       const cabinetData = {
         ...values,
-        name: values.name || "Cabinet sans nom", // Ensure name is always provided
         professionalProfileId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        address: values.address || "", // S'assurer que l'adresse n'est pas undefined
       };
 
       let result;
     
-      if (isEditing) {
+      if (isEditing && cabinet) {
         result = await api.updateCabinet(cabinet.id, cabinetData);
         toast.success("Cabinet mis à jour avec succès!");
       } else {
         result = await api.createCabinet(cabinetData);
         toast.success("Cabinet créé avec succès!");
-        form.reset(); // Reset the form after successful creation
+        form.reset();
       }
     
       if (onSuccess && result) {
