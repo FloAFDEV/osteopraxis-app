@@ -1,3 +1,4 @@
+
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
@@ -7,16 +8,23 @@ const patients: Patient[] = [];
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
+    console.log("patient-service.getPatients called, USE_SUPABASE =", USE_SUPABASE);
+    
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.getPatients();
+        console.log("Attempting to fetch patients from Supabase");
+        const result = await supabasePatientService.getPatients();
+        console.log(`Supabase returned ${result?.length || 0} patients`);
+        return result;
       } catch (error) {
-        console.error("Error fetching patients:", error);
-        throw error;
+        console.error("Error fetching patients from Supabase:", error);
+        // Don't throw here, try the fallback instead
+        console.log("Falling back to local data");
       }
     }
     
     // Fallback: code simulé existant
+    console.log("Using fallback local data");
     await delay(300);
     return [...patients];
   },
