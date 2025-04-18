@@ -1,4 +1,3 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -42,34 +41,16 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    try {
-      // Debug the current authentication state
-      const { data: authData } = await supabase.auth.getSession();
-      console.log("Current auth state when fetching patients:", 
-        authData.session ? `Authenticated as ${authData.session.user.id}` : "Not authenticated");
+    const { data, error } = await supabase
+      .from('Patient')
+      .select('*');
 
-      // Get all patients without filtering initially
-      const { data, error } = await supabase
-        .from('Patient')
-        .select('*')
-        .order('lastName', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching patients:', error);
-        throw error;
-      }
-
-      if (!data) {
-        console.log("No patient data returned from Supabase");
-        return [];
-      }
-
-      console.log(`Successfully retrieved ${data.length} patients from Supabase`);
-      return data.map(adaptPatientFromSupabase);
-    } catch (error) {
-      console.error('Exception while fetching patients:', error);
+    if (error) {
+      console.error('Error fetching patients:', error);
       throw error;
     }
+
+    return data.map(adaptPatientFromSupabase);
   },
 
   async getPatientById(id: number): Promise<Patient | null> {

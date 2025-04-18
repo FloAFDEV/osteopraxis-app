@@ -8,23 +8,15 @@ const patients: Patient[] = [];
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    console.log("patient-service.getPatients called, USE_SUPABASE =", USE_SUPABASE);
-    
     if (USE_SUPABASE) {
       try {
-        console.log("Attempting to fetch patients from Supabase");
-        const result = await supabasePatientService.getPatients();
-        console.log(`Supabase returned ${result?.length || 0} patients`);
-        return result;
+        return await supabasePatientService.getPatients();
       } catch (error) {
-        console.error("Error fetching patients from Supabase:", error);
-        // Don't throw here, try the fallback instead
-        console.log("Falling back to local data");
+        console.error("Erreur Supabase getPatients:", error);
       }
     }
     
     // Fallback: code simulé existant
-    console.log("Using fallback local data");
     await delay(300);
     return [...patients];
   },

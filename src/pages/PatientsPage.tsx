@@ -32,23 +32,21 @@ const PatientsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const patientsPerPage = 25;
 
-  // Simplified useQuery implementation for better reliability
+  // Use useQuery for better state and cache management
   const { data: patients, isLoading, error, refetch } = useQuery({
     queryKey: ['patients'],
     queryFn: async () => {
-      console.log("PatientsPage: Fetching patients");
       try {
-        const data = await api.getPatients();
-        console.log("PatientsPage: Patient data received:", data ? `${data.length} records` : "no data");
-        return data || [];
+        return await api.getPatients();
       } catch (err) {
-        console.error("PatientsPage: Error fetching patients:", err);
-        // Don't throw the error - this allows us to still render the UI
-        return [];
+        console.error("Error fetching patients:", err);
+        throw err;
       }
     },
-    retry: 1,
+    retry: 2,
+    retryDelay: 1000,
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Handler for forcing data reload with animation
@@ -57,10 +55,14 @@ const PatientsPage = () => {
     toast.info("Chargement des patients en cours...");
     try {
       await refetch();
-      toast.success("Les données des patients ont été rafraîchies");
+      if (patients && patients.length > 0) {
+        toast.success(`${patients.length} patients chargés avec succès`);
+      } else {
+        toast.warning("Aucun patient trouvé dans la base de données");
+      }
     } catch (err) {
-      console.error("Erreur lors du chargement des patients:", err);
       toast.error("Impossible de charger les patients");
+      console.error("Erreur lors du chargement des patients:", err);
     } finally {
       setIsRefreshing(false);
     }
@@ -68,7 +70,6 @@ const PatientsPage = () => {
 
   // Force reload on component mount
   useEffect(() => {
-    console.log("PatientsPage: Component mounted, refetching");
     refetch();
   }, [refetch]);
 
@@ -226,14 +227,6 @@ const PatientsPage = () => {
 
         {/* Loading and error states */}
         <PatientLoadingState isLoading={isLoading} error={error} onRetry={handleRetry} />
-
-        {/* Debugging information */}
-        {!isLoading && (
-          <div className="text-sm text-gray-500 mb-2">
-            {patients ? `${patients.length} patients trouvés` : "Aucun patient chargé"}
-            {error && ` (Erreur: ${error instanceof Error ? error.message : "Erreur inconnue"})`}
-          </div>
-        )}
 
         {/* Main content - patient list or empty state */}
         {!isLoading && !error && (

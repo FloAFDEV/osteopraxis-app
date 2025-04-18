@@ -1,6 +1,11 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  addAuthHeaders, 
+  ensureAppointmentStatus, 
+  AppointmentStatusValues
+} from "./utils";
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -140,6 +145,7 @@ export const supabaseAppointmentService = {
     }
   },
 
+  // Modification importante ici : utiliser POST au lieu de PATCH pour éviter les problèmes CORS
   async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
       const updateData: Record<string, any> = {};
@@ -153,11 +159,24 @@ export const supabaseAppointmentService = {
       }
       if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
+      // Utiliser upsert avec prefer:resolution=merge-duplicates au lieu de PATCH
+      // Nous devons fournir les champs obligatoires pour l'upsert, ou récupérer d'abord les données existantes
+      const existingAppointment = await this.getAppointmentById(id);
+      
+      if (!existingAppointment) {
+        throw new Error(`Appointment with ID ${id} not found`);
+      }
+      
+      // Fusionner l'existant avec les nouvelles données
+      const mergedData = {
+        ...existingAppointment,
+        ...updateData
+      };
+      
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
-          .update(updateData)
-          .eq("id", id)
+          .upsert(mergedData)
           .select()
           .single()
       );
