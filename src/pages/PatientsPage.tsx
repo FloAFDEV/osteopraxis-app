@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
@@ -8,6 +8,7 @@ import { PatientCard } from "@/components/patient-card";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/services/supabase-api/utils";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -27,6 +28,7 @@ const PatientsPage = () => {
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [activeLetter, setActiveLetter] = useState("");
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
+  const navigate = useNavigate();
   
   // Pagination - updated to 25 patients per page
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,7 +39,23 @@ const PatientsPage = () => {
     queryKey: ['patients'],
     queryFn: async () => {
       try {
-        return await api.getPatients();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate('/login');
+          return [];
+        }
+
+        // Get the osteopath's patients
+        const { data: patients, error } = await supabase
+          .from('Patient')
+          .select('*')
+          .order('lastName', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        return patients;
       } catch (err) {
         console.error("Error fetching patients:", err);
         throw err;
@@ -152,13 +170,34 @@ const PatientsPage = () => {
   const createTestPatient = async () => {
     try {
       toast.info("Création d'un patient test...");
+      
+      // Get current user's osteopathId
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Vous devez être connecté pour ajouter un patient");
+        navigate('/login');
+        return;
+      }
+
+      // Récupérer l'ostéopathe associé à l'utilisateur
+      const { data: osteopath, error: osteoError } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('userId', user.id)
+        .single();
+
+      if (osteoError || !osteopath) {
+        toast.error("Impossible de récupérer vos informations d'ostéopathe");
+        return;
+      }
+      
       const testPatient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> = {
         firstName: "Test",
         lastName: `Patient ${new Date().getTime().toString().slice(-4)}`, // Unique name
         gender: "Homme",
         email: `test${new Date().getTime()}@example.com`, // Unique email
         phone: "0123456789",
-        osteopathId: 1,
+        osteopathId: osteopath.id,
         address: "123 Rue Test",
         cabinetId: 1,
         maritalStatus: "SINGLE",
