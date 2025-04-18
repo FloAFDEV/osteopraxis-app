@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 import { checkAuth } from "./utils";
@@ -50,7 +51,7 @@ export const patientService = {
       // Check if the user is an admin first
       const { data: userData, error: userError } = await supabase
         .from('User')
-        .select('role')
+        .select('role, osteopathId')
         .eq('id', session.user.id)
         .maybeSingle();
 
@@ -76,19 +77,94 @@ export const patientService = {
         return (data || []).map(adaptPatientFromSupabase);
       }
 
-      // If not admin, try to get osteopath ID
+      // Si l'utilisateur a directement un osteopathId dans son profil, utiliser celui-ci
+      if (userData && userData.osteopathId) {
+        console.log(`User has direct osteopathId: ${userData.osteopathId}, using it to fetch patients`);
+        const { data, error } = await supabase
+          .from('Patient')
+          .select('*')
+          .eq('osteopathId', userData.osteopathId)
+          .order('lastName', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching patients with user osteopathId:', error);
+          throw error;
+        }
+
+        console.log(`Successfully fetched ${data?.length || 0} patients for user with osteopathId ${userData.osteopathId}`);
+        return (data || []).map(adaptPatientFromSupabase);
+      }
+
+      // Try to get osteopath ID
       const { data: osteopathData, error: osteopathError } = await supabase
         .from('Osteopath')
         .select('id')
         .eq('userId', session.user.id)
         .maybeSingle();
 
-      // If no osteopath found, return empty array
-      if (osteopathError) {
-        if (osteopathError.code === 'PGRST116') {
-          console.log('No osteopath found for this user, returning empty patients list');
-          return [];
+      // If no osteopath found, automatically create one
+      if (!osteopathData) {
+        console.log('No osteopath found for this user, creating one now...');
+        
+        const now = new Date().toISOString();
+        const { data: newOsteopath, error: createError } = await supabase
+          .from('Osteopath')
+          .insert({
+            name: 'Nouvel Ostéopathe',
+            userId: session.user.id,
+            createdAt: now,
+            updatedAt: now,
+            professional_title: 'Ostéopathe D.O.',
+            ape_code: '8690F'
+          })
+          .select()
+          .single();
+          
+        if (createError) {
+          console.error('Error creating osteopath:', createError);
+          throw createError;
         }
+        
+        // Update user with new osteopathId
+        const { error: updateError } = await supabase
+          .from('User')
+          .update({ osteopathId: newOsteopath.id })
+          .eq('id', session.user.id);
+          
+        if (updateError) {
+          console.error('Error updating user with osteopathId:', updateError);
+        }
+        
+        // Create test patient for new osteopath
+        const testPatient = {
+          firstName: "Patient",
+          lastName: "Test",
+          gender: "Homme" as Gender,
+          osteopathId: newOsteopath.id,
+          createdAt: now,
+          updatedAt: now,
+          isSmoker: false,
+          isDeceased: false,
+          hasVisionCorrection: false
+        };
+        
+        const { data: newPatient, error: patientError } = await supabase
+          .from('Patient')
+          .insert(testPatient)
+          .select()
+          .single();
+          
+        if (patientError) {
+          console.error('Error creating test patient:', patientError);
+        } else {
+          console.log('Created test patient for new osteopath:', newPatient);
+          return [adaptPatientFromSupabase(newPatient)];
+        }
+        
+        return [];
+      }
+
+      if (osteopathError && osteopathError.code !== 'PGRST116') {
         console.error('Error fetching osteopath id:', osteopathError);
         throw osteopathError;
       }

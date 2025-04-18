@@ -85,7 +85,24 @@ export const supabaseCabinetService = {
   // Adding getCabinetsByUserId method to fetch cabinets related to a user
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
     try {
-      // First get the osteopath ID for this user
+      // D'abord vérifier si l'utilisateur a un osteopathId directement dans son profil
+      const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('osteopathId')
+        .eq('id', userId)
+        .maybeSingle();
+        
+      if (userError && userError.code !== 'PGRST116') {
+        console.error('Error fetching user:', userError);
+        throw userError;
+      }
+      
+      if (userData && userData.osteopathId) {
+        console.log(`User has direct osteopathId: ${userData.osteopathId}, using it to fetch cabinets`);
+        return this.getCabinetsByOsteopathId(userData.osteopathId);
+      }
+      
+      // Sinon, chercher l'osteopath associé
       const { data: osteopathData, error: osteopathError } = await supabase
         .from('Osteopath')
         .select('id')
