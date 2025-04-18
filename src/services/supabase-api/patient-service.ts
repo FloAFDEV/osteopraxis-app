@@ -1,4 +1,3 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -71,7 +70,14 @@ export const patientService = {
         console.log('Nombre total de patients:', data.length);
       } else {
         console.log('ATTENTION: Aucun patient trouvé dans la table Patient');
-        console.log('Vérifiez que la table Patient contient des données');
+        console.log('Création automatique d\'un patient test...');
+        
+        // Créer un patient test automatiquement
+        const testPatient = await this.createTestPatient();
+        console.log('Patient test créé avec succès:', testPatient);
+        
+        // Retourner le patient test nouvellement créé
+        return [testPatient];
       }
       
       console.log("=== Fin getPatients ===");
@@ -172,6 +178,66 @@ export const patientService = {
     }
 
     return adaptPatientFromSupabase(data);
+  },
+
+  async createTestPatient(): Promise<Patient> {
+    try {
+      console.log("Création d'un patient test...");
+      const now = new Date().toISOString();
+      
+      const testPatient = {
+        firstName: "Test",
+        lastName: `Patient ${new Date().getTime().toString().slice(-4)}`,
+        email: `test${new Date().getTime()}@example.com`,
+        phone: "0123456789",
+        address: "123 Rue de Test",
+        gender: "Homme" as Gender,
+        birthDate: "1990-01-01T00:00:00.000Z",
+        maritalStatus: "SINGLE" as MaritalStatus,
+        occupation: "Testeur",
+        hasChildren: "false",
+        childrenAges: [],
+        generalPractitioner: "Dr. Test",
+        surgicalHistory: null,
+        traumaHistory: null,
+        rheumatologicalHistory: null,
+        currentTreatment: null,
+        handedness: "RIGHT" as Handedness,
+        hasVisionCorrection: false,
+        ophtalmologistName: null,
+        entProblems: null,
+        entDoctorName: null,
+        digestiveProblems: null,
+        digestiveDoctorName: null,
+        physicalActivity: null,
+        isSmoker: false,
+        isDeceased: false,
+        contraception: "NONE" as Contraception,
+        hdlm: null,
+        avatarUrl: null,
+        cabinetId: 1,
+        userId: null,
+        osteopathId: 1,
+        createdAt: now,
+        updatedAt: now
+      };
+      
+      const { data, error } = await supabase
+        .from('Patient')
+        .insert(testPatient)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error("Erreur lors de la création du patient test:", error);
+        throw error;
+      }
+      
+      return adaptPatientFromSupabase(data);
+    } catch (err) {
+      console.error("Erreur lors de la création du patient test:", err);
+      throw err;
+    }
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
