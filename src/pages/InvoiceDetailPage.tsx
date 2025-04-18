@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -12,6 +11,7 @@ import { InvoiceDetails } from '@/components/invoice-details';
 import { toast } from 'sonner';
 import { Invoice, Patient, Osteopath, Cabinet } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { Activity } from 'lucide-react';
 
 const InvoiceDetailPage = () => {
   const { id } = useParams<{ id: string }>();
