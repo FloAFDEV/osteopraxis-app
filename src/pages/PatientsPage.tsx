@@ -45,17 +45,18 @@ const PatientsPage = () => {
           return [];
         }
 
-        // Get the osteopath's patients
+        // Get the osteopath's patients - application des politiques RLS
         const { data: patients, error } = await supabase
           .from('Patient')
           .select('*')
           .order('lastName', { ascending: true });
 
         if (error) {
+          console.error("Erreur lors de la récupération des patients:", error);
           throw error;
         }
 
-        return patients;
+        return patients || [];
       } catch (err) {
         console.error("Error fetching patients:", err);
         throw err;
@@ -76,7 +77,7 @@ const PatientsPage = () => {
       if (patients && patients.length > 0) {
         toast.success(`${patients.length} patients chargés avec succès`);
       } else {
-        toast.warning("Aucun patient trouvé dans la base de données");
+        toast.warning("Aucun patient trouvé. Vous pouvez créer un nouveau patient en cliquant sur le bouton '+' en haut à droite.");
       }
     } catch (err) {
       toast.error("Impossible de charger les patients");

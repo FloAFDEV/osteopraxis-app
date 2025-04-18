@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   User, Calendar, FileText, MapPin, Mail, Phone, Activity, 
   List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users
@@ -24,33 +23,48 @@ const PatientDetailPage = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPatientData = async () => {
       if (!id) return;
       
       try {
-        const [patientData, appointmentsData] = await Promise.all([
-          api.getPatientById(parseInt(id)),
-          api.getAppointmentsByPatientId(parseInt(id))
-        ]);
+        setLoading(true);
+        setError(null);
+        
+        // Récupération du patient
+        const patientData = await api.getPatientById(parseInt(id));
         
         if (!patientData) {
-          throw new Error("Patient non trouvé");
+          setError("Patient non trouvé ou vous n'avez pas les permissions nécessaires pour accéder à ce dossier.");
+          setLoading(false);
+          return;
         }
         
         setPatient(patientData);
+        
+        // Récupération des rendez-vous une fois que le patient est confirmé accessible
+        const appointmentsData = await api.getAppointmentsByPatientId(parseInt(id));
         setAppointments(appointmentsData);
-      } catch (error) {
+        
+      } catch (error: any) {
         console.error("Error fetching patient data:", error);
-        toast.error("Impossible de charger les données du patient");
+        
+        // Message d'erreur plus précis en fonction du type d'erreur
+        if (error?.code === 'PGRST116') {
+          setError("Ce patient n'existe pas ou vous n'avez pas les permissions nécessaires pour y accéder.");
+        } else {
+          setError("Impossible de charger les données du patient: " + (error.message || "Erreur inconnue"));
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchPatientData();
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -65,20 +79,30 @@ const PatientDetailPage = () => {
     );
   }
 
-  if (!patient) {
+  if (error || !patient) {
     return (
       <Layout>
-        <div className="text-center py-12">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-          <h3 className="text-xl font-medium">Patient non trouvé</h3>
-          <p className="text-muted-foreground mt-2 mb-6">
-            Le patient que vous recherchez n&apos;existe pas ou a été supprimé.
-          </p>
-          <Button asChild>
-            <Link to="/patients">
-              Retour à la liste des patients
-            </Link>
-          </Button>
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="text-center max-w-md">
+            <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-3" />
+            <h3 className="text-xl font-medium">Patient non accessible</h3>
+            <p className="text-muted-foreground mt-2 mb-6">
+              {error || "Ce patient n'existe pas ou vous n'avez pas les droits nécessaires pour y accéder."}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button asChild>
+                <Link to="/patients">
+                  Retour à la liste des patients
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/patients/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Créer un nouveau patient
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </Layout>
     );
