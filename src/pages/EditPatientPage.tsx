@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -71,13 +70,6 @@ const EditPatientPage = () => {
       // Make sure ID is included and is a number
       if (typeof patientToUpdate.id === 'string') {
         patientToUpdate.id = parseInt(patientToUpdate.id);
-      }
-      
-      // Handle special date format if present
-      if (patientToUpdate.birthDate && 
-          typeof patientToUpdate.birthDate === 'object' && 
-          patientToUpdate.birthDate._type === 'Date') {
-        patientToUpdate.birthDate = new Date(patientToUpdate.birthDate.value.iso);
       }
       
       // Make sure all required fields are present

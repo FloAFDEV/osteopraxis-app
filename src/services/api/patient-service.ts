@@ -76,13 +76,17 @@ export const patientService = {
           throw new Error("Patient ID is required for update");
         }
         
-        // Ensure patient birthdate is properly formatted if it exists
+        // Handle birthDate properly - ensuring it's a string if not null
         if (patient.birthDate) {
-          if (typeof patient.birthDate === 'object' && patient.birthDate._type === 'Date') {
-            // Handle the special date object format
-            patient.birthDate = new Date(patient.birthDate.value.iso);
-          } else if (typeof patient.birthDate !== 'string') {
-            patient.birthDate = new Date(patient.birthDate).toISOString();
+          // Handle the special date object format
+          if (typeof patient.birthDate === 'object') {
+            if (patient.birthDate._type === 'Date') {
+              // Handle the special date object format
+              patient.birthDate = new Date(patient.birthDate.value.iso).toISOString();
+            } else if (patient.birthDate instanceof Date) {
+              // Convert Date object to ISO string
+              patient.birthDate = patient.birthDate.toISOString();
+            }
           }
         }
         

@@ -153,6 +153,8 @@ export const patientService = {
       throw new Error("Patient ID is required for update");
     }
     
+    console.log("Updating patient with upsert - ID:", id);
+    
     // Add updatedAt timestamp
     const now = new Date().toISOString();
     
@@ -211,12 +213,10 @@ export const patientService = {
     console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
     
     try {
-      // Use insert with onConflict instead of upsert for better control
+      // Use upsert instead of insert with onConflict for Supabase JS client
       const { data, error } = await supabase
         .from('Patient')
-        .insert(patientData)
-        .onConflict('id')
-        .merge()
+        .upsert(patientData)
         .select();
       
       if (error) {
