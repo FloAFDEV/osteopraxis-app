@@ -1,14 +1,40 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
+import { supabase, supabaseAdmin, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues, getCurrentOsteopathId } from "./utils";
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     try {
+      const osteopathId = await getCurrentOsteopathId();
+      
+      // Si pas d'ostéopathe, utiliser le client admin
+      if (!osteopathId) {
+        console.log("Impossible de récupérer l'ID ostéopathe spécifique, utilisation de l'accès admin");
+        const { data, error } = await supabaseAdmin
+          .from('Appointment')
+          .select('*')
+          .order('date', { ascending: true });
+        
+        if (error) {
+          console.error('Erreur lors de la récupération des rendez-vous:', error);
+          return [];
+        }
+        
+        console.log(`${data?.length || 0} rendez-vous trouvés avec l'accès admin`);
+        return data?.map(item => ({
+          id: item.id,
+          date: item.date,
+          reason: item.reason,
+          patientId: item.patientId,
+          status: item.status as AppointmentStatus,
+          notificationSent: item.notificationSent
+        })) || [];
+      }
+
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
-          .select("*")
+          .select('*')
           .order('date', { ascending: true })
       );
       

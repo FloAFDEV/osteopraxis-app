@@ -1,15 +1,35 @@
 
 import { Invoice, PaymentStatus } from "@/types";
-import { supabase, typedData } from "./utils";
+import { supabase, supabaseAdmin, typedData, getCurrentOsteopathId } from "./utils";
 
 export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     try {
-      // Correction: suppression de l'embed "*, Patient(firstName, lastName)" qui cause l'erreur
-      // quand plusieurs relations existent entre Invoice et Patient
+      const osteopathId = await getCurrentOsteopathId();
+      
+      if (!osteopathId) {
+        console.log("Impossible de récupérer l'ID ostéopathe spécifique, utilisation de l'accès admin");
+        const { data, error } = await supabaseAdmin
+          .from("Invoice")
+          .select('*')
+          .order('date', { ascending: false });
+        
+        if (error) throw new Error(error.message);
+        
+        console.log(`${data?.length || 0} factures trouvées avec l'accès admin`);
+        return (data || []).map(item => ({
+          id: item.id,
+          patientId: item.patientId,
+          consultationId: item.consultationId,
+          date: item.date,
+          amount: item.amount,
+          paymentStatus: item.paymentStatus as PaymentStatus
+        }));
+      }
+
       const { data, error } = await supabase
         .from("Invoice")
-        .select("*")
+        .select('*')
         .order('date', { ascending: false });
       
       if (error) throw new Error(error.message);

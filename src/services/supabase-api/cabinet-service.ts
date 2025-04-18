@@ -1,17 +1,34 @@
-
-// Import des types depuis le fichier des types
 import { Cabinet } from "@/types";
-import { supabase, typedData } from "./utils";
+import { supabase, supabaseAdmin, typedData, getCurrentOsteopathId } from "./utils";
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
-    const { data, error } = await supabase
-      .from("Cabinet")
-      .select("*");
+    try {
+      const osteopathId = await getCurrentOsteopathId();
       
-    if (error) throw new Error(error.message);
-    
-    return typedData<Cabinet[]>(data);
+      if (!osteopathId) {
+        console.log("Impossible de récupérer l'ID ostéopathe spécifique, utilisation de l'accès admin");
+        const { data, error } = await supabaseAdmin
+          .from("Cabinet")
+          .select('*');
+          
+        if (error) throw new Error(error.message);
+        
+        console.log(`${data?.length || 0} cabinets trouvés avec l'accès admin`);
+        return typedData<Cabinet[]>(data || []);
+      }
+      
+      const { data, error } = await supabase
+        .from("Cabinet")
+        .select("*");
+        
+      if (error) throw new Error(error.message);
+      
+      return typedData<Cabinet[]>(data || []);
+    } catch (error) {
+      console.error("Erreur getCabinets:", error);
+      throw error;
+    }
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
