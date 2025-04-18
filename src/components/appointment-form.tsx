@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
@@ -8,7 +7,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/services/api";
-import { Patient, AppointmentStatus } from "@/types";
+import { AppointmentStatus } from "@/types";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +36,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 
+// Définir l'interface Patient pour ce composant
+interface Patient {
+  id: number;
+  firstName: string;
+  lastName: string;
+}
+
 // Custom validation function to check if appointment time is in the past
 const isAppointmentInPast = (date: Date, timeString: string) => {
   const [hours, minutes] = timeString.split(':').map(Number);
@@ -59,7 +65,7 @@ const appointmentFormSchema = z.object({
   reason: z.string().min(3, {
     message: "La raison doit contenir au moins 3 caractères",
   }),
-  status: z.enum(["SCHEDULED", "COMPLETED", "CANCELED", "NO_SHOW", "RESCHEDULED"], {
+  status: z.enum(["PLANNED", "CONFIRMED", "CANCELLED", "COMPLETED"], {
     required_error: "Veuillez sélectionner un statut",
   }),
 }).refine((data) => {
@@ -100,7 +106,7 @@ export function AppointmentForm({
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
       time: defaultValues?.time || "09:00",
       reason: defaultValues?.reason || "",
-      status: defaultValues?.status || "SCHEDULED",
+      status: defaultValues?.status || "PLANNED",
     },
   });
   
@@ -157,9 +163,13 @@ export function AppointmentForm({
         return;
       }
       
+      const dateTimeISO = dateTime.toISOString();
+      
       const appointmentData = {
         patientId: data.patientId,
-        date: dateTime.toISOString(),
+        date: dateTimeISO,
+        startTime: timeToUse,
+        endTime: addHours(timeToUse, 1),
         reason: data.reason,
         status: data.status as AppointmentStatus,
         notificationSent: false,
@@ -183,6 +193,15 @@ export function AppointmentForm({
       setIsSubmitting(false);
     }
   };
+  
+  // Fonction utilitaire pour ajouter des heures à une heure au format string "HH:MM"
+  function addHours(timeStr: string, hoursToAdd: number): string {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    date.setTime(date.getTime() + (hoursToAdd * 60 * 60 * 1000));
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
   
   // Update available times when date changes
   form.watch("date");
@@ -376,11 +395,10 @@ export function AppointmentForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="SCHEDULED">Planifié</SelectItem>
+                  <SelectItem value="PLANNED">Planifié</SelectItem>
+                  <SelectItem value="CONFIRMED">Confirmé</SelectItem>
+                  <SelectItem value="CANCELLED">Annulé</SelectItem>
                   <SelectItem value="COMPLETED">Terminé</SelectItem>
-                  <SelectItem value="CANCELED">Annulé</SelectItem>
-                  <SelectItem value="NO_SHOW">Absent</SelectItem>
-                  <SelectItem value="RESCHEDULED">Reporté</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

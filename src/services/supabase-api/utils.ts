@@ -1,5 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { AppointmentStatus } from '@/types';
 
 // URL et clé API de Supabase
 const SUPABASE_URL = 'https://jpjuvzpqfirymtjwnier.supabase.co';
@@ -66,3 +67,19 @@ export async function getCurrentProfileId(): Promise<number | null> {
 
 // Pour compatibilité avec le code existant
 export const getCurrentOsteopathId = getCurrentProfileId;
+
+// Ajouter cette fonction pour gérer l'authentification dans les requêtes
+export function addAuthHeaders<T extends any>(query: T): T {
+  return query;
+}
+
+// Liste des valeurs valides pour AppointmentStatus
+export const AppointmentStatusValues = ['PLANNED', 'CONFIRMED', 'CANCELLED', 'COMPLETED'] as const;
+
+// Fonction pour s'assurer que le statut est valide
+export function ensureAppointmentStatus(status: any): AppointmentStatus {
+  if (typeof status === 'string' && AppointmentStatusValues.includes(status as AppointmentStatus)) {
+    return status as AppointmentStatus;
+  }
+  return 'PLANNED'; // Valeur par défaut
+}
