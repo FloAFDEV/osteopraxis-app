@@ -110,7 +110,7 @@ export const supabaseAppointmentService = {
         date: appointmentData.date,
         reason: appointmentData.reason,
         patientId: appointmentData.patientId,
-        status: validStatus,
+        status: validStatus as AppointmentStatus,
         notificationSent: appointmentData.notificationSent
       };
       
@@ -193,7 +193,7 @@ export const supabaseAppointmentService = {
       
       if (error) throw new Error(error.message);
       
-      return true; // Retourne true au lieu de void pour correspondre au type attendu
+      return true;
     } catch (error) {
       console.error("Erreur deleteAppointment:", error);
       throw error;

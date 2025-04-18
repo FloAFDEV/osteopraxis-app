@@ -19,7 +19,7 @@ export function addAuthHeaders(query: any) {
 }
 
 // Fonction utilitaire pour garantir que le statut de l'appointement est une valeur d'enum valide
-export const AppointmentStatusValues = ["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"];
+export const AppointmentStatusValues = ["SCHEDULED", "COMPLETED", "CANCELED", "NO_SHOW", "RESCHEDULED"];
 export function ensureAppointmentStatus(status: any) {
   if (typeof status === 'string' && AppointmentStatusValues.includes(status)) {
     return status;

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
@@ -58,7 +59,7 @@ const appointmentFormSchema = z.object({
   reason: z.string().min(3, {
     message: "La raison doit contenir au moins 3 caractères",
   }),
-  status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"], {
+  status: z.enum(["SCHEDULED", "COMPLETED", "CANCELED", "NO_SHOW", "RESCHEDULED"], {
     required_error: "Veuillez sélectionner un statut",
   }),
 }).refine((data) => {
@@ -377,7 +378,8 @@ export function AppointmentForm({
                 <SelectContent>
                   <SelectItem value="SCHEDULED">Planifié</SelectItem>
                   <SelectItem value="COMPLETED">Terminé</SelectItem>
-                  <SelectItem value="CANCELLED">Annulé</SelectItem>
+                  <SelectItem value="CANCELED">Annulé</SelectItem>
+                  <SelectItem value="NO_SHOW">Absent</SelectItem>
                   <SelectItem value="RESCHEDULED">Reporté</SelectItem>
                 </SelectContent>
               </Select>

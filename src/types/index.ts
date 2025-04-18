@@ -98,7 +98,8 @@ export interface Appointment {
 export type AppointmentStatus = 
   | "SCHEDULED" 
   | "COMPLETED" 
-  | "CANCELLED" 
+  | "CANCELED" 
+  | "NO_SHOW"
   | "RESCHEDULED";
 
 // Interface pour les cabinets

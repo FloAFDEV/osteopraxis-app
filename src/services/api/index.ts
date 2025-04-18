@@ -9,6 +9,12 @@ import { authService } from "./auth-service";
 export const api = {
   // Auth
   getSession: authService.getSession,
+  login: authService.login,
+  register: authService.register,
+  logout: authService.logout, 
+  checkAuth: authService.checkAuth,
+  loginWithMagicLink: authService.loginWithMagicLink,
+  promoteToAdmin: authService.promoteToAdmin,
   
   // Patients
   getPatients: patientService.getPatients,
@@ -20,7 +26,7 @@ export const api = {
   // Appointments
   getAppointments: appointmentService.getAppointments,
   getAppointmentById: appointmentService.getAppointmentById,
-  getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId, // Ajout de cette fonction
+  getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
   createAppointment: appointmentService.createAppointment,
   updateAppointment: appointmentService.updateAppointment,
   updateAppointmentStatus: appointmentService.updateAppointmentStatus,
