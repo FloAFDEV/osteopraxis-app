@@ -92,15 +92,82 @@ export const supabaseCabinetService = {
         .eq('userId', userId)
         .maybeSingle();
 
-      if (osteopathError) {
-        console.error('Error fetching osteopath by userId:', osteopathError);
-        throw osteopathError;
-      }
-
-      // If no osteopath found, return empty array
+      // If no osteopath found, create one automatically
       if (!osteopathData) {
         console.log('No osteopath found for userId:', userId);
+        console.log('Creating a default osteopath profile...');
+        
+        const now = new Date().toISOString();
+        const { data: userData } = await supabase
+          .from('User')
+          .select('first_name, last_name')
+          .eq('id', userId)
+          .maybeSingle();
+          
+        const name = userData ? 
+          `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : 
+          'Nouvel Ostéopathe';
+          
+        // Create a new osteopath record
+        const { data: newOsteopath, error: createError } = await supabase
+          .from('Osteopath')
+          .insert({
+            name: name || 'Nouvel Ostéopathe',
+            userId: userId,
+            createdAt: now,
+            updatedAt: now,
+            professional_title: 'Ostéopathe D.O.',
+            ape_code: '8690F'
+          })
+          .select()
+          .single();
+          
+        if (createError) {
+          console.error('Error creating osteopath profile:', createError);
+          throw createError;
+        }
+        
+        console.log('Created default osteopath profile:', newOsteopath);
+        
+        // Create a default cabinet for the new osteopath
+        const { data: newCabinet, error: cabinetError } = await supabase
+          .from('Cabinet')
+          .insert({
+            name: 'Mon Cabinet',
+            address: 'Adresse à définir',
+            osteopathId: newOsteopath.id,
+            createdAt: now,
+            updatedAt: now
+          })
+          .select()
+          .single();
+          
+        if (cabinetError) {
+          console.error('Error creating default cabinet:', cabinetError);
+          // Continue even if cabinet creation fails
+        } else {
+          console.log('Created default cabinet:', newCabinet);
+          return [adaptCabinetFromSupabase(newCabinet)];
+        }
+        
+        // Update the User record with the new osteopathId
+        const { error: updateUserError } = await supabase
+          .from('User')
+          .update({ osteopathId: newOsteopath.id })
+          .eq('id', userId);
+          
+        if (updateUserError) {
+          console.error('Error updating user with osteopathId:', updateUserError);
+          // Continue anyway
+        }
+        
+        // Return empty array if cabinet creation failed
         return [];
+      }
+      
+      if (osteopathError && osteopathError.code !== 'PGRST116') {
+        console.error('Error fetching osteopath by userId:', osteopathError);
+        throw osteopathError;
       }
       
       // Now get cabinets for this osteopath
