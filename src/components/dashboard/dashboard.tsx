@@ -227,7 +227,10 @@ export function Dashboard() {
         </Card>
       </div>
       
-      <AppointmentsOverview appointmentsToday={dashboardData.appointmentsToday} nextAppointment={dashboardData.nextAppointment} />
+      <AppointmentsOverview 
+        appointmentsToday={dashboardData.appointmentsToday} 
+        nextAppointment={dashboardData.nextAppointment} 
+      />
     </div>
   );
 }

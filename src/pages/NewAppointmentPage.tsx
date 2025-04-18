@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
+import { AppointmentFormProps } from "@/types";
 
 const NewAppointmentPage = () => {
   const navigate = useNavigate();

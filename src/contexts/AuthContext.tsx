@@ -1,22 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api } from '@/services/api';
-import { AuthState, User } from '@/types';
+import { AuthState, User, AuthContextType } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-interface AuthContextType {
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithMagicLink: (email: string) => Promise<boolean>;
-  register: (userData: { firstName: string; lastName: string; email: string; password: string; }) => Promise<void>;
-  logout: () => Promise<void>;
-  loadStoredToken: () => Promise<void>;
-  updateUser: (userData: User) => void;
-}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -98,6 +86,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated: true,
         isLoading: false,
         user: authResult.user,
+        token: authResult.token
       });
       
       navigate('/dashboard');
@@ -148,7 +137,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: authResult.user
+        user: authResult.user,
+        token: authResult.token
       });
       
       // Créer automatiquement un profil d'ostéopathe pour l'utilisateur
@@ -204,7 +194,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               setAuthState({
                 isAuthenticated: true,
                 isLoading: false,
-                user: authResult.user
+                user: authResult.user,
+                token: authResult.token
               });
             }
           } catch (error) {
@@ -232,6 +223,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
+  const isAdmin = authState.user?.role === 'ADMIN';
+
   return (
     <AuthContext.Provider
       value={{
@@ -243,7 +236,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         register,
         logout,
         loadStoredToken,
-        updateUser
+        updateUser,
+        isAdmin
       }}
     >
       {children}

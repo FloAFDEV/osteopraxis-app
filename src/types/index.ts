@@ -46,7 +46,7 @@ export interface ProfessionalProfile {
   updatedAt: string;
 }
 
-// Pour la rétrocompatibilité
+// Pour la rétrocompatibilité - mise à jour pour correspondre à ProfessionalProfile
 export interface Osteopath extends ProfessionalProfile {}
 
 // Patient types
@@ -94,15 +94,18 @@ export interface Patient {
 }
 
 // User types
+export type Role = 'USER' | 'ADMIN';
+
 export interface User {
   id: string;
   email: string;
   first_name?: string;
   last_name?: string;
-  role: 'USER' | 'ADMIN';
+  role: Role;
   professionalProfileId?: number;
   created_at: string;
   updated_at: string;
+  avatar_url?: string; // Add this property since it's used in the sidebar
 }
 
 // Invoice types
@@ -170,4 +173,41 @@ export interface DemographicsCardProps {
 export interface AppointmentsOverviewProps {
   appointmentsToday: number;
   nextAppointment: string;
+}
+
+// Adding interface for AppointmentFormProps
+export interface AppointmentFormProps {
+  patients: any[];
+  cabinets?: { id: number; name: string }[];
+  defaultValues?: any;
+  appointmentId?: number;
+  isEditing?: boolean;
+  initialDate?: Date;
+  onSubmit?: (data: any) => Promise<void>;
+  isSubmitting?: boolean;
+  onCancel?: () => void;
+}
+
+// Adding interface for OsteopathProfileFormProps (similar to ProfessionalProfileForm)
+export interface OsteopathProfileFormProps {
+  defaultValues?: Partial<ProfessionalProfile>;
+  osteopathId?: number; 
+  profileId?: number;
+  isEditing?: boolean;
+  onSuccess?: (data: ProfessionalProfile) => void;
+}
+
+// Adding properties to AuthContextType
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  loginWithMagicLink: (email: string) => Promise<boolean>;
+  register: (userData: { firstName: string; lastName: string; email: string; password: string; }) => Promise<void>;
+  logout: () => Promise<void>;
+  loadStoredToken: () => Promise<void>;
+  updateUser: (userData: User) => void;
+  isAdmin?: boolean;
+  promoteToAdmin?: (userId: string) => Promise<void>;
 }

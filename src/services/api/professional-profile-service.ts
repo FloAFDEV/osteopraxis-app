@@ -1,13 +1,25 @@
 
-import { ProfessionalProfile } from "@/types";
+import { ProfessionalProfile, ProfessionType } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseProfessionalProfileService } from "../supabase-api/professional-profile-service";
 import { supabase } from '@/integrations/supabase/client';
 
+// Helper function to safely convert string to ProfessionType
+const toProfessionType = (value: string): ProfessionType => {
+  if (value === 'osteopathe' || value === 'chiropracteur' || value === 'autre') {
+    return value as ProfessionType;
+  }
+  return 'osteopathe'; // Default fallback
+};
+
 export const professionalProfileService = {
   async getProfessionalProfiles(): Promise<ProfessionalProfile[]> {
     try {
-      return await supabaseProfessionalProfileService.getProfessionalProfiles();
+      const profiles = await supabaseProfessionalProfileService.getProfessionalProfiles();
+      return profiles.map(profile => ({
+        ...profile,
+        profession_type: toProfessionType(profile.profession_type)
+      }));
     } catch (error) {
       console.error("Erreur Supabase getProfessionalProfiles:", error);
       throw error;
@@ -16,7 +28,14 @@ export const professionalProfileService = {
 
   async getProfessionalProfileById(id: number): Promise<ProfessionalProfile | undefined> {
     try {
-      return await supabaseProfessionalProfileService.getProfessionalProfileById(id);
+      const profile = await supabaseProfessionalProfileService.getProfessionalProfileById(id);
+      if (profile) {
+        return {
+          ...profile,
+          profession_type: toProfessionType(profile.profession_type)
+        };
+      }
+      return undefined;
     } catch (error) {
       console.error("Erreur Supabase getProfessionalProfileById:", error);
       throw error;
@@ -45,7 +64,10 @@ export const professionalProfileService = {
       // Si un profil est trouvé, le retourner
       if (result) {
         console.log("Profil professionnel trouvé:", result);
-        return result;
+        return {
+          ...result,
+          profession_type: toProfessionType(result.profession_type)
+        };
       }
       
       console.log("Aucun profil trouvé, création d'un profil par défaut...");
@@ -122,7 +144,10 @@ export const professionalProfileService = {
             console.error("Erreur lors de la mise à jour de l'utilisateur avec l'ID du profil:", updateError);
           }
           
-          return newProfile as ProfessionalProfile;
+          return {
+            ...newProfile,
+            profession_type: toProfessionType(newProfile.profession_type)
+          } as ProfessionalProfile;
         }
         
         throw new Error("Échec de création du profil professionnel");
@@ -136,9 +161,15 @@ export const professionalProfileService = {
     }
   },
   
-  async updateProfessionalProfile(id: number, data: Partial<Omit<ProfessionalProfile, 'id' | 'createdAt'>>): Promise<ProfessionalProfile | undefined> {
+  async updateProfessionalProfile(id: number, data: Partial<Omit<ProfessionalProfile, 'id' | 'createdAt' | 'updatedAt'>>): Promise<ProfessionalProfile | undefined> {
     try {
       console.log(`Mise à jour du profil ID ${id} avec les données:`, data);
+      
+      // If profession_type is provided, ensure it's a valid enum value
+      if (data.profession_type && typeof data.profession_type === 'string') {
+        data.profession_type = toProfessionType(data.profession_type);
+      }
+      
       const { data: updatedProfile, error } = await supabase
         .from("ProfessionalProfile")
         .update(data)
@@ -149,7 +180,10 @@ export const professionalProfileService = {
       if (error) throw new Error(error.message);
       
       console.log("Profil professionnel mis à jour avec succès:", updatedProfile);
-      return updatedProfile as ProfessionalProfile;
+      return {
+        ...updatedProfile,
+        profession_type: toProfessionType(updatedProfile.profession_type)
+      } as ProfessionalProfile;
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil professionnel:", error);
       throw error;
@@ -174,11 +208,15 @@ export const professionalProfileService = {
       const userId = data.userId || sessionData.session.user.id;
       console.log("Utilisation de l'userId pour création:", userId);
       
+      // Ensure profession_type is a valid enum value
+      const profession_type = toProfessionType(data.profession_type);
+      
       const { data: newProfile, error } = await supabase
         .from("ProfessionalProfile")
         .insert({
           ...data,
           userId: userId,
+          profession_type,
           createdAt: now,
           updatedAt: now
         })
@@ -191,7 +229,10 @@ export const professionalProfileService = {
       }
       
       console.log("Profil professionnel créé avec succès via insertion directe:", newProfile);
-      return newProfile as ProfessionalProfile;
+      return {
+        ...newProfile,
+        profession_type: toProfessionType(newProfile.profession_type)
+      } as ProfessionalProfile;
     } catch (error) {
       console.error("Erreur lors de la création du profil professionnel:", error);
       throw error;

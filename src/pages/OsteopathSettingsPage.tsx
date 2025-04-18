@@ -60,7 +60,7 @@ const OsteopathSettingsPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          {profile ? <OsteopathProfileForm defaultValues={profile} profileId={profile.id} isEditing={true} onSuccess={handleSuccess} /> : <div className="text-center py-6">
+          {profile ? <OsteopathProfileForm defaultValues={profile} osteopathId={profile.id} isEditing={true} onSuccess={handleSuccess} /> : <div className="text-center py-6">
               <p className="text-muted-foreground mb-4">
                 Aucun profil professionnel trouvé. Veuillez en créer un.
               </p>

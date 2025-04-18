@@ -1,288 +1,268 @@
-import { useState, useEffect } from "react";
-import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock } from "lucide-react";
-import { api } from "@/services/api";
-import { Appointment, Patient } from "@/types";
-import { Layout } from "@/components/ui/layout";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { Link } from "react-router-dom";
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { Layout } from '@/components/ui/layout';
+import { api } from '@/services/api';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar as CalendarIcon, Clock, Info, MapPin, User } from 'lucide-react';
+import { format, parseISO, isToday, isTomorrow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Patient, Appointment, Cabinet } from '@/types';
+import { Link } from 'react-router-dom';
+import { FancyLoader } from '@/components/ui/fancy-loader';
 
 const SchedulePage = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
-  const [view, setView] = useState<"day" | "week">("week");
+  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Chargement des données
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const [appointmentsData, patientsData] = await Promise.all([api.getAppointments(), api.getPatients()]);
+        const [appointmentsData, patientsData, cabinetsData] = await Promise.all([
+          api.getAppointments(),
+          api.getPatients(),
+          api.getCabinets()
+        ]);
+
         setAppointments(appointmentsData);
         setPatients(patientsData);
+        setCabinets(cabinetsData);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Impossible de charger les données. Veuillez réessayer.");
+        console.error("Erreur lors du chargement des données:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
-  useEffect(() => {
-    // Calculate current week days
-    const start = startOfWeek(selectedDate, {
-      weekStartsOn: 1
-    }); // Week starts on Monday
-    const end = endOfWeek(selectedDate, {
-      weekStartsOn: 1
-    });
-    const days = eachDayOfInterval({
-      start,
-      end
-    });
-    setCurrentWeek(days);
-  }, [selectedDate]);
-
-  const getPatientById = (patientId: number) => {
-    return patients.find(patient => patient.id === patientId);
-  };
-
-  const getDayAppointments = (date: Date) => {
+  // Filtrer les rendez-vous pour la date sélectionnée
+  const appointmentsForSelectedDate = useMemo(() => {
     return appointments.filter(appointment => {
       const appointmentDate = parseISO(appointment.date);
-      return isSameDay(appointmentDate, date) && appointment.status === "SCHEDULED";
+      return (
+        appointmentDate.getDate() === selectedDate.getDate() &&
+        appointmentDate.getMonth() === selectedDate.getMonth() &&
+        appointmentDate.getFullYear() === selectedDate.getFullYear() &&
+        appointment.status !== 'CANCELLED'
+      );
     }).sort((a, b) => {
-      const timeA = parseISO(a.date);
-      const timeB = parseISO(b.date);
-      return timeA.getTime() - timeB.getTime();
+      return a.startTime.localeCompare(b.startTime);
     });
+  }, [appointments, selectedDate]);
+
+  // Fonction pour obtenir les détails du patient
+  const getPatientDetails = (patientId: number) => {
+    return patients.find(p => p.id === patientId);
   };
 
-  const navigateToPreviousWeek = () => {
-    setSelectedDate(prevDate => addDays(prevDate, -7));
+  // Fonction pour obtenir les détails du cabinet
+  const getCabinetDetails = (cabinetId?: number) => {
+    if (!cabinetId) return null;
+    return cabinets.find(c => c.id === cabinetId);
   };
 
-  const navigateToNextWeek = () => {
-    setSelectedDate(prevDate => addDays(prevDate, 7));
+  // Fonction pour obtenir la couleur de badge en fonction du statut
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'bg-green-500 hover:bg-green-600';
+      case 'PLANNED':
+        return 'bg-blue-500 hover:bg-blue-600';
+      case 'CANCELLED':
+        return 'bg-red-500 hover:bg-red-600';
+      case 'COMPLETED':
+        return 'bg-gray-500 hover:bg-gray-600';
+      default:
+        return 'bg-gray-500 hover:bg-gray-600';
+    }
   };
 
-  const navigateToPreviousDay = () => {
-    setSelectedDate(prevDate => addDays(prevDate, -1));
+  // Fonction pour traduire le statut
+  const translateStatus = (status: string) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'Confirmé';
+      case 'PLANNED':
+        return 'Planifié';
+      case 'CANCELLED':
+        return 'Annulé';
+      case 'COMPLETED':
+        return 'Terminé';
+      default:
+        return status;
+    }
   };
 
-  const navigateToNextDay = () => {
-    setSelectedDate(prevDate => addDays(prevDate, 1));
+  // Fonction pour formater une date plus lisible
+  const formatDateHeading = (date: Date) => {
+    if (isToday(date)) {
+      return "Aujourd'hui";
+    } else if (isTomorrow(date)) {
+      return "Demain";
+    } else {
+      return format(date, "EEEE d MMMM yyyy", { locale: fr });
+    }
   };
 
-  const navigateToToday = () => {
-    setSelectedDate(new Date());
-  };
+  if (isLoading) {
+    return <FancyLoader message="Chargement de votre agenda..." />;
+  }
 
-  return <Layout>
-      <div className="flex flex-col">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Clock className="h-8 w-8 text-amber-500" />
-            Planning
-          </h1>
-          
-          <div className="flex items-center gap-2">
-            <Tabs value={view} onValueChange={v => setView(v as "day" | "week")} className="mr-2">
-              <TabsList>
-                <TabsTrigger value="day">Jour</TabsTrigger>
-                <TabsTrigger value="week">Semaine</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            
-            <Button variant="outline" size="sm" onClick={navigateToToday}>
-              Aujourd'hui
-            </Button>
-            
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="ml-auto">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(selectedDate, "MMMM yyyy", {
-                  locale: fr
-                })}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar mode="single" selected={selectedDate} onSelect={date => date && setSelectedDate(date)} initialFocus className={cn("p-3 pointer-events-auto")} />
-              </PopoverContent>
-            </Popover>
-          </div>
+  return (
+    <Layout>
+      <div className="grid gap-6 md:grid-cols-[300px_1fr]">
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="p-4">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                className="rounded-md border"
+                locale={fr}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Statistiques</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">
+                  Rendez-vous aujourd'hui
+                </span>
+                <span className="font-medium">
+                  {appointments.filter(a => isToday(parseISO(a.date)) && a.status !== 'CANCELLED').length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">
+                  Rendez-vous cette semaine
+                </span>
+                <span className="font-medium">
+                  {/* Placeholder for weekly appointments count */}
+                  {appointments.filter(a => {
+                    const date = parseISO(a.date);
+                    const today = new Date();
+                    const startOfWeek = new Date(today);
+                    startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+                    const endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setDate(startOfWeek.getDate() + 6);
+                    return date >= startOfWeek && date <= endOfWeek && a.status !== 'CANCELLED';
+                  }).length}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {loading ? <div className="flex justify-center items-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Chargement du planning...</p>
-            </div>
-          </div> : <Tabs value={view} defaultValue={view}>
-            <TabsContent value="day">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <Button variant="ghost" size="sm" onClick={navigateToPreviousDay}>
-                    <ChevronLeft className="h-4 w-4" />
-                    Jour précédent
-                  </Button>
-                  
-                  <h2 className="text-xl font-medium capitalize">
-                    {format(selectedDate, "EEEE d MMMM yyyy", {
-                  locale: fr
-                })}
-                  </h2>
-                  
-                  <Button variant="ghost" size="sm" onClick={navigateToNextDay}>
-                    Jour suivant
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-                
-                <DaySchedule date={selectedDate} appointments={getDayAppointments(selectedDate)} getPatientById={getPatientById} />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="week">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <Button variant="ghost" size="sm" onClick={navigateToPreviousWeek}>
-                    <ChevronLeft className="h-4 w-4" />
-                    Semaine précédente
-                  </Button>
-                  
-                  <h2 className="text-xl font-medium">
-                    Semaine du {format(currentWeek[0], "d MMMM", {
-                  locale: fr
-                })} au {format(currentWeek[6], "d MMMM yyyy", {
-                  locale: fr
-                })}
-                  </h2>
-                  
-                  <Button variant="ghost" size="sm" onClick={navigateToNextWeek}>
-                    Semaine suivante
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-                  {currentWeek.map(day => <div key={day.toString()} className="flex flex-col">
-                      <div className={cn("p-2 text-center capitalize mb-2 rounded-md", isSameDay(day, new Date()) ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                        <div className="font-medium">{format(day, "EEEE", {
-                      locale: fr
-                    })}</div>
-                        <div className="text-sm">{format(day, "d MMM", {
-                      locale: fr
-                    })}</div>
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold tracking-tight capitalize">
+              {formatDateHeading(selectedDate)}
+            </h2>
+
+            <Link to="/appointments/new">
+              <Button>Nouveau rendez-vous</Button>
+            </Link>
+          </div>
+
+          {appointmentsForSelectedDate.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Info className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+                <h3 className="mt-4 text-lg font-semibold">Aucun rendez-vous</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Vous n'avez pas de rendez-vous programmé pour cette date.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {appointmentsForSelectedDate.map((appointment) => {
+                const patient = getPatientDetails(appointment.patientId);
+                const cabinet = getCabinetDetails(appointment.cabinetId);
+
+                return (
+                  <Card key={appointment.id} className="overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="flex flex-col sm:flex-row">
+                        <div className="flex-none bg-muted p-4 text-center sm:w-32 flex flex-col justify-center">
+                          <div className="text-2xl font-bold">{appointment.startTime}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {appointment.endTime && `→ ${appointment.endTime}`}
+                          </div>
+                        </div>
+                        <div className="flex-1 p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="text-lg font-semibold">
+                              {patient ? `${patient.firstName} ${patient.lastName}` : 'Patient inconnu'}
+                            </h3>
+                            <Badge className={getStatusColor(appointment.status)}>
+                              {translateStatus(appointment.status)}
+                            </Badge>
+                          </div>
+
+                          {appointment.reason && (
+                            <p className="text-sm text-muted-foreground mb-4">
+                              {appointment.reason}
+                            </p>
+                          )}
+
+                          <div className="flex flex-wrap gap-3 text-sm">
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span>{format(parseISO(appointment.date), "EEEE d MMMM", { locale: fr })}</span>
+                            </div>
+                            {cabinet && (
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <MapPin className="h-4 w-4" />
+                                <span>{cabinet.name}</span>
+                              </div>
+                            )}
+                            {patient && patient.phone && (
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <User className="h-4 w-4" />
+                                <span>{patient.phone}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-4 flex justify-end gap-2">
+                            {patient && (
+                              <Link to={`/patients/${patient.id}`}>
+                                <Button variant="outline" size="sm">
+                                  Voir patient
+                                </Button>
+                              </Link>
+                            )}
+                            <Link to={`/appointments/${appointment.id}`}>
+                              <Button size="sm">Détails</Button>
+                            </Link>
+                          </div>
+                        </div>
                       </div>
-                      
-                      {getDayAppointments(day).length === 0 ? <div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
-                          <p className="text-sm text-muted-foreground">Aucun rendez-vous</p>
-                        </div> : <div className="space-y-2">
-                          {getDayAppointments(day).map(appointment => {
-                    const patient = getPatientById(appointment.patientId);
-                    const appointmentTime = format(parseISO(appointment.date), "HH:mm");
-                    return <Card key={appointment.id} className="hover-scale">
-                                <CardContent className="p-3">
-                                  <div className="flex items-center justify-between mb-1">
-                                    <Badge className="bg-blue-500">{appointmentTime}</Badge>
-                                  </div>
-                                  <Link to={`/appointments/${appointment.id}/edit`} className="block group">
-                                    <h3 className="font-medium group-hover:text-primary truncate">
-                                      {patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground truncate">
-                                      {appointment.reason}
-                                    </p>
-                                  </Link>
-                                </CardContent>
-                              </Card>;
-                  })}
-                        </div>}
-                    </div>)}
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </Layout>;
-};
-
-interface DayScheduleProps {
-  date: Date;
-  appointments: Appointment[];
-  getPatientById: (id: number) => Patient | undefined;
-}
-
-const DaySchedule = ({
-  date,
-  appointments,
-  getPatientById
-}: DayScheduleProps) => {
-  // Generate time slots for the day (8am to 8pm)
-  const timeSlots = Array.from({
-    length: 25
-  }, (_, i) => {
-    const hour = Math.floor(i / 2) + 8; // Starting from 8 AM
-    const minute = i % 2 * 30; // 0 or 30 minutes
-    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-  });
-  
-  const getAppointmentForTimeSlot = (timeSlot: string) => {
-    return appointments.find(appointment => {
-      const appointmentTime = format(parseISO(appointment.date), "HH:mm");
-      return appointmentTime === timeSlot;
-    });
-  };
-  
-  return <div className="rounded-md border">
-      {timeSlots.map(timeSlot => {
-      const appointment = getAppointmentForTimeSlot(timeSlot);
-      const isCurrentTime = format(new Date(), "HH:mm") === timeSlot && isSameDay(date, new Date());
-      return <div key={timeSlot} className={cn("flex border-b last:border-b-0 transition-colors", isCurrentTime ? "bg-primary/5" : "hover:bg-muted/50")}>
-            <div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center">
-              <span className={cn("text-sm font-medium", isCurrentTime ? "text-primary" : "text-muted-foreground")}>
-                {timeSlot}
-              </span>
-            </div>
-            
-            <div className="flex-1 p-3">
-              {appointment ? <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-primary" />
-                      <Link to={`/patients/${appointment.patientId}`} className="font-medium hover:text-primary">
-                        {getPatientById(appointment.patientId)?.firstName || ""} {getPatientById(appointment.patientId)?.lastName || `Patient #${appointment.patientId}`}
-                      </Link>
-                    </div>
-                    <p className="text-sm text-muted-foreground ml-6">
-                      {appointment.reason}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to={`/appointments/${appointment.id}/edit`}>
-                      Détails
-                    </Link>
-                  </Button>
-                </div> : <Link to={`/appointments/new?date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}`} className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary">
-                  <span className="text-center">Disponible</span>
-                </Link>}
-            </div>
-          </div>;
-    })}
-    </div>;
+    </Layout>
+  );
 };
 
 export default SchedulePage;

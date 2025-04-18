@@ -57,7 +57,7 @@ export function CabinetForm({
         return;
       }
 
-      const cabinetData = {
+      const cabinetData: Omit<Cabinet, "id" | "createdAt" | "updatedAt"> = {
         name: values.name,
         address: values.address, 
         phone: values.phone,

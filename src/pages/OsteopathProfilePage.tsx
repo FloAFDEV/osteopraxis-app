@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { api } from "@/services/api";
@@ -190,36 +191,36 @@ const OsteopathProfilePage = () => {
     return <Navigate to="/login" />;
   }
 
-  const handleOsteopathSuccess = async (updatedOsteopath: ProfessionalProfile) => {
-    console.log("Succès de la mise à jour/création de l'ostéopathe:", updatedOsteopath);
+  const handleOsteopathSuccess = async (updatedProfile: ProfessionalProfile) => {
+    console.log("Succès de la mise à jour/création du profil:", updatedProfile);
     
-    // Si c'est une mise à jour d'un ostéopathe existant
+    // Si c'est une mise à jour d'un profil existant
     if (profile && profile.id) {
       toast.success("Profil mis à jour avec succès");
       
-      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe si nécessaire
-      if (!user?.professionalProfileId && updatedOsteopath.id) {
-        const updatedUser = { ...user!, professionalProfileId: updatedOsteopath.id };
+      // Mise à jour de l'utilisateur avec l'ID du profil si nécessaire
+      if (!user?.professionalProfileId && updatedProfile.id) {
+        const updatedUser = { ...user!, professionalProfileId: updatedProfile.id };
         updateUser(updatedUser);
       }
     } else {
       // Pour un nouveau profil
       toast.success("Profil créé avec succès");
       
-      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
-      if (updatedOsteopath && updatedOsteopath.id && user) {
-        const updatedUser = { ...user, professionalProfileId: updatedOsteopath.id };
+      // Mise à jour de l'utilisateur avec l'ID du profil
+      if (updatedProfile && updatedProfile.id && user) {
+        const updatedUser = { ...user, professionalProfileId: updatedProfile.id };
         updateUser(updatedUser);
       }
     }
     
-    // Mettre à jour l'état local avec l'ostéopathe mis à jour
-    setProfile(updatedOsteopath);
+    // Mettre à jour l'état local avec le profil mis à jour
+    setProfile(updatedProfile);
     
-    // Vérifier si des cabinets existent déjà pour cet ostéopathe
+    // Vérifier si des cabinets existent déjà pour ce profil
     try {
-      if (updatedOsteopath.id) {
-        const existingCabinets = await api.getCabinetsByProfessionalProfileId(updatedOsteopath.id);
+      if (updatedProfile.id) {
+        const existingCabinets = await api.getCabinetsByProfessionalProfileId(updatedProfile.id);
         setCabinets(existingCabinets || []);
         
         // Si des cabinets existent, rediriger vers le tableau de bord
@@ -233,7 +234,7 @@ const OsteopathProfilePage = () => {
       // Sinon, afficher le formulaire de cabinet
       setShowCabinetForm(true);
     } catch (error) {
-      console.error("Erreur lors de la vérification des cabinets après création de l'ostéopathe:", error);
+      console.error("Erreur lors de la vérification des cabinets après création du profil:", error);
     }
 
     // Vérifier s'il y a une URL de redirection stockée
@@ -313,10 +314,10 @@ const OsteopathProfilePage = () => {
                 <OsteopathProfileForm 
                   defaultValues={{
                     ...profile,
-                    // Pré-remplir le nom si l'ostéopathe n'en a pas déjà un
+                    // Pré-remplir le nom si le profil n'en a pas déjà un
                     name: profile?.name || getDefaultName()
                   }}
-                  profileId={profile?.id}
+                  osteopathId={profile?.id}
                   isEditing={!!profile?.id}
                   onSuccess={handleOsteopathSuccess}
                 />
@@ -334,8 +335,6 @@ const OsteopathProfilePage = () => {
                 Votre profil professionnel a été créé. Configurez maintenant votre cabinet pour commencer à utiliser l'application.
               </p>
             </div>
-
-            
           </>
         )}
       </div>

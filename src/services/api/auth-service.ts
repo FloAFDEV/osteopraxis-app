@@ -1,209 +1,235 @@
 
-import { User, AuthState } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
+import { User, AuthState, Role } from "@/types";
 import { supabaseAuthService } from "../supabase-api/auth-service";
+import { supabase } from '@/integrations/supabase/client';
 
-// Données simulées pour les utilisateurs
-const users: User[] = [
+// Mock data for the auth service when using mocks
+const mockUsers: User[] = [
   {
-    id: "d79c31bc-b1fa-42a2-bbd8-379f03f0d8e9",
-    email: "franck.blanchet@example.com",
-    first_name: "Franck",
-    last_name: "BLANCHET",
-    role: "OSTEOPATH",
-    created_at: "2024-12-20 22:29:30",
-    updated_at: "2024-12-20 22:29:30",
-    osteopathId: 1
+    id: "1",
+    email: "test@example.com",
+    first_name: "Test",
+    last_name: "User",
+    role: "USER",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
 
-// Variables pour stocker l'état d'authentification
-let authState: AuthState = {
-  user: null,
-  isAuthenticated: false,
-  token: null
-};
-
 export const authService = {
-  // Ajout explicite de la fonction getSession
-  async getSession(): Promise<AuthState | null> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAuthService.checkAuth();
-      } catch (error) {
-        console.error("Erreur Supabase getSession:", error);
-        return null;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(100);
-    const storedAuth = localStorage.getItem("authState");
-    
-    if (storedAuth) {
-      try {
-        return JSON.parse(storedAuth);
-      } catch (e) {
-        console.error("Failed to parse stored auth state", e);
-        return null;
-      }
-    }
-    
-    return null;
-  },
-  
-  async register(userData: {
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string
-  }): Promise<AuthState> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAuthService.register(userData.email, userData.password, userData.firstName, userData.lastName);
-      } catch (error) {
-        console.error("Erreur Supabase register:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(500);
-    // Simuler une inscription (démo seulement)
-    const newUser: User = {
-      id: `user-${Date.now()}`,
-      email: userData.email,
-      first_name: userData.firstName,
-      last_name: userData.lastName,
-      role: "OSTEOPATH",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      osteopathId: users.length + 1
-    };
-    
-    users.push(newUser);
-    
-    // Créer un token simulé
-    const token = "fake-jwt-token-" + Math.random().toString(36).substring(2);
-    
-    authState = {
-      user: newUser,
-      isAuthenticated: true,
-      token
-    };
-    
-    localStorage.setItem("authState", JSON.stringify(authState));
-    
-    return authState;
-  },
-  
   async login(email: string, password: string): Promise<AuthState> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAuthService.login(email, password);
-      } catch (error) {
-        console.error("Erreur Supabase login:", error);
-        throw error;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      if (data && data.user) {
+        // Récupérer les informations utilisateur depuis la base de données
+        const { data: userData, error: userError } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (userError) console.error("Erreur lors de la récupération des données utilisateur:", userError);
+        
+        const user: User = {
+          id: data.user.id,
+          email: data.user.email || "",
+          first_name: userData?.first_name || data.user.user_metadata?.first_name,
+          last_name: userData?.last_name || data.user.user_metadata?.last_name,
+          role: userData?.role || "USER",
+          professionalProfileId: userData?.professionalProfileId,
+          created_at: userData?.created_at || data.user.created_at,
+          updated_at: userData?.updated_at || data.user.updated_at,
+          avatar_url: data.user.user_metadata?.avatar_url
+        };
+        
+        return {
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+          token: data.session?.access_token
+        };
       }
+      
+      return {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        token: null
+      };
+    } catch (error) {
+      console.error("Erreur de connexion:", error);
+      return {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        token: null
+      };
     }
-    
-    // Fallback: code simulé existant
-    await delay(500);
-    const user = users.find(u => u.email === email);
-    
-    if (!user || password !== "password") { // Simulation de mot de passe pour démo
-      throw new Error("Identifiants incorrects");
-    }
-    
-    const token = "fake-jwt-token-" + Math.random().toString(36).substring(2);
-    
-    authState = {
-      user,
-      isAuthenticated: true,
-      token
-    };
-    
-    localStorage.setItem("authState", JSON.stringify(authState));
-    
-    return authState;
   },
   
-  async loginWithMagicLink(email: string): Promise<void> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAuthService.loginWithMagicLink(email);
-      } catch (error) {
-        console.error("Erreur Supabase magic link:", error);
-        throw error;
+  async register(userData: { firstName: string; lastName: string; email: string; password: string; }): Promise<AuthState> {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            first_name: userData.firstName,
+            last_name: userData.lastName
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data && data.user) {
+        // Créer l'entrée utilisateur dans notre table personnalisée
+        const { error: userError } = await supabase
+          .from('User')
+          .insert({
+            id: data.user.id,
+            email: userData.email,
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            role: "USER",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+          
+        if (userError) {
+          console.error("Erreur lors de la création de l'utilisateur:", userError);
+          throw userError;
+        }
+        
+        const user: User = {
+          id: data.user.id,
+          email: userData.email,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          role: "USER",
+          created_at: data.user.created_at,
+          updated_at: data.user.created_at
+        };
+        
+        return {
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+          token: data.session?.access_token
+        };
       }
+      
+      return {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        token: null
+      };
+    } catch (error) {
+      console.error("Erreur d'inscription:", error);
+      throw error;
     }
-    
-    // Fallback: code simulé
-    await delay(500);
-    console.log(`Magic link envoyé à ${email} (simulation)`);
   },
   
-  async logout(): Promise<void> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAuthService.logout();
-      } catch (error) {
-        console.error("Erreur Supabase logout:", error);
-      }
+  async loginWithMagicLink(email: string): Promise<boolean> {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin + "/dashboard"
+        }
+      });
+      
+      if (error) throw error;
+      
+      return true;
+    } catch (error) {
+      console.error("Erreur d'envoi du lien magique:", error);
+      return false;
     }
-    
-    // Fallback: code simulé existant
-    await delay(200);
-    authState = {
-      user: null,
-      isAuthenticated: false,
-      token: null
-    };
-    
-    localStorage.removeItem("authState");
+  },
+  
+  async getSession(): Promise<any> {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Erreur lors de la récupération de la session:", error);
+        return null;
+      }
+      
+      return data.session;
+    } catch (error) {
+      console.error("Erreur lors de la récupération de la session:", error);
+      return null;
+    }
   },
   
   async checkAuth(): Promise<AuthState> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAuthService.checkAuth();
-      } catch (error) {
-        console.error("Erreur Supabase checkAuth:", error);
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(100);
-    const storedAuth = localStorage.getItem("authState");
-    
-    if (storedAuth) {
-      try {
-        authState = JSON.parse(storedAuth);
-      } catch (e) {
-        console.error("Failed to parse stored auth state", e);
-        authState = {
+    try {
+      // Récupérer la session Supabase
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error || !data.session) {
+        return {
           user: null,
           isAuthenticated: false,
+          isLoading: false,
           token: null
         };
       }
-    }
-    
-    return authState;
-  },
-
-  async promoteToAdmin(userId: string): Promise<boolean> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAuthService.promoteToAdmin(userId);
-      } catch (error) {
-        console.error("Erreur Supabase promoteToAdmin:", error);
-        throw error;
+      
+      // Récupérer les informations utilisateur depuis la base de données
+      const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('*')
+        .eq('id', data.session.user.id)
+        .single();
+        
+      if (userError) {
+        console.error("Erreur lors de la récupération des données utilisateur:", userError);
       }
+      
+      const user: User = {
+        id: data.session.user.id,
+        email: data.session.user.email || "",
+        first_name: userData?.first_name || data.session.user.user_metadata?.first_name,
+        last_name: userData?.last_name || data.session.user.user_metadata?.last_name,
+        role: userData?.role || "USER",
+        professionalProfileId: userData?.professionalProfileId,
+        created_at: userData?.created_at || data.session.user.created_at,
+        updated_at: userData?.updated_at || data.session.user.updated_at,
+        avatar_url: data.session.user.user_metadata?.avatar_url
+      };
+      
+      return {
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+        token: data.session.access_token
+      };
+    } catch (error) {
+      console.error("Erreur lors de la vérification de l'authentification:", error);
+      return {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        token: null
+      };
     }
-    
-    // Fallback: code simulé
-    await delay(300);
-    return true;
+  },
+  
+  async logout(): Promise<void> {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Erreur de déconnexion:", error);
+    }
   }
 };

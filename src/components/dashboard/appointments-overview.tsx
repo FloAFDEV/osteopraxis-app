@@ -4,11 +4,7 @@ import { Calendar, Clock, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-
-export interface AppointmentsOverviewProps {
-  appointmentsToday: number;
-  nextAppointment: string;
-}
+import { AppointmentsOverviewProps } from '@/types';
 
 export function AppointmentsOverview({ appointmentsToday, nextAppointment }: AppointmentsOverviewProps) {
   return (
