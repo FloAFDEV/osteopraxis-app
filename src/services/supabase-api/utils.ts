@@ -19,6 +19,31 @@ export const supabaseAdmin = createClient(SUPABASE_URL, adminKey, {
   }
 });
 
+// Récupérer l'ID ostéopathe associé à l'utilisateur courant
+export async function getCurrentOsteopathId(): Promise<number | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+    
+    const userId = session.user.id;
+    const { data: osteopath, error } = await supabase
+      .from('Osteopath')
+      .select('id')
+      .eq('userId', userId)
+      .single();
+    
+    if (error || !osteopath) {
+      console.warn("Impossible de récupérer l'ID ostéopathe pour l'utilisateur connecté:", error);
+      return null;
+    }
+    
+    return osteopath.id;
+  } catch (err) {
+    console.error("Erreur lors de la récupération de l'ID ostéopathe:", err);
+    return null;
+  }
+}
+
 // Ajouter des en-têtes d'authentification aux requêtes pour contourner les restrictions RLS en développement
 export function addAuthHeaders(query: any) {
   // La fonction ne doit pas essayer d'ajouter des headers à la requête Supabase
