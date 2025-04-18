@@ -3,7 +3,7 @@ import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
 
-// Empty array for patients to remove fictitious data
+// Tableau vide pour les patients pour supprimer les données fictives
 const patients: Patient[] = [];
 
 export const patientService = {
@@ -88,9 +88,9 @@ export const patientService = {
   async deletePatient(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        const { error } = await supabasePatientService.deletePatient(id);
-        if (error) {
-          throw error;
+        const result = await supabasePatientService.deletePatient(id);
+        if (result.error) {
+          throw result.error;
         }
         return true;
       } catch (error) {

@@ -1,26 +1,32 @@
 
-import { patientService } from './patient-service';
-import { appointmentService } from './appointment-service';
-import { cabinetService } from './cabinet-service';
-import { osteopathService } from './osteopath-service';
-import { authService } from './auth-service';
-import { USE_SUPABASE } from './config';
-import { supabaseInvoiceService } from '../supabase-api/invoice-service';
-import { supabase } from '@/integrations/supabase/client';
+import { patientService } from "./patient-service";
+import { appointmentService } from "./appointment-service";
+import { cabinetService } from "./cabinet-service";
+import { osteopathService } from "./osteopath-service";
+import { invoiceService } from "./invoice-service";
+import { authService } from "./auth-service";
 
-// API principale
 export const api = {
-  // Services existants
-  ...patientService,
-  ...appointmentService,
-  ...cabinetService,
-  ...osteopathService,
-  ...authService,
+  // Auth
+  getSession: authService.getSession,
   
-  // Session Supabase
-  getSession: () => supabase.auth.getSession(),
+  // Patients
+  getPatients: patientService.getPatients,
+  getPatientById: patientService.getPatientById,
+  createPatient: patientService.createPatient,
+  updatePatient: patientService.updatePatient,
+  deletePatient: patientService.deletePatient,
   
-  // Méthodes de cabinet (ajoutées ou modifiées)
+  // Appointments
+  getAppointments: appointmentService.getAppointments,
+  getAppointmentById: appointmentService.getAppointmentById,
+  getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId, // Ajout de cette fonction
+  createAppointment: appointmentService.createAppointment,
+  updateAppointment: appointmentService.updateAppointment,
+  updateAppointmentStatus: appointmentService.updateAppointmentStatus,
+  deleteAppointment: appointmentService.deleteAppointment,
+  
+  // Cabinets
   getCabinets: cabinetService.getCabinets,
   getCabinetById: cabinetService.getCabinetById,
   getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
@@ -29,71 +35,23 @@ export const api = {
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
   
-  // Méthodes d'ostéopathe (ajoutées ou modifiées)
+  // Osteopaths
   getOsteopaths: osteopathService.getOsteopaths,
   getOsteopathById: osteopathService.getOsteopathById,
   getOsteopathByUserId: osteopathService.getOsteopathByUserId,
   updateOsteopath: osteopathService.updateOsteopath,
   createOsteopath: osteopathService.createOsteopath,
   
-  // Méthodes pour supprimer des entités
-  deletePatient: patientService.deletePatient,
-  deleteAppointment: appointmentService.deleteAppointment,
-  
-  // Service de facturation (directement depuis Supabase)
-  getInvoices: async () => {
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseInvoiceService.getInvoices();
-      } catch (error) {
-        console.error("Erreur lors de la récupération des factures:", error);
-        throw error;
-      }
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  getInvoiceById: (id: number) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.getInvoiceById(id);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  getInvoicesByPatientId: (patientId: number) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.getInvoicesByPatientId(patientId);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  createInvoice: (invoiceData: any) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.createInvoice(invoiceData);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  updateInvoice: (id: number, invoiceData: any) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.updateInvoice(id, invoiceData);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  updatePaymentStatus: (id: number, paymentStatus: 'PAID' | 'PENDING' | 'CANCELED') => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.updatePaymentStatus(id, paymentStatus);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  deleteInvoice: (id: number) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.deleteInvoice(id);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  }
+  // Invoices
+  getInvoices: invoiceService.getInvoices,
+  getInvoiceById: invoiceService.getInvoiceById,
+  getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
+  createInvoice: invoiceService.createInvoice,
+  updateInvoice: invoiceService.updateInvoice,
+  updatePaymentStatus: invoiceService.updatePaymentStatus,
+  deleteInvoice: invoiceService.deleteInvoice,
+  getInvoicesByPeriod: invoiceService.getInvoicesByPeriod,
+  getInvoiceSummary: invoiceService.getInvoiceSummary,
 };
 
-export { supabaseInvoiceService };
+export type Api = typeof api;

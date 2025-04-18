@@ -105,16 +105,7 @@ export const appointmentService = {
     if (USE_SUPABASE) {
       try {
         // Utiliser le service Supabase pour la suppression
-        const { error } = await supabase
-          .from("Appointment")
-          .delete()
-          .eq("id", id);
-          
-        if (error) {
-          console.error("Erreur lors de la suppression du rendez-vous:", error);
-          throw error;
-        }
-        
+        await supabaseAppointmentService.deleteAppointment(id);
         return true;
       } catch (error) {
         console.error("Erreur deleteAppointment:", error);
