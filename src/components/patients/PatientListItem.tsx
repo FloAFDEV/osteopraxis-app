@@ -47,6 +47,8 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
 
   const avatarStyle = getAvatarColor();
 
+  console.log(`Rendering patient: ${patient.id} - ${patient.firstName} ${patient.lastName}`);
+
   return (
     <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
       <div className="p-4">
@@ -66,7 +68,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
             <div>
               <div className="font-medium text-base flex items-center gap-1">
                 <Link to={`/patients/${patient.id}`} className="hover:underline">
-                  {patient.lastName} {patient.firstName}
+                  {patient.lastName || "Nom inconnu"} {patient.firstName || ""}
                 </Link>
                 {age !== null && <span className="text-sm ml-2 text-gray-400">({age} ans)</span>}
               </div>

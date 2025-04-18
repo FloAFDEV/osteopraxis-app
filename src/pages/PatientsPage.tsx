@@ -36,10 +36,14 @@ const PatientsPage = () => {
   const { data: patients, isLoading, error, refetch } = useQuery({
     queryKey: ['patients'],
     queryFn: async () => {
+      console.log("PatientPage: Fetching patients data...");
       try {
-        return await api.getPatients();
+        const data = await api.getPatients();
+        console.log(`PatientPage: Successfully fetched ${data.length} patients`);
+        return data;
       } catch (err) {
         console.error("Error fetching patients:", err);
+        toast.error("Impossible de récupérer les patients");
         throw err;
       }
     },

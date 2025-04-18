@@ -10,9 +10,13 @@ export const patientService = {
   async getPatients(): Promise<Patient[]> {
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.getPatients();
+        console.log("API getPatients: Using Supabase");
+        const patientsData = await supabasePatientService.getPatients();
+        console.log(`API getPatients: Récupéré ${patientsData.length} patients depuis Supabase`);
+        return patientsData;
       } catch (error) {
         console.error("Erreur Supabase getPatients:", error);
+        throw error; // Important: propagate the error to handle it in the UI
       }
     }
     

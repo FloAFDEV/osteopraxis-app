@@ -41,16 +41,23 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    const { data, error } = await supabase
-      .from('Patient')
-      .select('*');
+    try {
+      console.log("Fetching patients from Supabase...");
+      const { data, error } = await supabase
+        .from('Patient')
+        .select('*');
 
-    if (error) {
-      console.error('Error fetching patients:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching patients:', error);
+        throw error;
+      }
+
+      console.log(`Successfully fetched ${data?.length || 0} patients from Supabase`);
+      return data.map(adaptPatientFromSupabase);
+    } catch (err) {
+      console.error("Error in getPatients:", err);
+      throw err;
     }
-
-    return data.map(adaptPatientFromSupabase);
   },
 
   async getPatientById(id: number): Promise<Patient | null> {

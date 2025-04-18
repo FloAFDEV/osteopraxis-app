@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { Calendar, Clock, User } from "lucide-react";
@@ -29,7 +28,19 @@ export function AppointmentsOverview({
     const fetchData = async () => {
       try {
         // Récupérer les rendez-vous et les patients
-        const [appointmentsData, patientsData] = await Promise.all([api.getAppointments(), api.getPatients()]);
+        const appointmentsPromise = api.getAppointments()
+          .catch(err => {
+            console.error("Erreur lors de la récupération des rendez-vous:", err);
+            return [];
+          });
+          
+        const patientsPromise = api.getPatients()
+          .catch(err => {
+            console.error("Erreur lors de la récupération des patients:", err);
+            return [];
+          });
+        
+        const [appointmentsData, patientsData] = await Promise.all([appointmentsPromise, patientsPromise]);
 
         // Filtrer pour garder seulement les rendez-vous à venir
         const now = new Date();
@@ -39,11 +50,14 @@ export function AppointmentsOverview({
         }).sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime()).slice(0, 5); // Garder seulement les 5 prochains rendez-vous
 
         console.log(`Appointments for dashboard: ${filteredAppointments.length}`);
+        console.log(`Patients for dashboard: ${patientsData.length}`);
+        
         setUpcomingAppointments(filteredAppointments);
         setPatients(patientsData);
         setLoading(false);
       } catch (error) {
-        console.error("Erreur lors de la récupération des rendez-vous:", error);
+        console.error("Erreur lors de la récupération des données:", error);
+        toast.error("Impossible de charger les données du tableau de bord");
         setLoading(false);
       }
     };
