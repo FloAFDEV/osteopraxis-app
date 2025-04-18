@@ -1,3 +1,4 @@
+
 export type AppointmentStatus = 
   | 'SCHEDULED'
   | 'COMPLETED'
@@ -36,6 +37,15 @@ export type Contraception =
   | 'NATURAL_METHODS'
   | 'STERILIZATION';
 
+export type PaymentStatus =
+  | 'PAID'
+  | 'PENDING'
+  | 'CANCELED';
+
+export type Role =
+  | 'ADMIN'
+  | 'OSTEOPATH';
+
 export interface Appointment {
   id: number;
   date: string;
@@ -65,6 +75,7 @@ export interface Patient {
   contraception?: Contraception;
   isSmoker: boolean;
   isDeceased: boolean;
+  hasVisionCorrection: boolean;
   userId?: string;
   avatarUrl?: string;
   cabinetId?: number;
@@ -80,6 +91,85 @@ export interface Patient {
   surgicalHistory: string | null;
   traumaHistory: string | null;
   hdlm: string | null;
+}
+
+export interface Cabinet {
+  id: number;
+  name: string;
+  address: string;
+  phone?: string;
+  email?: string;
+  logoUrl?: string;
+  imageUrl?: string;
+  osteopathId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Osteopath {
+  id: number;
+  name: string;
+  adeli_number?: string;
+  siret?: string;
+  ape_code?: string;
+  professional_title?: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Invoice {
+  id: number;
+  patientId: number;
+  consultationId: number;
+  amount: number;
+  date: string;
+  paymentStatus: PaymentStatus;
+  tvaExoneration?: boolean;
+  tvaMotif?: string;
+}
+
+export interface Consultation {
+  id: number;
+  patientId: number;
+  osteopathId?: number;
+  date: string;
+  notes: string;
+  isCancelled: boolean;
+  cancellationReason?: string;
+}
+
+export interface TreatmentHistory {
+  id: number;
+  consultationId: number;
+  description: string;
+  date: string;
+}
+
+export interface MedicalDocument {
+  id: number;
+  patientId: number;
+  description: string;
+  url: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  osteopathId?: number;
+  role: Role;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  userId?: string;
+  user?: User;
+  loading: boolean;
+  error?: string;
 }
 
 export interface DashboardData {
