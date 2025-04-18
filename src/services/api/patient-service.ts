@@ -23,6 +23,7 @@ export const patientService = {
           console.warn("Aucune session d'authentification détectée");
         }
         
+        console.log("Tentative de récupération FORCÉE de tous les patients...");
         const patientsData = await supabasePatientService.getPatients();
         
         console.log(`API getPatients: Récupéré ${patientsData.length} patients depuis Supabase`);
