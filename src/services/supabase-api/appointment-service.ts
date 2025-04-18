@@ -145,7 +145,6 @@ export const supabaseAppointmentService = {
     }
   },
 
-  // Modification importante ici : utiliser POST au lieu de PATCH pour éviter les problèmes CORS
   async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
       const updateData: Record<string, any> = {};
@@ -159,7 +158,6 @@ export const supabaseAppointmentService = {
       }
       if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
-      // Utiliser upsert avec prefer:resolution=merge-duplicates au lieu de PATCH
       // Nous devons fournir les champs obligatoires pour l'upsert, ou récupérer d'abord les données existantes
       const existingAppointment = await this.getAppointmentById(id);
       

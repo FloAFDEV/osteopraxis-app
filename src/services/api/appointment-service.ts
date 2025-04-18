@@ -73,7 +73,6 @@ export const appointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        // Utilise supabaseAppointmentService.updateAppointment qui a été modifié pour utiliser upsert
         return await supabaseAppointmentService.updateAppointment(id, appointment);
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
@@ -86,26 +85,9 @@ export const appointmentService = {
     return undefined;
   },
 
-  // Méthode mise à jour pour utiliser updateAppointment au lieu de updateAppointmentStatus
-  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment | undefined> {
-    if (USE_SUPABASE) {
-      try {
-        return await this.updateAppointment(id, { status });
-      } catch (error) {
-        console.error("Erreur Supabase updateAppointmentStatus:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    return undefined;
-  },
-  
   async deleteAppointment(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        // Utiliser le service Supabase pour la suppression
         return await supabaseAppointmentService.deleteAppointment(id);
       } catch (error) {
         console.error("Erreur deleteAppointment:", error);
