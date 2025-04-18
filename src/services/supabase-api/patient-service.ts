@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -78,8 +79,25 @@ export const patientService = {
         console.warn("Utilisateur authentifié mais non trouvé dans la table User");
         console.log("Redirection vers la configuration du profil nécessaire");
         
-        // Note: La création du profil devrait être gérée par le processus d'inscription
-        // ou par une page de configuration de profil dédiée, et non dans le service patient
+        // IMPORTANT: Nous allons quand même récupérer TOUS les patients si l'utilisateur n'a pas de profil
+        // Cela permet de voir les données pendant la phase de développement/test
+        console.log("Mode développement: Récupération de tous les patients sans filtrage");
+        
+        // Récupérer tous les patients sans filtrage en mode développement
+        const { data, error } = await supabase.from('Patient').select('*');
+        
+        if (error) {
+          console.error('Erreur lors de la récupération des patients:', error);
+          throw error;
+        }
+
+        console.log(`${data?.length || 0} patients récupérés sans filtrage`);
+        if (data && data.length > 0) {
+          console.log('Premier patient:', data[0]);
+        }
+        
+        console.log("=== Fin getPatients ===");
+        return data?.map(adaptPatientFromSupabase) || [];
       }
       
       // Récupération des patients - Utiliser l'ID de l'ostéopathe de l'utilisateur si disponible
@@ -88,10 +106,13 @@ export const patientService = {
       if (userData?.osteopathId) {
         console.log(`Filtrage des patients pour l'ostéopathe ID: ${userData.osteopathId}`);
         query = query.eq('osteopathId', userData.osteopathId);
-      } else if (userData?.role !== 'ADMIN') {
-        // Si ce n'est pas un admin et qu'il n'a pas d'ID d'ostéopathe, ne retourner aucun patient
-        console.log("Utilisateur sans ID d'ostéopathe associé et non admin, aucun patient retourné");
-        return [];
+      } else if (userData?.role === 'ADMIN') {
+        // Si c'est un admin, ne pas filtrer par ostéopathe
+        console.log("Utilisateur ADMIN: récupération de tous les patients");
+      } else {
+        // Modification: récupérer tous les patients si l'utilisateur n'a pas d'ID d'ostéopathe
+        // mais n'est pas admin, pour faciliter le développement/test
+        console.log("Utilisateur sans ID d'ostéopathe - mode développement: récupération de tous les patients");
       }
       
       const { data, error } = await query;
