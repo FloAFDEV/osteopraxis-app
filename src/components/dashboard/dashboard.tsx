@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -10,8 +9,11 @@ import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/services/supabase-api/utils";
+import { toast } from "sonner";
 
 export function Dashboard() {
+  
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     totalPatients: 0,
     maleCount: 0,
@@ -45,12 +47,41 @@ export function Dashboard() {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        // Récupération des données réelles uniquement
+        // Récupérer d'abord l'utilisateur connecté
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.error('No user logged in for dashboard');
+          toast.error("Vous devez être connecté pour accéder au tableau de bord");
+          setLoading(false);
+          return;
+        }
+        
+        // Récupérer l'osteopathId de l'utilisateur
+        const { data: osteopath, error: osteoError } = await supabase
+          .from('Osteopath')
+          .select('id')
+          .eq('userId', user.id)
+          .single();
+          
+        if (osteoError || !osteopath) {
+          console.error('Error fetching osteopath info for dashboard:', osteoError);
+          toast.error("Impossible de récupérer vos informations d'ostéopathe");
+          setLoading(false);
+          return;
+        }
+        
+        console.log(`Loading dashboard data for osteopath ID ${osteopath.id}`);
+        
+        // Récupération des données réelles uniquement pour cet ostéopathe
         const [patients, appointments] = await Promise.all([
           api.getPatients(), 
           api.getAppointments()
         ]);
 
+        console.log("Patients récupérés pour le tableau de bord:", patients.length);
+
+        
+        
         // Calcul des statistiques avec uniquement les données réelles
         const totalPatients = patients.length;
         const maleCount = patients.filter(p => p.gender === "Homme").length;
@@ -185,8 +216,10 @@ export function Dashboard() {
           annualGrowthPercentage,
           monthlyGrowth
         });
+
       } catch (error) {
         console.error("Erreur lors du chargement des données du tableau de bord:", error);
+        toast.error("Impossible de charger les données du tableau de bord");
       } finally {
         setLoading(false);
       }
@@ -195,6 +228,7 @@ export function Dashboard() {
     loadDashboardData();
   }, []);
 
+  
   return (
     <div className="space-y-8">
       {/* Header Image Banner */}

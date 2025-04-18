@@ -43,13 +43,34 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    // For development, add a simulated auth header
-    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
-    
     try {
+      // Récupérer d'abord l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No user logged in');
+        return [];
+      }
+      
+      // Récupérer l'osteopathId de l'utilisateur
+      const { data: osteopath, error: osteoError } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('userId', user.id)
+        .single();
+        
+      if (osteoError || !osteopath) {
+        console.error('Error fetching osteopath info:', osteoError);
+        return [];
+      }
+      
+      console.log(`Fetching patients for osteopath ID ${osteopath.id}`);
+      
+      // Récupérer les patients de l'ostéopathe
       const { data, error } = await supabase
         .from('Patient')
-        .select('*');
+        .select('*')
+        .eq('osteopathId', osteopath.id)
+        .order('lastName', { ascending: true });
 
       if (error) {
         console.error('Error fetching patients:', error);
@@ -64,14 +85,32 @@ export const patientService = {
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
-    // For development, add a simulated auth header
-    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
-    
     try {
+      // Récupérer d'abord l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No user logged in');
+        return null;
+      }
+      
+      // Récupérer l'osteopathId de l'utilisateur
+      const { data: osteopath, error: osteoError } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('userId', user.id)
+        .single();
+        
+      if (osteoError || !osteopath) {
+        console.error('Error fetching osteopath info:', osteoError);
+        return null;
+      }
+      
+      // Récupérer le patient avec vérification qu'il appartient à cet ostéopathe
       const { data, error } = await supabase
         .from('Patient')
         .select('*')
         .eq('id', id)
+        .eq('osteopathId', osteopath.id)
         .single();
 
       if (error) {

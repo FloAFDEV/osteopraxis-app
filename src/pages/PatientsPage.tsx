@@ -45,10 +45,26 @@ const PatientsPage = () => {
           return [];
         }
 
+        // Récupérer d'abord l'osteopathId de l'utilisateur connecté
+        const { data: osteopath, error: osteoError } = await supabase
+          .from('Osteopath')
+          .select('id')
+          .eq('userId', user.id)
+          .single();
+
+        if (osteoError || !osteopath) {
+          console.error("Erreur lors de la récupération des informations de l'ostéopathe:", osteoError);
+          toast.error("Impossible de récupérer vos informations d'ostéopathe");
+          return [];
+        }
+
+        console.log("OsteopathId récupéré:", osteopath.id);
+
         // Get the osteopath's patients - application des politiques RLS
         const { data: patients, error } = await supabase
           .from('Patient')
           .select('*')
+          .eq('osteopathId', osteopath.id)
           .order('lastName', { ascending: true });
 
         if (error) {
@@ -56,6 +72,7 @@ const PatientsPage = () => {
           throw error;
         }
 
+        console.log("Patients récupérés:", patients ? patients.length : 0);
         return patients || [];
       } catch (err) {
         console.error("Error fetching patients:", err);
