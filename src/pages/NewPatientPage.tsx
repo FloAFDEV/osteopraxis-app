@@ -2,12 +2,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus, Loader2 } from "lucide-react";
+import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { PatientForm } from "@/components/patient-form";
 import { toast } from "sonner";
 import { Patient } from "@/types";
-import { patientService } from "@/services/api/patient-service";
-import { supabase } from "@/integrations/supabase/client";
 
 const NewPatientPage = () => {
   const [loading, setLoading] = useState(false);
@@ -23,37 +22,24 @@ const NewPatientPage = () => {
         setLoading(false);
         return;
       }
-
-      // Get current user's osteopathId
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Vous devez être connecté pour ajouter un patient");
-        navigate('/login');
-        return;
+      
+      // Convertir la date si elle est au format Date
+      if (patientData.birthDate instanceof Date) {
+        patientData.birthDate = patientData.birthDate.toISOString();
       }
-
-      // Récupérer l'ostéopathe associé à l'utilisateur
-      const { data: osteopath, error: osteoError } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id)
-        .single();
-
-      if (osteoError || !osteopath) {
-        toast.error("Impossible de récupérer vos informations d'ostéopathe");
-        return;
-      }
+      
+      console.log("Données patient avant création:", patientData);
       
       // Ajouter les données par défaut nécessaires
       const patientToCreate = {
         ...patientData,
-        osteopathId: osteopath.id,
+        osteopathId: 1, // Pour la démo, nous utilisons l'ostéopathe ID 1
         cabinetId: 1, // Pour la démo, nous utilisons le cabinet ID 1
         userId: null  // Requis par le type mais peut être null
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
       
       console.log("Envoi du patient à l'API:", patientToCreate);
-      const newPatient = await patientService.createPatient(patientToCreate);
+      const newPatient = await api.createPatient(patientToCreate);
       
       console.log("Patient créé avec succès:", newPatient);
       toast.success(`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`);

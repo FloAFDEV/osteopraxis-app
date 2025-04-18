@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
@@ -9,7 +8,6 @@ import { PatientCard } from "@/components/patient-card";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/services/supabase-api/utils";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -29,7 +27,6 @@ const PatientsPage = () => {
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [activeLetter, setActiveLetter] = useState("");
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
-  const navigate = useNavigate();
   
   // Pagination - updated to 25 patients per page
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,50 +37,7 @@ const PatientsPage = () => {
     queryKey: ['patients'],
     queryFn: async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          toast.error("Vous devez être connecté pour accéder aux patients");
-          navigate('/login');
-          return [];
-        }
-
-        console.log("Utilisateur authentifié:", user.id);
-
-        // CORRECTION: Récupérer l'osteopathId sans utiliser maybeSingle()
-        const { data: osteopaths, error: osteoError } = await supabase
-          .from('Osteopath')
-          .select('id')
-          .eq('userId', user.id);
-
-        if (osteoError) {
-          console.error("Erreur lors de la récupération des informations de l'ostéopathe:", osteoError);
-          toast.error("Impossible de récupérer vos informations d'ostéopathe");
-          return [];
-        }
-
-        if (!osteopaths || osteopaths.length === 0) {
-          console.error("Aucun profil d'ostéopathe trouvé pour cet utilisateur");
-          toast.error("Aucun profil d'ostéopathe trouvé pour votre compte");
-          return [];
-        }
-
-        const osteopathId = osteopaths[0].id;
-        console.log("OsteopathId récupéré:", osteopathId);
-
-        // Get the osteopath's patients - application des politiques RLS
-        const { data: patients, error } = await supabase
-          .from('Patient')
-          .select('*')
-          .eq('osteopathId', osteopathId)
-          .order('lastName', { ascending: true });
-
-        if (error) {
-          console.error("Erreur lors de la récupération des patients:", error);
-          throw error;
-        }
-
-        console.log("Patients récupérés:", patients ? patients.length : 0);
-        return patients || [];
+        return await api.getPatients();
       } catch (err) {
         console.error("Error fetching patients:", err);
         throw err;
@@ -104,7 +58,7 @@ const PatientsPage = () => {
       if (patients && patients.length > 0) {
         toast.success(`${patients.length} patients chargés avec succès`);
       } else {
-        toast.warning("Aucun patient trouvé. Vous pouvez créer un nouveau patient en cliquant sur le bouton '+' en haut à droite.");
+        toast.warning("Aucun patient trouvé dans la base de données");
       }
     } catch (err) {
       toast.error("Impossible de charger les patients");
@@ -198,36 +152,13 @@ const PatientsPage = () => {
   const createTestPatient = async () => {
     try {
       toast.info("Création d'un patient test...");
-      
-      // Get current user's osteopathId
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Vous devez être connecté pour ajouter un patient");
-        navigate('/login');
-        return;
-      }
-
-      // CORRECTION: Récupérer l'ostéopathe associé à l'utilisateur sans maybeSingle()
-      const { data: osteopaths, error: osteoError } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id);
-
-      if (osteoError || !osteopaths || osteopaths.length === 0) {
-        toast.error("Impossible de récupérer vos informations d'ostéopathe");
-        return;
-      }
-      
-      const osteopathId = osteopaths[0].id;
-      console.log("OsteopathId pour création de patient test:", osteopathId);
-      
       const testPatient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> = {
         firstName: "Test",
         lastName: `Patient ${new Date().getTime().toString().slice(-4)}`, // Unique name
         gender: "Homme",
         email: `test${new Date().getTime()}@example.com`, // Unique email
         phone: "0123456789",
-        osteopathId: osteopathId,
+        osteopathId: 1,
         address: "123 Rue Test",
         cabinetId: 1,
         maritalStatus: "SINGLE",

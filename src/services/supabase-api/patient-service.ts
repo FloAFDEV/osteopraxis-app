@@ -43,67 +43,13 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
+    // For development, add a simulated auth header
+    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
+    
     try {
-      // Récupérer d'abord l'utilisateur connecté
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('No user logged in');
-        return [];
-      }
-      
-      console.log("User authenticated:", user.id);
-      
-      let osteopathId: number | null = null;
-      
-      // CORRECTION: Récupérer l'osteopathId directement sans maybeSingle
-      console.log("Trying to fetch osteopath info directly from Osteopath table");
-      const { data: osteopaths, error: osteoError } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id);
-      
-      if (osteopaths && osteopaths.length > 0) {
-        console.log(`Found osteopathId ${osteopaths[0].id} directly from Osteopath table`);
-        osteopathId = osteopaths[0].id;
-      } else {
-        console.log('No osteopath record found for this user. Error:', osteoError?.message);
-        
-        // Fallback: Si ce n'est pas encore créé, créer automatiquement un enregistrement ostéopathe
-        if (SIMULATE_AUTH) {
-          console.log("Development mode: Creating a default osteopath record");
-          const { data: newOsteo, error: createError } = await supabase
-            .from('Osteopath')
-            .insert({
-              userId: user.id,
-              name: user.user_metadata?.name || 'Default Osteopath',
-              professional_title: 'Ostéopathe D.O.',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            })
-            .select();
-          
-          if (newOsteo && newOsteo.length > 0) {
-            console.log(`Created new osteopath with ID ${newOsteo[0].id}`);
-            osteopathId = newOsteo[0].id;
-          } else {
-            console.error('Failed to create default osteopath:', createError);
-          }
-        }
-      }
-      
-      if (!osteopathId) {
-        console.error('No osteopath info found or created for this user');
-        return [];
-      }
-      
-      console.log(`Fetching patients for osteopath ID ${osteopathId}`);
-      
-      // Récupérer les patients de l'ostéopathe
       const { data, error } = await supabase
         .from('Patient')
-        .select('*')
-        .eq('osteopathId', osteopathId)
-        .order('lastName', { ascending: true });
+        .select('*');
 
       if (error) {
         console.error('Error fetching patients:', error);
@@ -118,62 +64,19 @@ export const patientService = {
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
+    // For development, add a simulated auth header
+    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
+    
     try {
-      // Récupérer d'abord l'utilisateur connecté
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('No user logged in');
-        return null;
-      }
-      
-      let osteopathId: number | null = null;
-      
-      // Récupérer l'osteopathId de deux façons
-      const { data: userData, error: userError } = await supabase
-        .from('User')
-        .select('osteopathId')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (userData && userData.osteopathId) {
-        console.log(`Found osteopathId ${userData.osteopathId} from User table`);
-        osteopathId = userData.osteopathId;
-      } else {
-        console.log('OsteopathId not found in User table, trying Osteopath table');
-        // Fallback: essayer de récupérer depuis la table Osteopath
-        const { data: osteopath, error: osteoError } = await supabase
-          .from('Osteopath')
-          .select('id')
-          .eq('userId', user.id)
-          .maybeSingle();
-        
-        if (osteopath) {
-          console.log(`Found osteopathId ${osteopath.id} from Osteopath table`);
-          osteopathId = osteopath.id;
-        }
-      }
-      
-      if (!osteopathId) {
-        console.error('No osteopath info found for this user');
-        return null;
-      }
-      
-      // Récupérer le patient avec vérification qu'il appartient à cet ostéopathe
       const { data, error } = await supabase
         .from('Patient')
         .select('*')
         .eq('id', id)
-        .eq('osteopathId', osteopathId)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error(`Error fetching patient with id ${id}:`, error);
         throw error;
-      }
-
-      if (!data) {
-        console.log(`No patient found with id ${id} for osteopath ${osteopathId}`);
-        return null;
       }
 
       return adaptPatientFromSupabase(data);
@@ -380,4 +283,3 @@ export { patientService as supabasePatientService };
 export const updatePatient = async (patient: Patient): Promise<Patient> => {
   return patientService.updatePatient(patient);
 };
-
