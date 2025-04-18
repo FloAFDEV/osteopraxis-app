@@ -208,7 +208,7 @@ const OsteopathProfilePage = () => {
     }
     
     // Si des cabinets existent, rediriger vers le tableau de bord
-    if (existingCabinets && existingCabinets.length > 0) {
+    if (cabinets && cabinets.length > 0) {
       toast.success("Configuration terminée, redirection vers le tableau de bord");
       navigate("/dashboard");
       return;
