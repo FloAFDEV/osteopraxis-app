@@ -30,7 +30,7 @@ const patientSchema = z.object({
   phone: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   birthDate: z.date().optional().nullable(),
-  childrenAges: z.array(z.number()).optional().nullable(),
+  childrenAges: z.array(z.string()).optional().nullable(),
   firstName: z.string().min(1, "Prénom requis"),
   lastName: z.string().min(1, "Nom requis"),
   gender: z.string().optional().nullable(),
@@ -124,9 +124,13 @@ export function PatientForm({
     setChildrenAgesInput(value);
 
     // Convertir la chaîne en tableau d'âges (nombres)
-    const ages = value.split(",").map(age => parseInt(age.trim())).filter(age => !isNaN(age) && age > 0);
-    form.setValue("childrenAges", ages);
-  };
+    const ages = value.split(",")
+      .map(age => parseInt(age.trim()))
+      .filter(age => !isNaN(age) && age > 0);
+  
+  // Store as string[] as required by the Patient type
+  form.setValue("childrenAges", ages.map(String));
+};
 
   // Mettre à jour hasChildren quand childrenCount change
   useEffect(() => {

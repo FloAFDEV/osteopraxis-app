@@ -14,7 +14,7 @@ const EditCabinetPage = () => {
   const { id } = useParams<{ id: string }>();
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
-  const [osteopathData, setOsteopathData] = useState<any>(null);
+  const [professionalData, setProfessionalData] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,11 +26,11 @@ const EditCabinetPage = () => {
         }
         setCabinet(cabinetData);
 
-        // Récupérer les données de l'ostéopathe pour les infos de facturation
-        if (cabinetData.osteopathId) {
-          const osteopathInfo = await api.getOsteopathById(cabinetData.osteopathId);
-          if (osteopathInfo) {
-            setOsteopathData(osteopathInfo);
+        // Récupérer les données du professionnel pour les infos de facturation
+        if (cabinetData.professionalProfileId) {
+          const profileInfo = await api.getProfessionalProfileById(cabinetData.professionalProfileId);
+          if (profileInfo) {
+            setProfessionalData(profileInfo);
           }
         }
       } catch (error) {
@@ -102,14 +102,14 @@ const EditCabinetPage = () => {
               email: cabinet.email || undefined,
               imageUrl: cabinet.imageUrl || undefined,
               logoUrl: cabinet.logoUrl || undefined,
-              osteopathId: cabinet.osteopathId,
-              siret: osteopathData?.siret || undefined,
-              adeliNumber: osteopathData?.adeli_number || undefined,
-              apeCode: osteopathData?.ape_code || "8690F"
+              professionalProfileId: cabinet.professionalProfileId,
+              siret: professionalData?.siret || undefined,
+              adeliNumber: professionalData?.adeli_number || undefined,
+              apeCode: professionalData?.ape_code || "8690F"
             }} 
             cabinetId={cabinet.id} 
             isEditing={true} 
-            osteopathId={cabinet.osteopathId} 
+            professionalProfileId={cabinet.professionalProfileId} 
           />
         </div>
       </div>

@@ -35,12 +35,12 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
   // Determine background color and icon based on gender
   const getAvatarColor = () => {
     switch(patient.gender) {
-      case 'Homme':
+      case 'MALE':
         return {
           background: 'bg-blue-100 text-blue-600', 
           icon: <User className="h-5 w-5 text-blue-600" />
         };
-      case 'Femme':
+      case 'FEMALE':
         return {
           background: 'bg-pink-100 text-pink-600', 
           icon: <UserRound className="h-5 w-5 text-pink-600" />

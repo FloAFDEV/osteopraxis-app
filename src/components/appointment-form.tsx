@@ -164,6 +164,7 @@ export function AppointmentForm({
       }
       
       const dateTimeISO = dateTime.toISOString();
+      const now = new Date().toISOString();
       
       const appointmentData = {
         patientId: data.patientId,
@@ -173,6 +174,8 @@ export function AppointmentForm({
         reason: data.reason,
         status: data.status as AppointmentStatus,
         notificationSent: false,
+        createdAt: now,
+        updatedAt: now
       };
       
       if (isEditing && appointmentId) {

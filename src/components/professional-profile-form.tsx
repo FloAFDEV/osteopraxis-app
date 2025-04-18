@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -62,32 +61,45 @@ export function ProfessionalProfileForm({
       }
 
       let profileResponse;
+      const now = new Date().toISOString();
 
       if (isEditing && profileId) {
         // Mise à jour d'un profil existant
         profileResponse = await api.updateProfessionalProfile(profileId, {
-          ...data,
-          updatedAt: new Date().toISOString(),
+          name: data.name,
+          title: data.title,
+          adeli_number: data.adeli_number || null,
+          siret: data.siret || null,
+          ape_code: data.ape_code || null,
+          profession_type: data.profession_type,
+          updatedAt: now
         });
-      } else {
-        // Création d'un nouveau profil
-        profileResponse = await api.createProfessionalProfile({
-          ...data,
-          userId: user.id,
-        });
-      }
-
-      // Appeler le callback onSuccess si fourni
-      if (onSuccess && profileResponse) {
-        onSuccess(profileResponse);
-      }
-
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement du profil:", error);
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      // Création d'un nouveau profil
+      profileResponse = await api.createProfessionalProfile({
+        name: data.name,
+        title: data.title,
+        adeli_number: data.adeli_number || null,
+        siret: data.siret || null, 
+        ape_code: data.ape_code || null,
+        profession_type: data.profession_type,
+        userId: user.id,
+        createdAt: now,
+        updatedAt: now
+      });
     }
+
+    // Appeler le callback onSuccess si fourni
+    if (onSuccess && profileResponse) {
+      onSuccess(profileResponse);
+    }
+
+  } catch (error) {
+    console.error("Erreur lors de l'enregistrement du profil:", error);
+  } finally {
+    setIsSubmitting(false);
   }
+}
 
   return (
     <Form {...form}>

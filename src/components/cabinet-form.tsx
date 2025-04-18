@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -50,7 +49,7 @@ export function CabinetForm({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitting(true);
-      
+    
       if (!professionalProfileId) {
         toast.error("Vous devez avoir un profil professionnel pour créer un cabinet.");
         return;
@@ -58,11 +57,14 @@ export function CabinetForm({
 
       const cabinetData = {
         ...values,
-        professionalProfileId
+        name: values.name || "Cabinet sans nom", // Ensure name is always provided
+        professionalProfileId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
 
       let result;
-      
+    
       if (isEditing) {
         result = await api.updateCabinet(cabinet.id, cabinetData);
         toast.success("Cabinet mis à jour avec succès!");
@@ -71,11 +73,11 @@ export function CabinetForm({
         toast.success("Cabinet créé avec succès!");
         form.reset(); // Reset the form after successful creation
       }
-      
+    
       if (onSuccess && result) {
         onSuccess(result);
       }
-      
+    
     } catch (error) {
       console.error("Erreur lors de la soumission du formulaire de cabinet:", error);
       toast.error("Une erreur est survenue. Veuillez réessayer.");

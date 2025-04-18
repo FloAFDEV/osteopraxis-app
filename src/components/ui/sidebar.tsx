@@ -1,211 +1,295 @@
-
-import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
-  CalendarDays,
   LayoutDashboard,
-  Settings,
   Users,
-  Clock,
+  CalendarDays,
   FileText,
+  Settings,
+  Building2,
+  Menu,
+  X,
   ChevronDown,
   LogOut,
-  UserCog,
-  UserPlus,
-  Building,
-  Activity
-} from 'lucide-react';
+  User,
+} from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { api } from "@/services/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Cabinet } from "@/types";
 
 interface SidebarProps {
-  isCollapsed: boolean;
-  onToggle?: () => void;
+  className?: string;
 }
 
-export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
-  const { logout, user } = useAuth();
-  const { isMobile } = useIsMobile();
+export function Sidebar({ className }: SidebarProps) {
+  const [open, setOpen] = useState(false);
+  const [cabinetOptions, setCabinetOptions] = useState<Cabinet[]>([]);
+  const { user, logout } = useAuth();
   const location = useLocation();
-  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
 
   useEffect(() => {
-    // Récupérer les informations du cabinet si l'utilisateur est connecté
-    if (user?.osteopathId) {
-      const fetchCabinet = async () => {
-        try {
-          const cabinets = await api.getCabinetsByOsteopathId(user.osteopathId);
-          if (cabinets && cabinets.length > 0) {
-            setCabinet(cabinets[0]);
-          }
-        } catch (error) {
-          console.error("Erreur lors de la récupération du cabinet:", error);
-        }
-      };
+    const loadCabinets = async () => {
+      if (!user) return;
       
-      fetchCabinet();
-    }
+      try {
+        let cabinets;
+        // If user has a professional profile, load cabinets for that profile
+        if (user.professionalProfileId) {
+          cabinets = await api.getCabinetsByProfessionalProfileId(user.professionalProfileId);
+        } else {
+          // Otherwise load cabinets by user ID
+          cabinets = await api.getCabinetsByUserId(user.id);
+        }
+        
+        setCabinetOptions(cabinets || []);
+      } catch (error) {
+        console.error("Error loading cabinets:", error);
+      }
+    };
+    
+    loadCabinets();
   }, [user]);
 
-  // Définir les couleurs des icônes
-  const iconColors = {
-    dashboard: "text-indigo-600 dark:text-indigo-400",
-    patients: "text-green-600 dark:text-green-400", 
-    addPatient: "text-blue-600 dark:text-blue-400",
-    settings: "text-amber-600 dark:text-amber-400",
-    appointments: "text-red-600 dark:text-red-400",
-    invoices: "text-amber-600 dark:text-amber-400", // Changé en amber pour les factures
-    schedule: "text-cyan-600 dark:text-cyan-400"
-  };
+  // Close sidebar when route changes on mobile
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
 
-  // Rendre l'élément NavLink avec l'état active géré correctement
-  const renderNavLink = ({ href, icon: Icon, label, colorClass }: { href: string; icon: React.ElementType; label: string; colorClass?: string }) => {
-    const isActive = location.pathname === href || location.pathname.startsWith(`${href}/`);
+  const navigation = [
+    {
+      name: "Tableau de bord",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      current: location.pathname === "/dashboard",
+    },
+    {
+      name: "Patients",
+      href: "/patients",
+      icon: Users,
+      current: location.pathname.startsWith("/patients"),
+    },
+    {
+      name: "Rendez-vous",
+      href: "/appointments",
+      icon: CalendarDays,
+      current: location.pathname.startsWith("/appointments"),
+    },
+    {
+      name: "Facturation",
+      href: "/invoices",
+      icon: FileText,
+      current: location.pathname.startsWith("/invoices"),
+    },
+    {
+      name: "Cabinets",
+      href: "/cabinets",
+      icon: Building2,
+      current: location.pathname.startsWith("/cabinets"),
+    },
+    {
+      name: "Paramètres",
+      href: "/settings",
+      icon: Settings,
+      current: location.pathname.startsWith("/settings"),
+    },
+  ];
+
+  const getInitials = () => {
+    if (!user) return "?";
     
-    return (
-      <NavLink
-        key={href}
-        to={href}
-        onClick={() => isMobile && onToggle?.()}
-        className={cn(
-          "flex items-center gap-x-2 text-slate-700 dark:text-slate-300 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors",
-          "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
-          isActive && "bg-slate-100 text-slate-900 dark:bg-amber-900/30 dark:text-amber-50" // Changé en amber pour le focus
-        )}
-      >
-        {/* Icône toujours colorée, indépendamment de l'état de survol */}
-        <Icon size={18} className={colorClass} />
-        {!isCollapsed && <span>{label}</span>}
-      </NavLink>
-    );
+    const firstName = user.first_name || "";
+    const lastName = user.last_name || "";
+    
+    if (!firstName && !lastName) return user.email?.substring(0, 2).toUpperCase() || "?";
+    
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   return (
-    <aside className={cn(
-      "flex flex-col h-full bg-white dark:bg-gray-950 border-r dark:border-gray-800",
-      isCollapsed ? "w-[60px]" : "w-[240px]"
-    )}>
-      <div className="px-3 py-2">
-        <div className="flex items-center justify-center gap-2 mt-2">
-          <Activity className={cn(
-            "h-5 w-5 text-amber-500 dark:text-amber-400 transition-all",
-            !isCollapsed && "mb-1"
-          )} />
-          <h2 className={cn(
-            "font-bold text-lg text-slate-900 dark:text-amber-400 transition-all", // Changé en amber
-            isCollapsed ? "opacity-0 h-0 mt-0 absolute" : "opacity-100 h-auto"
-          )}>
-            PatientHub
-          </h2>
-        </div>
-        {!isCollapsed && (
-          <p className="text-xs text-center text-muted-foreground mb-2">
-            Gestion de cabinet
-          </p>
-        )}
+    <>
+      {/* Mobile menu button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setOpen(!open)}
+          className="rounded-full shadow-md"
+        >
+          {open ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
+        </Button>
       </div>
-      
-      <ScrollArea className="flex-1 px-3">
-        <div className="space-y-1 py-2">
-          {renderNavLink({ 
-            href: "/", 
-            icon: LayoutDashboard, 
-            label: "Tableau de bord",
-            colorClass: iconColors.dashboard
-          })}
-          
-          {renderNavLink({ 
-            href: "/patients", 
-            icon: Users, 
-            label: "Patients",
-            colorClass: iconColors.patients
-          })}
 
-          {renderNavLink({
-            href: "/patients/new",
-            icon: UserPlus,
-            label: "Ajouter un patient",
-            colorClass: iconColors.addPatient
-          })}
-          
-          {renderNavLink({ 
-            href: "/appointments", 
-            icon: CalendarDays, 
-            label: "Rendez-vous",
-            colorClass: iconColors.appointments
-          })}
-          
-          {renderNavLink({ 
-            href: "/invoices", 
-            icon: FileText, 
-            label: "Factures",
-            colorClass: iconColors.invoices
-          })}
-          
-          {renderNavLink({ 
-            href: "/schedule", 
-            icon: Clock, 
-            label: "Agenda",
-            colorClass: iconColors.schedule
-          })}
-          
-          {renderNavLink({ 
-            href: "/cabinet", 
-            icon: Building, 
-            label: "Cabinet",
-            colorClass: iconColors.settings
-          })}
-        </div>
-      </ScrollArea>
+      {/* Overlay for mobile */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
 
-      <div className={cn(
-        "p-3 mt-auto border-t dark:border-gray-800",
-        isCollapsed ? "flex justify-center" : ""
-      )}>
-        {!isCollapsed ? (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 px-2 py-1.5">
-              <Avatar className="w-8 h-8">
-                {cabinet && cabinet.logoUrl ? (
-                  <AvatarImage src={cabinet.logoUrl} alt={cabinet.name} />
-                ) : null}
-                <AvatarFallback className="bg-amber-600 dark:bg-amber-600 text-primary-foreground font-medium">
-                  {user?.first_name?.charAt(0) || user?.email?.charAt(0) || "?"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {user?.first_name || user?.email || "Utilisateur"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user?.role === "ADMIN" ? "Administrateur" : "Ostéopathe"}
-                </p>
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out lg:translate-x-0 bg-card border-r shadow-sm",
+          open ? "translate-x-0" : "-translate-x-full",
+          className
+        )}
+      >
+        <div className="flex h-full flex-col">
+          {/* Logo and title */}
+          <div className="flex h-16 shrink-0 items-center px-4 border-b">
+            <Link to="/dashboard" className="flex items-center space-x-2">
+              <div className="bg-primary text-primary-foreground p-1 rounded">
+                <LayoutDashboard className="h-6 w-6" />
               </div>
-              <ChevronDown size={16} className="text-muted-foreground" />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Button size="sm" variant="outline" className="w-full justify-start" asChild>
-                <NavLink to="/admin">
-                  <UserCog size={16} className="mr-2 text-amber-600 dark:text-amber-400" /> Compte
-                </NavLink>
-              </Button>
-              <Button size="sm" variant="outline" className="w-full justify-start" onClick={logout}>
-                <LogOut size={16} className="mr-2 text-red-600 dark:text-red-400" /> Déconnexion
-              </Button>
-            </div>
+              <span className="text-lg font-semibold">OsteoApp</span>
+            </Link>
           </div>
-        ) : (
-          <Button size="sm" variant="outline" className="w-full p-2 h-auto" onClick={logout}>
-            <LogOut size={16} className="text-red-600 dark:text-red-400" />
-          </Button>
-        )}
+
+          {/* Navigation */}
+          <ScrollArea className="flex-1 py-4">
+            <nav className="space-y-1 px-2">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={cn(
+                    "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                    item.current
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <item.icon
+                    className={cn(
+                      "mr-3 h-5 w-5 flex-shrink-0",
+                      item.current
+                        ? "text-primary"
+                        : "text-muted-foreground group-hover:text-foreground"
+                    )}
+                    aria-hidden="true"
+                  />
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Cabinet selector */}
+            {cabinetOptions.length > 0 && (
+              <div className="mt-6 px-4">
+                <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Vos cabinets
+                </h3>
+                <div className="mt-2 space-y-1">
+                  {cabinetOptions.map((cabinet) => (
+                    <Link
+                      key={cabinet.id}
+                      to={`/cabinets/${cabinet.id}`}
+                      className={cn(
+                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                        location.pathname === `/cabinets/${cabinet.id}`
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <Building2
+                        className={cn(
+                          "mr-3 h-4 w-4 flex-shrink-0",
+                          location.pathname === `/cabinets/${cabinet.id}`
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        )}
+                      />
+                      <span className="truncate">{cabinet.name}</span>
+                    </Link>
+                  ))}
+                  <Link
+                    to="/cabinets/new"
+                    className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    <span className="mr-3 h-4 w-4 flex-shrink-0 text-muted-foreground">
+                      +
+                    </span>
+                    Ajouter un cabinet
+                  </Link>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+
+          {/* User menu */}
+          <div className="border-t p-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-2 hover:bg-muted"
+                >
+                  <div className="flex items-center">
+                    <Avatar className="h-8 w-8 mr-2">
+                      <AvatarImage
+                        src={user?.avatar_url || ""}
+                        alt={user?.email || ""}
+                      />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {getInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="ml-2 text-left">
+                      <p className="text-sm font-medium truncate max-w-[120px]">
+                        {user?.first_name
+                          ? `${user.first_name} ${user.last_name || ""}`
+                          : user?.email || "Utilisateur"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate max-w-[120px]">
+                        {user?.email}
+                      </p>
+                    </div>
+                    <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profil</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Paramètres</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Se déconnecter</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </div>
-    </aside>
+    </>
   );
 }
