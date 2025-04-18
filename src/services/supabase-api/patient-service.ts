@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 import { checkAuth } from "./utils";
@@ -47,17 +48,56 @@ export const patientService = {
       const session = await checkAuth();
       console.log("Fetching patients with authenticated user:", session.user.id);
       
+      // Get the osteopath ID for the current user
+      const { data: osteopathData, error: osteopathError } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('userId', session.user.id)
+        .single();
+
+      if (osteopathError) {
+        if (osteopathError.code === 'PGRST116') {
+          // User might be an admin, try to get their role
+          const { data: userData } = await supabase
+            .from('User')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+
+          if (userData && userData.role === 'ADMIN') {
+            // Admin user can see all patients
+            console.log("Admin user detected, fetching all patients");
+            const { data, error } = await supabase
+              .from('Patient')
+              .select('*')
+              .order('lastName', { ascending: true });
+
+            if (error) {
+              console.error('Error fetching patients as admin:', error);
+              throw error;
+            }
+
+            console.log(`Successfully fetched ${data?.length || 0} patients as admin`);
+            return (data || []).map(adaptPatientFromSupabase);
+          }
+        }
+        console.error('Error fetching osteopath id:', osteopathError);
+        throw osteopathError;
+      }
+
+      // Regular osteopath user - fetch only their patients
       const { data, error } = await supabase
         .from('Patient')
         .select('*')
+        .eq('osteopathId', osteopathData.id)
         .order('lastName', { ascending: true });
 
       if (error) {
-        console.error('Error fetching patients:', error);
+        console.error('Error fetching patients for osteopath:', error);
         throw error;
       }
 
-      console.log(`Successfully fetched ${data?.length || 0} patients`);
+      console.log(`Successfully fetched ${data?.length || 0} patients for osteopath ID ${osteopathData.id}`);
       return (data || []).map(adaptPatientFromSupabase);
     } catch (error) {
       console.error('Error in getPatients:', error);
@@ -236,121 +276,4 @@ export { patientService as supabasePatientService };
 // Make this function available for direct import
 export const updatePatient = async (patient: Patient): Promise<Patient> => {
   return patientService.updatePatient(patient);
-};
-```
-
-```typescript
-import { Patient } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
-import { supabasePatientService } from "../supabase-api/patient-service";
-
-// Empty array for patients to remove fictitious data
-const patients: Patient[] = [];
-
-export const patientService = {
-  async getPatients(): Promise<Patient[]> {
-    if (USE_SUPABASE) {
-      try {
-        const patients = await supabasePatientService.getPatients();
-        console.log("Retrieved patients:", patients.length);
-        return patients;
-      } catch (error) {
-        console.error("Error in getPatients:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    return [...patients];
-  },
-
-  async getPatientById(id: number): Promise<Patient | undefined> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabasePatientService.getPatientById(id);
-      } catch (error) {
-        console.error("Erreur Supabase getPatientById:", error);
-        throw error;  // Propagate the error for better debugging
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(200);
-    return patients.find(patient => patient.id === id);
-  },
-
-  async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    if (USE_SUPABASE) {
-      try {
-        const createdPatient = await supabasePatientService.createPatient(patient);
-        return createdPatient;
-      } catch (error) {
-        console.error("Erreur Supabase createPatient:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(400);
-    const now = new Date().toISOString();
-    const newPatient = {
-      ...patient,
-      id: patients.length + 1,
-      createdAt: now,
-      updatedAt: now,
-    } as Patient;
-    patients.push(newPatient);
-    return newPatient;
-  },
-
-  async updatePatient(patient: Patient): Promise<Patient> {
-    if (USE_SUPABASE) {
-      try {
-        // Use the supabase patient service for update
-        const updatedPatient = await supabasePatientService.updatePatient(patient);
-        return updatedPatient;
-      } catch (error) {
-        console.error("Erreur Supabase updatePatient:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    const index = patients.findIndex(p => p.id === patient.id);
-    if (index !== -1) {
-      patients[index] = { 
-        ...patients[index], 
-        ...patient,
-        updatedAt: new Date().toISOString() 
-      };
-      return patients[index];
-    }
-    throw new Error(`Patient with id ${patient.id} not found`);
-  },
-
-  async deletePatient(id: number): Promise<boolean> {
-    if (USE_SUPABASE) {
-      try {
-        const { error } = await supabasePatientService.deletePatient(id);
-        if (error) {
-          throw error;
-        }
-        return true;
-      } catch (error) {
-        console.error("Erreur Supabase deletePatient:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    const index = patients.findIndex(p => p.id === id);
-    if (index !== -1) {
-      patients.splice(index, 1);
-      return true;
-    }
-    return false;
-  }
 };
