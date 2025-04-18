@@ -49,7 +49,7 @@ export interface ProfessionalProfile {
 // For backward compatibility
 export interface Osteopath extends ProfessionalProfile {}
 
-// Patient types
+// Patient types 
 export interface Patient {
   id: number;
   firstName: string;
@@ -62,6 +62,20 @@ export interface Patient {
   professionalProfileId: number;
   cabinetId?: number;
   currentTreatment?: string;
+  occupation?: string;
+  physicalActivity?: string;
+  generalPractitioner?: string;
+  ophtalmologistName?: string;
+  entDoctorName?: string;
+  entProblems?: string;
+  digestiveDoctorName?: string;
+  digestiveProblems?: string;
+  surgicalHistory?: string;
+  traumaHistory?: string;
+  rheumatologicalHistory?: string;
+  hasChildren?: string;
+  childrenAges?: string[];
+  avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
