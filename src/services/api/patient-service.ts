@@ -1,4 +1,3 @@
-
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
@@ -10,10 +9,12 @@ export const patientService = {
   async getPatients(): Promise<Patient[]> {
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.getPatients();
+        const patients = await supabasePatientService.getPatients();
+        console.log("Retrieved patients:", patients.length);
+        return patients;
       } catch (error) {
-        console.error("Erreur Supabase getPatients:", error);
-        throw error;  // Propagate the error for better debugging
+        console.error("Error in getPatients:", error);
+        throw error;
       }
     }
     
