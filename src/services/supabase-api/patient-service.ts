@@ -1,4 +1,3 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase, supabaseAdmin, getCurrentOsteopathId } from "./utils";
 
@@ -49,7 +48,7 @@ export const patientService = {
     try {
       console.log("=== Début getPatients: RÉCUPÉRATION FORCÉE DE TOUS LES PATIENTS ===");
       
-      // Récupérer l'ID ostéopathe associé à l'utilisateur authentifié
+      // Récupérer ou créer l'ID ostéopathe associé à l'utilisateur authentifié
       const osteopathId = await getCurrentOsteopathId();
       console.log(`Tentative récupération patients pour osteopathId: ${osteopathId}`);
       
@@ -87,62 +86,69 @@ export const patientService = {
           console.log('Nombre total de patients:', data.length);
           return data.map(adaptPatientFromSupabase);
         } 
+        
+        // Si aucun patient n'est trouvé, en créer un automatiquement
+        console.log('Aucun patient trouvé pour cet ostéopathe. Création d\'un patient de démo...');
+        const testPatient = await this.createTestPatient(osteopathId);
+        return [testPatient];
       }
       
-      // Aucun patient trouvé ou pas d'osteopathId, création d'un patient de test
-      console.log('ATTENTION: Aucun patient trouvé dans la base de données ou osteopathId invalide');
-      console.log('Création automatique d\'un patient test...');
+      // Aucun ostéopathe trouvé ou création échouée
+      console.log('ATTENTION: Impossible de récupérer ou créer un ostéopathe pour l\'utilisateur courant');
+      console.log('Création d\'un patient fictif en mémoire...');
       
-      const testPatient = await this.createTestPatient();
-      console.log('Patient test créé avec succès:', testPatient);
-      return [testPatient];
+      // Retourner un patient fictif en mémoire
+      return [this.createMockPatient()];
     } catch (err) {
       console.error("Erreur critique dans getPatients:", err);
       
       // Fallback: retourner un patient en mémoire pour ne pas bloquer l'interface
       console.log("Création d'un patient fictif en mémoire...");
-      const now = new Date().toISOString();
       
-      const mockPatient: Patient = {
-        id: 999,
-        firstName: "Patient",
-        lastName: "Démo",
-        email: "demo@example.com",
-        phone: "0123456789",
-        gender: "Homme" as Gender,
-        birthDate: "1990-01-01T00:00:00.000Z",
-        maritalStatus: "SINGLE" as MaritalStatus,
-        occupation: "Démo",
-        osteopathId: 1,
-        cabinetId: 1,
-        userId: null,
-        createdAt: now,
-        updatedAt: now,
-        hasChildren: "false",
-        handedness: "RIGHT" as Handedness,
-        contraception: "NONE" as Contraception,
-        hasVisionCorrection: false,
-        isDeceased: false,
-        isSmoker: false,
-        address: "123 Rue Démo",
-        childrenAges: [],
-        generalPractitioner: "Dr. Démo",
-        surgicalHistory: null,
-        traumaHistory: null,
-        rheumatologicalHistory: null,
-        currentTreatment: null,
-        ophtalmologistName: null,
-        entProblems: null,
-        entDoctorName: null,
-        digestiveProblems: null,
-        digestiveDoctorName: null,
-        physicalActivity: null,
-        hdlm: null,
-        avatarUrl: null
-      };
-      
-      return [mockPatient];
+      return [this.createMockPatient()];
     }
+  },
+
+  createMockPatient(): Patient {
+    const now = new Date().toISOString();
+    
+    return {
+      id: 999,
+      firstName: "Patient",
+      lastName: "Démo",
+      email: "demo@example.com",
+      phone: "0123456789",
+      gender: "Homme" as Gender,
+      birthDate: "1990-01-01T00:00:00.000Z",
+      maritalStatus: "SINGLE" as MaritalStatus,
+      occupation: "Démo",
+      osteopathId: 1,
+      cabinetId: 1,
+      userId: null,
+      createdAt: now,
+      updatedAt: now,
+      hasChildren: "false",
+      handedness: "RIGHT" as Handedness,
+      contraception: "NONE" as Contraception,
+      hasVisionCorrection: false,
+      isDeceased: false,
+      isSmoker: false,
+      address: "123 Rue Démo",
+      childrenAges: [],
+      generalPractitioner: "Dr. Démo",
+      surgicalHistory: null,
+      traumaHistory: null,
+      rheumatologicalHistory: null,
+      currentTreatment: null,
+      ophtalmologistName: null,
+      entProblems: null,
+      entDoctorName: null,
+      digestiveProblems: null,
+      digestiveDoctorName: null,
+      physicalActivity: null,
+      hdlm: null,
+      avatarUrl: null
+    };
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
@@ -197,7 +203,7 @@ export const patientService = {
     // Add current timestamps
     const now = new Date().toISOString();
     
-    // Get current osteopathId
+    // Get current osteopathId or create a new one if needed
     const osteopathId = await getCurrentOsteopathId();
     if (!osteopathId) {
       console.error("Impossible de créer un patient sans ID ostéopathe");
@@ -269,42 +275,42 @@ export const patientService = {
     return adaptPatientFromSupabase(data);
   },
 
-  async createTestPatient(): Promise<Patient> {
+  async createTestPatient(osteopathId?: number): Promise<Patient> {
     try {
       console.log("Création d'un patient test...");
-      const now = new Date().toISOString();
       
-      // Get current osteopathId
-      const osteopathId = await getCurrentOsteopathId();
-      if (!osteopathId) {
+      // Get osteopathId if not provided
+      const finalOsteopathId = osteopathId || await getCurrentOsteopathId();
+      if (!finalOsteopathId) {
         throw new Error("ID ostéopathe manquant pour la création du patient test");
       }
       
+      const now = new Date().toISOString();
       const testPatient = {
-        firstName: "Test",
-        lastName: `Patient ${new Date().getTime().toString().slice(-4)}`,
-        email: `test${new Date().getTime()}@example.com`,
+        firstName: "Jean",
+        lastName: "Dupont",
+        email: `patient.test.${new Date().getTime()}@example.com`,
         phone: "0123456789",
         address: "123 Rue de Test",
         gender: "Homme" as Gender,
-        birthDate: "1990-01-01T00:00:00.000Z",
-        maritalStatus: "SINGLE" as MaritalStatus,
-        occupation: "Testeur",
-        hasChildren: "false",
-        childrenAges: [],
-        generalPractitioner: "Dr. Test",
-        surgicalHistory: null,
-        traumaHistory: null,
+        birthDate: "1985-05-15T00:00:00.000Z",
+        maritalStatus: "MARRIED" as MaritalStatus,
+        occupation: "Ingénieur",
+        hasChildren: "true",
+        childrenAges: [8, 12],
+        generalPractitioner: "Dr. Martin",
+        surgicalHistory: "Appendicectomie 2015",
+        traumaHistory: "Fracture cheville gauche 2018",
         rheumatologicalHistory: null,
         currentTreatment: null,
         handedness: "RIGHT" as Handedness,
-        hasVisionCorrection: false,
-        ophtalmologistName: null,
+        hasVisionCorrection: true,
+        ophtalmologistName: "Dr. Blanc",
         entProblems: null,
         entDoctorName: null,
         digestiveProblems: null,
         digestiveDoctorName: null,
-        physicalActivity: null,
+        physicalActivity: "Course à pied 2x/semaine",
         isSmoker: false,
         isDeceased: false,
         contraception: "NONE" as Contraception,
@@ -312,7 +318,7 @@ export const patientService = {
         avatarUrl: null,
         cabinetId: 1,
         userId: null,
-        osteopathId: osteopathId, // Utiliser l'ID ostéopathe récupéré
+        osteopathId: finalOsteopathId,
         createdAt: now,
         updatedAt: now
       };
@@ -329,51 +335,13 @@ export const patientService = {
         throw error;
       }
       
+      console.log("Patient test créé avec succès:", data);
       return adaptPatientFromSupabase(data);
     } catch (err) {
       console.error("Erreur lors de la création du patient test:", err);
       
       // En cas d'échec, retourner un patient fictif
-      console.log("Retour d'un patient fictif...");
-      const now = new Date().toISOString();
-      
-      return {
-        id: 999,
-        firstName: "Patient",
-        lastName: "Fictif",
-        email: "fictif@example.com",
-        phone: "0123456789",
-        gender: "Homme" as Gender,
-        birthDate: "1990-01-01T00:00:00.000Z",
-        maritalStatus: "SINGLE" as MaritalStatus,
-        occupation: "Fictif",
-        osteopathId: 1,
-        cabinetId: 1,
-        userId: null,
-        createdAt: now,
-        updatedAt: now,
-        hasChildren: "false",
-        handedness: "RIGHT" as Handedness,
-        contraception: "NONE" as Contraception,
-        hasVisionCorrection: false,
-        isDeceased: false,
-        isSmoker: false,
-        address: "123 Rue Fictive",
-        childrenAges: [],
-        generalPractitioner: "Dr. Fictif",
-        surgicalHistory: null,
-        traumaHistory: null,
-        rheumatologicalHistory: null,
-        currentTreatment: null,
-        ophtalmologistName: null,
-        entProblems: null,
-        entDoctorName: null,
-        digestiveProblems: null,
-        digestiveDoctorName: null,
-        physicalActivity: null,
-        hdlm: null,
-        avatarUrl: null
-      };
+      return this.createMockPatient();
     }
   },
 
