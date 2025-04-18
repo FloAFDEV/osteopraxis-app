@@ -3,6 +3,7 @@ import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/com
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Patient, DashboardData } from "@/types";
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { User, UserRound, UserCircle } from 'lucide-react';
 
 interface DemographicsCardProps {
   patients?: Patient[];
@@ -23,11 +24,13 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       return [{
         name: "Homme",
         value: data.maleCount,
-        percentage: totalPatients > 0 ? Math.round((data.maleCount / totalPatients) * 100) : 0
+        percentage: totalPatients > 0 ? Math.round((data.maleCount / totalPatients) * 100) : 0,
+        icon: <User className="h-5 w-5 text-blue-600" />
       }, {
         name: "Femme",
         value: data.femaleCount,
-        percentage: totalPatients > 0 ? Math.round((data.femaleCount / totalPatients) * 100) : 0
+        percentage: totalPatients > 0 ? Math.round((data.femaleCount / totalPatients) * 100) : 0,
+        icon: <UserRound className="h-5 w-5 text-pink-600" />
       }];
     }
     if (patientsList.length > 0) {
@@ -55,10 +58,48 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 
   const chartData = calculateGenderData();
   const GENDER_COLORS = {
-    "Homme": "#3b82f6",
-    "Femme": "#d946ef",
+    "Homme": "#3b82f6",  // Bleu plus prononcé
+    "Femme": "#d946ef",  // Rose vif
     "Non spécifié": "#94a3b8"
   };
+
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    index
+  }: any) => {
+    if (percent < 0.05) return null;
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    const genderIcon = chartData[index].icon;
+    
+    return (
+      <g>
+        <text 
+          x={x} 
+          y={y} 
+          fill="white" 
+          fontWeight="bold" 
+          fontSize="14" 
+          dominantBaseline="central" 
+          textAnchor="middle"
+        >
+          {`${(percent * 100).toFixed(0)}%`}
+        </text>
+        <g transform={`translate(${x - 12}, ${y + 15}) scale(0.8)`}>
+          {genderIcon}
+        </g>
+      </g>
+    );
+  };
+
   const CustomTooltip = ({
     active,
     payload
@@ -77,22 +118,10 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     }
     return null;
   };
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent
-  }: any) => {
-    if (percent < 0.05) return null;
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    return <text x={x} y={y} fill="#fff" fontWeight="bold" fontSize="14" dominantBaseline="central" textAnchor="middle">
-        {`${(percent * 100).toFixed(0)}%`}
-      </text>;
+  const renderCustomLegendIcon = (color: string) => {
+    return <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill={color} rx="6" />
+      </svg>;
   };
   const CustomLegend = ({
     payload
@@ -136,9 +165,12 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       </Card>;
   }
   
-  return <Card className="overflow-hidden rounded-lg  bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
+  return (
+    <Card className="overflow-hidden rounded-lg bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
       <CardHeader>
-        <CardTitle className="text-gray-800 dark:text-white">Démographie des patients</CardTitle>
+        <CardTitle className="text-gray-800 dark:text-white">
+          Démographie des patients
+        </CardTitle>
         <CardDescription className="text-gray-600 dark:text-gray-400">
           Répartition par genre sur un total de {totalPatients} patients
         </CardDescription>
@@ -147,8 +179,22 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         <div className="h-[250px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={chartData} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={80} fill="#8884d8" dataKey="value">
-                {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || "#94a3b8"} />)}
+              <Pie 
+                data={chartData} 
+                cx="50%" 
+                cy="50%" 
+                labelLine={false} 
+                label={renderCustomizedLabel} 
+                outerRadius={80} 
+                fill="#8884d8" 
+                dataKey="value"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || "#94a3b8"} 
+                  />
+                ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
               <Legend content={<CustomLegend />} />
@@ -156,5 +202,6 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
           </ResponsiveContainer>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
