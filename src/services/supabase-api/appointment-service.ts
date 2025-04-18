@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 import { checkAuth } from "./utils";
@@ -9,8 +10,24 @@ const adaptAppointmentFromSupabase = (data: any): Appointment => ({
   patientId: data.patientId,
   reason: data.reason,
   notificationSent: data.notificationSent || false,
-  status: data.status as AppointmentStatus
+  status: convertDbStatusToAppStatus(data.status)
 });
+
+// Convert Supabase status (CANCELED) to our app status (CANCELLED)
+const convertAppStatusToDbStatus = (status: AppointmentStatus): string => {
+  if (status === "CANCELLED") {
+    return "CANCELED";
+  }
+  return status;
+};
+
+// Convert our app status (CANCELLED) to Supabase status (CANCELED)
+const convertDbStatusToAppStatus = (status: string): AppointmentStatus => {
+  if (status === "CANCELED") {
+    return "CANCELLED";
+  }
+  return status as AppointmentStatus;
+};
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -152,9 +169,18 @@ export const supabaseAppointmentService = {
 
   async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
     try {
+      // Convert the appointment status for Supabase
+      const supabaseAppointment = {
+        date: appointment.date,
+        patientId: appointment.patientId,
+        reason: appointment.reason,
+        status: convertAppStatusToDbStatus(appointment.status),
+        notificationSent: appointment.notificationSent
+      };
+
       const { data, error } = await supabase
         .from('Appointment')
-        .insert([appointment])
+        .insert(supabaseAppointment)
         .select()
         .single();
 
@@ -172,9 +198,15 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
+      // Convert the appointment status for Supabase if it exists
+      const supabaseAppointment = {
+        ...appointment,
+        status: appointment.status ? convertAppStatusToDbStatus(appointment.status) : undefined
+      };
+
       const { data, error } = await supabase
         .from('Appointment')
-        .update(appointment)
+        .update(supabaseAppointment)
         .eq('id', id)
         .select()
         .single();

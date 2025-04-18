@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -95,6 +94,9 @@ export interface Appointment {
   notificationSent: boolean;
 }
 
+// Note: In our app we use "CANCELLED" (British spelling),
+// but the Supabase database uses "CANCELED" (American spelling).
+// The adapter functions in appointment-service.ts handle the conversion.
 export type AppointmentStatus = 
   | "SCHEDULED" 
   | "COMPLETED" 
