@@ -1,19 +1,27 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, User, UserRound, Users } from "lucide-react";
+import { Mail, User, UserRound, Users, Trash2 } from "lucide-react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { differenceInYears, parseISO } from "date-fns";
+import { patientService } from "@/services/api/patient-service";
+import { toast } from "sonner";
+import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
 
 interface PatientListItemProps {
   patient: Patient;
+  onDeleted?: () => void;
 }
 
 const PatientListItem: React.FC<PatientListItemProps> = ({
-  patient
+  patient,
+  onDeleted
 }) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Calculate age only if birthDate is defined
   const age = patient.birthDate ? differenceInYears(new Date(), parseISO(patient.birthDate)) : null;
 
@@ -42,6 +50,31 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
           background: 'bg-purple-100 text-purple-600', 
           icon: <Users className="h-5 w-5 text-purple-600" />
         };
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await patientService.deletePatient(patient.id);
+      if (result) {
+        toast.success(`${patient.firstName} ${patient.lastName} a été supprimé`);
+        if (onDeleted) {
+          onDeleted();
+        }
+      } else {
+        toast.error("Impossible de supprimer le patient");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression du patient:", error);
+      toast.error("Erreur lors de la suppression du patient");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -93,6 +126,15 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
           </div>
           
           <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+              onClick={handleDeleteClick}
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
               <Link to={`/patients/${patient.id}/edit`}>Modifier</Link>
             </Button>
@@ -102,6 +144,13 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
           </div>
         </div>
       </div>
+
+      <ConfirmDeletePatientModal
+        isOpen={isDeleteModalOpen}
+        patientName={`${patient.firstName} ${patient.lastName}`}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        onDelete={handleConfirmDelete}
+      />
     </div>
   );
 };

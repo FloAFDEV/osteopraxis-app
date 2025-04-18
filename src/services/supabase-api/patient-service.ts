@@ -43,6 +43,20 @@ export const patientService = {
   async getPatients(): Promise<Patient[]> {
     try {
       console.log("Fetching patients from Supabase...");
+      
+      // Ajout d'un log pour afficher le schéma actuellement utilisé
+      const { data: schemaInfo, error: schemaError } = await supabase
+        .from('Patient')
+        .select('id')
+        .limit(1);
+        
+      if (schemaError) {
+        console.error('Error checking schema:', schemaError);
+      } else {
+        console.log('Schema check successful. Table exists.');
+      }
+      
+      // Récupération des patients avec plus d'informations de débogage
       const { data, error } = await supabase
         .from('Patient')
         .select('*');
@@ -52,7 +66,16 @@ export const patientService = {
         throw error;
       }
 
-      console.log(`Successfully fetched ${data?.length || 0} patients from Supabase`);
+      if (!data) {
+        console.log('No data returned from Supabase');
+        return [];
+      }
+
+      console.log(`Successfully fetched ${data.length} patients from Supabase`);
+      if (data.length > 0) {
+        console.log('Sample patient data:', JSON.stringify(data[0]));
+      }
+      
       return data.map(adaptPatientFromSupabase);
     } catch (err) {
       console.error("Error in getPatients:", err);
@@ -218,6 +241,8 @@ export const patientService = {
   
   async deletePatient(id: number): Promise<{ error: any | null }> {
     try {
+      console.log(`Deleting patient with ID ${id} from Supabase...`);
+      
       const { error } = await supabase
         .from('Patient')
         .delete()
@@ -228,6 +253,7 @@ export const patientService = {
         return { error };
       }
       
+      console.log(`Successfully deleted patient ${id} from Supabase`);
       return { error: null };
     } catch (error) {
       console.error('Exception while deleting patient:', error);

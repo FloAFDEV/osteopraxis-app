@@ -38,8 +38,18 @@ const PatientsPage = () => {
     queryFn: async () => {
       console.log("PatientPage: Fetching patients data...");
       try {
+        // Log more information about the API call
+        console.log("API getPatients will be called now");
         const data = await api.getPatients();
         console.log(`PatientPage: Successfully fetched ${data.length} patients`);
+        
+        // Debug: log the first patient if exists
+        if (data && data.length > 0) {
+          console.log("First patient details:", JSON.stringify(data[0]));
+        } else {
+          console.log("No patients found in the response");
+        }
+        
         return data;
       } catch (err) {
         console.error("Error fetching patients:", err);
@@ -205,6 +215,12 @@ const PatientsPage = () => {
     }
   };
 
+  // Handle patient deletion
+  const handlePatientDeleted = () => {
+    console.log("Patient deleted, refreshing list");
+    refetch();
+  };
+
   return (
     <Layout>
       <div className="flex flex-col min-h-full">
@@ -260,7 +276,11 @@ const PatientsPage = () => {
                   <Card className="overflow-hidden">
                     <div className="divide-y">
                       {paginatedPatients.map(patient => (
-                        <PatientListItem key={patient.id} patient={patient} />
+                        <PatientListItem 
+                          key={patient.id} 
+                          patient={patient} 
+                          onDeleted={handlePatientDeleted}
+                        />
                       ))}
                     </div>
                   </Card>

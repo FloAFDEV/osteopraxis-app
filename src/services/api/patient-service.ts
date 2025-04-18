@@ -11,8 +11,19 @@ export const patientService = {
     if (USE_SUPABASE) {
       try {
         console.log("API getPatients: Using Supabase");
+        console.log("Making direct request to Supabase API");
+        
         const patientsData = await supabasePatientService.getPatients();
+        
         console.log(`API getPatients: Récupéré ${patientsData.length} patients depuis Supabase`);
+        
+        // Debug: log the first patient if exists
+        if (patientsData && patientsData.length > 0) {
+          console.log("Premier patient trouvé:", patientsData[0]);
+        } else {
+          console.log("Aucun patient trouvé dans Supabase");
+        }
+        
         return patientsData;
       } catch (error) {
         console.error("Erreur Supabase getPatients:", error);
@@ -28,7 +39,10 @@ export const patientService = {
   async getPatientById(id: number): Promise<Patient | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.getPatientById(id);
+        console.log(`API getPatientById: Fetching patient with ID ${id}...`);
+        const patient = await supabasePatientService.getPatientById(id);
+        console.log(`API getPatientById: Patient found? ${patient ? 'Yes' : 'No'}`);
+        return patient;
       } catch (error) {
         console.error("Erreur Supabase getPatientById:", error);
       }
@@ -92,10 +106,15 @@ export const patientService = {
   async deletePatient(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
+        console.log(`API deletePatient: Deleting patient with ID ${id}...`);
         const result = await supabasePatientService.deletePatient(id);
+        
         if (result.error) {
+          console.error("Erreur lors de la suppression:", result.error);
           throw result.error;
         }
+        
+        console.log(`API deletePatient: Patient ${id} successfully deleted`);
         return true;
       } catch (error) {
         console.error("Erreur Supabase deletePatient:", error);
