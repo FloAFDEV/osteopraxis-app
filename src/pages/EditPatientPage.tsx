@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -66,13 +65,19 @@ const EditPatientPage = () => {
       };
 
       console.log("Sending patient data to API:", patientToUpdate);
+      // Make sure ID is included and is a number
+      if (typeof patientToUpdate.id === 'string') {
+        patientToUpdate.id = parseInt(patientToUpdate.id);
+      }
+      
+      // Make sure all required fields are present
       const result = await patientService.updatePatient(patientToUpdate);
 
       toast.success("Patient mis à jour avec succès");
       navigate('/patients');
     } catch (error: any) {
       console.error("Error updating patient:", error);
-      toast.error("Impossible de mettre à jour le patient");
+      toast.error("Impossible de mettre à jour le patient: " + (error.message || "Erreur inconnue"));
     } finally {
       setIsSaving(false);
     }

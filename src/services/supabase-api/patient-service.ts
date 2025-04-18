@@ -158,7 +158,7 @@ export const patientService = {
     
     // Prepare the complete patient data for update
     const patientData = {
-      id: id, // Inclure l'ID pour l'upsert
+      id: id, // Include the ID for the upsert
       firstName: patient.firstName,
       lastName: patient.lastName,
       email: patient.email,
@@ -192,23 +192,33 @@ export const patientService = {
       userId: patient.userId,
       osteopathId: patient.osteopathId || 1,
       updatedAt: now,
-      createdAt: patient.createdAt || now, // Utiliser createdAt existant ou le now si non défini
+      createdAt: patient.createdAt || now, // Use existing createdAt or now if not defined
     };
 
-    // CORRECTION: Utiliser upsert au lieu de update pour contourner les problèmes CORS avec PATCH
-    console.log("Mise à jour du patient avec upsert - ID:", id);
-    const { data, error } = await supabase
-      .from('Patient')
-      .upsert(patientData)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating patient:', error);
+    // CORRECTION: Use upsert instead of update to avoid CORS issues with PATCH
+    console.log("Updating patient with upsert - ID:", id);
+    
+    try {
+      // Use .from('Patient') with no filtering first
+      const { data, error } = await supabase
+        .from('Patient')
+        .upsert(patientData)
+        .select();
+      
+      if (error) {
+        console.error('Error in upsert operation:', error);
+        throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from upsert operation');
+      }
+      
+      return adaptPatientFromSupabase(data[0]);
+    } catch (error) {
+      console.error('Exception during patient update:', error);
       throw error;
     }
-
-    return adaptPatientFromSupabase(data);
   },
   
   async deletePatient(id: number): Promise<{ error: any | null }> {

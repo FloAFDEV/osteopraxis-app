@@ -64,6 +64,10 @@ export const patientService = {
       try {
         // Important: Utiliser la méthode upsert au lieu de update pour éviter les erreurs CORS
         console.log("Appel à supabasePatientService.updatePatient avec l'ID:", patient.id);
+        // Make sure patient data is fully defined before sending to Supabase
+        if (!patient.id) {
+          throw new Error("Patient ID is required for update");
+        }
         const updatedPatient = await supabasePatientService.updatePatient(patient);
         return updatedPatient;
       } catch (error) {
