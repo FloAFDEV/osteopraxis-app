@@ -212,6 +212,7 @@ const NewInvoicePage = () => {
     <Layout>
       <div className="max-w-4xl mx-auto py-6 md:py-10 px-2 md:px-0">
         <h1 className="text-3xl font-bold mb-4 md:mb-6">
+           <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
           <span
             className="
               inline-block                         /* garde la largeur du texte */
