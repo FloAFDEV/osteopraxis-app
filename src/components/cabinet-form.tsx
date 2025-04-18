@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -58,7 +59,7 @@ export function CabinetForm({
 
       const cabinetData = {
         name: values.name,
-        address: values.address || "", 
+        address: values.address, 
         phone: values.phone,
         email: values.email,
         logoUrl: values.logoUrl,

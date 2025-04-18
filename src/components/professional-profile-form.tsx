@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -76,17 +77,17 @@ export function ProfessionalProfileForm({
         });
     } else {
       // Création d'un nouveau profil
-      profileResponse = await api.createProfessionalProfile({
+      const newProfileData = {
         name: data.name,
         title: data.title,
         adeli_number: data.adeli_number || null,
         siret: data.siret || null, 
         ape_code: data.ape_code || null,
         profession_type: data.profession_type,
-        userId: user.id,
-        createdAt: now,
-        updatedAt: now
-      });
+        userId: user.id
+      };
+      
+      profileResponse = await api.createProfessionalProfile(newProfileData);
     }
 
     // Appeler le callback onSuccess si fourni

@@ -1,92 +1,57 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Loader2, AlertCircle } from "lucide-react";
-import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
+import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfessionalProfile } from "@/types";
+import { Building } from "lucide-react";
+import { FancyLoader } from "@/components/ui/fancy-loader";
+import { toast } from "sonner";
 
 const NewCabinetPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [professionalProfile, setProfessionalProfile] = useState<ProfessionalProfile | null>(null);
+  const [profile, setProfile] = useState<ProfessionalProfile | null>(null);
 
   useEffect(() => {
-    const checkProfessionalProfile = async () => {
-      if (!user) {
-        setError("Vous devez être connecté pour créer un cabinet.");
-        setLoading(false);
-        return;
-      }
-
+    const loadProfile = async () => {
       try {
-        // Si l'utilisateur a déjà un professionalProfileId défini
-        if (user.professionalProfileId) {
-          const profile = await api.getProfessionalProfileById(user.professionalProfileId);
-          if (profile) {
-            setProfessionalProfile(profile);
-            setLoading(false);
-            return;
-          }
+        if (!user?.id) {
+          toast.error("Utilisateur non authentifié");
+          navigate('/login');
+          return;
         }
 
-        // Sinon, essayer de récupérer par userId
-        const profile = await api.getProfessionalProfileByUserId(user.id);
-        if (profile) {
-          setProfessionalProfile(profile);
-        } else {
-          setError("Vous devez d'abord créer un profil professionnel avant de créer un cabinet.");
+        const profileData = await api.getProfessionalProfileByUserId(user.id);
+        
+        if (!profileData) {
+          // Aucun profil trouvé, rediriger vers la page de création de profil
+          toast.error("Vous devez d'abord créer un profil professionnel");
+          navigate('/profile/setup');
+          return;
         }
-      } catch (err) {
-        console.error("Erreur lors de la récupération du profil professionnel:", err);
-        setError("Erreur lors de la récupération du profil professionnel.");
+        
+        setProfile(profileData);
+      } catch (error) {
+        console.error("Erreur lors du chargement du profil:", error);
+        toast.error("Erreur lors du chargement du profil");
       } finally {
         setLoading(false);
       }
     };
 
-    checkProfessionalProfile();
-  }, [user]);
+    loadProfile();
+  }, [user, navigate]);
 
   if (loading) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Chargement...</span>
-        </div>
-      </Layout>
-    );
+    return <FancyLoader message="Chargement de votre profil..." />;
   }
 
-  if (error || !professionalProfile) {
-    return (
-      <Layout>
-        <div className="max-w-lg mx-auto py-8 text-center">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Impossible de créer un cabinet</h2>
-          <p className="mb-6 text-muted-foreground">{error || "Profil professionnel non trouvé."}</p>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => navigate("/professional-profile")}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-            >
-              Créer mon profil professionnel
-            </button>
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/90"
-            >
-              Retour au tableau de bord
-            </button>
-          </div>
-        </div>
-      </Layout>
-    );
+  if (!profile) {
+    return null; // Redirection déjà gérée dans useEffect
   }
 
   return (
@@ -94,20 +59,22 @@ const NewCabinetPage = () => {
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Building2 className="h-8 w-8 text-green-500" />
-            Nouveau Cabinet
+            <Building className="h-8 w-8 text-blue-500" />
+            Créer un nouveau cabinet
           </h1>
           <p className="text-muted-foreground mt-1">
-            Créez un nouveau cabinet en remplissant le formulaire ci-dessous.
+            Remplissez les informations de votre cabinet
           </p>
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <CabinetForm
-            professionalProfileId={professionalProfile.id}
-            onSuccess={() => {
-              navigate("/cabinets");
+          <CabinetForm 
+            professionalProfileId={profile.id} 
+            onSuccess={(cabinet) => {
+              toast.success("Cabinet créé avec succès!");
+              navigate('/cabinets');
             }}
+            onCancel={() => navigate('/cabinets')}
           />
         </div>
       </div>

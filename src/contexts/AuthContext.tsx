@@ -1,340 +1,252 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-} from "react";
-import { User } from "@/types";
-import { api } from "@/services/api";
-import { supabase } from "@/services/supabase-api/utils";
 
-interface AuthState {
-  user: User | null;
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { api } from '@/services/api';
+import { AuthState, User } from '@/types';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+interface AuthContextType {
   isAuthenticated: boolean;
-  token: string | null;
-  message?: string; // Optional message field for auth feedback
-}
-
-interface AuthContextType extends AuthState {
-  isAdmin: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-  }) => Promise<boolean>;
-  logout: () => void;
-  loadStoredToken: () => Promise<boolean>;
-  updateUser: (updatedUser: User) => boolean;
   isLoading: boolean;
-  loginWithMagicLink: (email: string) => Promise<void>;
-  promoteToAdmin: (userId: string) => Promise<boolean>;
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  loginWithMagicLink: (email: string) => Promise<boolean>;
+  register: (userData: { firstName: string; lastName: string; email: string; password: string; }) => Promise<void>;
+  logout: () => Promise<void>;
+  loadStoredToken: () => Promise<void>;
+  updateUser: (userData: User) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isAuthenticated: false,
-  token: null,
-  isAdmin: false,
-  isLoading: false,
-  login: async () => false,
-  register: async () => false,
-  logout: () => {},
-  loadStoredToken: async () => false,
-  updateUser: () => true,
-  loginWithMagicLink: async () => {},
-  promoteToAdmin: async () => false,
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth doit être utilisé à l\'intérieur d\'un AuthProvider');
+  }
+  return context;
+};
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
-    user: null,
     isAuthenticated: false,
-    token: null,
+    isLoading: true,
+    user: null
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [initialCheckDone, setInitialCheckDone] = useState(false);
-  const isAdmin = useMemo(() => authState.user?.role === "ADMIN", [authState.user]);
-  const [loadAttempts, setLoadAttempts] = useState(0);
-  const MAX_LOAD_ATTEMPTS = 3;
-
-  // Define loadStoredToken FIRST
-  const loadStoredToken = useCallback(async () => {
-    console.log("Tentative de chargement du token stocké...");
-    const storedAuthState = localStorage.getItem("authState");
-    if (storedAuthState) {
-      try {
-        console.log("État d'authentification trouvé dans localStorage");
-        const parsedState = JSON.parse(storedAuthState);
+  const navigate = useNavigate();
+  
+  // Cette fonction sera appelée au chargement initial de l'application
+  const loadStoredToken = async () => {
+    try {
+      console.log("Récupération de la session stockée...");
+      const session = await api.getSession();
+      
+      if (session && session.user) {
+        console.log("Session trouvée:", session.user);
         
-        if (parsedState.token) {
-          console.log("Token trouvé dans l'état stocké");
-          try {
-            if (parsedState.token) {
-              console.log("Définition du token dans la session Supabase");
-              await supabase.auth.setSession({
-                access_token: parsedState.token,
-                refresh_token: ""
-              });
-              console.log("Token défini dans Supabase");
-            }
-            
-            console.log("Attente de synchronisation...");
-            await new Promise(resolve => setTimeout(resolve, 500)); // Augmenté à 500ms
-            
-            console.log("Vérification de l'authentification...");
-            const authCheck = await api.checkAuth();
-            console.log("Résultat vérification d'auth:", authCheck);
-            
-            if (authCheck.isAuthenticated && authCheck.user) {
-              console.log("Authentification validée par l'API");
-              setAuthState({
-                user: authCheck.user,
-                isAuthenticated: true,
-                token: authCheck.token || parsedState.token,
-              });
-              
-              console.log("✅ Authentication réussie:", authCheck.user.id);
-              
-              // Vérifier l'état de la session Supabase
-              const { data: session } = await supabase.auth.getSession();
-              console.log("Session Supabase après vérification:", session?.session ? "Valide" : "Invalide");
-              
-              return true;
-            } else {
-              console.warn("Token invalidé par l'API, suppression de l'état d'authentification");
-              localStorage.removeItem("authState");
-              setAuthState({
-                user: null,
-                isAuthenticated: false,
-                token: null,
-              });
-              return false;
-            }
-          } catch (error) {
-            console.error("Error checking auth:", error);
-            
-            // Dernier recours: tenter une connexion directe avec Supabase
-            try {
-              console.log("Tentative de récupération directe de la session Supabase...");
-              const { data: supabaseSession } = await supabase.auth.getSession();
-              
-              if (supabaseSession?.session) {
-                console.log("Session Supabase trouvée directement:", supabaseSession.session.user.id);
-                // Utilisez la session Supabase et mettez à jour l'état local
-                return true;
-              }
-            } catch (supabaseError) {
-              console.error("Erreur lors de la récupération directe de la session Supabase:", supabaseError);
-            }
-            
-            console.warn("Erreur de vérification d'authentification, utilisation du token local comme fallback");
-            setAuthState({
-              user: parsedState.user,
-              isAuthenticated: true,
-              token: parsedState.token,
-            });
-            
-            return true;
-          }
-        } else {
-          console.log("Aucun token trouvé dans l'état stocké");
-        }
-      } catch (error) {
-        console.error("Error parsing auth state:", error);
-        localStorage.removeItem("authState");
-      }
-    } else {
-      console.log("Aucun état d'authentification trouvé dans localStorage");
-    }
-    return false;
-  }, []);
-
-  // Then use useEffect with loadStoredToken
-  useEffect(() => {
-    const initialAuth = async () => {
-      try {
-        console.log(`Tentative d'authentification initiale (${loadAttempts + 1}/${MAX_LOAD_ATTEMPTS})...`);
-        setIsLoading(true);
-        const success = await loadStoredToken();
-        console.log("Résultat de la tentative:", success ? "Succès" : "Échec");
+        // Vérifier si l'utilisateur existe dans notre base de données
+        const authResult = await api.checkAuth();
         
-        if (!success && loadAttempts < MAX_LOAD_ATTEMPTS) {
-          console.log(`Tentative d'authentification ${loadAttempts + 1}/${MAX_LOAD_ATTEMPTS} échouée, nouvel essai dans 1s...`);
-          setTimeout(() => setLoadAttempts(prev => prev + 1), 1000);
+        if (authResult && authResult.user) {
+          console.log("Utilisateur authentifié:", authResult.user);
+          setAuthState({
+            isAuthenticated: true,
+            isLoading: false,
+            user: authResult.user
+          });
           return;
         }
-      } catch (error) {
-        console.error("Error during initial auth check:", error);
-      } finally {
-        setIsLoading(false);
-        setInitialCheckDone(true);
+      } 
+      
+      // Si on arrive ici, c'est qu'aucune session valide n'a été trouvée
+      console.log("Aucune session valide trouvée");
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null
+      });
+      
+    } catch (error) {
+      console.error("Erreur lors de la récupération de la session:", error);
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null
+      });
+    }
+  };
+  
+  // Login
+  const login = async (email: string, password: string) => {
+    try {
+      console.log("Tentative de connexion pour:", email);
+      const authResult = await api.login(email, password);
+      
+      if (!authResult.isAuthenticated || !authResult.user) {
+        console.error("Échec de l'authentification");
+        throw new Error("Échec de l'authentification");
+      }
+      
+      console.log("Connexion réussie:", authResult);
+      
+      setAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        user: authResult.user,
+      });
+      
+      navigate('/dashboard');
+    } catch (error) {
+      console.error("Erreur de connexion:", error);
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null
+      });
+      toast.error("Identifiants incorrects");
+      throw error;
+    }
+  };
+  
+  // Login avec lien magique
+  const loginWithMagicLink = async (email: string): Promise<boolean> => {
+    try {
+      console.log("Envoi d'un lien magique à:", email);
+      const success = await api.loginWithMagicLink(email);
+      
+      if (success) {
+        toast.success("Un lien de connexion a été envoyé à votre adresse email");
+        return true;
+      } else {
+        throw new Error("Échec de l'envoi du lien magique");
+      }
+    } catch (error) {
+      console.error("Erreur d'envoi du lien magique:", error);
+      toast.error("Erreur lors de l'envoi du lien. Veuillez réessayer.");
+      return false;
+    }
+  };
+  
+  // Register
+  const register = async (userData: { firstName: string; lastName: string; email: string; password: string; }) => {
+    try {
+      console.log("Tentative d'inscription pour:", userData.email);
+      const authResult = await api.register(userData);
+      
+      if (!authResult.isAuthenticated || !authResult.user) {
+        console.error("Échec de l'enregistrement");
+        throw new Error("Échec de l'enregistrement");
+      }
+      
+      console.log("Inscription réussie:", authResult);
+      
+      setAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        user: authResult.user
+      });
+      
+      // Créer automatiquement un profil d'ostéopathe pour l'utilisateur
+      navigate('/profile/setup');
+      
+    } catch (error) {
+      console.error("Erreur d'inscription:", error);
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null
+      });
+      throw error;
+    }
+  };
+  
+  // Logout
+  const logout = async () => {
+    try {
+      await api.logout();
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error("Erreur de déconnexion:", error);
+      toast.error("Erreur lors de la déconnexion");
+    }
+  };
+  
+  // Mettre à jour les données utilisateur
+  const updateUser = (userData: User) => {
+    setAuthState(prevState => ({
+      ...prevState,
+      user: userData
+    }));
+  };
+  
+  useEffect(() => {
+    // Écouteur d'événements d'authentification Supabase
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Événement d'authentification Supabase:", event, session?.user?.id);
+        
+        if (event === 'SIGNED_IN' && session) {
+          console.log("Utilisateur connecté, obtention des données utilisateur");
+          try {
+            const authResult = await api.checkAuth();
+            if (authResult && authResult.user) {
+              console.log("Données utilisateur récupérées:", authResult.user);
+              setAuthState({
+                isAuthenticated: true,
+                isLoading: false,
+                user: authResult.user
+              });
+            }
+          } catch (error) {
+            console.error("Erreur lors de la récupération des données utilisateur:", error);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          console.log("Utilisateur déconnecté");
+          setAuthState({
+            isAuthenticated: false,
+            isLoading: false,
+            user: null
+          });
+        }
+      }
+    );
+
+    // Effet initial pour charger l'état d'authentification
+    loadStoredToken();
+    
+    // Nettoyage de l'écouteur à la destruction du composant
+    return () => {
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
       }
     };
-
-    initialAuth();
-  }, [loadAttempts, loadStoredToken]);
-
-  const login = useCallback(
-    async (email: string, password: string) => {
-      try {
-        console.log("Tentative de connexion avec:", email);
-        setIsLoading(true);
-        // Simulation d'une requête d'authentification
-        const response = await api.login(email, password);
-        
-        if (response.token) {
-          console.log("Connexion réussie, token reçu");
-          const authData = {
-            user: response.user,
-            isAuthenticated: true,
-            token: response.token,
-          };
-          
-          localStorage.setItem("authState", JSON.stringify(authData));
-          setAuthState(authData);
-          
-          // Définir également la session dans Supabase
-          if (response.token) {
-            console.log("Configuration de la session Supabase avec le token");
-            await supabase.auth.setSession({
-              access_token: response.token,
-              refresh_token: ""
-            });
-          }
-          
-          // Forcer un court délai pour s'assurer que l'état est bien mis à jour
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          return true;
-        }
-        console.log("Échec de connexion: pas de token reçu");
-        return false;
-      } catch (error) {
-        console.error("Login error:", error);
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  const loginWithMagicLink = useCallback(
-    async (email: string) => {
-      try {
-        setIsLoading(true);
-        await api.loginWithMagicLink(email);
-        // Note: We don't set auth state here as the user will need to click the link in their email
-      } catch (error) {
-        console.error("Magic link error:", error);
-        throw error;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  const register = useCallback(
-    async (userData: { 
-      firstName: string; 
-      lastName: string; 
-      email: string; 
-      password: string; 
-    }) => {
-      try {
-        setIsLoading(true);
-        const response = await api.register(userData);
-        
-        if (response.token) {
-          const authData = {
-            user: response.user,
-            isAuthenticated: true,
-            token: response.token,
-          };
-          
-          localStorage.setItem("authState", JSON.stringify(authData));
-          setAuthState(authData);
-          
-          // Forcer un court délai pour s'assurer que l'état est bien mis à jour
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error("Registration error:", error);
-        throw error;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  const logout = useCallback(() => {
-    localStorage.removeItem("authState");
-    setAuthState({
-      user: null,
-      isAuthenticated: false,
-      token: null,
-    });
-    api.logout();
-  }, []);
-
-  
-  
-  const updateUser = useCallback((updatedUser: User) => {
-    setAuthState((prev) => {
-      const newState = {
-        ...prev,
-        user: updatedUser,
-      };
-      
-      // Update localStorage
-      localStorage.setItem("authState", JSON.stringify(newState));
-      
-      return newState;
-    });
-    
-    return true;
-  }, []);
-
-  const promoteToAdmin = useCallback(async (userId: string) => {
-    try {
-      setIsLoading(true);
-      const result = await api.promoteToAdmin(userId);
-      return result;
-    } catch (error) {
-      console.error("Error promoting user to admin:", error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ 
-        ...authState, 
-        isAdmin, 
-        login, 
-        register, 
-        logout, 
-        loadStoredToken,
-        updateUser,
-        isLoading,
+      value={{
+        isAuthenticated: authState.isAuthenticated,
+        isLoading: authState.isLoading,
+        user: authState.user,
+        login,
         loginWithMagicLink,
-        promoteToAdmin
+        register,
+        logout,
+        loadStoredToken,
+        updateUser
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-}
-
-export const useAuth = () => useContext(AuthContext);
+};

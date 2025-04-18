@@ -83,6 +83,7 @@ type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
 interface AppointmentFormProps {
   patients: Patient[];
+  cabinets?: { id: number; name: string }[];
   defaultValues?: Partial<AppointmentFormValues>;
   appointmentId?: number;
   isEditing?: boolean;
@@ -90,6 +91,7 @@ interface AppointmentFormProps {
 
 export function AppointmentForm({
   patients,
+  cabinets,
   defaultValues,
   appointmentId,
   isEditing = false,

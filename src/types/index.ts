@@ -157,4 +157,17 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: User | null;
+  token?: string;
+}
+
+// Props pour les composants dashboard
+export interface DemographicsCardProps {
+  maleCount: number;
+  femaleCount: number;
+  otherCount: number;
+}
+
+export interface AppointmentsOverviewProps {
+  appointmentsToday: number;
+  nextAppointment: string;
 }
