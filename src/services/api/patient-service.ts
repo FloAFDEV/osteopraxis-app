@@ -13,6 +13,7 @@ export const patientService = {
         return await supabasePatientService.getPatients();
       } catch (error) {
         console.error("Erreur Supabase getPatients:", error);
+        throw error;  // Propagate the error for better debugging
       }
     }
     
@@ -27,6 +28,7 @@ export const patientService = {
         return await supabasePatientService.getPatientById(id);
       } catch (error) {
         console.error("Erreur Supabase getPatientById:", error);
+        throw error;  // Propagate the error for better debugging
       }
     }
     

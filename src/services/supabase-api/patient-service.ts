@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -41,6 +42,11 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
+    console.log("Fetching patients from Supabase");
+    
+    // We don't need to filter by osteopathId here because 
+    // Supabase RLS policies will automatically filter to only show patients 
+    // belonging to the logged-in osteopath, or all patients for admins
     const { data, error } = await supabase
       .from('Patient')
       .select('*');
@@ -50,10 +56,13 @@ export const patientService = {
       throw error;
     }
 
-    return data.map(adaptPatientFromSupabase);
+    console.log(`Fetched ${data?.length || 0} patients`);
+    return (data || []).map(adaptPatientFromSupabase);
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
+    console.log(`Fetching patient with id ${id}`);
+    
     const { data, error } = await supabase
       .from('Patient')
       .select('*')
@@ -82,6 +91,24 @@ export const patientService = {
     let genderValue = patient.gender;
     if (genderValue && genderValue.toString() === "Autre") {
       genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
+    }
+    
+    // Get the currently logged-in user's osteopathId
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    // Get the osteopath ID for the current user
+    let osteopathId = patient.osteopathId;
+    if (!osteopathId && userId) {
+      const { data: osteopathData } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('userId', userId)
+        .maybeSingle();
+        
+      if (osteopathData) {
+        osteopathId = osteopathData.id;
+      }
     }
     
     // Map the patient data to match the Supabase column names
@@ -117,7 +144,7 @@ export const patientService = {
       avatarUrl: patient.avatarUrl,
       cabinetId: patient.cabinetId,
       userId: patient.userId || null,
-      osteopathId: patient.osteopathId || 1, // Using default if not provided
+      osteopathId: osteopathId || 1, // Always ensure we have an osteopathId
       updatedAt: now, // Add the updatedAt field
       createdAt: now  // Add the createdAt field
     };
