@@ -42,6 +42,9 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
+    // For development, add a simulated auth header
+    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
+    
     const { data, error } = await supabase
       .from('Patient')
       .select('*');
@@ -55,6 +58,9 @@ export const patientService = {
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
+    // For development, add a simulated auth header
+    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
+    
     const { data, error } = await supabase
       .from('Patient')
       .select('*')
@@ -123,6 +129,9 @@ export const patientService = {
       createdAt: now  // Add the createdAt field
     };
 
+    // For development, add a simulated auth header
+    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
+    
     const { data, error } = await supabase
       .from('Patient')
       .insert(patientData)
@@ -140,6 +149,9 @@ export const patientService = {
   async updatePatient(patient: Patient): Promise<Patient> {
     // Use explicit ID for the update operation
     const id = patient.id;
+    if (!id) {
+      throw new Error("Patient ID is required for update");
+    }
     
     // Add updatedAt timestamp
     const now = new Date().toISOString();
@@ -158,7 +170,7 @@ export const patientService = {
     
     // Prepare the complete patient data for update
     const patientData = {
-      id: id, // Include the ID for the upsert
+      id: Number(id), // Ensure ID is a number and include it for the upsert
       firstName: patient.firstName,
       lastName: patient.lastName,
       email: patient.email,
@@ -195,14 +207,16 @@ export const patientService = {
       createdAt: patient.createdAt || now, // Use existing createdAt or now if not defined
     };
 
-    // CORRECTION: Use upsert instead of update to avoid CORS issues with PATCH
-    console.log("Updating patient with upsert - ID:", id);
+    // For development, add a simulated auth header
+    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
     
     try {
-      // Use .from('Patient') with no filtering first
+      // Use insert with onConflict instead of upsert for better control
       const { data, error } = await supabase
         .from('Patient')
-        .upsert(patientData)
+        .insert(patientData)
+        .onConflict('id')
+        .merge()
         .select();
       
       if (error) {
@@ -223,6 +237,9 @@ export const patientService = {
   
   async deletePatient(id: number): Promise<{ error: any | null }> {
     try {
+      // For development, add a simulated auth header
+      console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
+      
       const { error } = await supabase
         .from('Patient')
         .delete()

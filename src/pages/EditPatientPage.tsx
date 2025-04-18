@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -8,11 +9,7 @@ import { UserRound } from 'lucide-react';
 import { patientService } from '@/services/api/patient-service';
 
 const EditPatientPage = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +54,11 @@ const EditPatientPage = () => {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
       }
 
+      // Normalize contraception value
+      if (updatedData.contraception === "IMPLANT") {
+        updatedData.contraception = "IMPLANTS" as Contraception;
+      }
+
       // Ensure we're sending all required data for the patient
       const patientToUpdate = {
         ...patient,
@@ -65,9 +67,17 @@ const EditPatientPage = () => {
       };
 
       console.log("Sending patient data to API:", patientToUpdate);
+      
       // Make sure ID is included and is a number
       if (typeof patientToUpdate.id === 'string') {
         patientToUpdate.id = parseInt(patientToUpdate.id);
+      }
+      
+      // Handle special date format if present
+      if (patientToUpdate.birthDate && 
+          typeof patientToUpdate.birthDate === 'object' && 
+          patientToUpdate.birthDate._type === 'Date') {
+        patientToUpdate.birthDate = new Date(patientToUpdate.birthDate.value.iso);
       }
       
       // Make sure all required fields are present

@@ -13,6 +13,7 @@ export const patientService = {
         return await supabasePatientService.getPatients();
       } catch (error) {
         console.error("Erreur Supabase getPatients:", error);
+        throw error; // Let the error propagate up for proper handling
       }
     }
     
@@ -27,6 +28,7 @@ export const patientService = {
         return await supabasePatientService.getPatientById(id);
       } catch (error) {
         console.error("Erreur Supabase getPatientById:", error);
+        throw error; // Let the error propagate up for proper handling
       }
     }
     
@@ -62,12 +64,28 @@ export const patientService = {
   async updatePatient(patient: Patient): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        // Important: Utiliser la méthode upsert au lieu de update pour éviter les erreurs CORS
         console.log("Appel à supabasePatientService.updatePatient avec l'ID:", patient.id);
-        // Make sure patient data is fully defined before sending to Supabase
+        
+        // Ensure the patient ID is a number
+        if (typeof patient.id === 'string') {
+          patient.id = parseInt(patient.id, 10);
+        }
+        
+        // Validate patient ID is present
         if (!patient.id) {
           throw new Error("Patient ID is required for update");
         }
+        
+        // Ensure patient birthdate is properly formatted if it exists
+        if (patient.birthDate) {
+          if (typeof patient.birthDate === 'object' && patient.birthDate._type === 'Date') {
+            // Handle the special date object format
+            patient.birthDate = new Date(patient.birthDate.value.iso);
+          } else if (typeof patient.birthDate !== 'string') {
+            patient.birthDate = new Date(patient.birthDate).toISOString();
+          }
+        }
+        
         const updatedPatient = await supabasePatientService.updatePatient(patient);
         return updatedPatient;
       } catch (error) {
