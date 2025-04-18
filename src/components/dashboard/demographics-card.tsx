@@ -27,6 +27,12 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   const maleCount = data?.maleCount || 0;
   const femaleCount = data?.femaleCount || 0;
 
+  const GENDER_COLORS = {
+    "Homme": "#3b82f6",  // Blue more pronounced
+    "Femme": "#d946ef",  // Vibrant pink
+    "Non spécifié": "#94a3b8"
+  };
+
   const calculateGenderData = (): GenderChartData[] => {
     if (data && data.maleCount !== undefined && data.femaleCount !== undefined) {
       return [{
@@ -72,11 +78,6 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   };
 
   const chartData = calculateGenderData();
-  const GENDER_COLORS = {
-    "Homme": "#3b82f6",  // Bleu plus prononcé
-    "Femme": "#d946ef",  // Rose vif
-    "Non spécifié": "#94a3b8"
-  };
 
   const renderCustomizedLabel = ({
     cx,
