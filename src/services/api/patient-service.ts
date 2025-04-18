@@ -101,19 +101,18 @@ export const patientService = {
         // Handle birthDate properly - ensuring it's a string if not null
         if (patient.birthDate !== null && patient.birthDate !== undefined) {
           // Handle the special date object format
-          if (typeof patient.birthDate === 'object') {
+          const birthDateValue = patient.birthDate as any;
+          
+          if (typeof birthDateValue === 'object') {
             // Check if it's a Date object (has toISOString method)
-            if (patient.birthDate instanceof Date || 
-                (typeof patient.birthDate === 'object' && 
-                 'toISOString' in patient.birthDate)) {
-              patient.birthDate = patient.birthDate.toISOString();
-            } 
+            if (birthDateValue instanceof Date) {
+              patient.birthDate = birthDateValue.toISOString();
+            } else if ('toISOString' in birthDateValue) {
+              patient.birthDate = (birthDateValue as unknown as Date).toISOString();
+            }
             // Check for special _type property
-            else if (typeof patient.birthDate === 'object') {
-              const birthDateObj = patient.birthDate as any;
-              if (birthDateObj._type === 'Date') {
-                patient.birthDate = new Date(birthDateObj.value.iso).toISOString();
-              }
+            else if (birthDateValue._type === 'Date') {
+              patient.birthDate = new Date(birthDateValue.value.iso).toISOString();
             }
           }
         }
