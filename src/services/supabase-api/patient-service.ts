@@ -1,4 +1,3 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase, supabaseAdmin, getCurrentOsteopathId } from "./utils";
 
