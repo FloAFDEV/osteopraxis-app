@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -74,25 +73,20 @@ const EditPatientPage = () => {
         patientToUpdate.id = parseInt(patientToUpdate.id);
       }
       
-      try {
-        // Make sure all required fields are present
-        const result = await patientService.updatePatient(patientToUpdate);
-        toast.success("Patient mis à jour avec succès");
-        navigate('/patients');
-      } catch (error: any) {
-        // Special handling for permission errors in dev mode
-        if (SIMULATE_AUTH && error?.code === '42501') {
-          console.warn("Mode développement: simulation de la mise à jour réussie");
-          toast.success("(DEV MODE) Patient mis à jour avec succès");
-          navigate('/patients');
-          return;
-        }
-        
-        throw error; // Rethrow for the outer catch block
-      }
+      // Jamais utiliser la simulation - force les appels réels à la base de données
+      const result = await patientService.updatePatient(patientToUpdate);
+      toast.success("Patient mis à jour avec succès");
+      navigate('/patients');
+      
     } catch (error: any) {
       console.error("Error updating patient:", error);
-      toast.error("Impossible de mettre à jour le patient: " + (error.message || "Erreur inconnue"));
+      
+      // Vérifier si c'est une erreur d'authentification Supabase (permission denied)
+      if (error?.code === '42501') {
+        toast.error("Erreur de permission: vous n'avez pas les droits nécessaires pour modifier ce patient");
+      } else {
+        toast.error("Impossible de mettre à jour le patient: " + (error.message || "Erreur inconnue"));
+      }
     } finally {
       setIsSaving(false);
     }
