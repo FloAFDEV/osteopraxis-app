@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -21,6 +22,7 @@ const SchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
   const [view, setView] = useState<"day" | "week">("week");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,6 +38,7 @@ const SchedulePage = () => {
     };
     fetchData();
   }, []);
+
   useEffect(() => {
     // Calculate current week days
     const start = startOfWeek(selectedDate, {
@@ -50,9 +53,11 @@ const SchedulePage = () => {
     });
     setCurrentWeek(days);
   }, [selectedDate]);
+
   const getPatientById = (patientId: number) => {
     return patients.find(patient => patient.id === patientId);
   };
+
   const getDayAppointments = (date: Date) => {
     return appointments.filter(appointment => {
       const appointmentDate = parseISO(appointment.date);
@@ -63,21 +68,27 @@ const SchedulePage = () => {
       return timeA.getTime() - timeB.getTime();
     });
   };
+
   const navigateToPreviousWeek = () => {
     setSelectedDate(prevDate => addDays(prevDate, -7));
   };
+
   const navigateToNextWeek = () => {
     setSelectedDate(prevDate => addDays(prevDate, 7));
   };
+
   const navigateToPreviousDay = () => {
     setSelectedDate(prevDate => addDays(prevDate, -1));
   };
+
   const navigateToNextDay = () => {
     setSelectedDate(prevDate => addDays(prevDate, 1));
   };
+
   const navigateToToday = () => {
     setSelectedDate(new Date());
   };
+
   return <Layout>
       <div className="flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -208,30 +219,34 @@ const SchedulePage = () => {
       </div>
     </Layout>;
 };
+
 interface DayScheduleProps {
   date: Date;
   appointments: Appointment[];
   getPatientById: (id: number) => Patient | undefined;
 }
+
 const DaySchedule = ({
   date,
   appointments,
   getPatientById
 }: DayScheduleProps) => {
-  // Generate time slots for the day (8am to 6pm)
+  // Generate time slots for the day (8am to 8pm)
   const timeSlots = Array.from({
-    length: 21
+    length: 25
   }, (_, i) => {
     const hour = Math.floor(i / 2) + 8; // Starting from 8 AM
     const minute = i % 2 * 30; // 0 or 30 minutes
     return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
   });
+  
   const getAppointmentForTimeSlot = (timeSlot: string) => {
     return appointments.find(appointment => {
       const appointmentTime = format(parseISO(appointment.date), "HH:mm");
       return appointmentTime === timeSlot;
     });
   };
+  
   return <div className="rounded-md border">
       {timeSlots.map(timeSlot => {
       const appointment = getAppointmentForTimeSlot(timeSlot);
@@ -269,4 +284,5 @@ const DaySchedule = ({
     })}
     </div>;
 };
+
 export default SchedulePage;
