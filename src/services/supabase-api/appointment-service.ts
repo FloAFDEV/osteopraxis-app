@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus, SupabaseAppointmentStatus } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -218,8 +217,7 @@ export const supabaseAppointmentService = {
         console.error("Erreur d'authentification lors de la mise à jour:", authError);
       }
       
-      // Modification importante: Au lieu d'utiliser PATCH qui cause les problèmes CORS,
-      // récupérer d'abord le rendez-vous existant, puis faire un upsert (POST)
+      // Récupérer d'abord le rendez-vous existant
       console.log(`Récupération des données actuelles du rendez-vous ${id} avant mise à jour`);
       
       const existingAppointment = await this.getAppointmentById(id);
@@ -228,26 +226,20 @@ export const supabaseAppointmentService = {
         throw new Error(`Appointment with ID ${id} not found`);
       }
       
-      // Préparation des données à mettre à jour
-      const updateData: Record<string, any> = {
-        id: id, // Essentiel pour l'upsert
-        date: 'date' in appointmentData ? appointmentData.date : existingAppointment.date,
-        reason: 'reason' in appointmentData ? appointmentData.reason : existingAppointment.reason,
-        patientId: 'patientId' in appointmentData ? appointmentData.patientId : existingAppointment.patientId,
-        notificationSent: 'notificationSent' in appointmentData ? appointmentData.notificationSent : existingAppointment.notificationSent
+      // Préparation des données avec le bon typage
+      const updateData = {
+        id: id,
+        date: appointmentData.date ?? existingAppointment.date,
+        reason: appointmentData.reason ?? existingAppointment.reason,
+        patientId: appointmentData.patientId ?? existingAppointment.patientId,
+        notificationSent: appointmentData.notificationSent ?? existingAppointment.notificationSent,
+        status: appointmentData.status ? 
+          this.toSupabaseStatus(appointmentData.status) : 
+          this.toSupabaseStatus(existingAppointment.status)
       };
-      
-      // Gestion spéciale du statut pour la conversion
-      if ('status' in appointmentData && appointmentData.status) {
-        updateData.status = this.toSupabaseStatus(appointmentData.status);
-      } else {
-        updateData.status = this.toSupabaseStatus(existingAppointment.status);
-      }
       
       console.log("Données formatées pour la mise à jour:", updateData);
       
-      // Utilisation de la méthode upsert au lieu de .update pour éviter CORS
-      console.log("Utilisation de la méthode .upsert() pour mise à jour");
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
