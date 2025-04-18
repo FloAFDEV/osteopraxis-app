@@ -15,6 +15,7 @@ export const typedData = <T>(data: any): T => data as T;
 // Fonction utilitaire pour ajouter des en-têtes d'authentification simulés
 export const addAuthHeaders = <T extends { setHeader: (name: string, value: string) => T }>(query: T): T => {
   if (SIMULATE_AUTH) {
+    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
     return query.setHeader('X-Development-Mode', 'true');
   }
   return query;
@@ -58,10 +59,11 @@ export const checkAuth = async () => {
               console.log("Token local disponible. Tentative de réutilisation.");
               
               // Tenter de définir manuellement le token d'accès dans la session Supabase
-              await supabase.auth.setSession({
+              const setSessionResult = await supabase.auth.setSession({
                 access_token: parsedState.token,
                 refresh_token: ""
               });
+              console.log("Résultat setSession:", setSessionResult.error ? `Erreur: ${setSessionResult.error.message}` : "Succès");
               
               // Vérifier à nouveau la session
               const { data: refreshedData, error: refreshError } = await supabase.auth.getSession();
@@ -73,10 +75,22 @@ export const checkAuth = async () => {
               } else {
                 console.log("Échec de la réutilisation du token local");
               }
+            } else {
+              console.log("Pas de token dans l'état d'authentification stocké");
             }
+          } else {
+            console.log("Aucun état d'authentification trouvé dans localStorage");
           }
         } catch (localAuthError) {
           console.error("Erreur lors de la récupération du token local:", localAuthError);
+        }
+        
+        if (SIMULATE_AUTH) {
+          console.log("Mode développement: simulation d'une session active");
+          return {
+            user: { id: 'dev-user-id', email: 'dev@example.com' },
+            expires_at: Date.now() + 3600,
+          } as any;
         }
         
         console.error("Aucune session active trouvée et impossible de récupérer un token valide");
@@ -110,7 +124,7 @@ export function getEnumValue<T extends string>(value: string, allowedValues: rea
 }
 
 // AppointmentStatus enum helper - Correction de CANCELLED à CANCELED pour correspondre au type dans types.ts
-export const AppointmentStatusValues = ['SCHEDULED', 'COMPLETED', 'CANCELED', 'NO_SHOW', 'RESCHEDULED'] as const;
+export const AppointmentStatusValues = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'] as const;
 export type AppointmentStatusType = typeof AppointmentStatusValues[number];
 
 // Contraception enum helper
@@ -122,9 +136,11 @@ export type ContraceptionType = typeof ContraceptionValues[number];
 
 // Fonctions de sécurité pour s'assurer que les valeurs correspondent aux enum de Supabase
 export function ensureAppointmentStatus(status: string): AppointmentStatusType {
+  console.log("Validation du statut:", status);
   // Correction spéciale pour CANCELLED -> CANCELED
-  if (status === 'CANCELLED') {
-    return 'CANCELED';
+  if (status === 'CANCELED') {
+    console.log("Correction de CANCELED à CANCELLED pour Supabase");
+    return 'CANCELLED';
   }
   return getEnumValue(status, AppointmentStatusValues);
 }

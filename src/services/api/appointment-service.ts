@@ -2,12 +2,12 @@
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { supabase } from "@/integrations/supabase/client";
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
+        console.log("API: Appel à supabaseAppointmentService.getAppointments");
         return await supabaseAppointmentService.getAppointments();
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
@@ -23,6 +23,7 @@ export const appointmentService = {
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
+        console.log(`API: Appel à supabaseAppointmentService.getAppointmentById(${id})`);
         return await supabaseAppointmentService.getAppointmentById(id);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
@@ -38,6 +39,7 @@ export const appointmentService = {
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
+        console.log(`API: Appel à supabaseAppointmentService.getAppointmentsByPatientId(${patientId})`);
         return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentsByPatientId:", error);
@@ -53,6 +55,7 @@ export const appointmentService = {
   async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
+        console.log("API: Appel à supabaseAppointmentService.createAppointment", appointment);
         return await supabaseAppointmentService.createAppointment(appointment);
       } catch (error) {
         console.error("Erreur Supabase createAppointment:", error);
@@ -73,6 +76,7 @@ export const appointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
+        console.log(`API: Appel à supabaseAppointmentService.updateAppointment(${id})`, appointment);
         return await supabaseAppointmentService.updateAppointment(id, appointment);
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
@@ -88,6 +92,7 @@ export const appointmentService = {
   async deleteAppointment(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
+        console.log(`API: Appel à supabaseAppointmentService.deleteAppointment(${id})`);
         return await supabaseAppointmentService.deleteAppointment(id);
       } catch (error) {
         console.error("Erreur deleteAppointment:", error);
