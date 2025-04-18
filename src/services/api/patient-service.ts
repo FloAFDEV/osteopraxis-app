@@ -62,8 +62,7 @@ export const patientService = {
   async updatePatient(patient: Patient): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        // Important: Utiliser la méthode upsert au lieu de update pour éviter les erreurs CORS
-        console.log("Appel à supabasePatientService.updatePatient avec l'ID:", patient.id);
+        // Use the supabase patient service for update
         const updatedPatient = await supabasePatientService.updatePatient(patient);
         return updatedPatient;
       } catch (error) {
