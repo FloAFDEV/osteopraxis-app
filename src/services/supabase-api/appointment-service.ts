@@ -218,41 +218,45 @@ export const supabaseAppointmentService = {
         console.error("Erreur d'authentification lors de la mise à jour:", authError);
       }
       
-      const updateData: Record<string, any> = {};
+      // Modification importante: Au lieu d'utiliser PATCH qui cause les problèmes CORS,
+      // récupérer d'abord le rendez-vous existant, puis faire un upsert (POST)
+      console.log(`Récupération des données actuelles du rendez-vous ${id} avant mise à jour`);
       
-      if ('date' in appointmentData) updateData.date = appointmentData.date;
-      if ('reason' in appointmentData) updateData.reason = appointmentData.reason;
-      if ('patientId' in appointmentData) updateData.patientId = appointmentData.patientId;
-      if ('status' in appointmentData && appointmentData.status) {
-        // Convertir notre statut au format de Supabase
-        updateData.status = this.toSupabaseStatus(appointmentData.status);
-      }
-      if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
-      
-      console.log("Données formatées pour la mise à jour:", updateData);
-      
-      // Essayer de récupérer l'enregistrement existant d'abord
       const existingAppointment = await this.getAppointmentById(id);
-      
       if (!existingAppointment) {
         console.error(`Rendez-vous ${id} introuvable pour la mise à jour`);
         throw new Error(`Appointment with ID ${id} not found`);
       }
       
-      console.log("Données existantes récupérées:", existingAppointment);
+      // Préparation des données à mettre à jour
+      const updateData: Record<string, any> = {
+        id: id, // Essentiel pour l'upsert
+        date: 'date' in appointmentData ? appointmentData.date : existingAppointment.date,
+        reason: 'reason' in appointmentData ? appointmentData.reason : existingAppointment.reason,
+        patientId: 'patientId' in appointmentData ? appointmentData.patientId : existingAppointment.patientId,
+        notificationSent: 'notificationSent' in appointmentData ? appointmentData.notificationSent : existingAppointment.notificationSent
+      };
       
-      // Utiliser la méthode update au lieu de upsert
-      console.log("Utilisation de la méthode .update() pour mise à jour");
+      // Gestion spéciale du statut pour la conversion
+      if ('status' in appointmentData && appointmentData.status) {
+        updateData.status = this.toSupabaseStatus(appointmentData.status);
+      } else {
+        updateData.status = this.toSupabaseStatus(existingAppointment.status);
+      }
+      
+      console.log("Données formatées pour la mise à jour:", updateData);
+      
+      // Utilisation de la méthode upsert au lieu de .update pour éviter CORS
+      console.log("Utilisation de la méthode .upsert() pour mise à jour");
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
-          .update(updateData)
-          .eq("id", id)
+          .upsert(updateData)
           .select()
           .single()
       );
       
-      console.log("Requête préparée pour updateAppointment");
+      console.log("Requête préparée pour updateAppointment avec upsert");
       const { data, error } = await query;
       
       if (error) {
