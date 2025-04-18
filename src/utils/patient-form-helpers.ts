@@ -1,3 +1,4 @@
+
 import { AppointmentStatus } from "@/types";
 
 // Fonction pour valider et convertir la date
@@ -10,6 +11,14 @@ export const validateAndConvertDate = (dateString: string): string | null => {
   }
 
   return date.toISOString(); // Convertit en format ISO pour Supabase
+};
+
+// Fonction pour convertir hasChildren de string à boolean
+export const convertHasChildrenToBoolean = (value: string | boolean | null | undefined): boolean => {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return false; // default value
 };
 
 // Fonction pour valider et convertir le statut marital

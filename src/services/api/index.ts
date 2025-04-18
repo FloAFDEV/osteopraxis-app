@@ -1,3 +1,4 @@
+
 import { patientService } from "./patient-service";
 import { appointmentService } from "./appointment-service";
 import { cabinetService } from "./cabinet-service";
@@ -7,7 +8,7 @@ import { authService } from "./auth-service";
 
 export const api = {
   // Auth
-  getSession: authService.getSession,
+  getSession: authService.getSession || (() => Promise.resolve(null)),
   login: authService.login,
   register: authService.register,
   logout: authService.logout, 
