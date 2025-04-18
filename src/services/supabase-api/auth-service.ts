@@ -1,4 +1,3 @@
-
 import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 
@@ -43,8 +42,39 @@ export const supabaseAuthService = {
       if (userError) {
         console.error("Erreur lors de la création du profil utilisateur:", userError);
       }
+      
+      // Créer automatiquement un profil ostéopathe pour ce nouvel utilisateur
+      const now = new Date().toISOString();
+      const osteopathName = `${firstName} ${lastName}`.trim() || "Ostéopathe";
+      
+      const { data: osteopathData, error: osteopathError } = await supabase
+        .from("Osteopath")
+        .insert({
+          userId: data.user.id,
+          name: osteopathName,
+          professional_title: "Ostéopathe D.O.",
+          ape_code: "8690F",
+          createdAt: now,
+          updatedAt: now
+        })
+        .select('id')
+        .single();
+      
+      if (osteopathError) {
+        console.error("Erreur lors de la création du profil ostéopathe:", osteopathError);
+      } else if (osteopathData && osteopathData.id) {
+        // Mise à jour du profil utilisateur avec l'ID de l'ostéopathe
+        const { error: updateError } = await supabase
+          .from("User")
+          .update({ osteopathId: osteopathData.id })
+          .eq("id", data.user.id);
+        
+        if (updateError) {
+          console.error("Erreur lors de la mise à jour du profil utilisateur avec l'ID ostéopathe:", updateError);
+        }
+      }
     } catch (insertError) {
-      console.error("Erreur lors de la création du profil utilisateur:", insertError);
+      console.error("Erreur lors de la création des profils:", insertError);
     }
     
     // Si email confirmation est requise, retourner un état spécial avec un message
@@ -213,6 +243,34 @@ export const supabaseAuthService = {
         updated_at: new Date().toISOString(),
         osteopathId: null
       };
+      
+      // Si l'utilisateur n'a pas d'osteopathId, essayons de le récupérer
+      if (!user.osteopathId) {
+        try {
+          const { data: osteopathData, error: osteopathError } = await supabase
+            .from("Osteopath")
+            .select("id")
+            .eq("userId", user.id)
+            .maybeSingle();
+          
+          if (!osteopathError && osteopathData) {
+            console.log("Ostéopathe trouvé pour l'utilisateur:", osteopathData.id);
+            user.osteopathId = osteopathData.id;
+            
+            // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe
+            const { error: updateError } = await supabase
+              .from("User")
+              .update({ osteopathId: osteopathData.id })
+              .eq("id", user.id);
+            
+            if (updateError) {
+              console.error("Erreur lors de la mise à jour de l'utilisateur avec l'ID ostéopathe:", updateError);
+            }
+          }
+        } catch (osteoError) {
+          console.error("Erreur lors de la recherche de l'ostéopathe pour l'utilisateur:", osteoError);
+        }
+      }
       
       return {
         user,

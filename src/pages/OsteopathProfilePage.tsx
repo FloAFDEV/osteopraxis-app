@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { api } from "@/services/api";
@@ -55,44 +56,82 @@ const OsteopathProfilePage = () => {
       console.log("Vérification des données existantes pour l'utilisateur:", user.id);
       setLoading(true);
       
-      // Vérifions d'abord si un ostéopathe existe
-      const existingOsteopath = await api.getOsteopathByUserId(user.id);
-      console.log("Résultat de la recherche d'ostéopathe:", existingOsteopath || "Aucun trouvé");
-      
-      if (existingOsteopath && existingOsteopath.id) {
-        console.log("Ostéopathe trouvé avec ID:", existingOsteopath.id);
-        setOsteopath(existingOsteopath);
-        
-        // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
-        if (!user.osteopathId) {
-          console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", existingOsteopath.id);
-          const updatedUser = { ...user, osteopathId: existingOsteopath.id };
-          updateUser(updatedUser);
+      // Si l'utilisateur a déjà un osteopathId, récupérer directement l'ostéopathe
+      if (user.osteopathId) {
+        console.log("L'utilisateur a déjà un osteopathId:", user.osteopathId);
+        try {
+          const existingOsteopath = await api.getOsteopathById(user.osteopathId);
+          if (existingOsteopath) {
+            console.log("Ostéopathe trouvé avec ID:", existingOsteopath.id);
+            setOsteopath(existingOsteopath);
+            
+            // Vérifier s'il y a des cabinets existants
+            const existingCabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
+            console.log(`${existingCabinets.length} cabinet(s) trouvé(s) pour l'ostéopathe`);
+            setCabinets(existingCabinets);
+            
+            // Si des cabinets existent, rediriger vers le tableau de bord
+            if (existingCabinets && existingCabinets.length > 0) {
+              console.log("Cabinets existants trouvés, redirection vers le tableau de bord dans 1 seconde");
+              setTimeout(() => {
+                navigate("/dashboard");
+              }, 1000);
+              return;
+            } else {
+              // Sinon, afficher le formulaire de cabinet
+              setShowCabinetForm(true);
+            }
+            return;
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération de l'ostéopathe par ID:", error);
         }
-        
-        // Vérifier s'il y a des cabinets existants
-        const existingCabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
-        console.log(`${existingCabinets.length} cabinet(s) trouvé(s) pour l'ostéopathe`);
-        setCabinets(existingCabinets);
-        
-        // Si des cabinets existent, rediriger vers le tableau de bord
-        if (existingCabinets && existingCabinets.length > 0) {
-          console.log("Cabinets existants trouvés, redirection vers le tableau de bord dans 1 seconde");
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1000);
-          return;
-        } else {
-          // Sinon, afficher le formulaire de cabinet
-          setShowCabinetForm(true);
-        }
-      } else {
-        // Aucun ostéopathe trouvé, rester sur le formulaire de création
-        console.log("Aucun ostéopathe trouvé, formulaire de création nécessaire");
-        setOsteopath(null);
-        setShowCabinetForm(false);
       }
       
+      // Si nous arrivons ici, soit il n'y a pas d'osteopathId, soit nous n'avons pas trouvé l'ostéopathe avec cet ID
+      // Rechercher par userId à la place
+      console.log("Recherche d'un ostéopathe par userId:", user.id);
+      try {
+        const existingOsteopath = await api.getOsteopathByUserId(user.id);
+        console.log("Résultat de la recherche d'ostéopathe:", existingOsteopath || "Aucun trouvé");
+        
+        if (existingOsteopath && existingOsteopath.id) {
+          console.log("Ostéopathe trouvé avec ID:", existingOsteopath.id);
+          setOsteopath(existingOsteopath);
+          
+          // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe s'il n'était pas déjà renseigné
+          if (!user.osteopathId) {
+            console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", existingOsteopath.id);
+            const updatedUser = { ...user, osteopathId: existingOsteopath.id };
+            updateUser(updatedUser);
+          }
+          
+          // Vérifier s'il y a des cabinets existants
+          const existingCabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
+          console.log(`${existingCabinets.length} cabinet(s) trouvé(s) pour l'ostéopathe`);
+          setCabinets(existingCabinets);
+          
+          // Si des cabinets existent, rediriger vers le tableau de bord
+          if (existingCabinets && existingCabinets.length > 0) {
+            console.log("Cabinets existants trouvés, redirection vers le tableau de bord dans 1 seconde");
+            setTimeout(() => {
+              navigate("/dashboard");
+            }, 1000);
+            return;
+          } else {
+            // Sinon, afficher le formulaire de cabinet
+            setShowCabinetForm(true);
+          }
+        } else {
+          // Aucun ostéopathe trouvé, rester sur le formulaire de création
+          console.log("Aucun ostéopathe trouvé, formulaire de création nécessaire");
+          setOsteopath(null);
+          setShowCabinetForm(false);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la recherche d'ostéopathe par userId:", error);
+        setLoadError("Une erreur est survenue lors de la vérification de vos données");
+      }
     } catch (error) {
       console.error("Erreur lors de la vérification des données existantes:", error);
       setLoadError("Une erreur est survenue lors de la vérification de vos données");
