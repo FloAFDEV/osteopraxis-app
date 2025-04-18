@@ -46,73 +46,53 @@ export const patientService = {
   
   async getPatients(): Promise<Patient[]> {
     try {
-      console.log("Fetching patients from Supabase...");
+      console.log("=== Début getPatients ===");
       
       // Vérification de la session d'authentification
       const { data: session } = await supabase.auth.getSession();
-      if (!session || !session.session) {
-        console.error("Pas de session Supabase active - l'accès aux patients échouera");
-      } else {
-        console.log("Session Supabase active:", session.session.user.id);
+      console.log("État de la session:", session?.session ? "Active" : "Inactive");
+      
+      if (!session?.session) {
+        console.error("Pas de session Supabase active");
+        return [];
       }
+      
+      console.log("ID Utilisateur:", session.session.user.id);
       
       // Vérification du rôle et de l'ostéopathe associé
-      if (session?.session) {
-        try {
-          const { data: userData, error: userError } = await supabase
-            .from('User')
-            .select('role, osteopathId')
-            .eq('id', session.session.user.id)
-            .maybeSingle();
-          
-          if (userError) {
-            console.error("Erreur lors de la récupération des données utilisateur:", userError);
-          } else if (userData) {
-            console.log("Rôle utilisateur:", userData.role);
-            console.log("ID Ostéopathe associé:", userData.osteopathId);
-          } else {
-            console.warn("Utilisateur authentifié mais pas trouvé dans la table User");
-          }
-        } catch (e) {
-          console.error("Exception lors de la récupération des données utilisateur:", e);
-        }
+      const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('role, osteopathId')
+        .eq('id', session.session.user.id)
+        .single();
+      
+      if (userError) {
+        console.error("Erreur lors de la récupération des données utilisateur:", userError);
+      } else if (userData) {
+        console.log("Rôle utilisateur:", userData.role);
+        console.log("ID Ostéopathe associé:", userData.osteopathId);
       }
       
-      // Ajout d'un log pour afficher le schéma actuellement utilisé
-      const { data: schemaInfo, error: schemaError } = await supabase
-        .from('Patient')
-        .select('id')
-        .limit(1);
-        
-      if (schemaError) {
-        console.error('Error checking schema:', schemaError);
-      } else {
-        console.log('Schema check successful. Table exists.');
-      }
-      
-      // Récupération des patients avec plus d'informations de débogage
+      // Récupération des patients
       const { data, error } = await supabase
         .from('Patient')
         .select('*');
 
       if (error) {
-        console.error('Error fetching patients:', error);
+        console.error('Erreur lors de la récupération des patients:', error);
         throw error;
       }
 
-      if (!data) {
-        console.log('No data returned from Supabase');
-        return [];
-      }
-
-      console.log(`Successfully fetched ${data.length} patients from Supabase`);
-      if (data.length > 0) {
-        console.log('Sample patient data:', JSON.stringify(data[0]));
+      console.log(`${data?.length || 0} patients récupérés`);
+      if (data && data.length > 0) {
+        console.log('Premier patient:', data[0]);
       }
       
-      return data.map(adaptPatientFromSupabase);
+      console.log("=== Fin getPatients ===");
+      return data?.map(adaptPatientFromSupabase) || [];
+      
     } catch (err) {
-      console.error("Error in getPatients:", err);
+      console.error("Erreur dans getPatients:", err);
       throw err;
     }
   },
