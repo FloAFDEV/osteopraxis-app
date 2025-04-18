@@ -1,14 +1,9 @@
 
-// Configuration pour l'API
-// Le délai simulé pour les réponses d'API (en ms)
-export const DELAY = 300;
+// Configuration pour les API
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Fonction utilitaire pour simuler un délai d'API
-export const delay = (ms: number = DELAY) => new Promise(resolve => setTimeout(resolve, ms));
+// Mode Supabase activé par défaut, avec fallback sur données simulées en cas d'erreur
+export const USE_SUPABASE = true; 
 
-// Active l'utilisation de Supabase au lieu de l'API simulée
-export const USE_SUPABASE = true;
-
-// Mode de développement pour simuler l'authentification
-// Ajoute des en-têtes pour contourner l'authentification lors du développement
-export const SIMULATE_AUTH = true;
+// Activation du mode fallback qui permet d'utiliser des données simulées si Supabase échoue
+export const USE_FALLBACK = true;

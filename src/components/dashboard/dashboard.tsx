@@ -57,7 +57,8 @@ export function Dashboard() {
         console.log("Retrieved patients:", patients.length);
       } catch (patientError) {
         console.error("Erreur lors de la récupération des patients:", patientError);
-        // On continue avec un tableau vide de patients
+        toast.error("Impossible de charger les données des patients");
+        // On continue avec un tableau vide de patients ou des données simulées
       }
       
       try {
@@ -65,7 +66,8 @@ export function Dashboard() {
         console.log("Retrieved appointments:", appointments.length);
       } catch (appointmentError) {
         console.error("Erreur lors de la récupération des rendez-vous:", appointmentError);
-        // On continue avec un tableau vide de rendez-vous
+        toast.error("Impossible de charger les données des rendez-vous");
+        // On continue avec un tableau vide de rendez-vous ou des données simulées
       }
 
       // Calcul des statistiques avec uniquement les données réelles
@@ -259,6 +261,10 @@ export function Dashboard() {
                 <h3 className="text-xl font-medium text-red-800 dark:text-red-300 mb-2">Erreur de chargement des données</h3>
                 <p className="text-red-600/70 dark:text-red-400/70 mb-6 max-w-md mx-auto">
                   {error.message}
+                  <br />
+                  <span className="block mt-2 text-sm">
+                    Utilisation des données simulées. Si vous souhaitez utiliser vos vraies données, veuillez vérifier les politiques RLS de Supabase.
+                  </span>
                 </p>
                 <Button 
                   variant="outline" 

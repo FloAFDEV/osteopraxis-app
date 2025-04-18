@@ -37,7 +37,7 @@ port = 54328
 enabled = false
 port = 54329
 
-# Configuration pour les fonctions avec verification JWT désactivée pour le debug
+# Configuration pour les fonctions avec vérification JWT désactivée pour le debug
 [functions.completer-profil]
 verify_jwt = false
 
