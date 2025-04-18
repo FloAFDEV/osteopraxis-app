@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { Calendar, Clock, User } from "lucide-react";
@@ -91,28 +90,56 @@ export function AppointmentsOverview({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        {loading ? <div className="flex justify-center py-8">
+        {loading ? (
+          <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div> : upcomingAppointments.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+          </div>
+        ) : upcomingAppointments.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
             <Calendar className="h-12 w-12 mx-auto mb-3 text-slate-300" />
             <p>Aucun rendez-vous à venir</p>
-          </div> : <div>
+          </div>
+        ) : (
+          <div>
             {upcomingAppointments.map((appointment, index) => {
-          const patient = getPatientById(appointment.patientId);
-          const appointmentDate = parseISO(appointment.date);
-          const isLastItem = index === upcomingAppointments.length - 1;
-          return <div key={appointment.id} className={`flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-900/20 transition-colors relative ${!isLastItem ? 'border-b' : ''}`}>
+              const patient = getPatientById(appointment.patientId);
+              const appointmentDate = parseISO(appointment.date);
+              const isLastItem = index === upcomingAppointments.length - 1;
+              
+              return (
+                <div 
+                  key={appointment.id} 
+                  className={`flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-900/20 transition-colors relative ${!isLastItem ? 'border-b' : ''}`}
+                >
                   <div className="flex-shrink-0 mr-4">
                     <div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
-                      <User className="h-6 w-6 text-orange-500" />
+                      <User 
+                        className={`h-6 w-6 ${
+                          patient?.gender === "Femme" 
+                            ? "text-pink-500" 
+                            : patient?.gender === "Homme" 
+                              ? "text-blue-500" 
+                              : "text-gray-500"
+                        }`} 
+                      />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <Link to={`/patients/${appointment.patientId}`} className="font-medium text-slate-800 dark:text-white hover:underline text-base truncate block">
+                    <Link 
+                      to={`/patients/${appointment.patientId}`} 
+                      className={`font-medium hover:underline text-base truncate block ${
+                        patient?.gender === "Femme"
+                          ? "text-pink-700 dark:text-pink-300"
+                          : patient?.gender === "Homme"
+                            ? "text-blue-700 dark:text-blue-300"
+                            : "text-slate-800 dark:text-white"
+                      }`}
+                    >
                       {patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
                     </Link>
-                    <p className="text-sm text-muted-foreground truncate">{appointment.reason}</p>
-                    
+                    <p className="text-sm text-muted-foreground truncate">
+                      {appointment.reason}
+                    </p>
                     <div className="mt-2 flex flex-wrap gap-3">
                       <div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
                         <Clock className="h-3 w-3 text-blue-500 mr-1" />
@@ -121,36 +148,49 @@ export function AppointmentsOverview({
                       <div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
                         <Calendar className="h-3 w-3 text-purple-500 mr-1" />
                         <span>
-                          {format(appointmentDate, 'dd MMM yyyy', {
-                      locale: fr
-                    })}
+                          {format(appointmentDate, 'dd MMM yyyy', { locale: fr })}
                         </span>
                       </div>
-                      
-                      {isToday(appointmentDate) && <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs font-normal">
+                      {isToday(appointmentDate) && (
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs font-normal">
                           Aujourd'hui
-                        </Badge>}
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                  
                   <button
                     onClick={() => handleAppointmentClick(appointment.id)}
                     className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-xs font-medium transition-colors"
                   >
                     Détails
                   </button>
-                </div>;
-        })}
-            
+                </div>
+              );
+            })}
             <div className="p-4 bg-slate-50 dark:bg-slate-900/20 text-center">
-              <Link to="/appointments" className="text-blue-600 hover:text-gray-400 text-sm font-medium flex items-center justify-center">
+              <Link 
+                to="/appointments" 
+                className="text-blue-600 hover:text-gray-400 text-sm font-medium flex items-center justify-center"
+              >
                 Voir tous les rendez-vous
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="ml-1"
+                >
                   <path d="m9 18 6-6-6-6" />
                 </svg>
               </Link>
             </div>
-          </div>}
+          </div>
+        )}
       </CardContent>
     </Card>;
 }
