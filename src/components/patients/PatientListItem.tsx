@@ -6,9 +6,11 @@ import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { differenceInYears, parseISO } from "date-fns";
+
 interface PatientListItemProps {
   patient: Patient;
 }
+
 const PatientListItem: React.FC<PatientListItemProps> = ({
   patient
 }) => {
@@ -24,34 +26,41 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
 
   // Determine background color and icon based on gender
   const getAvatarColor = () => {
-    if (patient.gender === 'Homme') {
-      return 'bg-blue-100 text-blue-600';
-    } else if (patient.gender === 'Femme') {
-      return 'bg-pink-100 text-pink-600';
-    } else {
-      return 'bg-gray-100 text-gray-600';
+    switch(patient.gender) {
+      case 'Homme':
+        return {
+          background: 'bg-blue-100 text-blue-600', 
+          icon: <User className="h-5 w-5 text-blue-600" />
+        };
+      case 'Femme':
+        return {
+          background: 'bg-pink-100 text-pink-600', 
+          icon: <UserRound className="h-5 w-5 text-pink-600" />
+        };
+      default:
+        return {
+          background: 'bg-purple-100 text-purple-600', 
+          icon: <Users className="h-5 w-5 text-purple-600" />
+        };
     }
   };
 
-  // Get the appropriate gender icon
-  const getGenderIcon = () => {
-    if (patient.gender === 'Homme') {
-      return <User className="h-5 w-5 text-blue-600" />;
-    } else if (patient.gender === 'Femme') {
-      return <UserRound className="h-5 w-5 text-pink-600" />;
-    } else {
-      return <Users className="h-5 w-5 text-gray-600" />;
-    }
-  };
-  return <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
+  const avatarStyle = getAvatarColor();
+
+  return (
+    <div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
       <div className="p-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 flex-grow">
             {/* Avatar with gender */}
-            <Avatar className={`${getAvatarColor()} h-10 w-10`}>
-              {patient.avatarUrl ? <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} /> : <AvatarFallback className={getAvatarColor()}>
-                  {getGenderIcon()}
-                </AvatarFallback>}
+            <Avatar className={`${avatarStyle.background} h-10 w-10`}>
+              {patient.avatarUrl ? (
+                <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} />
+              ) : (
+                <AvatarFallback className={avatarStyle.background}>
+                  {avatarStyle.icon}
+                </AvatarFallback>
+              )}
             </Avatar>
             
             <div>
@@ -91,6 +100,8 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default PatientListItem;

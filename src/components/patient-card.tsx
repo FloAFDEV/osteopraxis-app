@@ -25,29 +25,30 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
     return `${firstInitial}${lastInitial}`;
   };
 
-  // Définir les couleurs en fonction du genre
+  // Définir les couleurs en fonction du genre avec des variantes plus subtiles
   const getGenderColors = (gender?: string) => {
-    if (gender === "Homme") {
-      return {
-        badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-        avatar: "bg-blue-600 text-white",
-        border: "border-blue-500",
-        icon: <UserCheck className="ml-1 h-4 w-4 text-blue-600" />
-      };
-    } else if (gender === "Femme") {
-      return {
-        badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-        avatar: "bg-pink-600 text-white",
-        border: "border-pink-500",
-        icon: <UserCircle className="ml-1 h-4 w-4 text-pink-600" />
-      };
-    } else {
-      return {
-        badge: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
-        avatar: "bg-gray-600 text-white",
-        border: "border-gray-500",
-        icon: <Users className="ml-1 h-4 w-4 text-purple-600" />
-      };
+    switch(gender) {
+      case 'Homme':
+        return {
+          badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+          avatar: "bg-blue-500 text-white",
+          border: "border-blue-500",
+          icon: <UserCheck className="ml-1 h-4 w-4 text-blue-600" />
+        };
+      case 'Femme':
+        return {
+          badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
+          avatar: "bg-pink-500 text-white",
+          border: "border-pink-500",
+          icon: <UserCircle className="ml-1 h-4 w-4 text-pink-600" />
+        };
+      default:
+        return {
+          badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+          avatar: "bg-purple-500 text-white",
+          border: "border-purple-500",
+          icon: <Users className="ml-1 h-4 w-4 text-purple-600" />
+        };
     }
   };
 
@@ -56,8 +57,11 @@ export function PatientCard({ patient, showDetailsButton = true }: PatientCardPr
   return (
     <Card 
       className="overflow-hidden transition-all duration-200 border-t-4 h-full hover:shadow-lg hover:scale-[1.02] flex flex-col" 
-      style={{ borderTopColor: patient.gender === 'Homme' ? '#2563eb' : 
-                                patient.gender === 'Femme' ? '#ec4899' : '#6b7280' }}
+      style={{ borderTopColor: 
+        patient.gender === 'Homme' ? '#2563eb' : 
+        patient.gender === 'Femme' ? '#ec4899' : 
+        '#6b7280' 
+      }}
     >
       <CardContent className="p-6 flex-grow">
         <div className="flex gap-4">

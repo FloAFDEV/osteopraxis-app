@@ -205,6 +205,8 @@ export type Database = {
           id: number
           patientId: number
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"]
+          tvaExoneration: boolean | null
+          tvaMotif: string | null
         }
         Insert: {
           amount: number
@@ -213,6 +215,8 @@ export type Database = {
           id?: number
           patientId: number
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
+          tvaExoneration?: boolean | null
+          tvaMotif?: string | null
         }
         Update: {
           amount?: number
@@ -221,6 +225,8 @@ export type Database = {
           id?: number
           patientId?: number
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
+          tvaExoneration?: boolean | null
+          tvaMotif?: string | null
         }
         Relationships: [
           {
@@ -565,7 +571,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       AppointmentStatus:
