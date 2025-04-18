@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -84,10 +85,11 @@ export const appointmentService = {
     return undefined;
   },
 
+  // Méthode mise à jour pour utiliser updateAppointment au lieu de updateAppointmentStatus
   async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.updateAppointmentStatus(id, status);
+        return await this.updateAppointment(id, { status });
       } catch (error) {
         console.error("Erreur Supabase updateAppointmentStatus:", error);
         throw error;

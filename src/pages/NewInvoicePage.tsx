@@ -15,6 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Osteopath, Cabinet, Invoice } from '@/types';
 import PatientFancyLoader from '@/components/patients/PatientFancyLoader';
+// Importation correcte de l'icône Activity de lucide-react
+import { Activity } from 'lucide-react';
 
 // Schema de validation pour le formulaire de facture
 const invoiceFormSchema = z.object({
@@ -46,7 +48,7 @@ const NewInvoicePage = () => {
   useEffect(() => {
     // Fonction pour récupérer les données professionnelles
     const fetchProfessionalData = async () => {
-      if (loading === false) return; // Éviter les appels multiples
+      if (!loading) return; // Éviter les appels multiples
 
       try {
         if (!user?.id) {
@@ -209,18 +211,18 @@ const NewInvoicePage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto py-6 md:py-10 px-2 md:px-0">
-<h1 className="text-3xl font-bold mb-4 md:mb-6">
-  <span
-    className="
-      inline-block                         /* garde la largeur du texte */
-      text-transparent bg-clip-text
-      bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
-      dark:from-blue-500 dark:via-purple-500 dark:to-pink-500
-    "
-  >
-    Nouvelle Facture
-  </span>
-</h1>      
+        <h1 className="text-3xl font-bold mb-4 md:mb-6">
+          <span
+            className="
+              inline-block                         /* garde la largeur du texte */
+              text-transparent bg-clip-text
+              bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
+              dark:from-blue-500 dark:via-purple-500 dark:to-pink-500
+            "
+          >
+            Nouvelle Facture
+          </span>
+        </h1>      
         <Card className="p-4 md:p-6 mb-4 md:mb-6">
           <h2 className="text-xl font-semibold mb-3 md:mb-4">Information du praticien</h2>
           <div className="grid md:grid-cols-2 gap-3 md:gap-4">
