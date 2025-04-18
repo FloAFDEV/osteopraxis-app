@@ -1,3 +1,4 @@
+
 // Specific fix for the cabinet-service.ts file where we need to ensure the right type is being used
 import { checkAuth, supabase } from "./utils";
 import { Cabinet } from "@/types";
@@ -61,22 +62,51 @@ export const supabaseCabinetService = {
     }
   },
 
-  async getCabinetByOsteopathId(osteopathId: number): Promise<Cabinet | null> {
+  // Renamed from getCabinetByOsteopathId to getCabinetsByOsteopathId for consistency
+  async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
     try {
       const { data, error } = await supabase
         .from('Cabinet')
         .select('*')
-        .eq('osteopathId', osteopathId)
-        .maybeSingle();
+        .eq('osteopathId', osteopathId);
 
       if (error) {
-        console.error('Error fetching cabinet by osteopathId:', error);
+        console.error('Error fetching cabinets by osteopathId:', error);
         throw error;
       }
 
-      return data ? adaptCabinetFromSupabase(data) : null;
+      return (data || []).map(adaptCabinetFromSupabase);
     } catch (error) {
-      console.error('Error in getCabinetByOsteopathId:', error);
+      console.error('Error in getCabinetsByOsteopathId:', error);
+      throw error;
+    }
+  },
+  
+  // Adding getCabinetsByUserId method to fetch cabinets related to a user
+  async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
+    try {
+      // First get the osteopath ID for this user
+      const { data: osteopathData, error: osteopathError } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('userId', userId)
+        .maybeSingle();
+
+      if (osteopathError) {
+        console.error('Error fetching osteopath by userId:', osteopathError);
+        throw osteopathError;
+      }
+
+      // If no osteopath found, return empty array
+      if (!osteopathData) {
+        console.log('No osteopath found for userId:', userId);
+        return [];
+      }
+      
+      // Now get cabinets for this osteopath
+      return await this.getCabinetsByOsteopathId(osteopathData.id);
+    } catch (error) {
+      console.error('Error in getCabinetsByUserId:', error);
       throw error;
     }
   },
@@ -137,7 +167,7 @@ export const supabaseCabinetService = {
     }
   },
 
-  async deleteCabinet(id: number): Promise<boolean> {
+  async deleteCabinet(id: number): Promise<void> {
     try {
       const { error } = await supabase
         .from('Cabinet')
@@ -148,8 +178,6 @@ export const supabaseCabinetService = {
         console.error('Error deleting cabinet:', error);
         throw error;
       }
-
-      return true;
     } catch (error) {
       console.error('Error in deleteCabinet:', error);
       throw error;
