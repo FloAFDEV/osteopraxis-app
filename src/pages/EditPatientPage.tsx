@@ -7,10 +7,13 @@ import { Patient, Contraception } from '@/types';
 import { toast } from 'sonner';
 import { UserRound } from 'lucide-react';
 import { patientService } from '@/services/api/patient-service';
-import { USE_SUPABASE, SIMULATE_AUTH } from '@/services/api/config';
 
 const EditPatientPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,11 +58,6 @@ const EditPatientPage = () => {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
       }
 
-      // Normalize contraception value
-      if (updatedData.contraception === "IMPLANT") {
-        updatedData.contraception = "IMPLANTS" as Contraception;
-      }
-
       // Ensure we're sending all required data for the patient
       const patientToUpdate = {
         ...patient,
@@ -68,31 +66,13 @@ const EditPatientPage = () => {
       };
 
       console.log("Sending patient data to API:", patientToUpdate);
-      
-      // Make sure ID is included and is a number
-      if (typeof patientToUpdate.id === 'string') {
-        patientToUpdate.id = parseInt(patientToUpdate.id);
-      }
-      
-      try {
-        // Make sure all required fields are present
-        const result = await patientService.updatePatient(patientToUpdate);
-        toast.success("Patient mis à jour avec succès");
-        navigate('/patients');
-      } catch (error: any) {
-        // Special handling for permission errors in dev mode
-        if (SIMULATE_AUTH && error?.code === '42501') {
-          console.warn("Mode développement: simulation de la mise à jour réussie");
-          toast.success("(DEV MODE) Patient mis à jour avec succès");
-          navigate('/patients');
-          return;
-        }
-        
-        throw error; // Rethrow for the outer catch block
-      }
+      const result = await patientService.updatePatient(patientToUpdate);
+
+      toast.success("Patient mis à jour avec succès");
+      navigate('/patients');
     } catch (error: any) {
       console.error("Error updating patient:", error);
-      toast.error("Impossible de mettre à jour le patient: " + (error.message || "Erreur inconnue"));
+      toast.error("Impossible de mettre à jour le patient");
     } finally {
       setIsSaving(false);
     }

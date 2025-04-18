@@ -1,7 +1,6 @@
 
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
-import { SIMULATE_AUTH } from "../api/config";
 
 const adaptPatientFromSupabase = (data: any): Patient => ({
   id: data.id,
@@ -43,47 +42,31 @@ const adaptPatientFromSupabase = (data: any): Patient => ({
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    // For development, add a simulated auth header
-    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
-    
-    try {
-      const { data, error } = await supabase
-        .from('Patient')
-        .select('*');
+    const { data, error } = await supabase
+      .from('Patient')
+      .select('*');
 
-      if (error) {
-        console.error('Error fetching patients:', error);
-        throw error;
-      }
-
-      return data.map(adaptPatientFromSupabase);
-    } catch (error) {
-      console.error('Exception while fetching patients:', error);
+    if (error) {
+      console.error('Error fetching patients:', error);
       throw error;
     }
+
+    return data.map(adaptPatientFromSupabase);
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
-    // For development, add a simulated auth header
-    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
-    
-    try {
-      const { data, error } = await supabase
-        .from('Patient')
-        .select('*')
-        .eq('id', id)
-        .single();
+    const { data, error } = await supabase
+      .from('Patient')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-      if (error) {
-        console.error(`Error fetching patient with id ${id}:`, error);
-        throw error;
-      }
-
-      return adaptPatientFromSupabase(data);
-    } catch (error) {
-      console.error(`Exception while fetching patient with id ${id}:`, error);
+    if (error) {
+      console.error(`Error fetching patient with id ${id}:`, error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
@@ -140,36 +123,23 @@ export const patientService = {
       createdAt: now  // Add the createdAt field
     };
 
-    // For development, add a simulated auth header
-    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
-    
-    try {
-      const { data, error } = await supabase
-        .from('Patient')
-        .insert(patientData)
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from('Patient')
+      .insert(patientData)
+      .select()
+      .single();
 
-      if (error) {
-        console.error('Error creating patient:', error);
-        throw error;
-      }
-
-      return adaptPatientFromSupabase(data);
-    } catch (error) {
-      console.error('Exception while creating patient:', error);
+    if (error) {
+      console.error('Error creating patient:', error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
     // Use explicit ID for the update operation
     const id = patient.id;
-    if (!id) {
-      throw new Error("Patient ID is required for update");
-    }
-    
-    console.log("Updating patient with upsert - ID:", id);
     
     // Add updatedAt timestamp
     const now = new Date().toISOString();
@@ -188,7 +158,7 @@ export const patientService = {
     
     // Prepare the complete patient data for update
     const patientData = {
-      id: Number(id), // Ensure ID is a number and include it for the upsert
+      id: id, // Inclure l'ID pour l'upsert
       firstName: patient.firstName,
       lastName: patient.lastName,
       email: patient.email,
@@ -222,40 +192,27 @@ export const patientService = {
       userId: patient.userId,
       osteopathId: patient.osteopathId || 1,
       updatedAt: now,
-      createdAt: patient.createdAt || now, // Use existing createdAt or now if not defined
+      createdAt: patient.createdAt || now, // Utiliser createdAt existant ou le now si non défini
     };
 
-    // For development, add a simulated auth header
-    console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
-    
-    try {
-      // Use upsert instead of insert with onConflict for Supabase JS client
-      const { data, error } = await supabase
-        .from('Patient')
-        .upsert(patientData)
-        .select();
-      
-      if (error) {
-        console.error('Error in upsert operation:', error);
-        throw error;
-      }
-      
-      if (!data || data.length === 0) {
-        throw new Error('No data returned from upsert operation');
-      }
-      
-      return adaptPatientFromSupabase(data[0]);
-    } catch (error) {
-      console.error('Exception during patient update:', error);
+    // CORRECTION: Utiliser upsert au lieu de update pour contourner les problèmes CORS avec PATCH
+    console.log("Mise à jour du patient avec upsert - ID:", id);
+    const { data, error } = await supabase
+      .from('Patient')
+      .upsert(patientData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating patient:', error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
   },
   
   async deletePatient(id: number): Promise<{ error: any | null }> {
     try {
-      // For development, add a simulated auth header
-      console.log("Mode développement: ajout d'en-têtes d'authentification simulés");
-      
       const { error } = await supabase
         .from('Patient')
         .delete()
