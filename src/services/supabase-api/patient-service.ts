@@ -55,17 +55,16 @@ export const patientService = {
       
       let osteopathId: number | null = null;
       
-      // CORRECTION: Récupérer l'osteopathId directement depuis la table Osteopath sans passer par User
+      // CORRECTION: Récupérer l'osteopathId directement sans maybeSingle
       console.log("Trying to fetch osteopath info directly from Osteopath table");
-      const { data: osteopath, error: osteoError } = await supabase
+      const { data: osteopaths, error: osteoError } = await supabase
         .from('Osteopath')
         .select('id')
-        .eq('userId', user.id)
-        .maybeSingle();
+        .eq('userId', user.id);
       
-      if (osteopath) {
-        console.log(`Found osteopathId ${osteopath.id} directly from Osteopath table`);
-        osteopathId = osteopath.id;
+      if (osteopaths && osteopaths.length > 0) {
+        console.log(`Found osteopathId ${osteopaths[0].id} directly from Osteopath table`);
+        osteopathId = osteopaths[0].id;
       } else {
         console.log('No osteopath record found for this user. Error:', osteoError?.message);
         
@@ -381,3 +380,4 @@ export { patientService as supabasePatientService };
 export const updatePatient = async (patient: Patient): Promise<Patient> => {
   return patientService.updatePatient(patient);
 };
+

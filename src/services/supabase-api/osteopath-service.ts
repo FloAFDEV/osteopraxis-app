@@ -51,40 +51,25 @@ export const supabaseOsteopathService = {
       
       console.log("ID utilisateur de la session:", sessionData.session.user.id);
       console.log("ID utilisateur passé en paramètre:", userId);
-      console.log("Exécution de la requête avec userId:", userId);
       
-      // Recherche exacte avec le userId
+      // CORRECTION: Ne pas utiliser maybeSingle() pour éviter l'erreur 406
       const { data, error } = await supabase
         .from("Osteopath")
         .select("*")
-        .eq("userId", userId)
-        .maybeSingle();
+        .eq("userId", userId);
         
       if (error) {
         console.error("Erreur lors de la recherche de l'ostéopathe:", error);
         throw new Error(error.message);
       }
       
-      console.log("Session actuelle:", sessionData.session ? "Authentifié" : "Non authentifié");
-      
-      if (!data) {
+      if (!data || data.length === 0) {
         console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
-        
-        // Afficher les ostéopathes existants pour le débogage
-        const { data: allOsteos, error: allOsteosError } = await supabase
-          .from("Osteopath")
-          .select("id, userId")
-          .limit(5);
-          
-        if (!allOsteosError && allOsteos) {
-          console.log("Voici les 5 premiers ostéopathes dans la base:", allOsteos);
-        }
-        
         return undefined;
       }
       
-      console.log("Ostéopathe trouvé:", data);
-      return typedData<Osteopath>(data);
+      console.log("Ostéopathe trouvé:", data[0]);
+      return typedData<Osteopath>(data[0]);
     } catch (error) {
       console.error("Exception lors de la recherche de l'ostéopathe:", error);
       throw error;

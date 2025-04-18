@@ -28,19 +28,43 @@ const DashboardPage = () => {
           return;
         }
         
-        // Vérifier aussi si l'utilisateur est associé à un ostéopathe
-        const { data: osteopath, error } = await supabase
+        // CORRECTION: Vérifier aussi si l'utilisateur est associé à un ostéopathe sans maybeSingle()
+        const { data: osteopaths, error } = await supabase
           .from('Osteopath')
           .select('id')
-          .eq('userId', session.user.id)
-          .maybeSingle();
+          .eq('userId', session.user.id);
         
         if (error) {
           console.error("Erreur lors de la vérification du profil d'ostéopathe:", error);
         }
         
-        if (!osteopath) {
+        if (!osteopaths || osteopaths.length === 0) {
           setAuthError("Votre profil d'ostéopathe n'est pas configuré. Veuillez compléter votre profil.");
+          
+          // Tentative de création automatique du profil ostéopathe si nécessaire
+          try {
+            const { data: newOsteo, error: createError } = await supabase
+              .from('Osteopath')
+              .insert({
+                userId: session.user.id,
+                name: session.user.user_metadata?.first_name || 'Nouvel Ostéopathe',
+                professional_title: 'Ostéopathe D.O.',
+                ape_code: '8690F',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              })
+              .select();
+              
+            if (newOsteo) {
+              console.log("Profil d'ostéopathe créé automatiquement:", newOsteo);
+              setAuthError(null);
+              toast.success("Profil d'ostéopathe créé automatiquement");
+            } else if (createError) {
+              console.error("Erreur lors de la création du profil ostéopathe:", createError);
+            }
+          } catch (createErr) {
+            console.error("Exception lors de la création du profil ostéopathe:", createErr);
+          }
         } else {
           setAuthError(null);
         }

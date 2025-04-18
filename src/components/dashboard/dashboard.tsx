@@ -63,6 +63,30 @@ export function Dashboard() {
         }
         
         console.log('User authenticated, loading dashboard data');
+
+        // CORRECTION: Vérifier si l'utilisateur a un profil ostéopathe
+        const { data: osteopaths, error: osteoError } = await supabase
+          .from('Osteopath')
+          .select('id')
+          .eq('userId', user.id);
+        
+        if (osteoError) {
+          console.error('Erreur lors de la récupération du profil ostéopathe:', osteoError);
+          toast.error("Impossible de récupérer votre profil ostéopathe");
+          setError("Impossible de récupérer votre profil ostéopathe");
+          setLoading(false);
+          return;
+        }
+        
+        if (!osteopaths || osteopaths.length === 0) {
+          console.error('Aucun profil ostéopathe trouvé pour cet utilisateur');
+          toast.error("Veuillez compléter votre profil ostéopathe");
+          setError("Veuillez compléter votre profil ostéopathe");
+          setLoading(false);
+          return;
+        }
+        
+        console.log('Ostéopathe trouvé, id:', osteopaths[0].id);
         
         // Récupération des données sans passer par la vérification d'ostéopathe supplémentaire
         // puisque nos services patients/appointments feront déjà cette vérification
