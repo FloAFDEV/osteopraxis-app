@@ -13,7 +13,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // NOTE: cette clé devrait être gérée de manière sécurisée, idéalement via des variables d'environnement
 export const supabaseAdmin = createClient(
   SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY || SUPABASE_KEY
+  // Résolution du problème "process is not defined" - Ne pas utiliser process.env
+  // Utiliser uniquement la clé SUPABASE_KEY par défaut
+  SUPABASE_KEY  
 );
 
 // Fonction d'aide pour typer correctement les données
@@ -69,6 +71,7 @@ export async function getCurrentProfileId(): Promise<number | null> {
 export const getCurrentOsteopathId = getCurrentProfileId;
 
 // Ajouter cette fonction pour gérer l'authentification dans les requêtes
+// En exportant la fonction pour résoudre l'erreur d'importation
 export function addAuthHeaders<T extends any>(query: T): T {
   return query;
 }

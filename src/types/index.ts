@@ -1,5 +1,5 @@
 
-// Update the Appointment type
+// Appointment types
 export type AppointmentStatus = 'PLANNED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
 
 export interface Appointment {
@@ -16,7 +16,7 @@ export interface Appointment {
   updatedAt: string;
 }
 
-// Update the Cabinet type
+// Cabinet types
 export interface Cabinet {
   id: number;
   name: string;
@@ -30,7 +30,9 @@ export interface Cabinet {
   updatedAt: string;
 }
 
-// Update the ProfessionalProfile type
+// ProfessionalProfile types
+export type ProfessionType = 'osteopathe' | 'chiropracteur' | 'autre';
+
 export interface ProfessionalProfile {
   id: number;
   userId: string;
@@ -39,12 +41,58 @@ export interface ProfessionalProfile {
   adeli_number?: string;
   siret?: string;
   ape_code?: string;
-  profession_type: 'osteopathe' | 'chiropracteur' | 'autre';
+  profession_type: ProfessionType;
   createdAt: string;
   updatedAt: string;
 }
 
-// Add DashboardData type
+// For backward compatibility
+export interface Osteopath extends ProfessionalProfile {}
+
+// Patient types
+export interface Patient {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  birthDate?: string;
+  address?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  professionalProfileId: number;
+  cabinetId?: number;
+  currentTreatment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// User types
+export interface User {
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  role: 'USER' | 'ADMIN';
+  professionalProfileId?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Invoice types
+export type PaymentStatus = 'PENDING' | 'PAID' | 'CANCELLED';
+
+export interface Invoice {
+  id: number;
+  patientId: number;
+  consultationId: number;
+  amount: number;
+  date: string;
+  paymentStatus: PaymentStatus;
+  tvaExoneration?: boolean;
+  tvaMotif?: string;
+}
+
+// Dashboard data types
 export interface DashboardData {
   totalPatients: number;
   maleCount: number;
@@ -67,4 +115,12 @@ export interface DashboardData {
     prevPatients: number;
     growthText: string;
   }[];
+}
+
+// Chart types
+export interface GenderChartData {
+  name: string;
+  value: number;
+  percentage: number;
+  icon: JSX.Element;
 }
