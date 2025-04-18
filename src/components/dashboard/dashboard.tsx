@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -8,9 +9,10 @@ import { DashboardData } from "@/types";
 import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { supabase } from "@/services/supabase-api/utils";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export function Dashboard() {
   
@@ -42,183 +44,188 @@ export function Dashboard() {
   });
   
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true);
+      setError(null);
       try {
         // Récupérer d'abord l'utilisateur connecté
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           console.error('No user logged in for dashboard');
           toast.error("Vous devez être connecté pour accéder au tableau de bord");
+          setError("Vous devez être connecté pour accéder au tableau de bord");
           setLoading(false);
           return;
         }
         
-        // Récupérer l'osteopathId de l'utilisateur
-        const { data: osteopath, error: osteoError } = await supabase
-          .from('Osteopath')
-          .select('id')
-          .eq('userId', user.id)
-          .single();
+        console.log('User authenticated, loading dashboard data');
+        
+        // Récupération des données sans passer par la vérification d'ostéopathe supplémentaire
+        // puisque nos services patients/appointments feront déjà cette vérification
+        try {
+          // Utiliser Promise.allSettled pour ne pas échouer si une des promesses échoue
+          const [patientsResult, appointmentsResult] = await Promise.allSettled([
+            api.getPatients(), 
+            api.getAppointments()
+          ]);
           
-        if (osteoError || !osteopath) {
-          console.error('Error fetching osteopath info for dashboard:', osteoError);
-          toast.error("Impossible de récupérer vos informations d'ostéopathe");
-          setLoading(false);
-          return;
-        }
+          const patients = patientsResult.status === 'fulfilled' ? patientsResult.value : [];
+          const appointments = appointmentsResult.status === 'fulfilled' ? appointmentsResult.value : [];
+          
+          console.log("Patients récupérés pour le tableau de bord:", patients.length);
+          console.log("Rendez-vous récupérés pour le tableau de bord:", appointments.length);
+          
+          if (patients.length === 0) {
+            setError("Aucun patient trouvé. Créez d'abord quelques patients.");
+          }
         
-        console.log(`Loading dashboard data for osteopath ID ${osteopath.id}`);
-        
-        // Récupération des données réelles uniquement pour cet ostéopathe
-        const [patients, appointments] = await Promise.all([
-          api.getPatients(), 
-          api.getAppointments()
-        ]);
+          // Calcul des statistiques avec uniquement les données réelles
+          const totalPatients = patients.length;
+          const maleCount = patients.filter(p => p.gender === "Homme").length;
+          const femaleCount = patients.filter(p => p.gender === "Femme").length;
 
-        console.log("Patients récupérés pour le tableau de bord:", patients.length);
+          // Calcul des âges et métriques de croissance
+          const today = new Date();
+          const currentYear = today.getFullYear();
+          const currentMonth = today.getMonth();
 
-        
-        
-        // Calcul des statistiques avec uniquement les données réelles
-        const totalPatients = patients.length;
-        const maleCount = patients.filter(p => p.gender === "Homme").length;
-        const femaleCount = patients.filter(p => p.gender === "Femme").length;
-
-        // Calcul des âges et métriques de croissance
-        const today = new Date();
-        const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth();
-
-        // Nouveaux patients ce mois-ci et cette année
-        const newPatientsThisMonth = patients.filter(p => {
-          const createdAt = new Date(p.createdAt);
-          return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
-        }).length;
-        
-        const newPatientsThisYear = patients.filter(p => {
-          const createdAt = new Date(p.createdAt);
-          return createdAt.getFullYear() === currentYear;
-        }).length;
-        
-        const newPatientsLastYear = patients.filter(p => {
-          const createdAt = new Date(p.createdAt);
-          return createdAt.getFullYear() === currentYear - 1;
-        }).length;
-
-        // Rendez-vous aujourd'hui
-        const appointmentsToday = appointments.filter(a => {
-          const appDate = new Date(a.date);
-          return appDate.toDateString() === today.toDateString();
-        }).length;
-
-        // Prochain rendez-vous
-        const futureAppointments = appointments
-          .filter(a => new Date(a.date) > today)
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        
-        const nextAppointment = futureAppointments.length > 0 
-          ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', { locale: fr })
-          : "Aucun rendez-vous prévu";
-
-        // Calcul de la croissance sur 30 jours
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        const newPatientsLast30Days = patients.filter(p => {
-          const createdAt = new Date(p.createdAt);
-          return createdAt >= thirtyDaysAgo;
-        }).length;
-        
-        const sixtyDaysAgo = new Date();
-        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-        
-        const patientsPrevious30Days = patients.filter(p => {
-          const createdAt = new Date(p.createdAt);
-          return createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo;
-        }).length;
-
-        // Taux de croissance
-        const thirtyDayGrowthPercentage = patientsPrevious30Days > 0 
-          ? Math.round((newPatientsLast30Days - patientsPrevious30Days) / patientsPrevious30Days * 100) 
-          : newPatientsLast30Days > 0 ? 100 : 0;
-        
-        const patientsLastYearEnd = patients.filter(p => {
-          const createdAt = new Date(p.createdAt);
-          return createdAt.getFullYear() < currentYear;
-        }).length;
-        
-        const annualGrowthPercentage = patientsLastYearEnd > 0 
-          ? Math.round(newPatientsThisYear / patientsLastYearEnd * 100) 
-          : newPatientsThisYear > 0 ? 100 : 0;
-
-        // Données de croissance mensuelle
-        const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
-        const monthlyGrowth = frenchMonths.map((month, index) => {
-          const thisYearPatients = patients.filter(p => {
+          // Nouveaux patients ce mois-ci et cette année
+          const newPatientsThisMonth = patients.filter(p => {
             const createdAt = new Date(p.createdAt);
-            return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear;
+            return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
           }).length;
           
-          const lastYearPatients = patients.filter(p => {
+          const newPatientsThisYear = patients.filter(p => {
             const createdAt = new Date(p.createdAt);
-            return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear - 1;
+            return createdAt.getFullYear() === currentYear;
           }).length;
           
-          const growthRate = lastYearPatients > 0 
-            ? Math.round((thisYearPatients - lastYearPatients) / lastYearPatients * 100) 
-            : thisYearPatients > 0 ? 100 : 0;
+          const newPatientsLastYear = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt.getFullYear() === currentYear - 1;
+          }).length;
+
+          // Rendez-vous aujourd'hui
+          const appointmentsToday = appointments.filter(a => {
+            const appDate = new Date(a.date);
+            return appDate.toDateString() === today.toDateString();
+          }).length;
+
+          // Prochain rendez-vous
+          const futureAppointments = appointments
+            .filter(a => new Date(a.date) > today)
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           
-          return {
-            month,
-            patients: thisYearPatients,
-            prevPatients: lastYearPatients,
-            growthText: `${growthRate}%`
+          const nextAppointment = futureAppointments.length > 0 
+            ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', { locale: fr })
+            : "Aucun rendez-vous prévu";
+
+          // Calcul de la croissance sur 30 jours
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          
+          const newPatientsLast30Days = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt >= thirtyDaysAgo;
+          }).length;
+          
+          const sixtyDaysAgo = new Date();
+          sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+          
+          const patientsPrevious30Days = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo;
+          }).length;
+
+          // Taux de croissance
+          const thirtyDayGrowthPercentage = patientsPrevious30Days > 0 
+            ? Math.round((newPatientsLast30Days - patientsPrevious30Days) / patientsPrevious30Days * 100) 
+            : newPatientsLast30Days > 0 ? 100 : 0;
+          
+          const patientsLastYearEnd = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt.getFullYear() < currentYear;
+          }).length;
+          
+          const annualGrowthPercentage = patientsLastYearEnd > 0 
+            ? Math.round(newPatientsThisYear / patientsLastYearEnd * 100) 
+            : newPatientsThisYear > 0 ? 100 : 0;
+
+          // Données de croissance mensuelle
+          const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+          const monthlyGrowth = frenchMonths.map((month, index) => {
+            const thisYearPatients = patients.filter(p => {
+              const createdAt = new Date(p.createdAt);
+              return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear;
+            }).length;
+            
+            const lastYearPatients = patients.filter(p => {
+              const createdAt = new Date(p.createdAt);
+              return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear - 1;
+            }).length;
+            
+            const growthRate = lastYearPatients > 0 
+              ? Math.round((thisYearPatients - lastYearPatients) / lastYearPatients * 100) 
+              : thisYearPatients > 0 ? 100 : 0;
+            
+            return {
+              month,
+              patients: thisYearPatients,
+              prevPatients: lastYearPatients,
+              growthText: `${growthRate}%`
+            };
+          });
+
+          // Calcul des âges moyens
+          const calculateAverageAge = (patientList: any[]) => {
+            const patientsWithBirthDate = patientList.filter(p => p.birthDate);
+            if (patientsWithBirthDate.length === 0) return 0;
+            
+            const totalAge = patientsWithBirthDate.reduce((sum, patient) => {
+              const birthDate = new Date(patient.birthDate);
+              const age = currentYear - birthDate.getFullYear();
+              return sum + age;
+            }, 0);
+            
+            return Math.round(totalAge / patientsWithBirthDate.length);
           };
-        });
-
-        // Calcul des âges moyens
-        const calculateAverageAge = (patientList: any[]) => {
-          const patientsWithBirthDate = patientList.filter(p => p.birthDate);
-          if (patientsWithBirthDate.length === 0) return 0;
           
-          const totalAge = patientsWithBirthDate.reduce((sum, patient) => {
-            const birthDate = new Date(patient.birthDate);
-            const age = currentYear - birthDate.getFullYear();
-            return sum + age;
-          }, 0);
-          
-          return Math.round(totalAge / patientsWithBirthDate.length);
-        };
-        
-        const averageAge = calculateAverageAge(patients);
-        const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
-        const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
+          const averageAge = calculateAverageAge(patients);
+          const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
+          const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
 
-        // Mettre à jour les données du tableau de bord
-        setDashboardData({
-          totalPatients,
-          maleCount,
-          femaleCount,
-          averageAge,
-          averageAgeMale,
-          averageAgeFemale,
-          newPatientsThisMonth,
-          newPatientsThisYear,
-          newPatientsLastYear,
-          appointmentsToday,
-          nextAppointment,
-          patientsLastYearEnd,
-          newPatientsLast30Days,
-          thirtyDayGrowthPercentage,
-          annualGrowthPercentage,
-          monthlyGrowth
-        });
+          // Mettre à jour les données du tableau de bord
+          setDashboardData({
+            totalPatients,
+            maleCount,
+            femaleCount,
+            averageAge,
+            averageAgeMale,
+            averageAgeFemale,
+            newPatientsThisMonth,
+            newPatientsThisYear,
+            newPatientsLastYear,
+            appointmentsToday,
+            nextAppointment,
+            patientsLastYearEnd,
+            newPatientsLast30Days,
+            thirtyDayGrowthPercentage,
+            annualGrowthPercentage,
+            monthlyGrowth
+          });
 
-      } catch (error) {
-        console.error("Erreur lors du chargement des données du tableau de bord:", error);
+        } catch (err: any) {
+          console.error("Erreur lors du traitement des données du tableau de bord:", err);
+          setError(`Erreur lors du chargement des données: ${err.message}`);
+          toast.error("Problème lors du chargement des données");
+        }
+      } catch (err: any) {
+        console.error("Erreur lors du chargement des données du tableau de bord:", err);
+        setError(`Erreur d'authentification: ${err.message}`);
         toast.error("Impossible de charger les données du tableau de bord");
       } finally {
         setLoading(false);
@@ -226,8 +233,12 @@ export function Dashboard() {
     };
     
     loadDashboardData();
-  }, []);
+  }, [retryCount]);
 
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    toast.info("Tentative de rechargement des données...");
+  };
   
   return (
     <div className="space-y-8">
@@ -259,6 +270,22 @@ export function Dashboard() {
             </p>
           </div>
         </div>
+      ) : error ? (
+        <Card className="p-8 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <AlertCircle className="h-12 w-12 text-amber-500" />
+            <h3 className="text-xl font-bold">Impossible de charger les données</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
+            <Button 
+              onClick={handleRetry} 
+              className="mt-4"
+              variant="outline"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Réessayer
+            </Button>
+          </div>
+        </Card>
       ) : (
         <>
           <div className="animate-fade-in">

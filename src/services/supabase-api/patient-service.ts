@@ -51,25 +51,45 @@ export const patientService = {
         return [];
       }
       
-      // Récupérer l'osteopathId de l'utilisateur
-      const { data: osteopath, error: osteoError } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id)
+      let osteopathId: number | null = null;
+      
+      // Récupérer l'osteopathId de deux façons: d'abord depuis la table User, puis en secours depuis Osteopath
+      const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('osteopathId')
+        .eq('id', user.id)
         .single();
+      
+      if (userData && userData.osteopathId) {
+        console.log(`Found osteopathId ${userData.osteopathId} from User table`);
+        osteopathId = userData.osteopathId;
+      } else {
+        console.log('OsteopathId not found in User table, trying Osteopath table');
+        // Fallback: essayer de récupérer depuis la table Osteopath
+        const { data: osteopath, error: osteoError } = await supabase
+          .from('Osteopath')
+          .select('id')
+          .eq('userId', user.id)
+          .maybeSingle(); // Use maybeSingle instead of single to avoid error when no rows
         
-      if (osteoError || !osteopath) {
-        console.error('Error fetching osteopath info:', osteoError);
+        if (osteopath) {
+          console.log(`Found osteopathId ${osteopath.id} from Osteopath table`);
+          osteopathId = osteopath.id;
+        }
+      }
+      
+      if (!osteopathId) {
+        console.error('No osteopath info found for this user');
         return [];
       }
       
-      console.log(`Fetching patients for osteopath ID ${osteopath.id}`);
+      console.log(`Fetching patients for osteopath ID ${osteopathId}`);
       
       // Récupérer les patients de l'ostéopathe
       const { data, error } = await supabase
         .from('Patient')
         .select('*')
-        .eq('osteopathId', osteopath.id)
+        .eq('osteopathId', osteopathId)
         .order('lastName', { ascending: true });
 
       if (error) {
@@ -93,15 +113,35 @@ export const patientService = {
         return null;
       }
       
-      // Récupérer l'osteopathId de l'utilisateur
-      const { data: osteopath, error: osteoError } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id)
-        .single();
+      let osteopathId: number | null = null;
+      
+      // Récupérer l'osteopathId de deux façons
+      const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('osteopathId')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      if (userData && userData.osteopathId) {
+        console.log(`Found osteopathId ${userData.osteopathId} from User table`);
+        osteopathId = userData.osteopathId;
+      } else {
+        console.log('OsteopathId not found in User table, trying Osteopath table');
+        // Fallback: essayer de récupérer depuis la table Osteopath
+        const { data: osteopath, error: osteoError } = await supabase
+          .from('Osteopath')
+          .select('id')
+          .eq('userId', user.id)
+          .maybeSingle();
         
-      if (osteoError || !osteopath) {
-        console.error('Error fetching osteopath info:', osteoError);
+        if (osteopath) {
+          console.log(`Found osteopathId ${osteopath.id} from Osteopath table`);
+          osteopathId = osteopath.id;
+        }
+      }
+      
+      if (!osteopathId) {
+        console.error('No osteopath info found for this user');
         return null;
       }
       
@@ -110,12 +150,17 @@ export const patientService = {
         .from('Patient')
         .select('*')
         .eq('id', id)
-        .eq('osteopathId', osteopath.id)
-        .single();
+        .eq('osteopathId', osteopathId)
+        .maybeSingle();
 
       if (error) {
         console.error(`Error fetching patient with id ${id}:`, error);
         throw error;
+      }
+
+      if (!data) {
+        console.log(`No patient found with id ${id} for osteopath ${osteopathId}`);
+        return null;
       }
 
       return adaptPatientFromSupabase(data);
