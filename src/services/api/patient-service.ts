@@ -1,7 +1,7 @@
-
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
+import { toast } from "sonner";
 
 // Tableau vide pour les patients pour supprimer les données fictives
 const patients: Patient[] = [];
@@ -16,26 +16,25 @@ export const patientService = {
         // Ajout de logs sur l'état d'authentification
         const { data: sessionData } = await supabasePatientService.getAuthSession();
         console.log("Session active:", sessionData?.session ? "Oui" : "Non");
-        if (sessionData?.session) {
-          console.log("ID Utilisateur:", sessionData.session.user.id);
-          console.log("Auth Cookie:", document.cookie.includes("sb-") ? "Présent" : "Absent");
-        } else {
+        if (!sessionData?.session) {
           console.warn("Aucune session d'authentification détectée");
+          throw new Error("Vous devez vous connecter pour accéder à vos patients");
         }
         
-        console.log("Tentative de récupération FORCÉE de tous les patients...");
-        const patientsData = await supabasePatientService.getPatients();
-        
-        console.log(`API getPatients: Récupéré ${patientsData.length} patients depuis Supabase`);
-        
-        // Debug: log the first patient if exists
-        if (patientsData && patientsData.length > 0) {
-          console.log("Premier patient trouvé:", patientsData[0]);
-        } else {
-          console.log("Aucun patient trouvé dans Supabase");
+        console.log("Tentative de récupération des patients...");
+        try {
+          const patientsData = await supabasePatientService.getPatients();
+          console.log(`API getPatients: Récupéré ${patientsData.length} patients depuis Supabase`);
+          return patientsData;
+        } catch (error: any) {
+          if (error.message?.includes("profil ostéopathe")) {
+            console.log("Redirection vers la page de configuration du profil ostéopathe");
+            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
+            window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
+            return [];
+          }
+          throw error;
         }
-        
-        return patientsData;
       } catch (error) {
         console.error("Erreur Supabase getPatients:", error);
         throw error; // Important: propagate the error to handle it in the UI
@@ -51,11 +50,22 @@ export const patientService = {
     if (USE_SUPABASE) {
       try {
         console.log(`API getPatientById: Fetching patient with ID ${id}...`);
-        const patient = await supabasePatientService.getPatientById(id);
-        console.log(`API getPatientById: Patient found? ${patient ? 'Yes' : 'No'}`);
-        return patient;
+        try {
+          const patient = await supabasePatientService.getPatientById(id);
+          console.log(`API getPatientById: Patient found? ${patient ? 'Yes' : 'No'}`);
+          return patient;
+        } catch (error: any) {
+          if (error.message?.includes("profil ostéopathe")) {
+            console.log("Redirection vers la page de configuration du profil ostéopathe");
+            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
+            window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
+            return undefined;
+          }
+          throw error;
+        }
       } catch (error) {
         console.error("Erreur Supabase getPatientById:", error);
+        throw error;
       }
     }
     
@@ -67,8 +77,21 @@ export const patientService = {
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        const createdPatient = await supabasePatientService.createPatient(patient);
-        return createdPatient;
+        try {
+          const createdPatient = await supabasePatientService.createPatient(patient);
+          return createdPatient;
+        } catch (error: any) {
+          if (error.message?.includes("profil ostéopathe")) {
+            console.log("Redirection vers la page de configuration du profil ostéopathe");
+            toast.error("Vous devez compléter votre profil avant de créer un patient");
+            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
+            setTimeout(() => {
+              window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
+            }, 1500);
+            throw error;
+          }
+          throw error;
+        }
       } catch (error) {
         console.error("Erreur Supabase createPatient:", error);
         throw error;
@@ -92,8 +115,21 @@ export const patientService = {
     if (USE_SUPABASE) {
       try {
         // Use the supabase patient service for update
-        const updatedPatient = await supabasePatientService.updatePatient(patient);
-        return updatedPatient;
+        try {
+          const updatedPatient = await supabasePatientService.updatePatient(patient);
+          return updatedPatient;
+        } catch (error: any) {
+          if (error.message?.includes("profil ostéopathe")) {
+            console.log("Redirection vers la page de configuration du profil ostéopathe");
+            toast.error("Vous devez compléter votre profil avant de modifier un patient");
+            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
+            setTimeout(() => {
+              window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
+            }, 1500);
+            throw error;
+          }
+          throw error;
+        }
       } catch (error) {
         console.error("Erreur Supabase updatePatient:", error);
         throw error;
@@ -118,15 +154,26 @@ export const patientService = {
     if (USE_SUPABASE) {
       try {
         console.log(`API deletePatient: Deleting patient with ID ${id}...`);
-        const result = await supabasePatientService.deletePatient(id);
-        
-        if (result.error) {
-          console.error("Erreur lors de la suppression:", result.error);
-          throw result.error;
+        try {
+          const result = await supabasePatientService.deletePatient(id);
+          
+          if (result.error) {
+            if (result.error.message?.includes("profil ostéopathe")) {
+              console.log("Redirection vers la page de configuration du profil ostéopathe");
+              toast.error("Vous devez compléter votre profil avant de supprimer un patient");
+              // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
+              setTimeout(() => {
+                window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
+              }, 1500);
+            }
+            throw result.error;
+          }
+          
+          console.log(`API deletePatient: Patient ${id} successfully deleted`);
+          return true;
+        } catch (error) {
+          throw error;
         }
-        
-        console.log(`API deletePatient: Patient ${id} successfully deleted`);
-        return true;
       } catch (error) {
         console.error("Erreur Supabase deletePatient:", error);
         throw error;

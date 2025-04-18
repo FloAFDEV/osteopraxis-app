@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase, supabaseAdmin, getCurrentOsteopathId } from "./utils";
 
@@ -47,21 +48,11 @@ export const patientService = {
   async getPatients(): Promise<Patient[]> {
     try {
       const osteopathId = await getCurrentOsteopathId();
-      // MODIFIÉ: Si osteopathId est null, utiliser le client admin pour récupérer tous les patients
+      
+      // Si osteopathId est null, l'utilisateur n'est pas associé à un ostéopathe
       if (!osteopathId) {
-        console.log("Impossible de récupérer l'ID ostéopathe spécifique, utilisation de l'accès admin");
-        const { data, error } = await supabaseAdmin
-          .from('Patient')
-          .select('*')
-          .order('lastName', { ascending: true });
-        
-        if (error) {
-          console.error('Erreur lors de la récupération des patients:', error);
-          return [];
-        }
-        
-        console.log(`${data?.length || 0} patients trouvés avec l'accès admin`);
-        return data?.map(adaptPatientFromSupabase) || [];
+        console.log("Utilisateur non associé à un ostéopathe, impossible de récupérer les patients");
+        throw new Error("Vous devez compléter votre profil ostéopathe avant d'accéder aux patients");
       }
 
       console.log(`Récupération des patients pour l'ostéopathe ${osteopathId}`);
@@ -73,14 +64,14 @@ export const patientService = {
 
       if (error) {
         console.error('Erreur lors de la récupération des patients:', error);
-        return [];
+        throw error;
       }
 
       console.log(`${data?.length || 0} patients trouvés`);
       return data?.map(adaptPatientFromSupabase) || [];
     } catch (err) {
       console.error("Erreur critique dans getPatients:", err);
-      return [];
+      throw err; // Propager l'erreur pour la gérer dans l'UI
     }
   },
 
@@ -90,42 +81,26 @@ export const patientService = {
       
       // Récupérer l'ID ostéopathe associé à l'utilisateur authentifié
       const osteopathId = await getCurrentOsteopathId();
-      
-      // Essayons d'abord avec le client standard
-      let result = await supabase
-        .from('Patient')
-        .select('*')
-        .eq('id', id);
-      
-      // Si erreur ou pas de données, essayons avec le client admin
-      if (result.error || !result.data || result.data.length === 0) {
-        console.log(`Tentative avec client admin pour le patient ${id}...`);
-        result = await supabaseAdmin
-          .from('Patient')
-          .select('*')
-          .eq('id', id);
+      if (!osteopathId) {
+        console.error("Utilisateur non associé à un ostéopathe");
+        throw new Error("Vous devez compléter votre profil ostéopathe avant d'accéder aux patients");
       }
       
-      const { data, error } = result;
+      // Récupération du patient avec vérification du propriétaire
+      const { data, error } = await supabase
+        .from('Patient')
+        .select('*')
+        .eq('id', id)
+        .eq('osteopathId', osteopathId)
+        .single();
 
       if (error) {
         console.error(`Error fetching patient with id ${id}:`, error);
         throw error;
       }
 
-      if (!data || data.length === 0) {
-        console.error(`Aucun patient trouvé avec l'ID ${id}`);
-        return null;
-      }
-
-      // Vérifier que le patient appartient bien à l'ostéopathe connecté
-      if (osteopathId && data[0].osteopathId !== osteopathId) {
-        console.error(`Le patient ${id} n'appartient pas à l'ostéopathe ${osteopathId}`);
-        return null;
-      }
-
-      console.log(`Patient ID ${id} trouvé:`, data[0]);
-      return adaptPatientFromSupabase(data[0]);
+      console.log(`Patient ID ${id} trouvé:`, data);
+      return adaptPatientFromSupabase(data);
     } catch (err) {
       console.error(`Erreur lors de la récupération du patient ID ${id}:`, err);
       throw err;
@@ -133,15 +108,15 @@ export const patientService = {
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    // Add current timestamps
-    const now = new Date().toISOString();
-    
-    // Get current osteopathId or create a new one if needed
+    // Récupérer l'ID ostéopathe actuel
     const osteopathId = await getCurrentOsteopathId();
     if (!osteopathId) {
-      console.error("Impossible de créer un patient sans ID ostéopathe");
-      throw new Error("ID ostéopathe manquant");
+      console.error("Utilisateur non associé à un ostéopathe");
+      throw new Error("Vous devez compléter votre profil ostéopathe avant de créer des patients");
     }
+    
+    // Add current timestamps
+    const now = new Date().toISOString();
     
     // Ensure contraception value is in the format expected by Supabase
     let contraceptionValue = patient.contraception;
@@ -189,35 +164,53 @@ export const patientService = {
       cabinetId: patient.cabinetId,
       userId: patient.userId || null,
       osteopathId: osteopathId, // Utiliser l'ID ostéopathe récupéré
-      updatedAt: now, // Add the updatedAt field
-      createdAt: now  // Add the createdAt field
+      updatedAt: now,
+      createdAt: now
     };
 
-    // Tenter avec client admin pour contourner les RLS
-    const { data, error } = await supabaseAdmin
-      .from('Patient')
-      .insert(patientData)
-      .select()
-      .single();
+    try {
+      // Utiliser le client standard d'abord (pour respecter les RLS)
+      const { data, error } = await supabase
+        .from('Patient')
+        .insert(patientData)
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error creating patient:', error);
-      throw error;
+      if (error) {
+        console.error('Erreur lors de la création du patient avec le client standard:', error);
+        throw error;
+      }
+
+      return adaptPatientFromSupabase(data);
+    } catch (standardError) {
+      console.error('Erreur standard, tentative avec le client admin:', standardError);
+      
+      // Tentative avec le client admin en cas d'échec
+      const { data, error } = await supabaseAdmin
+        .from('Patient')
+        .insert(patientData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de la création du patient avec le client admin:', error);
+        throw error;
+      }
+
+      return adaptPatientFromSupabase(data);
     }
-
-    return adaptPatientFromSupabase(data);
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
-    // Use explicit ID for the update operation
-    const id = patient.id;
-    
-    // Get current osteopathId and verify ownership
+    // Vérifier que l'utilisateur est associé à un ostéopathe
     const osteopathId = await getCurrentOsteopathId();
     if (!osteopathId) {
-      console.error("Impossible de mettre à jour un patient sans ID ostéopathe");
-      throw new Error("ID ostéopathe manquant");
+      console.error("Utilisateur non associé à un ostéopathe");
+      throw new Error("Vous devez compléter votre profil ostéopathe avant de modifier des patients");
     }
+    
+    // Use explicit ID for the update operation
+    const id = patient.id;
     
     // Vérifier que le patient appartient à cet ostéopathe
     if (patient.osteopathId !== osteopathId) {
@@ -277,21 +270,40 @@ export const patientService = {
       updatedAt: now
     };
 
-    // Using admin client to bypass RLS
-    console.log("Updating patient with id:", id);
-    const { data, error } = await supabaseAdmin
-      .from('Patient')
-      .update(patientData)
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      // First attempt with standard client to respect RLS
+      console.log("Updating patient with id:", id);
+      const { data, error } = await supabase
+        .from('Patient')
+        .update(patientData)
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error updating patient:', error);
-      throw error;
+      if (error) {
+        console.error('Erreur lors de la mise à jour du patient avec client standard:', error);
+        throw error;
+      }
+
+      return adaptPatientFromSupabase(data);
+    } catch (standardError) {
+      console.error('Tentative de mise à jour avec client admin:', standardError);
+      
+      // Using admin client as fallback
+      const { data, error } = await supabaseAdmin
+        .from('Patient')
+        .update(patientData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de la mise à jour du patient avec client admin:', error);
+        throw error;
+      }
+
+      return adaptPatientFromSupabase(data);
     }
-
-    return adaptPatientFromSupabase(data);
   },
   
   async deletePatient(id: number): Promise<{ error: any | null }> {
@@ -301,36 +313,64 @@ export const patientService = {
       // Get current osteopathId and verify ownership
       const osteopathId = await getCurrentOsteopathId();
       if (!osteopathId) {
-        console.error("Impossible de supprimer un patient sans ID ostéopathe");
-        return { error: new Error("ID ostéopathe manquant") };
+        console.error("Utilisateur non associé à un ostéopathe");
+        return { error: new Error("Vous devez compléter votre profil ostéopathe avant de supprimer des patients") };
       }
       
       // Vérifier que le patient appartient à cet ostéopathe
-      const { data: patient } = await supabaseAdmin
-        .from('Patient')
-        .select('osteopathId')
-        .eq('id', id)
-        .single();
-      
-      if (!patient) {
-        console.error(`Patient ${id} non trouvé`);
-        return { error: new Error("Patient non trouvé") };
-      }
-      
-      if (patient.osteopathId !== osteopathId) {
-        console.error(`Tentative de suppression du patient ${id} qui appartient à l'ostéopathe ${patient.osteopathId} par l'ostéopathe ${osteopathId}`);
-        return { error: new Error("Vous n'êtes pas autorisé à supprimer ce patient") };
-      }
-      
-      // Using admin client to bypass RLS
-      const { error } = await supabaseAdmin
-        .from('Patient')
-        .delete()
-        .eq('id', id);
+      try {
+        // First attempt with standard client
+        const { data: patient, error: checkError } = await supabase
+          .from('Patient')
+          .select('osteopathId')
+          .eq('id', id)
+          .eq('osteopathId', osteopathId)
+          .single();
         
-      if (error) {
-        console.error('Error deleting patient:', error);
-        return { error };
+        if (checkError || !patient) {
+          console.error(`Patient ${id} non trouvé ou non accessible:`, checkError);
+          return { error: new Error("Patient non trouvé ou vous n'avez pas les droits pour le supprimer") };
+        }
+        
+        // Delete with standard client
+        const { error: deleteError } = await supabase
+          .from('Patient')
+          .delete()
+          .eq('id', id);
+          
+        if (deleteError) {
+          throw deleteError;
+        }
+        
+      } catch (standardError) {
+        console.error('Erreur standard, tentative avec client admin:', standardError);
+        
+        // Fallback to admin client
+        const { data: adminPatient, error: adminCheckError } = await supabaseAdmin
+          .from('Patient')
+          .select('osteopathId')
+          .eq('id', id)
+          .single();
+        
+        if (adminCheckError || !adminPatient) {
+          console.error(`Patient ${id} non trouvé:`, adminCheckError);
+          return { error: new Error("Patient non trouvé") };
+        }
+        
+        if (adminPatient.osteopathId !== osteopathId) {
+          console.error(`Tentative de suppression du patient ${id} qui appartient à l'ostéopathe ${adminPatient.osteopathId} par l'ostéopathe ${osteopathId}`);
+          return { error: new Error("Vous n'êtes pas autorisé à supprimer ce patient") };
+        }
+        
+        const { error: adminDeleteError } = await supabaseAdmin
+          .from('Patient')
+          .delete()
+          .eq('id', id);
+          
+        if (adminDeleteError) {
+          console.error('Erreur lors de la suppression avec client admin:', adminDeleteError);
+          return { error: adminDeleteError };
+        }
       }
       
       console.log(`Successfully deleted patient ${id} from Supabase`);

@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useCallback } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/ui/layout";
@@ -24,6 +23,7 @@ const OsteopathProfilePage = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Générer un nom par défaut si first_name et last_name sont manquants
   const getDefaultName = useCallback(() => {
@@ -118,6 +118,18 @@ const OsteopathProfilePage = () => {
     checkAuthentication();
   }, [loadStoredToken]);
 
+  // Extraction des paramètres de redirection depuis l'URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const returnTo = searchParams.get('returnTo');
+    
+    if (returnTo) {
+      console.log("ReturnTo URL détectée:", returnTo);
+      // Stocker l'URL de retour pour l'utiliser après la création/mise à jour du profil
+      sessionStorage.setItem('redirectAfterProfile', returnTo);
+    }
+  }, [location]);
+
   // Chargement des données quand l'authentification est vérifiée
   useEffect(() => {
     if (authChecked && user && !hasAttemptedLoad) {
@@ -185,6 +197,25 @@ const OsteopathProfilePage = () => {
     } catch (error) {
       console.error("Erreur lors de la vérification des cabinets après création de l'ostéopathe:", error);
     }
+
+    // Vérifier s'il y a une URL de redirection stockée
+    const redirectUrl = sessionStorage.getItem('redirectAfterProfile');
+    if (redirectUrl) {
+      console.log("Redirection vers URL stockée:", redirectUrl);
+      sessionStorage.removeItem('redirectAfterProfile');
+      navigate(redirectUrl);
+      return;
+    }
+    
+    // Si des cabinets existent, rediriger vers le tableau de bord
+    if (existingCabinets && existingCabinets.length > 0) {
+      toast.success("Configuration terminée, redirection vers le tableau de bord");
+      navigate("/dashboard");
+      return;
+    }
+    
+    // Sinon, afficher le formulaire de cabinet
+    setShowCabinetForm(true);
   };
   
   const handleCabinetSuccess = () => {

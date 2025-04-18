@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
 import { createClient } from '@supabase/supabase-js';
 import { SIMULATE_AUTH } from "../api/config";
@@ -45,34 +44,9 @@ export async function getCurrentOsteopathId(): Promise<number | null> {
     
     if (!osteopath) {
       console.log("Aucun ostéopathe trouvé pour cet utilisateur");
-      
-      // NOUVEAU: Créer un ostéopathe temporaire pour cet utilisateur
-      try {
-        console.log("Création d'un ostéopathe par défaut pour l'utilisateur", userId);
-        const { data: newOsteopath, error: insertError } = await supabaseAdmin
-          .from('Osteopath')
-          .insert({
-            userId: userId,
-            name: "Ostéopathe temporaire",
-            professional_title: "Ostéopathe D.O.",
-            ape_code: "8690F",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          })
-          .select('id')
-          .single();
-          
-        if (insertError) {
-          console.error("Erreur lors de la création de l'ostéopathe:", insertError);
-          return 1; // ID par défaut comme fallback
-        }
-        
-        console.log("Ostéopathe créé avec succès, ID:", newOsteopath.id);
-        return newOsteopath.id;
-      } catch (createError) {
-        console.error("Exception lors de la création de l'ostéopathe:", createError);
-        return 1; // ID par défaut comme fallback
-      }
+      // Ne pas créer d'ostéopathe par défaut, retourner null
+      // L'application devra rediriger l'utilisateur vers une page de configuration
+      return null;
     }
     
     console.log("Ostéopathe trouvé avec l'ID:", osteopath.id);
@@ -80,7 +54,7 @@ export async function getCurrentOsteopathId(): Promise<number | null> {
     
   } catch (err) {
     console.error("Erreur lors de la récupération de l'ID ostéopathe:", err);
-    return 1; // ID par défaut comme fallback
+    return null;
   }
 }
 
