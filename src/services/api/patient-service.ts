@@ -1,4 +1,3 @@
-
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
@@ -12,7 +11,8 @@ export const patientService = {
       try {
         return await supabasePatientService.getPatients();
       } catch (error) {
-        console.error("Erreur Supabase getPatients:", error);
+        console.error("Error fetching patients:", error);
+        throw error;
       }
     }
     

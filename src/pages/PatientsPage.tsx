@@ -32,14 +32,19 @@ const PatientsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const patientsPerPage = 25;
 
-  // Use useQuery for better state and cache management
+  // Updated useQuery implementation with better error handling
   const { data: patients, isLoading, error, refetch } = useQuery({
     queryKey: ['patients'],
     queryFn: async () => {
       try {
-        return await api.getPatients();
+        const data = await api.getPatients();
+        if (!data || data.length === 0) {
+          console.log("No patients found");
+        }
+        return data;
       } catch (err) {
         console.error("Error fetching patients:", err);
+        toast.error("Impossible de charger les patients. Veuillez réessayer.");
         throw err;
       }
     },
