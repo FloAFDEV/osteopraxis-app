@@ -170,6 +170,7 @@ export interface AuthState {
   user?: User;
   loading: boolean;
   error?: string;
+  token?: string;
 }
 
 export interface DashboardData {

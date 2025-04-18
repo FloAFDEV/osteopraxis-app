@@ -128,7 +128,7 @@ export const supabaseAppointmentService = {
       throw error;
     }
   },
-
+  
   async getAppointmentById(id: number): Promise<Appointment | null> {
     try {
       const { data, error } = await supabase
@@ -201,10 +201,11 @@ export const supabaseAppointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
       // Convert the appointment status for Supabase if it exists
-      const supabaseAppointment = {
-        ...appointment,
-        status: appointment.status ? convertAppStatusToDbStatus(appointment.status) : undefined
-      };
+      const supabaseAppointment: any = { ...appointment };
+      
+      if (appointment.status) {
+        supabaseAppointment.status = convertAppStatusToDbStatus(appointment.status);
+      }
 
       const { data, error } = await supabase
         .from('Appointment')

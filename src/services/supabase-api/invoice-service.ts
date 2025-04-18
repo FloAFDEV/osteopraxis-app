@@ -1,156 +1,145 @@
-
+import { supabase } from "./utils";
 import { Invoice, PaymentStatus } from "@/types";
-import { supabase, typedData } from "./utils";
+
+// Helper function to adapt Invoice data from Supabase
+const adaptInvoiceFromSupabase = (data: any): Invoice => ({
+  id: data.id,
+  patientId: data.patientId,
+  consultationId: data.consultationId,
+  amount: data.amount,
+  date: data.date,
+  paymentStatus: data.paymentStatus,
+  tvaExoneration: data.tvaExoneration,
+  tvaMotif: data.tvaMotif
+});
 
 export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     try {
-      // Correction: suppression de l'embed "*, Patient(firstName, lastName)" qui cause l'erreur
-      // quand plusieurs relations existent entre Invoice et Patient
       const { data, error } = await supabase
-        .from("Invoice")
-        .select("*")
-        .order('date', { ascending: false });
-      
-      if (error) throw new Error(error.message);
-      
-      // Transform data with explicit typing
-      return (data || []).map(item => {
-        return {
-          id: item.id,
-          patientId: item.patientId,
-          consultationId: item.consultationId,
-          date: item.date,
-          amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus
-        } as Invoice;
-      });
+        .from('Invoice')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching invoices:', error);
+        throw error;
+      }
+
+      return (data || []).map(adaptInvoiceFromSupabase);
     } catch (error) {
-      console.error("Erreur getInvoices:", error);
+      console.error('Error in getInvoices:', error);
       throw error;
     }
   },
 
-  async getInvoiceById(id: number): Promise<Invoice | undefined> {
+  async getInvoiceById(id: number): Promise<Invoice | null> {
     try {
-      const query = supabase
-        .from("Invoice")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
-      
-      const { data, error } = await query;
-      
+      const { data, error } = await supabase
+        .from('Invoice')
+        .select('*')
+        .eq('id', id)
+        .single();
+
       if (error) {
-        if (error.code === "PGRST116") {
-          return undefined;
-        }
-        throw new Error(error.message);
+        console.error('Error fetching invoice by id:', error);
+        throw error;
       }
-      
-      if (!data) return undefined;
-      
-      // Return the properly typed invoice
-      return {
-        id: data.id,
-        patientId: data.patientId,
-        consultationId: data.consultationId,
-        date: data.date,
-        amount: data.amount,
-        paymentStatus: data.paymentStatus as PaymentStatus
-      } as Invoice;
+
+      return adaptInvoiceFromSupabase(data);
     } catch (error) {
-      console.error("Erreur getInvoiceById:", error);
+      console.error('Error in getInvoiceById:', error);
       throw error;
     }
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
     try {
-      const query = supabase
-        .from("Invoice")
-        .select("*")
-        .eq("patientId", patientId)
-        .order('date', { ascending: false });
-      
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
-      
-      // Transform data with explicit typing
-      return (data || []).map(item => {
-        return {
-          id: item.id,
-          patientId: item.patientId,
-          consultationId: item.consultationId,
-          date: item.date,
-          amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus
-        } as Invoice;
-      });
+      const { data, error } = await supabase
+        .from('Invoice')
+        .select('*')
+        .eq('patientId', patientId);
+
+      if (error) {
+        console.error('Error fetching invoices by patientId:', error);
+        throw error;
+      }
+
+      return (data || []).map(adaptInvoiceFromSupabase);
     } catch (error) {
-      console.error("Erreur getInvoicesByPatientId:", error);
+      console.error('Error in getInvoicesByPatientId:', error);
       throw error;
     }
   },
 
-  async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
+  async createInvoice(invoice: Omit<Invoice, 'id'>): Promise<Invoice> {
     try {
-      console.log("Création d'une facture avec les données:", invoiceData);
-      const query = supabase
-        .from("Invoice")
+      const invoiceData = {
+        patientId: invoice.patientId,
+        consultationId: invoice.consultationId,
+        amount: invoice.amount,
+        date: invoice.date,
+        paymentStatus: invoice.paymentStatus,
+        tvaExoneration: invoice.tvaExoneration,
+        tvaMotif: invoice.tvaMotif
+      };
+      
+      const { data, error } = await supabase
+        .from('Invoice')
         .insert(invoiceData)
         .select()
         .single();
       
-      const { data, error } = await query;
+      if (error) {
+        console.error('Error creating invoice:', error);
+        throw error;
+      }
       
-      if (error) throw new Error(error.message);
-      
-      return data as Invoice;
+      return adaptInvoiceFromSupabase(data);
     } catch (error) {
-      console.error("Erreur createInvoice:", error);
+      console.error('Error in createInvoice:', error);
       throw error;
     }
   },
 
-  async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
+  async updateInvoice(id: number, invoice: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
-      const query = supabase
-        .from("Invoice")
-        .update(invoiceData)
-        .eq("id", id)
+      const { data, error } = await supabase
+        .from('Invoice')
+        .update(invoice)
+        .eq('id', id)
         .select()
         .single();
-      
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
-      
-      return data as Invoice;
+
+      if (error) {
+        console.error('Error updating invoice:', error);
+        throw error;
+      }
+
+      return data ? adaptInvoiceFromSupabase(data) : undefined;
     } catch (error) {
-      console.error("Erreur updateInvoice:", error);
+      console.error('Error in updateInvoice:', error);
       throw error;
     }
   },
-  
-  async updatePaymentStatus(id: number, paymentStatus: PaymentStatus): Promise<Invoice | undefined> {
-    return this.updateInvoice(id, { paymentStatus });
-  },
-  
+
   async deleteInvoice(id: number): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from("Invoice")
+        .from('Invoice')
         .delete()
-        .eq("id", id);
-      
-      if (error) throw new Error(error.message);
-      
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting invoice:', error);
+        throw error;
+      }
+
       return true;
     } catch (error) {
-      console.error("Erreur deleteInvoice:", error);
+      console.error('Error in deleteInvoice:', error);
       throw error;
     }
   }
 };
+
+export default supabaseInvoiceService;
