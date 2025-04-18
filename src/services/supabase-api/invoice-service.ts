@@ -122,6 +122,27 @@ export const supabaseInvoiceService = {
     }
   },
 
+  async updatePaymentStatus(id: number, paymentStatus: PaymentStatus): Promise<Invoice | undefined> {
+    try {
+      const { data, error } = await supabase
+        .from('Invoice')
+        .update({ paymentStatus })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating payment status:', error);
+        throw error;
+      }
+
+      return data ? adaptInvoiceFromSupabase(data) : undefined;
+    } catch (error) {
+      console.error('Error in updatePaymentStatus:', error);
+      throw error;
+    }
+  },
+
   async deleteInvoice(id: number): Promise<boolean> {
     try {
       const { error } = await supabase

@@ -140,6 +140,7 @@ const InvoiceDetailPage = () => {
     if (patient) {
       return `${patient.firstName} ${patient.lastName}`;
     }
+    // Use optional chaining to safely access the Patient property
     if (invoice?.Patient) {
       return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
     }

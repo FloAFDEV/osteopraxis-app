@@ -63,6 +63,7 @@ export const supabaseAuthService = {
         },
         isAuthenticated: false,
         token: null,
+        loading: false, // Add the loading property
         message: "Veuillez confirmer votre email avant de vous connecter. Un lien de confirmation a été envoyé à votre adresse email."
       };
     }
@@ -80,7 +81,8 @@ export const supabaseAuthService = {
         osteopathId: null
       },
       isAuthenticated: true,
-      token: data.session?.access_token || null
+      token: data.session?.access_token || null,
+      loading: false // Add the loading property
     };
   },
   
@@ -177,7 +179,8 @@ export const supabaseAuthService = {
         return {
           user: null,
           isAuthenticated: false,
-          token: null
+          token: null,
+          loading: false // Add the loading property
         };
       }
       
@@ -217,14 +220,16 @@ export const supabaseAuthService = {
       return {
         user,
         isAuthenticated: true,
-        token: data.session.access_token
+        token: data.session.access_token,
+        loading: false // Add the loading property
       };
     } catch (error) {
       console.error("Erreur lors de la vérification de l'authentification:", error);
       return {
         user: null,
         isAuthenticated: false,
-        token: null
+        token: null,
+        loading: false // Add the loading property
       };
     }
   },

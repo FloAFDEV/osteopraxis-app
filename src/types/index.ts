@@ -1,4 +1,3 @@
-
 export type AppointmentStatus = 
   | 'SCHEDULED'
   | 'COMPLETED'
@@ -127,6 +126,7 @@ export interface Invoice {
   paymentStatus: PaymentStatus;
   tvaExoneration?: boolean;
   tvaMotif?: string;
+  Patient?: Patient; // Add optional Patient relation for joined queries
 }
 
 export interface Consultation {
@@ -171,6 +171,7 @@ export interface AuthState {
   loading: boolean;
   error?: string;
   token?: string;
+  message?: string; // Add optional message property
 }
 
 export interface DashboardData {
