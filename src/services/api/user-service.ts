@@ -3,12 +3,12 @@ import { User, Role } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export const userService = {
-  async updateUserRole(userId: string, role: Role): Promise<User> {
+  async updateUserRole(userId: string, role: Role | "OSTEOPATH"): Promise<User> {
     try {
       // Cast Role to string to avoid type errors
       const { data, error } = await supabase
         .from('User')
-        .update({ role: role as string })
+        .update({ role: role })
         .eq('id', userId)
         .select()
         .single();

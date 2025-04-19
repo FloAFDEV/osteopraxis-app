@@ -1,3 +1,4 @@
+
 import { Patient } from "@/types";
 import { supabase } from "./utils";
 
@@ -96,7 +97,7 @@ export const supabasePatientService = {
     
       const now = new Date().toISOString();
     
-      // Remove osteopathId from the insert
+      // Create patient with professionalProfileId
       const { data, error } = await supabase
         .from('Patient')
         .insert({

@@ -1,30 +1,44 @@
 
-/**
- * Date formatting utilities for the application
- */
+import { format, parse } from "date-fns";
 
 /**
- * Format a date object to YYYY-MM-DD string format for input elements
- * @param date Date object to format
- * @returns Formatted date string in YYYY-MM-DD format
+ * Format a date object into a string suitable for date input fields (YYYY-MM-DD)
  */
-export function formatDateForInput(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+export const formatDateForInput = (date: Date): string => {
+  return format(date, "yyyy-MM-dd");
+};
 
 /**
- * Format a time string for input elements
- * @param time Time string to format
- * @returns Formatted time string in HH:MM format
+ * Parse a date string from an input field (YYYY-MM-DD) into a Date object
  */
-export function formatTimeForInput(time: string): string {
-  if (!time) return '';
-  // If time already has the correct format, return it
-  if (/^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
-    return time.substring(0, 5); // Return only HH:MM part
-  }
-  return time;
-}
+export const parseDateFromInput = (dateString: string): Date => {
+  return parse(dateString, "yyyy-MM-dd", new Date());
+};
+
+/**
+ * Format a date object into a localized string (DD/MM/YYYY)
+ */
+export const formatDateLocalized = (date: Date): string => {
+  return format(date, "dd/MM/yyyy");
+};
+
+/**
+ * Format a date object into a full localized string with day name (lundi 01 janvier 2024)
+ */
+export const formatDateFullLocalized = (date: Date): string => {
+  return format(date, "PPPP");
+};
+
+/**
+ * Format a date and time for display (DD/MM/YYYY HH:mm)
+ */
+export const formatDateTimeLocalized = (date: Date): string => {
+  return format(date, "dd/MM/yyyy HH:mm");
+};
+
+/**
+ * Get only the time part from a date (HH:mm)
+ */
+export const formatTime = (date: Date): string => {
+  return format(date, "HH:mm");
+};

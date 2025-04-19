@@ -1,10 +1,11 @@
+
 import { AuthState, Role, User } from "@/types";
 import { supabaseAuthService } from "../supabase-api/auth-service";
 import { supabase } from "@/integrations/supabase/client";
 
 export const authService = {
   // Fonction pour obtenir la session actuelle
-  async getSession(): Promise<any> {
+  async getSession(): Promise<AuthState> {
     if (process.env.NODE_ENV !== "production") {
       console.log("Récupération de la session stockée...");
     }
@@ -34,7 +35,7 @@ export const authService = {
           isAuthenticated: false,
           isLoading: false,
           token: null
-        } as AuthState;
+        };
       }
       
       // Si une session existe, récupérer les données complètes de l'utilisateur
@@ -62,7 +63,7 @@ export const authService = {
             isAuthenticated: true,
             isLoading: false,
             token: data.session.access_token
-          } as AuthState;
+          };
         }
         
         return {
@@ -70,7 +71,7 @@ export const authService = {
           isAuthenticated: true,
           isLoading: false,
           token: data.session.access_token
-        } as AuthState;
+        };
       }
       
       return {
@@ -78,7 +79,7 @@ export const authService = {
         isAuthenticated: false,
         isLoading: false,
         token: null
-      } as AuthState;
+      };
       
     } catch (error) {
       console.error("Erreur lors de la vérification de l'authentification:", error);
@@ -87,7 +88,7 @@ export const authService = {
         isAuthenticated: false,
         isLoading: false,
         token: null
-      } as AuthState;
+      };
     }
   },
   
@@ -181,7 +182,7 @@ export const authService = {
         isAuthenticated: false,
         isLoading: false,
         token: null
-      } as AuthState;
+      };
       
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
@@ -211,6 +212,7 @@ export const authService = {
       
       // Si l'inscription réussit et renvoie une session
       if (data.session) {
+        const now = new Date().toISOString();
         // Créer l'entrée dans la table User
         const { error: userError } = await supabase
           .from('User')
@@ -220,8 +222,8 @@ export const authService = {
             first_name: userData.firstName,
             last_name: userData.lastName,
             role: "USER" as Role,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            created_at: now,
+            updated_at: now
           });
         
         if (userError) {
@@ -280,7 +282,7 @@ export const authService = {
         isAuthenticated: false,
         isLoading: false,
         token: null
-      } as AuthState;
+      };
       
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error);

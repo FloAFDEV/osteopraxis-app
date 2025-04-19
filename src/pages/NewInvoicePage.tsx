@@ -1,16 +1,16 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, FileInvoice, User } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "@radix-ui/react-icons"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
 const NewInvoicePage = () => {
@@ -82,7 +82,7 @@ const NewInvoicePage = () => {
           </Button>
 
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FileInvoice className="h-8 w-8 text-primary" />
+            <CalendarIcon className="h-8 w-8 text-primary" />
             Nouvelle Facture
           </h1>
           <p className="text-muted-foreground mt-1">

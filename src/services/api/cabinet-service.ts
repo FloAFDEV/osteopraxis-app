@@ -1,3 +1,4 @@
+
 import { Cabinet } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -36,23 +37,42 @@ export const cabinetService = {
     }
   },
   
+  async getCabinetsByProfessionalProfileId(professionalProfileId: number): Promise<Cabinet[]> {
+    try {
+      const { data, error } = await supabase
+        .from('Cabinet')
+        .select('*')
+        .eq('professionalProfileId', professionalProfileId);
+        
+      if (error) throw new Error(error.message);
+      return data as Cabinet[];
+    } catch (error) {
+      console.error("Error fetching cabinets by professional profile ID:", error);
+      return [];
+    }
+  },
+  
   async createCabinet(cabinetData: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     try {
       const now = new Date().toISOString();
+      
+      // Make sure to include osteopathId if professionalProfileId is provided
+      const dataToInsert = {
+        name: cabinetData.name,
+        address: cabinetData.address,
+        phone: cabinetData.phone,
+        email: cabinetData.email,
+        logoUrl: cabinetData.logoUrl,
+        imageUrl: cabinetData.imageUrl,
+        professionalProfileId: cabinetData.professionalProfileId,
+        osteopathId: cabinetData.professionalProfileId, // use professionalProfileId as osteopathId
+        createdAt: now,
+        updatedAt: now,
+      };
+      
       const { data, error } = await supabase
         .from('Cabinet')
-        .insert({
-          name: cabinetData.name,
-          address: cabinetData.address,
-          phone: cabinetData.phone,
-          email: cabinetData.email,
-          logoUrl: cabinetData.logoUrl,
-          imageUrl: cabinetData.imageUrl,
-          professionalProfileId: cabinetData.professionalProfileId,
-          osteopathId: cabinetData.professionalProfileId, // use professionalProfileId as osteopathId
-          createdAt: now,
-          updatedAt: now,
-        })
+        .insert(dataToInsert)
         .select()
         .single();
     

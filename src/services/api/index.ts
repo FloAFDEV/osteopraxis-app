@@ -6,6 +6,7 @@ import { invoiceService } from './invoice-service';
 import { cabinetService } from './cabinet-service';
 import { userService } from './user-service';
 import { professionalProfileService } from './professional-profile-service';
+import { consultationService } from './consultation-service';
 
 // Rename osteopathService to professionalProfileService for backward compatibility
 export const api = {
@@ -16,8 +17,9 @@ export const api = {
   ...cabinetService,
   ...userService,
   ...professionalProfileService,
+  ...consultationService,
   
-  // Add promoteToAdmin method
+  // Add convenience methods
   async promoteToAdmin(userId: string): Promise<void> {
     try {
       await userService.updateUserRole(userId, 'ADMIN');
@@ -25,5 +27,10 @@ export const api = {
       console.error("Error promoting user to admin:", error);
       throw error;
     }
+  },
+
+  // Add a wrapper for getCabinetsByProfessionalProfileId
+  async getCabinetsByProfessionalProfileId(professionalProfileId: number): Promise<any[]> {
+    return cabinetService.getCabinetsByProfessionalProfileId(professionalProfileId);
   }
 };
