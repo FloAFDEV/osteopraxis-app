@@ -171,14 +171,14 @@ export function Layout({
             </NavLink>
 
             <div className="p-2 flex items-center justify-between">
-              <span>Thème</span>
+              <span className="font-light">Thème</span>
               <ThemeToggle />
             </div>
 
-            <div className="p-2 rounded-md transition-colors flex items-center gap-2 text-destructive mt-4 cursor-pointer" onClick={() => {
+            <div onClick={() => {
           handleLogout();
           setIsMenuOpen(false);
-        }}>
+        }} className="p-2 rounded-md transition-colors flex items-center gap-2 text-destructive mt-4 cursor-pointer font-thin">
               <LogOut className="h-5 w-5" />
               Déconnexion
             </div>
