@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { api } from "@/services/api";
 import { Cabinet, CabinetFormProps } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -37,6 +38,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function CabinetForm({ defaultValues, cabinetId, professionalProfileId, isEditing = false, onSuccess }: CabinetFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -56,12 +58,13 @@ export function CabinetForm({ defaultValues, cabinetId, professionalProfileId, i
       
       const cabinetData = {
         professionalProfileId,
+        osteopathId: 1, // Par défaut, utilisons l'ID 1 pour la compatibilité
         name: data.name,
         address: data.address,
-        phone: data.phone,
-        email: data.email,
-        logoUrl: data.logoUrl,
-        imageUrl: data.imageUrl
+        phone: data.phone || "",
+        email: data.email || "",
+        logoUrl: data.logoUrl || "",
+        imageUrl: data.imageUrl || ""
       };
       
       let result;
@@ -86,6 +89,7 @@ export function CabinetForm({ defaultValues, cabinetId, professionalProfileId, i
     }
   };
 
+  // ... reste du composant inchangé
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">

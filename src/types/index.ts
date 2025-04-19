@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -19,12 +20,31 @@ export interface Patient {
   phone: string;
   address: string;
   birthDate: string;
-  gender: "Male" | "Female" | "Other";
+  gender: Gender;
   medicalHistory: string;
   professionalProfileId: number;
   createdAt: string;
   updatedAt: string;
+  // Propriétés supplémentaires pour corriger les erreurs
+  avatarUrl?: string;
+  hasChildren?: string;
+  childrenAges?: string[];
+  occupation?: string;
+  physicalActivity?: string;
+  generalPractitioner?: string;
+  ophtalmologistName?: string;
+  entDoctorName?: string;
+  entProblems?: string;
+  digestiveDoctorName?: string;
+  digestiveProblems?: string;
+  surgicalHistory?: string;
+  traumaHistory?: string;
+  rheumatologicalHistory?: string;
+  currentTreatment?: string;
+  isDeceased?: boolean;
 }
+
+export type Gender = "MALE" | "FEMALE" | "OTHER";
 
 export interface Appointment {
   id: number;
@@ -37,6 +57,9 @@ export interface Appointment {
   professionalProfileId: number;
   createdAt: string;
   updatedAt: string;
+  reason?: string; // Ajouté pour compatibilité avec le code existant
+  startTime?: string; // Ajouté pour compatibilité avec SchedulePage
+  endTime?: string; // Ajouté pour cohérence avec startTime
 }
 
 export interface Cabinet {
@@ -60,6 +83,9 @@ export interface Invoice {
   date: string;
   amount: number;
   paymentStatus: PaymentStatus;
+  // Ajout des propriétés manquantes
+  tvaExoneration?: boolean;
+  tvaMotif?: string;
 }
 
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
@@ -96,11 +122,29 @@ export interface AuthState {
   token: string | null;
 }
 
+export interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  token: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+}
+
 export interface ProfessionalProfileFormProps {
   defaultValues?: ProfessionalProfile;
   professionalProfileId?: number;
   isEditing?: boolean;
   onSuccess?: (updatedProfile: ProfessionalProfile) => Promise<void> | void;
+}
+
+export interface CabinetFormProps {
+  defaultValues?: Cabinet;
+  cabinetId?: number;
+  professionalProfileId: number;
+  isEditing?: boolean;
+  onSuccess?: (updatedCabinet: Cabinet) => Promise<void> | void;
 }
 
 export interface OsteopathProfileFormProps {
@@ -125,3 +169,52 @@ export interface Consultation {
   createdAt: string;
   updatedAt: string;
 }
+
+// Types pour les tableaux de bord
+export interface DashboardData {
+  totalPatients: number;
+  newPatients: number;
+  upcomingAppointments: number;
+  completedAppointments: number;
+  malePatients: number;
+  femalePatients: number;
+  otherPatients: number;
+  patientsByAge: {
+    [key: string]: number;
+  };
+}
+
+export interface MonthlyGrowthData {
+  month: string;
+  patients: number;
+}
+
+export interface AppointmentFormProps {
+  patients?: Patient[];
+  cabinets?: Cabinet[];
+  defaultValues?: any;
+  appointmentId?: number;
+  isEditing?: boolean;
+  initialDate?: Date;
+  onSubmit?: (data: any) => Promise<void>;
+  isSubmitting?: boolean;
+  onCancel?: () => void;
+}
+
+export interface AppointmentsOverviewProps {
+  upcomingAppointments: Appointment[];
+  loading?: boolean;
+}
+
+export type Contraception = 
+  | "NONE"
+  | "PILLS"
+  | "CONDOM"
+  | "IMPLANT"
+  | "DIAPHRAGM"
+  | "IUD"
+  | "INJECTION"
+  | "PATCH"
+  | "RING"
+  | "NATURAL_METHODS"
+  | "STERILIZATION";

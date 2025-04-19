@@ -43,6 +43,7 @@ const AppointmentsPage = () => {
   const filteredAppointments = appointments.filter(appointment => {
     const searchMatch =
       searchQuery === "" ||
+      appointment.notes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       appointment.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       appointment.patientId.toString().includes(searchQuery);
     
@@ -51,7 +52,7 @@ const AppointmentsPage = () => {
       format(parseISO(appointment.date), "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
       
     const statusMatch =
-      !selectedStatus || appointment.status === selectedStatus;
+      !selectedStatus || selectedStatus === "all" || appointment.status === selectedStatus;
       
     return searchMatch && dateMatch && statusMatch;
   });
@@ -160,7 +161,7 @@ const AppointmentsPage = () => {
               </PopoverContent>
             </Popover>
             
-            <Select onValueChange={(value) => setSelectedStatus(value as AppointmentStatus)}>
+            <Select onValueChange={(value) => setSelectedStatus(value === "all" ? undefined : value as AppointmentStatus)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
@@ -197,7 +198,7 @@ const AppointmentsPage = () => {
                 <p className="text-gray-500">
                   {appointment.time && format(parseISO(`2000-01-01T${appointment.time}`), "HH:mm", { locale: fr })}
                 </p>
-                <p className="text-gray-700">{appointment.notes}</p>
+                <p className="text-gray-700">{appointment.notes || appointment.reason}</p>
                 <div className="flex justify-end mt-4">
                   <Button
                     variant="outline"

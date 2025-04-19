@@ -59,7 +59,7 @@ export function AppointmentCard({
                   {patient.firstName} {patient.lastName}
                 </Link> : `Patient #${appointment.patientId}`}
             </h3>
-            <p className="text-muted-foreground">{appointment.reason}</p>
+            <p className="text-muted-foreground">{appointment.notes || appointment.reason}</p>
           </div>
           {getStatusBadge(appointment.status)}
         </div>

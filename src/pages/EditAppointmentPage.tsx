@@ -102,7 +102,8 @@ const EditAppointmentPage = () => {
               patientId: appointment.patientId,
               date,
               time,
-              reason: appointment.reason,
+              // Utiliser notes ou reason, selon ce qui est disponible
+              reason: appointment.notes || appointment.reason,
               status: appointment.status
             }} 
             appointmentId={appointment.id} 

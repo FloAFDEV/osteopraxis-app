@@ -9,6 +9,13 @@ export const formatDateForInput = (date: Date): string => {
 };
 
 /**
+ * Format a time object into a string suitable for time input fields (HH:mm)
+ */
+export const formatTimeForInput = (date: Date): string => {
+  return format(date, "HH:mm");
+};
+
+/**
  * Parse a date string from an input field (YYYY-MM-DD) into a Date object
  */
 export const parseDateFromInput = (dateString: string): Date => {
