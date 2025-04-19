@@ -26,7 +26,7 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
 import ProfessionalSettingsPage from "./pages/ProfessionalSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
-import { api } from './services/api';
+import { FancyLoader } from './components/ui/fancy-loader';
 
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
@@ -56,11 +56,7 @@ function App() {
   const publicPaths = ['/privacy-policy', '/terms-of-service'];
   
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <FancyLoader message="Chargement de votre application..." />;
   }
   
   return (

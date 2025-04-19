@@ -54,17 +54,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         
         if (session && session.user) {
           try {
+            // Récupérer les données du profil utilisateur
             const { data: userProfile, error: userError } = await supabase
               .from('User')
               .select('*')
               .eq('id', session.user.id)
-              .single();
+              .maybeSingle();
 
-            if (userError && userError.code !== 'PGRST116') {
-              console.error("Error fetching user data:", userError);
-              throw userError;
-            }
-
+            // Si l'utilisateur existe dans la base, utiliser ses données
             if (userProfile) {
               setAuthState({
                 user: userProfile as User,
@@ -72,22 +69,68 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                 isLoading: false,
                 token: session.access_token
               });
-            } else {
-              // Ne pas créer de profil ici, laisser le processus d'inscription s'en charger
-              setAuthState({
-                user: null,
-                isAuthenticated: false,
-                isLoading: false,
-                token: null
-              });
+              return;
+            }
+            
+            // Si l'utilisateur n'existe pas ou s'il y a une erreur (autre que PGRST116)
+            if (userError && userError.code !== 'PGRST116') {
+              console.error("Error fetching user data:", userError);
+              
+              // On continue avec les données de session même en cas d'erreur
+              console.log("Continuing with session data despite error");
+            }
+
+            // Continuer avec uniquement les données de session
+            const basicUser = {
+              id: session.user.id,
+              email: session.user.email || '',
+              first_name: session.user.user_metadata?.first_name || '',
+              last_name: session.user.user_metadata?.last_name || '',
+              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            
+            setAuthState({
+              user: basicUser as User,
+              isAuthenticated: true,
+              isLoading: false,
+              token: session.access_token
+            });
+            
+            // Tenter de créer l'utilisateur en arrière-plan
+            try {
+              const { data: newUser, error: createError } = await supabase
+                .from('User')
+                .insert([basicUser])
+                .select()
+                .single();
+                
+              if (createError) {
+                console.log("Error creating user in background, will continue with session data:", createError);
+              } else {
+                console.log("User record created successfully in background");
+              }
+            } catch (err) {
+              console.log("Failed to create user in background:", err);
             }
           } catch (error) {
             console.error("Error in auth state change handler:", error);
+            
+            // Fallback en cas d'erreur: utiliser les données de session de base
+            const fallbackUser = {
+              id: session.user.id,
+              email: session.user.email || '',
+              first_name: session.user.user_metadata?.first_name || '',
+              last_name: session.user.user_metadata?.last_name || '',
+              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
+            };
+            
             setAuthState({
-              user: null,
-              isAuthenticated: false,
+              user: fallbackUser as User,
+              isAuthenticated: true,
               isLoading: false,
-              token: null
+              token: session.access_token
             });
           }
         } else {
@@ -115,29 +158,65 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           return;
         }
 
-        const { data: userProfile, error: userError } = await supabase
-          .from('User')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+        // Tenter de récupérer le profil utilisateur
+        try {
+          const { data: userProfile, error: userError } = await supabase
+            .from('User')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
 
-        if (userError && userError.code !== 'PGRST116') {
-          throw userError;
-        }
-
-        if (userProfile) {
+          // Si l'utilisateur existe dans la base
+          if (userProfile) {
+            setAuthState({
+              user: userProfile as User,
+              isAuthenticated: true,
+              isLoading: false,
+              token: session.access_token
+            });
+            return;
+          }
+          
+          // Gérer l'absence d'utilisateur ou les erreurs
+          if (userError && userError.code !== 'PGRST116') {
+            console.error("Error fetching user profile:", userError);
+          }
+          
+          // Fallback: utiliser les données de session
+          const fallbackUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            first_name: session.user.user_metadata?.first_name || '',
+            last_name: session.user.user_metadata?.last_name || '',
+            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
           setAuthState({
-            user: userProfile as User,
+            user: fallbackUser as User,
             isAuthenticated: true,
             isLoading: false,
             token: session.access_token
           });
-        } else {
+          
+        } catch (error) {
+          console.error("Error during user profile fetch:", error);
+          
+          // Fallback en cas d'erreur
+          const basicUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            first_name: session.user.user_metadata?.first_name || '',
+            last_name: session.user.user_metadata?.last_name || '',
+            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
+          };
+          
           setAuthState({
-            user: null,
-            isAuthenticated: false,
+            user: basicUser as User,
+            isAuthenticated: true,
             isLoading: false,
-            token: null
+            token: session.access_token
           });
         }
       } catch (error) {

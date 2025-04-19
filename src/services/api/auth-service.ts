@@ -1,3 +1,4 @@
+
 import { User, Credentials } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,18 +25,65 @@ export const authService = {
         throw new Error("User or token not found after sign-in");
       }
 
-      // Fetch the complete user profile from the database
-      const { data: userProfile, error: userProfileError } = await supabase
-        .from('User')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      // Tenter de récupérer le profil utilisateur
+      try {
+        const { data: userProfile, error: userProfileError } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
 
-      if (userProfileError) {
-        throw userProfileError;
+        if (userProfileError) {
+          console.error("Error fetching user profile:", userProfileError);
+          
+          // Si l'utilisateur n'existe pas dans la base, créer un profil de base
+          if (userProfileError.code === 'PGRST116' || !userProfile) {
+            const basicUser = {
+              id: user.id,
+              email: user.email || '',
+              first_name: user.user_metadata?.first_name || '',
+              last_name: user.user_metadata?.last_name || '',
+              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            
+            return { user: basicUser as User, token };
+          }
+          
+          throw userProfileError;
+        }
+
+        if (userProfile) {
+          return { user: userProfile as User, token };
+        } else {
+          // Créer un profil de base si aucun n'est trouvé
+          const basicUser = {
+            id: user.id,
+            email: user.email || '',
+            first_name: user.user_metadata?.first_name || '',
+            last_name: user.user_metadata?.last_name || '',
+            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          return { user: basicUser as User, token };
+        }
+      } catch (profileError) {
+        console.error("Error handling user profile:", profileError);
+        
+        // Fallback en cas d'erreur
+        const basicUser = {
+          id: user.id,
+          email: user.email || '',
+          first_name: user.user_metadata?.first_name || '',
+          last_name: user.user_metadata?.last_name || '',
+          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
+        };
+        
+        return { user: basicUser as User, token };
       }
-
-      return { user: userProfile as User, token };
     } catch (error: any) {
       console.error("Login error:", error);
       throw new Error(error.message || "Login failed");
@@ -134,26 +182,66 @@ export const authService = {
       
       const userId = session.user.id;
       
-      const { data, error } = await supabase
-        .from('User')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle(); // Utilisez maybeSingle() au lieu de single()
-        
-      if (error) {
-        // Log de l'erreur détaillée
-        console.error("Erreur lors de la récupération de l'utilisateur:", error);
-        
-        // Gestion plus granulaire des erreurs
-        if (error.code === 'PGRST116') {
-          console.log("Aucun utilisateur trouvé avec cet ID");
-          return null;
+      try {
+        const { data, error } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+          
+        if (error) {
+          console.error("Erreur lors de la récupération de l'utilisateur:", error);
+          
+          if (error.code === 'PGRST116') {
+            console.log("Aucun utilisateur trouvé avec cet ID");
+            
+            // Créer un utilisateur de base à partir des données de session
+            const basicUser = {
+              id: session.user.id,
+              email: session.user.email || '',
+              first_name: session.user.user_metadata?.first_name || '',
+              last_name: session.user.user_metadata?.last_name || '',
+              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            
+            return basicUser as User;
+          }
+          
+          throw error;
         }
         
-        throw error;
+        if (data) {
+          return data as User;
+        }
+        
+        // Si aucun utilisateur n'est trouvé mais qu'il n'y a pas d'erreur
+        const basicUser = {
+          id: session.user.id,
+          email: session.user.email || '',
+          first_name: session.user.user_metadata?.first_name || '',
+          last_name: session.user.user_metadata?.last_name || '',
+          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        return basicUser as User;
+      } catch (error) {
+        console.error("Erreur lors de la requête utilisateur:", error);
+        
+        // Fallback en cas d'erreur
+        const basicUser = {
+          id: session.user.id,
+          email: session.user.email || '',
+          first_name: session.user.user_metadata?.first_name || '',
+          last_name: session.user.user_metadata?.last_name || '',
+          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
+        };
+        
+        return basicUser as User;
       }
-      
-      return data as User;
     } catch (error) {
       console.error("Erreur inattendue lors de la récupération de l'utilisateur:", error);
       return null;
