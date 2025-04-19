@@ -1,5 +1,5 @@
 
-import { Patient, Gender, Contraception, MaritalStatus, Handedness } from "@/types";
+import { Patient, Gender, Contraception, MaritalStatus, Handedness, DbGender, DbContraception, DbMaritalStatus } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { delay, USE_SUPABASE } from "./config";
 
@@ -22,7 +22,7 @@ export const patientService = {
           gender: mapDbGenderToAppGender(patient.gender),
           contraception: mapDbContraceptionToAppContraception(patient.contraception),
           maritalStatus: mapDbMaritalStatusToAppMaritalStatus(patient.maritalStatus),
-          handedness: mapDbHandednessToAppHandedness(patient.handedness),
+          handedness: patient.handedness,
           childrenAges: patient.childrenAges as unknown as string[]
         }));
         
@@ -59,7 +59,7 @@ export const patientService = {
           gender: mapDbGenderToAppGender(data.gender),
           contraception: mapDbContraceptionToAppContraception(data.contraception),
           maritalStatus: mapDbMaritalStatusToAppMaritalStatus(data.maritalStatus),
-          handedness: mapDbHandednessToAppHandedness(data.handedness),
+          handedness: data.handedness,
           childrenAges: data.childrenAges as unknown as string[]
         };
         
@@ -85,11 +85,13 @@ export const patientService = {
           gender: mapAppGenderToDbGender(patient.gender),
           contraception: mapAppContraceptionToDbContraception(patient.contraception),
           maritalStatus: mapAppMaritalStatusToDbMaritalStatus(patient.maritalStatus),
-          handedness: mapAppHandednessToDbHandedness(patient.handedness),
-          childrenAges: patient.childrenAges as unknown as number[],
+          handedness: patient.handedness,
+          childrenAges: patient.childrenAges ? 
+            patient.childrenAges.map(age => parseInt(age, 10)).filter(age => !isNaN(age)) : 
+            null,
           createdAt: now,
           updatedAt: now
-        };
+        } as any;
         
         const { data, error } = await supabase
           .from('Patient')
@@ -105,7 +107,7 @@ export const patientService = {
           gender: mapDbGenderToAppGender(data.gender),
           contraception: mapDbContraceptionToAppContraception(data.contraception),
           maritalStatus: mapDbMaritalStatusToAppMaritalStatus(data.maritalStatus),
-          handedness: mapDbHandednessToAppHandedness(data.handedness),
+          handedness: data.handedness,
           childrenAges: data.childrenAges as unknown as string[]
         };
         
@@ -138,10 +140,12 @@ export const patientService = {
           gender: mapAppGenderToDbGender(patient.gender),
           contraception: mapAppContraceptionToDbContraception(patient.contraception),
           maritalStatus: mapAppMaritalStatusToDbMaritalStatus(patient.maritalStatus),
-          handedness: mapAppHandednessToDbHandedness(patient.handedness),
-          childrenAges: patient.childrenAges as unknown as number[],
+          handedness: patient.handedness,
+          childrenAges: patient.childrenAges ? 
+            patient.childrenAges.map(age => parseInt(age, 10)).filter(age => !isNaN(age)) : 
+            null,
           updatedAt: new Date().toISOString()
-        };
+        } as any;
         
         const { data, error } = await supabase
           .from('Patient')
@@ -158,7 +162,7 @@ export const patientService = {
           gender: mapDbGenderToAppGender(data.gender),
           contraception: mapDbContraceptionToAppContraception(data.contraception),
           maritalStatus: mapDbMaritalStatusToAppMaritalStatus(data.maritalStatus),
-          handedness: mapDbHandednessToAppHandedness(data.handedness),
+          handedness: data.handedness,
           childrenAges: data.childrenAges as unknown as string[]
         };
         
@@ -227,7 +231,7 @@ export const patientService = {
           gender: mapDbGenderToAppGender(patient.gender),
           contraception: mapDbContraceptionToAppContraception(patient.contraception),
           maritalStatus: mapDbMaritalStatusToAppMaritalStatus(patient.maritalStatus),
-          handedness: mapDbHandednessToAppHandedness(patient.handedness),
+          handedness: patient.handedness,
           childrenAges: patient.childrenAges as unknown as string[]
         }));
         
@@ -258,7 +262,7 @@ export const patientService = {
           gender: mapDbGenderToAppGender(patient.gender),
           contraception: mapDbContraceptionToAppContraception(patient.contraception),
           maritalStatus: mapDbMaritalStatusToAppMaritalStatus(patient.maritalStatus),
-          handedness: mapDbHandednessToAppHandedness(patient.handedness),
+          handedness: patient.handedness,
           childrenAges: patient.childrenAges as unknown as string[]
         }));
         
@@ -282,19 +286,19 @@ export const patientService = {
 };
 
 // Helper functions to map between Supabase DB values and our application types
-function mapDbGenderToAppGender(dbGender: any): Gender {
+function mapDbGenderToAppGender(dbGender: DbGender): Gender {
   if (dbGender === "Homme") return "MALE";
   if (dbGender === "Femme") return "FEMALE";
   return null;
 }
 
-function mapAppGenderToDbGender(appGender: Gender | undefined): string | null {
+function mapAppGenderToDbGender(appGender: Gender | undefined): DbGender {
   if (appGender === "MALE") return "Homme";
   if (appGender === "FEMALE") return "Femme";
   return null;
 }
 
-function mapDbContraceptionToAppContraception(dbContraception: any): Contraception {
+function mapDbContraceptionToAppContraception(dbContraception: DbContraception): Contraception {
   switch (dbContraception) {
     case "PILLS": return "PILL";
     case "CONDOM": return "CONDOM";
@@ -305,53 +309,39 @@ function mapDbContraceptionToAppContraception(dbContraception: any): Contracepti
   }
 }
 
-function mapAppContraceptionToDbContraception(appContraception: Contraception | undefined): string | null {
+function mapAppContraceptionToDbContraception(appContraception: Contraception | undefined): DbContraception {
   switch (appContraception) {
     case "PILL": return "PILLS";
     case "CONDOM": return "CONDOM";
     case "IMPLANT": return "IMPLANTS";
     case "IUD": return "IUD";
     case "NONE": return "NONE";
-    case "OTHER": return "OTHER";
+    case "OTHER": return "DIAPHRAGM"; // Mapping OTHER to something in the DB enum
     default: return null;
   }
 }
 
-function mapDbMaritalStatusToAppMaritalStatus(dbMaritalStatus: any): MaritalStatus {
+function mapDbMaritalStatusToAppMaritalStatus(dbMaritalStatus: DbMaritalStatus): MaritalStatus {
   switch (dbMaritalStatus) {
     case "SINGLE": return "SINGLE";
     case "MARRIED": return "MARRIED";
     case "DIVORCED": return "DIVORCED";
     case "WIDOWED": return "WIDOWED";
+    case "SEPARATED": 
+    case "ENGAGED":
+    case "PARTNERED":
+      return "OTHER";
     default: return null;
   }
 }
 
-function mapAppMaritalStatusToDbMaritalStatus(appMaritalStatus: MaritalStatus | undefined): string | null {
+function mapAppMaritalStatusToDbMaritalStatus(appMaritalStatus: MaritalStatus | undefined): DbMaritalStatus {
   switch (appMaritalStatus) {
     case "SINGLE": return "SINGLE";
     case "MARRIED": return "MARRIED";
     case "DIVORCED": return "DIVORCED";
     case "WIDOWED": return "WIDOWED";
-    case "OTHER": return "OTHER";
-    default: return null;
-  }
-}
-
-function mapDbHandednessToAppHandedness(dbHandedness: any): Handedness {
-  switch (dbHandedness) {
-    case "LEFT": return "LEFT";
-    case "RIGHT": return "RIGHT";
-    case "AMBIDEXTROUS": return "AMBIDEXTROUS";
-    default: return null;
-  }
-}
-
-function mapAppHandednessToDbHandedness(appHandedness: Handedness | undefined): string | null {
-  switch (appHandedness) {
-    case "LEFT": return "LEFT";
-    case "RIGHT": return "RIGHT";
-    case "AMBIDEXTROUS": return "AMBIDEXTROUS";
+    case "OTHER": return "PARTNERED";
     default: return null;
   }
 }

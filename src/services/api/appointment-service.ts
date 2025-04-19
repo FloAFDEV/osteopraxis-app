@@ -84,7 +84,7 @@ export const appointmentService = {
         
         // Convert DB status to app status
         if (data) {
-          data.status = mapDbStatusToAppStatus(data.status);
+          data.status = mapDbStatusToAppStatus(data.status) as any;
         }
         
         return data as unknown as Appointment;
@@ -123,7 +123,7 @@ export const appointmentService = {
         
         // Convert DB status to app status
         if (data) {
-          data.status = mapDbStatusToAppStatus(data.status);
+          data.status = mapDbStatusToAppStatus(data.status) as any;
         }
         
         return data as unknown as Appointment;
@@ -152,14 +152,18 @@ export const appointmentService = {
         const dbStatus = updates.status ? mapAppointmentStatusToDb(updates.status) : undefined;
         
         // Only include fields that are in the Supabase schema
-        const appointmentPayload = {
+        const appointmentPayload: any = {
           date: updates.date,
           patientId: updates.patientId,
           reason: updates.reason,
           cabinetId: updates.cabinetId,
-          status: dbStatus,
           notificationSent: updates.notificationSent
         };
+        
+        // Only add status if it's defined
+        if (dbStatus) {
+          appointmentPayload.status = dbStatus;
+        }
         
         const { data, error } = await supabase
           .from('Appointment')
@@ -172,7 +176,7 @@ export const appointmentService = {
         
         // Convert DB status to app status
         if (data) {
-          data.status = mapDbStatusToAppStatus(data.status);
+          data.status = mapDbStatusToAppStatus(data.status) as any;
         }
         
         return data as unknown as Appointment;
@@ -213,7 +217,7 @@ export const appointmentService = {
         
         // Convert DB status to app status
         if (data) {
-          data.status = mapDbStatusToAppStatus(data.status);
+          data.status = mapDbStatusToAppStatus(data.status) as any;
         }
         
         return data as unknown as Appointment;
@@ -273,7 +277,7 @@ export const appointmentService = {
         // Convert DB status to app status
         const mappedData = data.map(appointment => ({
           ...appointment,
-          status: mapDbStatusToAppStatus(appointment.status)
+          status: mapDbStatusToAppStatus(appointment.status) as any
         }));
         
         return mappedData as unknown as Appointment[];

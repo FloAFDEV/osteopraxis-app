@@ -122,10 +122,17 @@ export interface CabinetFormProps {
   onSuccess?: (cabinet: Cabinet) => void;
 }
 
-// Gender and Contraception types
+// Gender and Contraception types updated to match Supabase enum values
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | null;
+export type DbGender = 'Homme' | 'Femme' | null;
+
+// Making type to match Supabase DB enum
+export type DbContraception = 'NONE' | 'PILLS' | 'CONDOM' | 'IMPLANTS' | 'DIAPHRAGM' | 'IUD' | 'INJECTION' | 'PATCH' | 'RING' | 'NATURAL_METHODS' | 'STERILIZATION' | null;
 export type Contraception = 'PILL' | 'IUD' | 'IMPLANT' | 'CONDOM' | 'NONE' | 'OTHER' | null;
+
 export type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'OTHER' | null;
+export type DbMaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'SEPARATED' | 'ENGAGED' | 'PARTNERED' | null;
+
 export type Handedness = 'LEFT' | 'RIGHT' | 'AMBIDEXTROUS' | null;
 
 // Add other necessary types for the application
