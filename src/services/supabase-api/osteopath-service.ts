@@ -1,5 +1,5 @@
 
-import { Osteopath } from "@/types";
+import { Osteopath, ProfessionalProfile } from "@/types";
 import { supabase, typedData } from "./utils";
 
 export const supabaseOsteopathService = {

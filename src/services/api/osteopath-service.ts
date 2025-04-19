@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,7 +38,7 @@ export const osteopathService = {
       id: data.id,
       userId: data.userId,
       name: data.name,
-      title: data.professional_title || "Ostéopathe D.O.",
+      professional_title: data.professional_title || "Ostéopathe D.O.",
       adeli_number: data.adeli_number,
       siret: data.siret,
       ape_code: data.ape_code,
@@ -59,7 +60,12 @@ export const osteopathService = {
       const { data, error } = await supabase
         .from('Osteopath')
         .insert({
-          ...osteopath,
+          userId: osteopath.userId,
+          name: osteopath.name,
+          professional_title: osteopath.professional_title || "Ostéopathe D.O.",
+          adeli_number: osteopath.adeli_number,
+          siret: osteopath.siret,
+          ape_code: osteopath.ape_code,
           createdAt: now,
           updatedAt: now,
         })
@@ -73,7 +79,7 @@ export const osteopathService = {
         id: data.id,
         userId: data.userId,
         name: data.name,
-        title: data.title || "Ostéopathe D.O.",
+        professional_title: data.professional_title || "Ostéopathe D.O.",
         adeli_number: data.adeli_number,
         siret: data.siret,
         ape_code: data.ape_code,
@@ -109,7 +115,7 @@ export const osteopathService = {
         id: data.id,
         userId: data.userId,
         name: data.name,
-        title: data.title || "Ostéopathe D.O.",
+        professional_title: data.professional_title || "Ostéopathe D.O.",
         adeli_number: data.adeli_number,
         siret: data.siret,
         ape_code: data.ape_code,

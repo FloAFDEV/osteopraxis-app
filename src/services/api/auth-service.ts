@@ -1,316 +1,254 @@
-import { AuthState, Role, User } from "@/types";
-import { supabaseAuthService } from "../supabase-api/auth-service";
-import { supabase } from "@/integrations/supabase/client";
+
+import { User, Role, AuthState } from "@/types";
+import { supabase } from '@/integrations/supabase/client';
+import { DEMO_MODE, USE_SUPABASE, delay } from './config';
+import { supabaseAuthService } from '../supabase-api/auth-service';
+import { toast } from 'sonner';
 
 export const authService = {
-  // Fonction pour obtenir la session actuelle
-  async getSession(): Promise<AuthState> {
-    if (process.env.NODE_ENV !== "production") {
-      console.log("Récupération de la session stockée...");
-    }
-    
-    try {
-      // Tente de récupérer l'état d'authentification depuis le localStorage
-      const storedAuth = localStorage.getItem("authState");
-      
-      // Si un état d'authentification existe en local storage
-      if (storedAuth) {
-        const authState = JSON.parse(storedAuth) as AuthState;
-        
-        // Vérifie que l'utilisateur et le token existent
-        if (authState.user && authState.token) {
-          return { ...authState };
-        }
-      }
-      
-      // Si pas d'état stocké ou état incomplet, tente de récupérer la session depuis Supabase
-      console.log("Récupération de la session depuis Supabase");
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Erreur lors de la récupération de la session:", error);
-        return {
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
-        };
-      }
-      
-      // Si une session existe, récupérer les données complètes de l'utilisateur
-      if (data.session) {
-        // Récupérer les données de l'utilisateur depuis la table User
-        const { data: userData, error: userError } = await supabase
-          .from('User')
-          .select('*')
-          .eq('id', data.session.user.id)
-          .single();
-        
-        if (userError) {
-          console.error("Erreur lors de la récupération des données utilisateur:", userError);
-          // Continuer avec les données minimales de l'utilisateur depuis auth
-          const minimalUser: User = {
-            id: data.session.user.id,
-            email: data.session.user.email || "",
-            first_name: "",
-            last_name: "",
-            role: "USER" as Role,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-          
-          return {
-            user: minimalUser,
-            isAuthenticated: true,
-            isLoading: false,
-            token: data.session.access_token
-          };
-        }
-        
-        return {
-          user: userData as User,
-          isAuthenticated: true,
-          isLoading: false,
-          token: data.session.access_token
-        };
-      }
-      
-      return {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null
-      };
-      
-    } catch (error) {
-      console.error("Erreur lors de la vérification de l'authentification:", error);
-      return {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null
-      };
-    }
-  },
-  
-  // Fonction pour vérifier l'authentification actuelle
-  async checkAuth(): Promise<AuthState> {
-    return await this.getSession();
-  },
-  
-  // Fonction pour connecter un utilisateur
-  async login(email: string, password: string): Promise<AuthState> {
+  async login(email: string, password: string): Promise<{ user: User | null; token: string | null }> {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
-      
+
       if (error) {
-        console.error("Erreur lors de la connexion:", error);
-        throw error;
+        console.error("Login error:", error);
+        throw new Error(error.message);
       }
-      
-      // Si la connexion réussit, récupérer les données complètes de l'utilisateur
-      if (data.session) {
-        // Récupérer les données de l'utilisateur depuis la table User
-        const { data: userData, error: userError } = await supabase
-          .from('User')
-          .select('*')
-          .eq('id', data.session.user.id)
-          .single();
-        
-        if (userError) {
-          console.error("Erreur lors de la récupération des données utilisateur:", userError);
-          // Continuer avec les données minimales de l'utilisateur
-          const minimalUser: User = {
-            id: data.session.user.id,
-            email: data.session.user.email || "",
-            first_name: userData.firstName || "",
-            last_name: userData.lastName || "",
-            role: "USER" as Role,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-          
-          const authState: AuthState = {
-            user: minimalUser,
-            isAuthenticated: true,
-            isLoading: false,
-            token: data.session.access_token
-          };
-          
-          // Stocker l'état d'authentification dans le localStorage
-          localStorage.setItem("authState", JSON.stringify(authState));
-          
-          return authState;
-        }
-        
-        const authState: AuthState = {
-          user: userData as User,
-          isAuthenticated: true,
-          isLoading: false,
-          token: data.session.access_token
-        };
-        
-        // Stocker l'état d'authentification dans le localStorage
-        localStorage.setItem("authState", JSON.stringify(authState));
-        
-        return authState;
+
+      console.log("Login successful:", data);
+
+      if (!data.user) {
+        return { user: null, token: null };
       }
-      
-      throw new Error("La connexion a échoué");
-      
-    } catch (error) {
-      console.error("Erreur lors de la connexion:", error);
-      throw error;
-    }
-  },
-  
-  // Fonction pour déconnecter un utilisateur
-  async logout(): Promise<AuthState> {
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Erreur lors de la déconnexion:", error);
-        throw error;
+
+      // Get user info from User table
+      const { data: userData, error: userError } = await supabase
+        .from("User")
+        .select("*")
+        .eq('id', data.user.id)
+        .single();
+
+      if (userError) {
+        console.error("Error fetching user data:", userError);
+        throw new Error(userError.message);
       }
-      
-      // Réinitialiser l'état d'authentification local
-      localStorage.removeItem("authState");
-      
-      return {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null
+
+      // Créer l'objet User à partir des données de l'authentification et de la table User
+      const user: User = {
+        id: data.user.id,
+        email: data.user.email || '',
+        first_name: userData?.first_name || '',
+        last_name: userData?.last_name || '',
+        role: (userData?.role as Role) || 'USER',
+        created_at: userData?.created_at || new Date().toISOString(),
+        updated_at: userData?.updated_at || new Date().toISOString(),
+        professionalProfileId: userData?.professionalProfileId,
+        avatar_url: data.user.user_metadata?.avatar_url
       };
-      
+
+      return {
+        user,
+        token: data.session ? data.session.access_token : null,
+      };
     } catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
+      console.error("Login error:", error);
       throw error;
     }
   },
-  
-  // Fonction pour inscrire un nouvel utilisateur
-  async register(userData: { firstName: string; lastName: string; email: string; password: string }): Promise<AuthState> {
+
+  async register(userData: { firstName: string; lastName: string; email: string; password: string }): Promise<{ user: User | null; token: string | null }> {
     try {
-      // Créer l'utilisateur dans Auth
-      const { data, error } = await supabase.auth.signUp({
+      // Register user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
           data: {
             first_name: userData.firstName,
-            last_name: userData.lastName
+            last_name: userData.lastName,
           }
         }
       });
-      
-      if (error) {
-        console.error("Erreur lors de l'inscription:", error);
-        throw error;
+
+      if (authError) {
+        console.error("Registration auth error:", authError);
+        throw new Error(authError.message);
       }
-      
-      // Si l'inscription réussit et renvoie une session
-      if (data.session) {
-        const now = new Date().toISOString();
-        // Créer l'entrée dans la table User
-        const { error: userError } = await supabase
-          .from('User')
-          .insert({
-            id: data.user?.id,
-            email: userData.email,
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            role: "USER",
-            created_at: now,
-            updated_at: now
-          });
-        
-        if (userError) {
-          console.error("Erreur lors de la création de l'utilisateur:", userError);
-          
-          // Si erreur dans la création de l'utilisateur, continuer avec les données minimales
-          const minimalUser: User = {
-            id: data.user?.id || "",
-            email: userData.email,
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            role: "USER" as Role,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-          
-          const authState: AuthState = {
-            user: minimalUser,
-            isAuthenticated: true,
-            isLoading: false,
-            token: data.session.access_token
-          };
-          
-          // Stocker l'état d'authentification dans le localStorage
-          localStorage.setItem("authState", JSON.stringify(authState));
-          
-          return authState;
-        }
-        
-        // Utilisateur créé avec succès
-        const user: User = {
-          id: data.user?.id || "",
-          email: userData.email,
+
+      if (!authData.user) {
+        console.error("Registration failed - no user returned");
+        throw new Error("Registration failed");
+      }
+
+      // Create entry in the User table
+      const now = new Date().toISOString();
+      const { data: userData2, error: userError } = await supabase
+        .from("User")
+        .insert({
+          id: authData.user.id,
+          email: authData.user.email || '',
           first_name: userData.firstName,
           last_name: userData.lastName,
-          role: "USER" as Role,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        
-        const authState: AuthState = {
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-          token: data.session.access_token
-        };
-        
-        // Stocker l'état d'authentification dans le localStorage
-        localStorage.setItem("authState", JSON.stringify(authState));
-        
-        return authState;
+          role: 'OSTEOPATH' as Role, // Par défaut, tous les utilisateurs sont des ostéopathes
+          created_at: now,
+          updated_at: now
+        })
+        .select()
+        .single();
+
+      if (userError) {
+        console.error("Error creating user record:", userError);
+        // Cleanup the auth user if DB insert fails
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        throw new Error(userError.message);
       }
-      
-      return {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null
+
+      // Créer l'objet User
+      const user: User = {
+        id: authData.user.id,
+        email: authData.user.email || '',
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        role: userData2.role as Role,
+        created_at: userData2.created_at,
+        updated_at: userData2.updated_at,
+        professionalProfileId: userData2.professionalProfileId
       };
-      
+
+      return {
+        user,
+        token: authData.session ? authData.session.access_token : null,
+      };
     } catch (error) {
-      console.error("Erreur lors de l'inscription:", error);
+      console.error("Registration error:", error);
+      throw error;
+    }
+  },
+
+  async logout(): Promise<void> {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
+  },
+
+  async getCurrentUser(): Promise<User | null> {
+    try {
+      // Get auth user
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error("Error getting session:", sessionError);
+        throw sessionError;
+      }
+
+      if (!sessionData.session?.user) {
+        return null;
+      }
+
+      // Get user info from User table
+      const { data: userData, error: userError } = await supabase
+        .from("User")
+        .select("*")
+        .eq('id', sessionData.session.user.id)
+        .single();
+
+      if (userError) {
+        console.error("Error fetching user data:", userError);
+        return null;
+      }
+
+      // Créer l'objet User
+      const user: User = {
+        id: sessionData.session.user.id,
+        email: sessionData.session.user.email || '',
+        first_name: userData?.first_name || '',
+        last_name: userData?.last_name || '',
+        role: userData?.role as Role,
+        created_at: userData?.created_at || '',
+        updated_at: userData?.updated_at || '',
+        professionalProfileId: userData?.professionalProfileId,
+        avatar_url: sessionData.session.user.user_metadata?.avatar_url
+      };
+
+      return user;
+    } catch (error) {
+      console.error("Error getting current user:", error);
+      return null;
+    }
+  },
+  
+  async loginWithMagicLink(email: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        console.error("Magic link login error:", error);
+        throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Magic link login error:", error);
       throw error;
     }
   },
   
-  // Fonction pour se connecter avec un lien magique envoyé par email
-  async loginWithMagicLink(email: string): Promise<boolean> {
+  async updateUserProfile(userId: string, updates: { firstName?: string; lastName?: string }): Promise<User> {
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: window.location.origin
-        }
-      });
-      
+      const { error } = await supabase
+        .from("User")
+        .update({
+          first_name: updates.firstName,
+          last_name: updates.lastName,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
       if (error) {
-        console.error("Erreur lors de l'envoi du lien magique:", error);
+        console.error("Error updating user profile:", error);
         throw error;
       }
-      
-      return true;
+
+      // Récupérer l'utilisateur mis à jour
+      const updatedUser = await this.getCurrentUser();
+      if (!updatedUser) {
+        throw new Error("Failed to get updated user");
+      }
+
+      return updatedUser;
     } catch (error) {
-      console.error("Erreur lors de l'envoi du lien magique:", error);
+      console.error("Error updating user profile:", error);
+      throw error;
+    }
+  },
+
+  async promoteToAdmin(userId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from("User")
+        .update({
+          role: 'ADMIN' as Role,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      if (error) {
+        console.error("Error promoting user to admin:", error);
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error promoting user to admin:", error);
       throw error;
     }
   }

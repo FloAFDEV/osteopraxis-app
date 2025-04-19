@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Calendar } from "lucide-react";
@@ -47,7 +48,7 @@ const AppointmentsPage = () => {
   };
 
   const filteredAppointments = appointments.filter((appointment) => {
-    if (!statusFilter || statusFilter === "all") {
+    if (statusFilter === "all") {
       return true;
     }
     return appointment.status === statusFilter;
@@ -86,7 +87,7 @@ const AppointmentsPage = () => {
           </div>
           <div>
             <Label htmlFor="status">Filtrer par statut :</Label>
-            <Select onValueChange={handleStatusFilterChange} defaultValue={statusFilter}>
+            <Select onValueChange={(value) => handleStatusFilterChange(value as AppointmentStatus | "all")} defaultValue={statusFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Tous les statuts" />
               </SelectTrigger>

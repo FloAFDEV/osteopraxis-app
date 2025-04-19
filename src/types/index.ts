@@ -112,6 +112,21 @@ export interface ProfessionalProfile {
   updatedAt: string;
 }
 
+// Ajout de l'interface Osteopath qui manquait
+export interface Osteopath {
+  id: number;
+  userId: string;
+  name: string;
+  title?: string;
+  professional_title?: string;
+  adeli_number?: string;
+  siret?: string;
+  ape_code?: string;
+  profession_type?: ProfessionType;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ProfessionType = "osteopathe" | "chiropracteur" | "autre";
 
 export interface AuthState {

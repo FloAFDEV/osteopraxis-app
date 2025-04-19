@@ -3,7 +3,7 @@
 export * from './utils';
 
 // Import and export the services
-import { patientService, supabasePatientService } from './patient-service';
+import { supabasePatientService } from './patient-service';
 import { supabaseAuthService } from './auth-service';
 import { supabaseAppointmentService } from './appointment-service';
 import { supabaseCabinetService } from './cabinet-service';
@@ -11,7 +11,7 @@ import { supabaseInvoiceService } from './invoice-service';
 import { supabaseOsteopathService } from './osteopath-service';
 
 // Export services with aliases
-export { patientService, supabasePatientService };
+export { supabasePatientService };
 export { supabaseAuthService as authService };
 export { supabaseAppointmentService as appointmentService };
 export { supabaseCabinetService as cabinetService };
@@ -21,7 +21,7 @@ export { supabaseOsteopathService as osteopathService };
 // Export a convenient single API object with all services
 export const supabaseApi = {
   auth: supabaseAuthService,
-  patients: patientService,
+  patients: supabasePatientService,
   appointments: supabaseAppointmentService,
   cabinets: supabaseCabinetService,
   invoices: supabaseInvoiceService,
