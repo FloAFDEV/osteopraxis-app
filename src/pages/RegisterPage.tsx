@@ -1,252 +1,152 @@
-
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, Activity, User, UserPlus } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
-const registerSchema = z.object({
-  firstName: z.string().min(1, "Le prénom est requis"),
-  lastName: z.string().min(1, "Le nom est requis"),
-  email: z.string().email("Email invalide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  confirmPassword: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères")
-}).refine((data) => data.password === data.confirmPassword, {
-  path: ["confirmPassword"],
-  message: "Les mots de passe ne correspondent pas",
+const formSchema = z.object({
+  firstName: z.string().min(2, {
+    message: "Le prénom doit comporter au moins 2 caractères.",
+  }),
+  lastName: z.string().min(2, {
+    message: "Le nom de famille doit comporter au moins 2 caractères.",
+  }),
+  email: z.string().email({
+    message: "Veuillez entrer une adresse email valide.",
+  }),
+  password: z.string().min(8, {
+    message: "Le mot de passe doit comporter au moins 8 caractères.",
+  }),
 });
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
-
 const RegisterPage = () => {
-  const { register, isLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const [registerError, setRegisterError] = useState<string | null>(null);
-
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+  const { register } = useAuth();
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (data: RegisterFormValues) => {
-    setRegisterError(null);
+  const handleSubmit = async (data: any) => {
+    setIsSubmitting(true);
+    setError(null);
+    
     try {
       await register({
-        email: data.email,
-        password: data.password,
         firstName: data.firstName,
-        lastName: data.lastName
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password
       });
-      // Ne pas rediriger ici car c'est géré dans le context en fonction de si confirmation email requise ou pas
-    } catch (error: any) {
-      console.error("Register error:", error);
-      setRegisterError(error.message || "Erreur lors de la création du compte");
-      toast.error(error.message || "Erreur lors de la création du compte");
+      toast.success("Inscription réussie ! Vous allez être redirigé...");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Erreur lors de l'inscription:", error);
+      setError("Une erreur s'est produite lors de l'inscription. Veuillez réessayer.");
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left section - Register form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
-        <div className="mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-            PatientHub
-          </h1>
-        </div>
-        
-        <div className="flex-grow flex items-center justify-center">
-          <div className="w-full max-w-md space-y-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
-                Créez votre compte
-              </h2>
-              <p className="text-gray-400 text-lg">
-                Rejoignez PatientHub pour gérer vos patients efficacement.
-              </p>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-[#0d1117] text-gray-400">Inscription</span>
-              </div>
-            </div>
-
-            {registerError && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-md">
-                {registerError}
-              </div>
-            )}
-
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel className="text-gray-300">Prénom</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                            <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Prénom" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel className="text-gray-300">Nom</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                            <Input className="pl-10 bg-[#161b22] border-gray-700 text-white" placeholder="Nom" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-300">Email</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                          <Input 
-                            className="pl-10 bg-[#161b22] border-gray-700 text-white" 
-                            placeholder="votre@email.com" 
-                            autoComplete="email"
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-300">Mot de passe</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                          <Input 
-                            type="password" 
-                            className="pl-10 bg-[#161b22] border-gray-700 text-white" 
-                            placeholder="Votre mot de passe" 
-                            autoComplete="new-password"
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-300">Confirmez le mot de passe</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                          <Input 
-                            type="password" 
-                            className="pl-10 bg-[#161b22] border-gray-700 text-white" 
-                            placeholder="Confirmer votre mot de passe" 
-                            autoComplete="new-password"
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:opacity-90 transition-opacity" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
-                      Création en cours...
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      S'inscrire
-                    </>
-                  )}
-                </Button>
-                
-                <div className="text-center">
-                  <p className="text-gray-400">
-                    Déjà inscrit ? <Link to="/login" className="text-blue-400 hover:underline">Se connecter</Link>
-                  </p>
-                </div>
-              </form>
-            </Form>
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">Créer un compte</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prénom</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom de famille</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="john.doe@example.com" type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mot de passe</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                    Création...
+                  </span>
+                ) : (
+                  "Créer le compte"
+                )}
+              </Button>
+            </form>
+          </Form>
+          <div className="text-sm text-muted-foreground text-center">
+            Vous avez déjà un compte? <Link to="/login" className="text-primary hover:underline">Se connecter</Link>
           </div>
-        </div>
-        
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>
-            La plateforme conçue pour faciliter la gestion des données médicales.<br />
-            Gérez vos rendez-vous et suivez efficacement vos patients.
-          </p>
-          <p className="mt-4">
-            © 2024 PatientHub. Tous droits réservés.
-          </p>
-        </div>
-      </div>
-
-      {/* Right section - Spine image */}
-      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-        <img 
-          src="/lovable-uploads/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png" 
-          alt="Image d'une colonne vertébrale" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 to-transparent"></div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

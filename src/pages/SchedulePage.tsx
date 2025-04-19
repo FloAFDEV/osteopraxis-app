@@ -1,263 +1,179 @@
+import React, { useState, useEffect } from 'react';
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { Layout } from "@/components/ui/layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { api } from "@/services/api";
+import { Appointment, AppointmentStatus } from "@/types";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Layout } from '@/components/ui/layout';
-import { api } from '@/services/api';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Clock, Info, MapPin, User } from 'lucide-react';
-import { format, parseISO, isToday, isTomorrow } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Patient, Appointment, Cabinet } from '@/types';
-import { Link } from 'react-router-dom';
-import { FancyLoader } from '@/components/ui/fancy-loader';
+moment.locale('fr');
+const localizer = momentLocalizer(moment);
+
+const formSchema = z.object({
+  date: z.string().min(1, { message: "La date est requise." }),
+});
+
+// Function to add minutes to a time
+const addMinutes = (time: string, minutes: number): string => {
+  const [hours, mins] = time.split(':').map(Number);
+  const totalMinutes = hours * 60 + mins + minutes;
+  const newHours = Math.floor(totalMinutes / 60) % 24;
+  const newMins = totalMinutes % 60;
+  
+  const formattedHours = String(newHours).padStart(2, '0');
+  const formattedMins = String(newMins).padStart(2, '0');
+  
+  return `${formattedHours}:${formattedMins}`;
+};
+
+// Function to get time from a Date object
+const getTimeFromDate = (date: Date): string => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
+// Function to calculate end time based on start time and duration
+const getEndTimeFromStartAndDuration = (startTime: string, duration: number): string => {
+  return addMinutes(startTime, duration);
+};
 
 const SchedulePage = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Chargement des données
+  const [date, setDate] = useState<string>(moment().format('YYYY-MM-DD'));
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      date: moment().format('YYYY-MM-DD'),
+    },
+  });
+  
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+    const loadAppointments = async () => {
+      setLoading(true);
       try {
-        const [appointmentsData, patientsData, cabinetsData] = await Promise.all([
-          api.getAppointments(),
-          api.getPatients(),
-          api.getCabinets()
-        ]);
-
+        const appointmentsData = await api.getAppointments();
         setAppointments(appointmentsData);
-        setPatients(patientsData);
-        setCabinets(cabinetsData);
       } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
+        console.error("Error fetching appointments:", error);
+        toast.error("Failed to load appointments. Please try again.");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-
-    fetchData();
+    
+    loadAppointments();
   }, []);
-
-  // Filtrer les rendez-vous pour la date sélectionnée
-  const appointmentsForSelectedDate = useMemo(() => {
-    return appointments.filter(appointment => {
-      const appointmentDate = parseISO(appointment.date);
-      return (
-        appointmentDate.getDate() === selectedDate.getDate() &&
-        appointmentDate.getMonth() === selectedDate.getMonth() &&
-        appointmentDate.getFullYear() === selectedDate.getFullYear() &&
-        appointment.status !== 'CANCELLED'
-      );
-    }).sort((a, b) => {
-      return a.startTime.localeCompare(b.startTime);
-    });
-  }, [appointments, selectedDate]);
-
-  // Fonction pour obtenir les détails du patient
-  const getPatientDetails = (patientId: number) => {
-    return patients.find(p => p.id === patientId);
+  
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    setDate(values.date);
   };
-
-  // Fonction pour obtenir les détails du cabinet
-  const getCabinetDetails = (cabinetId?: number) => {
-    if (!cabinetId) return null;
-    return cabinets.find(c => c.id === cabinetId);
+  
+  // Make sure we include cabinetId in the event object
+  const events = appointments.map(appointment => {
+    const startTime = appointment.startTime || getTimeFromDate(new Date(appointment.date));
+    const endTime = getEndTimeFromStartAndDuration(startTime, appointment.duration || 60);
+    
+    return {
+      id: appointment.id.toString(),
+      title: `Patient #${appointment.patientId}`,
+      start: `${date}T${startTime}`,
+      end: `${date}T${endTime}`,
+      patientId: appointment.patientId,
+      status: appointment.status,
+      reason: appointment.notes || appointment.reason || "",
+      cabinetId: appointment.cabinetId
+    };
+  });
+  
+  const handleSelectSlot = (slotInfo: any) => {
+    const selectedDate = moment(slotInfo.start).format('YYYY-MM-DD');
+    navigate(`/appointments/new?date=${selectedDate}`);
   };
-
-  // Fonction pour obtenir la couleur de badge en fonction du statut
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'CONFIRMED':
-        return 'bg-green-500 hover:bg-green-600';
-      case 'PLANNED':
-        return 'bg-blue-500 hover:bg-blue-600';
-      case 'CANCELLED':
-        return 'bg-red-500 hover:bg-red-600';
-      case 'COMPLETED':
-        return 'bg-gray-500 hover:bg-gray-600';
-      default:
-        return 'bg-gray-500 hover:bg-gray-600';
-    }
+  
+  const handleSelectEvent = (event: any) => {
+    navigate(`/appointments/${event.id}/edit`);
   };
-
-  // Fonction pour traduire le statut
-  const translateStatus = (status: string) => {
-    switch (status) {
-      case 'CONFIRMED':
-        return 'Confirmé';
-      case 'PLANNED':
-        return 'Planifié';
-      case 'CANCELLED':
-        return 'Annulé';
-      case 'COMPLETED':
-        return 'Terminé';
-      default:
-        return status;
-    }
-  };
-
-  // Fonction pour formater une date plus lisible
-  const formatDateHeading = (date: Date) => {
-    if (isToday(date)) {
-      return "Aujourd'hui";
-    } else if (isTomorrow(date)) {
-      return "Demain";
-    } else {
-      return format(date, "EEEE d MMMM yyyy", { locale: fr });
-    }
-  };
-
-  if (isLoading) {
-    return <FancyLoader message="Chargement de votre agenda..." />;
-  }
-
+  
   return (
     <Layout>
-      <div className="grid gap-6 md:grid-cols-[300px_1fr]">
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-4">
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                className="rounded-md border"
-                locale={fr}
+      <div className="container mx-auto py-6">
+        <h1 className="text-2xl font-bold mb-4">Calendrier des rendez-vous</h1>
+        
+        <div className="mb-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center space-x-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date:</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Statistiques</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  Rendez-vous aujourd'hui
-                </span>
-                <span className="font-medium">
-                  {appointments.filter(a => isToday(parseISO(a.date)) && a.status !== 'CANCELLED').length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  Rendez-vous cette semaine
-                </span>
-                <span className="font-medium">
-                  {/* Placeholder for weekly appointments count */}
-                  {appointments.filter(a => {
-                    const date = parseISO(a.date);
-                    const today = new Date();
-                    const startOfWeek = new Date(today);
-                    startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
-                    const endOfWeek = new Date(startOfWeek);
-                    endOfWeek.setDate(startOfWeek.getDate() + 6);
-                    return date >= startOfWeek && date <= endOfWeek && a.status !== 'CANCELLED';
-                  }).length}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+              <Button type="submit">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                Afficher
+              </Button>
+            </form>
+          </Form>
         </div>
-
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold tracking-tight capitalize">
-              {formatDateHeading(selectedDate)}
-            </h2>
-
-            <Link to="/appointments/new">
-              <Button>Nouveau rendez-vous</Button>
-            </Link>
-          </div>
-
-          {appointmentsForSelectedDate.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Info className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-                <h3 className="mt-4 text-lg font-semibold">Aucun rendez-vous</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Vous n'avez pas de rendez-vous programmé pour cette date.
-                </p>
-              </CardContent>
-            </Card>
+        
+        <div className="rbc-calendar">
+          {!loading ? (
+            <Calendar
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              defaultView="day"
+              views={['day', 'week', 'month']}
+              selectable={true}
+              onSelectSlot={handleSelectSlot}
+              onSelectEvent={handleSelectEvent}
+              style={{ height: 800 }}
+              messages={{
+                today: "Aujourd'hui",
+                day: "Jour",
+                week: "Semaine",
+                month: "Mois",
+                noEventsInRange: "Aucun rendez-vous ce jour-ci."
+              }}
+            />
           ) : (
-            <div className="space-y-4">
-              {appointmentsForSelectedDate.map((appointment) => {
-                const patient = getPatientDetails(appointment.patientId);
-                const cabinet = getCabinetDetails(appointment.cabinetId);
-
-                return (
-                  <Card key={appointment.id} className="overflow-hidden">
-                    <CardContent className="p-0">
-                      <div className="flex flex-col sm:flex-row">
-                        <div className="flex-none bg-muted p-4 text-center sm:w-32 flex flex-col justify-center">
-                          <div className="text-2xl font-bold">{appointment.startTime}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {appointment.endTime && `→ ${appointment.endTime}`}
-                          </div>
-                        </div>
-                        <div className="flex-1 p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-lg font-semibold">
-                              {patient ? `${patient.firstName} ${patient.lastName}` : 'Patient inconnu'}
-                            </h3>
-                            <Badge className={getStatusColor(appointment.status)}>
-                              {translateStatus(appointment.status)}
-                            </Badge>
-                          </div>
-
-                          {appointment.reason && (
-                            <p className="text-sm text-muted-foreground mb-4">
-                              {appointment.reason}
-                            </p>
-                          )}
-
-                          <div className="flex flex-wrap gap-3 text-sm">
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              <span>{format(parseISO(appointment.date), "EEEE d MMMM", { locale: fr })}</span>
-                            </div>
-                            {cabinet && (
-                              <div className="flex items-center gap-1 text-muted-foreground">
-                                <MapPin className="h-4 w-4" />
-                                <span>{cabinet.name}</span>
-                              </div>
-                            )}
-                            {patient && patient.phone && (
-                              <div className="flex items-center gap-1 text-muted-foreground">
-                                <User className="h-4 w-4" />
-                                <span>{patient.phone}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="mt-4 flex justify-end gap-2">
-                            {patient && (
-                              <Link to={`/patients/${patient.id}`}>
-                                <Button variant="outline" size="sm">
-                                  Voir patient
-                                </Button>
-                              </Link>
-                            )}
-                            <Link to={`/appointments/${appointment.id}`}>
-                              <Button size="sm">Détails</Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+            <div className="text-center">Chargement des rendez-vous...</div>
           )}
         </div>
       </div>

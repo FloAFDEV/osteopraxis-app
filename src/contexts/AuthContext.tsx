@@ -9,19 +9,22 @@ const defaultAuthState: AuthState = {
   isAuthenticated: false,
   isLoading: true,
   user: null,
-  token: undefined
+  token: null
 };
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   user: null,
+  token: null,
   login: async () => { throw new Error('Not implemented'); },
-  loginWithMagicLink: async () => false,
   register: async () => { throw new Error('Not implemented'); },
   logout: async () => { throw new Error('Not implemented'); },
   loadStoredToken: async () => { throw new Error('Not implemented'); },
   updateUser: () => { throw new Error('Not implemented'); },
+  loginWithMagicLink: async () => false,
+  isAdmin: false,
+  promoteToAdmin: async () => { throw new Error('Not implemented'); },
 });
 
 interface AuthProviderProps {
@@ -78,7 +81,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setAuthState({
             isAuthenticated: false,
             isLoading: false,
-            user: null
+            user: null,
+            token: null
           });
         }
       }
@@ -104,7 +108,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
-        user: null
+        user: null,
+        token: null
       });
       throw error;
     }
@@ -178,7 +183,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
-        user: null
+        user: null,
+        token: null
       });
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
@@ -214,10 +220,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
   
-  const value = {
+  const value: AuthContextType = {
     isAuthenticated: authState.isAuthenticated,
     isLoading: authState.isLoading,
     user: authState.user,
+    token: authState.token,
     login,
     loginWithMagicLink,
     register,

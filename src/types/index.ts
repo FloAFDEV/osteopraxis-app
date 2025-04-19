@@ -8,6 +8,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   professionalProfileId?: number;
+  avatar_url?: string;
 }
 
 export type Role = "USER" | "ADMIN" | "OSTEOPATH";
@@ -25,7 +26,6 @@ export interface Patient {
   professionalProfileId: number;
   createdAt: string;
   updatedAt: string;
-  // Propriétés supplémentaires pour corriger les erreurs
   avatarUrl?: string;
   hasChildren?: string;
   childrenAges?: string[];
@@ -50,16 +50,16 @@ export interface Appointment {
   id: number;
   patientId: number;
   date: string;
-  time: string;
-  duration: number;
-  notes: string;
   status: AppointmentStatus;
   professionalProfileId: number;
   createdAt: string;
   updatedAt: string;
-  reason?: string; // Ajouté pour compatibilité avec le code existant
-  startTime?: string; // Ajouté pour compatibilité avec SchedulePage
-  endTime?: string; // Ajouté pour cohérence avec startTime
+  reason?: string;
+  notes?: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+  cabinetId?: number;
 }
 
 export interface Cabinet {
@@ -83,7 +83,6 @@ export interface Invoice {
   date: string;
   amount: number;
   paymentStatus: PaymentStatus;
-  // Ajout des propriétés manquantes
   tvaExoneration?: boolean;
   tvaMotif?: string;
 }
@@ -96,19 +95,19 @@ export interface ProfessionalProfile {
   name: string;
   title: string;
   profession_type: ProfessionType;
-  address: string;
-  phone: string;
-  email: string;
-  website: string;
-  siret: string;
-  adeli_number: string;
-  ape_code: string;
-  vat_number: string;
-  bank_account_number: string;
-  iban: string;
-  bic: string;
-  logoUrl: string;
-  description: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  siret?: string;
+  adeli_number?: string;
+  ape_code?: string;
+  vat_number?: string;
+  bank_account_number?: string;
+  iban?: string;
+  bic?: string;
+  logoUrl?: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -129,7 +128,12 @@ export interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  register: (userData: { firstName: string; lastName: string; email: string; password: string; }) => Promise<void>;
+  loadStoredToken: () => Promise<AuthState>;
+  updateUser: (userData: User) => void;
+  isAdmin?: boolean;
+  promoteToAdmin?: (userId: string) => Promise<void>;
+  loginWithMagicLink?: (email: string) => Promise<boolean>;
 }
 
 export interface ProfessionalProfileFormProps {
@@ -158,35 +162,47 @@ export type AppointmentStatus =
   | "PLANNED" 
   | "CONFIRMED" 
   | "CANCELLED" 
-  | "COMPLETED";
+  | "COMPLETED"
+  | "all";
 
 export interface Consultation {
   id: number;
   patientId: number;
   date: string;
   notes: string;
-  professionalProfileId: number;
-  createdAt: string;
-  updatedAt: string;
+  professionalProfileId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  osteopathId?: number;
+  isCancelled?: boolean;
+  cancellationReason?: string;
 }
 
 // Types pour les tableaux de bord
 export interface DashboardData {
   totalPatients: number;
-  newPatients: number;
-  upcomingAppointments: number;
-  completedAppointments: number;
-  malePatients: number;
-  femalePatients: number;
-  otherPatients: number;
-  patientsByAge: {
-    [key: string]: number;
-  };
+  maleCount: number;
+  femaleCount: number;
+  averageAge: number;
+  averageAgeMale: number;
+  averageAgeFemale: number;
+  newPatientsThisMonth: number;
+  newPatientsThisYear: number;
+  newPatientsLastYear: number;
+  appointmentsToday: number;
+  nextAppointment: string;
+  patientsLastYearEnd: number;
+  newPatientsLast30Days: number;
+  thirtyDayGrowthPercentage: number;
+  annualGrowthPercentage: number;
+  monthlyGrowth: MonthlyGrowthData[];
 }
 
 export interface MonthlyGrowthData {
   month: string;
   patients: number;
+  prevPatients: number;
+  growthText: string;
 }
 
 export interface AppointmentFormProps {
@@ -202,8 +218,10 @@ export interface AppointmentFormProps {
 }
 
 export interface AppointmentsOverviewProps {
-  upcomingAppointments: Appointment[];
+  upcomingAppointments?: Appointment[];
   loading?: boolean;
+  appointmentsToday: number;
+  nextAppointment: string;
 }
 
 export type Contraception = 

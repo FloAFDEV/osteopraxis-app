@@ -50,6 +50,9 @@ export function AppointmentCard({
   });
   const formattedTime = format(appointmentDate, "HH:mm");
   
+  // Use either notes or reason, depending on which is available
+  const appointmentDescription = appointment.notes || appointment.reason || "";
+  
   return <Card className="overflow-hidden hover-scale">
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
@@ -59,7 +62,7 @@ export function AppointmentCard({
                   {patient.firstName} {patient.lastName}
                 </Link> : `Patient #${appointment.patientId}`}
             </h3>
-            <p className="text-muted-foreground">{appointment.notes || appointment.reason}</p>
+            <p className="text-muted-foreground">{appointmentDescription}</p>
           </div>
           {getStatusBadge(appointment.status)}
         </div>

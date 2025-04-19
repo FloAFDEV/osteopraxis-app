@@ -1,4 +1,3 @@
-
 import { AuthState, Role, User } from "@/types";
 import { supabaseAuthService } from "../supabase-api/auth-service";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +52,8 @@ export const authService = {
           const minimalUser: User = {
             id: data.session.user.id,
             email: data.session.user.email || "",
+            first_name: "",
+            last_name: "",
             role: "USER" as Role,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -125,6 +126,8 @@ export const authService = {
           const minimalUser: User = {
             id: data.session.user.id,
             email: data.session.user.email || "",
+            first_name: userData.firstName || "",
+            last_name: userData.lastName || "",
             role: "USER" as Role,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -221,7 +224,7 @@ export const authService = {
             email: userData.email,
             first_name: userData.firstName,
             last_name: userData.lastName,
-            role: "USER" as Role,
+            role: "USER",
             created_at: now,
             updated_at: now
           });

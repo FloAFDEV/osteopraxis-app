@@ -60,7 +60,18 @@ export function ProfessionalProfileForm({
         siret: values.siret,
         ape_code: values.ape_code,
         profession_type: values.profession_type,
-        userId: user?.id || defaultValues?.userId || ""
+        userId: user?.id || defaultValues?.userId || "",
+        // Add required fields for ProfessionalProfile
+        email: defaultValues?.email || "",
+        phone: defaultValues?.phone || "",
+        address: defaultValues?.address || "",
+        logoUrl: defaultValues?.logoUrl || "",
+        website: defaultValues?.website || "",
+        description: defaultValues?.description || "",
+        vat_number: defaultValues?.vat_number || "",
+        bank_account_number: defaultValues?.bank_account_number || "",
+        iban: defaultValues?.iban || "",
+        bic: defaultValues?.bic || "",
       };
 
       let result;
