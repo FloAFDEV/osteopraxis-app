@@ -185,7 +185,7 @@ export function Layout({
           </nav>
         </div>}
 
-      <main className="flex-1 container py-6">{children}</main>
+      <main className="flex-1 container px-4 md:px-6 py-6">{children}</main>
 
       <footer className="border-t py-6 bg-muted/30">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
