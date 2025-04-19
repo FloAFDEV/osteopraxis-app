@@ -7,5 +7,5 @@ export const USE_SUPABASE = true;
 // Simulate network delay for mock API (milliseconds)
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Add SIMULATE_AUTH flag
+// Set SIMULATE_AUTH to false to use real authentication
 export const SIMULATE_AUTH = false;

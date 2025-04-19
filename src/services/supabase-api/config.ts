@@ -3,8 +3,8 @@
 
 import { delay, USE_SUPABASE } from "../api/config";
 
-// Adding SIMULATE_AUTH flag to match what's used in the rest of the application
-export const SIMULATE_AUTH = false;
-
 // Export for use in other modules
-export { delay, USE_SUPABASE, SIMULATE_AUTH };
+export { delay, USE_SUPABASE };
+
+// Set SIMULATE_AUTH to false to use real authentication
+export const SIMULATE_AUTH = false;
