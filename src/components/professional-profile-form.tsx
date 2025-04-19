@@ -16,7 +16,8 @@ import {
 import { api } from "@/services/api";
 import { toast } from "sonner";
 import { UserCog } from "lucide-react";
-import { ProfessionalProfile, ProfessionType } from "@/types";
+import { ProfessionalProfile, ProfessionType, ProfessionalProfileFormProps } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Le nom doit comporter au moins 2 caractères" }),
@@ -27,13 +28,6 @@ const formSchema = z.object({
   profession_type: z.enum(["osteopathe", "chiropracteur", "autre"])
 });
 
-interface ProfessionalProfileFormProps {
-  defaultValues?: Partial<ProfessionalProfile>;
-  professionalProfileId?: number;
-  isEditing?: boolean;
-  onSuccess?: (data: ProfessionalProfile) => void;
-}
-
 export function ProfessionalProfileForm({
   defaultValues,
   professionalProfileId,
@@ -41,6 +35,7 @@ export function ProfessionalProfileForm({
   onSuccess
 }: ProfessionalProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,16 +60,17 @@ export function ProfessionalProfileForm({
         siret: values.siret,
         ape_code: values.ape_code,
         profession_type: values.profession_type,
+        userId: user?.id || defaultValues?.userId || ""
       };
 
       let result;
 
       if (isEditing && professionalProfileId) {
-        // Update existing osteopath
+        // Update existing profile
         result = await api.updateProfessionalProfile(professionalProfileId, profileData);
         toast.success("Profil mis à jour avec succès!");
       } else {
-        // Create new osteopath
+        // Create new profile
         result = await api.createProfessionalProfile(profileData);
         toast.success("Profil créé avec succès!");
         form.reset();

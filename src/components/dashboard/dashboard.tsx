@@ -5,7 +5,7 @@ import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AppointmentsOverview } from "@/components/dashboard/appointments-overview";
 import { DemographicsCard } from "@/components/dashboard/demographics-card";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
-import { DashboardData } from "@/types";
+import { DashboardData, MonthlyGrowthData } from "@/types";
 import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -125,7 +125,7 @@ export function Dashboard() {
 
         // Données de croissance mensuelle
         const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
-        const monthlyGrowth = frenchMonths.map((month, index) => {
+        const monthlyGrowth: MonthlyGrowthData[] = frenchMonths.map((month, index) => {
           const thisYearPatients = patients.filter(p => {
             const createdAt = new Date(p.createdAt);
             return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear;

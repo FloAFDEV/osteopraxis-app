@@ -1,0 +1,36 @@
+
+import { User } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+
+export const userService = {
+  async updateUserRole(userId: string, role: 'USER' | 'ADMIN'): Promise<User> {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .update({ role })
+        .eq('id', userId)
+        .select()
+        .single();
+        
+      if (error) throw new Error(error.message);
+      return data as User;
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      throw error;
+    }
+  },
+  
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .select('*');
+        
+      if (error) throw new Error(error.message);
+      return data as User[];
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw error;
+    }
+  }
+};

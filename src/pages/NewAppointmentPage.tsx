@@ -1,152 +1,91 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { api } from "@/services/api";
+import React, { useState, useEffect } from "react";
 import { Layout } from "@/components/ui/layout";
-import { AppointmentForm } from "@/components/appointment-form";
+import { useNavigate, useLocation } from "react-router-dom";
+import AppointmentForm from "@/components/appointment-form";
+import { api } from "@/services/api";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useAuth } from "@/contexts/AuthContext";
-import { AppointmentFormProps } from "@/types";
+import { AppointmentStatus } from "@/types";
+import { FancyLoader } from "@/components/ui/fancy-loader";
 
 const NewAppointmentPage = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const [patients, setPatients] = useState<any[]>([]);
+  const [cabinets, setCabinets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [initError, setInitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // État pour stocker les données initiales nécessaires au composant de formulaire
-  const [formInitialData, setFormInitialData] = useState({
-    patients: [],
-    cabinets: [],
-    initialDate: new Date(),
-  });
+  // Extract initialDate from query parameters if provided
+  const queryParams = new URLSearchParams(location.search);
+  const dateParam = queryParams.get("date");
+  const initialDate = dateParam ? new Date(dateParam) : new Date();
 
+  // Load patients and cabinets on component mount
   useEffect(() => {
-    const initializeForm = async () => {
+    const loadData = async () => {
       try {
-        setLoading(true);
+        const [patientsData, cabinetsData] = await Promise.all([
+          api.getPatients(),
+          api.getCabinets(),
+        ]);
 
-        // Récupérer la liste des patients
-        const patientsData = await api.getPatients();
-        if (!patientsData || patientsData.length === 0) {
-          console.warn("Aucun patient disponible pour créer un rendez-vous.");
-        }
-
-        // Récupérer la liste des cabinets pour l'utilisateur actuellement connecté
-        let cabinetsData = [];
-        if (user && user.professionalProfileId) {
-          cabinetsData = await api.getCabinetsByProfessionalProfileId(user.professionalProfileId);
-        }
-
-        if (!cabinetsData || cabinetsData.length === 0) {
-          console.warn("Aucun cabinet disponible pour créer un rendez-vous.");
-        }
-
-        setFormInitialData({
-          patients: patientsData || [],
-          cabinets: cabinetsData || [],
-          initialDate: new Date(),
-        });
+        setPatients(patientsData || []);
+        setCabinets(cabinetsData || []);
       } catch (error) {
-        console.error("Erreur lors de l'initialisation du formulaire de rendez-vous:", error);
-        setInitError("Impossible de charger les données nécessaires. Veuillez réessayer.");
+        console.error("Error loading data for appointment form:", error);
+        toast.error(
+          "Une erreur est survenue lors du chargement des données. Veuillez réessayer."
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    initializeForm();
-  }, [user]);
+    loadData();
+  }, []);
 
-  const handleCreateAppointment = async (appointmentData: any) => {
+  const handleFormSubmit = async (appointmentData: any) => {
     try {
-      setLoading(true);
+      setSubmitting(true);
 
-      // Formater correctement les données pour l'API
-      const formattedAppointment = {
+      // Ensure the status is a valid AppointmentStatus
+      const status: AppointmentStatus = appointmentData.status as AppointmentStatus || "PLANNED";
+
+      // Create the appointment with the validated data
+      await api.createAppointment({
         ...appointmentData,
-        patientId: parseInt(appointmentData.patientId),
-        cabinetId: appointmentData.cabinetId ? parseInt(appointmentData.cabinetId) : undefined,
-        date: format(appointmentData.date, "yyyy-MM-dd"),
-        status: "PLANNED", // Statut initial pour un nouveau rendez-vous
-        notificationSent: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+        status,
+      });
 
-      // Appel API pour créer le rendez-vous
-      const newAppointment = await api.createAppointment(formattedAppointment);
-
-      toast.success(`Rendez-vous créé le ${format(new Date(newAppointment.date), "PPPP", { locale: fr })}`);
+      toast.success("Rendez-vous créé avec succès!");
       navigate("/appointments");
     } catch (error) {
-      console.error("Erreur lors de la création du rendez-vous:", error);
+      console.error("Error creating appointment:", error);
       toast.error(
-        error instanceof Error 
-          ? `Erreur: ${error.message}` 
-          : "Une erreur est survenue lors de la création du rendez-vous"
+        "Une erreur est survenue lors de la création du rendez-vous. Veuillez réessayer."
       );
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  if (loading && !formInitialData.patients.length) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center py-20">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-muted-foreground">Chargement des données...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (initError) {
-    return (
-      <Layout>
-        <div className="max-w-md mx-auto text-center py-12">
-          <div className="text-red-500 mb-4 text-lg">⚠️ Erreur</div>
-          <p className="mb-4">{initError}</p>
-          <button 
-            onClick={() => navigate("/appointments")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Retour à la liste des rendez-vous
-          </button>
-        </div>
-      </Layout>
-    );
+  if (loading) {
+    return <FancyLoader message="Chargement..." />;
   }
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <CalendarIcon className="h-8 w-8 text-blue-500" />
-            Nouveau rendez-vous
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Planifiez un nouveau rendez-vous en remplissant le formulaire ci-dessous.
-          </p>
-        </div>
-
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          <AppointmentForm 
-            patients={formInitialData.patients}
-            cabinets={formInitialData.cabinets}
-            initialDate={formInitialData.initialDate}
-            onSubmit={handleCreateAppointment}
-            isSubmitting={loading}
-            onCancel={() => navigate("/appointments")}
-          />
-        </div>
+      <div className="container mx-auto py-6">
+        <h1 className="text-2xl font-bold mb-6">Nouveau rendez-vous</h1>
+        <AppointmentForm
+          patients={patients}
+          cabinets={cabinets}
+          initialDate={initialDate}
+          onSubmit={handleFormSubmit}
+          isSubmitting={submitting}
+          onCancel={() => navigate("/appointments")}
+        />
       </div>
     </Layout>
   );

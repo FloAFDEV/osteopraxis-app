@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { api } from "@/services/api";
@@ -316,7 +317,7 @@ const ProfessionalProfilePage = () => {
                     // Pré-remplir le nom si le profil n'en a pas déjà un
                     name: profile?.name || getDefaultName()
                   }}
-                  profileId={profile?.id}
+                  professionalProfileId={profile?.id}
                   isEditing={!!profile?.id}
                   onSuccess={handleProfileSuccess}
                 />

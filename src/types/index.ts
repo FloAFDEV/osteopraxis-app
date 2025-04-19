@@ -105,7 +105,7 @@ export interface User {
   professionalProfileId?: number;
   created_at: string;
   updated_at: string;
-  avatar_url?: string; // Add this property since it's used in the sidebar
+  avatar_url?: string;
 }
 
 // Invoice types
@@ -139,12 +139,14 @@ export interface DashboardData {
   newPatientsLast30Days: number;
   thirtyDayGrowthPercentage: number;
   annualGrowthPercentage: number;
-  monthlyGrowth: {
-    month: string;
-    patients: number;
-    prevPatients: number;
-    growthText: string;
-  }[];
+  monthlyGrowth: MonthlyGrowthData[];
+}
+
+export interface MonthlyGrowthData {
+  month: string;
+  patients: number;
+  prevPatients: number;
+  growthText: string;
 }
 
 // Chart types
@@ -188,6 +190,14 @@ export interface AppointmentFormProps {
   onCancel?: () => void;
 }
 
+// Adding interface for ProfessionalProfileFormProps
+export interface ProfessionalProfileFormProps {
+  defaultValues?: Partial<ProfessionalProfile>;
+  professionalProfileId?: number;
+  isEditing?: boolean;
+  onSuccess?: (data: ProfessionalProfile) => void;
+}
+
 // Adding interface for OsteopathProfileFormProps (similar to ProfessionalProfileForm)
 export interface OsteopathProfileFormProps {
   defaultValues?: Partial<ProfessionalProfile>;
@@ -210,4 +220,13 @@ export interface AuthContextType {
   updateUser: (userData: User) => void;
   isAdmin?: boolean;
   promoteToAdmin?: (userId: string) => Promise<void>;
+}
+
+// Add CabinetFormProps interface
+export interface CabinetFormProps {
+  defaultValues?: Partial<Cabinet>;
+  cabinetId?: number;
+  professionalProfileId: number;
+  isEditing?: boolean;
+  onSuccess?: (data: Cabinet) => void;
 }

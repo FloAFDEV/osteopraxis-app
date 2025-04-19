@@ -1,99 +1,74 @@
 
-import { api } from "@/services/api";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Cabinet, ProfessionalProfile } from "@/types";
 
 /**
- * Utilitaire pour migrer les patients de osteopathId vers professionalProfileId
+ * Migration helpers for transitioning from Osteopath to ProfessionalProfile
+ * These utilities help maintain backward compatibility during the migration
  */
-export async function migratePatients() {
-  try {
-    console.log("Début de la migration des patients...");
-    
-    // Récupérer tous les patients
-    const { data: patients, error: fetchError } = await supabase
-      .from('Patient')
-      .select('id, osteopathId, professionalProfileId');
-    
-    if (fetchError) {
-      throw new Error(`Erreur lors de la récupération des patients: ${fetchError.message}`);
-    }
-    
-    // Filtrer les patients qui ont un osteopathId mais pas de professionalProfileId
-    const patientsToMigrate = patients?.filter(
-      p => p.osteopathId && !p.professionalProfileId
-    );
-    
-    if (!patientsToMigrate || patientsToMigrate.length === 0) {
-      console.log("Aucun patient à migrer.");
-      return { migrated: 0, errors: 0 };
-    }
-    
-    console.log(`${patientsToMigrate.length} patients à migrer.`);
-    
-    // Compteurs
-    let migrated = 0;
-    let errors = 0;
-    
-    // Mettre à jour chaque patient
-    for (const patient of patientsToMigrate) {
-      try {
-        // Nous utilisons le même ID puisque ProfessionalProfile contient les mêmes données que Osteopath
-        const { error: updateError } = await supabase
-          .from('Patient')
-          .update({ professionalProfileId: patient.osteopathId })
-          .eq('id', patient.id);
-        
-        if (updateError) {
-          console.error(`Erreur lors de la mise à jour du patient ${patient.id}:`, updateError);
-          errors++;
-        } else {
-          migrated++;
-        }
-      } catch (err) {
-        console.error(`Exception lors de la mise à jour du patient ${patient.id}:`, err);
-        errors++;
-      }
-    }
-    
-    console.log(`Migration terminée: ${migrated} patients migrés, ${errors} erreurs.`);
-    return { migrated, errors };
-    
-  } catch (error) {
-    console.error("Erreur globale lors de la migration:", error);
-    toast.error("Une erreur est survenue pendant la migration des patients");
-    return { migrated: 0, errors: -1 };
-  }
-}
 
-/**
- * Utilitaire pour vérifier la cohérence des données après migration
- */
-export async function verifyMigration() {
-  try {
-    const { data, error } = await supabase
-      .from('Patient')
-      .select('id, osteopathId, professionalProfileId')
-      .is('professionalProfileId', null);
-    
-    if (error) {
-      throw new Error(`Erreur lors de la vérification: ${error.message}`);
-    }
-    
-    return {
-      success: true,
-      patientsWithoutProfile: data?.length || 0,
-      message: data?.length 
-        ? `${data.length} patients n'ont pas encore de professionalProfileId.`
-        : "Tous les patients ont un professionalProfileId."
-    };
-    
-  } catch (error) {
-    console.error("Erreur lors de la vérification:", error);
-    return { 
-      success: false, 
-      patientsWithoutProfile: -1,
-      message: `Erreur: ${error instanceof Error ? error.message : "Erreur inconnue"}`
-    };
+export const migrateOsteopathFieldsToProfessionalProfile = (oldObj: any): Partial<ProfessionalProfile> => {
+  const result: Partial<ProfessionalProfile> = {};
+  
+  // Map fields from old Osteopath to new ProfessionalProfile
+  if (oldObj?.name) result.name = oldObj.name;
+  if (oldObj?.professional_title) result.title = oldObj.professional_title;
+  if (oldObj?.title) result.title = oldObj.title;
+  if (oldObj?.userId) result.userId = oldObj.userId;
+  if (oldObj?.adeli_number) result.adeli_number = oldObj.adeli_number;
+  if (oldObj?.siret) result.siret = oldObj.siret;
+  if (oldObj?.ape_code) result.ape_code = oldObj.ape_code;
+  
+  // Set default profession_type if not provided
+  if (oldObj?.profession_type) {
+    result.profession_type = oldObj.profession_type;
+  } else {
+    result.profession_type = "osteopathe";
   }
-}
+  
+  // Copy timestamp fields if they exist
+  if (oldObj?.createdAt) result.createdAt = oldObj.createdAt;
+  if (oldObj?.updatedAt) result.updatedAt = oldObj.updatedAt;
+  
+  return result;
+};
+
+export const migrateCabinetFields = (oldObj: any): Partial<Cabinet> => {
+  const result: Partial<Cabinet> = {};
+  
+  // Copy standard fields
+  if (oldObj?.name) result.name = oldObj.name;
+  if (oldObj?.address) result.address = oldObj.address;
+  if (oldObj?.phone) result.phone = oldObj.phone;
+  if (oldObj?.email) result.email = oldObj.email;
+  if (oldObj?.logoUrl) result.logoUrl = oldObj.logoUrl;
+  if (oldObj?.imageUrl) result.imageUrl = oldObj.imageUrl;
+  
+  // Map osteopathId to professionalProfileId if needed
+  if (oldObj?.professionalProfileId) {
+    result.professionalProfileId = oldObj.professionalProfileId;
+  } else if (oldObj?.osteopathId) {
+    result.professionalProfileId = oldObj.osteopathId;
+    console.warn("Migrating osteopathId to professionalProfileId: ", oldObj.osteopathId);
+  }
+  
+  // Copy timestamp fields if they exist
+  if (oldObj?.createdAt) result.createdAt = oldObj.createdAt;
+  if (oldObj?.updatedAt) result.updatedAt = oldObj.updatedAt;
+  
+  return result;
+};
+
+export const migrateUserFields = (oldObj: any): any => {
+  const result = { ...oldObj };
+  
+  // Map osteopathId to professionalProfileId if needed
+  if (oldObj?.professionalProfileId) {
+    result.professionalProfileId = oldObj.professionalProfileId;
+  } else if (oldObj?.osteopathId) {
+    result.professionalProfileId = oldObj.osteopathId;
+    console.warn("Migrating user.osteopathId to user.professionalProfileId: ", oldObj.osteopathId);
+    delete result.osteopathId;
+  }
+  
+  return result;
+};

@@ -64,7 +64,7 @@ const ProfessionalSettingsPage = () => {
           {profile ? (
             <ProfessionalProfileForm 
               defaultValues={profile} 
-              profileId={profile.id} 
+              professionalProfileId={profile.id} 
               isEditing={true} 
               onSuccess={handleSuccess} 
             />
