@@ -1,10 +1,8 @@
 
 // Configuration for the Supabase API
 
-import { delay } from "../api/config";
-
 // Export for use in other modules
-export { delay };
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Use real authentication - we set this to false to ensure real auth is used
 export const USE_SUPABASE = true;
