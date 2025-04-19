@@ -6,13 +6,17 @@ export const userService = {
   async createUser(userData: Partial<User>): Promise<User> {
     try {
       const now = new Date().toISOString();
+      
+      // For compatibility with database schema, convert role if it's "USER"
+      const role = userData.role === 'USER' ? 'OSTEOPATH' : userData.role || 'OSTEOPATH';
+      
       const { data, error } = await supabase
         .from('User')
         .insert({
           email: userData.email!,
           first_name: userData.first_name || null,
           last_name: userData.last_name || null,
-          role: userData.role || 'OSTEOPATH',
+          role: role,
           created_at: now,
           updated_at: now
         })
@@ -52,12 +56,12 @@ export const userService = {
 
   async updateUser(id: string, updates: Partial<User>): Promise<User> {
     try {
+      // Create a copy of updates to avoid modifying the original object
+      const updatesForDB = { ...updates, updated_at: new Date().toISOString() };
+      
       const { data, error } = await supabase
         .from('User')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(updatesForDB)
         .eq('id', id)
         .select()
         .single();
@@ -72,10 +76,13 @@ export const userService = {
   
   async updateUserRole(id: string, role: Role): Promise<User> {
     try {
+      // For compatibility with database schema, convert role if it's "USER" 
+      const dbRole = role === 'USER' ? 'OSTEOPATH' : role;
+      
       const { data, error } = await supabase
         .from('User')
         .update({
-          role: role,
+          role: dbRole,
           updated_at: new Date().toISOString()
         })
         .eq('id', id)
