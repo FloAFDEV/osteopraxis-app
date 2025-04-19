@@ -128,7 +128,7 @@ export const authService = {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {
-        console.log("No active session found");
+        console.log("Pas de session active");
         return null;
       }
       
@@ -138,20 +138,25 @@ export const authService = {
         .from('User')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Utilisez maybeSingle() au lieu de single()
         
       if (error) {
+        // Log de l'erreur détaillée
+        console.error("Erreur lors de la récupération de l'utilisateur:", error);
+        
+        // Gestion plus granulaire des erreurs
         if (error.code === 'PGRST116') {
-          console.log("User not found in database");
+          console.log("Aucun utilisateur trouvé avec cet ID");
           return null;
         }
+        
         throw error;
       }
       
       return data as User;
     } catch (error) {
-      console.error("Error getting current user:", error);
-      throw error;
+      console.error("Erreur inattendue lors de la récupération de l'utilisateur:", error);
+      return null;
     }
   },
 
