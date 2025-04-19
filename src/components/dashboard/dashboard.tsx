@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -231,7 +230,7 @@ export function Dashboard() {
             <DashboardStats data={dashboardData} />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-2 sm:px-0">
             <div className="animate-fade-in animate-delay-100">
               <AppointmentsOverview data={dashboardData} />
             </div>
@@ -240,7 +239,7 @@ export function Dashboard() {
             </div>
           </div>
 
-          <div className="animate-fade-in animate-delay-300">
+          <div className="animate-fade-in animate-delay-300 px-2 sm:px-0">
             <Card className="hover-scale">
               <CardContent className="p-6 bg-inherit">
                 <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
