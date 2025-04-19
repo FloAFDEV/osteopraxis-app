@@ -1,6 +1,10 @@
 
-// Réutiliser la configuration de l'API
-import { delay, SIMULATE_AUTH } from "../api/config";
+// Configuration for the Supabase API
 
-// Export pour utilisation dans les services Supabase
-export { delay, SIMULATE_AUTH };
+import { delay, USE_SUPABASE } from "../api/config";
+
+// Export for use in other modules
+export { delay, USE_SUPABASE };
+
+// Add SIMULATE_AUTH flag
+export const SIMULATE_AUTH = false;

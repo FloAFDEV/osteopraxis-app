@@ -1,6 +1,6 @@
-import { User } from "@/types";
+
+import { User, Credentials } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { Credentials } from "@/types";
 
 export const authService = {
   async login(email: string, password: string): Promise<{ user: User; token: string }> {

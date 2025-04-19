@@ -1,99 +1,171 @@
 
-import { User, Role } from "@/types";
+import { User } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { delay, USE_SUPABASE } from "./config";
+
+// Sample data for development
+const users: User[] = [];
 
 export const userService = {
-  async createUser(userData: Partial<User>): Promise<User> {
-    try {
-      const now = new Date().toISOString();
-      
-      // For compatibility with database schema, convert role if it's "USER"
-      const role = userData.role === 'USER' ? 'OSTEOPATH' : userData.role || 'OSTEOPATH';
-      
-      const { data, error } = await supabase
-        .from('User')
-        .insert({
-          email: userData.email!,
-          first_name: userData.first_name || null,
-          last_name: userData.last_name || null,
-          role: role,
-          created_at: now,
-          updated_at: now
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as User;
-    } catch (error) {
-      console.error("Error creating user:", error);
-      throw error;
-    }
-  },
-
-  async getUserById(id: string): Promise<User | null> {
-    try {
-      const { data, error } = await supabase
-        .from('User')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        // Si l'erreur est "Aucune ligne trouvée", retourner null
-        if (error.code === 'PGRST116') {
-          return null;
+  async createUser(userData: Omit<User, "id" | "created_at" | "updated_at">): Promise<User> {
+    if (USE_SUPABASE) {
+      try {
+        const now = new Date().toISOString();
+        
+        // Ensure role is correctly typed for the database
+        let role = userData.role;
+        if (role === 'USER') {
+          role = 'OSTEOPATH'; // Default to OSTEOPATH as USER is not a valid db role
         }
+        
+        const { data, error } = await supabase
+          .from('User')
+          .insert({
+            email: userData.email,
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            role: role,
+            updated_at: now,
+            created_at: now,
+            professionalProfileId: userData.professionalProfileId,
+            osteopathId: userData.osteopathId
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        return data as User;
+      } catch (error) {
+        console.error("Error creating user:", error);
         throw error;
       }
-
-      return data as User;
-    } catch (error) {
-      console.error("Error fetching user by ID:", error);
-      throw error;
     }
-  },
-
-  async updateUser(id: string, updates: Partial<User>): Promise<User> {
-    try {
-      // Create a copy of updates to avoid modifying the original object
-      const updatesForDB = { ...updates, updated_at: new Date().toISOString() };
-      
-      const { data, error } = await supabase
-        .from('User')
-        .update(updatesForDB)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as User;
-    } catch (error) {
-      console.error("Error updating user:", error);
-      throw error;
-    }
+    
+    await delay(500);
+    const now = new Date().toISOString();
+    const newUser = {
+      ...userData,
+      id: `user-${users.length + 1}`,
+      created_at: now,
+      updated_at: now,
+    } as User;
+    
+    users.push(newUser);
+    return newUser;
   },
   
-  async updateUserRole(id: string, role: Role): Promise<User> {
-    try {
-      // For compatibility with database schema, convert role if it's "USER" 
-      const dbRole = role === 'USER' ? 'OSTEOPATH' : role;
-      
-      const { data, error } = await supabase
-        .from('User')
-        .update({
-          role: dbRole,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as User;
-    } catch (error) {
-      console.error("Error updating user role:", error);
-      throw error;
+  async getUserById(id: string): Promise<User | null> {
+    if (USE_SUPABASE) {
+      try {
+        const { data, error } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (error) {
+          if (error.code === 'PGRST116') {
+            return null;
+          }
+          throw error;
+        }
+        
+        return data as User;
+      } catch (error) {
+        console.error("Error fetching user by ID:", error);
+        throw error;
+      }
     }
+    
+    await delay(300);
+    return users.find(user => user.id === id) || null;
+  },
+  
+  async updateUser(updates: Partial<User>): Promise<User> {
+    if (USE_SUPABASE) {
+      try {
+        if (!updates.id) {
+          throw new Error("User ID is required");
+        }
+        
+        // Ensure role is correctly typed for the database
+        let role = updates.role;
+        if (role === 'USER') {
+          role = 'OSTEOPATH'; // Default to OSTEOPATH as USER is not a valid db role
+        }
+        
+        const { data, error } = await supabase
+          .from('User')
+          .update({
+            email: updates.email,
+            first_name: updates.first_name,
+            last_name: updates.last_name,
+            role: role,
+            updated_at: new Date().toISOString(),
+            professionalProfileId: updates.professionalProfileId,
+            osteopathId: updates.osteopathId
+          })
+          .eq('id', updates.id)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        return data as User;
+      } catch (error) {
+        console.error("Error updating user:", error);
+        throw error;
+      }
+    }
+    
+    await delay(300);
+    if (!updates.id) {
+      throw new Error("User ID is required");
+    }
+    
+    const index = users.findIndex(user => user.id === updates.id);
+    if (index === -1) {
+      throw new Error(`User with ID ${updates.id} not found`);
+    }
+    
+    users[index] = {
+      ...users[index],
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+    
+    return users[index];
+  },
+  
+  async updateUserRole(userId: string, role: 'ADMIN' | 'OSTEOPATH'): Promise<User> {
+    if (USE_SUPABASE) {
+      try {
+        const { data, error } = await supabase
+          .from('User')
+          .update({
+            role: role,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        return data as User;
+      } catch (error) {
+        console.error("Error updating user role:", error);
+        throw error;
+      }
+    }
+    
+    await delay(300);
+    const index = users.findIndex(user => user.id === userId);
+    if (index === -1) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+    
+    users[index].role = role;
+    users[index].updated_at = new Date().toISOString();
+    
+    return users[index];
   }
 };

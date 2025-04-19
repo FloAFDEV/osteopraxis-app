@@ -77,13 +77,22 @@ export const cabinetService = {
       try {
         const now = new Date().toISOString();
         
+        // Only include fields that match the Supabase schema
+        const cabinetPayload = {
+          name: cabinetData.name || '',
+          address: cabinetData.address || '',
+          phone: cabinetData.phone,
+          email: cabinetData.email,
+          professionalProfileId: cabinetData.professionalProfileId,
+          osteopathId: cabinetData.osteopathId || 0,
+          logoUrl: cabinetData.logoUrl,
+          imageUrl: cabinetData.imageUrl,
+          updatedAt: now
+        };
+        
         const { data, error } = await supabase
           .from('Cabinet')
-          .insert({
-            ...cabinetData,
-            createdAt: now,
-            updatedAt: now
-          })
+          .insert(cabinetPayload)
           .select()
           .single();
           
@@ -110,12 +119,22 @@ export const cabinetService = {
   async updateCabinet(id: number, updates: Partial<Cabinet>): Promise<Cabinet> {
     if (USE_SUPABASE) {
       try {
+        // Only include fields that match the Supabase schema
+        const cabinetPayload = {
+          name: updates.name,
+          address: updates.address,
+          phone: updates.phone,
+          email: updates.email,
+          professionalProfileId: updates.professionalProfileId,
+          osteopathId: updates.osteopathId,
+          logoUrl: updates.logoUrl,
+          imageUrl: updates.imageUrl,
+          updatedAt: new Date().toISOString()
+        };
+        
         const { data, error } = await supabase
           .from('Cabinet')
-          .update({
-            ...updates,
-            updatedAt: new Date().toISOString()
-          })
+          .update(cabinetPayload)
           .eq('id', id)
           .select()
           .single();

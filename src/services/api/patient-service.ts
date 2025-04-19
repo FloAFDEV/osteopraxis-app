@@ -1,104 +1,81 @@
-import { Patient } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
-import { supabasePatientService } from "../supabase-api/patient-service";
-import { toast } from "sonner";
 
-// Tableau vide pour les patients pour supprimer les données fictives
+import { Patient } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { delay, USE_SUPABASE } from "./config";
+
+// Sample data for development
 const patients: Patient[] = [];
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
     if (USE_SUPABASE) {
       try {
-        console.log("API getPatients: Using Supabase");
-        console.log("Making direct request to Supabase API");
-        
-        // Ajout de logs sur l'état d'authentification
-        const { data: sessionData } = await supabasePatientService.getAuthSession();
-        console.log("Session active:", sessionData?.session ? "Oui" : "Non");
-        if (!sessionData?.session) {
-          console.warn("Aucune session d'authentification détectée");
-          throw new Error("Vous devez vous connecter pour accéder à vos patients");
-        }
-        
-        console.log("Tentative de récupération des patients...");
-        try {
-          const patientsData = await supabasePatientService.getPatients();
-          console.log(`API getPatients: Récupéré ${patientsData.length} patients depuis Supabase`);
-          return patientsData;
-        } catch (error: any) {
-          if (error.message?.includes("profil ostéopathe")) {
-            console.log("Redirection vers la page de configuration du profil ostéopathe");
-            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
-            window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
-            return [];
-          }
-          throw error;
-        }
+        const { data, error } = await supabase
+          .from('Patient')
+          .select('*');
+          
+        if (error) throw error;
+        return data as Patient[];
       } catch (error) {
-        console.error("Erreur Supabase getPatients:", error);
-        throw error; // Important: propagate the error to handle it in the UI
+        console.error("Error fetching patients:", error);
+        throw error;
       }
     }
     
-    // Fallback: code simulé existant
     await delay(300);
     return [...patients];
   },
-
-  async getPatientById(id: number): Promise<Patient | undefined> {
+  
+  async getPatientById(id: number): Promise<Patient | null> {
     if (USE_SUPABASE) {
       try {
-        console.log(`API getPatientById: Fetching patient with ID ${id}...`);
-        try {
-          const patient = await supabasePatientService.getPatientById(id);
-          console.log(`API getPatientById: Patient found? ${patient ? 'Yes' : 'No'}`);
-          return patient;
-        } catch (error: any) {
-          if (error.message?.includes("profil ostéopathe")) {
-            console.log("Redirection vers la page de configuration du profil ostéopathe");
-            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
-            window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
-            return undefined;
+        const { data, error } = await supabase
+          .from('Patient')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (error) {
+          if (error.code === 'PGRST116') {
+            return null;
           }
           throw error;
         }
+        
+        return data as Patient;
       } catch (error) {
-        console.error("Erreur Supabase getPatientById:", error);
+        console.error("Error fetching patient by ID:", error);
         throw error;
       }
     }
     
-    // Fallback: code simulé existant
     await delay(200);
-    return patients.find(patient => patient.id === id);
+    return patients.find(patient => patient.id === id) || null;
   },
-
-  async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+  
+  async createPatient(patient: Omit<Patient, "id" | "createdAt" | "updatedAt">): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        try {
-          const createdPatient = await supabasePatientService.createPatient(patient);
-          return createdPatient;
-        } catch (error: any) {
-          if (error.message?.includes("profil ostéopathe")) {
-            console.log("Redirection vers la page de configuration du profil ostéopathe");
-            toast.error("Vous devez compléter votre profil avant de créer un patient");
-            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
-            setTimeout(() => {
-              window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
-            }, 1500);
-            throw error;
-          }
-          throw error;
-        }
+        const now = new Date().toISOString();
+        
+        const { data, error } = await supabase
+          .from('Patient')
+          .insert({
+            ...patient,
+            createdAt: now,
+            updatedAt: now
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        return data as Patient;
       } catch (error) {
-        console.error("Erreur Supabase createPatient:", error);
+        console.error("Error creating patient:", error);
         throw error;
       }
     }
     
-    // Fallback: code simulé existant
     await delay(400);
     const now = new Date().toISOString();
     const newPatient = {
@@ -107,86 +84,120 @@ export const patientService = {
       createdAt: now,
       updatedAt: now,
     } as Patient;
+    
     patients.push(newPatient);
     return newPatient;
   },
-
+  
   async updatePatient(patient: Patient): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        // Use the supabase patient service for update
-        try {
-          const updatedPatient = await supabasePatientService.updatePatient(patient);
-          return updatedPatient;
-        } catch (error: any) {
-          if (error.message?.includes("profil ostéopathe")) {
-            console.log("Redirection vers la page de configuration du profil ostéopathe");
-            toast.error("Vous devez compléter votre profil avant de modifier un patient");
-            // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
-            setTimeout(() => {
-              window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
-            }, 1500);
-            throw error;
-          }
-          throw error;
-        }
+        const { data, error } = await supabase
+          .from('Patient')
+          .update({
+            ...patient,
+            updatedAt: new Date().toISOString()
+          })
+          .eq('id', patient.id)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        return data as Patient;
       } catch (error) {
-        console.error("Erreur Supabase updatePatient:", error);
+        console.error("Error updating patient:", error);
         throw error;
       }
     }
     
-    // Fallback: code simulé existant
     await delay(300);
     const index = patients.findIndex(p => p.id === patient.id);
-    if (index !== -1) {
-      patients[index] = { 
-        ...patients[index], 
-        ...patient,
-        updatedAt: new Date().toISOString() 
-      };
-      return patients[index];
+    
+    if (index === -1) {
+      throw new Error(`Patient with ID ${patient.id} not found.`);
     }
-    throw new Error(`Patient with id ${patient.id} not found`);
+    
+    patients[index] = {
+      ...patient,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    return patients[index];
   },
-
+  
   async deletePatient(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        console.log(`API deletePatient: Deleting patient with ID ${id}...`);
-        try {
-          const result = await supabasePatientService.deletePatient(id);
+        const { error } = await supabase
+          .from('Patient')
+          .delete()
+          .eq('id', id);
           
-          if (result.error) {
-            if (result.error.message?.includes("profil ostéopathe")) {
-              console.log("Redirection vers la page de configuration du profil ostéopathe");
-              toast.error("Vous devez compléter votre profil avant de supprimer un patient");
-              // Rediriger vers la page de profil ostéopathe avec un paramètre returnTo
-              setTimeout(() => {
-                window.location.href = `/osteopath-profile?returnTo=${encodeURIComponent(window.location.pathname)}`;
-              }, 1500);
-            }
-            throw result.error;
-          }
-          
-          console.log(`API deletePatient: Patient ${id} successfully deleted`);
-          return true;
-        } catch (error) {
-          throw error;
-        }
+        if (error) throw error;
+        return true;
       } catch (error) {
-        console.error("Erreur Supabase deletePatient:", error);
+        console.error("Error deleting patient:", error);
         throw error;
       }
     }
     
-    // Fallback: code simulé existant
     await delay(300);
     const index = patients.findIndex(p => p.id === id);
+    
     if (index !== -1) {
       patients.splice(index, 1);
       return true;
     }
+    
     return false;
+  },
+  
+  // Add the missing getPatientsByLetter function
+  async getPatientsByLetter(letter: string): Promise<Patient[]> {
+    if (USE_SUPABASE) {
+      try {
+        const { data, error } = await supabase
+          .from('Patient')
+          .select('*')
+          .ilike('lastName', `${letter}%`);
+          
+        if (error) throw error;
+        return data as Patient[];
+      } catch (error) {
+        console.error("Error fetching patients by letter:", error);
+        throw error;
+      }
+    }
+    
+    await delay(300);
+    return patients.filter(p => p.lastName.toLowerCase().startsWith(letter.toLowerCase()));
+  },
+  
+  // Add the missing searchPatients function
+  async searchPatients(query: string): Promise<Patient[]> {
+    if (USE_SUPABASE) {
+      try {
+        const { data, error } = await supabase
+          .from('Patient')
+          .select('*')
+          .or(`firstName.ilike.%${query}%,lastName.ilike.%${query}%,email.ilike.%${query}%,phone.ilike.%${query}%`);
+          
+        if (error) throw error;
+        return data as Patient[];
+      } catch (error) {
+        console.error("Error searching patients:", error);
+        throw error;
+      }
+    }
+    
+    await delay(300);
+    const lowerQuery = query.toLowerCase();
+    return patients.filter(
+      p => 
+        p.firstName?.toLowerCase().includes(lowerQuery) || 
+        p.lastName?.toLowerCase().includes(lowerQuery) || 
+        p.email?.toLowerCase().includes(lowerQuery) || 
+        p.phone?.includes(query)
+    );
   }
 };

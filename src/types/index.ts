@@ -1,3 +1,4 @@
+
 // Add missing types or update existing ones here to ensure all the properties needed are present
 
 export type Role = 'ADMIN' | 'OSTEOPATH' | 'USER';
@@ -31,6 +32,14 @@ export interface AuthContextType extends AuthState {
   loginWithMagicLink: (email: string) => Promise<boolean>;
   isAdmin: boolean;
   promoteToAdmin: (userId: string) => Promise<void>;
+}
+
+// Adding Credentials type for auth-service
+export interface Credentials {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 // Profession Type
@@ -121,6 +130,9 @@ export type Handedness = 'LEFT' | 'RIGHT' | 'AMBIDEXTROUS' | null;
 
 // Add other necessary types for the application
 export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+
+// Match the DB status values
+export type DatabaseAppointmentStatus = "COMPLETED" | "CANCELED" | "SCHEDULED" | "NO_SHOW" | "RESCHEDULED";
 
 export interface Appointment {
   id: number;
