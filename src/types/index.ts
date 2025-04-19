@@ -1,4 +1,3 @@
-
 // Add missing types or update existing ones here to ensure all the properties needed are present
 
 export type Role = 'ADMIN' | 'OSTEOPATH' | 'USER';
@@ -163,12 +162,13 @@ export interface Patient {
   occupation?: string;
   maritalStatus?: MaritalStatus;
   hasChildren?: string;
-  childrenAges?: number[];
+  childrenAges?: string[]; // Changed from number[] to string[]
   handedness?: Handedness;
   avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
   osteopathId: number;
+  professionalProfileId?: number; // Added this field
   cabinetId?: number;
   userId?: string;
   isSmoker?: boolean;
@@ -187,6 +187,7 @@ export interface Patient {
   ophtalmologistName?: string;
   physicalActivity?: string;
   hdlm?: string;
+  notes?: string; // Added notes field
 }
 
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";

@@ -79,6 +79,8 @@ export function PatientForm({
       hasChildren: convertHasChildrenToBoolean(patient.hasChildren),
       // Assurer que birthDate est un objet Date s'il existe
       birthDate: patient.birthDate ? typeof patient.birthDate === 'string' ? new Date(patient.birthDate) : patient.birthDate : null,
+      // Conversion des âges des enfants de number[] à string[] si nécessaire
+      childrenAges: patient.childrenAges?.map(String) || [],
       // S'assurer que les valeurs null sont correctement gérées
       email: patient.email || "",
       phone: patient.phone || "",
@@ -94,7 +96,8 @@ export function PatientForm({
       surgicalHistory: patient.surgicalHistory || "",
       traumaHistory: patient.traumaHistory || "",
       rheumatologicalHistory: patient.rheumatologicalHistory || "",
-      currentTreatment: patient.currentTreatment || ""
+      currentTreatment: patient.currentTreatment || "",
+      notes: patient.notes || ""
     } : {
       firstName: "",
       lastName: "",
@@ -102,7 +105,9 @@ export function PatientForm({
       isSmoker: false,
       hasVisionCorrection: false,
       email: "",
-      phone: ""
+      phone: "",
+      childrenAges: [], // Initialize as empty string array
+      notes: ""
     }
   });
 

@@ -19,6 +19,8 @@ export const api = {
   register: authService.register,
   logout: authService.logout,
   getSession: authService.getSession,
+  getCurrentUser: authService.getCurrentUser,
+  promoteToAdmin: authService.promoteToAdmin,
   
   // User
   createUser: userService.createUser,
@@ -38,8 +40,10 @@ export const api = {
   // Appointment
   getAppointments: appointmentService.getAppointments,
   getAppointmentById: appointmentService.getAppointmentById,
+  getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
   createAppointment: appointmentService.createAppointment,
   updateAppointment: appointmentService.updateAppointment,
+  updateAppointmentStatus: appointmentService.updateAppointmentStatus,
   deleteAppointment: appointmentService.deleteAppointment,
   
   // Consultation
@@ -78,4 +82,5 @@ export const api = {
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
+  getCabinetsByProfessionalProfileId: cabinetService.getCabinetsByProfessionalProfileId,
 };
