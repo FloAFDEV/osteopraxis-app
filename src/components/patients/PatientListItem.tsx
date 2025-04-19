@@ -60,7 +60,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      const result = await patientService.deletePatient(patient.id);
+      const result = await patientService.deletePatient(Number(patient.id));
       if (result) {
         toast.success(`${patient.firstName} ${patient.lastName} a été supprimé`);
         if (onDeleted) {

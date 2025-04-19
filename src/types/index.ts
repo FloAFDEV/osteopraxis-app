@@ -8,10 +8,12 @@ export interface User {
   role: "ADMIN" | "OSTEOPATH";
   created_at: string;
   updated_at: string;
+  avatar_url?: string;
+  professionalProfileId?: number;
 }
 
 export interface Patient {
-  id: string;
+  id: string | number;
   first_name: string;
   last_name: string;
   firstName?: string; // Alias for first_name for backward compatibility
@@ -45,15 +47,17 @@ export interface Patient {
   currentTreatment?: string;
   hasChildren?: string;
   childrenAges?: string[];
+  professionalProfileId?: number;
+  isDeceased?: boolean;
 }
 
 export interface Appointment {
-  id: string;
-  patient_id: string;
-  patientId?: string; // Alias for patient_id
-  cabinet_id: string;
-  cabinetId?: string; // Alias for cabinet_id
-  date: string;
+  id: string | number;
+  patient_id: string | number;
+  patientId?: string | number; // Alias for patient_id
+  cabinet_id: string | number;
+  cabinetId?: string | number; // Alias for cabinet_id
+  date: string | Date;
   start_time: string;
   startTime?: string; // Alias for start_time
   end_time: string;
@@ -63,10 +67,12 @@ export interface Appointment {
   status?: AppointmentStatus;
   created_at: string;
   updated_at: string;
+  duration?: number;
+  notificationSent?: boolean;
 }
 
 export interface Cabinet {
-  id: string;
+  id: string | number;
   name: string;
   address: string;
   city: string;
@@ -81,14 +87,15 @@ export interface Cabinet {
   createdAt?: string; // Alias for created_at
   updated_at: string;
   updatedAt?: string; // Alias for updated_at
+  professionalProfileId?: number;
 }
 
 export interface Invoice {
-  id: string;
-  patient_id: string;
-  patientId?: string; // Alias for patient_id
-  cabinet_id: string;
-  cabinetId?: string; // Alias for cabinet_id
+  id: string | number;
+  patient_id: string | number;
+  patientId?: string | number; // Alias for patient_id
+  cabinet_id: string | number;
+  cabinetId?: string | number; // Alias for cabinet_id
   date: string;
   amount: number;
   notes?: string;
@@ -111,6 +118,14 @@ export interface AuthState {
 export type Role = "ADMIN" | "OSTEOPATH";
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+export type DatabaseAppointmentStatus = "SCHEDULED" | "CANCELED" | "COMPLETED" | "NO_SHOW" | "RESCHEDULED";
+export type Contraception = "PILL" | "CONDOM" | "IMPLANT" | "IUD" | "NONE" | "OTHER" | null;
+export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "OTHER" | null;
+export type Handedness = "RIGHT" | "LEFT" | "AMBIDEXTROUS" | null;
+export type DbGender = "Homme" | "Femme" | null;
+export type DbContraception = "PILLS" | "CONDOM" | "IMPLANTS" | "IUD" | "NONE" | "DIAPHRAGM" | null;
+export type DbMaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "SEPARATED" | "ENGAGED" | "PARTNERED" | null;
+export type ProfessionType = "osteopathe" | "chiropracteur" | "autre";
 
 export interface Credentials {
   firstName?: string;
@@ -143,6 +158,23 @@ export interface ProfessionalProfile {
   userId?: string;
   created_at?: string;
   updated_at?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  logoUrl?: string;
+  website?: string;
+  description?: string;
+  vat_number?: string;
+  bank_account_number?: string;
+  iban?: string;
+  bic?: string;
+}
+
+export interface ProfessionalProfileFormProps {
+  defaultValues?: ProfessionalProfile;
+  professionalProfileId?: number;
+  isEditing?: boolean;
+  onSuccess?: (data: ProfessionalProfile) => void;
 }
 
 export interface OsteopathProfileFormProps {
@@ -154,7 +186,7 @@ export interface OsteopathProfileFormProps {
 
 export interface CabinetFormProps {
   defaultValues?: Cabinet;
-  cabinetId?: number;
+  cabinetId?: number | string;
   professionalProfileId?: number;
   isEditing?: boolean;
   onSuccess?: (data: Cabinet) => void;

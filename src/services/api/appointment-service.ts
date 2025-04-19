@@ -1,5 +1,4 @@
-
-import { Appointment, DatabaseAppointmentStatus } from "@/types";
+import { Appointment, AppointmentStatus, DatabaseAppointmentStatus } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { delay, USE_SUPABASE } from "./config";
 
@@ -66,7 +65,7 @@ export const appointmentService = {
     return [...appointments];
   },
 
-  async getAppointmentById(id: number): Promise<Appointment | null> {
+  async getAppointmentById(id: number | string): Promise<Appointment | null> {
     if (USE_SUPABASE) {
       try {
         const { data, error } = await supabase
@@ -95,7 +94,7 @@ export const appointmentService = {
     }
 
     await delay(200);
-    return appointments.find(appointment => appointment.id === id) || null;
+    return appointments.find(appointment => appointment.id == id) || null;
   },
 
   async createAppointment(appointment: Omit<Appointment, "id">): Promise<Appointment> {
@@ -106,9 +105,9 @@ export const appointmentService = {
         // Only include fields that are in the Supabase schema
         const appointmentPayload = {
           date: appointment.date,
-          patientId: appointment.patientId,
+          patientId: Number(appointment.patientId || appointment.patient_id),
           reason: appointment.reason || '',
-          cabinetId: appointment.cabinetId,
+          cabinetId: appointment.cabinetId ? Number(appointment.cabinetId) : undefined,
           status: dbStatus,
           notificationSent: appointment.notificationSent || false
         };
@@ -264,7 +263,7 @@ export const appointmentService = {
     return false;
   },
 
-  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
+  async getAppointmentsByPatientId(patientId: number | string): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
         const { data, error } = await supabase
@@ -288,6 +287,6 @@ export const appointmentService = {
     }
 
     await delay(300);
-    return appointments.filter(a => a.patientId === patientId);
+    return appointments.filter(a => a.patientId == patientId || a.patient_id == patientId);
   }
 };
