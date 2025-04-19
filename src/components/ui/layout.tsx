@@ -46,7 +46,7 @@ export function Layout({
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
-            <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg">
+            <NavLink to="/" className="flex items-center gap-2 font-semibold text-3xl">
               <Activity className="h-5 w-5 text-blue-500" />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 font-bold">PatientHub</span>
             </NavLink>
