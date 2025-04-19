@@ -42,7 +42,7 @@ export const authService = {
         email: data.user.email || '',
         first_name: userData?.first_name || '',
         last_name: userData?.last_name || '',
-        role: (userData?.role as Role) || 'USER',
+        role: userData?.role as Role,
         created_at: userData?.created_at || new Date().toISOString(),
         updated_at: userData?.updated_at || new Date().toISOString(),
         professionalProfileId: userData?.professionalProfileId,
@@ -92,7 +92,7 @@ export const authService = {
           email: authData.user.email || '',
           first_name: userData.firstName,
           last_name: userData.lastName,
-          role: 'OSTEOPATH' as Role, // Par défaut, tous les utilisateurs sont des ostéopathes
+          role: 'OSTEOPATH', // Par défaut, tous les utilisateurs sont des ostéopathes
           created_at: now,
           updated_at: now
         })
@@ -238,7 +238,7 @@ export const authService = {
       const { error } = await supabase
         .from("User")
         .update({
-          role: 'ADMIN' as Role,
+          role: 'ADMIN',
           updated_at: new Date().toISOString()
         })
         .eq('id', userId);

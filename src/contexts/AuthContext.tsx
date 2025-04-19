@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType, AuthState, User, Role } from "@/types";
 import { api } from "@/services/api";
@@ -26,6 +26,17 @@ export const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   promoteToAdmin: async () => {},
 });
+
+// Hook to use auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  return context;
+};
 
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({

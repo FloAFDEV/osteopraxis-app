@@ -68,5 +68,25 @@ export const userService = {
       console.error("Error updating user:", error);
       throw error;
     }
+  },
+  
+  async updateUserRole(id: string, role: Role): Promise<User> {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .update({
+          role: role,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as User;
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      throw error;
+    }
   }
 };
