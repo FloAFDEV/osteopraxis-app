@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -88,11 +87,12 @@ export type Contraception =
 // Interface pour les rendez-vous
 export interface Appointment {
   id: number;
-  date: string;
+  date: string;  // Explicitly string to match API expectations
   patientId: number;
   reason: string;
   status: AppointmentStatus;
   notificationSent: boolean;
+  cabinetId?: number;  // Make cabinetId optional
 }
 
 export type AppointmentStatus = 
@@ -113,6 +113,10 @@ export interface Cabinet {
   osteopathId: number;
   createdAt: string;
   updatedAt: string;
+  // Add missing properties
+  city?: string;
+  zip_code?: string;
+  country?: string;
 }
 
 // Interface pour les ostéopathes

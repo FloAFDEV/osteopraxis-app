@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -53,7 +52,15 @@ export const appointmentService = {
   async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.createAppointment(appointment);
+        // Ensure date is a string
+        const appointmentData = {
+          ...appointment,
+          date: typeof appointment.date === 'object' 
+            ? (appointment.date as Date).toISOString() 
+            : appointment.date
+        };
+
+        return await supabaseAppointmentService.createAppointment(appointmentData);
       } catch (error) {
         console.error("Erreur Supabase createAppointment:", error);
         throw error;
@@ -66,6 +73,9 @@ export const appointmentService = {
     return {
       ...appointment,
       id: Math.floor(Math.random() * 1000),
+      date: typeof appointment.date === 'object' 
+        ? (appointment.date as Date).toISOString() 
+        : appointment.date,
       notificationSent: false
     } as Appointment;
   },

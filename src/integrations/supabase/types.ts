@@ -44,6 +44,7 @@ export type Database = {
       }
       Appointment: {
         Row: {
+          cabinetId: number | null
           date: string
           id: number
           notificationSent: boolean
@@ -52,6 +53,7 @@ export type Database = {
           status: Database["public"]["Enums"]["AppointmentStatus"]
         }
         Insert: {
+          cabinetId?: number | null
           date: string
           id?: number
           notificationSent?: boolean
@@ -60,6 +62,7 @@ export type Database = {
           status: Database["public"]["Enums"]["AppointmentStatus"]
         }
         Update: {
+          cabinetId?: number | null
           date?: string
           id?: number
           notificationSent?: boolean
@@ -73,6 +76,13 @@ export type Database = {
             columns: ["patientId"]
             isOneToOne: false
             referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_appointment_cabinet"
+            columns: ["cabinetId"]
+            isOneToOne: false
+            referencedRelation: "Cabinet"
             referencedColumns: ["id"]
           },
           {
@@ -95,6 +105,7 @@ export type Database = {
           name: string
           osteopathId: number
           phone: string | null
+          professionalProfileId: number | null
           updatedAt: string
         }
         Insert: {
@@ -107,6 +118,7 @@ export type Database = {
           name: string
           osteopathId: number
           phone?: string | null
+          professionalProfileId?: number | null
           updatedAt: string
         }
         Update: {
@@ -119,6 +131,7 @@ export type Database = {
           name?: string
           osteopathId?: number
           phone?: string | null
+          professionalProfileId?: number | null
           updatedAt?: string
         }
         Relationships: [
@@ -127,6 +140,13 @@ export type Database = {
             columns: ["osteopathId"]
             isOneToOne: false
             referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Cabinet_professionalProfileId_fkey"
+            columns: ["professionalProfileId"]
+            isOneToOne: false
+            referencedRelation: "ProfessionalProfile"
             referencedColumns: ["id"]
           },
           {
@@ -489,6 +509,45 @@ export type Database = {
           },
         ]
       }
+      ProfessionalProfile: {
+        Row: {
+          adeli_number: string | null
+          ape_code: string | null
+          createdAt: string
+          id: number
+          name: string
+          profession_type: string | null
+          siret: string | null
+          title: string | null
+          updatedAt: string
+          userId: string
+        }
+        Insert: {
+          adeli_number?: string | null
+          ape_code?: string | null
+          createdAt?: string
+          id?: number
+          name: string
+          profession_type?: string | null
+          siret?: string | null
+          title?: string | null
+          updatedAt?: string
+          userId: string
+        }
+        Update: {
+          adeli_number?: string | null
+          ape_code?: string | null
+          createdAt?: string
+          id?: number
+          name?: string
+          profession_type?: string | null
+          siret?: string | null
+          title?: string | null
+          updatedAt?: string
+          userId?: string
+        }
+        Relationships: []
+      }
       TreatmentHistory: {
         Row: {
           consultationId: number
@@ -533,6 +592,7 @@ export type Database = {
           id: string
           last_name: string | null
           osteopathId: number | null
+          professionalProfileId: number | null
           role: Database["public"]["Enums"]["Role"]
           updated_at: string
         }
@@ -543,7 +603,8 @@ export type Database = {
           id?: string
           last_name?: string | null
           osteopathId?: number | null
-          role: Database["public"]["Enums"]["Role"]
+          professionalProfileId?: number | null
+          role?: Database["public"]["Enums"]["Role"]
           updated_at: string
         }
         Update: {
@@ -553,6 +614,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           osteopathId?: number | null
+          professionalProfileId?: number | null
           role?: Database["public"]["Enums"]["Role"]
           updated_at?: string
         }
@@ -564,6 +626,13 @@ export type Database = {
             referencedRelation: "Osteopath"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "User_professionalProfileId_fkey"
+            columns: ["professionalProfileId"]
+            isOneToOne: false
+            referencedRelation: "ProfessionalProfile"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -573,6 +642,10 @@ export type Database = {
     Functions: {
       is_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_admin_user: {
+        Args: { user_id: string }
         Returns: boolean
       }
     }
