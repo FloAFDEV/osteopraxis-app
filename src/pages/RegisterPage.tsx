@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -16,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Mail, User, Lock } from "lucide-react";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -53,6 +55,7 @@ const RegisterPage = () => {
     setError(null);
     
     try {
+      console.log("Tentative d'inscription avec:", data.email);
       await register({
         firstName: data.firstName,
         lastName: data.lastName,
@@ -61,15 +64,17 @@ const RegisterPage = () => {
       });
       toast.success("Inscription réussie ! Vous allez être redirigé...");
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de l'inscription:", error);
-      setError("Une erreur s'est produite lors de l'inscription. Veuillez réessayer.");
+      setError(error.message || "Une erreur s'est produite lors de l'inscription.");
+      toast.error(error.message || "Échec de l'inscription. Veuillez réessayer.");
+    } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Créer un compte</CardTitle>
@@ -84,7 +89,10 @@ const RegisterPage = () => {
                   <FormItem>
                     <FormLabel>Prénom</FormLabel>
                     <FormControl>
-                      <Input placeholder="John" {...field} />
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input placeholder="John" className="pl-10" {...field} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -97,7 +105,10 @@ const RegisterPage = () => {
                   <FormItem>
                     <FormLabel>Nom de famille</FormLabel>
                     <FormControl>
-                      <Input placeholder="Doe" {...field} />
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input placeholder="Doe" className="pl-10" {...field} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -110,7 +121,10 @@ const RegisterPage = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="john.doe@example.com" type="email" {...field} />
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input placeholder="john.doe@example.com" type="email" className="pl-10" {...field} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,7 +137,10 @@ const RegisterPage = () => {
                   <FormItem>
                     <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input type="password" className="pl-10" {...field} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

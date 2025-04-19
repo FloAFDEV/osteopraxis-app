@@ -25,7 +25,6 @@ export const authService = {
         throw new Error("User or token not found after sign-in");
       }
 
-      // Tenter de récupérer le profil utilisateur
       try {
         const { data: userProfile, error: userProfileError } = await supabase
           .from('User')
@@ -33,47 +32,43 @@ export const authService = {
           .eq('id', user.id)
           .maybeSingle();
 
-        if (userProfileError) {
+        if (userProfileError && userProfileError.code !== 'PGRST116') {
           console.error("Error fetching user profile:", userProfileError);
-          
-          // Si l'utilisateur n'existe pas dans la base, créer un profil de base
-          if (userProfileError.code === 'PGRST116' || !userProfile) {
-            const basicUser = {
-              id: user.id,
-              email: user.email || '',
-              first_name: user.user_metadata?.first_name || '',
-              last_name: user.user_metadata?.last_name || '',
-              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-            
-            return { user: basicUser as User, token };
-          }
-          
           throw userProfileError;
         }
 
         if (userProfile) {
           return { user: userProfile as User, token };
-        } else {
-          // Créer un profil de base si aucun n'est trouvé
-          const basicUser = {
-            id: user.id,
-            email: user.email || '',
-            first_name: user.user_metadata?.first_name || '',
-            last_name: user.user_metadata?.last_name || '',
-            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-          
-          return { user: basicUser as User, token };
         }
+        
+        // Si l'utilisateur n'a pas de profil, créer un profil de base
+        const basicUser = {
+          id: user.id,
+          email: user.email || '',
+          first_name: user.user_metadata?.first_name || '',
+          last_name: user.user_metadata?.last_name || '',
+          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        // Essayer d'insérer le profil utilisateur
+        try {
+          const { error: insertError } = await supabase
+            .from('User')
+            .insert([basicUser]);
+            
+          if (insertError) {
+            console.error("Error creating user profile:", insertError);
+          }
+        } catch (err) {
+          console.error("Error during profile creation:", err);
+        }
+        
+        return { user: basicUser as User, token };
       } catch (profileError) {
         console.error("Error handling user profile:", profileError);
         
-        // Fallback en cas d'erreur
         const basicUser = {
           id: user.id,
           email: user.email || '',
@@ -92,7 +87,12 @@ export const authService = {
 
   async loginWithMagicLink(email: string): Promise<void> {
     try {
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const { error } = await supabase.auth.signInWithOtp({ 
+        email,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
 
       if (error) {
         throw error;
@@ -113,6 +113,7 @@ export const authService = {
             first_name: userData.firstName,
             last_name: userData.lastName,
           },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
 
@@ -120,29 +121,46 @@ export const authService = {
         throw error;
       }
 
-      if (!data.session) {
-        throw new Error("No session found after registration");
+      if (!data.user) {
+        throw new Error("No user found after registration");
       }
 
-      const user = data.session.user;
-      const token = data.session.access_token;
+      // Créer l'entrée utilisateur dans la table User
+      const userRecord = {
+        id: data.user.id,
+        email: userData.email,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
+      try {
+        const { error: profileError } = await supabase
+          .from('User')
+          .insert([userRecord]);
 
-      if (!user || !token) {
-        throw new Error("User or token not found after registration");
+        if (profileError) {
+          console.error("Error creating user profile:", profileError);
+        }
+      } catch (err) {
+        console.error("Error inserting user record:", err);
       }
 
-      // Fetch the complete user profile from the database
-      const { data: userProfile, error: userProfileError } = await supabase
-        .from('User')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (userProfileError) {
-        throw userProfileError;
+      // Si une session est disponible, retourner le token
+      if (data.session) {
+        return { 
+          user: userRecord as User, 
+          token: data.session.access_token 
+        };
       }
-
-      return { user: userProfile as User, token };
+      
+      // Sinon, retourner juste l'utilisateur
+      return { 
+        user: userRecord as User, 
+        token: '' 
+      };
     } catch (error: any) {
       console.error("Registration error:", error);
       throw new Error(error.message || "Registration failed");
@@ -189,26 +207,8 @@ export const authService = {
           .eq('id', userId)
           .maybeSingle();
           
-        if (error) {
+        if (error && error.code !== 'PGRST116') {
           console.error("Erreur lors de la récupération de l'utilisateur:", error);
-          
-          if (error.code === 'PGRST116') {
-            console.log("Aucun utilisateur trouvé avec cet ID");
-            
-            // Créer un utilisateur de base à partir des données de session
-            const basicUser = {
-              id: session.user.id,
-              email: session.user.email || '',
-              first_name: session.user.user_metadata?.first_name || '',
-              last_name: session.user.user_metadata?.last_name || '',
-              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-            
-            return basicUser as User;
-          }
-          
           throw error;
         }
         
@@ -216,7 +216,7 @@ export const authService = {
           return data as User;
         }
         
-        // Si aucun utilisateur n'est trouvé mais qu'il n'y a pas d'erreur
+        // Créer un utilisateur de base si aucun n'est trouvé
         const basicUser = {
           id: session.user.id,
           email: session.user.email || '',
@@ -226,6 +226,19 @@ export const authService = {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
+        
+        // Tenter de créer l'entrée utilisateur
+        try {
+          const { error: insertError } = await supabase
+            .from('User')
+            .insert([basicUser]);
+            
+          if (insertError) {
+            console.error("Error creating user entry:", insertError);
+          }
+        } catch (err) {
+          console.error("Failed to create user entry:", err);
+        }
         
         return basicUser as User;
       } catch (error) {
@@ -253,7 +266,7 @@ export const authService = {
       const { error } = await supabase
         .from('User')
         .update({
-          role: 'ADMIN', // Correctly typed now as 'ADMIN'
+          role: 'ADMIN', 
           updated_at: new Date().toISOString()
         })
         .eq('id', userId);

@@ -47,13 +47,7 @@ function App() {
     initAuth();
   }, [loadStoredToken]);
   
-  // IMPORTANT: Always allow access to the dashboard when authenticated
-  // Don't check for professional profile or cabinet existence here
-  
   console.log("État auth:", { isAuthenticated, userId: user?.id });
-  
-  // Configuration des chemins publics (accessibles sans connexion)
-  const publicPaths = ['/privacy-policy', '/terms-of-service'];
   
   if (loading) {
     return <FancyLoader message="Chargement de votre application..." />;

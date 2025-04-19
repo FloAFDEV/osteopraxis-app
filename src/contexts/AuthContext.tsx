@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType, AuthState, User } from "@/types";
@@ -8,7 +9,7 @@ export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   token: null,
-  login: async () => {},
+  login: async () => false,
   logout: async () => {},
   register: async () => {},
   loadStoredToken: async () => {
@@ -72,15 +73,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
               return;
             }
             
-            // Si l'utilisateur n'existe pas ou s'il y a une erreur (autre que PGRST116)
-            if (userError && userError.code !== 'PGRST116') {
-              console.error("Error fetching user data:", userError);
-              
-              // On continue avec les données de session même en cas d'erreur
-              console.log("Continuing with session data despite error");
-            }
-
-            // Continuer avec uniquement les données de session
+            // Si l'utilisateur n'existe pas ou s'il y a une erreur
             const basicUser = {
               id: session.user.id,
               email: session.user.email || '',
@@ -100,14 +93,12 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             
             // Tenter de créer l'utilisateur en arrière-plan
             try {
-              const { data: newUser, error: createError } = await supabase
+              const { error: createError } = await supabase
                 .from('User')
-                .insert([basicUser])
-                .select()
-                .single();
+                .insert([basicUser]);
                 
               if (createError) {
-                console.log("Error creating user in background, will continue with session data:", createError);
+                console.log("Error creating user in background:", createError);
               } else {
                 console.log("User record created successfully in background");
               }
@@ -175,11 +166,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
               token: session.access_token
             });
             return;
-          }
-          
-          // Gérer l'absence d'utilisateur ou les erreurs
-          if (userError && userError.code !== 'PGRST116') {
-            console.error("Error fetching user profile:", userError);
           }
           
           // Fallback: utiliser les données de session
@@ -275,56 +261,53 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       }
 
       try {
-        // Récupérer les données complètes de l'utilisateur
+        // Récupérer les données utilisateur
         const { data: userData, error: userError } = await supabase
           .from('User')
           .select('*')
           .eq('id', session.user.id)
           .maybeSingle();
         
-        if (userError) {
-          console.error("Error fetching user data:", userError);
-          throw userError;
-        }
-        
-        if (!userData) {
-          console.log("User not found in database, creating new user record");
+        // Créer un utilisateur de base si aucun n'est trouvé
+        if (!userData || userError) {
+          console.log("User not found or error, creating basic user");
           
-          // Create a new user record if one doesn't exist
           const newUserData = {
             id: session.user.id,
             email: session.user.email || '',
             first_name: session.user.user_metadata?.first_name || '',
             last_name: session.user.user_metadata?.last_name || '',
-            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH", // Only use valid database roles
+            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
           
-          const { data: newUser, error: createError } = await supabase
-            .from('User')
-            .insert([newUserData])
-            .select()
-            .single();
-            
-          if (createError) {
-            console.error("Error creating new user:", createError);
-            throw createError;
-          }
-          
-          console.log("New user created:", newUser);
-          
           const updatedAuthState = {
-            user: newUser as User,
+            user: newUserData as User,
             isAuthenticated: true,
             isLoading: false,
             token: session.access_token
           };
           
           setAuthState(updatedAuthState);
+          
+          // Tenter de créer l'utilisateur dans la base
+          try {
+            const { error: createError } = await supabase
+              .from('User')
+              .insert([newUserData]);
+              
+            if (createError) {
+              console.error("Error creating new user:", createError);
+            }
+          } catch (err) {
+            console.error("Failed to create user:", err);
+          }
+          
           return updatedAuthState;
         }
         
+        // Utiliser les données de l'utilisateur existant
         console.log("User authenticated:", userData);
         const updatedAuthState = {
           user: userData as User,
@@ -337,37 +320,40 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         return updatedAuthState;
       } catch (err) {
         console.error("Error processing user data:", err);
-        setAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
-        });
-        return {
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
+        
+        // Fallback en cas d'erreur
+        const basicUser = {
+          id: session.user.id,
+          email: session.user.email || '',
+          first_name: session.user.user_metadata?.first_name || '',
+          last_name: session.user.user_metadata?.last_name || '',
+          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
         };
+        
+        const fallbackAuthState = {
+          user: basicUser as User,
+          isAuthenticated: true,
+          isLoading: false,
+          token: session.access_token
+        };
+        
+        setAuthState(fallbackAuthState);
+        return fallbackAuthState;
       }
     } catch (error) {
       console.error("Error loading stored token:", error);
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null
-      });
-      return {
+      const errorState = {
         user: null,
         isAuthenticated: false,
         isLoading: false,
         token: null
       };
+      setAuthState(errorState);
+      return errorState;
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -382,12 +368,12 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         throw new Error("Pas de session après connexion");
       }
 
-      // Le profil utilisateur sera géré par le listener onAuthStateChange
-      toast.success(`Bienvenue !`);
+      // Session sera gérée par le listener onAuthStateChange
+      return true;
     } catch (error: any) {
       console.error("Login error:", error);
       toast.error(error.message || "Échec de la connexion. Veuillez réessayer.");
-      throw error;
+      return false;
     }
   };
 
@@ -444,6 +430,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             first_name: userData.firstName,
             last_name: userData.lastName,
           },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
 
@@ -455,6 +442,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         throw new Error("Pas d'utilisateur créé");
       }
 
+      // Créer le profil utilisateur dans la table User
       const { error: profileError } = await supabase
         .from('User')
         .insert({
@@ -469,10 +457,33 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
       if (profileError) {
         console.error("Error creating user profile:", profileError);
-        throw profileError;
+        // Continuer même si le profil n'a pas pu être créé
       }
 
-      toast.success("Compte créé avec succès ! Veuillez vous connecter.");
+      toast.success("Compte créé avec succès!");
+      
+      // Si la session est disponible immédiatement (selon les paramètres Supabase)
+      if (data.session) {
+        setAuthState({
+          user: {
+            id: data.user.id,
+            email: userData.email,
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            role: 'OSTEOPATH',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          } as User,
+          isAuthenticated: true,
+          isLoading: false,
+          token: data.session.access_token
+        });
+        return true;
+      }
+      
+      // Sinon indiquer à l'utilisateur de vérifier son email
+      toast.info("Veuillez vérifier votre boîte mail pour confirmer votre inscription");
+      
     } catch (error: any) {
       console.error("Registration error:", error);
       toast.error(error.message || "Échec de l'inscription. Veuillez réessayer.");
