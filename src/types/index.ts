@@ -174,7 +174,7 @@ export interface Patient {
   occupation?: string;
   maritalStatus?: MaritalStatus;
   hasChildren?: string;
-  childrenAges?: string[]; // Changed from number[] to string[]
+  childrenAges?: string[]; // Keep as string[] to match our application type
   handedness?: Handedness;
   avatarUrl?: string;
   createdAt: string;

@@ -1,5 +1,5 @@
 
-import { Patient } from "@/types";
+import { Patient, Gender, Contraception, MaritalStatus, Handedness } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { delay, USE_SUPABASE } from "./config";
 
@@ -15,7 +15,18 @@ export const patientService = {
           .select('*');
           
         if (error) throw error;
-        return data as Patient[];
+        
+        // Map Supabase DB values to our application types
+        const mappedData = data.map(patient => ({
+          ...patient,
+          gender: mapDbGenderToAppGender(patient.gender),
+          contraception: mapDbContraceptionToAppContraception(patient.contraception),
+          maritalStatus: mapDbMaritalStatusToAppMaritalStatus(patient.maritalStatus),
+          handedness: mapDbHandednessToAppHandedness(patient.handedness),
+          childrenAges: patient.childrenAges as unknown as string[]
+        }));
+        
+        return mappedData as Patient[];
       } catch (error) {
         console.error("Error fetching patients:", error);
         throw error;
@@ -42,7 +53,17 @@ export const patientService = {
           throw error;
         }
         
-        return data as Patient;
+        // Map DB values to our application types
+        const mappedData = {
+          ...data,
+          gender: mapDbGenderToAppGender(data.gender),
+          contraception: mapDbContraceptionToAppContraception(data.contraception),
+          maritalStatus: mapDbMaritalStatusToAppMaritalStatus(data.maritalStatus),
+          handedness: mapDbHandednessToAppHandedness(data.handedness),
+          childrenAges: data.childrenAges as unknown as string[]
+        };
+        
+        return mappedData as Patient;
       } catch (error) {
         console.error("Error fetching patient by ID:", error);
         throw error;
@@ -58,18 +79,37 @@ export const patientService = {
       try {
         const now = new Date().toISOString();
         
+        // Map application values to DB values
+        const patientPayload = {
+          ...patient,
+          gender: mapAppGenderToDbGender(patient.gender),
+          contraception: mapAppContraceptionToDbContraception(patient.contraception),
+          maritalStatus: mapAppMaritalStatusToDbMaritalStatus(patient.maritalStatus),
+          handedness: mapAppHandednessToDbHandedness(patient.handedness),
+          childrenAges: patient.childrenAges as unknown as number[],
+          createdAt: now,
+          updatedAt: now
+        };
+        
         const { data, error } = await supabase
           .from('Patient')
-          .insert({
-            ...patient,
-            createdAt: now,
-            updatedAt: now
-          })
+          .insert(patientPayload)
           .select()
           .single();
           
         if (error) throw error;
-        return data as Patient;
+        
+        // Map DB values back to our application types
+        const mappedData = {
+          ...data,
+          gender: mapDbGenderToAppGender(data.gender),
+          contraception: mapDbContraceptionToAppContraception(data.contraception),
+          maritalStatus: mapDbMaritalStatusToAppMaritalStatus(data.maritalStatus),
+          handedness: mapDbHandednessToAppHandedness(data.handedness),
+          childrenAges: data.childrenAges as unknown as string[]
+        };
+        
+        return mappedData as Patient;
       } catch (error) {
         console.error("Error creating patient:", error);
         throw error;
@@ -92,18 +132,37 @@ export const patientService = {
   async updatePatient(patient: Patient): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
+        // Map application values to DB values
+        const patientPayload = {
+          ...patient,
+          gender: mapAppGenderToDbGender(patient.gender),
+          contraception: mapAppContraceptionToDbContraception(patient.contraception),
+          maritalStatus: mapAppMaritalStatusToDbMaritalStatus(patient.maritalStatus),
+          handedness: mapAppHandednessToDbHandedness(patient.handedness),
+          childrenAges: patient.childrenAges as unknown as number[],
+          updatedAt: new Date().toISOString()
+        };
+        
         const { data, error } = await supabase
           .from('Patient')
-          .update({
-            ...patient,
-            updatedAt: new Date().toISOString()
-          })
+          .update(patientPayload)
           .eq('id', patient.id)
           .select()
           .single();
           
         if (error) throw error;
-        return data as Patient;
+        
+        // Map DB values back to our application types
+        const mappedData = {
+          ...data,
+          gender: mapDbGenderToAppGender(data.gender),
+          contraception: mapDbContraceptionToAppContraception(data.contraception),
+          maritalStatus: mapDbMaritalStatusToAppMaritalStatus(data.maritalStatus),
+          handedness: mapDbHandednessToAppHandedness(data.handedness),
+          childrenAges: data.childrenAges as unknown as string[]
+        };
+        
+        return mappedData as Patient;
       } catch (error) {
         console.error("Error updating patient:", error);
         throw error;
@@ -152,7 +211,6 @@ export const patientService = {
     return false;
   },
   
-  // Add the missing getPatientsByLetter function
   async getPatientsByLetter(letter: string): Promise<Patient[]> {
     if (USE_SUPABASE) {
       try {
@@ -162,7 +220,18 @@ export const patientService = {
           .ilike('lastName', `${letter}%`);
           
         if (error) throw error;
-        return data as Patient[];
+        
+        // Map DB values to our application types
+        const mappedData = data.map(patient => ({
+          ...patient,
+          gender: mapDbGenderToAppGender(patient.gender),
+          contraception: mapDbContraceptionToAppContraception(patient.contraception),
+          maritalStatus: mapDbMaritalStatusToAppMaritalStatus(patient.maritalStatus),
+          handedness: mapDbHandednessToAppHandedness(patient.handedness),
+          childrenAges: patient.childrenAges as unknown as string[]
+        }));
+        
+        return mappedData as Patient[];
       } catch (error) {
         console.error("Error fetching patients by letter:", error);
         throw error;
@@ -173,7 +242,6 @@ export const patientService = {
     return patients.filter(p => p.lastName.toLowerCase().startsWith(letter.toLowerCase()));
   },
   
-  // Add the missing searchPatients function
   async searchPatients(query: string): Promise<Patient[]> {
     if (USE_SUPABASE) {
       try {
@@ -183,7 +251,18 @@ export const patientService = {
           .or(`firstName.ilike.%${query}%,lastName.ilike.%${query}%,email.ilike.%${query}%,phone.ilike.%${query}%`);
           
         if (error) throw error;
-        return data as Patient[];
+        
+        // Map DB values to our application types
+        const mappedData = data.map(patient => ({
+          ...patient,
+          gender: mapDbGenderToAppGender(patient.gender),
+          contraception: mapDbContraceptionToAppContraception(patient.contraception),
+          maritalStatus: mapDbMaritalStatusToAppMaritalStatus(patient.maritalStatus),
+          handedness: mapDbHandednessToAppHandedness(patient.handedness),
+          childrenAges: patient.childrenAges as unknown as string[]
+        }));
+        
+        return mappedData as Patient[];
       } catch (error) {
         console.error("Error searching patients:", error);
         throw error;
@@ -201,3 +280,78 @@ export const patientService = {
     );
   }
 };
+
+// Helper functions to map between Supabase DB values and our application types
+function mapDbGenderToAppGender(dbGender: any): Gender {
+  if (dbGender === "Homme") return "MALE";
+  if (dbGender === "Femme") return "FEMALE";
+  return null;
+}
+
+function mapAppGenderToDbGender(appGender: Gender | undefined): string | null {
+  if (appGender === "MALE") return "Homme";
+  if (appGender === "FEMALE") return "Femme";
+  return null;
+}
+
+function mapDbContraceptionToAppContraception(dbContraception: any): Contraception {
+  switch (dbContraception) {
+    case "PILLS": return "PILL";
+    case "CONDOM": return "CONDOM";
+    case "IMPLANTS": return "IMPLANT";
+    case "IUD": return "IUD";
+    case "NONE": return "NONE";
+    default: return null;
+  }
+}
+
+function mapAppContraceptionToDbContraception(appContraception: Contraception | undefined): string | null {
+  switch (appContraception) {
+    case "PILL": return "PILLS";
+    case "CONDOM": return "CONDOM";
+    case "IMPLANT": return "IMPLANTS";
+    case "IUD": return "IUD";
+    case "NONE": return "NONE";
+    case "OTHER": return "OTHER";
+    default: return null;
+  }
+}
+
+function mapDbMaritalStatusToAppMaritalStatus(dbMaritalStatus: any): MaritalStatus {
+  switch (dbMaritalStatus) {
+    case "SINGLE": return "SINGLE";
+    case "MARRIED": return "MARRIED";
+    case "DIVORCED": return "DIVORCED";
+    case "WIDOWED": return "WIDOWED";
+    default: return null;
+  }
+}
+
+function mapAppMaritalStatusToDbMaritalStatus(appMaritalStatus: MaritalStatus | undefined): string | null {
+  switch (appMaritalStatus) {
+    case "SINGLE": return "SINGLE";
+    case "MARRIED": return "MARRIED";
+    case "DIVORCED": return "DIVORCED";
+    case "WIDOWED": return "WIDOWED";
+    case "OTHER": return "OTHER";
+    default: return null;
+  }
+}
+
+function mapDbHandednessToAppHandedness(dbHandedness: any): Handedness {
+  switch (dbHandedness) {
+    case "LEFT": return "LEFT";
+    case "RIGHT": return "RIGHT";
+    case "AMBIDEXTROUS": return "AMBIDEXTROUS";
+    default: return null;
+  }
+}
+
+function mapAppHandednessToDbHandedness(appHandedness: Handedness | undefined): string | null {
+  switch (appHandedness) {
+    case "LEFT": return "LEFT";
+    case "RIGHT": return "RIGHT";
+    case "AMBIDEXTROUS": return "AMBIDEXTROUS";
+    default: return null;
+  }
+}

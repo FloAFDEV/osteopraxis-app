@@ -55,7 +55,7 @@ export const appointmentService = {
           status: mapDbStatusToAppStatus(appointment.status)
         }));
         
-        return mappedData as Appointment[];
+        return mappedData as unknown as Appointment[];
       } catch (error) {
         console.error("Error fetching appointments:", error);
         throw error;
@@ -87,7 +87,7 @@ export const appointmentService = {
           data.status = mapDbStatusToAppStatus(data.status);
         }
         
-        return data as Appointment;
+        return data as unknown as Appointment;
       } catch (error) {
         console.error("Error fetching appointment by ID:", error);
         throw error;
@@ -126,7 +126,7 @@ export const appointmentService = {
           data.status = mapDbStatusToAppStatus(data.status);
         }
         
-        return data as Appointment;
+        return data as unknown as Appointment;
       } catch (error) {
         console.error("Error creating appointment:", error);
         throw error;
@@ -175,7 +175,7 @@ export const appointmentService = {
           data.status = mapDbStatusToAppStatus(data.status);
         }
         
-        return data as Appointment;
+        return data as unknown as Appointment;
       } catch (error) {
         console.error("Error updating appointment:", error);
         throw error;
@@ -216,7 +216,7 @@ export const appointmentService = {
           data.status = mapDbStatusToAppStatus(data.status);
         }
         
-        return data as Appointment;
+        return data as unknown as Appointment;
       } catch (error) {
         console.error("Error updating appointment status:", error);
         throw error;
@@ -276,7 +276,7 @@ export const appointmentService = {
           status: mapDbStatusToAppStatus(appointment.status)
         }));
         
-        return mappedData as Appointment[];
+        return mappedData as unknown as Appointment[];
       } catch (error) {
         console.error("Error fetching appointments by patient ID:", error);
         throw error;

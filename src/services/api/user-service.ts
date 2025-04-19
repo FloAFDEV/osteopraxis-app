@@ -1,5 +1,5 @@
 
-import { User } from "@/types";
+import { User, Role } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { delay, USE_SUPABASE } from "./config";
 
@@ -13,10 +13,7 @@ export const userService = {
         const now = new Date().toISOString();
         
         // Ensure role is correctly typed for the database
-        let role = userData.role;
-        if (role === 'USER') {
-          role = 'OSTEOPATH'; // Default to OSTEOPATH as USER is not a valid db role
-        }
+        let role: "ADMIN" | "OSTEOPATH" = userData.role === 'ADMIN' ? 'ADMIN' : 'OSTEOPATH';
         
         const { data, error } = await supabase
           .from('User')
@@ -89,10 +86,9 @@ export const userService = {
         }
         
         // Ensure role is correctly typed for the database
-        let role = updates.role;
-        if (role === 'USER') {
-          role = 'OSTEOPATH'; // Default to OSTEOPATH as USER is not a valid db role
-        }
+        const role: "ADMIN" | "OSTEOPATH" | undefined = 
+          !updates.role ? undefined :
+          updates.role === 'ADMIN' ? 'ADMIN' : 'OSTEOPATH';
         
         const { data, error } = await supabase
           .from('User')

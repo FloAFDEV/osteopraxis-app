@@ -172,5 +172,4 @@ export const authService = {
       throw error;
     }
   },
-  
 };

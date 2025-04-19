@@ -53,7 +53,6 @@ export const osteopathService = {
     return osteopaths.find(o => o.id === id) || null;
   },
 
-  // Add the missing getOsteopathByUserId function
   async getOsteopathByUserId(userId: string): Promise<Osteopath | null> {
     if (USE_SUPABASE) {
       try {
@@ -94,7 +93,8 @@ export const osteopathService = {
           adeli_number: osteopath.adeli_number,
           siret: osteopath.siret,
           ape_code: osteopath.ape_code,
-          title: osteopath.title
+          createdAt: now,
+          updatedAt: now
         };
         
         const { data, error } = await supabase
@@ -135,7 +135,7 @@ export const osteopathService = {
           adeli_number: updates.adeli_number,
           siret: updates.siret,
           ape_code: updates.ape_code,
-          title: updates.title
+          updatedAt: new Date().toISOString()
         };
         
         const { data, error } = await supabase
