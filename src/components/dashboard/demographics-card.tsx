@@ -4,13 +4,13 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { Patient, DashboardData } from "@/types";
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { User, UserRound, UserCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DemographicsCardProps {
   patients?: Patient[];
   data?: DashboardData;
 }
 
-// Define a proper type for our chart data that always includes the icon property
 interface GenderChartData {
   name: string;
   value: number;
@@ -22,14 +22,15 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   patients,
   data
 }) => {
+  const { isMobile } = useIsMobile();
   const patientsList = patients || [];
   const totalPatients = patientsList.length || data?.totalPatients || 0;
   const maleCount = data?.maleCount || 0;
   const femaleCount = data?.femaleCount || 0;
 
   const GENDER_COLORS = {
-    "Homme": "#3b82f6",  // Blue more pronounced
-    "Femme": "#d946ef",  // Vibrant pink
+    "Homme": "#3b82f6",  
+    "Femme": "#d946ef",  
     "Non spécifié": "#94a3b8"
   };
 
@@ -134,11 +135,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     }
     return null;
   };
-  const renderCustomLegendIcon = (color: string) => {
-    return <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill={color} rx="6" />
-      </svg>;
-  };
+
   const CustomLegend = ({
     payload
   }: any) => {
@@ -165,6 +162,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
           </li>)}
       </ul>;
   };
+
   const isLoading = patientsList.length === 0 && !data || !maleCount && !femaleCount && totalPatients === 0;
   
   if (isLoading) {
@@ -192,7 +190,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] mt-4">
+        <div className={`h-[${isMobile ? '250' : '300'}px] mt-4`}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie 
@@ -201,7 +199,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
                 cy="50%" 
                 labelLine={false} 
                 label={renderCustomizedLabel} 
-                outerRadius={120}
+                outerRadius={isMobile ? 100 : 120}
                 fill="#8884d8" 
                 dataKey="value"
               >
