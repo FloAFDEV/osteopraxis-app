@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -159,12 +160,12 @@ const AppointmentsPage = () => {
               </PopoverContent>
             </Popover>
             
-            <Select onValueChange={(value) => setSelectedStatus(value as AppointmentStatus)} defaultValue={selectedStatus || ""}>
+            <Select onValueChange={(value) => setSelectedStatus(value as AppointmentStatus)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les statuts</SelectItem>
+                <SelectItem value="all">Tous les statuts</SelectItem>
                 <SelectItem value="PLANNED">Planifié</SelectItem>
                 <SelectItem value="CONFIRMED">Confirmé</SelectItem>
                 <SelectItem value="CANCELLED">Annulé</SelectItem>
@@ -194,9 +195,9 @@ const AppointmentsPage = () => {
                   {format(parseISO(appointment.date), "EEEE dd MMMM yyyy", { locale: fr })}
                 </p>
                 <p className="text-gray-500">
-                  {format(parseISO(appointment.date), "HH:mm", { locale: fr })}
+                  {appointment.time && format(parseISO(`2000-01-01T${appointment.time}`), "HH:mm", { locale: fr })}
                 </p>
-                <p className="text-gray-700">{appointment.reason}</p>
+                <p className="text-gray-700">{appointment.notes}</p>
                 <div className="flex justify-end mt-4">
                   <Button
                     variant="outline"
