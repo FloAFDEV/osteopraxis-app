@@ -1,8 +1,6 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType, AuthState, User } from "@/types";
-import { api } from "@/services/api";
 import { toast } from 'sonner';
 
 export const AuthContext = createContext<AuthContextType>({
@@ -51,75 +49,48 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     
     // Add auth state change listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.id);
         
         if (session && session.user) {
-          // Fetch user profile separately to avoid race conditions with setTimeout
-          setTimeout(async () => {
-            try {
-              const { data, error } = await supabase
-                .from('User')
-                .select('*')
-                .eq('id', session.user.id)
-                .maybeSingle();
-                
-              if (error) {
-                console.error("Error fetching user data:", error);
-                return;
-              }
-              
-              if (data) {
-                console.log("User found in database:", data);
-                setAuthState({
-                  user: data as User,
-                  isAuthenticated: true,
-                  isLoading: false,
-                  token: session.access_token
-                });
-              } else {
-                console.log("User not found in database, creating new user record");
-                
-                try {
-                  // Create a new user record if one doesn't exist
-                  const newUserData = {
-                    id: session.user.id,
-                    email: session.user.email || '',
-                    first_name: session.user.user_metadata?.first_name || '',
-                    last_name: session.user.user_metadata?.last_name || '',
-                    role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH", // Only use valid database roles
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                  };
-                  
-                  const { data: newUser, error: createError } = await supabase
-                    .from('User')
-                    .insert([newUserData])
-                    .select()
-                    .single();
-                    
-                  if (createError) {
-                    console.error("Error creating new user:", createError);
-                    return;
-                  }
-                  
-                  console.log("New user created:", newUser);
-                  setAuthState({
-                    user: newUser as User,
-                    isAuthenticated: true,
-                    isLoading: false,
-                    token: session.access_token
-                  });
-                } catch (err) {
-                  console.error("Failed to create user record:", err);
-                }
-              }
-            } catch (error) {
-              console.error("Error in auth state change handler:", error);
+          try {
+            const { data: userProfile, error: userError } = await supabase
+              .from('User')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            if (userError && userError.code !== 'PGRST116') {
+              console.error("Error fetching user data:", userError);
+              throw userError;
             }
-          }, 0);
+
+            if (userProfile) {
+              setAuthState({
+                user: userProfile as User,
+                isAuthenticated: true,
+                isLoading: false,
+                token: session.access_token
+              });
+            } else {
+              // Ne pas créer de profil ici, laisser le processus d'inscription s'en charger
+              setAuthState({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                token: null
+              });
+            }
+          } catch (error) {
+            console.error("Error in auth state change handler:", error);
+            setAuthState({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+              token: null
+            });
+          }
         } else {
-          // No active session
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -133,8 +104,42 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     // Then check for existing session
     const setupAuth = async () => {
       try {
-        console.log("Checking for existing session");
-        await loadStoredToken();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            token: null
+          });
+          return;
+        }
+
+        const { data: userProfile, error: userError } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (userError && userError.code !== 'PGRST116') {
+          throw userError;
+        }
+
+        if (userProfile) {
+          setAuthState({
+            user: userProfile as User,
+            isAuthenticated: true,
+            isLoading: false,
+            token: session.access_token
+          });
+        } else {
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            token: null
+          });
+        }
       } catch (error) {
         console.error("Error during auth setup:", error);
         setAuthState({
@@ -298,56 +303,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         throw new Error("Pas de session après connexion");
       }
 
-      // Fetch the complete user profile
-      const { data: userData, error: userError } = await supabase
-        .from('User')
-        .select('*')
-        .eq('id', data.session.user.id)
-        .maybeSingle();
-
-      if (userError) {
-        console.error("Error fetching user data:", userError);
-        throw userError;
-      }
-
-      let user: User;
-
-      if (!userData) {
-        // Create user record if it doesn't exist
-        const newUserData = {
-          id: data.session.user.id,
-          email: email,
-          first_name: data.session.user.user_metadata?.first_name || '',
-          last_name: data.session.user.user_metadata?.last_name || '',
-          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH", // Only use valid database roles
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        
-        const { data: newUser, error: createError } = await supabase
-          .from('User')
-          .insert([newUserData])
-          .select()
-          .single();
-          
-        if (createError) {
-          console.error("Error creating new user:", createError);
-          throw createError;
-        }
-        
-        user = newUser as User;
-      } else {
-        user = userData as User;
-      }
-      
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-        token: data.session.access_token
-      });
-      
-      toast.success(`Bienvenue, ${user.first_name || user.email} !`);
+      // Le profil utilisateur sera géré par le listener onAuthStateChange
+      toast.success(`Bienvenue !`);
     } catch (error: any) {
       console.error("Login error:", error);
       toast.error(error.message || "Échec de la connexion. Veuillez réessayer.");
@@ -415,42 +372,28 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         throw error;
       }
 
-      if (!data.session) {
-        // If email confirmation is required by Supabase settings
-        toast.success("Compte créé ! Veuillez vérifier votre email pour confirmer votre inscription.");
-        return;
+      if (!data.user) {
+        throw new Error("Pas d'utilisateur créé");
       }
 
-      // If email confirmation is not required, create user profile
-      const newUserData = {
-        id: data.user!.id,
-        email: userData.email,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH", // Only use valid database roles
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      
-      const { data: newUser, error: createError } = await supabase
+      const { error: profileError } = await supabase
         .from('User')
-        .insert([newUserData])
-        .select()
-        .single();
-        
-      if (createError) {
-        console.error("Error creating new user:", createError);
-        throw createError;
+        .insert({
+          id: data.user.id,
+          email: userData.email,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          role: 'OSTEOPATH',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error("Error creating user profile:", profileError);
+        throw profileError;
       }
-      
-      setAuthState({
-        user: newUser as User,
-        isAuthenticated: true,
-        isLoading: false,
-        token: data.session.access_token
-      });
-      
-      toast.success(`Bienvenue, ${userData.firstName} ! Votre compte a été créé.`);
+
+      toast.success("Compte créé avec succès ! Veuillez vous connecter.");
     } catch (error: any) {
       console.error("Registration error:", error);
       toast.error(error.message || "Échec de l'inscription. Veuillez réessayer.");
