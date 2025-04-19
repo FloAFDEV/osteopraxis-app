@@ -87,14 +87,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                     email: session.user.email || '',
                     first_name: session.user.user_metadata?.first_name || '',
                     last_name: session.user.user_metadata?.last_name || '',
-                    role: 'USER' as Role,
+                    role: "USER" as Role, // Spécifier le type comme Role
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                   };
                   
                   const { data: newUser, error: createError } = await supabase
                     .from('User')
-                    .insert(newUserData)
+                    .insert([newUserData]) // Passer un tableau pour l'insert
                     .select()
                     .single();
                     
@@ -212,14 +212,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             email: session.user.email || '',
             first_name: session.user.user_metadata?.first_name || '',
             last_name: session.user.user_metadata?.last_name || '',
-            role: 'USER' as Role,
+            role: "USER" as Role, // Spécifier le type comme Role
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
           
           const { data: newUser, error: createError } = await supabase
             .from('User')
-            .insert(newUserData)
+            .insert([newUserData]) // Passer un tableau pour l'insert
             .select()
             .single();
             
@@ -319,14 +319,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           email: email,
           first_name: data.session.user.user_metadata?.first_name || '',
           last_name: data.session.user.user_metadata?.last_name || '',
-          role: 'USER' as Role,
+          role: "USER" as Role, // Spécifier le type comme Role
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
         
         const { data: newUser, error: createError } = await supabase
           .from('User')
-          .insert(newUserData)
+          .insert([newUserData]) // Passer un tableau pour l'insert
           .select()
           .single();
           
@@ -427,14 +427,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         email: userData.email,
         first_name: userData.firstName,
         last_name: userData.lastName,
-        role: 'USER' as Role,
+        role: "USER" as Role, // Spécifier le type comme Role
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
       
       const { data: newUser, error: createError } = await supabase
         .from('User')
-        .insert(newUserData)
+        .insert([newUserData]) // Passer un tableau pour l'insert
         .select()
         .single();
         

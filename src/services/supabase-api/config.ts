@@ -6,5 +6,5 @@ import { delay, USE_SUPABASE } from "../api/config";
 // Export for use in other modules
 export { delay, USE_SUPABASE };
 
-// Set SIMULATE_AUTH to false to use real authentication
+// Use real authentication
 export const SIMULATE_AUTH = false;

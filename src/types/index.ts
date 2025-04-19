@@ -1,6 +1,9 @@
-
 // Add missing types or update existing ones here to ensure all the properties needed are present
 
+export type DbRole = 'ADMIN' | 'OSTEOPATH' | 'USER';
+
+// Cette définition permet la compatibilité avec Supabase tout en maintenant
+// les types actuels dans l'application
 export type Role = 'ADMIN' | 'OSTEOPATH' | 'USER';
 
 export interface User {
@@ -278,3 +281,57 @@ export interface MedicalDocument {
   url: string;
   description: string;
 }
+
+// Database types pour assurer la compatibilité avec Supabase
+export type DbGender = 'Homme' | 'Femme' | null;
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | null;
+
+// Type de conversion pour les énumérations
+export const mapDbGenderToGender = (dbGender: DbGender): Gender => {
+  if (dbGender === 'Homme') return 'MALE';
+  if (dbGender === 'Femme') return 'FEMALE';
+  return null;
+};
+
+export const mapGenderToDbGender = (gender: Gender): DbGender => {
+  if (gender === 'MALE') return 'Homme';
+  if (gender === 'FEMALE') return 'Femme';
+  return null;
+};
+
+export type DbContraception = 'NONE' | 'PILLS' | 'CONDOM' | 'IMPLANTS' | 'DIAPHRAGM' | 'IUD' | 'INJECTION' | 'PATCH' | 'RING' | 'NATURAL_METHODS' | 'STERILIZATION' | null;
+export type Contraception = 'PILL' | 'IUD' | 'IMPLANT' | 'CONDOM' | 'NONE' | 'OTHER' | null;
+
+// Fonctions de mappage pour la contraception
+export const mapDbContraceptionToContraception = (dbContraception: DbContraception): Contraception => {
+  if (dbContraception === 'PILLS') return 'PILL';
+  if (dbContraception === 'IUD') return 'IUD';
+  if (dbContraception === 'IMPLANTS') return 'IMPLANT';
+  if (dbContraception === 'CONDOM') return 'CONDOM';
+  if (dbContraception === 'NONE') return 'NONE';
+  return 'OTHER';
+};
+
+export type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'OTHER' | null;
+export type DbMaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'SEPARATED' | 'ENGAGED' | 'PARTNERED' | null;
+
+export type Handedness = 'LEFT' | 'RIGHT' | 'AMBIDEXTROUS' | null;
+
+export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+export type DatabaseAppointmentStatus = "COMPLETED" | "CANCELED" | "SCHEDULED" | "NO_SHOW" | "RESCHEDULED";
+
+// Fonctions de mappage pour le statut des rendez-vous
+export const mapDbAppointmentStatusToAppointmentStatus = (dbStatus: DatabaseAppointmentStatus): AppointmentStatus => {
+  if (dbStatus === 'COMPLETED') return 'COMPLETED';
+  if (dbStatus === 'CANCELED') return 'CANCELLED';
+  if (dbStatus === 'SCHEDULED') return 'PLANNED';
+  return 'PLANNED'; // Default for NO_SHOW, RESCHEDULED
+};
+
+export const mapAppointmentStatusToDbAppointmentStatus = (status: AppointmentStatus): DatabaseAppointmentStatus => {
+  if (status === 'COMPLETED') return 'COMPLETED';
+  if (status === 'CANCELLED') return 'CANCELED';
+  if (status === 'PLANNED') return 'SCHEDULED';
+  if (status === 'CONFIRMED') return 'SCHEDULED';
+  return 'SCHEDULED';
+};
