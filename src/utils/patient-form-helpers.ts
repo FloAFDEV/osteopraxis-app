@@ -1,7 +1,14 @@
-
 import { AppointmentStatus } from "@/types";
 
-// Fonction pour valider et convertir la date
+/**
+ * Date formatting utilities for the application
+ */
+
+/**
+ * Format a date object to YYYY-MM-DD string format for input elements
+ * @param date Date object to format
+ * @returns Formatted date string in YYYY-MM-DD format
+ */
 export const validateAndConvertDate = (dateString: string): string | null => {
   if (!dateString) return null;
 
@@ -89,11 +96,11 @@ export const validateChildrenAges = (ages: string): number[] | null => {
 };
 
 // Fonction pour valider et convertir le statut du rendez-vous
-export const validateAppointmentStatus = (status: string): AppointmentStatus | null => {
-  const allowedStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELED", "NO_SHOW", "RESCHEDULED"];
+export function validateAppointmentStatus(status: string): AppointmentStatus | null {
+  const allowedStatuses: AppointmentStatus[] = ["PLANNED", "CONFIRMED", "CANCELLED", "COMPLETED"];
   if (!status) return null;
   if (allowedStatuses.includes(status as AppointmentStatus)) {
     return status as AppointmentStatus;
   }
   return null;
-};
+}

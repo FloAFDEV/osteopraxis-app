@@ -1,4 +1,3 @@
-
 import { AuthState, Role, User } from "@/types";
 import { supabaseAuthService } from "../supabase-api/auth-service";
 import { supabase } from "@/integrations/supabase/client";

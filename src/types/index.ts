@@ -1,4 +1,3 @@
-
 // Appointment types
 export type AppointmentStatus = 'PLANNED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
 
@@ -162,6 +161,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: User | null;
+  token?: string;
 }
 
 // Props pour les composants dashboard
