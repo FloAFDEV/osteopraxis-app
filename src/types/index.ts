@@ -57,6 +57,17 @@ export interface Patient {
   userId: string | null;
 }
 
+// Mise à jour des interfaces pour les autres entités pour assurer la cohérence des types
+export interface Appointment {
+  id: number;
+  date: string;  
+  patientId: number;
+  reason: string;
+  status: AppointmentStatus;
+  notificationSent: boolean;
+  cabinetId?: number;
+}
+
 // Enums pour les patients
 export type Gender = "Homme" | "Femme";
 
@@ -85,16 +96,6 @@ export type Contraception =
   | "STERILIZATION";
 
 // Interface pour les rendez-vous
-export interface Appointment {
-  id: number;
-  date: string;  // Explicitly string to match API expectations
-  patientId: number;
-  reason: string;
-  status: AppointmentStatus;
-  notificationSent: boolean;
-  cabinetId?: number;  // Make cabinetId optional
-}
-
 export type AppointmentStatus = 
   | "SCHEDULED" 
   | "COMPLETED" 
