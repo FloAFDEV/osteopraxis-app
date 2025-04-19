@@ -1,189 +1,240 @@
-
-import { Patient } from "@/types";
+import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
-export const supabasePatientService = {
-  async getAuthSession() {
-    return await supabase.auth.getSession();
-  },
+const adaptPatientFromSupabase = (data: any): Patient => ({
+  id: data.id,
+  createdAt: data.created_at || data.createdAt,
+  updatedAt: data.updated_at || data.updatedAt,
+  firstName: data.firstName,
+  lastName: data.lastName,
+  email: data.email,
+  phone: data.phone,
+  address: data.address,
+  gender: data.gender as Gender,
+  birthDate: data.birthDate,
+  maritalStatus: data.maritalStatus as MaritalStatus,
+  occupation: data.occupation,
+  hasChildren: data.hasChildren,
+  childrenAges: data.childrenAges,
+  generalPractitioner: data.generalPractitioner,
+  surgicalHistory: data.surgicalHistory,
+  traumaHistory: data.traumaHistory,
+  rheumatologicalHistory: data.rheumatologicalHistory,
+  currentTreatment: data.currentTreatment,
+  handedness: data.handedness as Handedness,
+  hasVisionCorrection: data.hasVisionCorrection,
+  ophtalmologistName: data.ophtalmologistName,
+  entProblems: data.entProblems,
+  entDoctorName: data.entDoctorName,
+  digestiveProblems: data.digestiveProblems,
+  digestiveDoctorName: data.digestiveDoctorName,
+  physicalActivity: data.physicalActivity,
+  isSmoker: data.isSmoker,
+  isDeceased: data.isDeceased,
+  contraception: data.contraception as Contraception,
+  hdlm: data.hdlm,
+  avatarUrl: data.avatarUrl,
+  cabinetId: data.cabinetId,
+  userId: data.userId || null,
+  osteopathId: data.osteopathId || 1, // Default value to match Patient type
+});
 
+export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Vous devez vous connecter pour accéder à vos patients");
-      }
+    const { data, error } = await supabase
+      .from('Patient')
+      .select('*');
 
-      const { data: userProfile } = await supabase
-        .from('User')
-        .select('professionalProfileId')
-        .eq('id', session.session?.user.id)
-        .single();
-
-      if (!userProfile?.professionalProfileId) {
-        throw new Error("Vous devez compléter votre profil professionnel avant de consulter vos patients");
-      }
-
-      const { data, error } = await supabase
-        .from('Patient')
-        .select('*')
-        .eq('professionalProfileId', userProfile.professionalProfileId);
-
-      if (error) {
-        throw error;
-      }
-
-      return data as Patient[];
-    } catch (error) {
-      console.error("Error fetching patients:", error);
+    if (error) {
+      console.error('Error fetching patients:', error);
       throw error;
     }
+
+    return data.map(adaptPatientFromSupabase);
   },
 
   async getPatientById(id: number): Promise<Patient | null> {
-    try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Vous devez vous connecter pour accéder à ce patient");
-      }
+    const { data, error } = await supabase
+      .from('Patient')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-      const { data: userProfile } = await supabase
-        .from('User')
-        .select('professionalProfileId')
-        .eq('id', session.session?.user.id)
-        .single();
-
-      if (!userProfile?.professionalProfileId) {
-        throw new Error("Vous devez compléter votre profil professionnel avant de consulter vos patients");
-      }
-
-      const { data, error } = await supabase
-        .from('Patient')
-        .select('*')
-        .eq('id', id)
-        .eq('professionalProfileId', userProfile.professionalProfileId)
-        .single();
-
-      if (error) {
-        // If error is "No rows found", return null
-        if (error.code === 'PGRST116') {
-          return null;
-        }
-        throw error;
-      }
-
-      return data as Patient;
-    } catch (error) {
-      console.error("Error fetching patient by ID:", error);
+    if (error) {
+      console.error(`Error fetching patient with id ${id}:`, error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
   },
 
-  async createPatient(patientData: Partial<Patient>): Promise<Patient> {
-    try {
-      // Get the professional profile ID from the user
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Vous devez vous connecter pour créer un patient");
+  async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+    // Add current timestamps
+    const now = new Date().toISOString();
     
-      const { data: userProfile } = await supabase
-        .from('User')
-        .select('professionalProfileId')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (!userProfile?.professionalProfileId) {
-        throw new Error("Vous devez compléter votre profil professionnel avant de créer un patient");
-      }
+    // Ensure contraception value is in the format expected by Supabase
+    let contraceptionValue = patient.contraception;
+    if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
+      contraceptionValue = "IMPLANTS" as Contraception;
+    }
     
-      const now = new Date().toISOString();
+    // Handle gender type mismatch by converting if needed
+    let genderValue = patient.gender;
+    if (genderValue && genderValue.toString() === "Autre") {
+      genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
+    }
     
-      // Create patient with professionalProfileId
-      const { data, error } = await supabase
-        .from('Patient')
-        .insert({
-          ...patientData,
-          professionalProfileId: userProfile.professionalProfileId,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .select()
-        .single();
-    
-      if (error) {
-        throw error;
-      }
-    
-      return data as Patient;
-    } catch (error) {
-      console.error("Error creating patient:", error);
+    // Map the patient data to match the Supabase column names
+    const patientData = {
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      phone: patient.phone,
+      address: patient.address,
+      gender: genderValue,
+      maritalStatus: patient.maritalStatus,
+      occupation: patient.occupation,
+      hasChildren: patient.hasChildren,
+      childrenAges: patient.childrenAges,
+      birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
+      generalPractitioner: patient.generalPractitioner,
+      surgicalHistory: patient.surgicalHistory,
+      traumaHistory: patient.traumaHistory,
+      rheumatologicalHistory: patient.rheumatologicalHistory,
+      currentTreatment: patient.currentTreatment,
+      handedness: patient.handedness,
+      hasVisionCorrection: patient.hasVisionCorrection,
+      ophtalmologistName: patient.ophtalmologistName,
+      entProblems: patient.entProblems,
+      entDoctorName: patient.entDoctorName,
+      digestiveProblems: patient.digestiveProblems,
+      digestiveDoctorName: patient.digestiveDoctorName,
+      physicalActivity: patient.physicalActivity,
+      isSmoker: patient.isSmoker,
+      isDeceased: patient.isDeceased,
+      contraception: contraceptionValue,
+      hdlm: patient.hdlm,
+      avatarUrl: patient.avatarUrl,
+      cabinetId: patient.cabinetId,
+      userId: patient.userId || null,
+      osteopathId: patient.osteopathId || 1, // Using default if not provided
+      updatedAt: now, // Add the updatedAt field
+      createdAt: now  // Add the createdAt field
+    };
+
+    const { data, error } = await supabase
+      .from('Patient')
+      .insert(patientData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating patient:', error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
-    try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Vous devez vous connecter pour modifier ce patient");
-      }
+    // Use explicit ID for the update operation
+    const id = patient.id;
+    
+    // Add updatedAt timestamp
+    const now = new Date().toISOString();
+    
+    // Convert contraception from IMPLANT to IMPLANTS if needed for Supabase
+    let contraceptionValue = patient.contraception;
+    if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
+      contraceptionValue = "IMPLANTS" as Contraception;
+    }
+    
+    // Handle gender updates for compatibility with Supabase
+    let genderValue = patient.gender;
+    if (genderValue && genderValue.toString() === "Autre") {
+      genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
+    }
+    
+    // Prepare the complete patient data for update
+    const patientData = {
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      phone: patient.phone,
+      address: patient.address,
+      gender: genderValue,
+      maritalStatus: patient.maritalStatus,
+      occupation: patient.occupation,
+      hasChildren: patient.hasChildren,
+      childrenAges: patient.childrenAges,
+      birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
+      generalPractitioner: patient.generalPractitioner,
+      surgicalHistory: patient.surgicalHistory,
+      traumaHistory: patient.traumaHistory,
+      rheumatologicalHistory: patient.rheumatologicalHistory,
+      currentTreatment: patient.currentTreatment,
+      handedness: patient.handedness,
+      hasVisionCorrection: patient.hasVisionCorrection,
+      ophtalmologistName: patient.ophtalmologistName,
+      entProblems: patient.entProblems,
+      entDoctorName: patient.entDoctorName,
+      digestiveProblems: patient.digestiveProblems,
+      digestiveDoctorName: patient.digestiveDoctorName,
+      physicalActivity: patient.physicalActivity,
+      isSmoker: patient.isSmoker,
+      isDeceased: patient.isDeceased,
+      contraception: contraceptionValue,
+      hdlm: patient.hdlm,
+      avatarUrl: patient.avatarUrl,
+      cabinetId: patient.cabinetId,
+      userId: patient.userId,
+      osteopathId: patient.osteopathId || 1,
+      updatedAt: now
+    };
 
-      const { data: userProfile } = await supabase
-        .from('User')
-        .select('professionalProfileId')
-        .eq('id', session.session?.user.id)
-        .single();
+    // Using POST method instead of PATCH for better CORS compatibility
+    console.log("Updating patient with id:", id);
+    const { data, error } = await supabase
+      .from('Patient')
+      .update(patientData)
+      .eq('id', id)
+      .select()
+      .single();
 
-      if (!userProfile?.professionalProfileId) {
-        throw new Error("Vous devez compléter votre profil professionnel avant de modifier ce patient");
-      }
-
-      const now = new Date().toISOString();
-      const { data, error } = await supabase
-        .from('Patient')
-        .update({ ...patient, updatedAt: now })
-        .eq('id', patient.id)
-        .eq('professionalProfileId', userProfile.professionalProfileId)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data as Patient;
-    } catch (error) {
-      console.error("Error updating patient:", error);
+    if (error) {
+      console.error('Error updating patient:', error);
       throw error;
     }
+
+    return adaptPatientFromSupabase(data);
   },
-
-  async deletePatient(id: number): Promise<{ data: any; error: any }> {
+  
+  async deletePatient(id: number): Promise<{ error: any | null }> {
     try {
-       const { data: session } = await supabase.auth.getSession();
-        if (!session) {
-          throw new Error("Vous devez vous connecter pour supprimer ce patient");
-        }
-
-        const { data: userProfile } = await supabase
-          .from('User')
-          .select('professionalProfileId')
-          .eq('id', session.session?.user.id)
-          .single();
-
-        if (!userProfile?.professionalProfileId) {
-          throw new Error("Vous devez compléter votre profil professionnel avant de supprimer ce patient");
-        }
-        
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('Patient')
         .delete()
-        .eq('id', id)
-        .eq('professionalProfileId', userProfile.professionalProfileId);
-
-      return { data, error };
+        .eq('id', id);
+        
+      if (error) {
+        console.error('Error deleting patient:', error);
+        return { error };
+      }
+      
+      return { error: null };
     } catch (error) {
-      console.error("Error deleting patient:", error);
-      return { data: null, error: error };
+      console.error('Exception while deleting patient:', error);
+      return { error };
     }
-  },
+  }
+};
+
+// Export as default and named export
+export default patientService;
+// Also export for compatibility with previous code
+export { patientService as supabasePatientService };
+
+// Make this function available for direct import
+export const updatePatient = async (patient: Patient): Promise<Patient> => {
+  return patientService.updatePatient(patient);
 };

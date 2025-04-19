@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -10,7 +9,7 @@ import { FancyLoader } from '@/components/ui/fancy-loader';
 import { InvoicePrintView } from '@/components/invoice-print-view';
 import { InvoiceDetails } from '@/components/invoice-details';
 import { toast } from 'sonner';
-import { Invoice, Patient, ProfessionalProfile, Cabinet } from '@/types';
+import { Invoice, Patient, Osteopath, Cabinet } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Activity } from 'lucide-react';
 
@@ -19,7 +18,7 @@ const InvoiceDetailPage = () => {
   const { user } = useAuth();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [patient, setPatient] = useState<Patient | null>(null);
-  const [professionalProfile, setProfessionalProfile] = useState<ProfessionalProfile | null>(null);
+  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
@@ -28,6 +27,7 @@ const InvoiceDetailPage = () => {
   // Configuration pour l'impression
   const handlePrint = useReactToPrint({
     documentTitle: `Facture_${id}`,
+    // Utiliser contentRef au lieu de content ou documentContent
     contentRef: printRef
   });
   
@@ -54,19 +54,19 @@ const InvoiceDetailPage = () => {
               console.log("Données de patient récupérées:", patientData);
               setPatient(patientData || null);
               
-              // Si le patient a un professionalProfileId, utiliser celui-ci pour charger le profil professionnel
-              if (patientData?.professionalProfileId) {
+              // Si le patient a un osteopathId, utiliser celui-ci pour charger l'ostéopathe
+              if (patientData?.osteopathId) {
                 try {
-                  console.log(`Chargement des données du profil professionnel ID: ${patientData.professionalProfileId}`);
-                  const profileData = await api.getProfessionalProfileById(patientData.professionalProfileId);
-                  console.log("Données de profil professionnel récupérées:", profileData);
-                  setProfessionalProfile(profileData || null);
+                  console.log(`Chargement des données de l'ostéopathe ID: ${patientData.osteopathId}`);
+                  const osteopathData = await api.getOsteopathById(patientData.osteopathId);
+                  console.log("Données d'ostéopathe récupérées:", osteopathData);
+                  setOsteopath(osteopathData || null);
                   
-                  // Charger les données du cabinet associé au profil professionnel
-                  if (profileData?.id) {
+                  // Charger les données du cabinet associé à l'ostéopathe
+                  if (osteopathData?.id) {
                     try {
-                      console.log(`Chargement des données du cabinet pour le profil professionnel ID: ${profileData.id}`);
-                      const cabinets = await api.getCabinetsByProfessionalProfileId(profileData.id);
+                      console.log(`Chargement des données du cabinet pour l'ostéopathe ID: ${osteopathData.id}`);
+                      const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
                       console.log("Données de cabinets récupérées:", cabinets);
                       
                       if (cabinets && cabinets.length > 0) {
@@ -76,26 +76,26 @@ const InvoiceDetailPage = () => {
                       console.error("Erreur lors du chargement du cabinet:", cabinetError);
                     }
                   }
-                } catch (profileError) {
-                  console.error("Erreur lors du chargement du profil professionnel:", profileError);
+                } catch (osteopathError) {
+                  console.error("Erreur lors du chargement de l'ostéopathe:", osteopathError);
                 }
               }
-              // Si l'utilisateur est connecté mais que le patient n'a pas de professionalProfileId
-              else if (user?.professionalProfileId) {
+              // Si l'utilisateur est connecté mais que le patient n'a pas d'osteopathId
+              else if (user?.osteopathId) {
                 try {
-                  console.log(`Utilisation du professionalProfileId de l'utilisateur: ${user.professionalProfileId}`);
-                  const profileData = await api.getProfessionalProfileById(user.professionalProfileId);
-                  console.log("Données de profil professionnel récupérées via user:", profileData);
-                  setProfessionalProfile(profileData || null);
+                  console.log(`Utilisation de l'osteopathId de l'utilisateur: ${user.osteopathId}`);
+                  const osteopathData = await api.getOsteopathById(user.osteopathId);
+                  console.log("Données d'ostéopathe récupérées via user:", osteopathData);
+                  setOsteopath(osteopathData || null);
                   
-                  if (profileData?.id) {
-                    const cabinets = await api.getCabinetsByProfessionalProfileId(profileData.id);
+                  if (osteopathData?.id) {
+                    const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
                     if (cabinets && cabinets.length > 0) {
                       setCabinet(cabinets[0]);
                     }
                   }
                 } catch (error) {
-                  console.error("Erreur lors du chargement du profil professionnel via userId:", error);
+                  console.error("Erreur lors du chargement de l'ostéopathe via userId:", error);
                 }
               }
               
@@ -132,12 +132,16 @@ const InvoiceDetailPage = () => {
   };
   
   const handleDownload = () => {
+    // Pour le téléchargement, on utilise la même fonction que pour l'impression
     handlePrint();
   };
   
   const getPatientName = () => {
     if (patient) {
       return `${patient.firstName} ${patient.lastName}`;
+    }
+    if (invoice?.Patient) {
+      return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
     }
     return `Patient #${invoice?.patientId || ""}`;
   };
@@ -199,7 +203,7 @@ const InvoiceDetailPage = () => {
                 <InvoicePrintView 
                   invoice={invoice}
                   patient={patient}
-                  professionalProfile={professionalProfile}
+                  osteopath={osteopath}
                   cabinet={cabinet}
                 />
               </div>

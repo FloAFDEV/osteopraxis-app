@@ -1,33 +1,14 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, supabaseAdmin, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues, getCurrentOsteopathId } from "./utils";
+import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     try {
-      const osteopathId = await getCurrentOsteopathId();
-      
-      // Si pas d'ostéopathe, utiliser le client admin
-      if (!osteopathId) {
-        console.log("Impossible de récupérer l'ID ostéopathe spécifique, utilisation de l'accès admin");
-        const { data, error } = await supabaseAdmin
-          .from('Appointment')
-          .select('*')
-          .order('date', { ascending: true });
-        
-        if (error) {
-          console.error('Erreur lors de la récupération des rendez-vous:', error);
-          return [];
-        }
-        
-        console.log(`${data?.length || 0} rendez-vous trouvés avec l'accès admin`);
-        return data || [];
-      }
-
       const query = addAuthHeaders(
         supabase
           .from("Appointment")
-          .select('*')
+          .select("*")
           .order('date', { ascending: true })
       );
       
@@ -35,7 +16,17 @@ export const supabaseAppointmentService = {
       
       if (error) throw new Error(error.message);
       
-      return data || [];
+      if (!data) return [];
+      
+      // Transform data with proper typing
+      return data.map(item => ({
+        id: item.id,
+        date: item.date,
+        reason: item.reason,
+        patientId: item.patientId,
+        status: item.status as AppointmentStatus,
+        notificationSent: item.notificationSent
+      }));
     } catch (error) {
       console.error("Erreur getAppointments:", error);
       throw error;
@@ -61,7 +52,17 @@ export const supabaseAppointmentService = {
         throw new Error(error.message);
       }
       
-      return data || undefined;
+      if (!data) return undefined;
+      
+      // Transform data with proper typing
+      return {
+        id: data.id,
+        date: data.date,
+        reason: data.reason,
+        patientId: data.patientId,
+        status: data.status as AppointmentStatus,
+        notificationSent: data.notificationSent
+      };
     } catch (error) {
       console.error("Erreur getAppointmentById:", error);
       throw error;
@@ -82,22 +83,35 @@ export const supabaseAppointmentService = {
       
       if (error) throw new Error(error.message);
       
-      return data || [];
+      if (!data) return [];
+      
+      // Transform data with proper typing
+      return data.map(item => ({
+        id: item.id,
+        date: item.date,
+        reason: item.reason,
+        patientId: item.patientId,
+        status: item.status as AppointmentStatus,
+        notificationSent: item.notificationSent
+      }));
     } catch (error) {
       console.error("Erreur getAppointmentsByPatientId:", error);
       throw error;
     }
   },
 
-  async createAppointment(appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Appointment> {
+  async createAppointment(appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> {
     try {
       // Make sure the status value is one of the allowed enum values
       const validStatus = ensureAppointmentStatus(appointmentData.status);
       
       // Create appointment with proper status type
       const appointmentToCreate = {
-        ...appointmentData,
-        status: validStatus
+        date: appointmentData.date,
+        reason: appointmentData.reason,
+        patientId: appointmentData.patientId,
+        status: validStatus,
+        notificationSent: appointmentData.notificationSent
       };
       
       const query = addAuthHeaders(
@@ -112,7 +126,14 @@ export const supabaseAppointmentService = {
       
       if (error) throw new Error(error.message);
       
-      return data;
+      return {
+        id: data.id,
+        date: data.date,
+        reason: data.reason,
+        patientId: data.patientId,
+        status: data.status as AppointmentStatus,
+        notificationSent: data.notificationSent
+      };
     } catch (error) {
       console.error("Erreur createAppointment:", error);
       throw error;
@@ -121,12 +142,16 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
-      const updateData: Record<string, any> = { ...appointmentData };
+      const updateData: Record<string, any> = {};
       
+      if ('date' in appointmentData) updateData.date = appointmentData.date;
+      if ('reason' in appointmentData) updateData.reason = appointmentData.reason;
+      if ('patientId' in appointmentData) updateData.patientId = appointmentData.patientId;
       if ('status' in appointmentData && appointmentData.status) {
         // Make sure status is a valid enum value
         updateData.status = ensureAppointmentStatus(appointmentData.status);
       }
+      if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
       const query = addAuthHeaders(
         supabase
@@ -141,7 +166,14 @@ export const supabaseAppointmentService = {
       
       if (error) throw new Error(error.message);
       
-      return data;
+      return {
+        id: data.id,
+        date: data.date,
+        reason: data.reason,
+        patientId: data.patientId,
+        status: data.status as AppointmentStatus,
+        notificationSent: data.notificationSent
+      };
     } catch (error) {
       console.error("Erreur updateAppointment:", error);
       throw error;
@@ -161,7 +193,7 @@ export const supabaseAppointmentService = {
       
       if (error) throw new Error(error.message);
       
-      return true;
+      return true; // Retourne true au lieu de void pour correspondre au type attendu
     } catch (error) {
       console.error("Erreur deleteAppointment:", error);
       throw error;

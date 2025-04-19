@@ -1,280 +1,182 @@
 
-import { User, Credentials } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
+import { User, AuthState } from "@/types";
+import { delay, USE_SUPABASE } from "./config";
+import { supabaseAuthService } from "../supabase-api/auth-service";
+
+// Données simulées pour les utilisateurs
+const users: User[] = [
+  {
+    id: "d79c31bc-b1fa-42a2-bbd8-379f03f0d8e9",
+    email: "franck.blanchet@example.com",
+    first_name: "Franck",
+    last_name: "BLANCHET",
+    role: "OSTEOPATH",
+    created_at: "2024-12-20 22:29:30",
+    updated_at: "2024-12-20 22:29:30",
+    osteopathId: 1
+  }
+];
+
+// Variables pour stocker l'état d'authentification
+let authState: AuthState = {
+  user: null,
+  isAuthenticated: false,
+  token: null
+};
 
 export const authService = {
-  async login(email: string, password: string): Promise<{ user: User; token: string }> {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!data.session) {
-        throw new Error("No session found after sign-in");
-      }
-
-      const user = data.session.user;
-      const token = data.session.access_token;
-
-      if (!user || !token) {
-        throw new Error("User or token not found after sign-in");
-      }
-
+  async register(userData: {
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  }): Promise<AuthState> {
+    if (USE_SUPABASE) {
       try {
-        const { data: userProfile, error: userProfileError } = await supabase
-          .from('User')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (userProfileError && userProfileError.code !== 'PGRST116') {
-          console.error("Error fetching user profile:", userProfileError);
-          throw userProfileError;
-        }
-
-        if (userProfile) {
-          return { user: userProfile as User, token };
-        }
-        
-        // Si l'utilisateur n'a pas de profil, créer un profil de base
-        const basicUser = {
-          id: user.id,
-          email: user.email || '',
-          first_name: user.user_metadata?.first_name || '',
-          last_name: user.user_metadata?.last_name || '',
-          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        
-        // Essayer d'insérer le profil utilisateur
-        try {
-          const { error: insertError } = await supabase
-            .from('User')
-            .insert([basicUser]);
-            
-          if (insertError) {
-            console.error("Error creating user profile:", insertError);
-          }
-        } catch (err) {
-          console.error("Error during profile creation:", err);
-        }
-        
-        return { user: basicUser as User, token };
-      } catch (profileError) {
-        console.error("Error handling user profile:", profileError);
-        
-        const basicUser = {
-          id: user.id,
-          email: user.email || '',
-          first_name: user.user_metadata?.first_name || '',
-          last_name: user.user_metadata?.last_name || '',
-          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
-        };
-        
-        return { user: basicUser as User, token };
-      }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      throw new Error(error.message || "Login failed");
-    }
-  },
-
-  async loginWithMagicLink(email: string): Promise<void> {
-    try {
-      const { error } = await supabase.auth.signInWithOtp({ 
-        email,
-        options: {
-          emailRedirectTo: window.location.origin
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error: any) {
-      console.error("Login with magic link error:", error);
-      throw new Error(error.message || "Failed to send magic link");
-    }
-  },
-
-  async register(userData: Credentials): Promise<{ user: User; token: string }> {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-          },
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!data.user) {
-        throw new Error("No user found after registration");
-      }
-
-      // Créer l'entrée utilisateur dans la table User
-      const userRecord = {
-        id: data.user.id,
-        email: userData.email,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      
-      try {
-        const { error: profileError } = await supabase
-          .from('User')
-          .insert([userRecord]);
-
-        if (profileError) {
-          console.error("Error creating user profile:", profileError);
-        }
-      } catch (err) {
-        console.error("Error inserting user record:", err);
-      }
-
-      // Si une session est disponible, retourner le token
-      if (data.session) {
-        return { 
-          user: userRecord as User, 
-          token: data.session.access_token 
-        };
-      }
-      
-      // Sinon, retourner juste l'utilisateur
-      return { 
-        user: userRecord as User, 
-        token: '' 
-      };
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      throw new Error(error.message || "Registration failed");
-    }
-  },
-
-  async logout(): Promise<void> {
-    try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        throw error;
-      }
-    } catch (error: any) {
-      console.error("Logout error:", error);
-      throw new Error(error.message || "Logout failed");
-    }
-  },
-
-  async getSession() {
-    try {
-      return await supabase.auth.getSession();
-    } catch (error) {
-      console.error("getSession error:", error);
-      throw error;
-    }
-  },
-
-  async getCurrentUser(): Promise<User | null> {
-    try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session) {
-        console.log("Pas de session active");
-        return null;
-      }
-      
-      const userId = session.user.id;
-      
-      try {
-        const { data, error } = await supabase
-          .from('User')
-          .select('*')
-          .eq('id', userId)
-          .maybeSingle();
-          
-        if (error && error.code !== 'PGRST116') {
-          console.error("Erreur lors de la récupération de l'utilisateur:", error);
-          throw error;
-        }
-        
-        if (data) {
-          return data as User;
-        }
-        
-        // Créer un utilisateur de base si aucun n'est trouvé
-        const basicUser = {
-          id: session.user.id,
-          email: session.user.email || '',
-          first_name: session.user.user_metadata?.first_name || '',
-          last_name: session.user.user_metadata?.last_name || '',
-          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        
-        // Tenter de créer l'entrée utilisateur
-        try {
-          const { error: insertError } = await supabase
-            .from('User')
-            .insert([basicUser]);
-            
-          if (insertError) {
-            console.error("Error creating user entry:", insertError);
-          }
-        } catch (err) {
-          console.error("Failed to create user entry:", err);
-        }
-        
-        return basicUser as User;
+        return await supabaseAuthService.register(userData.email, userData.password, userData.firstName, userData.lastName);
       } catch (error) {
-        console.error("Erreur lors de la requête utilisateur:", error);
-        
-        // Fallback en cas d'erreur
-        const basicUser = {
-          id: session.user.id,
-          email: session.user.email || '',
-          first_name: session.user.user_metadata?.first_name || '',
-          last_name: session.user.user_metadata?.last_name || '',
-          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
-        };
-        
-        return basicUser as User;
+        console.error("Erreur Supabase register:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Erreur inattendue lors de la récupération de l'utilisateur:", error);
-      return null;
     }
+    
+    // Fallback: code simulé existant
+    await delay(500);
+    // Simuler une inscription (démo seulement)
+    const newUser: User = {
+      id: `user-${Date.now()}`,
+      email: userData.email,
+      first_name: userData.firstName,
+      last_name: userData.lastName,
+      role: "OSTEOPATH",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      osteopathId: users.length + 1
+    };
+    
+    users.push(newUser);
+    
+    // Créer un token simulé
+    const token = "fake-jwt-token-" + Math.random().toString(36).substring(2);
+    
+    authState = {
+      user: newUser,
+      isAuthenticated: true,
+      token
+    };
+    
+    localStorage.setItem("authState", JSON.stringify(authState));
+    
+    return authState;
+  },
+  
+  async login(email: string, password: string): Promise<AuthState> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAuthService.login(email, password);
+      } catch (error) {
+        console.error("Erreur Supabase login:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(500);
+    const user = users.find(u => u.email === email);
+    
+    if (!user || password !== "password") { // Simulation de mot de passe pour démo
+      throw new Error("Identifiants incorrects");
+    }
+    
+    const token = "fake-jwt-token-" + Math.random().toString(36).substring(2);
+    
+    authState = {
+      user,
+      isAuthenticated: true,
+      token
+    };
+    
+    localStorage.setItem("authState", JSON.stringify(authState));
+    
+    return authState;
+  },
+  
+  async loginWithMagicLink(email: string): Promise<void> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAuthService.loginWithMagicLink(email);
+      } catch (error) {
+        console.error("Erreur Supabase magic link:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé
+    await delay(500);
+    console.log(`Magic link envoyé à ${email} (simulation)`);
+  },
+  
+  async logout(): Promise<void> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAuthService.logout();
+      } catch (error) {
+        console.error("Erreur Supabase logout:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(200);
+    authState = {
+      user: null,
+      isAuthenticated: false,
+      token: null
+    };
+    
+    localStorage.removeItem("authState");
+  },
+  
+  async checkAuth(): Promise<AuthState> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAuthService.checkAuth();
+      } catch (error) {
+        console.error("Erreur Supabase checkAuth:", error);
+      }
+    }
+    
+    // Fallback: code simulé existant
+    await delay(100);
+    const storedAuth = localStorage.getItem("authState");
+    
+    if (storedAuth) {
+      try {
+        authState = JSON.parse(storedAuth);
+      } catch (e) {
+        console.error("Failed to parse stored auth state", e);
+        authState = {
+          user: null,
+          isAuthenticated: false,
+          token: null
+        };
+      }
+    }
+    
+    return authState;
   },
 
-  async promoteToAdmin(userId: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('User')
-        .update({
-          role: 'ADMIN', 
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
-        
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error promoting user to admin:", error);
-      throw error;
+  async promoteToAdmin(userId: string): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAuthService.promoteToAdmin(userId);
+      } catch (error) {
+        console.error("Erreur Supabase promoteToAdmin:", error);
+        throw error;
+      }
     }
-  },
+    
+    // Fallback: code simulé
+    await delay(300);
+    return true;
+  }
 };

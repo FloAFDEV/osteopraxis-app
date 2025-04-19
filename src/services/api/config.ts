@@ -1,10 +1,14 @@
 
-// Configuration for API services
+// Configuration pour l'API
+// Le délai simulé pour les réponses d'API (en ms)
+export const DELAY = 300;
 
-// Set to true to use Supabase, false to use mock data
+// Fonction utilitaire pour simuler un délai d'API
+export const delay = (ms: number = DELAY) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Active l'utilisation de Supabase au lieu de l'API simulée
 export const USE_SUPABASE = true;
 
-// Simulate network delay for mock API (milliseconds)
-export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Note: SIMULATE_AUTH is now defined only in supabase-api/config.ts
+// Mode de développement pour simuler l'authentification
+// Ajoute des en-têtes pour contourner l'authentification lors du développement
+export const SIMULATE_AUTH = true;

@@ -1,43 +1,17 @@
-
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Clock, Calendar, FileText } from "lucide-react";
-import { Appointment, AppointmentStatus } from "@/types";
+import { Appointment, Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-
-// Définir l'interface Patient pour ce composant
-interface Patient {
-  id: number;
-  firstName: string;
-  lastName: string;
-  currentTreatment?: string;
-}
-
 interface AppointmentCardProps {
   appointment: Appointment;
   patient?: Patient;
   onEdit?: () => void;
   onCancel?: () => void;
 }
-
-const getStatusBadge = (status: AppointmentStatus) => {
-  switch (status) {
-    case "PLANNED":
-      return <Badge className="bg-blue-500">Planifié</Badge>;
-    case "CONFIRMED":
-      return <Badge className="bg-green-500">Confirmé</Badge>;
-    case "CANCELLED":
-      return <Badge className="bg-red-500">Annulé</Badge>;
-    case "COMPLETED":
-      return <Badge className="bg-green-500">Terminé</Badge>;
-    default:
-      return null;
-  }
-};
-
 export function AppointmentCard({
   appointment,
   patient,
@@ -49,10 +23,20 @@ export function AppointmentCard({
     locale: fr
   });
   const formattedTime = format(appointmentDate, "HH:mm");
-  
-  // Use either notes or reason, depending on which is available
-  const appointmentDescription = appointment.notes || appointment.reason || "";
-  
+  const getStatusBadge = (status: Appointment["status"]) => {
+    switch (status) {
+      case "SCHEDULED":
+        return <Badge className="bg-blue-500">Planifié</Badge>;
+      case "COMPLETED":
+        return <Badge className="bg-green-500">Terminé</Badge>;
+      case "CANCELLED":
+        return <Badge className="bg-red-500">Annulé</Badge>;
+      case "RESCHEDULED":
+        return <Badge className="bg-amber-500">Reporté</Badge>;
+      default:
+        return null;
+    }
+  };
   return <Card className="overflow-hidden hover-scale">
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
@@ -62,7 +46,7 @@ export function AppointmentCard({
                   {patient.firstName} {patient.lastName}
                 </Link> : `Patient #${appointment.patientId}`}
             </h3>
-            <p className="text-muted-foreground">{appointmentDescription}</p>
+            <p className="text-muted-foreground">{appointment.reason}</p>
           </div>
           {getStatusBadge(appointment.status)}
         </div>
@@ -89,7 +73,7 @@ export function AppointmentCard({
           {onEdit && <Button variant="outline" size="sm" onClick={onEdit}>
               Modifier
             </Button>}
-          {onCancel && appointment.status === "PLANNED" && <Button variant="destructive" size="sm" onClick={onCancel}>
+          {onCancel && appointment.status === "SCHEDULED" && <Button variant="destructive" size="sm" onClick={onCancel}>
               Annuler
             </Button>}
         </CardFooter>}

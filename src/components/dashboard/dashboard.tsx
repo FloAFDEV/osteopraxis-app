@@ -5,7 +5,7 @@ import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AppointmentsOverview } from "@/components/dashboard/appointments-overview";
 import { DemographicsCard } from "@/components/dashboard/demographics-card";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
-import { DashboardData, MonthlyGrowthData } from "@/types";
+import { DashboardData } from "@/types";
 import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -53,8 +53,8 @@ export function Dashboard() {
 
         // Calcul des statistiques avec uniquement les données réelles
         const totalPatients = patients.length;
-        const maleCount = patients.filter(p => p.gender === "MALE").length;
-        const femaleCount = patients.filter(p => p.gender === "FEMALE").length;
+        const maleCount = patients.filter(p => p.gender === "Homme").length;
+        const femaleCount = patients.filter(p => p.gender === "Femme").length;
 
         // Calcul des âges et métriques de croissance
         const today = new Date();
@@ -125,7 +125,7 @@ export function Dashboard() {
 
         // Données de croissance mensuelle
         const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
-        const monthlyGrowth: MonthlyGrowthData[] = frenchMonths.map((month, index) => {
+        const monthlyGrowth = frenchMonths.map((month, index) => {
           const thisYearPatients = patients.filter(p => {
             const createdAt = new Date(p.createdAt);
             return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear;
@@ -163,8 +163,8 @@ export function Dashboard() {
         };
         
         const averageAge = calculateAverageAge(patients);
-        const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "MALE"));
-        const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "FEMALE"));
+        const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
+        const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
 
         // Mettre à jour les données du tableau de bord
         setDashboardData({
@@ -194,43 +194,64 @@ export function Dashboard() {
     
     loadDashboardData();
   }, []);
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[500px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-  
+
   return (
-    <div className="space-y-6">
-      <DashboardStats data={dashboardData} />
-      
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-        <Card className="md:col-span-4">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-medium mb-4">Évolution du nombre de patients</h3>
-            <GrowthChart data={dashboardData.monthlyGrowth} />
-          </CardContent>
-        </Card>
-        
-        <Card className="md:col-span-2">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-medium mb-4">Démographie des patients</h3>
-            <DemographicsCard 
-              maleCount={dashboardData.maleCount}
-              femaleCount={dashboardData.femaleCount}
-              otherCount={dashboardData.totalPatients - dashboardData.maleCount - dashboardData.femaleCount}
-            />
-          </CardContent>
-        </Card>
+    <div className="space-y-8">
+      {/* Header Image Banner */}
+      <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg mb-8 animate-fade-in shadow-lg transform hover:scale-[1.01] transition-all duration-500">
+        <img 
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400" 
+          alt="Cabinet d'ostéopathie" 
+          className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex items-center">
+          <div className="px-6 md:px-10 max-w-2xl animate-fade-in animate-delay-100">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl text-white font-bold mb-2">
+              Tableau de bord
+            </h1>
+            <p className="text-white/90 text-sm md:text-base lg:text-lg max-w-md">
+              Bienvenue sur votre espace de gestion. Suivez vos activités et consultez vos statistiques en temps réel.
+            </p>
+          </div>
+        </div>
       </div>
-      
-      <AppointmentsOverview 
-        appointmentsToday={dashboardData.appointmentsToday} 
-        nextAppointment={dashboardData.nextAppointment} 
-      />
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+            <p className="text-lg text-gray-600 dark:text-gray-300 animate-pulse">
+              Chargement des données...
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="animate-fade-in">
+            <DashboardStats data={dashboardData} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="animate-fade-in animate-delay-100">
+              <AppointmentsOverview data={dashboardData} />
+            </div>
+            <div className="animate-fade-in animate-delay-200">
+              <DemographicsCard data={dashboardData} />
+            </div>
+          </div>
+
+          <div className="animate-fade-in animate-delay-300">
+            <Card className="hover-scale">
+              <CardContent className="p-6 bg-inherit">
+                <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
+                <div className="h-full">
+                  <GrowthChart data={dashboardData} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }

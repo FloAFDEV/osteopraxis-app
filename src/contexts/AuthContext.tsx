@@ -1,552 +1,341 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { AuthContextType, AuthState, User } from "@/types";
-import { toast } from 'sonner';
 
-export const AuthContext = createContext<AuthContextType>({
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
+import { User } from "@/types";
+import { api } from "@/services/api";
+import { supabase } from "@/services/supabase-api/utils";
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  token: string | null;
+  message?: string; // Optional message field for auth feedback
+}
+
+interface AuthContextType extends AuthState {
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }) => Promise<boolean>;
+  logout: () => void;
+  loadStoredToken: () => Promise<boolean>;
+  updateUser: (updatedUser: User) => boolean;
+  isLoading: boolean;
+  loginWithMagicLink: (email: string) => Promise<void>;
+  promoteToAdmin: (userId: string) => Promise<boolean>;
+}
+
+const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
-  isLoading: true,
   token: null,
-  login: async () => false,
-  logout: async () => {},
-  register: async () => false,
-  loadStoredToken: async () => {
-    return {
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      token: null
-    };
-  },
-  updateUser: () => {},
-  loginWithMagicLink: async () => false,
   isAdmin: false,
-  promoteToAdmin: async () => {},
+  isLoading: false,
+  login: async () => false,
+  register: async () => false,
+  logout: () => {},
+  loadStoredToken: async () => false,
+  updateUser: () => true,
+  loginWithMagicLink: async () => {},
+  promoteToAdmin: async () => false,
 });
 
-// Hook to use auth context
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
-};
-
-export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    isLoading: true,
-    token: null
+    token: null,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
+  const isAdmin = useMemo(() => authState.user?.role === "ADMIN", [authState.user]);
+  const [loadAttempts, setLoadAttempts] = useState(0);
+  const MAX_LOAD_ATTEMPTS = 3;
 
-  useEffect(() => {
-    console.log("Setting up auth listener");
-    
-    // Add auth state change listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.id);
+  // Define loadStoredToken FIRST
+  const loadStoredToken = useCallback(async () => {
+    console.log("Tentative de chargement du token stocké...");
+    const storedAuthState = localStorage.getItem("authState");
+    if (storedAuthState) {
+      try {
+        console.log("État d'authentification trouvé dans localStorage");
+        const parsedState = JSON.parse(storedAuthState);
         
-        if (session && session.user) {
+        if (parsedState.token) {
+          console.log("Token trouvé dans l'état stocké");
           try {
-            // Récupérer les données du profil utilisateur
-            const { data: userProfile, error: userError } = await supabase
-              .from('User')
-              .select('*')
-              .eq('id', session.user.id)
-              .maybeSingle();
-
-            // Si l'utilisateur existe dans la base, utiliser ses données
-            if (userProfile) {
-              setAuthState({
-                user: userProfile as User,
-                isAuthenticated: true,
-                isLoading: false,
-                token: session.access_token
+            if (parsedState.token) {
+              console.log("Définition du token dans la session Supabase");
+              await supabase.auth.setSession({
+                access_token: parsedState.token,
+                refresh_token: ""
               });
-              return;
+              console.log("Token défini dans Supabase");
             }
             
-            // Si l'utilisateur n'existe pas ou s'il y a une erreur
-            const basicUser = {
-              id: session.user.id,
-              email: session.user.email || '',
-              first_name: session.user.user_metadata?.first_name || '',
-              last_name: session.user.user_metadata?.last_name || '',
-              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
+            console.log("Attente de synchronisation...");
+            await new Promise(resolve => setTimeout(resolve, 500)); // Augmenté à 500ms
             
-            setAuthState({
-              user: basicUser as User,
-              isAuthenticated: true,
-              isLoading: false,
-              token: session.access_token
-            });
+            console.log("Vérification de l'authentification...");
+            const authCheck = await api.checkAuth();
+            console.log("Résultat vérification d'auth:", authCheck);
             
-            // Tenter de créer l'utilisateur en arrière-plan
-            try {
-              const { error: createError } = await supabase
-                .from('User')
-                .insert([basicUser]);
-                
-              if (createError) {
-                console.log("Error creating user in background:", createError);
-              } else {
-                console.log("User record created successfully in background");
-              }
-            } catch (err) {
-              console.log("Failed to create user in background:", err);
+            if (authCheck.isAuthenticated && authCheck.user) {
+              console.log("Authentification validée par l'API");
+              setAuthState({
+                user: authCheck.user,
+                isAuthenticated: true,
+                token: authCheck.token || parsedState.token,
+              });
+              
+              console.log("✅ Authentication réussie:", authCheck.user.id);
+              
+              // Vérifier l'état de la session Supabase
+              const { data: session } = await supabase.auth.getSession();
+              console.log("Session Supabase après vérification:", session?.session ? "Valide" : "Invalide");
+              
+              return true;
+            } else {
+              console.warn("Token invalidé par l'API, suppression de l'état d'authentification");
+              localStorage.removeItem("authState");
+              setAuthState({
+                user: null,
+                isAuthenticated: false,
+                token: null,
+              });
+              return false;
             }
           } catch (error) {
-            console.error("Error in auth state change handler:", error);
+            console.error("Error checking auth:", error);
             
-            // Fallback en cas d'erreur: utiliser les données de session de base
-            const fallbackUser = {
-              id: session.user.id,
-              email: session.user.email || '',
-              first_name: session.user.user_metadata?.first_name || '',
-              last_name: session.user.user_metadata?.last_name || '',
-              role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
-            };
+            // Dernier recours: tenter une connexion directe avec Supabase
+            try {
+              console.log("Tentative de récupération directe de la session Supabase...");
+              const { data: supabaseSession } = await supabase.auth.getSession();
+              
+              if (supabaseSession?.session) {
+                console.log("Session Supabase trouvée directement:", supabaseSession.session.user.id);
+                // Utilisez la session Supabase et mettez à jour l'état local
+                return true;
+              }
+            } catch (supabaseError) {
+              console.error("Erreur lors de la récupération directe de la session Supabase:", supabaseError);
+            }
             
+            console.warn("Erreur de vérification d'authentification, utilisation du token local comme fallback");
             setAuthState({
-              user: fallbackUser as User,
+              user: parsedState.user,
               isAuthenticated: true,
-              isLoading: false,
-              token: session.access_token
+              token: parsedState.token,
             });
+            
+            return true;
           }
         } else {
-          setAuthState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-            token: null
-          });
-        }
-      }
-    );
-    
-    // Then check for existing session
-    const setupAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          setAuthState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-            token: null
-          });
-          return;
-        }
-
-        // Tenter de récupérer le profil utilisateur
-        try {
-          const { data: userProfile, error: userError } = await supabase
-            .from('User')
-            .select('*')
-            .eq('id', session.user.id)
-            .maybeSingle();
-
-          // Si l'utilisateur existe dans la base
-          if (userProfile) {
-            setAuthState({
-              user: userProfile as User,
-              isAuthenticated: true,
-              isLoading: false,
-              token: session.access_token
-            });
-            return;
-          }
-          
-          // Fallback: utiliser les données de session
-          const fallbackUser = {
-            id: session.user.id,
-            email: session.user.email || '',
-            first_name: session.user.user_metadata?.first_name || '',
-            last_name: session.user.user_metadata?.last_name || '',
-            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-          
-          setAuthState({
-            user: fallbackUser as User,
-            isAuthenticated: true,
-            isLoading: false,
-            token: session.access_token
-          });
-          
-        } catch (error) {
-          console.error("Error during user profile fetch:", error);
-          
-          // Fallback en cas d'erreur
-          const basicUser = {
-            id: session.user.id,
-            email: session.user.email || '',
-            first_name: session.user.user_metadata?.first_name || '',
-            last_name: session.user.user_metadata?.last_name || '',
-            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
-          };
-          
-          setAuthState({
-            user: basicUser as User,
-            isAuthenticated: true,
-            isLoading: false,
-            token: session.access_token
-          });
+          console.log("Aucun token trouvé dans l'état stocké");
         }
       } catch (error) {
-        console.error("Error during auth setup:", error);
-        setAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
-        });
+        console.error("Error parsing auth state:", error);
+        localStorage.removeItem("authState");
       }
-    };
-
-    setupAuth();
-    
-    return () => {
-      subscription?.unsubscribe();
-    };
+    } else {
+      console.log("Aucun état d'authentification trouvé dans localStorage");
+    }
+    return false;
   }, []);
 
-  const loadStoredToken = async (): Promise<AuthState> => {
-    try {
-      // Récupérer la session utilisateur
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Error checking auth session:", error);
-        setAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
-        });
-        return {
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
-        };
-      }
-
-      if (!session) {
-        console.log("No session found");
-        setAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
-        });
-        return {
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: null
-        };
-      }
-
+  // Then use useEffect with loadStoredToken
+  useEffect(() => {
+    const initialAuth = async () => {
       try {
-        // Récupérer les données utilisateur
-        const { data: userData, error: userError } = await supabase
-          .from('User')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle();
+        console.log(`Tentative d'authentification initiale (${loadAttempts + 1}/${MAX_LOAD_ATTEMPTS})...`);
+        setIsLoading(true);
+        const success = await loadStoredToken();
+        console.log("Résultat de la tentative:", success ? "Succès" : "Échec");
         
-        // Créer un utilisateur de base si aucun n'est trouvé
-        if (!userData || userError) {
-          console.log("User not found or error, creating basic user");
-          
-          const newUserData = {
-            id: session.user.id,
-            email: session.user.email || '',
-            first_name: session.user.user_metadata?.first_name || '',
-            last_name: session.user.user_metadata?.last_name || '',
-            role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-          
-          const updatedAuthState = {
-            user: newUserData as User,
+        if (!success && loadAttempts < MAX_LOAD_ATTEMPTS) {
+          console.log(`Tentative d'authentification ${loadAttempts + 1}/${MAX_LOAD_ATTEMPTS} échouée, nouvel essai dans 1s...`);
+          setTimeout(() => setLoadAttempts(prev => prev + 1), 1000);
+          return;
+        }
+      } catch (error) {
+        console.error("Error during initial auth check:", error);
+      } finally {
+        setIsLoading(false);
+        setInitialCheckDone(true);
+      }
+    };
+
+    initialAuth();
+  }, [loadAttempts, loadStoredToken]);
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        console.log("Tentative de connexion avec:", email);
+        setIsLoading(true);
+        // Simulation d'une requête d'authentification
+        const response = await api.login(email, password);
+        
+        if (response.token) {
+          console.log("Connexion réussie, token reçu");
+          const authData = {
+            user: response.user,
             isAuthenticated: true,
-            isLoading: false,
-            token: session.access_token
+            token: response.token,
           };
           
-          setAuthState(updatedAuthState);
+          localStorage.setItem("authState", JSON.stringify(authData));
+          setAuthState(authData);
           
-          // Tenter de créer l'utilisateur dans la base
-          try {
-            const { error: createError } = await supabase
-              .from('User')
-              .insert([newUserData]);
-              
-            if (createError) {
-              console.error("Error creating new user:", createError);
-            }
-          } catch (err) {
-            console.error("Failed to create user:", err);
+          // Définir également la session dans Supabase
+          if (response.token) {
+            console.log("Configuration de la session Supabase avec le token");
+            await supabase.auth.setSession({
+              access_token: response.token,
+              refresh_token: ""
+            });
           }
           
-          return updatedAuthState;
+          // Forcer un court délai pour s'assurer que l'état est bien mis à jour
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          return true;
         }
-        
-        // Utiliser les données de l'utilisateur existant
-        console.log("User authenticated:", userData);
-        const updatedAuthState = {
-          user: userData as User,
-          isAuthenticated: true,
-          isLoading: false,
-          token: session.access_token
-        };
-        
-        setAuthState(updatedAuthState);
-        return updatedAuthState;
-      } catch (err) {
-        console.error("Error processing user data:", err);
-        
-        // Fallback en cas d'erreur
-        const basicUser = {
-          id: session.user.id,
-          email: session.user.email || '',
-          first_name: session.user.user_metadata?.first_name || '',
-          last_name: session.user.user_metadata?.last_name || '',
-          role: "OSTEOPATH" as "ADMIN" | "OSTEOPATH"
-        };
-        
-        const fallbackAuthState = {
-          user: basicUser as User,
-          isAuthenticated: true,
-          isLoading: false,
-          token: session.access_token
-        };
-        
-        setAuthState(fallbackAuthState);
-        return fallbackAuthState;
+        console.log("Échec de connexion: pas de token reçu");
+        return false;
+      } catch (error) {
+        console.error("Login error:", error);
+        return false;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error loading stored token:", error);
-      const errorState = {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null
+    },
+    []
+  );
+
+  const loginWithMagicLink = useCallback(
+    async (email: string) => {
+      try {
+        setIsLoading(true);
+        await api.loginWithMagicLink(email);
+        // Note: We don't set auth state here as the user will need to click the link in their email
+      } catch (error) {
+        console.error("Magic link error:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const register = useCallback(
+    async (userData: { 
+      firstName: string; 
+      lastName: string; 
+      email: string; 
+      password: string; 
+    }) => {
+      try {
+        setIsLoading(true);
+        const response = await api.register(userData);
+        
+        if (response.token) {
+          const authData = {
+            user: response.user,
+            isAuthenticated: true,
+            token: response.token,
+          };
+          
+          localStorage.setItem("authState", JSON.stringify(authData));
+          setAuthState(authData);
+          
+          // Forcer un court délai pour s'assurer que l'état est bien mis à jour
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Registration error:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("authState");
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+      token: null,
+    });
+    api.logout();
+  }, []);
+
+  
+  
+  const updateUser = useCallback((updatedUser: User) => {
+    setAuthState((prev) => {
+      const newState = {
+        ...prev,
+        user: updatedUser,
       };
-      setAuthState(errorState);
-      return errorState;
-    }
-  };
+      
+      // Update localStorage
+      localStorage.setItem("authState", JSON.stringify(newState));
+      
+      return newState;
+    });
+    
+    return true;
+  }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const promoteToAdmin = useCallback(async (userId: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!data.session) {
-        throw new Error("Pas de session après connexion");
-      }
-
-      // Session sera gérée par le listener onAuthStateChange
-      return true;
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Échec de la connexion. Veuillez réessayer.");
-      return false;
-    }
-  };
-
-  const loginWithMagicLink = async (email: string): Promise<boolean> => {
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: window.location.origin,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-      
-      toast.success(`Un lien de connexion a été envoyé à ${email}`);
-      return true;
-    } catch (error: any) {
-      console.error("Magic link login error:", error);
-      toast.error(error.message || "Échec de l'envoi du lien magique. Veuillez réessayer.");
-      return false;
-    }
-  };
-
-  const logout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
-      
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null
-      });
-      
-      toast.info("Vous avez été déconnecté");
-    } catch (error: any) {
-      console.error("Logout error:", error);
-      toast.error(error.message || "Échec de la déconnexion. Veuillez réessayer.");
-    }
-  };
-
-  const register = async (userData: { firstName: string; lastName: string; email: string; password: string }): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-          },
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!data.user) {
-        throw new Error("Pas d'utilisateur créé");
-      }
-
-      // Créer le profil utilisateur dans la table User
-      const { error: profileError } = await supabase
-        .from('User')
-        .insert({
-          id: data.user.id,
-          email: userData.email,
-          first_name: userData.firstName,
-          last_name: userData.lastName,
-          role: 'OSTEOPATH',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-
-      if (profileError) {
-        console.error("Error creating user profile:", profileError);
-        // Continuer même si le profil n'a pas pu être créé
-      }
-
-      toast.success("Compte créé avec succès!");
-      
-      // Si la session est disponible immédiatement (selon les paramètres Supabase)
-      if (data.session) {
-        setAuthState({
-          user: {
-            id: data.user.id,
-            email: userData.email,
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            role: 'OSTEOPATH',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          } as User,
-          isAuthenticated: true,
-          isLoading: false,
-          token: data.session.access_token
-        });
-        return true;
-      }
-      
-      // Sinon indiquer à l'utilisateur de vérifier son email
-      toast.info("Veuillez vérifier votre boîte mail pour confirmer votre inscription");
-      return true;
-      
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      toast.error(error.message || "Échec de l'inscription. Veuillez réessayer.");
-      return false;
-    }
-  };
-  
-  const updateUser = (updatedUserData: User) => {
-    if (authState.user) {
-      setAuthState({
-        ...authState,
-        user: {
-          ...authState.user,
-          ...updatedUserData
-        }
-      });
-    }
-  };
-  
-  const promoteToAdmin = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('User')
-        .update({
-          role: 'ADMIN' as "ADMIN" | "OSTEOPATH",
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId)
-        .select()
-        .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success("Utilisateur promu administrateur avec succès");
-      
-      // Si l'utilisateur courant est promu, mettre à jour son état
-      if (authState.user && authState.user.id === userId) {
-        updateUser(data as User);
-      }
-    } catch (error: any) {
+      setIsLoading(true);
+      const result = await api.promoteToAdmin(userId);
+      return result;
+    } catch (error) {
       console.error("Error promoting user to admin:", error);
-      toast.error(error.message || "Échec de la promotion. Veuillez réessayer.");
-      throw error;
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-  };
-  
+  }, []);
+
   return (
-    <AuthContext.Provider 
-      value={{
-        ...authState,
-        login,
-        logout,
-        register,
+    <AuthContext.Provider
+      value={{ 
+        ...authState, 
+        isAdmin, 
+        login, 
+        register, 
+        logout, 
         loadStoredToken,
         updateUser,
+        isLoading,
         loginWithMagicLink,
-        isAdmin: authState.user?.role === 'ADMIN',
         promoteToAdmin
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
+}
+
+export const useAuth = () => useContext(AuthContext);

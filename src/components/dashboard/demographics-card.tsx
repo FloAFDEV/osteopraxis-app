@@ -1,89 +1,223 @@
-
 import React from 'react';
-import { User, UserRound, Users } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { Patient, DashboardData } from "@/types";
+import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { User, UserRound, UserCircle } from 'lucide-react';
 
-export interface DemographicsCardProps {
-  maleCount: number;
-  femaleCount: number;
-  otherCount: number;
+interface DemographicsCardProps {
+  patients?: Patient[];
+  data?: DashboardData;
 }
 
-export function DemographicsCard({ maleCount, femaleCount, otherCount }: DemographicsCardProps) {
-  const total = maleCount + femaleCount + otherCount;
-  
-  const data = [
-    {
-      name: 'Hommes',
-      value: maleCount,
-      color: '#3b82f6',
-      icon: <User className="h-4 w-4 text-blue-500" />
-    },
-    {
-      name: 'Femmes',
-      value: femaleCount,
-      color: '#ec4899',
-      icon: <UserRound className="h-4 w-4 text-pink-500" />
-    },
-    {
-      name: 'Autres',
-      value: otherCount,
-      color: '#a855f7',
-      icon: <Users className="h-4 w-4 text-purple-500" />
-    }
-  ].filter(item => item.value > 0);
+// Define a proper type for our chart data that always includes the icon property
+interface GenderChartData {
+  name: string;
+  value: number;
+  percentage: number;
+  icon: React.ReactNode;
+}
 
-  const getPercentage = (value: number) => {
-    return total > 0 ? Math.round((value / total) * 100) : 0;
+export const DemographicsCard: React.FC<DemographicsCardProps> = ({
+  patients,
+  data
+}) => {
+  const patientsList = patients || [];
+  const totalPatients = patientsList.length || data?.totalPatients || 0;
+  const maleCount = data?.maleCount || 0;
+  const femaleCount = data?.femaleCount || 0;
+
+  const GENDER_COLORS = {
+    "Homme": "#3b82f6",  // Blue more pronounced
+    "Femme": "#d946ef",  // Vibrant pink
+    "Non spécifié": "#94a3b8"
   };
 
+  const calculateGenderData = (): GenderChartData[] => {
+    if (data && data.maleCount !== undefined && data.femaleCount !== undefined) {
+      return [{
+        name: "Homme",
+        value: data.maleCount,
+        percentage: totalPatients > 0 ? Math.round((data.maleCount / totalPatients) * 100) : 0,
+        icon: <User className="h-5 w-5 text-blue-600" />
+      }, {
+        name: "Femme",
+        value: data.femaleCount,
+        percentage: totalPatients > 0 ? Math.round((data.femaleCount / totalPatients) * 100) : 0,
+        icon: <UserRound className="h-5 w-5 text-pink-600" />
+      }];
+    }
+    if (patientsList.length > 0) {
+      const genderCounts = patientsList.reduce((acc, patient) => {
+        const gender = patient.gender || "Non spécifié";
+        acc[gender] = (acc[gender] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      return Object.entries(genderCounts).map(([name, value]) => ({
+        name,
+        value,
+        percentage: Math.round((value / totalPatients) * 100),
+        icon: name === "Homme" ? 
+          <User className="h-5 w-5 text-blue-600" /> : 
+          name === "Femme" ? 
+            <UserRound className="h-5 w-5 text-pink-600" /> : 
+            <UserCircle className="h-5 w-5 text-gray-600" />
+      }));
+    }
+    return [{
+      name: "Homme",
+      value: 1,
+      percentage: 50,
+      icon: <User className="h-5 w-5 text-blue-600" />
+    }, {
+      name: "Femme",
+      value: 1,
+      percentage: 50,
+      icon: <UserRound className="h-5 w-5 text-pink-600" />
+    }];
+  };
+
+  const chartData = calculateGenderData();
+
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    index
+  }: any) => {
+    if (percent < 0.05) return null;
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    const genderIcon = chartData[index].icon;
+    
+    return (
+      <g>
+        <text 
+          x={x} 
+          y={y} 
+          fill="white" 
+          fontWeight="bold" 
+          fontSize="14" 
+          dominantBaseline="central" 
+          textAnchor="middle"
+        >
+          {`${(percent * 100).toFixed(0)}%`}
+        </text>
+        <g transform={`translate(${x - 12}, ${y + 15}) scale(0.8)`}>
+          {genderIcon}
+        </g>
+      </g>
+    );
+  };
+
+  const CustomTooltip = ({
+    active,
+    payload
+  }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return <div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow">
+          <p className="font-medium">{data.name}</p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{data.value}</span> patients
+          </p>
+          <p className="text-sm text-primary font-semibold">
+            {data.percentage}% du total
+          </p>
+        </div>;
+    }
+    return null;
+  };
+  const renderCustomLegendIcon = (color: string) => {
+    return <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill={color} rx="6" />
+      </svg>;
+  };
+  const CustomLegend = ({
+    payload
+  }: any) => {
+    if (!payload) return null;
+    return <ul className="flex flex-wrap justify-center gap-4 pt-4">
+        {payload.map((entry: any, index: number) => <li key={`legend-${index}`} className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full" style={{
+          backgroundColor: entry.color
+        }} />
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-sm cursor-help">
+                    {entry.value} ({entry.payload.percentage}%)
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {entry.payload.value} patients ({entry.payload.percentage}% du total)
+                  </p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
+          </li>)}
+      </ul>;
+  };
+  const isLoading = patientsList.length === 0 && !data || !maleCount && !femaleCount && totalPatients === 0;
+  
+  if (isLoading) {
+    return <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg">
+        <CardHeader>
+          <CardTitle>Démographie des patients</CardTitle>
+          <CardDescription>
+            Chargement des données démographiques...
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-[250px]">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+        </CardContent>
+      </Card>;
+  }
+  
   return (
-    <div className="flex flex-col h-full">
-      <div className="h-[200px] mb-4">
-        {total > 0 ? (
+    <Card className="overflow-hidden rounded-lg bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
+      <CardHeader>
+        <CardTitle className="text-gray-800 dark:text-white">
+          Démographie des patients
+        </CardTitle>
+        <CardDescription className="text-gray-600 dark:text-gray-400">
+          Répartition par genre sur un total de {totalPatients} patients
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[250px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={2}
+              <Pie 
+                data={chartData} 
+                cx="50%" 
+                cy="50%" 
+                labelLine={false} 
+                label={renderCustomizedLabel} 
+                outerRadius={80} 
+                fill="#8884d8" 
                 dataKey="value"
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || "#94a3b8"} 
+                  />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(value: number) => [`${value} (${getPercentage(value)}%)`, 'Patients']}
-                labelFormatter={(label) => `${label}`}
-              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend content={<CustomLegend />} />
             </PieChart>
           </ResponsiveContainer>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">Aucune donnée disponible</p>
-          </div>
-        )}
-      </div>
-      <div className="grid grid-cols-1 gap-2">
-        {data.map((item) => (
-          <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center">
-              {item.icon}
-              <span className="ml-2 text-sm">{item.name}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">{item.value}</span>
-              <span className="text-xs text-muted-foreground ml-1">
-                ({getPercentage(item.value)}%)
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
-}
+};

@@ -1,233 +1,211 @@
 
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { ChevronDown, Menu, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { UserNav } from './user-nav';
-import { Button } from './button';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
-
-// Fixed lucide icon importing - replacing dynamic imports that were causing issues
-import { 
-  Home, 
-  Users, 
-  Calendar, 
-  FileText, 
-  Settings, 
-  Building,
-  FileBarChart,
-  Bell,
-  Database,
-  UserCog,
-  LifeBuoy,
-  Search,
-  ShieldCheck,
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  CalendarDays,
+  LayoutDashboard,
+  Settings,
+  Users,
+  Clock,
+  FileText,
+  ChevronDown,
   LogOut,
-  Presentation
+  UserCog,
+  UserPlus,
+  Building,
+  Activity
 } from 'lucide-react';
-
-const getIcon = (name: string) => {
-  const icons: Record<string, React.ReactNode> = {
-    Home: <Home className="h-5 w-5" />,
-    Users: <Users className="h-5 w-5" />,
-    Calendar: <Calendar className="h-5 w-5" />,
-    FileText: <FileText className="h-5 w-5" />,
-    Settings: <Settings className="h-5 w-5" />,
-    Building: <Building className="h-5 w-5" />,
-    FileBarChart: <FileBarChart className="h-5 w-5" />,
-    Bell: <Bell className="h-5 w-5" />,
-    Database: <Database className="h-5 w-5" />,
-    UserCog: <UserCog className="h-5 w-5" />,
-    LifeBuoy: <LifeBuoy className="h-5 w-5" />,
-    Search: <Search className="h-5 w-5" />,
-    ShieldCheck: <ShieldCheck className="h-5 w-5" />,
-    LogOut: <LogOut className="h-5 w-5" />,
-    Presentation: <Presentation className="h-5 w-5" />,
-  };
-  
-  return icons[name] || <div className="h-5 w-5 bg-muted rounded-md" />;
-};
-
-export interface NavItem {
-  title: string;
-  href: string;
-  icon: string;
-  submenu?: boolean;
-  subItems?: NavItem[];
-  badge?: React.ReactNode;
-}
+import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { api } from "@/services/api";
+import { Cabinet } from "@/types";
 
 interface SidebarProps {
-  navItems: NavItem[];
+  isCollapsed: boolean;
+  onToggle?: () => void;
 }
 
-export function Sidebar({ navItems }: SidebarProps) {
-  const { pathname } = useLocation();
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, logout } = useAuth();
-
-  const handleSubmenuClick = (title: string) => {
-    setOpenSubmenu(prev => (prev === title ? null : title));
-  };
-
-  const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
+export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+  const { logout, user } = useAuth();
+  const { isMobile } = useIsMobile();
+  const location = useLocation();
+  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
 
   useEffect(() => {
-    // Close mobile sidebar when route changes
-    setMobileOpen(false);
-    
-    // Open/close submenus based on active route
-    navItems.forEach(item => {
-      if (item.submenu && item.subItems) {
-        const hasActiveChild = item.subItems.some(subItem => isActive(subItem.href));
-        if (hasActiveChild) {
-          setOpenSubmenu(item.title);
+    // Récupérer les informations du cabinet si l'utilisateur est connecté
+    if (user?.osteopathId) {
+      const fetchCabinet = async () => {
+        try {
+          const cabinets = await api.getCabinetsByOsteopathId(user.osteopathId);
+          if (cabinets && cabinets.length > 0) {
+            setCabinet(cabinets[0]);
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération du cabinet:", error);
         }
-      }
-    });
-  }, [pathname, navItems]);
-  
-  // Desktop sidebar
-  const SidebarContent = () => (
-    <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-center px-4 py-4">
-        <div className="font-semibold text-lg tracking-tight text-primary">OstéoDashboard</div>
-      </div>
-      <div className="flex-1 overflow-y-auto pt-2 pb-4">
-        <nav className="flex flex-col gap-1 px-2">
-          {navItems.map((item, index) => {
-            const isSubmenuOpen = openSubmenu === item.title;
-            const isItemActive = isActive(item.href);
-            
-            // Is this item or any of its children active
-            const isActiveRoute = item.submenu
-              ? (item.subItems || []).some(subItem => isActive(subItem.href))
-              : isItemActive;
-            
-            // For items with submenu
-            if (item.submenu && item.subItems) {
-              return (
-                <div key={index}>
-                  <button
-                    onClick={() => handleSubmenuClick(item.title)}
-                    className={cn(
-                      "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                      isActiveRoute
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      {getIcon(item.icon)}
-                      <span>{item.title}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {item.badge && <span>{item.badge}</span>}
-                      <ChevronDown
-                        className={cn("h-4 w-4 transition-transform", isSubmenuOpen && "rotate-180")}
-                      />
-                    </div>
-                  </button>
-                  
-                  {isSubmenuOpen && (
-                    <div className="mt-1 ml-4 pl-3 border-l border-border">
-                      {item.subItems.map((subItem, subIndex) => (
-                        <NavLink
-                          key={subIndex}
-                          to={subItem.href}
-                          className={({ isActive }) =>
-                            cn(
-                              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                              isActive
-                                ? "bg-primary text-primary-foreground"
-                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                            )
-                          }
-                        >
-                          {getIcon(subItem.icon)}
-                          <span>{subItem.title}</span>
-                        </NavLink>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-            
-            // For regular menu items
-            return (
-              <NavLink
-                key={index}
-                to={item.href}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )
-                }
-              >
-                <div className="flex items-center gap-3">
-                  {getIcon(item.icon)}
-                  <span>{item.title}</span>
-                </div>
-                {item.badge && <span>{item.badge}</span>}
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
+      };
       
-      {/* User profile section */}
-      <div className="mt-auto border-t pt-4 px-4">
-        <UserNav />
-        <div className="mt-4">
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={() => logout()}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Se déconnecter
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+      fetchCabinet();
+    }
+  }, [user]);
+
+  // Définir les couleurs des icônes
+  const iconColors = {
+    dashboard: "text-indigo-600 dark:text-indigo-400",
+    patients: "text-green-600 dark:text-green-400", 
+    addPatient: "text-blue-600 dark:text-blue-400",
+    settings: "text-amber-600 dark:text-amber-400",
+    appointments: "text-red-600 dark:text-red-400",
+    invoices: "text-amber-600 dark:text-amber-400", // Changé en amber pour les factures
+    schedule: "text-cyan-600 dark:text-cyan-400"
+  };
+
+  // Rendre l'élément NavLink avec l'état active géré correctement
+  const renderNavLink = ({ href, icon: Icon, label, colorClass }: { href: string; icon: React.ElementType; label: string; colorClass?: string }) => {
+    const isActive = location.pathname === href || location.pathname.startsWith(`${href}/`);
+    
+    return (
+      <NavLink
+        key={href}
+        to={href}
+        onClick={() => isMobile && onToggle?.()}
+        className={cn(
+          "flex items-center gap-x-2 text-slate-700 dark:text-slate-300 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors",
+          "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+          isActive && "bg-slate-100 text-slate-900 dark:bg-amber-900/30 dark:text-amber-50" // Changé en amber pour le focus
+        )}
+      >
+        {/* Icône toujours colorée, indépendamment de l'état de survol */}
+        <Icon size={18} className={colorClass} />
+        {!isCollapsed && <span>{label}</span>}
+      </NavLink>
+    );
+  };
 
   return (
-    <>
-      {/* Mobile Toggle */}
-      <div className="lg:hidden flex items-center px-4 py-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-9 w-9 p-0"
-          onClick={() => setMobileOpen(true)}
-        >
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle sidebar</span>
-        </Button>
-      </div>
-
-      {/* Mobile Sidebar */}
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-72">
-          <SidebarContent />
-        </SheetContent>
-      </Sheet>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 z-10">
-        <div className="flex flex-col flex-grow bg-background border-r">
-          <SidebarContent />
+    <aside className={cn(
+      "flex flex-col h-full bg-white dark:bg-gray-950 border-r dark:border-gray-800",
+      isCollapsed ? "w-[60px]" : "w-[240px]"
+    )}>
+      <div className="px-3 py-2">
+        <div className="flex items-center justify-center gap-2 mt-2">
+          <Activity className={cn(
+            "h-5 w-5 text-amber-500 dark:text-amber-400 transition-all",
+            !isCollapsed && "mb-1"
+          )} />
+          <h2 className={cn(
+            "font-bold text-lg text-slate-900 dark:text-amber-400 transition-all", // Changé en amber
+            isCollapsed ? "opacity-0 h-0 mt-0 absolute" : "opacity-100 h-auto"
+          )}>
+            PatientHub
+          </h2>
         </div>
+        {!isCollapsed && (
+          <p className="text-xs text-center text-muted-foreground mb-2">
+            Gestion de cabinet
+          </p>
+        )}
       </div>
-    </>
+      
+      <ScrollArea className="flex-1 px-3">
+        <div className="space-y-1 py-2">
+          {renderNavLink({ 
+            href: "/", 
+            icon: LayoutDashboard, 
+            label: "Tableau de bord",
+            colorClass: iconColors.dashboard
+          })}
+          
+          {renderNavLink({ 
+            href: "/patients", 
+            icon: Users, 
+            label: "Patients",
+            colorClass: iconColors.patients
+          })}
+
+          {renderNavLink({
+            href: "/patients/new",
+            icon: UserPlus,
+            label: "Ajouter un patient",
+            colorClass: iconColors.addPatient
+          })}
+          
+          {renderNavLink({ 
+            href: "/appointments", 
+            icon: CalendarDays, 
+            label: "Rendez-vous",
+            colorClass: iconColors.appointments
+          })}
+          
+          {renderNavLink({ 
+            href: "/invoices", 
+            icon: FileText, 
+            label: "Factures",
+            colorClass: iconColors.invoices
+          })}
+          
+          {renderNavLink({ 
+            href: "/schedule", 
+            icon: Clock, 
+            label: "Agenda",
+            colorClass: iconColors.schedule
+          })}
+          
+          {renderNavLink({ 
+            href: "/cabinet", 
+            icon: Building, 
+            label: "Cabinet",
+            colorClass: iconColors.settings
+          })}
+        </div>
+      </ScrollArea>
+
+      <div className={cn(
+        "p-3 mt-auto border-t dark:border-gray-800",
+        isCollapsed ? "flex justify-center" : ""
+      )}>
+        {!isCollapsed ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <Avatar className="w-8 h-8">
+                {cabinet && cabinet.logoUrl ? (
+                  <AvatarImage src={cabinet.logoUrl} alt={cabinet.name} />
+                ) : null}
+                <AvatarFallback className="bg-amber-600 dark:bg-amber-600 text-primary-foreground font-medium">
+                  {user?.first_name?.charAt(0) || user?.email?.charAt(0) || "?"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {user?.first_name || user?.email || "Utilisateur"}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user?.role === "ADMIN" ? "Administrateur" : "Ostéopathe"}
+                </p>
+              </div>
+              <ChevronDown size={16} className="text-muted-foreground" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button size="sm" variant="outline" className="w-full justify-start" asChild>
+                <NavLink to="/admin">
+                  <UserCog size={16} className="mr-2 text-amber-600 dark:text-amber-400" /> Compte
+                </NavLink>
+              </Button>
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={logout}>
+                <LogOut size={16} className="mr-2 text-red-600 dark:text-red-400" /> Déconnexion
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button size="sm" variant="outline" className="w-full p-2 h-auto" onClick={logout}>
+            <LogOut size={16} className="text-red-600 dark:text-red-400" />
+          </Button>
+        )}
+      </div>
+    </aside>
   );
 }

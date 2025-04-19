@@ -1,198 +1,167 @@
 
 import { Osteopath } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
 import { delay, USE_SUPABASE } from "./config";
-
-// Sample data for development
-const osteopaths: Osteopath[] = [];
+import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
+import { supabase } from '@/integrations/supabase/client';
 
 export const osteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
-    if (USE_SUPABASE) {
-      try {
-        const { data, error } = await supabase
-          .from('Osteopath')
-          .select('*');
-          
-        if (error) throw error;
-        return data as Osteopath[];
-      } catch (error) {
-        console.error("Error fetching osteopaths:", error);
-        throw error;
-      }
+    try {
+      return await supabaseOsteopathService.getOsteopaths();
+    } catch (error) {
+      console.error("Erreur Supabase getOsteopaths:", error);
+      throw error; // Propagation de l'erreur au lieu de fallback
     }
-    
-    await delay(300);
-    return [...osteopaths];
-  },
-  
-  async getOsteopathById(id: number): Promise<Osteopath | null> {
-    if (USE_SUPABASE) {
-      try {
-        const { data, error } = await supabase
-          .from('Osteopath')
-          .select('*')
-          .eq('id', id)
-          .single();
-          
-        if (error) {
-          if (error.code === 'PGRST116') {
-            return null;
-          }
-          throw error;
-        }
-        
-        return data as Osteopath;
-      } catch (error) {
-        console.error("Error fetching osteopath by ID:", error);
-        throw error;
-      }
-    }
-    
-    await delay(200);
-    return osteopaths.find(o => o.id === id) || null;
   },
 
-  async getOsteopathByUserId(userId: string): Promise<Osteopath | null> {
-    if (USE_SUPABASE) {
+  async getOsteopathById(id: number): Promise<Osteopath | undefined> {
+    try {
+      return await supabaseOsteopathService.getOsteopathById(id);
+    } catch (error) {
+      console.error("Erreur Supabase getOsteopathById:", error);
+      throw error; // Propagation de l'erreur au lieu de fallback
+    }
+  },
+  
+  async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {
+    console.log(`Recherche d'ostéopathe par userId: ${userId}`);
+    
+    try {
+      // Ajout d'un délai court pour s'assurer que l'authentification est établie
+      await delay(300);
+      
+      // Debug log de la session actuelle
+      const { data: sessionData, error } = await supabase.auth.getSession();
+      if (sessionData && sessionData.session) {
+        console.log("Utilisateur authentifié:", sessionData.session.user.id);
+        console.log("Token d'accès présent:", !!sessionData.session.access_token);
+      } else {
+        console.log("Pas de session active:", error || "Aucune erreur");
+      }
+      
+      // Première tentative via l'API directe
+      const result = await supabaseOsteopathService.getOsteopathByUserId(userId);
+      if (result) return result;
+      
+      console.log("Aucun résultat via l'API directe, tentative via la fonction edge");
+      
+      // En cas d'absence de résultat, essayer via la fonction edge
       try {
-        const { data, error } = await supabase
-          .from('Osteopath')
-          .select('*')
-          .eq('userId', userId)
-          .single();
-          
-        if (error) {
-          if (error.code === 'PGRST116') {
-            return null;
-          }
-          throw error;
+        if (!sessionData || !sessionData.session) {
+          console.error("Pas de session pour appeler la fonction edge");
+          throw new Error("Pas de session active");
         }
         
-        return data as Osteopath;
-      } catch (error) {
-        console.error("Error fetching osteopath by user ID:", error);
-        throw error;
+        console.log("Tentative via la fonction edge completer-profil");
+        const response = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({
+            osteopathData: {
+              name: "À compléter",
+              professional_title: "Ostéopathe D.O.",
+              ape_code: "8690F"
+            }
+          })
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Erreur de la fonction edge:", errorText);
+          throw new Error(`Erreur de la fonction edge: ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log("Résultat de la fonction edge:", result);
+        
+        if (result && result.osteopath) {
+          return result.osteopath;
+        }
+        throw new Error("Résultat invalide de la fonction edge");
+      } catch (edgeError) {
+        console.error("Erreur lors de l'appel à la fonction edge:", edgeError);
+        throw edgeError;
       }
+    } catch (error) {
+      console.error("Erreur Supabase getOsteopathByUserId:", error);
+      throw error;
     }
-    
-    await delay(200);
-    return osteopaths.find(o => o.userId === userId) || null;
   },
   
-  async createOsteopath(osteopath: Omit<Osteopath, "id" | "createdAt" | "updatedAt">): Promise<Osteopath> {
-    if (USE_SUPABASE) {
-      try {
-        const now = new Date().toISOString();
-        
-        // Ensure we only include fields that match the Supabase schema
-        const osteopathPayload = {
-          name: osteopath.name,
-          userId: osteopath.userId,
-          professional_title: osteopath.professional_title,
-          adeli_number: osteopath.adeli_number,
-          siret: osteopath.siret,
-          ape_code: osteopath.ape_code,
-          createdAt: now,
-          updatedAt: now
-        };
-        
-        const { data, error } = await supabase
-          .from('Osteopath')
-          .insert(osteopathPayload)
-          .select()
-          .single();
-          
-        if (error) throw error;
-        return data as Osteopath;
-      } catch (error) {
-        console.error("Error creating osteopath:", error);
-        throw error;
-      }
+  async updateOsteopath(id: number, data: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {
+    try {
+      return await supabaseOsteopathService.updateOsteopath(id, data);
+    } catch (error) {
+      console.error("Erreur Supabase updateOsteopath:", error);
+      throw error;
     }
-    
-    await delay(400);
-    const now = new Date().toISOString();
-    const newOsteopath: Osteopath = {
-      ...osteopath,
-      id: osteopaths.length + 1,
-      createdAt: now,
-      updatedAt: now,
-    };
-    
-    osteopaths.push(newOsteopath);
-    return newOsteopath;
   },
   
-  async updateOsteopath(id: number, updates: Partial<Osteopath>): Promise<Osteopath> {
-    if (USE_SUPABASE) {
+  async createOsteopath(data: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
+    console.log("Création d'un ostéopathe avec les données:", data);
+    
+    try {
+      // Ajout d'un délai court pour garantir que l'auth est bien établie
+      await delay(300);
+      
+      // Vérifier l'état de la session
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("Session avant création:", sessionData.session ? "Authentifié" : "Non authentifié");
+      
+      // Premier essai: utilisation directe du service Supabase
       try {
-        // Ensure we only include fields that match the Supabase schema
-        const osteopathPayload = {
-          name: updates.name,
-          userId: updates.userId,
-          professional_title: updates.professional_title,
-          adeli_number: updates.adeli_number,
-          siret: updates.siret,
-          ape_code: updates.ape_code,
-          updatedAt: new Date().toISOString()
-        };
+        console.log("Tentative de création via API Supabase");
+        const result = await supabaseOsteopathService.createOsteopath(data);
+        console.log("Création réussie via API Supabase:", result);
+        return result;
+      } catch (error) {
+        console.error("Erreur lors de la création via API Supabase:", error);
         
-        const { data, error } = await supabase
-          .from('Osteopath')
-          .update(osteopathPayload)
-          .eq('id', id)
-          .select()
-          .single();
+        // En cas d'échec, essayer via la fonction edge
+        if (sessionData && sessionData.session) {
+          console.log("Tentative via la fonction edge completer-profil");
           
-        if (error) throw error;
-        return data as Osteopath;
-      } catch (error) {
-        console.error("Error updating osteopath:", error);
-        throw error;
+          try {
+            const response = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${sessionData.session.access_token}`
+              },
+              body: JSON.stringify({
+                osteopathData: data
+              })
+            });
+            
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error("Erreur de la fonction edge:", errorText);
+              throw new Error(`Erreur de la fonction edge: ${errorText}`);
+            }
+            
+            const result = await response.json();
+            console.log("Résultat de la fonction edge:", result);
+            
+            if (result && result.osteopath) {
+              return result.osteopath;
+            } else {
+              throw new Error("Réponse de la fonction edge invalide");
+            }
+          } catch (edgeError) {
+            console.error("Erreur lors de l'appel à la fonction edge:", edgeError);
+            throw edgeError;
+          }
+        } else {
+          console.error("Pas de session pour appeler la fonction edge");
+          throw new Error("Utilisateur non authentifié");
+        }
       }
+    } catch (error) {
+      console.error("Erreur globale createOsteopath:", error);
+      throw error; // Propagation de l'erreur sans fallback
     }
-    
-    await delay(300);
-    const index = osteopaths.findIndex(o => o.id === id);
-    
-    if (index === -1) {
-      throw new Error(`Osteopath with ID ${id} not found.`);
-    }
-    
-    osteopaths[index] = {
-      ...osteopaths[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    
-    return osteopaths[index];
-  },
-  
-  async deleteOsteopath(id: number): Promise<boolean> {
-    if (USE_SUPABASE) {
-      try {
-        const { error } = await supabase
-          .from('Osteopath')
-          .delete()
-          .eq('id', id);
-          
-        if (error) throw error;
-        return true;
-      } catch (error) {
-        console.error("Error deleting osteopath:", error);
-        throw error;
-      }
-    }
-    
-    await delay(300);
-    const index = osteopaths.findIndex(o => o.id === id);
-    
-    if (index !== -1) {
-      osteopaths.splice(index, 1);
-      return true;
-    }
-    
-    return false;
   }
 };

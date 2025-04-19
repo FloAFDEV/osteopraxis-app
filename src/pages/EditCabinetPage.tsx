@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
 import { api } from "@/services/api";
-import { Cabinet, ProfessionalProfile } from "@/types";
+import { Cabinet } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
 import { toast } from "sonner";
@@ -14,7 +14,7 @@ const EditCabinetPage = () => {
   const { id } = useParams<{ id: string }>();
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
-  const [professionalData, setProfessionalData] = useState<ProfessionalProfile | null>(null);
+  const [osteopathData, setOsteopathData] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,11 +26,11 @@ const EditCabinetPage = () => {
         }
         setCabinet(cabinetData);
 
-        // Récupérer les données du professionnel pour les infos de facturation
-        if (cabinetData.professionalProfileId) {
-          const profileInfo = await api.getProfessionalProfileById(cabinetData.professionalProfileId);
-          if (profileInfo) {
-            setProfessionalData(profileInfo);
+        // Récupérer les données de l'ostéopathe pour les infos de facturation
+        if (cabinetData.osteopathId) {
+          const osteopathInfo = await api.getOsteopathById(cabinetData.osteopathId);
+          if (osteopathInfo) {
+            setOsteopathData(osteopathInfo);
           }
         }
       } catch (error) {
@@ -95,13 +95,21 @@ const EditCabinetPage = () => {
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
           <CabinetForm 
-            defaultValues={cabinet}
-            cabinetId={cabinet.id}
-            professionalProfileId={cabinet.professionalProfileId}
-            onSuccess={() => {
-              toast.success("Cabinet mis à jour avec succès");
-              navigate("/cabinets");
-            }}
+            defaultValues={{
+              name: cabinet.name,
+              address: cabinet.address,
+              phone: cabinet.phone || undefined,
+              email: cabinet.email || undefined,
+              imageUrl: cabinet.imageUrl || undefined,
+              logoUrl: cabinet.logoUrl || undefined,
+              osteopathId: cabinet.osteopathId,
+              siret: osteopathData?.siret || undefined,
+              adeliNumber: osteopathData?.adeli_number || undefined,
+              apeCode: osteopathData?.ape_code || "8690F"
+            }} 
+            cabinetId={cabinet.id} 
+            isEditing={true} 
+            osteopathId={cabinet.osteopathId} 
           />
         </div>
       </div>

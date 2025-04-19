@@ -1,180 +1,142 @@
-
 import { Cabinet } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseCabinetService } from "../supabase-api/cabinet-service";
 
-// Sample data for development
-const cabinets: Cabinet[] = [];
+// Données simulées pour les cabinets
+const cabinets: Cabinet[] = [
+  {
+    id: 1,
+    name: "Cabinet d'Ostéopathie Zen",
+    address: "18 Rue Lafayette, Toulouse",
+    phone: "05 61 23 45 67",
+    imageUrl: null,
+    logoUrl: null,
+    osteopathId: 1,
+    createdAt: "2024-12-20 22:29:30",
+    updatedAt: "2024-12-20 22:29:30"
+  }
+];
 
 export const cabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
     if (USE_SUPABASE) {
       try {
-        const { data, error } = await supabase
-          .from('Cabinet')
-          .select('*');
-          
-        if (error) throw error;
-        return data as Cabinet[];
+        return await supabaseCabinetService.getCabinets();
       } catch (error) {
-        console.error("Error fetching cabinets:", error);
+        console.error("Erreur Supabase getCabinets:", error);
         throw error;
       }
     }
     
+    // Fallback: code simulé existant
     await delay(300);
     return [...cabinets];
   },
 
-  async getCabinetById(id: number): Promise<Cabinet | null> {
+  async getCabinetById(id: number): Promise<Cabinet | undefined> {
     if (USE_SUPABASE) {
       try {
-        const { data, error } = await supabase
-          .from('Cabinet')
-          .select('*')
-          .eq('id', id)
-          .single();
-          
-        if (error) {
-          if (error.code === 'PGRST116') {
-            return null;
-          }
-          throw error;
-        }
-        return data as Cabinet;
+        return await supabaseCabinetService.getCabinetById(id);
       } catch (error) {
-        console.error("Error fetching cabinet by ID:", error);
+        console.error("Erreur Supabase getCabinetById:", error);
         throw error;
       }
     }
     
+    // Fallback: code simulé existant
     await delay(200);
-    return cabinets.find(cabinet => cabinet.id === id) || null;
+    return cabinets.find(cabinet => cabinet.id === id);
   },
 
-  async getCabinetsByProfessionalProfileId(profileId: number): Promise<Cabinet[]> {
+  async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
     if (USE_SUPABASE) {
       try {
-        const { data, error } = await supabase
-          .from('Cabinet')
-          .select('*')
-          .eq('professionalProfileId', profileId);
-          
-        if (error) throw error;
-        return data as Cabinet[];
+        return await supabaseCabinetService.getCabinetsByOsteopathId(osteopathId);
       } catch (error) {
-        console.error("Error fetching cabinets by profile ID:", error);
+        console.error("Erreur Supabase getCabinetsByOsteopathId:", error);
         throw error;
       }
     }
     
+    // Fallback: code simulé existant
     await delay(300);
-    return cabinets.filter(cabinet => cabinet.professionalProfileId === profileId);
+    return cabinets.filter(cabinet => cabinet.osteopathId === osteopathId);
   },
 
-  async createCabinet(cabinetData: Partial<Cabinet>): Promise<Cabinet> {
+  async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
     if (USE_SUPABASE) {
       try {
-        const now = new Date().toISOString();
-        
-        // Only include fields that match the Supabase schema
-        const cabinetPayload = {
-          name: cabinetData.name || '',
-          address: cabinetData.address || '',
-          phone: cabinetData.phone,
-          email: cabinetData.email,
-          professionalProfileId: cabinetData.professionalProfileId,
-          osteopathId: cabinetData.osteopathId || 0,
-          logoUrl: cabinetData.logoUrl,
-          imageUrl: cabinetData.imageUrl,
-          updatedAt: now
-        };
-        
-        const { data, error } = await supabase
-          .from('Cabinet')
-          .insert(cabinetPayload)
-          .select()
-          .single();
-          
-        if (error) throw error;
-        return data as Cabinet;
+        return await supabaseCabinetService.getCabinetsByUserId(userId);
       } catch (error) {
-        console.error("Error creating cabinet:", error);
+        console.error("Erreur Supabase getCabinetsByUserId:", error);
         throw error;
       }
     }
     
+    // Fallback: code simulé existant
+    await delay(300);
+    return [...cabinets]; // Simulation: return all cabinets for demo
+  },
+
+  async createCabinet(cabinetData: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseCabinetService.createCabinet(cabinetData);
+      } catch (error) {
+        console.error("Erreur Supabase createCabinet:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(400);
     const now = new Date().toISOString();
     const newCabinet = {
       ...cabinetData,
       id: cabinets.length + 1,
       createdAt: now,
-      updatedAt: now,
+      updatedAt: now
     } as Cabinet;
     cabinets.push(newCabinet);
     return newCabinet;
   },
 
-  async updateCabinet(id: number, updates: Partial<Cabinet>): Promise<Cabinet> {
+  async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
     if (USE_SUPABASE) {
       try {
-        // Only include fields that match the Supabase schema
-        const cabinetPayload = {
-          name: updates.name,
-          address: updates.address,
-          phone: updates.phone,
-          email: updates.email,
-          professionalProfileId: updates.professionalProfileId,
-          osteopathId: updates.osteopathId,
-          logoUrl: updates.logoUrl,
-          imageUrl: updates.imageUrl,
-          updatedAt: new Date().toISOString()
-        };
-        
-        const { data, error } = await supabase
-          .from('Cabinet')
-          .update(cabinetPayload)
-          .eq('id', id)
-          .select()
-          .single();
-          
-        if (error) throw error;
-        return data as Cabinet;
+        return await supabaseCabinetService.updateCabinet(id, cabinetData);
       } catch (error) {
-        console.error("Error updating cabinet:", error);
+        console.error("Erreur Supabase updateCabinet:", error);
         throw error;
       }
     }
     
+    // Fallback: code simulé existant
     await delay(300);
     const index = cabinets.findIndex(c => c.id === id);
-    if (index === -1) throw new Error(`Cabinet with id ${id} not found`);
-    
-    cabinets[index] = {
-      ...cabinets[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    return cabinets[index];
+    if (index !== -1) {
+      cabinets[index] = { 
+        ...cabinets[index], 
+        ...cabinetData,
+        updatedAt: new Date().toISOString() 
+      };
+      return cabinets[index];
+    }
+    return undefined;
   },
 
   async deleteCabinet(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        const { error } = await supabase
-          .from('Cabinet')
-          .delete()
-          .eq('id', id);
-          
-        if (error) throw error;
+        await supabaseCabinetService.deleteCabinet(id);
         return true;
       } catch (error) {
-        console.error("Error deleting cabinet:", error);
+        console.error("Erreur Supabase deleteCabinet:", error);
         throw error;
       }
     }
     
+    // Fallback: code simulé existant
     await delay(300);
     const index = cabinets.findIndex(c => c.id === id);
     if (index !== -1) {

@@ -1,218 +1,276 @@
-
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { UserPlus } from "lucide-react";
 import { api } from "@/services/api";
+import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { PatientCard } from "@/components/patient-card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { UserPlus, Search, Users, Check, X } from "lucide-react";
-import { Patient, Gender } from "@/types";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
 
-const PatientsPage: React.FC = () => {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGender, setSelectedGender] = useState<string>("all");
-  const [isLoading, setIsLoading] = useState(true);
+// Import refactored components
+import AlphabetFilter from "@/components/patients/AlphabetFilter";
+import PatientListItem from "@/components/patients/PatientListItem";
+import EmptyPatientState from "@/components/patients/EmptyPatientState";
+import PatientSearch from "@/components/patients/PatientSearch";
+import PatientLoadingState from "@/components/patients/PatientLoadingState";
+import PatientHeader from "@/components/patients/PatientHeader";
+import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
+import PatientPagination from "@/components/patients/PatientPagination";
 
-  useEffect(() => {
-    const fetchPatients = async () => {
-      setIsLoading(true);
+type SortOption = 'name' | 'date' | 'email' | 'gender';
+
+const PatientsPage = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [activeLetter, setActiveLetter] = useState("");
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
+  
+  // Pagination - updated to 25 patients per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const patientsPerPage = 25;
+
+  // Use useQuery for better state and cache management
+  const { data: patients, isLoading, error, refetch } = useQuery({
+    queryKey: ['patients'],
+    queryFn: async () => {
       try {
-        const data = await api.getPatients();
-        setPatients(data);
-        setFilteredPatients(data);
-      } catch (error) {
-        console.error("Error fetching patients:", error);
-        toast.error("Erreur lors du chargement des patients");
-      } finally {
-        setIsLoading(false);
+        return await api.getPatients();
+      } catch (err) {
+        console.error("Error fetching patients:", err);
+        throw err;
       }
-    };
+    },
+    retry: 2,
+    retryDelay: 1000,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
-    fetchPatients();
-  }, []);
+  // Handler for forcing data reload with animation
+  const handleRetry = async () => {
+    setIsRefreshing(true);
+    toast.info("Chargement des patients en cours...");
+    try {
+      await refetch();
+      if (patients && patients.length > 0) {
+        toast.success(`${patients.length} patients chargés avec succès`);
+      } else {
+        toast.warning("Aucun patient trouvé dans la base de données");
+      }
+    } catch (err) {
+      toast.error("Impossible de charger les patients");
+      console.error("Erreur lors du chargement des patients:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-  // Apply filters when searchTerm or selectedGender changes
+  // Force reload on component mount
   useEffect(() => {
-    const filtered = patients.filter((patient) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        `${patient.firstName} ${patient.lastName}`
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        patient.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.phone?.includes(searchTerm);
+    refetch();
+  }, [refetch]);
 
-      const matchesGender =
-        selectedGender === "all" || patient.gender === selectedGender as Gender;
+  const handleLetterChange = (letter: string) => {
+    setActiveLetter(letter);
+    setSearchQuery("");
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page when search changes
+  };
 
-      return matchesSearch && matchesGender;
+  const handleClearFilter = () => {
+    setActiveLetter('');
+    setSearchQuery('');
+  };
+
+  const getSortedPatients = () => {
+    if (!patients) return [];
+    
+    // First filter the patients
+    let filtered = patients.filter(patient => {
+      const fullName = `${patient.firstName || ''} ${patient.lastName || ''}`.toLowerCase();
+      const searchLower = searchQuery.toLowerCase();
+      
+      // If a letter is selected, filter by the first letter of the name
+      if (activeLetter && !searchQuery) {
+        const firstLetter = (patient.lastName || '').charAt(0).toUpperCase();
+        return firstLetter === activeLetter;
+      }
+      
+      // Otherwise, filter by search
+      return (
+        searchQuery === "" ||
+        fullName.includes(searchLower) ||
+        (patient.email && patient.email.toLowerCase().includes(searchLower)) ||
+        (patient.phone && patient.phone.includes(searchLower)) ||
+        (patient.occupation && patient.occupation.toLowerCase().includes(searchLower))
+      );
     });
+    
+    // Then sort the patients by the chosen criterion
+    return [...filtered].sort((a, b) => {
+      switch(sortBy) {
+        case 'name':
+          return (a.lastName || '').localeCompare(b.lastName || '');
+        case 'date':
+          // Sort by creation date, newest first
+          return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
+        case 'email':
+          return (a.email || '').localeCompare(b.email || '');
+        case 'gender':
+          return (a.gender || '').localeCompare(b.gender || '');
+        default:
+          return (a.lastName || '').localeCompare(b.lastName || '');
+      }
+    });
+  };
 
-    setFilteredPatients(filtered);
-  }, [searchTerm, selectedGender, patients]);
+  const filteredPatients = getSortedPatients();
+  
+  // Pagination logic
+  const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
+  const paginatedPatients = filteredPatients.slice(
+    (currentPage - 1) * patientsPerPage,
+    currentPage * patientsPerPage
+  );
+  
+  // Page navigation
+  const goToPage = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo(0, 0);
+    }
+  };
 
-  // Statistical Calculations
-  const totalPatients = patients.length;
-  const malePatients = patients.filter((p) => p.gender === "MALE").length;
-  const femalePatients = patients.filter((p) => p.gender === "FEMALE").length;
-  const otherPatients = totalPatients - malePatients - femalePatients;
-
-  const activePatients = patients.filter((p) => !p.isDeceased).length;
-  const newPatientsThisMonth = patients.filter((p) => {
-    const createdDate = new Date(p.createdAt);
-    const now = new Date();
-    return (
-      createdDate.getMonth() === now.getMonth() &&
-      createdDate.getFullYear() === now.getFullYear()
-    );
-  }).length;
+  // Function to create a test patient in Supabase for debugging
+  const createTestPatient = async () => {
+    try {
+      toast.info("Création d'un patient test...");
+      const testPatient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> = {
+        firstName: "Test",
+        lastName: `Patient ${new Date().getTime().toString().slice(-4)}`, // Unique name
+        gender: "Homme",
+        email: `test${new Date().getTime()}@example.com`, // Unique email
+        phone: "0123456789",
+        osteopathId: 1,
+        address: "123 Rue Test",
+        cabinetId: 1,
+        maritalStatus: "SINGLE",
+        birthDate: new Date().toISOString(),
+        handedness: "RIGHT",
+        contraception: "NONE",
+        hasVisionCorrection: false,
+        isDeceased: false,
+        isSmoker: false,
+        hasChildren: "false",
+        childrenAges: [],
+        physicalActivity: null,
+        currentTreatment: null,
+        digestiveDoctorName: null,
+        digestiveProblems: null,
+        entDoctorName: null,
+        entProblems: null,
+        generalPractitioner: null,
+        occupation: null,
+        ophtalmologistName: null,
+        rheumatologicalHistory: null,
+        surgicalHistory: null,
+        traumaHistory: null,
+        hdlm: null,
+        userId: null,
+        avatarUrl: null
+      };
+      
+      try {
+        await api.createPatient(testPatient);
+        toast.success("Patient test créé avec succès");
+        refetch();
+      } catch (err: any) {
+        toast.error(`Erreur lors de la création du patient test: ${err.message}`);
+        console.error("Erreur lors de la création du patient test:", err);
+      }
+    } catch (err) {
+      console.error("Erreur lors de la préparation du patient test:", err);
+      toast.error("Impossible de créer le patient test");
+    }
+  };
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center">
-              <Users className="mr-2 h-8 w-8 text-primary" />
-              Patients
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Gérez vos patients et leurs dossiers médicaux
-            </p>
-          </div>
-          <Button asChild>
-            <Link to="/patients/new" className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              Nouveau patient
-            </Link>
-          </Button>
-        </div>
+      <div className="flex flex-col min-h-full">
+        {/* Header section */}
+        <PatientHeader 
+          patientCount={patients?.length || 0}
+          isRefreshing={isRefreshing} 
+          onRefresh={handleRetry}
+          onCreateTestPatient={createTestPatient}
+        />
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total patients
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalPatients}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {activePatients} actifs
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Répartition par genre
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <div className="text-sm">Hommes</div>
-                  <div className="text-2xl font-bold">{malePatients}</div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm">Femmes</div>
-                  <div className="text-2xl font-bold">{femalePatients}</div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm">Autre</div>
-                  <div className="text-2xl font-bold">{otherPatients}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Nouveaux ce mois
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{newPatientsThisMonth}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {((newPatientsThisMonth / totalPatients) * 100 || 0).toFixed(1)}%
-                du total
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Search and filter section */}
+        <PatientSearch 
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          sortBy={sortBy}
+          onSortChange={(option) => setSortBy(option)}
+          viewMode={viewMode}
+          onViewModeChange={(mode) => setViewMode(mode)}
+        />
 
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Rechercher un patient..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Select
-            value={selectedGender}
-            onValueChange={setSelectedGender}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrer par genre" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les genres</SelectItem>
-              <SelectItem value="MALE">Hommes</SelectItem>
-              <SelectItem value="FEMALE">Femmes</SelectItem>
-              <SelectItem value="OTHER">Autre</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Alphabet filter */}
+        <AlphabetFilter activeLetter={activeLetter} onLetterChange={handleLetterChange} />
 
-        {/* Patients List */}
-        {isLoading ? (
-          <div className="flex justify-center items-center p-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        ) : filteredPatients.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPatients.map((patient) => (
-              <PatientCard key={patient.id} patient={patient} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center p-12 border rounded-lg">
-            <Users className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-            <h3 className="mt-4 text-lg font-medium">Aucun patient trouvé</h3>
-            <p className="mt-2 text-sm text-muted-foreground mb-4">
-              Aucun patient ne correspond à vos critères de recherche.
-            </p>
-            <Button onClick={() => {
-              setSearchTerm("");
-              setSelectedGender("all");
-            }}>
-              Réinitialiser les filtres
-            </Button>
-          </div>
+        {/* Loading and error states */}
+        <PatientLoadingState isLoading={isLoading} error={error} onRetry={handleRetry} />
+
+        {/* Main content - patient list or empty state */}
+        {!isLoading && !error && (
+          <>
+            {filteredPatients.length === 0 ? (
+              <EmptyPatientState 
+                searchQuery={searchQuery} 
+                activeLetter={activeLetter} 
+                onClearFilter={handleClearFilter} 
+                onCreateTestPatient={createTestPatient} 
+              />
+            ) : (
+              <>
+                <PatientResultsSummary 
+                  patientCount={filteredPatients.length}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                />
+                
+                {viewMode === 'cards' ? (
+                  <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    {paginatedPatients.map(patient => (
+                      <PatientCard key={patient.id} patient={patient} />
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="overflow-hidden">
+                    <div className="divide-y">
+                      {paginatedPatients.map(patient => (
+                        <PatientListItem key={patient.id} patient={patient} />
+                      ))}
+                    </div>
+                  </Card>
+                )}
+                
+                {/* Pagination */}
+                <PatientPagination 
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={goToPage}
+                />
+              </>
+            )}
+          </>
         )}
       </div>
     </Layout>

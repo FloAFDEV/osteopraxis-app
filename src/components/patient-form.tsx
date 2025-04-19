@@ -30,7 +30,7 @@ const patientSchema = z.object({
   phone: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   birthDate: z.date().optional().nullable(),
-  childrenAges: z.array(z.string()).optional().nullable(),
+  childrenAges: z.array(z.number()).optional().nullable(),
   firstName: z.string().min(1, "Prénom requis"),
   lastName: z.string().min(1, "Nom requis"),
   gender: z.string().optional().nullable(),
@@ -79,8 +79,6 @@ export function PatientForm({
       hasChildren: convertHasChildrenToBoolean(patient.hasChildren),
       // Assurer que birthDate est un objet Date s'il existe
       birthDate: patient.birthDate ? typeof patient.birthDate === 'string' ? new Date(patient.birthDate) : patient.birthDate : null,
-      // Conversion des âges des enfants de number[] à string[] si nécessaire
-      childrenAges: patient.childrenAges?.map(String) || [],
       // S'assurer que les valeurs null sont correctement gérées
       email: patient.email || "",
       phone: patient.phone || "",
@@ -96,8 +94,7 @@ export function PatientForm({
       surgicalHistory: patient.surgicalHistory || "",
       traumaHistory: patient.traumaHistory || "",
       rheumatologicalHistory: patient.rheumatologicalHistory || "",
-      currentTreatment: patient.currentTreatment || "",
-      notes: patient.notes || ""
+      currentTreatment: patient.currentTreatment || ""
     } : {
       firstName: "",
       lastName: "",
@@ -105,9 +102,7 @@ export function PatientForm({
       isSmoker: false,
       hasVisionCorrection: false,
       email: "",
-      phone: "",
-      childrenAges: [], // Initialize as empty string array
-      notes: ""
+      phone: ""
     }
   });
 
@@ -129,13 +124,9 @@ export function PatientForm({
     setChildrenAgesInput(value);
 
     // Convertir la chaîne en tableau d'âges (nombres)
-    const ages = value.split(",")
-      .map(age => parseInt(age.trim()))
-      .filter(age => !isNaN(age) && age > 0);
-  
-  // Store as string[] as required by the Patient type
-  form.setValue("childrenAges", ages.map(String));
-};
+    const ages = value.split(",").map(age => parseInt(age.trim())).filter(age => !isNaN(age) && age > 0);
+    form.setValue("childrenAges", ages);
+  };
 
   // Mettre à jour hasChildren quand childrenCount change
   useEffect(() => {

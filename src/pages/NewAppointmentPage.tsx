@@ -1,91 +1,69 @@
 
-import React, { useState, useEffect } from "react";
-import { Layout } from "@/components/ui/layout";
-import { useNavigate, useLocation } from "react-router-dom";
-import AppointmentForm from "@/components/appointment-form";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { Calendar } from "lucide-react";
 import { api } from "@/services/api";
+import { Patient } from "@/types";
+import { Layout } from "@/components/ui/layout";
+import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
-import { AppointmentStatus } from "@/types";
-import { FancyLoader } from "@/components/ui/fancy-loader";
 
 const NewAppointmentPage = () => {
-  const [patients, setPatients] = useState<any[]>([]);
-  const [cabinets, setCabinets] = useState<any[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
-
-  // Extract initialDate from query parameters if provided
   const queryParams = new URLSearchParams(location.search);
-  const dateParam = queryParams.get("date");
-  const initialDate = dateParam ? new Date(dateParam) : new Date();
+  const patientId = queryParams.get('patientId') ? parseInt(queryParams.get('patientId')!) : undefined;
 
-  // Load patients and cabinets on component mount
   useEffect(() => {
-    const loadData = async () => {
+    const fetchPatients = async () => {
       try {
-        const [patientsData, cabinetsData] = await Promise.all([
-          api.getPatients(),
-          api.getCabinets(),
-        ]);
-
-        setPatients(patientsData || []);
-        setCabinets(cabinetsData || []);
+        const data = await api.getPatients();
+        setPatients(data);
       } catch (error) {
-        console.error("Error loading data for appointment form:", error);
-        toast.error(
-          "Une erreur est survenue lors du chargement des données. Veuillez réessayer."
-        );
+        console.error("Error fetching patients:", error);
+        toast.error("Impossible de charger les patients. Veuillez réessayer.");
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
+    fetchPatients();
   }, []);
-
-  const handleFormSubmit = async (appointmentData: any) => {
-    try {
-      setSubmitting(true);
-
-      // Ensure the status is a valid AppointmentStatus
-      const status: AppointmentStatus = appointmentData.status as AppointmentStatus || "PLANNED";
-
-      // Create the appointment with the validated data
-      await api.createAppointment({
-        ...appointmentData,
-        status,
-      });
-
-      toast.success("Rendez-vous créé avec succès!");
-      navigate("/appointments");
-    } catch (error) {
-      console.error("Error creating appointment:", error);
-      toast.error(
-        "Une erreur est survenue lors de la création du rendez-vous. Veuillez réessayer."
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
-    return <FancyLoader message="Chargement..." />;
-  }
 
   return (
     <Layout>
-      <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Nouveau rendez-vous</h1>
-        <AppointmentForm
-          patients={patients}
-          cabinets={cabinets}
-          initialDate={initialDate}
-          onSubmit={handleFormSubmit}
-          isSubmitting={submitting}
-          onCancel={() => navigate("/appointments")}
-        />
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Calendar className="h-8 w-8 text-primary" />
+            Nouveau rendez-vous
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Créez un rendez-vous en remplissant le formulaire ci-dessous.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Chargement des données...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-card rounded-lg border shadow-sm p-6">
+            <AppointmentForm 
+              patients={patients} 
+              defaultValues={{ 
+                patientId,
+                date: new Date(),
+                time: "09:00",
+                status: "SCHEDULED"
+              }}
+            />
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -1,292 +1,129 @@
-import { Appointment, AppointmentStatus, DatabaseAppointmentStatus } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
+
+import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
-
-// Mapping between app AppointmentStatus and database status
-const mapAppointmentStatusToDb = (status: string): DatabaseAppointmentStatus => {
-  switch (status) {
-    case "PLANNED":
-      return "SCHEDULED";
-    case "CONFIRMED":
-      return "SCHEDULED";
-    case "CANCELLED":
-      return "CANCELED";
-    case "COMPLETED":
-      return "COMPLETED";
-    default:
-      return "SCHEDULED";
-  }
-};
-
-const mapDbStatusToAppStatus = (status: string): string => {
-  switch (status) {
-    case "SCHEDULED":
-      return "PLANNED";
-    case "CANCELED":
-      return "CANCELLED";
-    case "COMPLETED":
-      return "COMPLETED";
-    case "NO_SHOW":
-      return "CANCELLED";
-    case "RESCHEDULED":
-      return "PLANNED";
-    default:
-      return "PLANNED";
-  }
-};
-
-// Sample data for development
-const appointments: Appointment[] = [];
+import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+import { supabase } from "@/integrations/supabase/client";
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        const { data, error } = await supabase
-          .from('Appointment')
-          .select('*');
-
-        if (error) throw error;
-        
-        // Convert DB status to app status
-        const mappedData = data.map(appointment => ({
-          ...appointment,
-          status: mapDbStatusToAppStatus(appointment.status)
-        }));
-        
-        return mappedData as unknown as Appointment[];
+        return await supabaseAppointmentService.getAppointments();
       } catch (error) {
-        console.error("Error fetching appointments:", error);
+        console.error("Erreur Supabase getAppointments:", error);
         throw error;
       }
     }
-
+    
+    // Fallback: code simulé existant
     await delay(300);
-    return [...appointments];
+    return [];
   },
 
-  async getAppointmentById(id: number | string): Promise<Appointment | null> {
+  async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        const { data, error } = await supabase
-          .from('Appointment')
-          .select('*')
-          .eq('id', id)
-          .single();
-          
-        if (error) {
-          if (error.code === 'PGRST116') {
-            return null;
-          }
-          throw error;
-        }
-        
-        // Convert DB status to app status
-        if (data) {
-          data.status = mapDbStatusToAppStatus(data.status) as any;
-        }
-        
-        return data as unknown as Appointment;
+        return await supabaseAppointmentService.getAppointmentById(id);
       } catch (error) {
-        console.error("Error fetching appointment by ID:", error);
+        console.error("Erreur Supabase getAppointmentById:", error);
         throw error;
       }
     }
-
+    
+    // Fallback: code simulé existant
     await delay(200);
-    return appointments.find(appointment => appointment.id == id) || null;
+    return undefined;
   },
 
-  async createAppointment(appointment: Omit<Appointment, "id">): Promise<Appointment> {
+  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        const dbStatus = mapAppointmentStatusToDb(appointment.status);
-        
-        // Only include fields that are in the Supabase schema
-        const appointmentPayload = {
-          date: appointment.date,
-          patientId: Number(appointment.patientId || appointment.patient_id),
-          reason: appointment.reason || '',
-          cabinetId: appointment.cabinetId ? Number(appointment.cabinetId) : undefined,
-          status: dbStatus,
-          notificationSent: appointment.notificationSent || false
-        };
-        
-        const { data, error } = await supabase
-          .from('Appointment')
-          .insert(appointmentPayload)
-          .select()
-          .single();
-
-        if (error) throw error;
-        
-        // Convert DB status to app status
-        if (data) {
-          data.status = mapDbStatusToAppStatus(data.status) as any;
-        }
-        
-        return data as unknown as Appointment;
+        return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
       } catch (error) {
-        console.error("Error creating appointment:", error);
+        console.error("Erreur Supabase getAppointmentsByPatientId:", error);
         throw error;
       }
     }
+    
+    // Fallback: code simulé existant
+    await delay(300);
+    return [];
+  },
 
+  async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.createAppointment(appointment);
+      } catch (error) {
+        console.error("Erreur Supabase createAppointment:", error);
+        throw error;
+      }
+    }
+    
+    // Fallback: code simulé existant
     await delay(400);
     const now = new Date().toISOString();
-    const newAppointment = {
+    return {
       ...appointment,
-      id: appointments.length + 1,
-      createdAt: now,
-      updatedAt: now,
-    };
-    appointments.push(newAppointment);
-    return newAppointment;
+      id: Math.floor(Math.random() * 1000),
+      notificationSent: false
+    } as Appointment;
   },
 
-  async updateAppointment(id: number, updates: Partial<Appointment>): Promise<Appointment> {
+  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        // Map the status if present
-        const dbStatus = updates.status ? mapAppointmentStatusToDb(updates.status) : undefined;
-        
-        // Only include fields that are in the Supabase schema
-        const appointmentPayload: any = {
-          date: updates.date,
-          patientId: updates.patientId,
-          reason: updates.reason,
-          cabinetId: updates.cabinetId,
-          notificationSent: updates.notificationSent
-        };
-        
-        // Only add status if it's defined
-        if (dbStatus) {
-          appointmentPayload.status = dbStatus;
-        }
-        
-        const { data, error } = await supabase
-          .from('Appointment')
-          .update(appointmentPayload)
-          .eq('id', id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        
-        // Convert DB status to app status
-        if (data) {
-          data.status = mapDbStatusToAppStatus(data.status) as any;
-        }
-        
-        return data as unknown as Appointment;
+        return await supabaseAppointmentService.updateAppointment(id, appointment);
       } catch (error) {
-        console.error("Error updating appointment:", error);
+        console.error("Erreur Supabase updateAppointment:", error);
         throw error;
       }
     }
-
+    
+    // Fallback: code simulé existant
     await delay(300);
-    const index = appointments.findIndex(a => a.id === id);
-    if (index === -1) {
-      throw new Error(`Appointment with ID ${id} not found`);
-    }
-
-    appointments[index] = {
-      ...appointments[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-
-    return appointments[index];
+    return undefined;
   },
 
-  async updateAppointmentStatus(id: number, status: string): Promise<Appointment> {
+  // Méthode mise à jour pour utiliser updateAppointment au lieu de updateAppointmentStatus
+  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        const dbStatus = mapAppointmentStatusToDb(status);
-        
-        const { data, error } = await supabase
-          .from('Appointment')
-          .update({ status: dbStatus })
-          .eq('id', id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        
-        // Convert DB status to app status
-        if (data) {
-          data.status = mapDbStatusToAppStatus(data.status) as any;
-        }
-        
-        return data as unknown as Appointment;
+        return await this.updateAppointment(id, { status });
       } catch (error) {
-        console.error("Error updating appointment status:", error);
+        console.error("Erreur Supabase updateAppointmentStatus:", error);
         throw error;
       }
     }
-
+    
+    // Fallback: code simulé existant
     await delay(300);
-    const index = appointments.findIndex(a => a.id === id);
-    if (index === -1) {
-      throw new Error(`Appointment with ID ${id} not found`);
-    }
-
-    appointments[index].status = status as any;
-    appointments[index].updatedAt = new Date().toISOString();
-
-    return appointments[index];
+    return undefined;
   },
-
+  
   async deleteAppointment(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
+        // Utiliser le service Supabase pour la suppression
         const { error } = await supabase
-          .from('Appointment')
+          .from("Appointment")
           .delete()
-          .eq('id', id);
+          .eq("id", id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Erreur lors de la suppression du rendez-vous:", error);
+          throw error;
+        }
+        
         return true;
       } catch (error) {
-        console.error("Error deleting appointment:", error);
+        console.error("Erreur deleteAppointment:", error);
         throw error;
       }
     }
-
+    
+    // Fallback: simuler la suppression locale
     await delay(300);
-    const index = appointments.findIndex(a => a.id === id);
-    if (index !== -1) {
-      appointments.splice(index, 1);
-      return true;
-    }
-    return false;
+    return true;
   },
-
-  async getAppointmentsByPatientId(patientId: number | string): Promise<Appointment[]> {
-    if (USE_SUPABASE) {
-      try {
-        const { data, error } = await supabase
-          .from('Appointment')
-          .select('*')
-          .eq('patientId', patientId);
-
-        if (error) throw error;
-        
-        // Convert DB status to app status
-        const mappedData = data.map(appointment => ({
-          ...appointment,
-          status: mapDbStatusToAppStatus(appointment.status) as any
-        }));
-        
-        return mappedData as unknown as Appointment[];
-      } catch (error) {
-        console.error("Error fetching appointments by patient ID:", error);
-        throw error;
-      }
-    }
-
-    await delay(300);
-    return appointments.filter(a => a.patientId == patientId || a.patient_id == patientId);
-  }
 };

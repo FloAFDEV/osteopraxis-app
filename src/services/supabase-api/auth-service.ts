@@ -1,172 +1,241 @@
 
-import { User, AuthState, Role } from "@/types";
+import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 
 export const supabaseAuthService = {
-  async signIn(email: string, password: string) {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  async signUp(userData: {
-    email: string;
-    password: string;
-    firstName?: string;
-    lastName?: string;
-  }) {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-          },
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      // Create an entry in the User table if sign up was successful
-      if (data.user) {
-        // Check if user already exists in the User table
-        const { data: existingUser } = await supabase
-          .from("User")
-          .select("id")
-          .eq("id", data.user.id)
-          .single();
-
-        if (!existingUser) {
-          const { error: userError } = await supabase
-            .from("User")
-            .insert({
-              id: data.user.id,
-              email: userData.email,
-              first_name: userData.firstName,
-              last_name: userData.lastName,
-              role: "OSTEOPATH" as Role,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            });
-
-          if (userError) {
-            console.error("Error creating user record:", userError);
-            // Continue anyway, as the auth record is created
-          }
+  async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
+    console.log("Registering user with Supabase:", { email, firstName, lastName });
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName
         }
       }
-
-      return data;
-    } catch (error) {
-      throw error;
+    });
+    
+    if (error) {
+      console.error("Supabase registration error:", error);
+      throw new Error(error.message);
     }
-  },
-
-  async signOut() {
+    
+    if (!data.user) {
+      throw new Error("Échec lors de la création du compte");
+    }
+    
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
+      // Créer l'entrée User associée
+      const { error: userError } = await supabase
+        .from("User")
+        .insert({
+          id: data.user.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          role: "OSTEOPATH", // Par défaut, tous les nouveaux utilisateurs sont des ostéopathes
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      
+      if (userError) {
+        console.error("Erreur lors de la création du profil utilisateur:", userError);
       }
-      return;
-    } catch (error) {
-      throw error;
+    } catch (insertError) {
+      console.error("Erreur lors de la création du profil utilisateur:", insertError);
     }
+    
+    // Si email confirmation est requise, retourner un état spécial avec un message
+    if (data.session === null) {
+      // Email confirmation required
+      return {
+        user: {
+          id: data.user.id,
+          email: data.user.email || "",
+          first_name: firstName,
+          last_name: lastName,
+          role: "OSTEOPATH" as Role,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          osteopathId: null
+        },
+        isAuthenticated: false,
+        token: null,
+        message: "Veuillez confirmer votre email avant de vous connecter. Un lien de confirmation a été envoyé à votre adresse email."
+      };
+    }
+    
+    // Si inscription réussie et pas de confirmation d'email requise, connecter l'utilisateur
+    return {
+      user: {
+        id: data.user.id,
+        email: data.user.email || "",
+        first_name: firstName,
+        last_name: lastName,
+        role: "OSTEOPATH" as Role,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        osteopathId: null
+      },
+      isAuthenticated: true,
+      token: data.session?.access_token || null
+    };
   },
-
-  async getSession() {
-    try {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        throw error;
+  
+  async login(email: string, password: string): Promise<AuthState> {
+    console.log("Logging in with Supabase:", email);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) {
+      console.error("Supabase login error:", error);
+      
+      // Si l'erreur concerne l'email non confirmé, retourner un message spécifique
+      if (error.message.includes("Email not confirmed") || error.message === "Email not confirmed") {
+        throw new Error("Email non confirmé. Veuillez vérifier votre boîte mail et cliquer sur le lien de confirmation.");
       }
-      return data.session;
-    } catch (error) {
-      throw error;
+      
+      throw new Error(error.message);
     }
+    
+    if (!data.user) {
+      throw new Error("Identifiants incorrects");
+    }
+    
+    // Récupérer les informations supplémentaires de l'utilisateur depuis la table User
+    const { data: userData, error: userError } = await supabase
+      .from("User")
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
+    
+    if (userError) {
+      console.error("Erreur lors de la récupération des données utilisateur:", userError);
+    }
+    
+    const typedUserData = userData as any;
+    
+    const user: User = typedUserData ? {
+      id: data.user.id,
+      email: data.user.email || "",
+      first_name: typedUserData.first_name,
+      last_name: typedUserData.last_name,
+      role: typedUserData.role,
+      created_at: typedUserData.created_at,
+      updated_at: typedUserData.updated_at,
+      osteopathId: typedUserData.osteopathId
+    } : {
+      id: data.user.id,
+      email: data.user.email || "",
+      first_name: null,
+      last_name: null,
+      role: "OSTEOPATH" as Role, // Valeur par défaut
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      osteopathId: null
+    };
+    
+    const authState: AuthState = {
+      user,
+      isAuthenticated: true,
+      token: data.session?.access_token || null
+    };
+    
+    localStorage.setItem("authState", JSON.stringify(authState));
+    
+    return authState;
   },
-
-  async getUserProfile(userId: string) {
+  
+  async loginWithMagicLink(email: string): Promise<void> {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin,
+      }
+    });
+    
+    if (error) throw new Error(error.message);
+  },
+  
+  async logout(): Promise<void> {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error("Erreur lors de la déconnexion:", error);
+    
+    localStorage.removeItem("authState");
+  },
+  
+  async checkAuth(): Promise<AuthState> {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase.auth.getSession();
+      
+      if (!data.session) {
+        return {
+          user: null,
+          isAuthenticated: false,
+          token: null
+        };
+      }
+      
+      // Récupérer les informations supplémentaires de l'utilisateur depuis la table User
+      const { data: userData, error: userError } = await supabase
         .from("User")
         .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) {
-        throw error;
+        .eq("id", data.session.user.id)
+        .maybeSingle();
+      
+      if (userError) {
+        console.error("Erreur lors de la récupération des données utilisateur:", userError);
       }
-
-      return data as User;
+      
+      const typedUserData = userData as any;
+      
+      const user: User = typedUserData ? {
+        id: data.session.user.id,
+        email: data.session.user.email || "",
+        first_name: typedUserData.first_name,
+        last_name: typedUserData.last_name,
+        role: typedUserData.role,
+        created_at: typedUserData.created_at,
+        updated_at: typedUserData.updated_at,
+        osteopathId: typedUserData.osteopathId
+      } : {
+        id: data.session.user.id,
+        email: data.session.user.email || "",
+        first_name: null,
+        last_name: null,
+        role: "OSTEOPATH" as Role,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        osteopathId: null
+      };
+      
+      return {
+        user,
+        isAuthenticated: true,
+        token: data.session.access_token
+      };
     } catch (error) {
-      throw error;
+      console.error("Erreur lors de la vérification de l'authentification:", error);
+      return {
+        user: null,
+        isAuthenticated: false,
+        token: null
+      };
     }
   },
 
-  async resetPassword(email: string) {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+  async promoteToAdmin(userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from("User")
+      .update({ role: "ADMIN" })
+      .eq("id", userId);
 
-      if (error) {
-        throw error;
-      }
-
-      return true;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  async updatePassword(password: string) {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      return true;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  async signInWithMagicLink(email: string) {
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: window.location.origin,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      return true;
-    } catch (error) {
-      throw error;
-    }
-  },
+    if (error) throw new Error(error.message);
+    return true;
+  }
 };

@@ -1,84 +1,138 @@
+
 import { createClient } from '@supabase/supabase-js';
-import { AppointmentStatus } from '@/types';
+import type { Database } from '@/integrations/supabase/types';
+import { SIMULATE_AUTH } from '../api/config';
 
-// URL et clé API de Supabase
-const SUPABASE_URL = 'https://jpjuvzpqfirymtjwnier.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ';
+// Importer le client depuis le fichier généré
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-// Création du client Supabase
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// Exporter le client avec des options d'authentification renforcées
+export const supabase = supabaseClient;
 
-// Client Supabase avec accès administrateur pour les opérations spéciales
-// NOTE: cette clé devrait être gérée de manière sécurisée, idéalement via des variables d'environnement
-export const supabaseAdmin = createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+// Type utilitaire pour les données typées
+export const typedData = <T>(data: any): T => data as T;
 
-// Fonction d'aide pour typer correctement les données
-export function typedData<T>(data: any): T {
-  return data as T;
-}
+// Fonction utilitaire pour ajouter des en-têtes d'authentification simulés
+export const addAuthHeaders = <T extends { setHeader: (name: string, value: string) => T }>(query: T): T => {
+  if (SIMULATE_AUTH) {
+    return query.setHeader('X-Development-Mode', 'true');
+  }
+  return query;
+};
 
-// Fonction utilitaire pour récupérer l'ID du profil professionnel de l'utilisateur actuellement connecté
-export async function getCurrentProfileId(): Promise<number | null> {
-  try {
-    // Vérifier l'authentification
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData?.session) {
-      console.log("Pas de session utilisateur active");
-      return null;
-    }
-    
-    const userId = sessionData.session.user.id;
-    
-    // Récupérer l'utilisateur depuis la table User
-    const { data: userData, error: userError } = await supabase
-      .from("User")
-      .select("professionalProfileId")
-      .eq("id", userId)
-      .single();
+// Fonction helper pour vérifier l'état d'authentification avant les opérations
+export const checkAuth = async () => {
+  console.log("Vérification de l'état d'authentification...");
+  
+  // Essayer plusieurs fois en cas d'erreur réseau
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      console.log("Résultat getSession:", data ? "Données reçues" : "Aucune donnée", error ? `Erreur: ${error.message}` : "Pas d'erreur");
       
-    if (userError || !userData?.professionalProfileId) {
-      console.log("Pas de professionalProfileId trouvé pour l'utilisateur", userId);
-      
-      // Essayer de trouver directement le profil associé
-      const { data: profileData } = await supabase
-        .from("ProfessionalProfile")
-        .select("id")
-        .eq("userId", userId)
-        .maybeSingle();
+      if (error) {
+        console.error(`Erreur d'authentification (tentative ${attempts + 1}/${maxAttempts}):`, error);
         
-      if (profileData?.id) {
-        console.log("Profil trouvé directement:", profileData.id);
-        return profileData.id;
+        if (attempts < maxAttempts - 1) {
+          attempts++;
+          // Attendre avant de réessayer
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        
+        throw new Error(`Erreur d'authentification: ${error.message}`);
       }
       
-      return null;
+      if (!data.session) {
+        console.log("Aucune session active trouvée, vérification du token local");
+        // Avant d'échouer, essayons de récupérer le token du localStorage
+        try {
+          const storedAuthState = localStorage.getItem("authState");
+          if (storedAuthState) {
+            console.log("État d'authentification trouvé dans le localStorage");
+            const parsedState = JSON.parse(storedAuthState);
+            if (parsedState.token) {
+              console.log("Token local disponible. Tentative de réutilisation.");
+              
+              // Tenter de définir manuellement le token d'accès dans la session Supabase
+              await supabase.auth.setSession({
+                access_token: parsedState.token,
+                refresh_token: ""
+              });
+              
+              // Vérifier à nouveau la session
+              const { data: refreshedData, error: refreshError } = await supabase.auth.getSession();
+              console.log("Après tentative avec token local:", refreshedData?.session ? "Session active" : "Pas de session", refreshError ? `Erreur: ${refreshError.message}` : "Pas d'erreur");
+              
+              if (!refreshError && refreshedData.session) {
+                console.log("Réutilisation du token local réussie, session active:", refreshedData.session.user.id);
+                return refreshedData.session;
+              } else {
+                console.log("Échec de la réutilisation du token local");
+              }
+            }
+          }
+        } catch (localAuthError) {
+          console.error("Erreur lors de la récupération du token local:", localAuthError);
+        }
+        
+        console.error("Aucune session active trouvée et impossible de récupérer un token valide");
+        throw new Error('Non authentifié');
+      }
+      
+      console.log("Authentification vérifiée, ID utilisateur:", data.session.user.id);
+      return data.session;
+    } catch (error) {
+      if (attempts < maxAttempts - 1) {
+        attempts++;
+        console.error(`Erreur lors de la vérification d'authentification (tentative ${attempts}/${maxAttempts}):`, error);
+        // Attendre avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        throw error;
+      }
     }
-    
-    return userData.professionalProfileId;
-  } catch (error) {
-    console.error("Erreur lors de la récupération du profil:", error);
-    return null;
   }
+  
+  // Si on arrive ici, c'est qu'on a épuisé toutes les tentatives
+  throw new Error('Impossible de vérifier l\'authentification après plusieurs tentatives');
+};
+
+// Récupérer un type enum à partir d'une valeur string
+export function getEnumValue<T extends string>(value: string, allowedValues: readonly T[]): T {
+  if (allowedValues.includes(value as T)) {
+    return value as T;
+  }
+  throw new Error(`Valeur enum invalide: ${value}. Les valeurs autorisées sont: ${allowedValues.join(', ')}`);
 }
 
-// Pour compatibilité avec le code existant
-export const getCurrentOsteopathId = getCurrentProfileId;
+// AppointmentStatus enum helper - Correction de CANCELLED à CANCELED pour correspondre au type dans types.ts
+export const AppointmentStatusValues = ['SCHEDULED', 'COMPLETED', 'CANCELED', 'NO_SHOW', 'RESCHEDULED'] as const;
+export type AppointmentStatusType = typeof AppointmentStatusValues[number];
 
-// En exportant la fonction pour résoudre l'erreur d'importation
-export function addAuthHeaders<T extends any>(query: T): T {
-  return query;
+// Contraception enum helper
+export const ContraceptionValues = [
+  'NONE', 'PILLS', 'PATCH', 'RING', 'IUD', 'IMPLANT', 
+  'CONDOM', 'DIAPHRAGM', 'INJECTION', 'NATURAL_METHODS', 'STERILIZATION'
+] as const;
+export type ContraceptionType = typeof ContraceptionValues[number];
+
+// Fonctions de sécurité pour s'assurer que les valeurs correspondent aux enum de Supabase
+export function ensureAppointmentStatus(status: string): AppointmentStatusType {
+  // Correction spéciale pour CANCELLED -> CANCELED
+  if (status === 'CANCELLED') {
+    return 'CANCELED';
+  }
+  return getEnumValue(status, AppointmentStatusValues);
 }
 
-// Liste des valeurs valides pour AppointmentStatus
-export const AppointmentStatusValues = ['PLANNED', 'CONFIRMED', 'CANCELLED', 'COMPLETED'] as const;
-
-// Fonction pour s'assurer que le statut est valide
-export function ensureAppointmentStatus(status: any): AppointmentStatus {
-  if (typeof status === 'string' && AppointmentStatusValues.includes(status as AppointmentStatus)) {
-    return status as AppointmentStatus;
+export function ensureContraception(contraception: string): ContraceptionType {
+  // Correction spéciale pour IMPLANTS -> IMPLANT
+  if (contraception === 'IMPLANTS') {
+    return 'IMPLANT';
   }
-  return 'PLANNED'; // Valeur par défaut
+  return getEnumValue(contraception, ContraceptionValues);
 }

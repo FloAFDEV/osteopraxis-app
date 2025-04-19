@@ -1,74 +1,128 @@
 
-import React from 'react';
-import { format, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Invoice, Patient, ProfessionalProfile, Cabinet } from '@/types';
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
 
 interface InvoicePrintViewProps {
   invoice: Invoice;
-  patient: Patient;
-  professionalProfile?: ProfessionalProfile;
+  patient?: Patient;
+  osteopath?: Osteopath;
   cabinet?: Cabinet;
 }
 
-export const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({ 
-  invoice, 
-  patient, 
-  professionalProfile,
-  cabinet
-}) => {
-  const invoiceDate = parseISO(invoice.date);
-  const formattedDate = format(invoiceDate, 'dd MMMM yyyy', { locale: fr });
+export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: InvoicePrintViewProps) => {
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
+  };
+
+  const formattedDate = format(new Date(invoice.date), "dd MMMM yyyy", { locale: fr });
+  const currentDate = format(new Date(), "dd MMMM yyyy", { locale: fr });
+  
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PAID': return "Payée";
+      case 'PENDING': return "En attente";
+      case 'CANCELED': return "Annulée";
+      default: return "Inconnue";
+    }
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-start">
+    <div className="bg-white p-8 max-w-3xl mx-auto">
+      <div className="flex justify-between items-start mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Facture N°{invoice.id}</h1>
-          <p>Date: {formattedDate}</p>
+          {cabinet && cabinet.logoUrl ? (
+            <img 
+              src={cabinet.logoUrl} 
+              alt={`Logo ${cabinet.name}`} 
+              className="h-16 mb-3"
+              style={{ maxWidth: '200px', objectFit: 'contain' }}
+            />
+          ) : (
+            <h1 className="text-3xl font-bold text-green-700">{cabinet?.name || "PatientHub"}</h1>
+          )}
+          <p className="text-gray-600">{osteopath?.professional_title || "Gestion de cabinet d'ostéopathie"}</p>
+          <p className="text-gray-600 mt-2">
+            {cabinet ? (
+              <>
+                {cabinet.address}<br />
+                {cabinet.phone && <>{cabinet.phone}<br /></>}
+                {cabinet.email && <>{cabinet.email}<br /></>}
+              </>
+            ) : (
+              <>
+                123 Rue de la Santé<br />
+                75001 Paris, France<br />
+                Tél: 01 23 45 67 89
+              </>
+            )}
+          </p>
         </div>
+        <div className="text-right">
+          <h2 className="text-2xl font-medium text-green-800">FACTURE</h2>
+          <p className="font-medium mt-1">#{invoice.id.toString().padStart(4, '0')}</p>
+          <p className="mt-2 text-gray-600">Date d'émission: {formattedDate}</p>
+          <p className="text-gray-600">Statut: <span className="text-green-700 font-semibold">{getStatusLabel(invoice.paymentStatus)}</span></p>
+        </div>
+      </div>
+
+      <hr className="my-6 border-green-200" />
+      
+      <div className="grid grid-cols-2 gap-8 mb-8">
         <div>
-          {cabinet?.name && <p className="font-bold">{cabinet.name}</p>}
-          {cabinet?.address && <p>{cabinet.address}</p>}
-          {cabinet?.phone && <p>Téléphone: {cabinet.phone}</p>}
+          <h3 className="font-medium text-green-800 mb-2">Facturer à:</h3>
+          {patient ? (
+            <div>
+              <p className="font-medium">{patient.firstName} {patient.lastName}</p>
+              {patient.email && <p>{patient.email}</p>}
+              {patient.phone && <p>{patient.phone}</p>}
+              {patient.address && <p>{patient.address}</p>}
+            </div>
+          ) : (
+            <p>Patient #{invoice.patientId}</p>
+          )}
+        </div>
+        <div className="text-right">
+          <h3 className="font-medium text-green-800 mb-2">Informations professionnelles:</h3>
+          <p className="font-medium">{osteopath?.name || "Cabinet d'ostéopathie"}</p>
+          {osteopath?.siret && <p>SIRET: {osteopath.siret}</p>}
+          {osteopath?.adeli_number && <p>ADELI: {osteopath.adeli_number}</p>}
+          {osteopath?.ape_code && <p>Code APE: {osteopath.ape_code}</p>}
         </div>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold">Patient</h2>
-        <p>Nom: {patient.firstName} {patient.lastName}</p>
-        {patient.address && <p>Adresse: {patient.address}</p>}
-        {patient.phone && <p>Téléphone: {patient.phone}</p>}
-      </div>
+      <table className="w-full mb-8">
+        <thead>
+          <tr className="border-b border-green-300">
+            <th className="py-2 px-2 text-left text-green-800">Description</th>
+            <th className="py-2 px-2 text-right text-green-800">Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-green-200">
+            <td className="py-4 px-2">Consultation d'ostéopathie</td>
+            <td className="py-4 px-2 text-right text-green-700 font-bold">{formatAmount(invoice.amount)}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr className="font-medium">
+            <td className="py-4 px-2 text-right text-green-800">Total</td>
+            <td className="py-4 px-2 text-right text-green-700 font-bold">{formatAmount(invoice.amount)}</td>
+          </tr>
+        </tfoot>
+      </table>
 
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold">Détails de la consultation</h2>
-        <p>Consultation N°: {invoice.consultationId}</p>
-        <p>Montant: {invoice.amount} €</p>
-        {invoice.tvaExoneration && <p>Exonération de TVA: Oui</p>}
-        {invoice.tvaMotif && <p>Motif d'exonération: {invoice.tvaMotif}</p>}
-      </div>
-
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold">Paiement</h2>
-        <p>Statut: {invoice.paymentStatus}</p>
-      </div>
-
-      {professionalProfile && (
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold">Informations du professionnel de santé</h2>
-          <div className="mt-4">
-            <p className="font-bold">{professionalProfile.name}</p>
-            <p>{professionalProfile.title}</p>
-            <p>N° ADELI: {professionalProfile.adeli_number || "-"}</p>
-            <p>N° SIRET: {professionalProfile.siret || "-"}</p>
-            <p>Code APE: {professionalProfile.ape_code || "8690F"}</p>
-          </div>
+      <div className="border-t border-green-200 pt-6">
+        <h3 className="font-medium text-green-800 mb-2">Notes:</h3>
+        <p className="text-gray-600 mb-6">
+          Merci de votre confiance. Cette facture est payable dans un délai de 30 jours.
+          Veuillez inclure le numéro de facture dans votre communication de paiement.
+        </p>
+        
+        <div className="text-center text-gray-500 text-sm mt-8">
+          <p className="text-green-600">Document généré le {currentDate}</p>
+          <p className="mt-1 text-green-500">PatientHub - Logiciel de gestion pour ostéopathes</p>
         </div>
-      )}
-
-      <div className="mt-8 text-center">
-        <p>Merci de votre confiance !</p>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
-import AppointmentForm from "@/components/appointment-form";
+import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -81,37 +82,35 @@ const EditAppointmentPage = () => {
   const appointmentDate = new Date(appointment.date);
   const date = appointmentDate;
   const time = format(appointmentDate, "HH:mm");
-
+  
   return <Layout>
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Calendar className="h-8 w-8 text-purple-500" />
-          Modifier le rendez-vous
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Modifiez les détails du rendez-vous en utilisant le formulaire ci-dessous.
-        </p>
-      </div>
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Calendar className="h-8 w-8 text-purple-500" />
+            Modifier le rendez-vous
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Modifiez les détails du rendez-vous en utilisant le formulaire ci-dessous.
+          </p>
+        </div>
 
-      <div className="bg-card rounded-lg border shadow-sm p-6">
-        <AppointmentForm 
-          patients={patients} 
-          defaultValues={{
-            patientId: appointment.patientId,
-            date,
-            time,
-            // Utiliser notes ou reason, selon ce qui est disponible
-            reason: appointment.notes || appointment.reason || "",
-            status: appointment.status,
-            cabinetId: appointment.cabinetId
-          }} 
-          appointmentId={appointment.id} 
-          isEditing={true} 
-        />
+        <div className="bg-card rounded-lg border shadow-sm p-6">
+          <AppointmentForm 
+            patients={patients} 
+            defaultValues={{
+              patientId: appointment.patientId,
+              date,
+              time,
+              reason: appointment.reason,
+              status: appointment.status
+            }} 
+            appointmentId={appointment.id} 
+            isEditing={true} 
+          />
+        </div>
       </div>
-    </div>
-  </Layout>;
+    </Layout>;
 };
 
 export default EditAppointmentPage;

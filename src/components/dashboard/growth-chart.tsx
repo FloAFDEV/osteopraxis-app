@@ -5,48 +5,101 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
-import { MonthlyGrowthData } from "@/types";
+import { DashboardData } from "@/types";
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
+  LineChart,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
-  Legend
+  Line
 } from "recharts";
 
 interface GrowthChartProps {
-  data: MonthlyGrowthData[];
+  data: DashboardData;
 }
 
 export function GrowthChart({ data }: GrowthChartProps) {
-  return (
-    <div className="h-[300px]">
+  if (!data || !data.monthlyGrowth) {
+    return (
+      <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg">
+        <CardHeader>
+          <CardTitle>Croissance mensuelle</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Traduction des mois
+  const monthMap: Record<string, string> = {
+    January: "Janvier",
+    February: "Février",
+    March: "Mars",
+    April: "Avril",
+    May: "Mai",
+    June: "Juin",
+    July: "Juillet",
+    August: "Août",
+    September: "Septembre",
+    October: "Octobre",
+    November: "Novembre",
+    December: "Décembre"
+  };
+
+  const formattedData = data.monthlyGrowth.map((item) => ({
+    month: monthMap[item.month] || item.month,
+    patients: item.patients,
+    growthText: item.growthText
+  }));
+
+   return (
+    <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip 
-            formatter={(value, name) => {
-              return [value, name === "patients" ? "Patients" : "Année précédente"];
+        <LineChart data={formattedData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+          <XAxis
+            dataKey="month"
+            tick={{ fill: "#64748b", fontSize: 12 }}
+          />
+          <YAxis
+            tick={{ fill: "#64748b", fontSize: 12 }}
+            domain={[0, "auto"]}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#0891b2",
+              border: "none",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
             }}
-            labelFormatter={(label) => `Mois: ${label}`} 
-            contentStyle={{ 
-              backgroundColor: 'var(--card)',
-              borderColor: 'var(--border)',
-              borderRadius: '6px'
+            itemStyle={{ color: "#ffffff", fontSize: "14px" }}
+            labelStyle={{ color: "#ffffff", fontWeight: "bold" }}
+            formatter={(_, __, props: any) => {
+              const patients = props.payload?.patients ?? 0;
+              const growthText =
+                patients === 0
+                  ? "Aucune activité ce mois"
+                  : props.payload?.growthText ?? "";
+
+              return [
+                `👥 ${patients} patients`,
+                growthText || "Pas de comparaison disponible"
+              ];
             }}
           />
-          <Legend />
-          <Bar dataKey="patients" name="Cette année" fill="#2563eb" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="prevPatients" name="Année précédente" fill="#9333ea" radius={[4, 4, 0, 0]} />
-        </BarChart>
+          <Line
+            type="monotone"
+            dataKey="patients"
+            stroke="#4C51BF"
+            strokeWidth={3}
+            dot={{ stroke: "#4C51BF", strokeWidth: 2, r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );

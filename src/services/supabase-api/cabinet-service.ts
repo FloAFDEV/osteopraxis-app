@@ -1,117 +1,149 @@
 
+// Import des types depuis le fichier des types
 import { Cabinet } from "@/types";
-import { supabase, getCurrentProfileId } from "./utils";
+import { supabase, typedData } from "./utils";
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
     const { data, error } = await supabase
-      .from('Cabinet')
-      .select('*')
-      .order('name');
+      .from("Cabinet")
+      .select("*");
       
     if (error) throw new Error(error.message);
     
-    return data as Cabinet[];
+    return typedData<Cabinet[]>(data);
   },
 
-  async getCabinetById(id: number): Promise<Cabinet | null> {
+  async getCabinetById(id: number): Promise<Cabinet | undefined> {
     const { data, error } = await supabase
-      .from('Cabinet')
-      .select('*')
-      .eq('id', id)
+      .from("Cabinet")
+      .select("*")
+      .eq("id", id)
       .single();
       
     if (error) {
-      if (error.code === 'PGRST116') return null; // Pas trouvé
+      if (error.code === "PGRST116") {
+        return undefined;
+      }
       throw new Error(error.message);
     }
     
-    return data as Cabinet;
+    return typedData<Cabinet>(data);
   },
-  
-  async getCabinetsByProfessionalProfileId(professionalProfileId: number): Promise<Cabinet[]> {
-    console.log(`Récupération des cabinets pour le profil ID ${professionalProfileId}`);
-    const { data, error } = await supabase
-      .from('Cabinet')
-      .select('*')
-      .eq('professionalProfileId', professionalProfileId)
-      .order('name');
-      
-    if (error) {
-      console.error("Erreur lors de la récupération des cabinets par professionalProfileId:", error);
-      throw new Error(error.message);
-    }
-    
-    console.log(`${data?.length || 0} cabinets trouvés pour le profil ID ${professionalProfileId}`);
-    return data as Cabinet[] || [];
-  },
-  
-  async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
-    // Récupérer d'abord l'ID du profil professionnel de l'utilisateur
-    const profileId = await getCurrentProfileId();
-    if (!profileId) {
-      console.log("Pas de profil professionnel associé à cet utilisateur");
+
+  async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
+    if (!osteopathId) {
+      console.log("OsteopathId invalide fourni à getCabinetsByOsteopathId");
       return [];
     }
     
-    // Récupérer les cabinets associés à ce profil
-    return this.getCabinetsByProfessionalProfileId(profileId);
+    const { data, error } = await supabase
+      .from("Cabinet")
+      .select("*")
+      .eq("osteopathId", osteopathId);
+      
+    if (error) throw new Error(error.message);
+    
+    return typedData<Cabinet[]>(data || []);
   },
   
-  async createCabinet(data: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
+  async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
+    console.log("Recherche des cabinets pour l'userId:", userId);
+    
+    if (!userId) {
+      console.log("UserId invalide fourni à getCabinetsByUserId");
+      return [];
+    }
+    
+    try {
+      // First get the osteopath ID for this user
+      const { data: osteopathData, error: osteopathError } = await supabase
+        .from("Osteopath")
+        .select("id")
+        .eq("userId", userId)
+        .maybeSingle();
+        
+      if (osteopathError) {
+        console.error("Erreur lors de la recherche de l'ostéopathe:", osteopathError);
+        throw new Error(osteopathError.message);
+      }
+      
+      if (!osteopathData) {
+        console.log("Aucun ostéopathe trouvé pour l'userId:", userId);
+        return [];
+      }
+      
+      console.log("Ostéopathe trouvé avec l'ID:", osteopathData.id);
+      
+      // Now get cabinets with this osteopath ID
+      const { data: cabinets, error: cabinetsError } = await supabase
+        .from("Cabinet")
+        .select("*")
+        .eq("osteopathId", osteopathData.id);
+        
+      if (cabinetsError) throw new Error(cabinetsError.message);
+      
+      console.log(`${cabinets?.length || 0} cabinet(s) trouvé(s) pour l'ostéopathe`);
+      return typedData<Cabinet[]>(cabinets || []);
+    } catch (error) {
+      console.error("Exception lors de la recherche des cabinets:", error);
+      throw error;
+    }
+  },
+
+  async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     const now = new Date().toISOString();
     
-    const { data: newCabinet, error } = await supabase
-      .from('Cabinet')
-      .insert({
-        ...data,
-        createdAt: now,
-        updatedAt: now
-      })
+    // Add timestamps required by Supabase schema
+    const cabinetWithTimestamps = {
+      ...cabinet,
+      updatedAt: now,
+      createdAt: now
+    };
+    
+    const { data, error } = await supabase
+      .from("Cabinet")
+      .insert(cabinetWithTimestamps)
       .select()
       .single();
       
-    if (error) {
-      console.error("Erreur lors de la création du cabinet:", error);
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
     
-    return newCabinet as Cabinet;
+    return typedData<Cabinet>(data);
   },
-  
-  async updateCabinet(id: number, data: Partial<Omit<Cabinet, 'id' | 'createdAt'>>): Promise<Cabinet | null> {
-    const { data: updatedCabinet, error } = await supabase
-      .from('Cabinet')
-      .update({
-        ...data,
-        updatedAt: new Date().toISOString()
-      })
-      .eq('id', id)
+
+  async updateCabinet(id: number, cabinet: Partial<Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Cabinet> {
+    const { data, error } = await supabase
+      .from("Cabinet")
+      .update({ ...cabinet, updatedAt: new Date().toISOString() })
+      .eq("id", id)
       .select()
       .single();
       
-    if (error) {
-      console.error("Erreur lors de la mise à jour du cabinet:", error);
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
     
-    return updatedCabinet as Cabinet;
+    return typedData<Cabinet>(data);
   },
-  
+
+  async updateTimestamps(cabinetId: number): Promise<void> {
+    const now = new Date().toISOString();
+    
+    const { error } = await supabase
+      .from("Cabinet")
+      .update({ 
+        updatedAt: now 
+      })
+      .eq("id", cabinetId);
+      
+    if (error) throw new Error(error.message);
+  },
+
   async deleteCabinet(id: number): Promise<void> {
     const { error } = await supabase
-      .from('Cabinet')
+      .from("Cabinet")
       .delete()
-      .eq('id', id);
+      .eq("id", id);
       
-    if (error) {
-      console.error("Erreur lors de la suppression du cabinet:", error);
-      throw new Error(error.message);
-    }
-  },
-  
-  // Pour compatibilité avec le code existant
-  getCabinetsByOsteopathId: function(osteopathId: number) {
-    return this.getCabinetsByProfessionalProfileId(osteopathId);
+    if (error) throw new Error(error.message);
   }
 };
