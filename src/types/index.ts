@@ -1,11 +1,7 @@
-
 // Add missing types or update existing ones here to ensure all the properties needed are present
 
-export type DbRole = 'ADMIN' | 'OSTEOPATH' | 'USER';
-
-// Cette définition permet la compatibilité avec Supabase tout en maintenant
-// les types actuels dans l'application
-export type Role = 'ADMIN' | 'OSTEOPATH' | 'USER';
+// Type Role simplifié pour correspondre exactement à la base de données
+export type Role = 'ADMIN' | 'OSTEOPATH';
 
 export interface User {
   id: string;

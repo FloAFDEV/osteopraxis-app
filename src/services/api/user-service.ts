@@ -1,4 +1,3 @@
-
 import { User, Role } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { delay, USE_SUPABASE } from "./config";
@@ -13,7 +12,7 @@ export const userService = {
         const now = new Date().toISOString();
         
         // Ensure role is correctly typed for the database
-        let role: "ADMIN" | "OSTEOPATH" = userData.role === 'ADMIN' ? 'ADMIN' : 'OSTEOPATH';
+        let role: Role = userData.role === 'ADMIN' ? 'ADMIN' : 'OSTEOPATH';
         
         const { data, error } = await supabase
           .from('User')
@@ -86,9 +85,7 @@ export const userService = {
         }
         
         // Ensure role is correctly typed for the database
-        const role: "ADMIN" | "OSTEOPATH" | undefined = 
-          !updates.role ? undefined :
-          updates.role === 'ADMIN' ? 'ADMIN' : 'OSTEOPATH';
+        const role: Role | undefined = updates.role;
         
         const { data, error } = await supabase
           .from('User')
@@ -132,7 +129,7 @@ export const userService = {
     return users[index];
   },
   
-  async updateUserRole(userId: string, role: 'ADMIN' | 'OSTEOPATH'): Promise<User> {
+  async updateUserRole(userId: string, role: Role): Promise<User> {
     if (USE_SUPABASE) {
       try {
         const { data, error } = await supabase

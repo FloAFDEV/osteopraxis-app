@@ -604,7 +604,7 @@ export type Database = {
           last_name?: string | null
           osteopathId?: number | null
           professionalProfileId?: number | null
-          role: Database["public"]["Enums"]["Role"]
+          role?: Database["public"]["Enums"]["Role"]
           updated_at: string
         }
         Update: {

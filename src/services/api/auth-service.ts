@@ -1,4 +1,3 @@
-
 import { User, Credentials } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -161,7 +160,7 @@ export const authService = {
       const { error } = await supabase
         .from('User')
         .update({
-          role: 'ADMIN',
+          role: 'ADMIN', // Correctly typed now as 'ADMIN'
           updated_at: new Date().toISOString()
         })
         .eq('id', userId);

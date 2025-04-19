@@ -1,5 +1,5 @@
 
-import { User, AuthState } from "@/types";
+import { User, AuthState, Role } from "@/types";
 import { supabase } from "./utils";
 
 export const supabaseAuthService = {
@@ -59,7 +59,7 @@ export const supabaseAuthService = {
               email: userData.email,
               first_name: userData.firstName,
               last_name: userData.lastName,
-              role: "USER",
+              role: "OSTEOPATH" as Role,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             });
