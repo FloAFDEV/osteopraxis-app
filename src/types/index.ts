@@ -24,9 +24,9 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  register: (userData: { firstName: string; lastName: string; email: string; password: string }) => Promise<void>;
+  register: (userData: { firstName: string; lastName: string; email: string; password: string }) => Promise<boolean>;
   loadStoredToken: () => Promise<AuthState>;
   updateUser: (updatedUserData: User) => void;
   loginWithMagicLink: (email: string) => Promise<boolean>;

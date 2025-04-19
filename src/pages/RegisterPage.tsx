@@ -56,14 +56,17 @@ const RegisterPage = () => {
     
     try {
       console.log("Tentative d'inscription avec:", data.email);
-      await register({
+      const success = await register({
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         password: data.password
       });
-      toast.success("Inscription réussie ! Vous allez être redirigé...");
-      navigate("/dashboard");
+      
+      if (success) {
+        toast.success("Inscription réussie ! Vous allez être redirigé...");
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       console.error("Erreur lors de l'inscription:", error);
       setError(error.message || "Une erreur s'est produite lors de l'inscription.");

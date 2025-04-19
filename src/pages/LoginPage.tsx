@@ -47,9 +47,9 @@ const LoginPage = () => {
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
       console.log("Tentative de connexion avec:", data.email);
-      const result = await login(data.email, data.password);
-      console.log("Résultat de connexion:", result);
-      if (result) {
+      const success = await login(data.email, data.password);
+      console.log("Résultat de connexion:", success);
+      if (success) {
         toast.success("Connexion réussie!");
         navigate("/dashboard");
       }

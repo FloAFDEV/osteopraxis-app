@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType, AuthState, User } from "@/types";
@@ -11,7 +10,7 @@ export const AuthContext = createContext<AuthContextType>({
   token: null,
   login: async () => false,
   logout: async () => {},
-  register: async () => {},
+  register: async () => false,
   loadStoredToken: async () => {
     return {
       user: null,
@@ -420,7 +419,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     }
   };
 
-  const register = async (userData: { firstName: string; lastName: string; email: string; password: string }) => {
+  const register = async (userData: { firstName: string; lastName: string; email: string; password: string }): Promise<boolean> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
@@ -483,11 +482,12 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       
       // Sinon indiquer à l'utilisateur de vérifier son email
       toast.info("Veuillez vérifier votre boîte mail pour confirmer votre inscription");
+      return true;
       
     } catch (error: any) {
       console.error("Registration error:", error);
       toast.error(error.message || "Échec de l'inscription. Veuillez réessayer.");
-      throw error;
+      return false;
     }
   };
   
