@@ -1,80 +1,71 @@
 
-import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Building, ArrowLeft } from "lucide-react";
 import { Layout } from "@/components/ui/layout";
-import { CabinetForm } from "@/components/cabinet-form";
-import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { ProfessionalProfile } from "@/types";
-import { Building } from "lucide-react";
-import { FancyLoader } from "@/components/ui/fancy-loader";
+import { CabinetForm } from "@/components/cabinet-form";
+import { Cabinet } from "@/types";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const NewCabinetPage = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<ProfessionalProfile | null>(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        if (!user?.id) {
-          toast.error("Utilisateur non authentifié");
-          navigate('/login');
-          return;
-        }
-
-        const profileData = await api.getProfessionalProfileByUserId(user.id);
-        
-        if (!profileData) {
-          // Aucun profil trouvé, rediriger vers la page de création de profil
-          toast.error("Vous devez d'abord créer un profil professionnel");
-          navigate('/profile/setup');
-          return;
-        }
-        
-        setProfile(profileData);
-      } catch (error) {
-        console.error("Erreur lors du chargement du profil:", error);
-        toast.error("Erreur lors du chargement du profil");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, [user, navigate]);
-
-  if (loading) {
-    return <FancyLoader message="Chargement de votre profil..." />;
+  // If there's no user or professional profile ID, redirect to profile page
+  if (!user?.professionalProfileId) {
+    return (
+      <Layout>
+        <div className="max-w-3xl mx-auto p-6">
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold mb-2">Profil professionnel requis</h3>
+            <p>
+              Vous devez d'abord créer un profil professionnel avant de créer un cabinet.
+            </p>
+            <Button
+              className="mt-4"
+              onClick={() => navigate("/professional-profile")}
+            >
+              Créer mon profil professionnel
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
-  if (!profile) {
-    return null; // Redirection déjà gérée dans useEffect
-  }
+  const handleCabinetCreated = (cabinet: Cabinet) => {
+    toast.success("Le cabinet a été créé avec succès !");
+    navigate("/cabinets");
+  };
 
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mb-2"
+            onClick={() => navigate("/cabinets")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour aux cabinets
+          </Button>
+
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Building className="h-8 w-8 text-blue-500" />
+            <Building className="h-8 w-8 text-primary" />
             Créer un nouveau cabinet
           </h1>
           <p className="text-muted-foreground mt-1">
-            Remplissez les informations de votre cabinet
+            Renseignez les informations de votre cabinet pour l'afficher sur vos documents et communications
           </p>
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <CabinetForm 
-            professionalProfileId={profile.id} 
-            onSuccess={(cabinet) => {
-              toast.success("Cabinet créé avec succès!");
-              navigate('/cabinets');
-            }}
-            onCancel={() => navigate('/cabinets')}
+          <CabinetForm
+            professionalProfileId={user.professionalProfileId}
+            onSuccess={handleCabinetCreated}
           />
         </div>
       </div>

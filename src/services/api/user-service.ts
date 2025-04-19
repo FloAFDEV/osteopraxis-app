@@ -1,9 +1,9 @@
 
-import { User } from "@/types";
+import { User, Role } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export const userService = {
-  async updateUserRole(userId: string, role: 'USER' | 'ADMIN'): Promise<User> {
+  async updateUserRole(userId: string, role: Role): Promise<User> {
     try {
       const { data, error } = await supabase
         .from('User')

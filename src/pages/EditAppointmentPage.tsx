@@ -5,7 +5,7 @@ import { Calendar, AlertCircle } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
-import { AppointmentForm } from "@/components/appointment-form";
+import AppointmentForm from "@/components/appointment-form";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";

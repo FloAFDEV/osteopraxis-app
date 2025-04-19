@@ -162,7 +162,6 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: User | null;
-  token?: string;
 }
 
 // Props pour les composants dashboard
@@ -202,7 +201,6 @@ export interface ProfessionalProfileFormProps {
 export interface OsteopathProfileFormProps {
   defaultValues?: Partial<ProfessionalProfile>;
   osteopathId?: number; 
-  profileId?: number;
   isEditing?: boolean;
   onSuccess?: (data: ProfessionalProfile) => void;
 }

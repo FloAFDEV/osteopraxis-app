@@ -95,7 +95,8 @@ const EditCabinetPage = () => {
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
           <CabinetForm 
-            cabinet={cabinet}
+            defaultValues={cabinet}
+            cabinetId={cabinet.id}
             professionalProfileId={cabinet.professionalProfileId}
             onSuccess={() => {
               toast.success("Cabinet mis à jour avec succès");

@@ -2,7 +2,6 @@
 import { authService } from './auth-service';
 import { patientService } from './patient-service';
 import { appointmentService } from './appointment-service';
-import { consultationService } from './consultation-service';
 import { invoiceService } from './invoice-service';
 import { cabinetService } from './cabinet-service';
 import { userService } from './user-service';
@@ -13,7 +12,6 @@ export const api = {
   ...authService,
   ...patientService,
   ...appointmentService,
-  ...consultationService,
   ...invoiceService,
   ...cabinetService,
   ...userService,
