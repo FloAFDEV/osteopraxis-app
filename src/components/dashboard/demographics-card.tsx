@@ -190,7 +190,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className={`h-[${isMobile ? '200' : '300'}px] mt-4`}>
+        <div className={`h-[${isMobile ? '300' : '300'}px] mt-4`}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie 
