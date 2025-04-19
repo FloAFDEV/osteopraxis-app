@@ -1,7 +1,7 @@
 
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthContextType, AuthState, User, Role } from "@/types";
+import { AuthContextType, AuthState, User, Role, DbRole } from "@/types";
 import { api } from "@/services/api";
 import { toast } from 'sonner';
 
@@ -87,14 +87,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                     email: session.user.email || '',
                     first_name: session.user.user_metadata?.first_name || '',
                     last_name: session.user.user_metadata?.last_name || '',
-                    role: "USER" as Role, // Spécifier le type comme Role
+                    role: "USER" as DbRole, // Explicitly cast to match DB type
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                   };
                   
                   const { data: newUser, error: createError } = await supabase
                     .from('User')
-                    .insert([newUserData]) // Passer un tableau pour l'insert
+                    .insert([newUserData])
                     .select()
                     .single();
                     
@@ -212,14 +212,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             email: session.user.email || '',
             first_name: session.user.user_metadata?.first_name || '',
             last_name: session.user.user_metadata?.last_name || '',
-            role: "USER" as Role, // Spécifier le type comme Role
+            role: "USER" as DbRole, // Explicitly cast to match DB type
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
           
           const { data: newUser, error: createError } = await supabase
             .from('User')
-            .insert([newUserData]) // Passer un tableau pour l'insert
+            .insert([newUserData])
             .select()
             .single();
             
@@ -319,14 +319,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           email: email,
           first_name: data.session.user.user_metadata?.first_name || '',
           last_name: data.session.user.user_metadata?.last_name || '',
-          role: "USER" as Role, // Spécifier le type comme Role
+          role: "USER" as DbRole, // Explicitly cast to match DB type
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
         
         const { data: newUser, error: createError } = await supabase
           .from('User')
-          .insert([newUserData]) // Passer un tableau pour l'insert
+          .insert([newUserData])
           .select()
           .single();
           
@@ -427,14 +427,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         email: userData.email,
         first_name: userData.firstName,
         last_name: userData.lastName,
-        role: "USER" as Role, // Spécifier le type comme Role
+        role: "USER" as DbRole, // Explicitly cast to match DB type
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
       
       const { data: newUser, error: createError } = await supabase
         .from('User')
-        .insert([newUserData]) // Passer un tableau pour l'insert
+        .insert([newUserData])
         .select()
         .single();
         
@@ -475,7 +475,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       const { data, error } = await supabase
         .from('User')
         .update({
-          role: 'ADMIN',
+          role: 'ADMIN' as DbRole,
           updated_at: new Date().toISOString()
         })
         .eq('id', userId)

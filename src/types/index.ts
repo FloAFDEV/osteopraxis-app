@@ -1,3 +1,4 @@
+
 // Add missing types or update existing ones here to ensure all the properties needed are present
 
 export type DbRole = 'ADMIN' | 'OSTEOPATH' | 'USER';
@@ -125,11 +126,10 @@ export interface CabinetFormProps {
   onSuccess?: (cabinet: Cabinet) => void;
 }
 
-// Gender and Contraception types updated to match Supabase enum values
-export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | null;
+// Database enum types
 export type DbGender = 'Homme' | 'Femme' | null;
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | null;
 
-// Making type to match Supabase DB enum
 export type DbContraception = 'NONE' | 'PILLS' | 'CONDOM' | 'IMPLANTS' | 'DIAPHRAGM' | 'IUD' | 'INJECTION' | 'PATCH' | 'RING' | 'NATURAL_METHODS' | 'STERILIZATION' | null;
 export type Contraception = 'PILL' | 'IUD' | 'IMPLANT' | 'CONDOM' | 'NONE' | 'OTHER' | null;
 
@@ -138,10 +138,10 @@ export type DbMaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'S
 
 export type Handedness = 'LEFT' | 'RIGHT' | 'AMBIDEXTROUS' | null;
 
-// Add other necessary types for the application
+// Application status values
 export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
-// Match the DB status values
+// Database status values
 export type DatabaseAppointmentStatus = "COMPLETED" | "CANCELED" | "SCHEDULED" | "NO_SHOW" | "RESCHEDULED";
 
 export interface Appointment {
@@ -282,10 +282,6 @@ export interface MedicalDocument {
   description: string;
 }
 
-// Database types pour assurer la compatibilité avec Supabase
-export type DbGender = 'Homme' | 'Femme' | null;
-export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | null;
-
 // Type de conversion pour les énumérations
 export const mapDbGenderToGender = (dbGender: DbGender): Gender => {
   if (dbGender === 'Homme') return 'MALE';
@@ -299,9 +295,6 @@ export const mapGenderToDbGender = (gender: Gender): DbGender => {
   return null;
 };
 
-export type DbContraception = 'NONE' | 'PILLS' | 'CONDOM' | 'IMPLANTS' | 'DIAPHRAGM' | 'IUD' | 'INJECTION' | 'PATCH' | 'RING' | 'NATURAL_METHODS' | 'STERILIZATION' | null;
-export type Contraception = 'PILL' | 'IUD' | 'IMPLANT' | 'CONDOM' | 'NONE' | 'OTHER' | null;
-
 // Fonctions de mappage pour la contraception
 export const mapDbContraceptionToContraception = (dbContraception: DbContraception): Contraception => {
   if (dbContraception === 'PILLS') return 'PILL';
@@ -311,14 +304,6 @@ export const mapDbContraceptionToContraception = (dbContraception: DbContracepti
   if (dbContraception === 'NONE') return 'NONE';
   return 'OTHER';
 };
-
-export type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'OTHER' | null;
-export type DbMaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'SEPARATED' | 'ENGAGED' | 'PARTNERED' | null;
-
-export type Handedness = 'LEFT' | 'RIGHT' | 'AMBIDEXTROUS' | null;
-
-export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
-export type DatabaseAppointmentStatus = "COMPLETED" | "CANCELED" | "SCHEDULED" | "NO_SHOW" | "RESCHEDULED";
 
 // Fonctions de mappage pour le statut des rendez-vous
 export const mapDbAppointmentStatusToAppointmentStatus = (dbStatus: DatabaseAppointmentStatus): AppointmentStatus => {

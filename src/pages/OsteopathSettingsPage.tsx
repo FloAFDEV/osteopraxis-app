@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/ui/layout";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
 import { UserCog } from "lucide-react";
