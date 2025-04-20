@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { Calendar, Clock, User } from "lucide-react";
@@ -77,7 +78,9 @@ export function AppointmentsOverview({
 
   // Use default value if data.appointmentsToday is undefined
   const appointmentsToday = data?.appointmentsToday || 0;
-  return <Card className={`${className} shadow-sm hover:shadow-md transition-shadow`}>
+  
+  return (
+    <Card className={`${className} shadow-sm hover:shadow-md transition-shadow`}>
       <CardHeader className="border-b bg-slate-50 dark:bg-slate-900/50">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -192,5 +195,6 @@ export function AppointmentsOverview({
           </div>
         )}
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }
