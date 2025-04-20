@@ -2,7 +2,6 @@
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { supabase } from "@/integrations/supabase/client";
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
