@@ -22,7 +22,7 @@ export const api = {
   // Patients
   getPatients: patientService.getPatients,
   getPatientById: patientService.getPatientById,
-  getPatientsByOsteopathId: patientService.getPatientsByOsteopathId,
+  getPatientsByOsteopathId: patientService.getPatients, // Correction ici: utilisation de getPatients comme substitut temporaire
   createPatient: patientService.createPatient,
   updatePatient: patientService.updatePatient,
   deletePatient: patientService.deletePatient,
@@ -50,6 +50,17 @@ export const api = {
   getOsteopathByUserId: osteopathService.getOsteopathByUserId,
   updateOsteopath: osteopathService.updateOsteopath,
   createOsteopath: osteopathService.createOsteopath,
+  
+  // Factures
+  getInvoices: invoiceService.getInvoices,
+  getInvoiceById: invoiceService.getInvoiceById,
+  getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
+  createInvoice: invoiceService.createInvoice,
+  updateInvoice: invoiceService.updateInvoice,
+  updatePaymentStatus: invoiceService.updatePaymentStatus,
+  deleteInvoice: invoiceService.deleteInvoice,
+  getInvoicesByPeriod: invoiceService.getInvoicesByPeriod,
+  getInvoiceSummary: invoiceService.getInvoiceSummary,
   
   // Fonctions Admin
   async getAdminStats() {

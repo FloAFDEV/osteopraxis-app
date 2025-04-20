@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -7,7 +6,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile"; // Correction ici: useMobile -> useIsMobile
 import { CabinetSelector } from "@/components/cabinet/cabinet-selector";
 import { api } from "@/services/api";
 
@@ -17,7 +16,7 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const { logout, user } = useAuth();
-  const { isMobile } = useMobile();
+  const { isMobile } = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | undefined>(undefined);
   const location = useLocation();

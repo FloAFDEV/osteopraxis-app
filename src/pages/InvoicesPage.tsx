@@ -12,12 +12,14 @@ import { InvoiceDetails } from "@/components/invoice-details";
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+
   const {
     data: invoices,
     isLoading,
@@ -26,11 +28,11 @@ const InvoicesPage = () => {
     queryKey: ["invoices"],
     queryFn: api.getInvoices
   });
+
   const handleDeleteInvoice = async () => {
     if (!selectedInvoiceId) return;
     try {
-      // Cette fonctionnalité n'est pas encore implémentée dans l'API
-      // await api.deleteInvoice(selectedInvoiceId);
+      await api.deleteInvoice(selectedInvoiceId);
       toast.success("Facture supprimée avec succès");
       refetch();
     } catch (error) {
@@ -41,11 +43,22 @@ const InvoicesPage = () => {
       setSelectedInvoiceId(null);
     }
   };
-  const filteredInvoices = invoices?.filter(invoice => {
-    const matchesQuery = invoice.Patient?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) || invoice.Patient?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) || invoice.id.toString().includes(searchQuery);
+
+  // Correction ici: vérifier que invoices existe avant d'utiliser filter
+  const filteredInvoices = invoices ? invoices.filter(invoice => {
+    // Tenir compte de la possibilité que Patient soit undefined
+    const patientFirstName = invoice.Patient?.firstName || "";
+    const patientLastName = invoice.Patient?.lastName || "";
+    
+    const matchesQuery = 
+      patientFirstName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      patientLastName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      invoice.id.toString().includes(searchQuery);
+    
     const matchesStatus = statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
     return matchesQuery && matchesStatus;
-  });
+  }) : [];
+
   return <Layout>
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

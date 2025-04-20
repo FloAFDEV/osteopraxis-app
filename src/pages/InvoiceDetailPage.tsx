@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -27,7 +28,6 @@ const InvoiceDetailPage = () => {
   // Configuration pour l'impression
   const handlePrint = useReactToPrint({
     documentTitle: `Facture_${id}`,
-    // Utiliser contentRef au lieu de content ou documentContent
     contentRef: printRef
   });
   
@@ -40,71 +40,78 @@ const InvoiceDetailPage = () => {
         console.log(`Chargement des données de la facture ID: ${id}`);
         setLoading(true);
         
-        const invoiceData = await api.getInvoiceById(parseInt(id));
-        console.log("Données de facture récupérées:", invoiceData);
-        
-        if (invoiceData) {
-          setInvoice(invoiceData);
+        // Vérification que api.getInvoiceById existe avant de l'appeler
+        if (typeof api.getInvoiceById === 'function') {
+          const invoiceData = await api.getInvoiceById(parseInt(id));
+          console.log("Données de facture récupérées:", invoiceData);
           
-          // Charger les données du patient associé
-          if (invoiceData.patientId) {
-            try {
-              console.log(`Chargement des données du patient ID: ${invoiceData.patientId}`);
-              const patientData = await api.getPatientById(invoiceData.patientId);
-              console.log("Données de patient récupérées:", patientData);
-              setPatient(patientData || null);
-              
-              // Si le patient a un osteopathId, utiliser celui-ci pour charger l'ostéopathe
-              if (patientData?.osteopathId) {
-                try {
-                  console.log(`Chargement des données de l'ostéopathe ID: ${patientData.osteopathId}`);
-                  const osteopathData = await api.getOsteopathById(patientData.osteopathId);
-                  console.log("Données d'ostéopathe récupérées:", osteopathData);
-                  setOsteopath(osteopathData || null);
-                  
-                  // Charger les données du cabinet associé à l'ostéopathe
-                  if (osteopathData?.id) {
-                    try {
-                      console.log(`Chargement des données du cabinet pour l'ostéopathe ID: ${osteopathData.id}`);
+          if (invoiceData) {
+            setInvoice(invoiceData);
+            
+            // Charger les données du patient associé
+            if (invoiceData.patientId) {
+              try {
+                console.log(`Chargement des données du patient ID: ${invoiceData.patientId}`);
+                const patientData = await api.getPatientById(invoiceData.patientId);
+                console.log("Données de patient récupérées:", patientData);
+                setPatient(patientData || null);
+                
+                // Si le patient a un osteopathId, utiliser celui-ci pour charger l'ostéopathe
+                if (patientData?.osteopathId) {
+                  try {
+                    console.log(`Chargement des données de l'ostéopathe ID: ${patientData.osteopathId}`);
+                    const osteopathData = await api.getOsteopathById(patientData.osteopathId);
+                    console.log("Données d'ostéopathe récupérées:", osteopathData);
+                    setOsteopath(osteopathData || null);
+                    
+                    // Charger les données du cabinet associé à l'ostéopathe
+                    if (osteopathData?.id) {
+                      try {
+                        console.log(`Chargement des données du cabinet pour l'ostéopathe ID: ${osteopathData.id}`);
+                        const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+                        console.log("Données de cabinets récupérées:", cabinets);
+                        
+                        if (cabinets && cabinets.length > 0) {
+                          setCabinet(cabinets[0]);
+                        }
+                      } catch (cabinetError) {
+                        console.error("Erreur lors du chargement du cabinet:", cabinetError);
+                      }
+                    }
+                  } catch (osteopathError) {
+                    console.error("Erreur lors du chargement de l'ostéopathe:", osteopathError);
+                  }
+                }
+                // Si l'utilisateur est connecté mais que le patient n'a pas d'osteopathId
+                else if (user?.osteopathId) {
+                  try {
+                    console.log(`Utilisation de l'osteopathId de l'utilisateur: ${user.osteopathId}`);
+                    const osteopathData = await api.getOsteopathById(user.osteopathId);
+                    console.log("Données d'ostéopathe récupérées via user:", osteopathData);
+                    setOsteopath(osteopathData || null);
+                    
+                    if (osteopathData?.id) {
                       const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
-                      console.log("Données de cabinets récupérées:", cabinets);
-                      
                       if (cabinets && cabinets.length > 0) {
                         setCabinet(cabinets[0]);
                       }
-                    } catch (cabinetError) {
-                      console.error("Erreur lors du chargement du cabinet:", cabinetError);
                     }
+                  } catch (error) {
+                    console.error("Erreur lors du chargement de l'ostéopathe via userId:", error);
                   }
-                } catch (osteopathError) {
-                  console.error("Erreur lors du chargement de l'ostéopathe:", osteopathError);
                 }
+                
+              } catch (patientError) {
+                console.error("Erreur lors du chargement du patient:", patientError);
               }
-              // Si l'utilisateur est connecté mais que le patient n'a pas d'osteopathId
-              else if (user?.osteopathId) {
-                try {
-                  console.log(`Utilisation de l'osteopathId de l'utilisateur: ${user.osteopathId}`);
-                  const osteopathData = await api.getOsteopathById(user.osteopathId);
-                  console.log("Données d'ostéopathe récupérées via user:", osteopathData);
-                  setOsteopath(osteopathData || null);
-                  
-                  if (osteopathData?.id) {
-                    const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
-                    if (cabinets && cabinets.length > 0) {
-                      setCabinet(cabinets[0]);
-                    }
-                  }
-                } catch (error) {
-                  console.error("Erreur lors du chargement de l'ostéopathe via userId:", error);
-                }
-              }
-              
-            } catch (patientError) {
-              console.error("Erreur lors du chargement du patient:", patientError);
             }
+          } else {
+            toast.error("Facture non trouvée");
+            navigate('/invoices');
           }
         } else {
-          toast.error("Facture non trouvée");
+          console.error("La fonction api.getInvoiceById n'existe pas");
+          toast.error("Impossible de charger la facture: API non disponible");
           navigate('/invoices');
         }
       } catch (error) {
@@ -122,9 +129,15 @@ const InvoiceDetailPage = () => {
     if (!invoice) return;
     
     try {
-      await api.deleteInvoice(invoice.id);
-      toast.success("Facture supprimée avec succès");
-      navigate('/invoices');
+      // Vérification que api.deleteInvoice existe avant de l'appeler
+      if (typeof api.deleteInvoice === 'function') {
+        await api.deleteInvoice(invoice.id);
+        toast.success("Facture supprimée avec succès");
+        navigate('/invoices');
+      } else {
+        console.error("La fonction api.deleteInvoice n'existe pas");
+        toast.error("Impossible de supprimer la facture: API non disponible");
+      }
     } catch (error) {
       console.error("Erreur lors de la suppression de la facture:", error);
       toast.error("Erreur lors de la suppression de la facture");
