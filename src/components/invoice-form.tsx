@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Patient, PaymentStatus } from '@/types';
+import { Patient, PaymentStatus, Appointment } from '@/types';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Card } from '@/components/ui/card';
+import { useQuery } from '@tanstack/react-query';
 
 // Define the form schema with Zod
 const formSchema = z.object({
@@ -29,18 +31,26 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface InvoiceFormProps {
-  patient: Patient;
+  initialPatient?: Patient;
+  initialAppointment?: Appointment;
   onCreate: () => void;
 }
 
-export const InvoiceForm = ({ patient, onCreate }: InvoiceFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: InvoiceFormProps) => {
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(initialPatient || null);
+
+  // Fetch patients list if no initial patient is provided
+  const { data: patients } = useQuery({
+    queryKey: ['patients'],
+    queryFn: api.getPatients,
+    enabled: !initialPatient // Only fetch if no initial patient
+  });
 
   const defaultValues: FormValues = {
-    patientId: patient.id,
-    consultationId: 0, // Default to 0, will be updated if needed
-    amount: 60, // Default amount for a consultation
-    date: format(new Date(), 'yyyy-MM-dd'),
+    patientId: initialPatient?.id || 0,
+    consultationId: initialAppointment?.id || 0,
+    amount: 60,
+    date: initialAppointment?.date || format(new Date(), 'yyyy-MM-dd'),
     paymentStatus: 'PAID',
     paymentMethod: 'CB',
     tvaExoneration: true,
@@ -54,10 +64,9 @@ export const InvoiceForm = ({ patient, onCreate }: InvoiceFormProps) => {
   });
 
   const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
     try {
       await api.createInvoice({
-        patientId: data.patientId,
+        patientId: selectedPatient?.id || data.patientId,
         consultationId: data.consultationId || 0,
         amount: data.amount,
         date: data.date,
@@ -72,8 +81,14 @@ export const InvoiceForm = ({ patient, onCreate }: InvoiceFormProps) => {
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast.error("Erreur lors de la création de la facture");
-    } finally {
-      setIsSubmitting(false);
+    }
+  };
+
+  const handlePatientSelect = (patientId: string) => {
+    const patient = patients?.find(p => p.id === parseInt(patientId));
+    setSelectedPatient(patient || null);
+    if (patient) {
+      form.setValue('patientId', patient.id);
     }
   };
 
@@ -81,25 +96,61 @@ export const InvoiceForm = ({ patient, onCreate }: InvoiceFormProps) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Patient info (display only) */}
+          {/* Patient selection or display */}
           <div className="space-y-4">
-            <div className="p-4 border rounded-md bg-muted/20">
-              <h3 className="font-medium mb-2">Informations du patient</h3>
-              <p>
-                <span className="text-muted-foreground">Nom:</span> {patient.lastName}
-              </p>
-              <p>
-                <span className="text-muted-foreground">Prénom:</span> {patient.firstName}
-              </p>
-              {patient.email && (
+            {!initialPatient && (
+              <FormField
+                control={form.control}
+                name="patientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Patient</FormLabel>
+                    <Select 
+                      onValueChange={handlePatientSelect}
+                      defaultValue={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un patient" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {patients?.map(patient => (
+                          <SelectItem key={patient.id} value={patient.id.toString()}>
+                            {patient.firstName} {patient.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Display selected or initial patient info */}
+            {(selectedPatient || initialPatient) && (
+              <Card className="p-4 bg-muted/20">
+                <h3 className="font-medium mb-2">Informations du patient</h3>
                 <p>
-                  <span className="text-muted-foreground">Email:</span> {patient.email}
+                  <span className="text-muted-foreground">Nom:</span>{' '}
+                  {(selectedPatient || initialPatient)?.lastName}
                 </p>
-              )}
-            </div>
+                <p>
+                  <span className="text-muted-foreground">Prénom:</span>{' '}
+                  {(selectedPatient || initialPatient)?.firstName}
+                </p>
+                {(selectedPatient || initialPatient)?.email && (
+                  <p>
+                    <span className="text-muted-foreground">Email:</span>{' '}
+                    {(selectedPatient || initialPatient)?.email}
+                  </p>
+                )}
+              </Card>
+            )}
           </div>
 
-          {/* Invoice amount */}
+          {/* Invoice details */}
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -114,7 +165,6 @@ export const InvoiceForm = ({ patient, onCreate }: InvoiceFormProps) => {
                       min="0"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                      placeholder="60.00"
                     />
                   </FormControl>
                   <FormMessage />
@@ -122,7 +172,6 @@ export const InvoiceForm = ({ patient, onCreate }: InvoiceFormProps) => {
               )}
             />
 
-            {/* Invoice date */}
             <FormField
               control={form.control}
               name="date"
@@ -228,8 +277,8 @@ export const InvoiceForm = ({ patient, onCreate }: InvoiceFormProps) => {
           <Button variant="outline" type="button" onClick={onCreate}>
             Annuler
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Création..." : "Créer la facture"}
+          <Button type="submit">
+            Créer la facture
           </Button>
         </div>
       </form>

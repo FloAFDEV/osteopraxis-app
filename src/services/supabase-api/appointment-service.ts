@@ -1,16 +1,14 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
-import { delay, USE_SUPABASE } from "../api/config";
 import { supabase, addAuthHeaders } from "./utils";
 
 // Helper function to map between AppointmentStatus values and Supabase values
-const mapStatusToSupabase = (status: AppointmentStatus): string => {
+const mapStatusToSupabase = (status: AppointmentStatus): "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW" | "RESCHEDULED" => {
   // Map "CANCELLED" to "CANCELED" for Supabase compatibility
   if (status === "CANCELLED") return "CANCELED";
-  return status;
+  return status as "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW" | "RESCHEDULED";
 };
 
-const mapStatusFromSupabase = (status: string): AppointmentStatus => {
+const mapStatusFromSupabase = (status: "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW" | "RESCHEDULED"): AppointmentStatus => {
   // Map "CANCELED" from Supabase to "CANCELLED" for app types
   if (status === "CANCELED") return "CANCELLED";
   return status as AppointmentStatus;
@@ -96,7 +94,7 @@ export const supabaseAppointmentService = {
       return {
         ...data,
         status: mapStatusFromSupabase(data.status)
-      };
+      } as Appointment;
     } catch (error) {
       console.error("Error creating appointment:", error);
       throw error;
@@ -127,7 +125,7 @@ export const supabaseAppointmentService = {
       return {
         ...data,
         status: mapStatusFromSupabase(data.status)
-      };
+      } as Appointment;
     } catch (error) {
       console.error("Error updating appointment:", error);
       throw error;

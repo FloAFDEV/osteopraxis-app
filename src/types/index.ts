@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -101,7 +100,8 @@ export type AppointmentStatus =
   | "SCHEDULED" 
   | "COMPLETED" 
   | "CANCELLED" 
-  | "RESCHEDULED";
+  | "RESCHEDULED"
+  | "NO_SHOW";
 
 // Interface pour les cabinets
 export interface Cabinet {
