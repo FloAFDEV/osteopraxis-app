@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import { supabase, typedData } from "./utils";
 
@@ -10,7 +9,7 @@ export const supabaseOsteopathService = {
       
     if (error) throw new Error(error.message);
     
-    return typedData<Osteopath[]>(data);
+    return (data || []) as Osteopath[];
   },
 
   async getOsteopathById(id: number): Promise<Osteopath | undefined> {
@@ -22,38 +21,38 @@ export const supabaseOsteopathService = {
       
     if (error) {
       if (error.code === "PGRST116") {
-        console.log("Ostéopathe non trouvé avec l'ID:", id);
+        console.log("Osteopath not found with ID:", id);
         return undefined;
       }
       throw new Error(error.message);
     }
     
-    return typedData<Osteopath>(data);
+    return data as Osteopath;
   },
   
   async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {
-    console.log("Recherche d'un ostéopathe avec l'userId:", userId);
+    console.log("Looking for osteopath with userId:", userId);
     
     if (!userId) {
-      console.log("UserId invalide fourni à getOsteopathByUserId");
-      throw new Error("UserId invalide fourni");
+      console.log("Invalid userId provided to getOsteopathByUserId");
+      throw new Error("Invalid userId provided");
     }
     
     try {
-      // Vérifier l'état de la session avant d'exécuter la requête
+      // Check session state before executing the query
       const { data: sessionData } = await supabase.auth.getSession();
-      console.log("État de la session:", sessionData.session ? "Authentifié" : "Non authentifié");
+      console.log("Session state:", sessionData.session ? "Authenticated" : "Not authenticated");
       
       if (!sessionData.session) {
-        console.log("Utilisateur non authentifié, impossible de récupérer l'ostéopathe");
-        throw new Error("Utilisateur non authentifié");
+        console.log("User not authenticated, cannot retrieve osteopath");
+        throw new Error("User not authenticated");
       }
       
-      console.log("ID utilisateur de la session:", sessionData.session.user.id);
-      console.log("ID utilisateur passé en paramètre:", userId);
-      console.log("Exécution de la requête avec userId:", userId);
+      console.log("Session user ID:", sessionData.session.user.id);
+      console.log("Parameter user ID:", userId);
+      console.log("Executing query with userId:", userId);
       
-      // Recherche exacte avec le userId
+      // Exact match with userId
       const { data, error } = await supabase
         .from("Osteopath")
         .select("*")
@@ -61,32 +60,32 @@ export const supabaseOsteopathService = {
         .maybeSingle();
         
       if (error) {
-        console.error("Erreur lors de la recherche de l'ostéopathe:", error);
+        console.error("Error when searching for osteopath:", error);
         throw new Error(error.message);
       }
       
-      console.log("Session actuelle:", sessionData.session ? "Authentifié" : "Non authentifié");
+      console.log("Current session:", sessionData.session ? "Authenticated" : "Not authenticated");
       
       if (!data) {
-        console.log("Aucun ostéopathe trouvé avec l'userId:", userId);
+        console.log("No osteopath found with userId:", userId);
         
-        // Afficher les ostéopathes existants pour le débogage
+        // Display existing osteopaths for debugging
         const { data: allOsteos, error: allOsteosError } = await supabase
           .from("Osteopath")
           .select("id, userId")
           .limit(5);
           
         if (!allOsteosError && allOsteos) {
-          console.log("Voici les 5 premiers ostéopathes dans la base:", allOsteos);
+          console.log("Here are the first 5 osteopaths in the database:", allOsteos);
         }
         
         return undefined;
       }
       
-      console.log("Ostéopathe trouvé:", data);
-      return typedData<Osteopath>(data);
+      console.log("Osteopath found:", data);
+      return data as Osteopath;
     } catch (error) {
-      console.error("Exception lors de la recherche de l'ostéopathe:", error);
+      console.error("Exception while searching for osteopath:", error);
       throw error;
     }
   },
@@ -104,7 +103,7 @@ export const supabaseOsteopathService = {
       if (error) throw new Error(error.message);
       
       console.log("Ostéopathe mis à jour avec succès:", updatedOsteo);
-      return typedData<Osteopath>(updatedOsteo);
+      return updatedOsteo as Osteopath;
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'ostéopathe:", error);
       throw error;
@@ -146,7 +145,7 @@ export const supabaseOsteopathService = {
       }
       
       console.log("Ostéopathe créé avec succès via insertion directe:", newOsteopath);
-      return newOsteopath;
+      return newOsteopath as Osteopath;
     } catch (error) {
       console.error("Erreur lors de la création de l'ostéopathe:", error);
       throw error;

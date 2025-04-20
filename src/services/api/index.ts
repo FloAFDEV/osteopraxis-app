@@ -1,4 +1,3 @@
-
 import { delay, USE_SUPABASE } from "./config";
 
 // Importer les services
@@ -22,7 +21,17 @@ export const api = {
   // Patients
   getPatients: patientService.getPatients,
   getPatientById: patientService.getPatientById,
-  getPatientsByOsteopathId: patientService.getPatientsByOsteopathId, 
+  getPatientsByOsteopathId: async (osteopathId: number) => {
+    // Implementation for the missing function
+    console.log("Getting patients for osteopath ID:", osteopathId);
+    try {
+      const patients = await patientService.getPatients();
+      return patients.filter(patient => patient.osteopathId === osteopathId);
+    } catch (error) {
+      console.error("Error in getPatientsByOsteopathId:", error);
+      throw error;
+    }
+  },
   createPatient: patientService.createPatient,
   updatePatient: patientService.updatePatient,
   deletePatient: patientService.deletePatient,

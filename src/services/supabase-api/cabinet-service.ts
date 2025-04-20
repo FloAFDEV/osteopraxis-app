@@ -1,5 +1,5 @@
 
-// Import des types depuis le fichier des types
+// Import types
 import { Cabinet } from "@/types";
 import { supabase, typedData } from "./utils";
 
@@ -11,7 +11,7 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return typedData<Cabinet[]>(data);
+    return (data || []) as Cabinet[];
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
@@ -28,12 +28,12 @@ export const supabaseCabinetService = {
       throw new Error(error.message);
     }
     
-    return typedData<Cabinet>(data);
+    return data as Cabinet;
   },
 
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
     if (!osteopathId) {
-      console.log("OsteopathId invalide fourni à getCabinetsByOsteopathId");
+      console.log("Invalid osteopathId provided to getCabinetsByOsteopathId");
       return [];
     }
     
@@ -44,14 +44,14 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return typedData<Cabinet[]>(data || []);
+    return (data || []) as Cabinet[];
   },
   
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
-    console.log("Recherche des cabinets pour l'userId:", userId);
+    console.log("Searching for cabinets for userId:", userId);
     
     if (!userId) {
-      console.log("UserId invalide fourni à getCabinetsByUserId");
+      console.log("Invalid userId provided to getCabinetsByUserId");
       return [];
     }
     
@@ -64,16 +64,16 @@ export const supabaseCabinetService = {
         .maybeSingle();
         
       if (osteopathError) {
-        console.error("Erreur lors de la recherche de l'ostéopathe:", osteopathError);
+        console.error("Error finding osteopath:", osteopathError);
         throw new Error(osteopathError.message);
       }
       
       if (!osteopathData) {
-        console.log("Aucun ostéopathe trouvé pour l'userId:", userId);
+        console.log("No osteopath found for userId:", userId);
         return [];
       }
       
-      console.log("Ostéopathe trouvé avec l'ID:", osteopathData.id);
+      console.log("Osteopath found with ID:", osteopathData.id);
       
       // Now get cabinets with this osteopath ID
       const { data: cabinets, error: cabinetsError } = await supabase
@@ -83,10 +83,10 @@ export const supabaseCabinetService = {
         
       if (cabinetsError) throw new Error(cabinetsError.message);
       
-      console.log(`${cabinets?.length || 0} cabinet(s) trouvé(s) pour l'ostéopathe`);
-      return typedData<Cabinet[]>(cabinets || []);
+      console.log(`${cabinets?.length || 0} cabinet(s) found for osteopath`);
+      return (cabinets || []) as Cabinet[];
     } catch (error) {
-      console.error("Exception lors de la recherche des cabinets:", error);
+      console.error("Exception while searching for cabinets:", error);
       throw error;
     }
   },
@@ -109,7 +109,7 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return typedData<Cabinet>(data);
+    return data as Cabinet;
   },
 
   async updateCabinet(id: number, cabinet: Partial<Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Cabinet> {
@@ -122,7 +122,7 @@ export const supabaseCabinetService = {
       
     if (error) throw new Error(error.message);
     
-    return typedData<Cabinet>(data);
+    return data as Cabinet;
   },
 
   async updateTimestamps(cabinetId: number): Promise<void> {
