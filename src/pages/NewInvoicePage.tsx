@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -36,10 +37,12 @@ const NewInvoicePage: React.FC = () => {
       const patientData = await api.getPatientById(patientIdNum);
       if (patientData) {
         setPatient(patientData);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error loading patient details:", error);
       toast.error("Error loading patient details");
+      setIsLoading(false);
     }
   };
 

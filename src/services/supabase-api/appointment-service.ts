@@ -1,199 +1,155 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
+import { delay, USE_SUPABASE } from "../api/config";
+import { supabase, addAuthHeaders } from "./utils";
+
+// Helper function to map between AppointmentStatus values and Supabase values
+const mapStatusToSupabase = (status: AppointmentStatus): string => {
+  // Map "CANCELLED" to "CANCELED" for Supabase compatibility
+  if (status === "CANCELLED") return "CANCELED";
+  return status;
+};
+
+const mapStatusFromSupabase = (status: string): AppointmentStatus => {
+  // Map "CANCELED" from Supabase to "CANCELLED" for app types
+  if (status === "CANCELED") return "CANCELLED";
+  return status as AppointmentStatus;
+};
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Appointment")
-          .select("*")
-          .order('date', { ascending: true })
-      );
+      const { data, error } = await supabase
+        .from("Appointment")
+        .select("*")
+        .order('date', { ascending: false });
       
-      const { data, error } = await query;
+      if (error) throw error;
       
-      if (error) throw new Error(error.message);
-      
-      if (!data) return [];
-      
-      // Transform data with proper typing
-      return data.map(item => ({
-        id: item.id,
-        date: item.date,
-        reason: item.reason,
-        patientId: item.patientId,
-        status: item.status as AppointmentStatus,
-        notificationSent: item.notificationSent
+      return (data || []).map(appointment => ({
+        ...appointment,
+        status: mapStatusFromSupabase(appointment.status)
       }));
     } catch (error) {
-      console.error("Erreur getAppointments:", error);
+      console.error("Error fetching appointments:", error);
       throw error;
     }
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Appointment")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle()
-      );
+      const { data, error } = await supabase
+        .from("Appointment")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
       
-      const { data, error } = await query;
-      
-      if (error) {
-        if (error.code === "PGRST116") {
-          return undefined;
-        }
-        throw new Error(error.message);
-      }
-      
+      if (error) throw error;
       if (!data) return undefined;
       
-      // Transform data with proper typing
       return {
-        id: data.id,
-        date: data.date,
-        reason: data.reason,
-        patientId: data.patientId,
-        status: data.status as AppointmentStatus,
-        notificationSent: data.notificationSent
+        ...data,
+        status: mapStatusFromSupabase(data.status)
       };
     } catch (error) {
-      console.error("Erreur getAppointmentById:", error);
+      console.error("Error fetching appointment:", error);
       throw error;
     }
   },
 
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Appointment")
-          .select("*")
-          .eq("patientId", patientId)
-          .order('date', { ascending: true })
-      );
-      
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
-      
-      if (!data) return [];
-      
-      // Transform data with proper typing
-      return data.map(item => ({
-        id: item.id,
-        date: item.date,
-        reason: item.reason,
-        patientId: item.patientId,
-        status: item.status as AppointmentStatus,
-        notificationSent: item.notificationSent
-      }));
-    } catch (error) {
-      console.error("Erreur getAppointmentsByPatientId:", error);
-      throw error;
-    }
-  },
-
-  async createAppointment(appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> {
-    try {
-      // Make sure the status value is one of the allowed enum values
-      const validStatus = ensureAppointmentStatus(appointmentData.status);
-      
-      // Create appointment with proper status type
-      const appointmentToCreate = {
-        date: appointmentData.date,
-        reason: appointmentData.reason,
-        patientId: appointmentData.patientId,
-        status: validStatus,
-        notificationSent: appointmentData.notificationSent
-      };
-      
-      const query = addAuthHeaders(
-        supabase
-          .from("Appointment")
-          .insert(appointmentToCreate)
-          .select()
-          .single()
-      );
-      
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
-      
-      return {
-        id: data.id,
-        date: data.date,
-        reason: data.reason,
-        patientId: data.patientId,
-        status: data.status as AppointmentStatus,
-        notificationSent: data.notificationSent
-      };
-    } catch (error) {
-      console.error("Erreur createAppointment:", error);
-      throw error;
-    }
-  },
-
-  async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
-    try {
-      console.log("Mise à jour du rendez-vous:", id, appointmentData);
-      const updateData: Record<string, any> = {};
-      
-      if ('date' in appointmentData) updateData.date = appointmentData.date;
-      if ('reason' in appointmentData) updateData.reason = appointmentData.reason;
-      if ('patientId' in appointmentData) updateData.patientId = appointmentData.patientId;
-      if ('status' in appointmentData && appointmentData.status) {
-        // Make sure status is a valid enum value
-        updateData.status = ensureAppointmentStatus(appointmentData.status);
-      }
-      if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
-      
-      // Utiliser la méthode directe de l'API Supabase au lieu de l'interface de requête
-      // pour éviter les problèmes CORS avec les méthodes PATCH
       const { data, error } = await supabase
         .from("Appointment")
-        .update(updateData)
+        .select("*")
+        .eq("patientId", patientId)
+        .order('date', { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || []).map(appointment => ({
+        ...appointment,
+        status: mapStatusFromSupabase(appointment.status)
+      }));
+    } catch (error) {
+      console.error("Error fetching patient appointments:", error);
+      throw error;
+    }
+  },
+
+  async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
+    try {
+      // Map the status for Supabase compatibility
+      const appointmentData = {
+        ...appointment,
+        status: mapStatusToSupabase(appointment.status)
+      };
+      
+      const { data, error } = await supabase
+        .from("Appointment")
+        .insert(appointmentData)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      return {
+        ...data,
+        status: mapStatusFromSupabase(data.status)
+      };
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+      throw error;
+    }
+  },
+
+  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
+    try {
+      // If status is included, map it for Supabase compatibility
+      const appointmentData = { ...appointment };
+      if (appointmentData.status) {
+        appointmentData.status = mapStatusToSupabase(appointmentData.status);
+      }
+      
+      const query = supabase
+        .from("Appointment")
+        .update(appointmentData)
         .eq("id", id)
         .select()
         .single();
       
-      if (error) {
-        console.error("Erreur lors de la mise à jour:", error);
-        throw new Error(error.message);
-      }
+      // Apply auth headers to fix CORS issues with PATCH
+      const authedQuery = await addAuthHeaders(query);
+      const { data, error } = await authedQuery;
+      
+      if (error) throw error;
       
       return {
-        id: data.id,
-        date: data.date,
-        reason: data.reason,
-        patientId: data.patientId,
-        status: data.status as AppointmentStatus,
-        notificationSent: data.notificationSent
+        ...data,
+        status: mapStatusFromSupabase(data.status)
       };
     } catch (error) {
-      console.error("Erreur updateAppointment:", error);
+      console.error("Error updating appointment:", error);
       throw error;
     }
   },
   
   async deleteAppointment(id: number): Promise<boolean> {
     try {
-      // Utiliser la méthode directe au lieu de addAuthHeaders
-      const { error } = await supabase
+      const query = supabase
         .from("Appointment")
         .delete()
         .eq("id", id);
       
-      if (error) throw new Error(error.message);
+      // Apply auth headers to fix CORS issues with DELETE
+      const authedQuery = await addAuthHeaders(query);
+      const { error } = await authedQuery;
+      
+      if (error) throw error;
       
       return true;
     } catch (error) {
-      console.error("Erreur deleteAppointment:", error);
+      console.error("Error deleting appointment:", error);
       throw error;
     }
   }
