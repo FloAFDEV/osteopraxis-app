@@ -11,8 +11,10 @@ export const supabaseAuthService = {
       options: {
         data: {
           first_name: firstName,
-          last_name: lastName
-        }
+          last_name: lastName,
+          role: "OSTEOPATH"  // Par défaut ostéopathe
+        },
+        emailRedirectTo: window.location.origin // S'assure que la redirection se fait vers votre app
       }
     });
     
@@ -37,7 +39,7 @@ export const supabaseAuthService = {
           first_name: firstName,
           last_name: lastName,
           email: email,
-          role: "OSTEOPATH", // Par défaut, tous les nouveaux utilisateurs sont des ostéopathes
+          role: "OSTEOPATH",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
@@ -151,11 +153,23 @@ export const supabaseAuthService = {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: window.location.origin, // Redirection vers votre app
+        data: {
+          redirectOnLogin: true // Assure une redirection après connexion
+        }
       }
     });
     
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Erreur magic link:", error);
+      toast.error("Erreur lors de l'envoi du lien de connexion");
+      throw error;
+    }
+    
+    toast.success(
+      "Un lien de connexion a été envoyé à votre adresse email. Veuillez vérifier votre boîte mail pour vous connecter.", 
+      { duration: 6000 }
+    );
   },
   
   async logout(): Promise<void> {
