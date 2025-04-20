@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -96,10 +97,12 @@ export type Contraception =
   | "STERILIZATION";
 
 // Interface pour les rendez-vous
+// Updated to include both "CANCELLED" (app standard) and "CANCELED" (Supabase standard)
 export type AppointmentStatus = 
   | "SCHEDULED" 
   | "COMPLETED" 
-  | "CANCELLED" 
+  | "CANCELLED"
+  | "CANCELED"  // Added to match Supabase schema
   | "RESCHEDULED"
   | "NO_SHOW";
 

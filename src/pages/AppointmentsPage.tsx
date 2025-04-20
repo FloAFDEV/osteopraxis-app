@@ -118,6 +118,7 @@ const AppointmentsPage = () => {
                 <SelectItem value="COMPLETED">Terminés</SelectItem>
                 <SelectItem value="CANCELLED">Annulés</SelectItem>
                 <SelectItem value="RESCHEDULED">Reportés</SelectItem>
+                <SelectItem value="NO_SHOW">Non présentés</SelectItem>
               </SelectContent>
             </Select>
           </div>
