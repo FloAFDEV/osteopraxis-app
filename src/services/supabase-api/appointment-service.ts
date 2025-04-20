@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, addAuthHeaders, ensureAppointmentStatus, AppointmentStatusValues } from "./utils";
 
@@ -142,6 +141,7 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | undefined> {
     try {
+      console.log("Mise à jour du rendez-vous:", id, appointmentData);
       const updateData: Record<string, any> = {};
       
       if ('date' in appointmentData) updateData.date = appointmentData.date;
@@ -153,18 +153,19 @@ export const supabaseAppointmentService = {
       }
       if ('notificationSent' in appointmentData) updateData.notificationSent = appointmentData.notificationSent;
       
-      const query = addAuthHeaders(
-        supabase
-          .from("Appointment")
-          .update(updateData)
-          .eq("id", id)
-          .select()
-          .single()
-      );
+      // Utiliser la méthode directe de l'API Supabase au lieu de l'interface de requête
+      // pour éviter les problèmes CORS avec les méthodes PATCH
+      const { data, error } = await supabase
+        .from("Appointment")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
       
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error("Erreur lors de la mise à jour:", error);
+        throw new Error(error.message);
+      }
       
       return {
         id: data.id,
@@ -182,18 +183,15 @@ export const supabaseAppointmentService = {
   
   async deleteAppointment(id: number): Promise<boolean> {
     try {
-      const query = addAuthHeaders(
-        supabase
-          .from("Appointment")
-          .delete()
-          .eq("id", id)
-      );
-      
-      const { error } = await query;
+      // Utiliser la méthode directe au lieu de addAuthHeaders
+      const { error } = await supabase
+        .from("Appointment")
+        .delete()
+        .eq("id", id);
       
       if (error) throw new Error(error.message);
       
-      return true; // Retourne true au lieu de void pour correspondre au type attendu
+      return true;
     } catch (error) {
       console.error("Erreur deleteAppointment:", error);
       throw error;

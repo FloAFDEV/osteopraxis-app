@@ -22,7 +22,7 @@ export const api = {
   // Patients
   getPatients: patientService.getPatients,
   getPatientById: patientService.getPatientById,
-  getPatientsByOsteopathId: patientService.getPatients, // Correction ici: utilisation de getPatients comme substitut temporaire
+  getPatientsByOsteopathId: patientService.getPatientsByOsteopathId, 
   createPatient: patientService.createPatient,
   updatePatient: patientService.updatePatient,
   deletePatient: patientService.deletePatient,

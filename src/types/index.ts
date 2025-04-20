@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -141,10 +142,15 @@ export interface Invoice {
   amount: number;
   date: string;
   paymentStatus: PaymentStatus;
-  Patient?: { // Ajout d'une propriété optionnelle Patient
+  Patient?: {
     firstName: string;
     lastName: string;
   };
+  // Nouveaux champs pour les mentions légales françaises
+  tvaExoneration?: boolean;
+  tvaMotif?: string;
+  paymentMethod?: string;
+  notes?: string;
 }
 
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";

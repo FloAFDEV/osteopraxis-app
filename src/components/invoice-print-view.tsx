@@ -27,6 +27,17 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
     }
   };
 
+  const getPaymentMethod = (method?: string) => {
+    if (!method) return "";
+    switch (method) {
+      case 'CB': return "Carte Bancaire";
+      case 'ESPECES': return "Espèces";
+      case 'CHEQUE': return "Chèque";
+      case 'VIREMENT': return "Virement bancaire";
+      default: return method;
+    }
+  };
+
   return (
     <div className="bg-white p-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-start mb-8">
@@ -41,7 +52,7 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           ) : (
             <h1 className="text-3xl font-bold text-green-700">{cabinet?.name || "PatientHub"}</h1>
           )}
-          <p className="text-gray-600">{osteopath?.professional_title || "Gestion de cabinet d'ostéopathie"}</p>
+          <p className="text-gray-600">{osteopath?.professional_title || "Ostéopathe D.O."}</p>
           <p className="text-gray-600 mt-2">
             {cabinet ? (
               <>
@@ -57,9 +68,14 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
               </>
             )}
           </p>
+          <div className="text-gray-600 mt-2 text-sm">
+            {osteopath?.siret && <p>SIRET: {osteopath.siret}</p>}
+            {osteopath?.adeli_number && <p>ADELI: {osteopath.adeli_number}</p>}
+            {osteopath?.ape_code && <p>Code APE: {osteopath.ape_code}</p>}
+          </div>
         </div>
         <div className="text-right">
-          <h2 className="text-2xl font-medium text-green-800">FACTURE</h2>
+          <h2 className="text-2xl font-medium text-green-800">NOTE D'HONORAIRES</h2>
           <p className="font-medium mt-1">#{invoice.id.toString().padStart(4, '0')}</p>
           <p className="mt-2 text-gray-600">Date d'émission: {formattedDate}</p>
           <p className="text-gray-600">Statut: <span className="text-green-700 font-semibold">{getStatusLabel(invoice.paymentStatus)}</span></p>
@@ -74,6 +90,11 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           {patient ? (
             <div>
               <p className="font-medium">{patient.firstName} {patient.lastName}</p>
+              {patient.birthDate && 
+                <p className="text-gray-600 text-sm">
+                  Né(e) le {format(new Date(patient.birthDate), "dd/MM/yyyy")}
+                </p>
+              }
               {patient.email && <p>{patient.email}</p>}
               {patient.phone && <p>{patient.phone}</p>}
               {patient.address && <p>{patient.address}</p>}
@@ -83,18 +104,18 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           )}
         </div>
         <div className="text-right">
-          <h3 className="font-medium text-green-800 mb-2">Informations professionnelles:</h3>
-          <p className="font-medium">{osteopath?.name || "Cabinet d'ostéopathie"}</p>
-          {osteopath?.siret && <p>SIRET: {osteopath.siret}</p>}
-          {osteopath?.adeli_number && <p>ADELI: {osteopath.adeli_number}</p>}
-          {osteopath?.ape_code && <p>Code APE: {osteopath.ape_code}</p>}
+          <h3 className="font-medium text-green-800 mb-2">Mode de règlement:</h3>
+          <p className="font-medium">{getPaymentMethod(invoice.paymentMethod)}</p>
+          {invoice.paymentStatus === "PAID" && 
+            <p className="text-green-600 font-bold mt-2">ACQUITTÉE</p>
+          }
         </div>
       </div>
 
       <table className="w-full mb-8">
         <thead>
           <tr className="border-b border-green-300">
-            <th className="py-2 px-2 text-left text-green-800">Description</th>
+            <th className="py-2 px-2 text-left text-green-800">Désignation</th>
             <th className="py-2 px-2 text-right text-green-800">Montant</th>
           </tr>
         </thead>
@@ -113,10 +134,13 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
       </table>
 
       <div className="border-t border-green-200 pt-6">
-        <h3 className="font-medium text-green-800 mb-2">Notes:</h3>
-        <p className="text-gray-600 mb-6">
-          Merci de votre confiance. Cette facture est payable dans un délai de 30 jours.
-          Veuillez inclure le numéro de facture dans votre communication de paiement.
+        <h3 className="font-medium text-green-800 mb-2">Mentions obligatoires:</h3>
+        <p className="text-gray-600 mb-3 font-medium text-sm">
+          {invoice.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI"}
+        </p>
+        <p className="text-gray-500 text-sm mb-6">
+          En votre aimable règlement à réception.
+          Merci de votre confiance.
         </p>
         
         <div className="text-center text-gray-500 text-sm mt-8">
