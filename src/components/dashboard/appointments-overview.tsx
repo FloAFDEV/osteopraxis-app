@@ -129,9 +129,9 @@ export function AppointmentsOverview({
                       to={`/patients/${appointment.patientId}`} 
                       className={`font-medium hover:underline text-base truncate block ${
                         patient?.gender === "Femme"
-                          ? "text-pink-700 dark:text-pink-300"
+                          ? "text-pink-700 dark:text-pink-400"
                           : patient?.gender === "Homme"
-                            ? "text-blue-700 dark:text-blue-300"
+                            ? "text-blue-700 dark:text-blue-400"
                             : "text-slate-800 dark:text-white"
                       }`}
                     >
