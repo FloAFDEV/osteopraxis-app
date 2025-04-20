@@ -2,18 +2,17 @@
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, addAuthHeaders } from "./utils";
 
-// Helper function to map between AppointmentStatus values and Supabase values
-const mapStatusToSupabase = (status: AppointmentStatus): "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW" | "RESCHEDULED" => {
-  // Map "CANCELLED" to "CANCELED" for Supabase compatibility
-  if (status === "CANCELLED") return "CANCELED";
-  return status as "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW" | "RESCHEDULED";
+// Map between app and Supabase appointment statuses
+const mapStatusToSupabase = (status: AppointmentStatus): "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW" => {
+  return status === "CANCELLED" ? "CANCELED" : status;
 };
 
-const mapStatusFromSupabase = (status: "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW" | "RESCHEDULED"): AppointmentStatus => {
-  // In our app, we use "CANCELLED" (with double L)
-  if (status === "CANCELED") return "CANCELLED";
-  return status as AppointmentStatus;
+const mapStatusFromSupabase = (status: string): AppointmentStatus => {
+  return status === "CANCELED" ? "CANCELLED" : status as AppointmentStatus;
 };
+
+// Type for appointment creation that omits generated fields
+type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'>;
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -21,7 +20,7 @@ export const supabaseAppointmentService = {
       const { data, error } = await supabase
         .from("Appointment")
         .select("*")
-        .order('date', { ascending: false });
+        .order('date', { ascending: true });
       
       if (error) throw error;
       
@@ -35,16 +34,16 @@ export const supabaseAppointmentService = {
     }
   },
 
-  async getAppointmentById(id: number): Promise<Appointment | undefined> {
+  async getAppointmentById(id: number): Promise<Appointment> {
     try {
       const { data, error } = await supabase
         .from("Appointment")
         .select("*")
         .eq("id", id)
-        .maybeSingle();
+        .single();
       
       if (error) throw error;
-      if (!data) return undefined;
+      if (!data) throw new Error(`Appointment with id ${id} not found`);
       
       return {
         ...data,
@@ -62,7 +61,7 @@ export const supabaseAppointmentService = {
         .from("Appointment")
         .select("*")
         .eq("patientId", patientId)
-        .order('date', { ascending: false });
+        .order('date', { ascending: true });
       
       if (error) throw error;
       
@@ -76,17 +75,16 @@ export const supabaseAppointmentService = {
     }
   },
 
-  async createAppointment(appointment: Omit<Appointment, 'id'>): Promise<Appointment> {
+  async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
     try {
-      // Map the status for Supabase compatibility
-      const appointmentData = {
+      const payload = {
         ...appointment,
         status: mapStatusToSupabase(appointment.status)
       };
       
       const { data, error } = await supabase
         .from("Appointment")
-        .insert(appointmentData)
+        .insert(payload)
         .select()
         .single();
       
@@ -95,24 +93,23 @@ export const supabaseAppointmentService = {
       return {
         ...data,
         status: mapStatusFromSupabase(data.status)
-      } as Appointment;
+      };
     } catch (error) {
       console.error("Error creating appointment:", error);
       throw error;
     }
   },
 
-  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined> {
+  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
     try {
-      // If status is included, map it for Supabase compatibility
-      const appointmentData = { ...appointment };
-      if (appointmentData.status) {
-        appointmentData.status = mapStatusToSupabase(appointmentData.status);
-      }
+      const payload = {
+        ...appointment,
+        status: appointment.status ? mapStatusToSupabase(appointment.status) : undefined
+      };
       
       const query = supabase
         .from("Appointment")
-        .update(appointmentData)
+        .update(payload)
         .eq("id", id)
         .select()
         .single();
@@ -126,7 +123,7 @@ export const supabaseAppointmentService = {
       return {
         ...data,
         status: mapStatusFromSupabase(data.status)
-      } as Appointment;
+      };
     } catch (error) {
       console.error("Error updating appointment:", error);
       throw error;
