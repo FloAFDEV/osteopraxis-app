@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, addAuthHeaders } from "./utils";
 
