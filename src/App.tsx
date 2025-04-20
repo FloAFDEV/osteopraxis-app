@@ -26,6 +26,7 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import OsteopathProfilePage from "./pages/OsteopathProfilePage";
 import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 import { api } from './services/api';
 
 function App() {
@@ -47,11 +48,6 @@ function App() {
     initAuth();
   }, [loadStoredToken]);
   
-  // IMPORTANT: Always allow access to the dashboard when authenticated
-  // Don't check for osteopath or cabinet existence here
-  
-  console.log("État auth:", { isAuthenticated, userId: user?.id });
-  
   // Configuration des chemins publics (accessibles sans connexion)
   const publicPaths = ['/privacy-policy', '/terms-of-service'];
   
@@ -62,6 +58,8 @@ function App() {
       </div>
     );
   }
+  
+  const isAdmin = user?.role === "ADMIN";
   
   return (
     <>
@@ -92,6 +90,13 @@ function App() {
         <Route path="/cabinets/:id/edit" element={isAuthenticated ? <EditCabinetPage /> : <Navigate to="/login" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+        
+        {/* Nouvelle route pour l'administration */}
+        <Route path="/admin" element={
+          isAuthenticated ? 
+            (isAdmin ? <AdminDashboardPage /> : <Navigate to="/dashboard" />) : 
+            <Navigate to="/login" />
+        } />
         
         {/* Redirect cabinet à cabinets */}
         <Route path="/cabinet" element={isAuthenticated ? <Navigate to="/cabinets" /> : <Navigate to="/login" />} />

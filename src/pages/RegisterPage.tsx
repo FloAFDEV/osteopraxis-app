@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, Activity, User, UserPlus } from "lucide-react";
+import { Mail, Lock, Activity, User, UserPlus, Info } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),
@@ -28,6 +29,7 @@ const RegisterPage = () => {
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
   const [registerError, setRegisterError] = useState<string | null>(null);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -49,13 +51,48 @@ const RegisterPage = () => {
         firstName: data.firstName,
         lastName: data.lastName
       });
-      // Ne pas rediriger ici car c'est géré dans le context en fonction de si confirmation email requise ou pas
+      
+      setRegistrationSuccess(true);
+      toast.success("Votre compte a été créé avec succès !");
+      
+      // Redirection vers la configuration du profil après 2 secondes
+      setTimeout(() => {
+        navigate("/profile/setup");
+      }, 2000);
+      
     } catch (error: any) {
       console.error("Register error:", error);
       setRegisterError(error.message || "Erreur lors de la création du compte");
       toast.error(error.message || "Erreur lors de la création du compte");
     }
   };
+  
+  // Si l'inscription a réussi, afficher un message de confirmation
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0d1117]">
+        <div className="w-full max-w-md space-y-8 bg-[#161b22] p-8 rounded-xl border border-gray-700 shadow-xl">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-white mb-6">Inscription réussie !</h1>
+            <div className="flex justify-center mb-6">
+              <div className="bg-green-500/20 rounded-full p-3">
+                <User className="h-10 w-10 text-green-400" />
+              </div>
+            </div>
+            <p className="text-gray-300 mb-6">
+              Votre compte a été créé avec succès. Vous allez être redirigé vers la configuration de votre profil professionnel.
+            </p>
+            <div className="animate-pulse mb-6 flex justify-center">
+              <div className="bg-blue-500/30 rounded-full h-2 w-24"></div>
+            </div>
+            <p className="text-gray-400 text-sm">
+              Redirection automatique vers la configuration de votre profil...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -88,9 +125,11 @@ const RegisterPage = () => {
             </div>
 
             {registerError && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-md">
-                {registerError}
-              </div>
+              <Alert variant="destructive" className="bg-red-500/10 border border-red-500/50 text-red-500">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Erreur</AlertTitle>
+                <AlertDescription>{registerError}</AlertDescription>
+              </Alert>
             )}
 
             <Form {...form}>
@@ -198,6 +237,14 @@ const RegisterPage = () => {
                     </FormItem>
                   )}
                 />
+                
+                <Alert className="bg-blue-500/10 border border-blue-500/30 text-blue-400">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Information</AlertTitle>
+                  <AlertDescription>
+                    Après votre inscription, vous serez guidé pour configurer votre profil professionnel et votre cabinet.
+                  </AlertDescription>
+                </Alert>
 
                 <Button 
                   type="submit" 

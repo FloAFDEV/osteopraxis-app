@@ -1,26 +1,41 @@
 
-import { patientService } from './patient-service';
-import { appointmentService } from './appointment-service';
-import { cabinetService } from './cabinet-service';
-import { osteopathService } from './osteopath-service';
-import { authService } from './auth-service';
-import { USE_SUPABASE } from './config';
-import { supabaseInvoiceService } from '../supabase-api/invoice-service';
-import { supabase } from '@/integrations/supabase/client';
+import { delay, USE_SUPABASE } from "./config";
 
-// API principale
+// Importer les services
+import { authService } from "./auth-service";
+import { patientService } from "./patient-service";
+import { appointmentService } from "./appointment-service";
+import { cabinetService } from "./cabinet-service";
+import { invoiceService } from "./invoice-service";
+import { osteopathService } from "./osteopath-service";
+
+// Exporter l'API unifiée
 export const api = {
-  // Services existants
-  ...patientService,
-  ...appointmentService,
-  ...cabinetService,
-  ...osteopathService,
-  ...authService,
-  
-  // Session Supabase
-  getSession: () => supabase.auth.getSession(),
-  
-  // Méthodes de cabinet (ajoutées ou modifiées)
+  // Auth
+  register: authService.register,
+  login: authService.login,
+  loginWithMagicLink: authService.loginWithMagicLink,
+  logout: authService.logout,
+  checkAuth: authService.checkAuth,
+  promoteToAdmin: authService.promoteToAdmin,
+
+  // Patients
+  getPatients: patientService.getPatients,
+  getPatientById: patientService.getPatientById,
+  getPatientsByOsteopathId: patientService.getPatientsByOsteopathId,
+  createPatient: patientService.createPatient,
+  updatePatient: patientService.updatePatient,
+  deletePatient: patientService.deletePatient,
+
+  // Rendez-vous
+  getAppointments: appointmentService.getAppointments,
+  getAppointmentById: appointmentService.getAppointmentById,
+  getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
+  createAppointment: appointmentService.createAppointment,
+  updateAppointment: appointmentService.updateAppointment,
+  deleteAppointment: appointmentService.deleteAppointment,
+
+  // Cabinets
   getCabinets: cabinetService.getCabinets,
   getCabinetById: cabinetService.getCabinetById,
   getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
@@ -28,72 +43,37 @@ export const api = {
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
-  
-  // Méthodes d'ostéopathe (ajoutées ou modifiées)
+
+  // Ostéopathes
   getOsteopaths: osteopathService.getOsteopaths,
   getOsteopathById: osteopathService.getOsteopathById,
   getOsteopathByUserId: osteopathService.getOsteopathByUserId,
   updateOsteopath: osteopathService.updateOsteopath,
   createOsteopath: osteopathService.createOsteopath,
   
-  // Méthodes pour supprimer des entités
-  deletePatient: patientService.deletePatient,
-  deleteAppointment: appointmentService.deleteAppointment,
-  
-  // Service de facturation (directement depuis Supabase)
-  getInvoices: async () => {
+  // Fonctions Admin
+  async getAdminStats() {
     if (USE_SUPABASE) {
-      try {
-        return await supabaseInvoiceService.getInvoices();
-      } catch (error) {
-        console.error("Erreur lors de la récupération des factures:", error);
-        throw error;
-      }
+      // Implémentation future avec Supabase
+      await delay(300);
+      return {
+        totalUsers: 0,
+        totalOsteopaths: 0,
+        totalCabinets: 0,
+        totalPatients: 0,
+        totalAppointments: 0
+      };
     }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  getInvoiceById: (id: number) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.getInvoiceById(id);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  getInvoicesByPatientId: (patientId: number) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.getInvoicesByPatientId(patientId);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  createInvoice: (invoiceData: any) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.createInvoice(invoiceData);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  updateInvoice: (id: number, invoiceData: any) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.updateInvoice(id, invoiceData);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  updatePaymentStatus: (id: number, paymentStatus: 'PAID' | 'PENDING' | 'CANCELED') => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.updatePaymentStatus(id, paymentStatus);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
-  },
-  
-  deleteInvoice: (id: number) => {
-    if (USE_SUPABASE) {
-      return supabaseInvoiceService.deleteInvoice(id);
-    }
-    throw new Error("Fonctionnalité de facturation non disponible en mode local");
+    
+    // Version simulée
+    await delay(500);
+    
+    return {
+      totalUsers: 10,
+      totalOsteopaths: 8,
+      totalCabinets: 12,
+      totalPatients: 120,
+      totalAppointments: 350
+    };
   }
 };
-
-export { supabaseInvoiceService };
