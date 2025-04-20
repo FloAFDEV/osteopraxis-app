@@ -1,9 +1,7 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, addAuthHeaders } from "./utils";
 
 // Helper function to map between AppointmentStatus values and Supabase values
-// Updated to handle both spellings consistently
 const mapStatusToSupabase = (status: AppointmentStatus): "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW" | "RESCHEDULED" => {
   // Map "CANCELLED" to "CANCELED" for Supabase compatibility
   if (status === "CANCELLED") return "CANCELED";
