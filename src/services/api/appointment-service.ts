@@ -1,7 +1,11 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+
+// Type guard for checking if a value is a Date
+function isDate(value: unknown): value is Date {
+  return value instanceof Date;
+}
 
 // Type for appointment creation that omits generated fields
 type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'>;
@@ -63,7 +67,7 @@ export const appointmentService = {
       try {
         const payload = {
           ...appointment,
-          date: appointment.date instanceof Date ? appointment.date.toISOString() : appointment.date
+          date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
         };
         return await supabaseAppointmentService.createAppointment(payload);
       } catch (error) {
@@ -78,9 +82,9 @@ export const appointmentService = {
     return {
       ...appointment,
       id: Math.floor(Math.random() * 1000),
-      date: appointment.date instanceof Date ? appointment.date.toISOString() : appointment.date,
+      date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
       notificationSent: false,
-      status: appointment.status || "SCHEDULED",
+      status: "SCHEDULED",
       createdAt: now,
       updatedAt: now
     } as Appointment;
@@ -91,7 +95,7 @@ export const appointmentService = {
       try {
         const payload = {
           ...appointment,
-          date: appointment.date instanceof Date ? appointment.date.toISOString() : appointment.date
+          date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
         };
         return await supabaseAppointmentService.updateAppointment(id, payload);
       } catch (error) {
@@ -106,6 +110,7 @@ export const appointmentService = {
     return {
       ...appointment,
       id,
+      date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
       updatedAt: now
     } as Appointment;
   },
