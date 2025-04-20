@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -95,7 +96,6 @@ export const appointmentService = {
     return undefined;
   },
 
-  // Méthode mise à jour pour utiliser updateAppointment au lieu de updateAppointmentStatus
   async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
@@ -114,20 +114,9 @@ export const appointmentService = {
   async deleteAppointment(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        // Utiliser le service Supabase pour la suppression
-        const { error } = await supabase
-          .from("Appointment")
-          .delete()
-          .eq("id", id);
-          
-        if (error) {
-          console.error("Erreur lors de la suppression du rendez-vous:", error);
-          throw error;
-        }
-        
-        return true;
+        return await supabaseAppointmentService.deleteAppointment(id);
       } catch (error) {
-        console.error("Erreur deleteAppointment:", error);
+        console.error("Erreur Supabase deleteAppointment:", error);
         throw error;
       }
     }
