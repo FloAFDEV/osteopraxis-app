@@ -1,7 +1,7 @@
-
 import { User, AuthState } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAuthService } from "../supabase-api/auth-service";
+import { toast } from "sonner";
 
 // Données simulées pour les utilisateurs
 const users: User[] = [
@@ -33,9 +33,14 @@ export const authService = {
   }): Promise<AuthState> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAuthService.register(userData.email, userData.password, userData.firstName, userData.lastName);
+        const response = await supabaseAuthService.register(userData.email, userData.password, userData.firstName, userData.lastName);
+        if (response.message) {
+          toast.info(response.message);
+        }
+        return response;
       } catch (error) {
         console.error("Erreur Supabase register:", error);
+        toast.error("Erreur lors de l'inscription");
         throw error;
       }
     }
@@ -76,6 +81,15 @@ export const authService = {
         return await supabaseAuthService.login(email, password);
       } catch (error) {
         console.error("Erreur Supabase login:", error);
+        
+        // Messages d'erreur spécifiques
+        if (error.message?.includes("Invalid login credentials")) {
+          toast.error("Identifiants incorrects");
+        } else if (error.message?.includes("Email not confirmed")) {
+          toast.error("Email non confirmé. Veuillez vérifier votre boîte mail.");
+        } else {
+          toast.error("Erreur lors de la connexion");
+        }
         throw error;
       }
     }
@@ -100,13 +114,17 @@ export const authService = {
     
     return authState;
   },
-  
+
   async loginWithMagicLink(email: string): Promise<void> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAuthService.loginWithMagicLink(email);
+        await supabaseAuthService.loginWithMagicLink(email);
+        toast.success("Un lien de connexion a été envoyé à votre adresse email. Veuillez vérifier votre boîte mail.", {
+          duration: 6000
+        });
       } catch (error) {
-        console.error("Erreur Supabase magic link:", error);
+        console.error("Erreur magic link:", error);
+        toast.error("Erreur lors de l'envoi du lien de connexion");
         throw error;
       }
     }

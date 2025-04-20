@@ -1,10 +1,9 @@
-
 import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 
 export const supabaseAuthService = {
   async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
-    console.log("Registering user with Supabase:", { email, firstName, lastName });
+    console.log("Inscription avec Supabase:", { email, firstName, lastName });
     
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -18,8 +17,11 @@ export const supabaseAuthService = {
     });
     
     if (error) {
-      console.error("Supabase registration error:", error);
-      throw new Error(error.message);
+      console.error("Erreur d'inscription Supabase:", error);
+      if (error.message.includes("User already registered")) {
+        throw new Error("Un compte existe déjà avec cet email");
+      }
+      throw error;
     }
     
     if (!data.user) {
@@ -85,7 +87,7 @@ export const supabaseAuthService = {
   },
   
   async login(email: string, password: string): Promise<AuthState> {
-    console.log("Logging in with Supabase:", email);
+    console.log("Connexion avec Supabase:", email);
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -93,14 +95,8 @@ export const supabaseAuthService = {
     });
     
     if (error) {
-      console.error("Supabase login error:", error);
-      
-      // Si l'erreur concerne l'email non confirmé, retourner un message spécifique
-      if (error.message.includes("Email not confirmed") || error.message === "Email not confirmed") {
-        throw new Error("Email non confirmé. Veuillez vérifier votre boîte mail et cliquer sur le lien de confirmation.");
-      }
-      
-      throw new Error(error.message);
+      console.error("Erreur de connexion Supabase:", error);
+      throw error;
     }
     
     if (!data.user) {

@@ -10,15 +10,19 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères")
 });
+
 const magicLinkSchema = z.object({
   email: z.string().email("Email invalide")
 });
+
 type LoginFormValues = z.infer<typeof loginSchema>;
 type MagicLinkFormValues = z.infer<typeof magicLinkSchema>;
+
 const LoginPage = () => {
   const {
     login,
@@ -27,6 +31,7 @@ const LoginPage = () => {
   } = useAuth();
   const [activeTab, setActiveTab] = useState("password");
   const navigate = useNavigate();
+
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -34,26 +39,44 @@ const LoginPage = () => {
       password: ""
     }
   });
+
   const magicLinkForm = useForm<MagicLinkFormValues>({
     resolver: zodResolver(magicLinkSchema),
     defaultValues: {
       email: ""
     }
   });
+
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
-      await login(data.email, data.password);
+      const success = await login(data.email, data.password);
+      if (success) {
+        toast.success("Connexion réussie !");
+        navigate("/");
+      } else {
+        toast.error("Identifiants incorrects");
+      }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Erreur de connexion:", error);
+      toast.error("Une erreur est survenue lors de la connexion");
     }
   };
+
   const onMagicLinkSubmit = async (data: MagicLinkFormValues) => {
     try {
       await loginWithMagicLink(data.email);
+      toast.success(
+        "Lien de connexion envoyé ! Veuillez vérifier votre boîte mail pour vous connecter.",
+        {
+          duration: 6000,
+        }
+      );
     } catch (error) {
-      console.error("Magic link error:", error);
+      console.error("Erreur magic link:", error);
+      toast.error("Erreur lors de l'envoi du lien de connexion");
     }
   };
+
   return <div className="min-h-screen flex">
       {/* Left section - Login form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
@@ -200,4 +223,5 @@ const LoginPage = () => {
       </div>
     </div>;
 };
+
 export default LoginPage;
