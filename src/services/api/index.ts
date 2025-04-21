@@ -13,7 +13,10 @@ export const api = {
   login: authService.login,
   register: authService.register,
   logout: authService.logout,
-  getCurrentUser: authService.getCurrentUser,
+  getCurrentUser: authService.getCurrentUser || (() => Promise.resolve(null)),
+  checkAuth: authService.checkAuth || (() => Promise.resolve({ isAuthenticated: false, user: null })),
+  loginWithMagicLink: authService.loginWithMagicLink || ((email: string) => Promise.resolve()),
+  promoteToAdmin: authService.promoteToAdmin || ((userId: string) => Promise.resolve(false)),
   
   // Patient related
   getPatients: patientService.getPatients,
@@ -40,6 +43,8 @@ export const api = {
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
+  getCabinetsByUserId: cabinetService.getCabinetsByUserId || (() => Promise.resolve([])),
+  getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId || ((id: number) => Promise.resolve([])),
   
   // Invoice related
   getInvoices: invoiceService.getInvoices,
@@ -50,5 +55,9 @@ export const api = {
   
   // Osteopath related
   getOsteopath: osteopathService.getOsteopath,
-  updateOsteopath: osteopathService.updateOsteopath
+  getOsteopaths: osteopathService.getOsteopaths || (() => Promise.resolve([])),
+  getOsteopathById: osteopathService.getOsteopathById || ((id: number) => Promise.resolve(undefined)),
+  getOsteopathByUserId: osteopathService.getOsteopathByUserId || ((userId: string) => Promise.resolve(undefined)),
+  updateOsteopath: osteopathService.updateOsteopath,
+  createOsteopath: osteopathService.createOsteopath || ((data: any) => Promise.resolve({}))
 };
