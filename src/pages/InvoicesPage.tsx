@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -28,13 +29,14 @@ const InvoicesPage = () => {
   const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
   const [printAllInvoices, setPrintAllInvoices] = useState<Invoice[] | null>(null);
 
-  // Correction : UN SEUL printRef !
+  // Correction : UN SEUL printRef !
   const printRef = useRef<HTMLDivElement>(null);
   const [readyToPrint, setReadyToPrint] = useState(false);
 
-  // Configuration de react-to-print
+  // Configuration de react-to-print avec correction de l'interface TypeScript
   const handlePrint = useReactToPrint({
-    content: () => printRef.current!,
+    // Remplacer 'content' par 'contentRef' pour respecter l'interface UseReactToPrintOptions
+    contentRef: () => printRef.current,
     documentTitle: printInvoice
       ? `Facture_${printInvoice.id.toString().padStart(4, "0")}`
       : printAllInvoices
@@ -334,3 +336,4 @@ const InvoicesPage = () => {
 };
 
 export default InvoicesPage;
+
