@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -251,11 +252,6 @@ const SchedulePage = () => {
       </div>
     </Layout>
   );
-};
-
-// Fonction qui avait pu être oubliée lors des modifications précédentes
-const getPatientById = (patients: Patient[], patientId: number) => {
-  return patients.find((patient) => patient.id === patientId);
 };
 
 interface DayScheduleProps {

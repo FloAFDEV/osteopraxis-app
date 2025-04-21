@@ -12,30 +12,36 @@ export type Database = {
       Appointment: {
         Row: {
           cabinetId: number | null
+          createdAt: string
           date: string
           id: number
           notificationSent: boolean
           patientId: number
           reason: string
           status: Database["public"]["Enums"]["AppointmentStatus"]
+          updatedAt: string
         }
         Insert: {
           cabinetId?: number | null
+          createdAt?: string
           date: string
           id?: number
           notificationSent?: boolean
           patientId: number
           reason: string
           status: Database["public"]["Enums"]["AppointmentStatus"]
+          updatedAt?: string
         }
         Update: {
           cabinetId?: number | null
+          createdAt?: string
           date?: string
           id?: number
           notificationSent?: boolean
           patientId?: number
           reason?: string
           status?: Database["public"]["Enums"]["AppointmentStatus"]
+          updatedAt?: string
         }
         Relationships: [
           {
