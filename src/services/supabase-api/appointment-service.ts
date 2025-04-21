@@ -112,11 +112,11 @@ export const supabaseAppointmentService = {
   },
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
-    // MODIFICATION : PATCH transformé en POST + X-HTTP-Method-Override
-    // Cela évite les préflight PATCH et fonctionne bien avec Supabase !
-    const tokenResponse = await supabase.auth.getSession();
-    const token = tokenResponse.session?.access_token;
-    const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? ""; // Si géré par l’env d’exécution
+    // MODIFICATION : PATCH transformé en POST + X-HTTP-Method-Override
+    // Cela évite les préflight PATCH et fonctionne bien avec Supabase !
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
     const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
     // Le status doit être normalisé côté payload
     const updatePayload = {
@@ -124,7 +124,7 @@ export const supabaseAppointmentService = {
       status: update.status ? normalizeStatus(update.status) : undefined,
       updatedAt: new Date().toISOString(),
     };
-    // Nettoyage : suppression undefined pour ne pas PATCH n’importe quoi
+    // Nettoyage : suppression undefined pour ne pas PATCH n'importe quoi
     Object.keys(updatePayload).forEach((k) => updatePayload[k as keyof typeof updatePayload] === undefined && delete updatePayload[k as keyof typeof updatePayload]);
     const res = await fetch(PATCH_URL, {
       method: "POST",
@@ -166,4 +166,3 @@ export const supabaseAppointmentService = {
     }
   }
 };
-
