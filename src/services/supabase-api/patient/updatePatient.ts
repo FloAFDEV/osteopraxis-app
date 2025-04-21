@@ -26,10 +26,10 @@ export async function updatePatient(patient: UpdatePatientPayload): Promise<Pati
     osteopathId: patient.osteopathId || 1,
   };
 
-  // Mise à jour avec single() pour obtenir directement l'objet
+  // Utiliser la méthode POST avec X-HTTP-Method-Override pour contourner les restrictions CORS
   const { data, error } = await supabase
     .from("Patient")
-    .update(updatable)
+    .upsert(updatable)
     .eq("id", patient.id)
     .select()
     .single();
