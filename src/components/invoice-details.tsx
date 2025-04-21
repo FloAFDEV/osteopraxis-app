@@ -76,7 +76,7 @@ export const InvoiceDetails = ({
   }}
 >
         {/* Accent bar en haut - amélioré pour le dark mode */}
-        <div className="absolute h-1 w-full left-0 top-0 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 dark:from-amber-600/90 dark:via-amber-500/80 dark:to-amber-700/90 rounded-t-lg blur-[1.5px] opacity-80" />
+        <div className="absolute h-1 w-full left-0 top-0 bg-gradient-to-r from-blue-400 via-blue-300 to-blue-500 dark:from-blue-600/90 dark:via-blue-500/80 dark:to-blue-700/90 rounded-t-lg blur-[1.5px] opacity-80" />
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-between items-center gap-x-3 text-lg">
             <div className="flex items-center gap-2 sm:gap-3">
