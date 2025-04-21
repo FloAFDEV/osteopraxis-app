@@ -96,10 +96,17 @@ export const supabaseInvoiceService = {
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
     try {
-      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = invoiceData as any;
+      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...dataToInsert } = invoiceData as any;
+      
+      // Si consultationId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
+      if (!dataToInsert.consultationId || dataToInsert.consultationId === 0) {
+        delete dataToInsert.consultationId;
+      }
+      
       const { data, error } = await supabase
         .from("Invoice")
-        .insert(insertable)
+        .insert(dataToInsert)
+        .select()
         .single();
 
       if (error) {
@@ -116,6 +123,11 @@ export const supabaseInvoiceService = {
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
+      // Si consultationId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
+      if (invoiceData.consultationId === 0 || invoiceData.consultationId === null) {
+        delete invoiceData.consultationId;
+      }
+      
       const query = supabase
         .from("Invoice")
         .update(invoiceData)

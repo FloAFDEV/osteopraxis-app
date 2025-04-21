@@ -14,8 +14,9 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Card } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
+import { Checkbox } from "@/components/ui/checkbox";
 
-// Define the form schema with Zod
+// Modify the schema to make consultationId optional
 const formSchema = z.object({
   patientId: z.number(),
   consultationId: z.number().optional(),
@@ -25,7 +26,8 @@ const formSchema = z.object({
   paymentMethod: z.string().optional(),
   tvaExoneration: z.boolean().optional(),
   tvaMotif: z.string().optional(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  noConsultation: z.boolean().optional() // New field to indicate no consultation is needed
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -38,6 +40,7 @@ interface InvoiceFormProps {
 
 export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: InvoiceFormProps) => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(initialPatient || null);
+  const [noConsultation, setNoConsultation] = useState<boolean>(false);
 
   // Fetch patients list if no initial patient is provided
   const { data: patients } = useQuery({
@@ -55,7 +58,8 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
     paymentMethod: 'CB',
     tvaExoneration: true,
     tvaMotif: 'TVA non applicable - Article 261-4-1° du CGI',
-    notes: ''
+    notes: '',
+    noConsultation: false
   };
 
   const form = useForm<FormValues>({
@@ -67,7 +71,8 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
     try {
       await api.createInvoice({
         patientId: selectedPatient?.id || data.patientId,
-        consultationId: data.consultationId || 0,
+        // Set consultationId to 0 or null if noConsultation is checked
+        consultationId: data.noConsultation ? 0 : (data.consultationId || 0),
         amount: data.amount,
         date: data.date,
         paymentStatus: data.paymentStatus as PaymentStatus,
@@ -91,6 +96,11 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
     if (patient) {
       form.setValue('patientId', patient.id);
     }
+  };
+
+  const handleNoConsultationChange = (checked: boolean) => {
+    setNoConsultation(checked);
+    form.setValue('noConsultation', checked);
   };
 
   return (
@@ -183,6 +193,30 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
                     <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* No consultation checkbox */}
+            <FormField
+              control={form.control}
+              name="noConsultation"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked);
+                        handleNoConsultationChange(checked === true);
+                      }}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Facture sans consultation associée
+                    </FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
@@ -286,4 +320,3 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
     </Form>
   );
 };
-
