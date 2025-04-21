@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ export const InvoiceDetails = ({
     boxShadow: "0 4px 16px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(59, 130, 246, 0.08)"
   }}
 >
-  {/* Barre d’accent en haut */}
+  {/* Barre d'accent en haut */}
   <div
     className="absolute top-0 left-0 w-full h-1
                bg-gradient-to-r from-blue-400 to-blue-600
@@ -126,7 +127,19 @@ export const InvoiceDetails = ({
       </div>
       <div className="mt-3 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700 flex justify-between">
         <div className="flex space-x-2">
-          {onEdit}
+          {onEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-blue-600 hover:text-blue-800 border-blue-200 dark:border-blue-700
+                        dark:text-blue-400 dark:hover:text-blue-300 shadow-sm transition"
+              onClick={onEdit}
+              aria-label="Modifier la facture"
+            >
+              <Edit className="h-4 w-4" />
+              <span className="sr-only">Modifier</span>
+            </Button>
+          )}
           {onDelete && (
             <Button
               size="sm"
