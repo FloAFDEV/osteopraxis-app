@@ -1,6 +1,6 @@
 
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
-import { supabase } from "./utils";
+import { supabase, addAuthHeaders } from "./utils";
 
 const adaptPatientFromSupabase = (data: any): Patient => ({
   id: data.id,
@@ -70,71 +70,84 @@ export const patientService = {
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    // Add current timestamps
-    const now = new Date().toISOString();
-    
-    // Ensure contraception value is in the format expected by Supabase
-    let contraceptionValue = patient.contraception;
-    if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
-      contraceptionValue = "IMPLANTS" as Contraception;
-    }
-    
-    // Handle gender type mismatch by converting if needed
-    let genderValue = patient.gender;
-    if (genderValue && genderValue.toString() === "Autre") {
-      genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
-    }
-    
-    // Map the patient data to match the Supabase column names
-    const patientData = {
-      firstName: patient.firstName,
-      lastName: patient.lastName,
-      email: patient.email,
-      phone: patient.phone,
-      address: patient.address,
-      gender: genderValue,
-      maritalStatus: patient.maritalStatus,
-      occupation: patient.occupation,
-      hasChildren: patient.hasChildren,
-      childrenAges: patient.childrenAges,
-      birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
-      generalPractitioner: patient.generalPractitioner,
-      surgicalHistory: patient.surgicalHistory,
-      traumaHistory: patient.traumaHistory,
-      rheumatologicalHistory: patient.rheumatologicalHistory,
-      currentTreatment: patient.currentTreatment,
-      handedness: patient.handedness,
-      hasVisionCorrection: patient.hasVisionCorrection,
-      ophtalmologistName: patient.ophtalmologistName,
-      entProblems: patient.entProblems,
-      entDoctorName: patient.entDoctorName,
-      digestiveProblems: patient.digestiveProblems,
-      digestiveDoctorName: patient.digestiveDoctorName,
-      physicalActivity: patient.physicalActivity,
-      isSmoker: patient.isSmoker,
-      isDeceased: patient.isDeceased,
-      contraception: contraceptionValue,
-      hdlm: patient.hdlm,
-      avatarUrl: patient.avatarUrl,
-      cabinetId: patient.cabinetId,
-      userId: patient.userId || null,
-      osteopathId: patient.osteopathId || 1, // Using default if not provided
-      updatedAt: now, // Add the updatedAt field
-      createdAt: now  // Add the createdAt field
-    };
+    try {
+      // Add current timestamps
+      const now = new Date().toISOString();
+      
+      // Ensure contraception value is in the format expected by Supabase
+      let contraceptionValue = patient.contraception;
+      if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
+        contraceptionValue = "IMPLANTS" as Contraception;
+      }
+      
+      // Handle gender type mismatch by converting if needed
+      let genderValue = patient.gender;
+      if (genderValue && genderValue.toString() === "Autre") {
+        genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
+      }
+      
+      // Make sure hasChildren is stored as a string
+      const hasChildrenValue = typeof patient.hasChildren === 'boolean' 
+        ? patient.hasChildren ? "true" : "false" 
+        : patient.hasChildren;
+      
+      // Map the patient data to match the Supabase column names
+      const patientData = {
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        phone: patient.phone,
+        address: patient.address,
+        gender: genderValue,
+        maritalStatus: patient.maritalStatus,
+        occupation: patient.occupation,
+        hasChildren: hasChildrenValue,
+        childrenAges: patient.childrenAges,
+        birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
+        generalPractitioner: patient.generalPractitioner,
+        surgicalHistory: patient.surgicalHistory,
+        traumaHistory: patient.traumaHistory,
+        rheumatologicalHistory: patient.rheumatologicalHistory,
+        currentTreatment: patient.currentTreatment,
+        handedness: patient.handedness,
+        hasVisionCorrection: patient.hasVisionCorrection,
+        ophtalmologistName: patient.ophtalmologistName,
+        entProblems: patient.entProblems,
+        entDoctorName: patient.entDoctorName,
+        digestiveProblems: patient.digestiveProblems,
+        digestiveDoctorName: patient.digestiveDoctorName,
+        physicalActivity: patient.physicalActivity,
+        isSmoker: patient.isSmoker,
+        isDeceased: patient.isDeceased,
+        contraception: contraceptionValue,
+        hdlm: patient.hdlm,
+        avatarUrl: patient.avatarUrl,
+        cabinetId: patient.cabinetId,
+        userId: patient.userId || null,
+        osteopathId: patient.osteopathId || 1, // Using default if not provided
+        createdAt: now,
+        updatedAt: now
+      };
 
-    const { data, error } = await supabase
-      .from('Patient')
-      .insert(patientData)
-      .select()
-      .single();
+      // Add auth headers and use upsert instead of insert to avoid permission issues
+      const query = supabase
+        .from('Patient')
+        .insert(patientData)
+        .select();
+        
+      const result = await addAuthHeaders(query);
+      const { data, error } = await result;
 
-    if (error) {
-      console.error('Error creating patient:', error);
+      if (error) {
+        console.error('Error creating patient:', error);
+        throw error;
+      }
+
+      return adaptPatientFromSupabase(data[0]);
+    } catch (error) {
+      console.error('Error in createPatient:', error);
       throw error;
     }
-
-    return adaptPatientFromSupabase(data);
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
@@ -157,8 +170,14 @@ export const patientService = {
         genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
       }
       
+      // Make sure hasChildren is stored as a string
+      const hasChildrenValue = typeof patient.hasChildren === 'boolean' 
+        ? patient.hasChildren ? "true" : "false" 
+        : patient.hasChildren;
+        
       // Prepare the complete patient data for update
       const patientData = {
+        id: id,
         firstName: patient.firstName,
         lastName: patient.lastName,
         email: patient.email,
@@ -167,7 +186,7 @@ export const patientService = {
         gender: genderValue,
         maritalStatus: patient.maritalStatus,
         occupation: patient.occupation,
-        hasChildren: patient.hasChildren,
+        hasChildren: hasChildrenValue,
         childrenAges: patient.childrenAges,
         birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
         generalPractitioner: patient.generalPractitioner,
@@ -196,22 +215,21 @@ export const patientService = {
 
       console.log("Updating patient with id:", id);
       
-      // Solution 1: Utiliser POST au lieu de PATCH (upsert)
-      const { data, error } = await supabase
+      // Use upsert instead of update to avoid permission issues
+      const query = supabase
         .from('Patient')
-        .upsert({
-          id: id, // Inclure l'ID pour que upsert fonctionne comme mise à jour
-          ...patientData
-        })
-        .select()
-        .single();
+        .upsert(patientData)
+        .select();
+        
+      const result = await addAuthHeaders(query);
+      const { data, error } = await result;
 
       if (error) {
         console.error('Error updating patient:', error);
         throw error;
       }
 
-      return adaptPatientFromSupabase(data);
+      return adaptPatientFromSupabase(data[0]);
     } catch (error) {
       console.error('Error updating patient:', error);
       throw error;
@@ -220,10 +238,13 @@ export const patientService = {
   
   async deletePatient(id: number): Promise<{ error: any | null }> {
     try {
-      const { error } = await supabase
+      const query = supabase
         .from('Patient')
         .delete()
         .eq('id', id);
+        
+      const result = await addAuthHeaders(query);
+      const { error } = await result;
         
       if (error) {
         console.error('Error deleting patient:', error);
