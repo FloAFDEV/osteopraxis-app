@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Activity, User, Mail, Phone, Calendar, FileText, AlertCircle } from 'lucide-react';
+import { Activity, User, Mail, Phone, Calendar, FileText, AlertCircle, FileText2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { api } from '@/services/api';
@@ -13,7 +14,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from 'sonner';
-import { InvoiceIcon } from 'lucide-react';
 
 const PatientDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -98,13 +98,13 @@ const PatientDetailPage = () => {
           <CardContent className="space-y-4">
             <div className="flex justify-center">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={patient.imageUrl} />
+                <AvatarImage src={patient.avatarUrl || undefined} />
                 <AvatarFallback>{patient.firstName[0]}{patient.lastName[0]}</AvatarFallback>
               </Avatar>
             </div>
             <div className="text-center">
               <h2 className="text-lg font-semibold">{patient.firstName} {patient.lastName}</h2>
-              <p className="text-sm text-muted-foreground">{patient.dateOfBirth ? format(parseISO(patient.dateOfBirth), 'd MMMM yyyy', { locale: fr }) : 'Date de naissance non renseignée'}</p>
+              <p className="text-sm text-muted-foreground">{patient.birthDate ? format(parseISO(patient.birthDate), 'd MMMM yyyy', { locale: fr }) : 'Date de naissance non renseignée'}</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
@@ -242,7 +242,7 @@ const PatientDetailPage = () => {
                   ) : (
                     <div className="text-center py-12 border border-dashed rounded-lg">
                       <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                        <InvoiceIcon className="h-6 w-6 text-muted-foreground" />
+                        <FileText2 className="h-6 w-6 text-muted-foreground" />
                       </div>
                       <h3 className="text-lg font-medium mb-1">Aucune facture</h3>
                       <p className="text-muted-foreground mb-4">
@@ -250,7 +250,7 @@ const PatientDetailPage = () => {
                       </p>
                       <Button asChild>
                         <Link to={`/invoices/new?patientId=${id}`}>
-                          <InvoiceIcon className="h-4 w-4 mr-2" />
+                          <FileText2 className="h-4 w-4 mr-2" />
                           Créer une facture
                         </Link>
                       </Button>

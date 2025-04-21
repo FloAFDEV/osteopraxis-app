@@ -139,7 +139,7 @@ export const appointmentService = {
       ...appointment,
       id,
       date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
-      status: appointment.status ? normalizeStatus(appointment.status) : undefined,
+      status: appointment.status ? normalizeStatus(appointment.status) : "SCHEDULED",
       updatedAt: now
     } as Appointment;
   },
@@ -157,12 +157,16 @@ export const appointmentService = {
     
     // Mock: return updated appointment data with CANCELED status
     await delay(300);
-    const now = new Date().toISOString();
-    return {
+    // Cast as Appointment to fix type error
+    const mockedAppointment: Appointment = {
       id,
       status: "CANCELED",
-      updatedAt: now
-    } as Appointment;
+      date: new Date().toISOString(),
+      patientId: 1,
+      reason: "Cancelled appointment",
+      notificationSent: false
+    };
+    return mockedAppointment;
   },
 
   async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {

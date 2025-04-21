@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock, "invoice" as InvoiceIcon } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock, FileText2 } from "lucide-react";
 import { api } from "@/services/api";
-import { Appointment, Patient } from "@/types";
+import { Appointment, Patient, AppointmentStatus } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -53,7 +53,7 @@ const SchedulePage = () => {
     const days = eachDayOfInterval({ start, end });
     setCurrentWeek(days);
   }, [selectedDate]);
-  
+
   const getPatientById = (patientId: number) => {
     return patients.find((patient) => patient.id === patientId);
   };
@@ -78,7 +78,7 @@ const SchedulePage = () => {
       // Mettre à jour la liste des rendez-vous
       const updatedAppointments = appointments.map(appointment => 
         appointment.id === appointmentId 
-          ? { ...appointment, status: "CANCELED" } 
+          ? { ...appointment, status: "CANCELED" as AppointmentStatus } 
           : appointment
       );
       setAppointments(updatedAppointments);
@@ -108,8 +108,7 @@ const SchedulePage = () => {
     setSelectedDate(new Date());
   };
   
-  return (
-    <Layout>
+  return <Layout>
       <div className="flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -270,8 +269,7 @@ const SchedulePage = () => {
           </Tabs>
         )}
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
 
 interface DayScheduleProps {
@@ -336,7 +334,7 @@ const DaySchedule = ({
                   <div className="flex gap-2">
                     <Button variant="ghost" size="sm" asChild>
                       <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
-                        <InvoiceIcon className="h-4 w-4 mr-1" />
+                        <FileText2 className="h-4 w-4 mr-1" />
                         Facture
                       </Link>
                     </Button>

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, AlertCircle, "invoice" as InvoiceIcon } from "lucide-react";
+import { Calendar, AlertCircle, FileText2 } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -139,7 +139,7 @@ const EditAppointmentPage = () => {
           {appointment.status === "COMPLETED" && (
             <Button variant="outline" asChild>
               <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
-                <InvoiceIcon className="h-4 w-4 mr-2" />
+                <FileText2 className="h-4 w-4 mr-2" />
                 Créer une facture
               </Link>
             </Button>

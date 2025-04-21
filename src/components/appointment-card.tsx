@@ -1,7 +1,7 @@
 
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Clock, Calendar, FileText, "invoice" as InvoiceIcon } from "lucide-react";
+import { Clock, Calendar, FileText, FileText2 } from "lucide-react";
 import { Appointment, Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,7 @@ export function AppointmentCard({
         {appointment.status === "COMPLETED" && (
           <Button variant="outline" size="sm" asChild>
             <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
-              <InvoiceIcon className="h-4 w-4 mr-1" />
+              <FileText2 className="h-4 w-4 mr-1" />
               Facture
             </Link>
           </Button>
