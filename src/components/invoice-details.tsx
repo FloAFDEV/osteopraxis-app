@@ -67,6 +67,20 @@ export const InvoiceDetails = ({
     }
   };
 
+  // Function to display patient name correctly with proper fallbacks
+  const getDisplayPatientName = () => {
+    // If a patientName prop is provided explicitly, use it
+    if (patientName) return patientName;
+    
+    // If the invoice has a Patient object attached (from API), use it
+    if (invoice.Patient && invoice.Patient.firstName && invoice.Patient.lastName) {
+      return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
+    }
+    
+    // Fallback to patient ID
+    return `Patient #${invoice.patientId}`;
+  };
+
   return (
     <>
       <Card className={clsx(
@@ -107,7 +121,7 @@ export const InvoiceDetails = ({
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Patient :</span>
               <span className="font-semibold text-blue-600 dark:text-blue-300">
-                {patientName || (invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : `Patient #${invoice.patientId}`)}
+                {getDisplayPatientName()}
               </span>
             </div>
             <div className="flex justify-between mt-3 pt-3 border-t border-dashed border-blue-200 dark:border-blue-800/50">

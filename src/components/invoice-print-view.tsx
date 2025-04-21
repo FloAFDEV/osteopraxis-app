@@ -39,20 +39,20 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
   };
 
   return (
-    <div className="bg-white p-6 max-w-3xl mx-auto text-sm">
-      {/* En-tête avec logo et infos cabinet */}
-      <div className="flex justify-between items-start mb-4">
+    <div className="bg-white p-4 max-w-3xl mx-auto text-sm page-break-after">
+      {/* En-tête avec logo et infos cabinet - Format plus compact */}
+      <div className="flex justify-between items-start mb-3">
         <div className="max-w-[50%]">
-          <h1 className="text-2xl font-bold mb-1 text-amber-700">{cabinet?.name || "PatientHub"}</h1>
+          <h1 className="text-xl font-bold mb-1 text-amber-700">{cabinet?.name || "PatientHub"}</h1>
           {cabinet?.logoUrl && (
-            <img src={cabinet.logoUrl} alt={`Logo ${cabinet.name}`} className="h-12 mb-2 object-contain" />
+            <img src={cabinet.logoUrl} alt={`Logo ${cabinet.name}`} className="h-10 mb-1 object-contain" />
           )}
-          <div className="text-xs space-y-0.5 text-gray-600">
+          <div className="text-[10px] space-y-0.5 text-gray-600">
             {osteopath?.professional_title && <p>{osteopath.professional_title}</p>}
             {cabinet?.address && <p>{cabinet.address}</p>}
             {cabinet?.phone && <p>Tél: {cabinet.phone}</p>}
             {cabinet?.email && <p>{cabinet.email}</p>}
-            <div className="text-[11px] mt-1 space-y-0.5">
+            <div className="text-[10px] space-y-0.5">
               {osteopath?.siret && <p>SIRET: {osteopath.siret}</p>}
               {osteopath?.adeli_number && <p>ADELI: {osteopath.adeli_number}</p>}
               {osteopath?.ape_code && <p>Code APE: {osteopath.ape_code}</p>}
@@ -62,7 +62,7 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
         
         <div className="text-right">
           <h2 className="text-lg font-semibold text-amber-700 mb-1">NOTE D'HONORAIRES</h2>
-          <p className="font-medium mb-2">#{invoice.id.toString().padStart(4, '0')}</p>
+          <p className="font-medium mb-1">#{invoice.id.toString().padStart(4, '0')}</p>
           <div className="text-xs space-y-0.5 text-gray-600">
             <p>Date d'émission: {formattedDate}</p>
             <p>Statut: <span className="text-amber-600 font-semibold">{getStatusLabel(invoice.paymentStatus)}</span></p>
@@ -70,12 +70,12 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
         </div>
       </div>
 
-      <hr className="my-3 border-amber-200" />
+      <hr className="my-2 border-amber-200" />
       
-      {/* Informations client et paiement */}
-      <div className="grid grid-cols-2 gap-4 mb-4 text-xs">
+      {/* Informations client et paiement - Format plus compact */}
+      <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
         <div>
-          <h3 className="font-medium text-amber-700 mb-1">Facturer à:</h3>
+          <h3 className="font-medium text-amber-700 mb-0.5">Facturer à:</h3>
           <div className="space-y-0.5 text-gray-600">
             {patient ? (
               <>
@@ -93,7 +93,7 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           </div>
         </div>
         <div className="text-right">
-          <h3 className="font-medium text-amber-700 mb-1">Mode de règlement:</h3>
+          <h3 className="font-medium text-amber-700 mb-0.5">Mode de règlement:</h3>
           <p className="font-medium text-gray-800">{getPaymentMethod(invoice.paymentMethod)}</p>
           {invoice.paymentStatus === "PAID" && 
             <p className="text-amber-600 font-bold mt-1">ACQUITTÉE</p>
@@ -102,44 +102,43 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
       </div>
 
       {/* Tableau détaillé */}
-      <div className="border border-amber-200 rounded mb-4">
-        <table className="w-full text-sm">
+      <div className="border border-amber-200 rounded mb-3">
+        <table className="w-full text-xs">
           <thead>
             <tr className="bg-amber-50">
-              <th className="py-2 px-3 text-left text-amber-700 font-medium">Désignation</th>
-              <th className="py-2 px-3 text-right text-amber-700 font-medium">Montant</th>
+              <th className="py-1 px-3 text-left text-amber-700 font-medium">Désignation</th>
+              <th className="py-1 px-3 text-right text-amber-700 font-medium">Montant</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-t border-amber-100">
-              <td className="py-2 px-3 text-gray-700">Consultation d'ostéopathie</td>
-              <td className="py-2 px-3 text-right text-amber-700 font-medium">{formatAmount(invoice.amount)}</td>
+              <td className="py-1 px-3 text-gray-700">Consultation d'ostéopathie</td>
+              <td className="py-1 px-3 text-right text-amber-700 font-medium">{formatAmount(invoice.amount)}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr className="border-t border-amber-100 bg-amber-50/50">
-              <td className="py-2 px-3 text-right text-amber-700 font-medium">Total</td>
-              <td className="py-2 px-3 text-right text-amber-700 font-bold">{formatAmount(invoice.amount)}</td>
+              <td className="py-1 px-3 text-right text-amber-700 font-medium">Total</td>
+              <td className="py-1 px-3 text-right text-amber-700 font-bold">{formatAmount(invoice.amount)}</td>
             </tr>
           </tfoot>
         </table>
       </div>
 
       {/* Mentions légales */}
-      <div className="text-xs space-y-2 text-gray-600 mb-4">
+      <div className="text-[10px] space-y-1 text-gray-600 mb-2">
         <p className="font-medium">{invoice.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI"}</p>
         <p>En votre aimable règlement à réception. Merci de votre confiance.</p>
       </div>
       
       {/* Pied de page */}
-      <div className="text-center border-t border-amber-100 pt-2 mt-auto">
-        <p className="text-[10px] text-gray-500">Document généré le {currentDate}</p>
-        <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+      <div className="text-center border-t border-amber-100 pt-1 mt-auto">
+        <p className="text-[9px] text-gray-500">Document généré le {currentDate}</p>
+        <h1 className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
           PatientHub
         </h1>
-        <p className="text-[10px] text-gray-500">Logiciel de gestion pour ostéopathes</p>
+        <p className="text-[9px] text-gray-500">Logiciel de gestion pour ostéopathes</p>
       </div>
     </div>
   );
 };
-

@@ -392,13 +392,12 @@ const InvoicesPage = () => {
               </h1>
               <div className="space-y-8">
                 {printAllInvoices.map(invoice => (
-                  <div key={invoice.id} className="page-break-after">
+                  <div key={invoice.id} className="page-break-after mb-4">
                     <InvoicePrintView 
                       invoice={invoice}
                       osteopath={printOsteopath}
                       cabinet={printCabinet}
                     />
-                    <div className="h-12"></div>
                   </div>
                 ))}
               </div>
