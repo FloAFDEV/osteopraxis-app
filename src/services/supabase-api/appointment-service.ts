@@ -13,24 +13,25 @@ type CreateAppointmentPayload = {
 };
 
 // Type pour l'objet réellement envoyé à Supabase
-type InsertableAppointment = CreateAppointmentPayload & {
+type InsertableAppointment = {
+  date: string;
+  patientId: number;
+  reason: string;
+  status: AppointmentStatus;
+  cabinetId?: number;
+  notificationSent: boolean;
   createdAt: string;
   updatedAt: string;
-  status: string; // Using string to avoid type conflicts
-  notificationSent: boolean;
 };
 
 // Type pour les mises à jour d'appointment
 type UpdateAppointmentPayload = Partial<CreateAppointmentPayload>;
 
-// Map entre les statuts de l'application et ceux de Supabase
-const mapStatusToSupabase = (status: AppointmentStatus): string => {
-  return status === "CANCELLED" ? "CANCELED" : status;
-};
-
-const mapStatusFromSupabase = (status: string): AppointmentStatus => {
-  return status === "CANCELED" ? "CANCELLED" : status as AppointmentStatus;
-};
+// Fonction pour normaliser les status (si jamais "CANCELLED" est reçu d'anciennes données)
+function normalizeStatus(status?: string): AppointmentStatus {
+  if (status?.toUpperCase() === 'CANCELLED') return "CANCELED";
+  return (status as AppointmentStatus) ?? "SCHEDULED";
+}
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -40,10 +41,7 @@ export const supabaseAppointmentService = {
         .select("*")
         .order('date', { ascending: true });
       if (error) throw error;
-      return (data || []).map(appointment => ({
-        ...appointment,
-        status: mapStatusFromSupabase(appointment.status)
-      }));
+      return data || [];
     } catch (error) {
       console.error("Error fetching appointments:", error);
       throw error;
@@ -61,10 +59,7 @@ export const supabaseAppointmentService = {
       if (error) throw error;
       if (!data) throw new Error(`Appointment with id ${id} not found`);
 
-      return {
-        ...data,
-        status: mapStatusFromSupabase(data.status)
-      };
+      return data;
     } catch (error) {
       console.error("Error fetching appointment:", error);
       throw error;
@@ -81,10 +76,7 @@ export const supabaseAppointmentService = {
 
       if (error) throw error;
 
-      return (data || []).map(appointment => ({
-        ...appointment,
-        status: mapStatusFromSupabase(appointment.status)
-      }));
+      return data || [];
     } catch (error) {
       console.error("Error fetching patient appointments:", error);
       throw error;
@@ -97,8 +89,11 @@ export const supabaseAppointmentService = {
       
       // Création de l'objet à insérer avec les champs timestamp
       const insertable: InsertableAppointment = {
-        ...payload,
-        status: payload.status ? mapStatusToSupabase(payload.status) : "SCHEDULED",
+        date: payload.date,
+        patientId: payload.patientId,
+        reason: payload.reason,
+        cabinetId: payload.cabinetId,
+        status: normalizeStatus(payload.status),
         notificationSent: payload.notificationSent ?? false,
         createdAt: now,
         updatedAt: now
@@ -115,10 +110,7 @@ export const supabaseAppointmentService = {
         throw error;
       }
       
-      return {
-        ...data,
-        status: mapStatusFromSupabase(data.status),
-      };
+      return data;
     } catch (error: any) {
       console.error("Error creating appointment:", error);
       throw error;
@@ -127,7 +119,7 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
     try {
-      // Ne pas inclure createdAt ou updatedAt dans la mise à jour
+      // Ne pas inclure createdAt dans la mise à jour
       const now = new Date().toISOString();
       
       const updateData: Partial<InsertableAppointment> = {
@@ -135,9 +127,9 @@ export const supabaseAppointmentService = {
         updatedAt: now
       };
 
-      // Si status est fourni, s'assurer qu'il est correctement mappé
+      // Si status est fourni, s'assurer qu'il est correctement normalisé
       if (update.status) {
-        updateData.status = mapStatusToSupabase(update.status);
+        updateData.status = normalizeStatus(update.status);
       }
 
       const { data, error } = await supabase
@@ -152,10 +144,7 @@ export const supabaseAppointmentService = {
         throw error;
       }
 
-      return {
-        ...data,
-        status: mapStatusFromSupabase(data.status),
-      };
+      return data;
     } catch (error: any) {
       console.error("Error updating appointment:", error);
       throw error;

@@ -8,6 +8,12 @@ function isDate(value: unknown): value is Date {
   return value instanceof Date;
 }
 
+// Function to normalize status
+function normalizeStatus(status?: string): AppointmentStatus {
+  if (status?.toUpperCase() === 'CANCELLED') return "CANCELED";
+  return (status as AppointmentStatus) ?? "SCHEDULED";
+}
+
 // Type pour la création d'un rendez-vous sans les champs générés
 type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'> & {
   notificationSent?: boolean;
@@ -68,10 +74,11 @@ export const appointmentService = {
   async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        // Convertir la date si nécessaire
+        // Convertir la date si nécessaire et normaliser le status
         const payload = {
           ...appointment,
           notificationSent: appointment.notificationSent ?? false,
+          status: normalizeStatus(appointment.status),
           date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
         };
         return await supabaseAppointmentService.createAppointment(payload);
@@ -89,7 +96,7 @@ export const appointmentService = {
       id: Math.floor(Math.random() * 1000),
       date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
       notificationSent: appointment.notificationSent ?? false,
-      status: appointment.status || "SCHEDULED",
+      status: normalizeStatus(appointment.status),
       createdAt: now,
       updatedAt: now
     } as Appointment;
@@ -98,13 +105,16 @@ export const appointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        // Convertir la date si nécessaire
-        const payload = appointment.date 
-          ? { 
-              ...appointment,
-              date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
-            }
-          : appointment;
+        // Convertir la date si nécessaire et normaliser le status
+        const payload: Partial<Appointment> = { ...appointment };
+        
+        if (appointment.date) {
+          payload.date = isDate(appointment.date) ? appointment.date.toISOString() : appointment.date;
+        }
+        
+        if (appointment.status) {
+          payload.status = normalizeStatus(appointment.status);
+        }
           
         return await supabaseAppointmentService.updateAppointment(id, payload);
       } catch (error) {
@@ -120,12 +130,13 @@ export const appointmentService = {
       ...appointment,
       id,
       date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
+      status: appointment.status ? normalizeStatus(appointment.status) : undefined,
       updatedAt: now
     } as Appointment;
   },
 
   async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
-    return this.updateAppointment(id, { status });
+    return this.updateAppointment(id, { status: normalizeStatus(status) });
   },
   
   async deleteAppointment(id: number): Promise<boolean> {
