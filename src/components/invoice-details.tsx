@@ -64,13 +64,17 @@ export const InvoiceDetails = ({
   };
 
   return <>
-      <Card className={clsx("hover-scale border-0 shadow-xl px-1.5 pb-2.5 pt-4 transition-all duration-300", "relative overflow-hidden min-h-[165px] glass-morphism",
-    // Improved dark mode styling
-    "bg-gradient-to-br from-white/90 via-amber-50/70 to-gray-100/90", "dark:from-gray-900/95 dark:via-amber-950/30 dark:to-gray-950/90")} style={{
-      boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07), 0 2px 8px 0 rgba(252, 211, 77, 0.08)",
-      border: "1.5px solid rgba(251,191,36,0.1)"
-    }}>
-        {/* Accent bar en haut - amélioré pour le dark mode */}
+      <Card className={clsx(
+        // COULEUR & GRADIENT EN ACCORD AVEC LE RESTE DU SITE
+        "hover-scale border-0 shadow-xl px-1.5 pb-2.5 pt-4 transition-all duration-300",
+        "relative overflow-hidden min-h-[165px] glass-morphism",
+        // Palette corrigée
+        "bg-gradient-to-br from-card to-secondary/80 dark:from-card dark:to-gray-900"
+      )} style={{
+        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07), 0 2px 8px 0 rgba(254, 215, 102, 0.08)",
+        border: "1.5px solid rgba(251,191,36,0.10)"
+      }}>
+        {/* Accent bar (inchangée) */}
         <div className="absolute h-1 w-full left-0 top-0 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 dark:from-amber-600/90 dark:via-amber-500/80 dark:to-amber-700/90 rounded-t-lg blur-[1.5px] opacity-80" />
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-between items-center gap-x-3 text-lg">
@@ -116,10 +120,17 @@ export const InvoiceDetails = ({
                     <Printer className="h-4 w-4" />
                     <span className="sr-only">Imprimer</span>
                   </Button>}
-                {onDownload && <Button size="sm" variant="default" className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white" onClick={onDownload}>
+                {onDownload && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border border-amber-400 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 font-bold hover:bg-amber-100 dark:hover:bg-amber-800/40 transition-all"
+                    onClick={onDownload}
+                  >
                     <Download className="h-4 w-4" />
-                    <span className="sr-only">Télécharger</span>
-                  </Button>}
+                    Exporter PDF
+                  </Button>
+                )}
               </div>
             </div>
           </div>

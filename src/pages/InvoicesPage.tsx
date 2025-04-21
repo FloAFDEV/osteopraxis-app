@@ -27,14 +27,19 @@ const InvoicesPage = () => {
 
   const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
   const [printAllInvoices, setPrintAllInvoices] = useState<Invoice[] | null>(null);
+
+  // Correction : UN SEUL printRef !
   const printRef = useRef<HTMLDivElement>(null);
   const [readyToPrint, setReadyToPrint] = useState(false);
 
   // Configuration de react-to-print
   const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: printInvoice ? `Facture_${printInvoice.id.toString().padStart(4, "0")}` : 
-                   printAllInvoices ? `Factures_${selectedYear}` : "Facture",
+    content: () => printRef.current!,
+    documentTitle: printInvoice
+      ? `Facture_${printInvoice.id.toString().padStart(4, "0")}`
+      : printAllInvoices
+        ? `Factures_${selectedYear}`
+        : "Facture",
     onAfterPrint: () => {
       setPrintInvoice(null);
       setPrintAllInvoices(null);
@@ -42,14 +47,12 @@ const InvoicesPage = () => {
     },
   });
 
-  // Effet pour déclencher l'impression lorsqu'une facture est sélectionnée
   useEffect(() => {
     if (printInvoice || printAllInvoices) {
       setReadyToPrint(true);
     }
   }, [printInvoice, printAllInvoices]);
 
-  // Effet pour déclencher l'impression lorsque tout est prêt
   useEffect(() => {
     if ((printInvoice || printAllInvoices) && readyToPrint) {
       setTimeout(() => {
@@ -139,10 +142,14 @@ const InvoicesPage = () => {
     setPrintAllInvoices(null);
   };
 
+  // Export immédiat en PDF sans toast intermédiaire
   const handleDownloadInvoice = (invoice: Invoice) => {
     setPrintInvoice(invoice);
     setPrintAllInvoices(null);
-    toast.info("Utilisez la fenêtre d'impression pour sauvegarder le PDF.");
+    // Lancer directement impression PDF après un petit délai de montage DOM
+    setTimeout(() => {
+      handlePrint?.();
+    }, 100);
   };
 
   // Impression et téléchargement de toutes les factures d'une année
@@ -244,9 +251,11 @@ const InvoicesPage = () => {
                     setSelectedInvoiceId(invoice.id);
                     setIsDeleteModalOpen(true);
                   }}
+                  // Bouton Export PDF renommé + style harmonisée, appel nouvelle logique
                   onDownload={() => handleDownloadInvoice(invoice)}
                   onPrint={() => handlePrintInvoice(invoice)}
                 />
+                {/* Menu action rapide (Imprimer / Export PDF) */}
                 <div className="absolute top-3 right-4 flex gap-1 opacity-70 group-hover:opacity-100">
                   <Button
                     variant="ghost"
@@ -260,7 +269,7 @@ const InvoicesPage = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDownloadInvoice(invoice)}
-                    title="Télécharger"
+                    title="Exporter la facture en PDF"
                   >
                     <Download />
                   </Button>
@@ -284,7 +293,6 @@ const InvoicesPage = () => {
           </div>
         )}
       </div>
-
       {/* Impression PDF/print invisible pour la facture unique sélectionnée */}
       {printInvoice && (
         <div className="hidden">
@@ -293,7 +301,6 @@ const InvoicesPage = () => {
           </div>
         </div>
       )}
-
       {/* Impression PDF/print invisible pour toutes les factures d'une année */}
       {printAllInvoices && (
         <div className="hidden">
@@ -314,7 +321,6 @@ const InvoicesPage = () => {
           </div>
         </div>
       )}
-
       {isDeleteModalOpen && selectedInvoiceId && (
         <ConfirmDeleteInvoiceModal
           isOpen={isDeleteModalOpen}
