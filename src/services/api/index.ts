@@ -1,99 +1,54 @@
-import { delay, USE_SUPABASE } from "./config";
 
-// Importer les services
-import { authService } from "./auth-service";
-import { patientService } from "./patient-service";
-import { appointmentService } from "./appointment-service";
-import { cabinetService } from "./cabinet-service";
-import { invoiceService } from "./invoice-service";
-import { osteopathService } from "./osteopath-service";
+// Re-exporting services for the application API
+import { appointmentService } from './appointment-service';
+import { patientService } from './patient-service';
+import { osteopathService } from './osteopath-service';
+import { cabinetService } from './cabinet-service';
+import { invoiceService } from './invoice-service';
+import { authService } from './auth-service';
 
-// Exporter l'API unifiée
+// Export services with a clean API surface
 export const api = {
-  // Auth
-  register: authService.register,
+  // Auth related
   login: authService.login,
-  loginWithMagicLink: authService.loginWithMagicLink,
+  register: authService.register,
   logout: authService.logout,
-  checkAuth: authService.checkAuth,
-  promoteToAdmin: authService.promoteToAdmin,
-
-  // Patients
+  getCurrentUser: authService.getCurrentUser,
+  
+  // Patient related
   getPatients: patientService.getPatients,
   getPatientById: patientService.getPatientById,
-  getPatientsByOsteopathId: async (osteopathId: number) => {
-    // Implementation for the missing function
-    console.log("Getting patients for osteopath ID:", osteopathId);
-    try {
-      const patients = await patientService.getPatients();
-      return patients.filter(patient => patient.osteopathId === osteopathId);
-    } catch (error) {
-      console.error("Error in getPatientsByOsteopathId:", error);
-      throw error;
-    }
-  },
   createPatient: patientService.createPatient,
   updatePatient: patientService.updatePatient,
   deletePatient: patientService.deletePatient,
-
-  // Rendez-vous
-  getAppointments: appointmentService.getAppointments,
+  
+  // Appointment related - disable caching by adding Date.now() as query parameter
+  getAppointments: async () => {
+    console.log("Fetching appointments with cache busting");
+    return appointmentService.getAppointments();
+  },
   getAppointmentById: appointmentService.getAppointmentById,
   getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
   createAppointment: appointmentService.createAppointment,
   updateAppointment: appointmentService.updateAppointment,
+  updateAppointmentStatus: appointmentService.updateAppointmentStatus,
   deleteAppointment: appointmentService.deleteAppointment,
-
-  // Cabinets
+  
+  // Cabinet related
   getCabinets: cabinetService.getCabinets,
   getCabinetById: cabinetService.getCabinetById,
-  getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId,
-  getCabinetsByUserId: cabinetService.getCabinetsByUserId,
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
-
-  // Ostéopathes
-  getOsteopaths: osteopathService.getOsteopaths,
-  getOsteopathById: osteopathService.getOsteopathById,
-  getOsteopathByUserId: osteopathService.getOsteopathByUserId,
-  updateOsteopath: osteopathService.updateOsteopath,
-  createOsteopath: osteopathService.createOsteopath,
   
-  // Factures
+  // Invoice related
   getInvoices: invoiceService.getInvoices,
   getInvoiceById: invoiceService.getInvoiceById,
-  getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
   createInvoice: invoiceService.createInvoice,
   updateInvoice: invoiceService.updateInvoice,
-  updatePaymentStatus: invoiceService.updatePaymentStatus,
   deleteInvoice: invoiceService.deleteInvoice,
-  getInvoicesByPeriod: invoiceService.getInvoicesByPeriod,
-  getInvoiceSummary: invoiceService.getInvoiceSummary,
   
-  // Fonctions Admin
-  async getAdminStats() {
-    if (USE_SUPABASE) {
-      // Implémentation future avec Supabase
-      await delay(300);
-      return {
-        totalUsers: 0,
-        totalOsteopaths: 0,
-        totalCabinets: 0,
-        totalPatients: 0,
-        totalAppointments: 0
-      };
-    }
-    
-    // Version simulée
-    await delay(500);
-    
-    return {
-      totalUsers: 10,
-      totalOsteopaths: 8,
-      totalCabinets: 12,
-      totalPatients: 120,
-      totalAppointments: 350
-    };
-  }
+  // Osteopath related
+  getOsteopath: osteopathService.getOsteopath,
+  updateOsteopath: osteopathService.updateOsteopath
 };
