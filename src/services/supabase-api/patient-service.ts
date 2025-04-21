@@ -1,11 +1,9 @@
 
-import {
-  getPatients,
-  getPatientById,
-  createPatient,
-  updatePatient,
-  deletePatient
-} from "./patient-queries";
+import { getPatients } from "./patient/getPatients";
+import { getPatientById } from "./patient/getPatientById";
+import { createPatient } from "./patient/createPatient";
+import { updatePatient } from "./patient/updatePatient";
+import { deletePatient } from "./patient/deletePatient";
 
 export const patientService = {
   getPatients,
