@@ -198,6 +198,7 @@ export type Database = {
           id: number
           notes: string | null
           patientId: number
+          paymentMethod: string | null
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"]
           tvaExoneration: boolean | null
           tvaMotif: string | null
@@ -209,6 +210,7 @@ export type Database = {
           id?: number
           notes?: string | null
           patientId: number
+          paymentMethod?: string | null
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
           tvaExoneration?: boolean | null
           tvaMotif?: string | null
@@ -220,6 +222,7 @@ export type Database = {
           id?: number
           notes?: string | null
           patientId?: number
+          paymentMethod?: string | null
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
           tvaExoneration?: boolean | null
           tvaMotif?: string | null

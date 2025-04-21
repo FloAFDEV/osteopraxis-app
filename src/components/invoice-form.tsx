@@ -71,7 +71,8 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
         amount: data.amount,
         date: data.date,
         paymentStatus: data.paymentStatus as PaymentStatus,
-        paymentMethod: data.paymentMethod,
+        // Ensure we pass paymentMethod only if defined and non-empty string to avoid API errors
+        paymentMethod: data.paymentMethod && data.paymentMethod.trim() !== "" ? data.paymentMethod : undefined,
         tvaExoneration: data.tvaExoneration,
         tvaMotif: data.tvaMotif,
         notes: data.notes
@@ -285,3 +286,4 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
     </Form>
   );
 };
+
