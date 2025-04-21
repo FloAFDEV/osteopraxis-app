@@ -1,12 +1,14 @@
-
 import { corsHeaders } from '../../_shared/cors.ts'
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 serve(async (req: Request) => {
-  // Gestion de la requête OPTIONS pour CORS (preflight)
+  // Pré-flight OPTIONS systématique pour CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, {
+      status: 204, // No Content, meilleure pratique
+      headers: corsHeaders,
+    });
   }
 
   try {
@@ -210,5 +212,4 @@ serve(async (req: Request) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }
-})
-
+});
