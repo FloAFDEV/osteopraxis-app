@@ -179,7 +179,15 @@ export function AppointmentForm({
       }) => <FormItem>
               <FormLabel>Patient</FormLabel>
               {/* Champ de recherche */}
-              <input type="text" placeholder="Rechercher un patient" value={patientSearch} autoComplete="off" onChange={e => setPatientSearch(e.target.value)} disabled={isSubmitting} className="mb-2 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-black" />
+              <input
+                type="text"
+                placeholder="Rechercher un patient"
+                value={patientSearch}
+                autoComplete="off"
+                onChange={e => setPatientSearch(e.target.value)}
+                disabled={isSubmitting}
+                className="mb-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
               <Select disabled={isSubmitting} onValueChange={value => field.onChange(parseInt(value, 10))} defaultValue={field.value?.toString()}>
                 <FormControl>
                   <SelectTrigger>

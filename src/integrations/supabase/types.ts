@@ -92,7 +92,7 @@ export type Database = {
           osteopathId: number
           phone?: string | null
           professionalProfileId?: number | null
-          updatedAt: string
+          updatedAt?: string
         }
         Update: {
           address?: string
@@ -308,7 +308,7 @@ export type Database = {
           name: string
           professional_title?: string | null
           siret?: string | null
-          updatedAt: string
+          updatedAt?: string
           userId: string
         }
         Update: {
