@@ -27,11 +27,10 @@ const InvoicesPage = () => {
   const printRef = useRef<HTMLDivElement>(null);
   const [readyToPrint, setReadyToPrint] = useState(false);
 
-  // Correction ici : la prop s'appelle `content` et c'est bien la bonne pour
-  // react-to-print 3.x (cf. https://github.com/gregnb/react-to-print#api)
-  const printRef = useRef<HTMLDivElement>(null);
+  // Configuration de react-to-print
   const handlePrint = useReactToPrint({
-    content: () => printRef.current!,
+    // The correct property is contentRef for react-to-print 3.x
+    contentRef: printRef,
     documentTitle: printInvoice ? `Facture_${printInvoice.id.toString().padStart(4, "0")}` : "Facture",
     onAfterPrint: () => {
       setPrintInvoice(null);
@@ -176,7 +175,6 @@ const InvoicesPage = () => {
                   }}
                   onDownload={() => handleDownloadInvoice(invoice)}
                   onPrint={() => handlePrintInvoice(invoice)}
-                  // Ajout d'une prop custom pour améliorer la carte si besoin plus tard
                 />
                 <div className="absolute top-3 right-4 flex gap-1 opacity-70 group-hover:opacity-100">
                   <Button
