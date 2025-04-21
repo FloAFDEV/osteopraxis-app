@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   User, Calendar, FileText, MapPin, Mail, Phone, Activity, 
-  List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users
+  List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users, Trash
 } from "lucide-react";
 import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -17,12 +18,15 @@ import { AppointmentCard } from "@/components/appointment-card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
 
 const PatientDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPatientData = async () => {
@@ -50,6 +54,19 @@ const PatientDetailPage = () => {
 
     fetchPatientData();
   }, [id]);
+
+  const handleDeletePatient = async () => {
+    setShowDeleteModal(false);
+    if (!patient) return;
+    try {
+      await api.deletePatient(patient.id);
+      toast.success("Patient supprimé avec succès !");
+      navigate("/patients");
+    } catch (err) {
+      toast.error("Erreur lors de la suppression du patient");
+      setShowDeleteModal(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -132,6 +149,12 @@ const PatientDetailPage = () => {
 
   return (
     <Layout>
+      <ConfirmDeletePatientModal
+        isOpen={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        onDelete={handleDeletePatient}
+        patientName={patient.firstName + " " + patient.lastName}
+      />
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-2">
           <Button 
@@ -151,6 +174,10 @@ const PatientDetailPage = () => {
               <Edit className="mr-2 h-4 w-4" />
               Modifier
             </Link>
+          </Button>
+          <Button variant="destructive" onClick={() => setShowDeleteModal(true)} size="sm">
+            <Trash className="mr-1 h-4 w-4" />
+            Supprimer
           </Button>
           <Button asChild>
             <Link to={`/appointments/new?patientId=${patient.id}`}>
@@ -504,3 +531,4 @@ const PatientDetailPage = () => {
 };
 
 export default PatientDetailPage;
+

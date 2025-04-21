@@ -1,22 +1,22 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
 import { PatientForm } from '@/components/patient-form';
-import { Patient, Contraception } from '@/types';
+import { Patient } from '@/types';
 import { toast } from 'sonner';
-import { UserRound } from 'lucide-react';
+import { UserRound, Trash } from 'lucide-react';
 import { patientService } from '@/services/api/patient-service';
+import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
+import { Button } from "@/components/ui/button";
 
 const EditPatientPage = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -78,6 +78,19 @@ const EditPatientPage = () => {
     }
   };
 
+  const handleDeletePatient = async () => {
+    setShowDeleteModal(false);
+    if (!patient) return;
+    try {
+      await patientService.deletePatient(patient.id);
+      toast.success("Patient supprimé avec succès !");
+      navigate("/patients");
+    } catch (err) {
+      toast.error("Erreur lors de la suppression du patient");
+      setShowDeleteModal(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -110,24 +123,37 @@ const EditPatientPage = () => {
   const hasChildren = patient?.hasChildren === "true";
   const childrenInfo = hasChildren && patient?.childrenAges && patient.childrenAges.length > 0 ? `${patient.childrenAges.length} enfant(s): ${patient.childrenAges.join(', ')} ans` : null;
   
-  return <Layout>
+  return (
+    <Layout>
+      <ConfirmDeletePatientModal
+        isOpen={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        onDelete={handleDeletePatient}
+        patientName={patient.firstName + " " + patient.lastName}
+      />
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <UserRound className="h-8 w-8 text-pink-500" />
-            Modifier la fiche patient de {patient?.firstName} {patient?.lastName}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Modifiez les informations du patient
-          </p>
-          {childrenInfo && <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md text-blue-700">
-              <span className="font-medium">Enfants : </span>{childrenInfo}
-            </div>}
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start gap-2">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <UserRound className="h-8 w-8 text-pink-500" />
+              Modifier la fiche patient de {patient?.firstName} {patient?.lastName}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Modifiez les informations du patient
+            </p>
+            {childrenInfo && <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md text-blue-700">
+                <span className="font-medium">Enfants : </span>{childrenInfo}
+              </div>}
+          </div>
+          <Button variant="destructive" onClick={() => setShowDeleteModal(true)} className="flex items-center gap-2" size="sm">
+            <Trash className="mr-1 h-4 w-4" />
+            Supprimer
+          </Button>
         </div>
-
         <PatientForm patient={patient} onSave={handleSave} isLoading={isSaving} />
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
 
 export default EditPatientPage;
