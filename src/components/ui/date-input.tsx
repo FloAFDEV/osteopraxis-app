@@ -3,16 +3,14 @@ import * as React from "react";
 import { format, parse, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 export interface DateInputProps {
   value: Date | undefined;
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
-  format?: string;
+  format?: string; // "dd/MM/yyyy" par défaut
   className?: string;
   disabled?: boolean;
 }
@@ -23,99 +21,86 @@ export function DateInput({
   placeholder = "JJ/MM/AAAA",
   format: dateFormat = "dd/MM/yyyy",
   className,
-  disabled = false
+  disabled = false,
 }: DateInputProps) {
-  const [inputValue, setInputValue] = React.useState<string>(
+  const [inputValue, setInputValue] = React.useState(
     value ? format(value, dateFormat) : ""
   );
-  const [open, setOpen] = React.useState(false);
-
-  // Pour indiquer visuellement une date invalide
-  const [isInvalid, setIsInvalid] = React.useState(false);
+  const [invalid, setInvalid] = React.useState(false);
 
   React.useEffect(() => {
     setInputValue(value ? format(value, dateFormat) : "");
   }, [value, dateFormat]);
 
-  // Vérifie la validité au changement clavier
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-    try {
-      const parsedDate = parse(newValue, dateFormat, new Date(), { locale: fr });
-      const valid = isValid(parsedDate);
-      setIsInvalid(!valid);
-      if (valid) {
-        onChange(parsedDate);
-      }
-    } catch {
-      setIsInvalid(true);
+  // Helper pour parser et contrôler la validité + bornes d’années (1900 à aujourd’hui)
+  const parseOrNull = (str: string) => {
+    const d = parse(str, dateFormat, new Date(), { locale: fr });
+    if (!isValid(d)) return null;
+    // Limiter l’année
+    const year = d.getFullYear();
+    const thisYear = new Date().getFullYear();
+    if (year < 1900 || year > thisYear) return null;
+    return d;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setInputValue(v);
+
+    // Dès 10 caractères, tentative de parse stricte
+    const parsed = parseOrNull(v);
+    setInvalid(!parsed && v.length === 10); // Afficher erreur seulement si champ complet mais invalide
+    if (parsed) {
+      onChange(parsed);
+    }
+    // Si vide, on supprime la date
+    if (v.trim() === "") {
+      onChange(undefined);
+      setInvalid(false);
     }
   };
 
-  // Vérifie ou reset la validité lors du blur
   const handleBlur = () => {
     if (!inputValue) {
-      setIsInvalid(false);
+      setInvalid(false);
       onChange(undefined);
       return;
     }
-    try {
-      const parsedDate = parse(inputValue, dateFormat, new Date(), { locale: fr });
-      const valid = isValid(parsedDate);
-      setIsInvalid(!valid);
-      if (valid) {
-        onChange(parsedDate);
-        setInputValue(format(parsedDate, dateFormat));
-      } else {
-        setInputValue(value ? format(value, dateFormat) : "");
-      }
-    } catch {
-      setIsInvalid(true);
+    const parsed = parseOrNull(inputValue);
+    if (parsed) {
+      onChange(parsed);
+      setInputValue(format(parsed, dateFormat));
+      setInvalid(false);
+    } else {
+      // reset à l’ancienne valeur (valeur Date précédente ou chaîne vide)
       setInputValue(value ? format(value, dateFormat) : "");
+      setInvalid(true);
     }
   };
 
-  // Fermeture du popover à la sélection
-  const handleCalendarSelect = (date?: Date) => {
-    onChange(date);
-    setOpen(false);
-  };
-
   return (
-    <div className={cn("relative grid gap-2", className)}>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Input
-            value={inputValue}
-            onChange={handleInputChange}
-            onBlur={handleBlur}
-            placeholder={placeholder}
-            className={cn(
-              "pr-10",
-              isInvalid && "border-destructive"
-            )}
-            inputMode="numeric"
-            pattern="\d{2}/\d{2}/\d{4}"
-            disabled={disabled}
-            aria-invalid={isInvalid}
-          />
-        </PopoverTrigger>
-        {/* Icône calendrier en absolu, non interactive */}
-        <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={value}
-            onSelect={handleCalendarSelect}
-            initialFocus
-            disabled={disabled}
-            captionLayout="dropdown"
-            fromYear={1900}
-            toYear={new Date().getFullYear()}
-          />
-        </PopoverContent>
-      </Popover>
+    <div className={cn("relative", className)}>
+      <Input
+        type="text"
+        value={inputValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        inputMode="numeric"
+        pattern="\d{2}/\d{2}/\d{4}"
+        disabled={disabled}
+        aria-invalid={invalid}
+        title="Format : JJ/MM/AAAA"
+        className={cn(invalid && "border-destructive pr-10")}
+      />
+      {/* Icône purement décorative */}
+      <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+      {/* Mini aide si erreur */}
+      {invalid && (
+        <span className="text-xs text-destructive absolute left-0 -bottom-5">
+          Date invalide ou hors bornes (1900–{new Date().getFullYear()})
+        </span>
+      )}
     </div>
   );
 }
