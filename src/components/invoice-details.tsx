@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -67,9 +66,9 @@ export const InvoiceDetails = ({
     }
   };
 
-  // Function to display patient name correctly with proper fallbacks
+  // Updated function to correctly display patient name
   const getDisplayPatientName = () => {
-    // If a patientName prop is provided explicitly, use it
+    // If a patientName prop is provided explicitly, use it first
     if (patientName) return patientName;
     
     // If the invoice has a Patient object attached (from API), use it
@@ -77,7 +76,7 @@ export const InvoiceDetails = ({
       return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
     }
     
-    // Fallback to patient ID
+    // Fallback to patient ID only if no name is available
     return `Patient #${invoice.patientId}`;
   };
 
@@ -120,7 +119,7 @@ export const InvoiceDetails = ({
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Patient :</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-300">
+              <span className="font-semibold text-blue-600 dark:text-blue-300 truncate max-w-[200px]">
                 {getDisplayPatientName()}
               </span>
             </div>
