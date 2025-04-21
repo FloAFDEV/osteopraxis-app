@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -29,6 +30,16 @@ const InvoiceDetailPage = () => {
     documentTitle: `Facture_${id}`,
     contentRef: printRef
   });
+  
+  // Wrapper function to handle the print event
+  const onPrintClick = () => {
+    handlePrint();
+  };
+  
+  // Wrapper function to handle the download event
+  const onDownloadClick = () => {
+    handlePrint();
+  };
   
   // Charger les données de la facture
   useEffect(() => {
@@ -127,11 +138,6 @@ const InvoiceDetailPage = () => {
     }
   };
   
-  const handleDownload = () => {
-    // Pour le téléchargement, on utilise la même fonction que pour l'impression
-    handlePrint();
-  };
-  
   const getPatientName = () => {
     if (patient) {
       return `${patient.firstName} ${patient.lastName}`;
@@ -174,13 +180,13 @@ const InvoiceDetailPage = () => {
          
           <div className="space-x-2">
             <Button 
-              onClick={() => handlePrint()} 
+              onClick={onPrintClick} 
               variant="outline"
             >
               Imprimer
             </Button>
             <Button 
-              onClick={handlePrint} 
+              onClick={onDownloadClick} 
               variant="default"
             >
               Télécharger
@@ -198,8 +204,8 @@ const InvoiceDetailPage = () => {
                 patientName={getPatientName()}
                 onEdit={() => {}} 
                 onDelete={handleDelete}
-                onPrint={() => handlePrint()}
-                onDownload={handlePrint}
+                onPrint={onPrintClick}
+                onDownload={onDownloadClick}
               />
             </div>
             
