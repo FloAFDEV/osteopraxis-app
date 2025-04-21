@@ -90,6 +90,9 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           <p className="font-medium text-amber-600">#{invoice.id.toString().padStart(4, '0')}</p>
           <p className="mt-4 text-gray-600">Date de consultation: {formattedDate}</p>
           <p className="text-gray-600">
+            Mode de règlement: {getPaymentMethod(invoice.paymentMethod)}
+          </p>
+          <p className="text-gray-600">
             Statut: <span className="text-amber-600 font-semibold">{getStatusLabel(invoice.paymentStatus)}</span>
           </p>
         </div>
