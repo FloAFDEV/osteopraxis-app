@@ -112,33 +112,40 @@ export const supabaseAppointmentService = {
   },
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
-    try {
-      const updateData: Partial<InsertableAppointment> = {
-        ...update,
-      };
-
-      // Si status est fourni, s'assurer qu'il est correctement normalisé
-      if (update.status) {
-        updateData.status = normalizeStatus(update.status);
+    // MODIFICATION : PATCH transformé en POST + X-HTTP-Method-Override
+    // Cela évite les préflight PATCH et fonctionne bien avec Supabase !
+    const tokenResponse = await supabase.auth.getSession();
+    const token = tokenResponse.session?.access_token;
+    const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? ""; // Si géré par l’env d’exécution
+    const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
+    // Le status doit être normalisé côté payload
+    const updatePayload = {
+      ...update,
+      status: update.status ? normalizeStatus(update.status) : undefined,
+      updatedAt: new Date().toISOString(),
+    };
+    // Nettoyage : suppression undefined pour ne pas PATCH n’importe quoi
+    Object.keys(updatePayload).forEach((k) => updatePayload[k as keyof typeof updatePayload] === undefined && delete updatePayload[k as keyof typeof updatePayload]);
+    const res = await fetch(PATCH_URL, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: token ? `Bearer ${token}` : "",
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+        "X-HTTP-Method-Override": "PATCH",
+      },
+      body: JSON.stringify(updatePayload),
+    });
+    if (!res.ok) {
+      try {
+        throw await res.json();
+      } catch (e) {
+        throw new Error("Erreur lors de la modification du rendez-vous");
       }
-
-      const { data, error } = await supabase
-        .from("Appointment")
-        .update(updateData)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("[SUPABASE ERROR]", error.code, error.message);
-        throw error;
-      }
-
-      return data;
-    } catch (error: any) {
-      console.error("Error updating appointment:", error);
-      throw error;
     }
+    const data = await res.json();
+    return Array.isArray(data) ? data[0] : data;
   },
 
   async deleteAppointment(id: number): Promise<boolean> {
@@ -159,3 +166,4 @@ export const supabaseAppointmentService = {
     }
   }
 };
+
