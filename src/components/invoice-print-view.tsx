@@ -46,15 +46,17 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
     <div className="bg-white p-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-start mb-8">
         <div>
-          {cabinet && cabinet.logoUrl ? (
+          {/* Nom du cabinet en plus gros et gras */}
+          <h1 className="text-4xl font-extrabold mb-2">
+            {cabinet?.name || "PatientHub"}
+          </h1>
+          {cabinet?.logoUrl && (
             <img 
               src={cabinet.logoUrl} 
               alt={`Logo ${cabinet.name}`} 
               className="h-16 mb-3"
               style={{ maxWidth: '200px', objectFit: 'contain' }}
             />
-          ) : (
-            <h1 className="text-3xl font-bold text-green-700">{cabinet?.name || "PatientHub"}</h1>
           )}
           <p className="text-gray-600">{osteopath?.professional_title || "Ostéopathe D.O."}</p>
           <p className="text-gray-600 mt-2">
@@ -148,10 +150,22 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
         </p>
         
         <div className="text-center text-gray-500 text-sm mt-8">
-          <p className="text-green-600">Document généré le {currentDate}</p>
-          <p className="mt-1 text-green-500">PatientHub - Logiciel de gestion pour ostéopathes</p>
+          {/* Nom du site avec dégradé */}
+          <h1
+            className="
+              text-3xl md:text-4xl font-bold
+              bg-clip-text text-transparent
+              bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
+              dark:from-blue-500 dark:via-purple-500 dark:to-purple-500
+            "
+          >
+            PatientHub
+          </h1>
+          <p className="text-gray-500 text-sm">Logiciel de gestion pour ostéopathes</p>
+          <p className="text-gray-400 text-xs mt-1">Document généré le {currentDate}</p>
         </div>
       </div>
     </div>
   );
 };
+
