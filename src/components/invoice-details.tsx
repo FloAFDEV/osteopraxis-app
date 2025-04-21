@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ConfirmDeleteInvoiceModal from "./modals/ConfirmDeleteInvoiceModal";
 import clsx from "clsx";
+
 interface InvoiceDetailsProps {
   invoice: Invoice;
   patientName?: string;
@@ -15,6 +16,7 @@ interface InvoiceDetailsProps {
   onDownload?: () => void;
   onPrint?: () => void;
 }
+
 export const InvoiceDetails = ({
   invoice,
   patientName,
@@ -24,6 +26,7 @@ export const InvoiceDetails = ({
   onPrint
 }: InvoiceDetailsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const formatDate = (date: string) => {
     return format(new Date(date), "dd MMMM yyyy", {
       locale: fr
@@ -59,6 +62,7 @@ export const InvoiceDetails = ({
         return "Statut inconnu";
     }
   };
+
   return <>
       <Card className={clsx("hover-scale border-0 shadow-xl px-1.5 pb-2.5 pt-4 transition-all duration-300", "relative overflow-hidden min-h-[165px] glass-morphism",
     // Improved dark mode styling
@@ -98,7 +102,10 @@ export const InvoiceDetails = ({
             </div>
             <div className="flex justify-between mt-3 pt-3 border-t border-dashed border-amber-200 dark:border-amber-800/50">
               <div className="flex space-x-2">
-                {onEdit}
+                {onEdit && <Button size="sm" variant="outline" className="border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all dark:bg-amber-950/30" onClick={onEdit}>
+                    <Edit className="h-4 w-4" />
+                    <span className="sr-only">Modifier</span>
+                  </Button>}
                 {onDelete && <Button size="sm" variant="outline" className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 border border-red-200 dark:border-red-800/60 shadow transition-all dark:bg-red-950/30 dark:hover:bg-red-900/40" onClick={() => setIsDeleteModalOpen(true)} aria-label="Supprimer la facture">
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Supprimer</span>
