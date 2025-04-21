@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -106,11 +105,10 @@ const SchedulePage = () => {
                 <TabsTrigger value="week">Semaine</TabsTrigger>
               </TabsList>
             </Tabs>
-            
+            {/* Le bouton Aujourd'hui sera affiché également dans la vue Jour */}
             <Button variant="outline" size="sm" onClick={navigateToToday}>
               Aujourd'hui
             </Button>
-            
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="ml-auto">
@@ -132,8 +130,8 @@ const SchedulePage = () => {
             </Popover>
           </div>
         </div>
-
         {loading ? (
+          
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -144,24 +142,26 @@ const SchedulePage = () => {
           <Tabs value={view} defaultValue={view}>
             <TabsContent value="day">
               <div className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <Button variant="ghost" size="sm" onClick={navigateToPreviousDay}>
-                    <ChevronLeft className="h-4 w-4" />
-                    Jour précédent
-                  </Button>
-                  
-                  <h2 className="text-xl font-medium capitalize">
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={navigateToPreviousDay}>
+                      <ChevronLeft className="h-4 w-4" />
+                      Jour précédent
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={navigateToToday}>
+                      Aujourd'hui
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={navigateToNextDay}>
+                      Jour suivant
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                  <h2 className="text-xl font-medium capitalize mt-2 sm:mt-0">
                     {format(selectedDate, "EEEE d MMMM yyyy", {
                       locale: fr,
                     })}
                   </h2>
-                  
-                  <Button variant="ghost" size="sm" onClick={navigateToNextDay}>
-                    Jour suivant
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
                 </div>
-                
                 <DaySchedule
                   date={selectedDate}
                   appointments={getDayAppointments(selectedDate)}
