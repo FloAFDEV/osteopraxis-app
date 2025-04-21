@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 
@@ -112,40 +111,60 @@ export const supabaseAppointmentService = {
   },
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
-    // MODIFICATION : PATCH transformé en POST + X-HTTP-Method-Override
-    // Cela évite les préflight PATCH et fonctionne bien avec Supabase !
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
+    // ============ NOUVELLE LOGIQUE PATCH EN POST + X-HTTP-Method-Override ============
+    // 1. Récupérer le token d'auth utilisateur
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session?.access_token) {
+      throw new Error("Utilisateur non authentifié");
+    }
+    const token = session.access_token;
+
+    // 2. Composez l'URL API
     const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
     const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
-    // Le status doit être normalisé côté payload
+
+    // 3. Préparer le payload (nettoyage undefined)
     const updatePayload = {
       ...update,
       status: update.status ? normalizeStatus(update.status) : undefined,
       updatedAt: new Date().toISOString(),
     };
-    // Nettoyage : suppression undefined pour ne pas PATCH n'importe quoi
-    Object.keys(updatePayload).forEach((k) => updatePayload[k as keyof typeof updatePayload] === undefined && delete updatePayload[k as keyof typeof updatePayload]);
+    Object.keys(updatePayload).forEach(
+      (k) =>
+        (updatePayload as any)[k] === undefined &&
+        delete (updatePayload as any)[k]
+    );
+
+    // 4. Appel POST en forçant PATCH + token explicite
     const res = await fetch(PATCH_URL, {
       method: "POST",
       headers: {
         apikey: SUPABASE_ANON_KEY,
-        Authorization: token ? `Bearer ${token}` : "",
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
         Prefer: "return=representation",
         "X-HTTP-Method-Override": "PATCH",
       },
       body: JSON.stringify(updatePayload),
     });
+
     if (!res.ok) {
-      try {
-        throw await res.json();
-      } catch (e) {
-        throw new Error("Erreur lors de la modification du rendez-vous");
-      }
+      const err = await res.json().catch(() => ({}));
+      throw new Error(
+        `Erreur HTTP ${res.status}: ${JSON.stringify(err)}`
+      );
     }
+
+    // La réponse est toujours un array d'1 element via PostgREST
     const data = await res.json();
-    return Array.isArray(data) ? data[0] : data;
+    if (Array.isArray(data) && data.length > 0) return data[0];
+    // fallback : parfois selon Prefer/headers c’est un objet direct
+    if (data && typeof data === "object") return data as Appointment;
+    throw new Error("Aucune donnée retournée lors de la modification du rendez-vous");
   },
 
   async deleteAppointment(id: number): Promise<boolean> {
