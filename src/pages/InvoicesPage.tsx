@@ -16,6 +16,7 @@ import { InvoicePrintView } from "@/components/invoice-print-view";
 import { useReactToPrint } from "react-to-print";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
@@ -358,7 +359,7 @@ const InvoicesPage = () => {
               const patientName = getPatientName(invoice);
               
               return (
-                <div key={invoice.id} className="relative group">
+                <div key={invoice.id} className="group relative">
                   <InvoiceDetails
                     invoice={invoice}
                     patientName={patientName}
@@ -367,40 +368,42 @@ const InvoicesPage = () => {
                       setSelectedInvoiceId(invoice.id);
                       setIsDeleteModalOpen(true);
                     }}
-                    onDownload={() => handleDownloadInvoice(invoice)}
-                    onPrint={() => handlePrintInvoice(invoice)}
                   />
-                  {/* Patient name with gender-based styling */}
-                  <div className="absolute top-12 left-0 right-0 text-center">
-                    <span 
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium truncate max-w-[90%]
+                  
+                  {/* Patient name badge */}
+                  <div className="absolute top-11 left-0 right-0 text-center">
+                    <Badge 
+                      className={`inline-block px-3 py-1 text-sm font-medium truncate max-w-[90%] shadow-sm
                         ${gender === "Femme" 
-                          ? "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300" 
+                          ? "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50" 
                           : gender === "Homme" 
-                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800/70"
                         }`}
                     >
                       {patientName}
-                    </span>
+                    </Badge>
                   </div>
-                  {/* Menu action rapide (Imprimer / Export PDF) */}
-                  <div className="absolute top-3 right-4 flex gap-1 opacity-70 group-hover:opacity-100">
+                  
+                  {/* Action buttons for print/export */}
+                  <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
+                      className="h-7 w-7 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
                       onClick={() => handlePrintInvoice(invoice)}
                       title="Imprimer"
                     >
-                      <Printer />
+                      <Printer className="h-3.5 w-3.5" />
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
+                      className="h-7 w-7 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
                       onClick={() => handleDownloadInvoice(invoice)}
                       title="Exporter la facture en PDF"
                     >
-                      <Download />
+                      <Download className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -424,7 +427,7 @@ const InvoicesPage = () => {
         )}
       </div>
       
-      {/* Impression PDF/print invisible pour la facture unique sélectionnée */}
+      {/* Print components hidden section - keep the same */}
       {printInvoice && (
         <div className="hidden">
           <div ref={printRef}>
@@ -438,7 +441,6 @@ const InvoicesPage = () => {
         </div>
       )}
       
-      {/* Impression PDF/print invisible pour toutes les factures d'une année */}
       {printAllInvoices && (
         <div className="hidden">
           <div ref={printRef}>

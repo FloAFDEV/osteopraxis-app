@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Printer, Download, Edit, Trash2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { FileText, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ConfirmDeleteInvoiceModal from "./modals/ConfirmDeleteInvoiceModal";
@@ -66,7 +67,7 @@ export const InvoiceDetails = ({
     }
   };
 
-  // Updated function to correctly display patient name
+  // Function to display patient name
   const getDisplayPatientName = () => {
     // If a patientName prop is provided explicitly, use it first
     if (patientName) return patientName;
@@ -83,67 +84,53 @@ export const InvoiceDetails = ({
   return (
     <>
       <Card className={clsx(
-        "hover-scale border shadow-lg px-4 pb-4 pt-5 transition-all duration-300",
+        "hover-scale border shadow hover:shadow-lg px-4 pb-4 pt-0 transition-all duration-300",
         "relative overflow-hidden min-h-[165px]",
-        "bg-gradient-to-br from-white via-blue-50 to-blue-100",
+        "bg-gradient-to-br from-white via-blue-50/50 to-blue-100/30",
         "dark:from-gray-800 dark:via-gray-700 dark:to-gray-900",
         "border border-gray-200 dark:border-gray-700",
         "rounded-lg"
-      )}
-      style={{
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(59, 130, 246, 0.1)"
-      }}>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex justify-between items-center gap-x-3 text-lg">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/80 dark:to-blue-800/90 rounded-full p-2 shadow-md border border-blue-100 dark:border-blue-700/50">
-                <FileText className="h-8 w-8 text-blue-600 dark:text-blue-300 drop-shadow" />
+      )}>
+        <CardContent className="p-4 pt-5 flex flex-col h-full">
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex items-center gap-2">
+              <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/80 dark:to-blue-800/90 rounded-full p-1.5 shadow-sm border border-blue-100 dark:border-blue-700/50">
+                <FileText className="h-4 w-4 text-blue-600 dark:text-blue-300" />
               </div>
-              <span className="font-black text-xl tracking-wider text-blue-700 dark:text-blue-200">
+              <span className="font-bold text-lg tracking-wide text-blue-700 dark:text-blue-200">
                 #{invoice.id.toString().padStart(4, "0")}
               </span>
-              <span className={clsx("px-2 py-0.5 text-xs rounded-full font-bold border bg-white/70 dark:bg-gray-900/80 transition-colors duration-200", getStatusColor(invoice.paymentStatus))}>
+              <span className={clsx("px-2 py-0.5 text-xs rounded-full font-bold border bg-white/70 dark:bg-gray-900/80 transition-colors", getStatusColor(invoice.paymentStatus))}>
                 {getStatusText(invoice.paymentStatus)}
               </span>
             </div>
-            <span className="font-extrabold text-2xl sm:text-2xl bg-gradient-to-r from-blue-500 to-blue-700 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent drop-shadow ml-2">
+            <span className="font-bold text-xl bg-gradient-to-r from-blue-500 to-blue-700 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
               {formatCurrency(invoice.amount)}
             </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-2">
-          <div className="text-sm space-y-2">
+          </div>
+          
+          <div className="mt-3 text-sm space-y-1.5">
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Date :</span>
-              <span className="font-semibold dark:text-gray-200">{formatDate(invoice.date)}</span>
+              <span className="font-medium dark:text-gray-200">{formatDate(invoice.date)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400 font-medium">Patient :</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-300 truncate max-w-[200px]">
-                {getDisplayPatientName()}
-              </span>
-            </div>
-            <div className="flex justify-between mt-3 pt-3 border-t border-dashed border-blue-200 dark:border-blue-800/50">
-              <div className="space-x-2">
-                {onEdit && <Button size="sm" variant="outline" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800/60 shadow transition-all dark:bg-blue-950/30 dark:hover:bg-blue-900/40" onClick={onEdit}>
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Modifier</span>
-                </Button>}
-                {onDelete && <Button size="sm" variant="outline" className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 border border-red-200 dark:border-red-800/60 shadow transition-all dark:bg-red-950/30 dark:hover:bg-red-900/40" onClick={() => setIsDeleteModalOpen(true)}>
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Supprimer</span>
-                </Button>}
-              </div>
-              <div className="space-x-2">
-                {onPrint && <Button size="sm" variant="outline" className="border border-blue-200 dark:border-blue-800/60 text-blue-800 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all dark:bg-blue-950/30" onClick={onPrint}>
-                  <Printer className="h-4 w-4" />
-                  <span className="sr-only">Imprimer</span>
-                </Button>}
-                {onDownload && <Button size="sm" variant="default" className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" onClick={onDownload}>
-                  <Download className="h-4 w-4" />
-                  <span className="sr-only">Télécharger</span>
-                </Button>}
-              </div>
+          </div>
+          
+          {/* Actions bar */}
+          <div className="mt-auto pt-3 border-t border-dashed border-blue-200/50 dark:border-blue-800/30 flex justify-between items-center">
+            <div className="space-x-1.5">
+              {onEdit && (
+                <Button size="sm" variant="outline" className="h-8 px-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 border-blue-200 dark:border-blue-800/60 transition-all dark:bg-blue-950/30 dark:hover:bg-blue-900/40" onClick={onEdit}>
+                  <Edit className="h-3.5 w-3.5" />
+                  <span className="text-xs">Éditer</span>
+                </Button>
+              )}
+              {onDelete && (
+                <Button size="sm" variant="outline" className="h-8 px-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 border-red-200 dark:border-red-800/60 transition-all dark:bg-red-950/30 dark:hover:bg-red-900/40" onClick={() => setIsDeleteModalOpen(true)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span className="text-xs">Supprimer</span>
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
