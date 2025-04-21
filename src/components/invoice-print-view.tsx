@@ -38,6 +38,17 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
     }
   };
 
+  // Fonction pour obtenir le nom du patient complet
+  const getPatientName = () => {
+    if (patient) {
+      return `${patient.firstName} ${patient.lastName}`;
+    }
+    if (invoice.Patient) {
+      return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
+    }
+    return `Patient #${invoice.patientId}`;
+  };
+
   return (
     <div className="bg-white p-8 max-w-3xl mx-auto rounded-lg shadow-lg border border-amber-200 dark:border-amber-800">
       <div className="flex justify-between items-start mb-8">
@@ -90,21 +101,17 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
       <div className="grid grid-cols-2 gap-8 mb-8">
         <div>
           <h3 className="font-medium text-amber-700 dark:text-amber-300 mb-2">Facturer à:</h3>
-          {patient ? (
-            <div>
-              <p className="font-medium text-gray-800 dark:text-amber-50">{patient.firstName} {patient.lastName}</p>
-              {patient.birthDate && 
-                <p className="text-gray-600 dark:text-amber-200/80 text-sm">
-                  Né(e) le {format(new Date(patient.birthDate), "dd/MM/yyyy")}
-                </p>
-              }
-              {patient.email && <p className="text-gray-600 dark:text-amber-100/90">{patient.email}</p>}
-              {patient.phone && <p className="text-gray-600 dark:text-amber-100/90">{patient.phone}</p>}
-              {patient.address && <p className="text-gray-600 dark:text-amber-100/90">{patient.address}</p>}
-            </div>
-          ) : (
-            <p className="text-gray-600 dark:text-amber-100">Patient #{invoice.patientId}</p>
-          )}
+          <div>
+            <p className="font-medium text-gray-800 dark:text-amber-50 text-lg">{getPatientName()}</p>
+            {patient?.birthDate && 
+              <p className="text-gray-600 dark:text-amber-200/80 text-sm">
+                Né(e) le {format(new Date(patient.birthDate), "dd/MM/yyyy")}
+              </p>
+            }
+            {patient?.email && <p className="text-gray-600 dark:text-amber-100/90">{patient.email}</p>}
+            {patient?.phone && <p className="text-gray-600 dark:text-amber-100/90">{patient.phone}</p>}
+            {patient?.address && <p className="text-gray-600 dark:text-amber-100/90">{patient.address}</p>}
+          </div>
         </div>
         <div className="text-right">
           <h3 className="font-medium text-amber-700 dark:text-amber-300 mb-2">Mode de règlement:</h3>
