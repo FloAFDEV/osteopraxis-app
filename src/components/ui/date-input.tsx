@@ -1,6 +1,7 @@
 
 import * as React from "react";
 import { format, parse, isValid } from "date-fns";
+import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -41,7 +42,7 @@ export function DateInput({
     const newValue = e.target.value;
     setInputValue(newValue);
     try {
-      const parsedDate = parse(newValue, dateFormat, new Date());
+      const parsedDate = parse(newValue, dateFormat, new Date(), { locale: fr });
       const valid = isValid(parsedDate);
       setIsInvalid(!valid);
       if (valid) {
@@ -60,7 +61,7 @@ export function DateInput({
       return;
     }
     try {
-      const parsedDate = parse(inputValue, dateFormat, new Date());
+      const parsedDate = parse(inputValue, dateFormat, new Date(), { locale: fr });
       const valid = isValid(parsedDate);
       setIsInvalid(!valid);
       if (valid) {
@@ -109,9 +110,13 @@ export function DateInput({
             onSelect={handleCalendarSelect}
             initialFocus
             disabled={disabled}
+            captionLayout="dropdown"
+            fromYear={1900}
+            toYear={new Date().getFullYear()}
           />
         </PopoverContent>
       </Popover>
     </div>
   );
 }
+
