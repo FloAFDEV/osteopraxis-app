@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
@@ -114,12 +115,9 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
         <div className="text-right">
           <h3 className="font-medium text-amber-700 mb-3">Mode de règlement:</h3>
           <p className="font-medium text-gray-800 mb-2">{getPaymentMethod(invoice.paymentMethod)}</p>
-          {invoice.paymentStatus === "PAID" && (
-            <div className="mt-4">
-              <p className="text-amber-600 font-bold text-lg">ACQUITTÉE</p>
-              <p className="text-gray-600 text-sm">Le {currentDate}</p>
-            </div>
-          )}
+          {invoice.paymentStatus === "PAID" && 
+            <p className="text-amber-600 font-bold text-lg">ACQUITTÉE</p>
+          }
         </div>
       </div>
 
