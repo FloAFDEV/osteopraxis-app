@@ -1,14 +1,30 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, addAuthHeaders } from "./utils";
+import { supabase } from "./utils";
 
 // Type plus spécifique pour la création d'appointment
-type CreateAppointmentPayload = Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>;
+type CreateAppointmentPayload = {
+  date: string;
+  patientId: number;
+  reason: string;
+  status?: AppointmentStatus;
+  cabinetId?: number;
+  notificationSent?: boolean;
+};
+
+// Type pour l'objet réellement envoyé à Supabase
+type InsertableAppointment = CreateAppointmentPayload & {
+  createdAt: string;
+  updatedAt: string;
+  status: string; // Using string to avoid type conflicts
+  notificationSent: boolean;
+};
+
 // Type pour les mises à jour d'appointment
-type UpdateAppointmentPayload = Partial<Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>>;
+type UpdateAppointmentPayload = Partial<CreateAppointmentPayload>;
 
 // Map entre les statuts de l'application et ceux de Supabase
-const mapStatusToSupabase = (status: AppointmentStatus): "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW" => {
+const mapStatusToSupabase = (status: AppointmentStatus): string => {
   return status === "CANCELLED" ? "CANCELED" : status;
 };
 
@@ -80,9 +96,9 @@ export const supabaseAppointmentService = {
       const now = new Date().toISOString();
       
       // Création de l'objet à insérer avec les champs timestamp
-      const insertable: Omit<Appointment, 'id'> = {
+      const insertable: InsertableAppointment = {
         ...payload,
-        status: payload.status ?? "SCHEDULED",
+        status: payload.status ? mapStatusToSupabase(payload.status) : "SCHEDULED",
         notificationSent: payload.notificationSent ?? false,
         createdAt: now,
         updatedAt: now
@@ -114,7 +130,7 @@ export const supabaseAppointmentService = {
       // Ne pas inclure createdAt ou updatedAt dans la mise à jour
       const now = new Date().toISOString();
       
-      const updateData: UpdateAppointmentPayload & { updatedAt: string } = {
+      const updateData: Partial<InsertableAppointment> = {
         ...update,
         updatedAt: now
       };

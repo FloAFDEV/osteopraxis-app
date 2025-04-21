@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { supabaseOsteopathService } from "../../supabase-api/osteopath-service";
 import { supabasePatientService } from "../../supabase-api/patient-service";
@@ -164,7 +163,8 @@ describe("Tests d'intégration CRUD sur Supabase (Osteopath, Patient, Cabinet, I
       patientId: patientId!,
       date: new Date().toISOString(),
       status: "SCHEDULED",
-      reason: "Test CRUD rendez-vous"
+      reason: "Test CRUD rendez-vous",
+      notificationSent: false
     });
     appointmentId = appointment.id;
     expect(appointmentId).toBeDefined();

@@ -9,7 +9,9 @@ function isDate(value: unknown): value is Date {
 }
 
 // Type pour la création d'un rendez-vous sans les champs générés
-type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'>;
+type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'> & {
+  notificationSent?: boolean;
+};
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -69,6 +71,7 @@ export const appointmentService = {
         // Convertir la date si nécessaire
         const payload = {
           ...appointment,
+          notificationSent: appointment.notificationSent ?? false,
           date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
         };
         return await supabaseAppointmentService.createAppointment(payload);
@@ -85,8 +88,8 @@ export const appointmentService = {
       ...appointment,
       id: Math.floor(Math.random() * 1000),
       date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
-      notificationSent: false,
-      status: "SCHEDULED",
+      notificationSent: appointment.notificationSent ?? false,
+      status: appointment.status || "SCHEDULED",
       createdAt: now,
       updatedAt: now
     } as Appointment;
