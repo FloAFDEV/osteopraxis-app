@@ -1,5 +1,4 @@
-
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/ui/layout";
@@ -8,16 +7,15 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/services/api";
 import { Invoice } from "@/types";
 import { toast } from "sonner";
-import { FileText, Search, Plus, Activity, Filter } from "lucide-react";
+import { FileText, Search, Plus, Activity, Filter, Printer, Download } from "lucide-react";
 import { InvoiceDetails } from "@/components/invoice-details";
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-
-// Ajout : pour les boutons print/download
-import { Printer, Download } from "lucide-react";
 import { InvoicePrintView } from "@/components/invoice-print-view";
 import { useReactToPrint } from "react-to-print";
+
+// Ajout : pour les boutons print/download
 import { useEffect } from "react";
 
 // Pour le rendu print invisible
@@ -30,26 +28,20 @@ const InvoicesPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
 
-  // Pour impression directe d'une facture depuis la liste
   const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
-
-  // Permet d'attendre que le printRef soit monté avant lancement impression
   const [readyToPrint, setReadyToPrint] = useState(false);
 
-  // Pour le bouton imprimer - FIX: supprimé la propriété 'content' incorrecte et utilisé le getter correct
+  // Correction ici : mettre 'content' au bon endroit dans l'objet d'options
   const handlePrint = useReactToPrint({
-    // Plutôt qu'une propriété "content", useReactToPrint attend une fonction "documentTitle" et une fonction qui retourne le ref
+    content: () => printRef.current,
     documentTitle: printInvoice ? `Facture_${printInvoice.id.toString().padStart(4, "0")}` : "Facture",
     onAfterPrint: () => {
-      setPrintInvoice(null); // Reset après print pour libérer la référence mémoire
+      setPrintInvoice(null);
       setReadyToPrint(false);
-    },
-    // Cette fonction retourne l'élément à imprimer
-    content: () => printRef.current,
+    }
   });
 
-  // Quand on veut imprimer : montrer le rendu invisible, attendre qu'il soit prêt, puis imprimer
   useEffect(() => {
     if (printInvoice) {
       setReadyToPrint(true);
@@ -60,12 +52,11 @@ const InvoicesPage = () => {
     if (printInvoice && readyToPrint) {
       setTimeout(() => {
         handlePrint && handlePrint();
-      }, 200); // Attendre un peu pour que le rendu invisible soit prêt
+      }, 200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readyToPrint, printInvoice]);
 
-  // Correction ici: vérifier que invoices existe avant d'utiliser filter
   const {
     data: invoices,
     isLoading,
@@ -175,7 +166,7 @@ const InvoicesPage = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
           </div>
         ) : filteredInvoices && filteredInvoices.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredInvoices.map(invoice => (
               <div key={invoice.id} className="relative group">
                 <InvoiceDetails
@@ -188,8 +179,8 @@ const InvoicesPage = () => {
                   }}
                   onDownload={() => handleDownloadInvoice(invoice)}
                   onPrint={() => handlePrintInvoice(invoice)}
+                  // Ajout d'une prop custom pour améliorer la carte si besoin plus tard
                 />
-
                 <div className="absolute top-3 right-4 flex gap-1 opacity-70 group-hover:opacity-100">
                   <Button
                     variant="ghost"
