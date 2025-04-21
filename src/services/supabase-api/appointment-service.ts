@@ -21,9 +21,7 @@ export const supabaseAppointmentService = {
         .from("Appointment")
         .select("*")
         .order('date', { ascending: true });
-      
       if (error) throw error;
-      
       return (data || []).map(appointment => ({
         ...appointment,
         status: mapStatusFromSupabase(appointment.status)
@@ -41,10 +39,10 @@ export const supabaseAppointmentService = {
         .select("*")
         .eq("id", id)
         .maybeSingle();
-      
+
       if (error) throw error;
       if (!data) throw new Error(`Appointment with id ${id} not found`);
-      
+
       return {
         ...data,
         status: mapStatusFromSupabase(data.status)
@@ -62,9 +60,9 @@ export const supabaseAppointmentService = {
         .select("*")
         .eq("patientId", patientId)
         .order('date', { ascending: true });
-      
+
       if (error) throw error;
-      
+
       return (data || []).map(appointment => ({
         ...appointment,
         status: mapStatusFromSupabase(appointment.status)
@@ -77,30 +75,31 @@ export const supabaseAppointmentService = {
 
   async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
     try {
-      // Exclude id from payload to let Postgres sequence handle it
-      const payload = {
-        ...appointment,
-        status: appointment.status ? mapStatusToSupabase(appointment.status) : "SCHEDULED",
-        // Don't include ID or timestamps - let Postgres handle them
-        notificationSent: appointment.notificationSent ?? false
-      };
-      
+      // Omettre id et timestamps, laisser Postgres les remplir (s'ils ont des DEFAULTs)
+      const {
+        id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, notificationSent, ...insertable
+      } = appointment as any;
       const { data, error } = await supabase
         .from("Appointment")
-        .insert(payload)
-        .select()
+        .insert({
+          ...insertable,
+          status: appointment.status ?? "SCHEDULED",
+          // notificationSent (facultatif) : si non défini, colonne sql a-t-elle un DEFAULT ?
+          notificationSent: notificationSent ?? false,
+        })
         .single();
-      
+
       if (error) {
-        console.error("Error details:", error.message);
+        // Log dynamique
+        console.error("[SUPABASE ERROR]", error.code, error.constraint, error.message);
         throw error;
       }
-      
+
       return {
         ...data,
         status: mapStatusFromSupabase(data.status)
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating appointment:", error);
       throw error;
     }
@@ -108,30 +107,29 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
     try {
-      // Don't include timestamps in updates - let Postgres handle them with triggers
-      const { createdAt, updatedAt, ...updatePayload } = appointment;
-      
-      const payload = {
-        ...updatePayload,
-        status: updatePayload.status ? mapStatusToSupabase(updatePayload.status) : undefined
-      };
-      
+      // N'envoyer createdAt ni updatedAt, on laisse Postgres gérer les triggers/defaults updatedAt
+      const patch = { ...appointment } as Partial<Appointment>;
+      delete (patch as any).createdAt;
+      delete (patch as any).updatedAt;
+
+      // Forcer la màj du champ updatedAt côté SQL si besoin (à adapter si trigger)
+      patch.updatedAt = new Date().toISOString();
+
       const query = supabase
         .from("Appointment")
-        .update(payload)
+        .update(patch)
         .eq("id", id)
-        .select()
         .single();
-      
-      // Apply auth headers to fix CORS issues with PATCH
+
+      // Application d'en-têtes d'auth si nécessaire
       const authedQuery = await addAuthHeaders(query);
       const { data, error } = await authedQuery;
-      
+
       if (error) {
-        console.error("Error details:", error.message);
+        console.error("[SUPABASE ERROR]", error.code, error.constraint, error.message);
         throw error;
       }
-      
+
       return {
         ...data,
         status: mapStatusFromSupabase(data.status)
@@ -141,20 +139,20 @@ export const supabaseAppointmentService = {
       throw error;
     }
   },
-  
+
   async deleteAppointment(id: number): Promise<boolean> {
     try {
       const query = supabase
         .from("Appointment")
         .delete()
         .eq("id", id);
-      
-      // Apply auth headers to fix CORS issues with DELETE
+
+      // Application d'en-têtes d'auth si besoin
       const authedQuery = await addAuthHeaders(query);
       const { error } = await authedQuery;
-      
+
       if (error) throw error;
-      
+
       return true;
     } catch (error) {
       console.error("Error deleting appointment:", error);
