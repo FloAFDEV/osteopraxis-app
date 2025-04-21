@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
-import { FileText, Calendar, Clock, Mail, Phone, Map, User, Edit, AlertTriangle, Trash2 } from "lucide-react";
+import { FileText, Calendar, Clock, Mail, Phone, Map, User, Edit, AlertTriangle } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient, Appointment, Invoice } from "@/types";
 import { format, parseISO, differenceInYears } from "date-fns";
@@ -119,6 +119,7 @@ const PatientDetailPage = () => {
               <AvatarFallback className="bg-primary/10 text-primary text-xl">
                 {patient.firstName[0]}{patient.lastName[0]}
               </AvatarFallback>
+              {patient.avatarUrl && <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} />}
             </Avatar>
             
             <div>
@@ -206,21 +207,21 @@ const PatientDetailPage = () => {
                 <div>
                   <h3 className="text-sm text-gray-500 mb-1">Médecin traitant</h3>
                   <p className="font-medium">
-                    {patient.doctor || "Non spécifié"}
+                    {patient.generalPractitioner || "Non spécifié"}
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm text-gray-500 mb-1">Antécédents médicaux</h3>
+                  <h3 className="text-sm text-gray-500 mb-1">Antécédents chirurgicaux</h3>
                   <p className="font-medium">
-                    {patient.medicalHistory || "Aucun antécédent médical noté"}
+                    {patient.surgicalHistory || "Aucun antécédent noté"}
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm text-gray-500 mb-1">Allergies</h3>
+                  <h3 className="text-sm text-gray-500 mb-1">Antécédents traumatiques</h3>
                   <p className="font-medium">
-                    {patient.allergies || "Aucune allergie notée"}
+                    {patient.traumaHistory || "Aucun antécédent noté"}
                   </p>
                 </div>
               </div>
@@ -341,12 +342,12 @@ const PatientDetailPage = () => {
                           </td>
                           <td className="px-4 py-3 text-center">
                             <Badge className={
-                              invoice.status === 'PAID' ? 'bg-green-500' :
-                              invoice.status === 'PENDING' ? 'bg-amber-500' :
+                              invoice.paymentStatus === 'PAID' ? 'bg-green-500' :
+                              invoice.paymentStatus === 'PENDING' ? 'bg-amber-500' :
                               'bg-red-500'
                             }>
-                              {invoice.status === 'PAID' ? 'Payée' : 
-                               invoice.status === 'PENDING' ? 'En attente' : 
+                              {invoice.paymentStatus === 'PAID' ? 'Payée' : 
+                               invoice.paymentStatus === 'PENDING' ? 'En attente' : 
                                'Annulée'}
                             </Badge>
                           </td>

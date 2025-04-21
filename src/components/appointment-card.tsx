@@ -7,12 +7,14 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+
 interface AppointmentCardProps {
   appointment: Appointment;
   patient?: Patient;
   onEdit?: () => void;
   onCancel?: () => void;
 }
+
 export function AppointmentCard({
   appointment,
   patient,
@@ -24,6 +26,7 @@ export function AppointmentCard({
     locale: fr
   });
   const formattedTime = format(appointmentDate, "HH:mm");
+
   const getStatusBadge = (status: Appointment["status"]) => {
     switch (status) {
       case "SCHEDULED":
@@ -38,6 +41,7 @@ export function AppointmentCard({
         return null;
     }
   };
+
   return <Card className="overflow-hidden hover-scale">
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">

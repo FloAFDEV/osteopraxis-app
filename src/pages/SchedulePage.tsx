@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock, FileText2 } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock, FileText } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient, AppointmentStatus } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -334,7 +334,7 @@ const DaySchedule = ({
                   <div className="flex gap-2">
                     <Button variant="ghost" size="sm" asChild>
                       <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
-                        <FileText2 className="h-4 w-4 mr-1" />
+                        <FileText className="h-4 w-4 mr-1" />
                         Facture
                       </Link>
                     </Button>
