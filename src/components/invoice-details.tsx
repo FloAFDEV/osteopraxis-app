@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -61,36 +60,28 @@ export const InvoiceDetails = ({
     }
   };
   return <>
-      <Card className={clsx(
-        "hover-scale border shadow-lg px-4 pb-4 pt-5 transition-all duration-300", 
-        "relative overflow-hidden min-h-[165px]",
-        // Dégradé très léger pour l'arrière‑plan
-        "bg-gradient-to-br from-white via-blue-50 to-blue-100",
-        // Mode sombre : nuances de gris froid
-        "dark:from-gray-800 dark:via-gray-700 dark:to-gray-900",
-        // Bordure nette et discrète
-        "border border-gray-200 dark:border-gray-700"
-      )} 
-      style={{
-        // Ombre discrète, ton bleu-gris
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(59, 130, 246, 0.1)"
-      }}>
-        {/* Accent bar en haut - bleu */}
-        <div className="absolute h-1 w-full left-0 top-0 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 dark:from-blue-600 dark:via-blue-500 dark:to-blue-700 rounded-t-lg blur-[1px]" />
+      <Card className={clsx("hover-scale border-0 shadow-xl px-1.5 pb-2.5 pt-4 transition-all duration-300", "relative overflow-hidden min-h-[165px] glass-morphism",
+    // Improved dark mode styling
+    "bg-gradient-to-br from-white/90 via-amber-50/70 to-gray-100/90", "dark:from-gray-900/95 dark:via-amber-950/30 dark:to-gray-950/90")} style={{
+      boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07), 0 2px 8px 0 rgba(252, 211, 77, 0.08)",
+      border: "1.5px solid rgba(251,191,36,0.1)"
+    }}>
+        {/* Accent bar en haut - amélioré pour le dark mode */}
+        <div className="absolute h-1 w-full left-0 top-0 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 dark:from-amber-600/90 dark:via-amber-500/80 dark:to-amber-700/90 rounded-t-lg blur-[1.5px] opacity-80" />
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-between items-center gap-x-3 text-lg">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-300 dark:from-blue-900/80 dark:to-blue-800/90 rounded-full p-2 shadow-md border border-blue-50 dark:border-blue-800/50">
-                <FileText className="h-8 w-8 text-blue-600 dark:text-blue-300 drop-shadow" />
+              <div className="bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-900/80 dark:to-amber-800/90 rounded-full p-2 shadow-md border border-amber-100 dark:border-amber-700/50">
+                <FileText className="h-8 w-8 text-amber-600 dark:text-amber-300 drop-shadow" />
               </div>
-              <span className="font-black text-xl tracking-wider text-blue-700 dark:text-blue-200">
+              <span className="font-black text-xl tracking-wider text-amber-700 dark:text-amber-200">
                 #{invoice.id.toString().padStart(4, "0")}
               </span>
               <span className={clsx("px-2 py-0.5 text-xs rounded-full font-bold border bg-white/70 dark:bg-gray-900/80 transition-colors duration-200", getStatusColor(invoice.paymentStatus))}>
                 {getStatusText(invoice.paymentStatus)}
               </span>
             </div>
-            <span className="font-extrabold text-2xl sm:text-2xl bg-gradient-to-r from-blue-500 to-blue-700 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent drop-shadow ml-2">
+            <span className="font-extrabold text-2xl sm:text-2xl bg-gradient-to-r from-amber-500 to-amber-700 dark:from-amber-400 dark:to-amber-300 bg-clip-text text-transparent drop-shadow ml-2">
               {formatCurrency(invoice.amount)}
             </span>
           </CardTitle>
@@ -103,25 +94,22 @@ export const InvoiceDetails = ({
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Patient :</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-300">{patientName || `Patient #${invoice.patientId}`}</span>
+              <span className="font-semibold text-amber-600 dark:text-amber-300">{patientName || `Patient #${invoice.patientId}`}</span>
             </div>
-            <div className="flex justify-between mt-3 pt-3 border-t border-dashed border-blue-200 dark:border-blue-800/50">
+            <div className="flex justify-between mt-3 pt-3 border-t border-dashed border-amber-200 dark:border-amber-800/50">
               <div className="flex space-x-2">
-                {onEdit && <Button size="sm" variant="outline" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800/60 shadow transition-all dark:bg-blue-950/30 dark:hover:bg-blue-900/40" onClick={onEdit} aria-label="Modifier la facture">
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Modifier</span>
-                  </Button>}
+                {onEdit}
                 {onDelete && <Button size="sm" variant="outline" className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 border border-red-200 dark:border-red-800/60 shadow transition-all dark:bg-red-950/30 dark:hover:bg-red-900/40" onClick={() => setIsDeleteModalOpen(true)} aria-label="Supprimer la facture">
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Supprimer</span>
                   </Button>}
               </div>
               <div className="flex space-x-2">
-                {onPrint && <Button size="sm" variant="outline" className="border border-blue-200 dark:border-blue-800/60 text-blue-800 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all dark:bg-blue-950/30" onClick={onPrint}>
+                {onPrint && <Button size="sm" variant="outline" className="border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all dark:bg-amber-950/30" onClick={onPrint}>
                     <Printer className="h-4 w-4" />
-                    <span className="sr-only">Imprimer</span>
+                    
                   </Button>}
-                {onDownload && <Button size="sm" variant="default" className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" onClick={onDownload}>
+                {onDownload && <Button size="sm" variant="default" className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white" onClick={onDownload}>
                     <Download className="h-4 w-4" />
                     <span className="sr-only">Télécharger</span>
                   </Button>}
