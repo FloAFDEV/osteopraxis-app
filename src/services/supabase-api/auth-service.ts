@@ -1,5 +1,6 @@
 import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
+import { toast } from "sonner";
 
 export const supabaseAuthService = {
   async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
