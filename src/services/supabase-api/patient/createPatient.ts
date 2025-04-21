@@ -13,7 +13,7 @@ export async function createPatient(patient: Omit<Patient, "id" | "createdAt" | 
     genderValue = "Homme" as Gender;
   }
 
-  // On ne gère plus createdAt ni updatedAt ici, on laisse Postgres s'en charger
+  // Don't send createdAt/updatedAt from client, let Postgres handle them
   const patientData = {
     ...patient,
     contraception: contraceptionValue,
@@ -21,14 +21,15 @@ export async function createPatient(patient: Omit<Patient, "id" | "createdAt" | 
     birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
     osteopathId: patient.osteopathId || 1,
     userId: patient.userId || null,
+    // Let Postgres handle timestamps
     createdAt: undefined,
     updatedAt: undefined,
   };
 
-  // On réalise tout en un seul upsert (avec onConflict 'email') : 
+  // Use upsert with email conflict handling
   const { data, error } = await supabase
     .from("Patient")
-    .upsert(patientData, { onConflict: "email", ignoreDuplicates: false })
+    .upsert(patientData, { onConflict: 'email', ignoreDuplicates: false })
     .select()
     .single();
 

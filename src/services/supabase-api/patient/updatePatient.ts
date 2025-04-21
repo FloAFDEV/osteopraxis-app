@@ -13,20 +13,22 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
     genderValue = "Homme" as Gender;
   }
 
-  // On ne modifie pas createdAt/updatedAt côté client :
+  // Remove createdAt/updatedAt from client-side updates - let Postgres handle these
   const patientData = {
     ...patient,
     contraception: contraceptionValue,
     gender: genderValue,
     birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
     osteopathId: patient.osteopathId || 1,
+    // Let Postgres handle timestamps
     createdAt: undefined,
     updatedAt: undefined,
   };
 
+  // Use upsert with onConflict to handle potential conflicts
   const { data, error } = await supabase
     .from("Patient")
-    .upsert(patientData, { onConflict: "id", ignoreDuplicates: false })
+    .upsert(patientData)
     .select()
     .single();
 

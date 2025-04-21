@@ -4,6 +4,7 @@ import { supabase } from "../utils";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 
 export async function getPatientById(id: number): Promise<Patient | null> {
+  // Use maybeSingle() instead of single() to handle case when no patient is found
   const { data, error } = await supabase
     .from("Patient")
     .select("*")
