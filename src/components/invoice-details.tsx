@@ -107,7 +107,7 @@ export const InvoiceDetails = ({
               <div className="flex space-x-2">
                 {onPrint && <Button size="sm" variant="outline" className="border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all dark:bg-amber-950/30" onClick={onPrint}>
                     <Printer className="h-4 w-4" />
-                    
+                    <span className="sr-only">Imprimer</span>
                   </Button>}
                 {onDownload && <Button size="sm" variant="default" className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white" onClick={onDownload}>
                     <Download className="h-4 w-4" />
