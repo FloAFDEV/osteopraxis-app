@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // ajout useNavigate
 
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -22,7 +22,8 @@ const SchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
   const [view, setView] = useState<"day" | "week">("week");
-  
+  const navigate = useNavigate(); // Hook pour rediriger
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -69,13 +70,10 @@ const SchedulePage = () => {
     });
   };
 
-  // Modifier cette fonction pour utiliser la nouvelle méthode cancelAppointment
   const handleCancelAppointment = async (appointmentId: number) => {
     try {
       await api.cancelAppointment(appointmentId);
       toast.success("Rendez-vous annulé avec succès");
-      
-      // Mettre à jour la liste des rendez-vous
       const updatedAppointments = appointments.map(appointment => 
         appointment.id === appointmentId 
           ? { ...appointment, status: "CANCELED" as AppointmentStatus } 
@@ -108,6 +106,12 @@ const SchedulePage = () => {
     setSelectedDate(new Date());
   };
   
+  const handleDayHeaderClick = (date: Date) => {
+    // Redirige vers la création de rendez-vous avec la date pré-remplie
+    const dateStr = format(date, "yyyy-MM-dd");
+    navigate(`/appointments/new?date=${dateStr}`);
+  };
+
   return <Layout>
       <div className="flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -123,7 +127,6 @@ const SchedulePage = () => {
                 <TabsTrigger value="week">Semaine</TabsTrigger>
               </TabsList>
             </Tabs>
-            {/* Le bouton Aujourd'hui sera affiché également dans la vue Jour */}
             <Button variant="outline" size="sm" onClick={navigateToToday}>
               Aujourd'hui
             </Button>
@@ -149,7 +152,6 @@ const SchedulePage = () => {
           </div>
         </div>
         {loading ? (
-          
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -214,21 +216,30 @@ const SchedulePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
                   {currentWeek.map((day) => (
                     <div key={day.toString()} className="flex flex-col">
-                      <div
+                      <button
+                        type="button"
                         className={cn(
-                          "p-2 text-center capitalize mb-2 rounded-md",
-                          isSameDay(day, new Date())
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
+                          "p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full",
+                          isSameDay(day, new Date()) ? "bg-primary text-primary-foreground" : "bg-muted"
                         )}
+                        onClick={() => handleDayHeaderClick(day)}
+                        tabIndex={0}
+                        title={`Ajouter un rendez-vous le ${format(day, "d MMMM yyyy", {locale: fr})}`}
                       >
-                        <div className="font-medium">{format(day, "EEEE", {
-                          locale: fr,
-                        })}</div>
-                        <div className="text-sm">{format(day, "d MMM", {
-                          locale: fr,
-                        })}</div>
-                      </div>
+                        <div className="font-medium">
+                          {format(day, "EEEE", {
+                            locale: fr,
+                          })}
+                        </div>
+                        <div className="text-sm">
+                          {format(day, "d MMM", {
+                            locale: fr,
+                          })}
+                        </div>
+                        <span className="sr-only">
+                          Ajouter un rendez-vous
+                        </span>
+                      </button>
                       
                       {getDayAppointments(day).length === 0 ? (
                         <div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
