@@ -34,20 +34,22 @@ const InvoicesPage = () => {
   const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Permet d’attendre que le printRef soit monté avant lancement impression
+  // Permet d'attendre que le printRef soit monté avant lancement impression
   const [readyToPrint, setReadyToPrint] = useState(false);
 
-  // Pour le bouton imprimer
+  // Pour le bouton imprimer - FIX: supprimé la propriété 'content' incorrecte et utilisé le getter correct
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    // Plutôt qu'une propriété "content", useReactToPrint attend une fonction "documentTitle" et une fonction qui retourne le ref
     documentTitle: printInvoice ? `Facture_${printInvoice.id.toString().padStart(4, "0")}` : "Facture",
     onAfterPrint: () => {
       setPrintInvoice(null); // Reset après print pour libérer la référence mémoire
       setReadyToPrint(false);
-    }
+    },
+    // Cette fonction retourne l'élément à imprimer
+    content: () => printRef.current,
   });
 
-  // Quand on veut imprimer : montrer le rendu invisible, attendre qu’il soit prêt, puis imprimer
+  // Quand on veut imprimer : montrer le rendu invisible, attendre qu'il soit prêt, puis imprimer
   useEffect(() => {
     if (printInvoice) {
       setReadyToPrint(true);
