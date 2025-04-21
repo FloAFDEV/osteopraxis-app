@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -95,6 +94,7 @@ const PatientDetailPage = () => {
   const upcomingAppointments = appointments
     .filter(app => app.status === "SCHEDULED" && new Date(app.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
   const pastAppointments = appointments
     .filter(app => app.status !== "SCHEDULED" || new Date(app.date) < new Date())
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -409,12 +409,12 @@ const PatientDetailPage = () => {
                       }}
                       onCancel={async () => {
                         try {
-                          await api.updateAppointment(appointment.id, { status: "CANCELLED" });
+                          await api.updateAppointment(appointment.id, { status: "CANCELED" });
                           // Update local state
                           setAppointments(prevAppointments =>
                             prevAppointments.map(app =>
                               app.id === appointment.id
-                                ? { ...app, status: "CANCELLED" }
+                                ? { ...app, status: "CANCELED" }
                                 : app
                             )
                           );
@@ -460,13 +460,13 @@ const PatientDetailPage = () => {
                                 className={
                                   appointment.status === "COMPLETED" 
                                     ? "bg-green-500" 
-                                    : appointment.status === "CANCELLED" 
+                                    : appointment.status === "CANCELED"
                                       ? "bg-red-500" 
                                       : "bg-amber-500"
                                 }
                               >
                                 {appointment.status === "COMPLETED" && "Terminé"}
-                                {appointment.status === "CANCELLED" && "Annulé"}
+                                {appointment.status === "CANCELED" && "Annulé"}
                                 {appointment.status === "RESCHEDULED" && "Reporté"}
                                 {appointment.status === "SCHEDULED" && "Passé"}
                               </Badge>

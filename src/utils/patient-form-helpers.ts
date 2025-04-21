@@ -91,7 +91,7 @@ export function isUserAdmin(user: User | null): boolean {
  * Adapte le statut d'un rendez-vous depuis Supabase
  */
 export function adaptAppointmentStatusFromSupabase(status: string): AppointmentStatus {
-  const validStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"];
+  const validStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELED", "RESCHEDULED"];
   
   if (validStatuses.includes(status as AppointmentStatus)) {
     return status as AppointmentStatus;

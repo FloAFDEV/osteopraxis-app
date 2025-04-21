@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+
 const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -67,13 +68,13 @@ const AppointmentsPage = () => {
     if (!appointmentToCancel) return;
     try {
       await api.updateAppointment(appointmentToCancel.id, {
-        status: "CANCELLED"
+        status: "CANCELED"
       });
 
       // Update local state
       setAppointments(prevAppointments => prevAppointments.map(app => app.id === appointmentToCancel.id ? {
         ...app,
-        status: "CANCELLED"
+        status: "CANCELED"
       } : app));
       toast.success("Rendez-vous annulé avec succès");
     } catch (error) {
@@ -116,7 +117,7 @@ const AppointmentsPage = () => {
                 <SelectItem value="all">Tous les statuts</SelectItem>
                 <SelectItem value="SCHEDULED">Planifiés</SelectItem>
                 <SelectItem value="COMPLETED">Terminés</SelectItem>
-                <SelectItem value="CANCELLED">Annulés</SelectItem>
+                <SelectItem value="CANCELED">Annulés</SelectItem>
                 <SelectItem value="RESCHEDULED">Reportés</SelectItem>
                 <SelectItem value="NO_SHOW">Non présentés</SelectItem>
               </SelectContent>

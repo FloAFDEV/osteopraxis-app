@@ -6,7 +6,7 @@ import { supabase as supabaseClient } from "@/integrations/supabase/client";
 export const supabase = supabaseClient;
 
 // Define AppointmentStatusValues array
-export const AppointmentStatusValues: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"];
+export const AppointmentStatusValues: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELED", "RESCHEDULED"];
 
 // Function to ensure the appointment status is one of the allowed enum values
 export const ensureAppointmentStatus = (status: string): AppointmentStatus => {

@@ -1,3 +1,4 @@
+
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Clock, Calendar, FileText } from "lucide-react";
@@ -29,7 +30,7 @@ export function AppointmentCard({
         return <Badge className="bg-blue-500">Planifié</Badge>;
       case "COMPLETED":
         return <Badge className="bg-green-500">Terminé</Badge>;
-      case "CANCELLED":
+      case "CANCELED":
         return <Badge className="bg-red-500">Annulé</Badge>;
       case "RESCHEDULED":
         return <Badge className="bg-amber-500">Reporté</Badge>;

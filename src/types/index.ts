@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -96,11 +97,11 @@ export type Contraception =
   | "STERILIZATION";
 
 // Interface pour les rendez-vous
-// Updated to only use "CANCELED" (Supabase standard) for consistency
+// Updated to only use "CANCELED" (one L) for consistency
 export type AppointmentStatus = 
   | "SCHEDULED" 
   | "COMPLETED" 
-  | "CANCELED"  // Using single spelling consistently
+  | "CANCELED"  // Using single L spelling consistently
   | "RESCHEDULED"
   | "NO_SHOW";
 
