@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -57,10 +56,12 @@ const InvoiceDetailPage = () => {
                 setPatient(patientData || null);
                 
                 // Si le patient a un osteopathId, utiliser celui-ci pour charger l'ostéopathe
-                if (patientData?.osteopathId) {
+                let osteopathId = patientData?.osteopathId || user?.osteopathId;
+                
+                if (osteopathId) {
                   try {
-                    console.log(`Chargement des données de l'ostéopathe ID: ${patientData.osteopathId}`);
-                    const osteopathData = await api.getOsteopathById(patientData.osteopathId);
+                    console.log(`Chargement des données de l'ostéopathe ID: ${osteopathId}`);
+                    const osteopathData = await api.getOsteopathById(osteopathId);
                     console.log("Données d'ostéopathe récupérées:", osteopathData);
                     setOsteopath(osteopathData || null);
                     
@@ -72,6 +73,7 @@ const InvoiceDetailPage = () => {
                         console.log("Données de cabinets récupérées:", cabinets);
                         
                         if (cabinets && cabinets.length > 0) {
+                          console.log("Cabinet sélectionné:", cabinets[0]);
                           setCabinet(cabinets[0]);
                         }
                       } catch (cabinetError) {
@@ -82,25 +84,6 @@ const InvoiceDetailPage = () => {
                     console.error("Erreur lors du chargement de l'ostéopathe:", osteopathError);
                   }
                 }
-                // Si l'utilisateur est connecté mais que le patient n'a pas d'osteopathId
-                else if (user?.osteopathId) {
-                  try {
-                    console.log(`Utilisation de l'osteopathId de l'utilisateur: ${user.osteopathId}`);
-                    const osteopathData = await api.getOsteopathById(user.osteopathId);
-                    console.log("Données d'ostéopathe récupérées via user:", osteopathData);
-                    setOsteopath(osteopathData || null);
-                    
-                    if (osteopathData?.id) {
-                      const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
-                      if (cabinets && cabinets.length > 0) {
-                        setCabinet(cabinets[0]);
-                      }
-                    }
-                  } catch (error) {
-                    console.error("Erreur lors du chargement de l'ostéopathe via userId:", error);
-                  }
-                }
-                
               } catch (patientError) {
                 console.error("Erreur lors du chargement du patient:", patientError);
               }
@@ -197,7 +180,7 @@ const InvoiceDetailPage = () => {
               Imprimer
             </Button>
             <Button 
-              onClick={handleDownload} 
+              onClick={handlePrint} 
               variant="default"
             >
               Télécharger
@@ -216,7 +199,7 @@ const InvoiceDetailPage = () => {
                 onEdit={() => {}} 
                 onDelete={handleDelete}
                 onPrint={() => handlePrint()}
-                onDownload={handleDownload}
+                onDownload={handlePrint}
               />
             </div>
             

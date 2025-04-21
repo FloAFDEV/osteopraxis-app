@@ -38,6 +38,10 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
     }
   };
 
+  // Debug des propriétés reçues
+  console.log("Cabinet info in InvoicePrintView:", cabinet);
+  console.log("Osteopath info in InvoicePrintView:", osteopath);
+
   return (
     <div className="bg-white p-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-start mb-8">
@@ -56,7 +60,7 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           <p className="text-gray-600 mt-2">
             {cabinet ? (
               <>
-                {cabinet.address}<br />
+                {cabinet.address && <>{cabinet.address}<br /></>}
                 {cabinet.phone && <>{cabinet.phone}<br /></>}
                 {cabinet.email && <>{cabinet.email}<br /></>}
               </>

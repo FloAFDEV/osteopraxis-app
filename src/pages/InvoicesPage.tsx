@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/services/api";
-import { Invoice } from "@/types";
+import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
 import { toast } from "sonner";
 import { FileText, Search, Plus, Activity, Filter, Printer, Download, Calendar } from "lucide-react";
 import { InvoiceDetails } from "@/components/invoice-details";
@@ -16,10 +15,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { InvoicePrintView } from "@/components/invoice-print-view";
 import { useReactToPrint } from "react-to-print";
 import { format } from "date-fns";
-
+import { useAuth } from "@/contexts/AuthContext";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -28,14 +28,17 @@ const InvoicesPage = () => {
 
   const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
   const [printAllInvoices, setPrintAllInvoices] = useState<Invoice[] | null>(null);
+  const [printPatient, setPrintPatient] = useState<Patient | null>(null);
+  const [printOsteopath, setPrintOsteopath] = useState<Osteopath | null>(null);
+  const [printCabinet, setPrintCabinet] = useState<Cabinet | null>(null);
 
-  // Correction : UN SEUL printRef !
+  // Référence pour l'impression
   const printRef = useRef<HTMLDivElement>(null);
   const [readyToPrint, setReadyToPrint] = useState(false);
 
-  // Correction de la configuration de react-to-print pour respecter l'interface TypeScript
+  // Configuration de react-to-print
   const handlePrint = useReactToPrint({
-    // Corriger l'erreur en passant directement la ref au lieu d'une fonction
+    // Référence directe à la div
     contentRef: printRef,
     documentTitle: printInvoice
       ? `Facture_${printInvoice.id.toString().padStart(4, "0")}`
@@ -45,6 +48,9 @@ const InvoicesPage = () => {
     onAfterPrint: () => {
       setPrintInvoice(null);
       setPrintAllInvoices(null);
+      setPrintPatient(null);
+      setPrintOsteopath(null);
+      setPrintCabinet(null);
       setReadyToPrint(false);
     },
   });
@@ -58,7 +64,7 @@ const InvoicesPage = () => {
   useEffect(() => {
     if ((printInvoice || printAllInvoices) && readyToPrint) {
       setTimeout(() => {
-        handlePrint && handlePrint();
+        handlePrint();
       }, 200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,6 +78,43 @@ const InvoicesPage = () => {
     queryKey: ["invoices"],
     queryFn: api.getInvoices
   });
+
+  // Fonction pour charger les données associées à une facture (patient, ostéopathe, cabinet)
+  const loadInvoiceRelatedData = async (invoice: Invoice) => {
+    try {
+      // Charger les données du patient
+      let patientData = null;
+      let osteopathData = null;
+      let cabinetData = null;
+      
+      if (invoice.patientId) {
+        patientData = await api.getPatientById(invoice.patientId);
+        
+        // Déterminer l'ID de l'ostéopathe à partir du patient ou de l'utilisateur connecté
+        const osteopathId = patientData?.osteopathId || user?.osteopathId;
+        
+        if (osteopathId) {
+          osteopathData = await api.getOsteopathById(osteopathId);
+          
+          if (osteopathData?.id) {
+            const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+            if (cabinets && cabinets.length > 0) {
+              cabinetData = cabinets[0];
+            }
+          }
+        }
+      }
+      
+      return {
+        patient: patientData,
+        osteopath: osteopathData,
+        cabinet: cabinetData
+      };
+    } catch (error) {
+      console.error("Erreur lors du chargement des données associées:", error);
+      return { patient: null, osteopath: null, cabinet: null };
+    }
+  };
 
   const handleDeleteInvoice = async () => {
     if (!selectedInvoiceId) return;
@@ -88,7 +131,7 @@ const InvoicesPage = () => {
     }
   };
 
-  // Nouvelle : Trouver le nom du patient dans les data Invoice (pas de Patient? fallback)
+  // Obtenir le nom du patient
   const getPatientName = (invoice: Invoice) => {
     // @ts-ignore (Patient peut être attaché par API)
     if (invoice.Patient) {
@@ -139,28 +182,57 @@ const InvoicesPage = () => {
   };
 
   // Impression et téléchargement d'une facture individuelle
-  const handlePrintInvoice = (invoice: Invoice) => {
+  const handlePrintInvoice = async (invoice: Invoice) => {
     setPrintInvoice(invoice);
     setPrintAllInvoices(null);
+    
+    // Charger les données associées
+    const relatedData = await loadInvoiceRelatedData(invoice);
+    setPrintPatient(relatedData.patient);
+    setPrintOsteopath(relatedData.osteopath);
+    setPrintCabinet(relatedData.cabinet);
+    
+    console.log("Données pour impression:", {
+      invoice,
+      patient: relatedData.patient,
+      osteopath: relatedData.osteopath,
+      cabinet: relatedData.cabinet
+    });
   };
 
   // Export immédiat en PDF sans toast intermédiaire
-  const handleDownloadInvoice = (invoice: Invoice) => {
+  const handleDownloadInvoice = async (invoice: Invoice) => {
+    // Charger les données associées avant l'impression
+    const relatedData = await loadInvoiceRelatedData(invoice);
+    
     setPrintInvoice(invoice);
+    setPrintPatient(relatedData.patient);
+    setPrintOsteopath(relatedData.osteopath);
+    setPrintCabinet(relatedData.cabinet);
     setPrintAllInvoices(null);
+    
     // Lancer directement impression PDF après un petit délai de montage DOM
     setTimeout(() => {
-      handlePrint?.();
-    }, 100);
+      handlePrint();
+    }, 200);
   };
 
   // Impression et téléchargement de toutes les factures d'une année
-  const handleDownloadAllInvoices = () => {
+  const handleDownloadAllInvoices = async () => {
     const yearInvoices = getInvoicesByYear(selectedYear);
     
     if (yearInvoices.length === 0) {
       toast.error(`Aucune facture trouvée pour l'année ${selectedYear}`);
       return;
+    }
+    
+    // Pour l'impression multiple, nous utilisons les données du premier ostéopathe/cabinet
+    // car c'est généralement le même pour toutes les factures d'un utilisateur
+    if (yearInvoices.length > 0) {
+      const relatedData = await loadInvoiceRelatedData(yearInvoices[0]);
+      setPrintPatient(null); // Pas de patient spécifique pour l'impression multiple
+      setPrintOsteopath(relatedData.osteopath);
+      setPrintCabinet(relatedData.cabinet);
     }
     
     setPrintAllInvoices(yearInvoices);
@@ -295,14 +367,21 @@ const InvoicesPage = () => {
           </div>
         )}
       </div>
+      
       {/* Impression PDF/print invisible pour la facture unique sélectionnée */}
       {printInvoice && (
         <div className="hidden">
           <div ref={printRef}>
-            <InvoicePrintView invoice={printInvoice} />
+            <InvoicePrintView 
+              invoice={printInvoice} 
+              patient={printPatient} 
+              osteopath={printOsteopath} 
+              cabinet={printCabinet} 
+            />
           </div>
         </div>
       )}
+      
       {/* Impression PDF/print invisible pour toutes les factures d'une année */}
       {printAllInvoices && (
         <div className="hidden">
@@ -314,7 +393,11 @@ const InvoicesPage = () => {
               <div className="space-y-8">
                 {printAllInvoices.map(invoice => (
                   <div key={invoice.id} className="page-break-after">
-                    <InvoicePrintView invoice={invoice} />
+                    <InvoicePrintView 
+                      invoice={invoice}
+                      osteopath={printOsteopath}
+                      cabinet={printCabinet}
+                    />
                     <div className="h-12"></div>
                   </div>
                 ))}
@@ -323,6 +406,7 @@ const InvoicesPage = () => {
           </div>
         </div>
       )}
+      
       {isDeleteModalOpen && selectedInvoiceId && (
         <ConfirmDeleteInvoiceModal
           isOpen={isDeleteModalOpen}
@@ -336,4 +420,3 @@ const InvoicesPage = () => {
 };
 
 export default InvoicesPage;
-
