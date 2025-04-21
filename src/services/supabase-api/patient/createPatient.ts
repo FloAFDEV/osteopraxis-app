@@ -3,6 +3,7 @@ import { Patient, Contraception, Gender } from "@/types";
 import { supabase } from "../utils";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 
+// Ne jamais envoyer id / createdAt / updatedAt ; fallback sur DEFAULTs SQL pour les timestamps
 export async function createPatient(patient: Omit<Patient, "id" | "createdAt" | "updatedAt">): Promise<Patient> {
   let contraceptionValue = patient.contraception;
   if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
@@ -13,28 +14,23 @@ export async function createPatient(patient: Omit<Patient, "id" | "createdAt" | 
     genderValue = "Homme" as Gender;
   }
 
-  // Don't send createdAt/updatedAt from client, let Postgres handle them
-  const patientData = {
+  const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = {
     ...patient,
     contraception: contraceptionValue,
     gender: genderValue,
     birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
     osteopathId: patient.osteopathId || 1,
-    userId: patient.userId || null,
-    // Let Postgres handle timestamps
-    createdAt: undefined,
-    updatedAt: undefined,
-  };
+    userId: patient.userId || null
+  } as any;
 
-  // Use upsert with email conflict handling
+  // Si onConflict: s'assurer que 'email' est bien UNIQUE côté SQL, sinon retirer!
   const { data, error } = await supabase
     .from("Patient")
-    .upsert(patientData, { onConflict: 'email', ignoreDuplicates: false })
-    .select()
+    .insert(insertable)
     .single();
 
   if (error) {
-    console.error("Error creating patient:", error);
+    console.error("[SUPABASE ERROR]", error.code, error.message);
     throw error;
   }
 

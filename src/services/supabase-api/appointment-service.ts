@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, addAuthHeaders } from "./utils";
 
@@ -75,29 +74,23 @@ export const supabaseAppointmentService = {
 
   async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
     try {
-      // Omettre id et timestamps, laisser Postgres les remplir (s'ils ont des DEFAULTs)
-      const {
-        id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, notificationSent, ...insertable
-      } = appointment as any;
+      // Exclure id/createdAt/updatedAt pour insert
+      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = appointment as any;
       const { data, error } = await supabase
         .from("Appointment")
         .insert({
           ...insertable,
-          status: appointment.status ?? "SCHEDULED",
-          // notificationSent (facultatif) : si non défini, colonne sql a-t-elle un DEFAULT ?
-          notificationSent: notificationSent ?? false,
+          status: appointment.status ?? "SCHEDULED"
         })
         .single();
 
       if (error) {
-        // Log dynamique
-        console.error("[SUPABASE ERROR]", error.code, error.constraint, error.message);
+        console.error("[SUPABASE ERROR]", error.code, error.message);
         throw error;
       }
-
       return {
         ...data,
-        status: mapStatusFromSupabase(data.status)
+        status: mapStatusFromSupabase(data.status),
       };
     } catch (error: any) {
       console.error("Error creating appointment:", error);
@@ -105,36 +98,27 @@ export const supabaseAppointmentService = {
     }
   },
 
-  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
+  async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {
     try {
-      // N'envoyer createdAt ni updatedAt, on laisse Postgres gérer les triggers/defaults updatedAt
-      const patch = { ...appointment } as Partial<Appointment>;
-      delete (patch as any).createdAt;
-      delete (patch as any).updatedAt;
+      const { createdAt, updatedAt, ...patch } = update;
+      // Laisser SQL gérer updatedAt via trigger, pas besoin de le surcharger
 
-      // Forcer la màj du champ updatedAt côté SQL si besoin (à adapter si trigger)
-      patch.updatedAt = new Date().toISOString();
-
-      const query = supabase
+      const { data, error } = await supabase
         .from("Appointment")
         .update(patch)
         .eq("id", id)
         .single();
 
-      // Application d'en-têtes d'auth si nécessaire
-      const authedQuery = await addAuthHeaders(query);
-      const { data, error } = await authedQuery;
-
       if (error) {
-        console.error("[SUPABASE ERROR]", error.code, error.constraint, error.message);
+        console.error("[SUPABASE ERROR]", error.code, error.message);
         throw error;
       }
 
       return {
         ...data,
-        status: mapStatusFromSupabase(data.status)
+        status: mapStatusFromSupabase(data.status),
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating appointment:", error);
       throw error;
     }
@@ -142,19 +126,17 @@ export const supabaseAppointmentService = {
 
   async deleteAppointment(id: number): Promise<boolean> {
     try {
-      const query = supabase
+      const { error } = await supabase
         .from("Appointment")
         .delete()
         .eq("id", id);
 
-      // Application d'en-têtes d'auth si besoin
-      const authedQuery = await addAuthHeaders(query);
-      const { error } = await authedQuery;
-
-      if (error) throw error;
-
+      if (error) {
+        console.error("[SUPABASE ERROR]", error.code, error.message);
+        throw error;
+      }
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting appointment:", error);
       throw error;
     }

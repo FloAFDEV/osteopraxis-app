@@ -96,17 +96,17 @@ export const supabaseInvoiceService = {
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
     try {
-      console.log("Création d'une facture avec les données:", invoiceData);
-      const query = supabase
+      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = invoiceData as any;
+      const { data, error } = await supabase
         .from("Invoice")
-        .insert(invoiceData)
-        .select()
+        .insert(insertable)
         .single();
-      
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
-      
+
+      if (error) {
+        console.error("[SUPABASE ERROR]", error.code, error.message);
+        throw error;
+      }
+
       return data as Invoice;
     } catch (error) {
       console.error("Erreur createInvoice:", error);

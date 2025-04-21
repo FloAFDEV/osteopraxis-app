@@ -1,4 +1,3 @@
-
 // Import types
 import { Cabinet } from "@/types";
 import { supabase, typedData } from "./utils";
@@ -92,23 +91,18 @@ export const supabaseCabinetService = {
   },
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
-    const now = new Date().toISOString();
-    
-    // Add timestamps required by Supabase schema
-    const cabinetWithTimestamps = {
-      ...cabinet,
-      updatedAt: now,
-      createdAt: now
-    };
-    
+    // Ne jamais envoyer id/timestamps, Postgres gère
+    const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = cabinet as any;
     const { data, error } = await supabase
       .from("Cabinet")
-      .insert(cabinetWithTimestamps)
-      .select()
+      .insert(insertable)
       .single();
-      
-    if (error) throw new Error(error.message);
-    
+
+    if (error) {
+      console.error("[SUPABASE ERROR]", error.code, error.message);
+      throw error;
+    }
+
     return data as Cabinet;
   },
 
