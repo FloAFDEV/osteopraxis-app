@@ -1,4 +1,3 @@
-
 import { corsHeaders } from '../_shared/cors.ts'
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -7,58 +6,59 @@ serve(async (req: Request) => {
   // Pré-flight OPTIONS systématique pour CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, {
-      status: 204, // No Content, meilleure pratique
+      status: 204,
       headers: corsHeaders,
     });
   }
 
-  try {
-    // Récupérer le token JWT de l'en-tête Authorization
-    const authHeader = req.headers.get('Authorization')
-    console.log("Authorization header présent:", !!authHeader);
-    
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Aucun token d\'authentification fourni' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      )
-    }
-
-    // Créer un client Supabase avec le token auth
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_ANON_KEY') || '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
+  // Récupérer le token JWT de l'en-tête Authorization
+  const authHeader = req.headers.get('Authorization')
+  console.log("Authorization header présent:", !!authHeader);
+  
+  if (!authHeader) {
+    return new Response(
+      JSON.stringify({ error: 'Aucun token d\'authentification fourni' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
     )
+  }
 
-    // Récupérer la session utilisateur
-    console.log("Récupération de l'utilisateur...");
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
-    
-    if (userError || !user) {
-      console.error("Erreur de récupération de l'utilisateur:", userError);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Erreur de récupération de l\'utilisateur', 
-          details: userError,
-          auth: authHeader ? "Token présent" : "Pas de token"
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      )
+  // Créer un client Supabase avec le token auth
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') || '',
+    Deno.env.get('SUPABASE_ANON_KEY') || '',
+    {
+      global: {
+        headers: { Authorization: authHeader },
+      },
     }
+  )
 
-    // Récupérer les données envoyées dans le corps de la requête
-    console.log("Récupération des données du corps...");
+  // Récupérer la session utilisateur
+  console.log("Récupération de l'utilisateur...");
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+  
+  if (userError || !user) {
+    console.error("Erreur de récupération de l'utilisateur:", userError);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Erreur de récupération de l\'utilisateur', 
+        details: userError,
+        auth: authHeader ? "Token présent" : "Pas de token"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+    )
+  }
+
+  try {
+    // Support both PATCH and POST with X-HTTP-Method-Override
+    const method = req.headers.get('X-HTTP-Method-Override') || req.method;
+    console.log("Méthode effective:", method);
+    
     let osteopathData;
     try {
       const requestData = await req.json();
       osteopathData = requestData.osteopathData;
       
-      // Si aucun nom n'est fourni, utiliser l'email comme valeur par défaut
       if (osteopathData && !osteopathData.name && user.email) {
         osteopathData.name = user.email.split('@')[0];
       }
