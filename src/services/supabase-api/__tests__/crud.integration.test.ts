@@ -1,11 +1,11 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { supabaseOsteopathService } from "../osteopath-service";
-import { supabasePatientService } from "../patient-service";
-import { supabaseCabinetService } from "../cabinet-service";
-import { supabaseInvoiceService } from "../invoice-service";
-import { supabaseAppointmentService } from "../appointment-service";
-import { supabase } from "../utils";
+import { supabaseOsteopathService } from "../../supabase-api/osteopath-service";
+import { supabasePatientService } from "../../supabase-api/patient-service";
+import { supabaseCabinetService } from "../../supabase-api/cabinet-service";
+import { supabaseInvoiceService } from "../../supabase-api/invoice-service";
+import { supabaseAppointmentService } from "../../supabase-api/appointment-service";
+import { supabase } from "../../supabase-api/utils";
 
 // Utilisateur et IDs fictifs utilisés pour lier les entités
 const OSTEO_TEST_EMAIL = "crudemotest@example.com";
