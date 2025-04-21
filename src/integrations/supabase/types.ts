@@ -193,7 +193,7 @@ export type Database = {
       Invoice: {
         Row: {
           amount: number
-          consultationId: number
+          consultationId: number | null
           date: string
           id: number
           notes: string | null
@@ -205,7 +205,7 @@ export type Database = {
         }
         Insert: {
           amount: number
-          consultationId: number
+          consultationId?: number | null
           date?: string
           id?: number
           notes?: string | null
@@ -217,7 +217,7 @@ export type Database = {
         }
         Update: {
           amount?: number
-          consultationId?: number
+          consultationId?: number | null
           date?: string
           id?: number
           notes?: string | null

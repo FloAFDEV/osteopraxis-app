@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/ui/layout";
@@ -13,6 +14,15 @@ import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceM
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 
+// Ajout : pour les boutons print/download
+import { Printer, Download } from "lucide-react";
+import { InvoicePrintView } from "@/components/invoice-print-view";
+import { useReactToPrint } from "react-to-print";
+import { useEffect } from "react";
+
+// Pour le rendu print invisible
+import { useState as useReactState } from "react";
+
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +30,40 @@ const InvoicesPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
 
+  // Pour impression directe d'une facture depuis la liste
+  const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
+
+  // Permet d’attendre que le printRef soit monté avant lancement impression
+  const [readyToPrint, setReadyToPrint] = useState(false);
+
+  // Pour le bouton imprimer
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: printInvoice ? `Facture_${printInvoice.id.toString().padStart(4, "0")}` : "Facture",
+    onAfterPrint: () => {
+      setPrintInvoice(null); // Reset après print pour libérer la référence mémoire
+      setReadyToPrint(false);
+    }
+  });
+
+  // Quand on veut imprimer : montrer le rendu invisible, attendre qu’il soit prêt, puis imprimer
+  useEffect(() => {
+    if (printInvoice) {
+      setReadyToPrint(true);
+    }
+  }, [printInvoice]);
+
+  useEffect(() => {
+    if (printInvoice && readyToPrint) {
+      setTimeout(() => {
+        handlePrint && handlePrint();
+      }, 200); // Attendre un peu pour que le rendu invisible soit prêt
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readyToPrint, printInvoice]);
+
+  // Correction ici: vérifier que invoices existe avant d'utiliser filter
   const {
     data: invoices,
     isLoading,
@@ -44,22 +88,47 @@ const InvoicesPage = () => {
     }
   };
 
+  // Nouvelle : Trouver le nom du patient dans les data Invoice (pas de Patient? fallback)
+  const getPatientName = (invoice: Invoice) => {
+    // @ts-ignore (Patient peut être attaché par API)
+    if (invoice.Patient) {
+      //@ts-ignore
+      return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
+    }
+    return `Patient #${invoice.patientId}`;
+  };
+
   // Correction ici: vérifier que invoices existe avant d'utiliser filter
   const filteredInvoices = invoices ? invoices.filter(invoice => {
     // Tenir compte de la possibilité que Patient soit undefined
+    // @ts-ignore
     const patientFirstName = invoice.Patient?.firstName || "";
+    // @ts-ignore
     const patientLastName = invoice.Patient?.lastName || "";
-    
-    const matchesQuery = 
-      patientFirstName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      patientLastName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+
+    const matchesQuery =
+      patientFirstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patientLastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       invoice.id.toString().includes(searchQuery);
-    
+
     const matchesStatus = statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
     return matchesQuery && matchesStatus;
   }) : [];
 
-  return <Layout>
+  // Impression et téléchargement de la facture depuis la liste
+  const handlePrintInvoice = (invoice: Invoice) => {
+    setPrintInvoice(invoice);
+  };
+
+  const handleDownloadInvoice = (invoice: Invoice) => {
+    setPrintInvoice(invoice);
+    // L'utilisateur pourra utiliser la fonction d'impression et choisir "Save as PDF" via la fenêtre du navigateur
+    // Pour une vraie génération PDF sans interaction navigateur, il faudrait une librairie supplémentaire type jspdf ou html2pdf mais c'est plus complexe
+    toast.info("Utilisez la fenêtre d'impression pour sauvegarder le PDF.");
+  };
+
+  return (
+    <Layout>
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -68,13 +137,12 @@ const InvoicesPage = () => {
               Factures
             </span>
           </h1>
-          
           <Button onClick={() => navigate("/invoices/new")} className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600">
             <Plus className="h-5 w-5" />
             Nouvelle facture
           </Button>
         </div>
-        
+
         <Card className="mb-8">
           <CardContent className="p-2">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -82,7 +150,6 @@ const InvoicesPage = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input placeholder="Rechercher une facture..." className="pl-9" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
               </div>
-              
               <div className="flex items-center gap-2 min-w-[200px]">
                 <Filter className="h-4 w-4 text-gray-400" />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -100,33 +167,84 @@ const InvoicesPage = () => {
             </div>
           </CardContent>
         </Card>
-        
-        {isLoading ? <div className="flex justify-center items-center py-20">
+
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-          </div> : filteredInvoices && filteredInvoices.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredInvoices.map(invoice => <InvoiceDetails key={invoice.id} invoice={invoice} patientName={invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : `Patient #${invoice.patientId}`} onEdit={() => navigate(`/invoices/${invoice.id}`)} onDelete={() => {
-          setSelectedInvoiceId(invoice.id);
-          setIsDeleteModalOpen(true);
-        }} onDownload={() => toast.success("Téléchargement de la facture (fonctionnalité à venir)")} onPrint={() => {
-          navigate(`/invoices/${invoice.id}`);
-          setTimeout(() => {
-            window.print();
-          }, 500);
-        }} />)}
-          </div> : <div className="text-center py-20">
+          </div>
+        ) : filteredInvoices && filteredInvoices.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredInvoices.map(invoice => (
+              <div key={invoice.id} className="relative group">
+                <InvoiceDetails
+                  invoice={invoice}
+                  patientName={getPatientName(invoice)}
+                  onEdit={() => navigate(`/invoices/${invoice.id}`)}
+                  onDelete={() => {
+                    setSelectedInvoiceId(invoice.id);
+                    setIsDeleteModalOpen(true);
+                  }}
+                  onDownload={() => handleDownloadInvoice(invoice)}
+                  onPrint={() => handlePrintInvoice(invoice)}
+                />
+
+                <div className="absolute top-3 right-4 flex gap-1 opacity-70 group-hover:opacity-100">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handlePrintInvoice(invoice)}
+                    title="Imprimer"
+                  >
+                    <Printer />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDownloadInvoice(invoice)}
+                    title="Télécharger"
+                  >
+                    <Download />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
             <FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
             <h3 className="mt-4 text-xl font-medium">Aucune facture trouvée</h3>
             <p className="mt-2 text-gray-500 dark:text-gray-400">
-              {searchQuery || statusFilter !== "ALL" ? "Essayez de modifier vos critères de recherche." : "Commencez par créer votre première facture."}
+              {searchQuery || statusFilter !== "ALL"
+                ? "Essayez de modifier vos critères de recherche."
+                : "Commencez par créer votre première facture."}
             </p>
             <Button onClick={() => navigate("/invoices/new")} className="mt-6 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600">
               <Plus className="h-4 w-4 mr-2" />
               Créer une facture
             </Button>
-          </div>}
+          </div>
+        )}
       </div>
-      
-      {isDeleteModalOpen && selectedInvoiceId && <ConfirmDeleteInvoiceModal isOpen={isDeleteModalOpen} invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")} onCancel={() => setIsDeleteModalOpen(false)} onDelete={handleDeleteInvoice} />}
-    </Layout>;
+
+      {/* Impression PDF/print invisible pour la facture sélectionnée */}
+      {printInvoice && (
+        <div className="hidden">
+          <div ref={printRef}>
+            <InvoicePrintView invoice={printInvoice} />
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && selectedInvoiceId && (
+        <ConfirmDeleteInvoiceModal
+          isOpen={isDeleteModalOpen}
+          invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")}
+          onCancel={() => setIsDeleteModalOpen(false)}
+          onDelete={handleDeleteInvoice}
+        />
+      )}
+    </Layout>
+  );
 };
+
 export default InvoicesPage;
