@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar, AlertCircle, "invoice" as InvoiceIcon } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 const EditAppointmentPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -49,6 +50,20 @@ const EditAppointmentPage = () => {
     
     fetchData();
   }, [id]);
+
+  const handleCancel = async () => {
+    if (!appointment || !id) return;
+    
+    try {
+      await api.cancelAppointment(parseInt(id));
+      toast.success("Rendez-vous annulé avec succès");
+      // Mettre à jour l'état local
+      setAppointment({ ...appointment, status: "CANCELED" });
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+      toast.error("Impossible d'annuler le rendez-vous");
+    }
+  };
 
   if (loading) {
     return <Layout>
@@ -93,6 +108,42 @@ const EditAppointmentPage = () => {
           <p className="text-muted-foreground mt-1">
             Modifiez les détails du rendez-vous en utilisant le formulaire ci-dessous.
           </p>
+        </div>
+
+        {/* Status badge */}
+        <div className="mb-4">
+          <Badge className={
+            appointment.status === "SCHEDULED" ? "bg-blue-500" :
+            appointment.status === "COMPLETED" ? "bg-green-500" :
+            appointment.status === "CANCELED" ? "bg-red-500" :
+            "bg-amber-500"
+          }>
+            {appointment.status === "SCHEDULED" ? "Planifié" :
+             appointment.status === "COMPLETED" ? "Terminé" :
+             appointment.status === "CANCELED" ? "Annulé" :
+             "Reporté"}
+          </Badge>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {appointment.status === "SCHEDULED" && (
+            <Button 
+              variant="destructive" 
+              onClick={handleCancel}
+            >
+              Annuler le rendez-vous
+            </Button>
+          )}
+          
+          {appointment.status === "COMPLETED" && (
+            <Button variant="outline" asChild>
+              <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
+                <InvoiceIcon className="h-4 w-4 mr-2" />
+                Créer une facture
+              </Link>
+            </Button>
+          )}
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">

@@ -1,7 +1,7 @@
 
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Clock, Calendar, FileText } from "lucide-react";
+import { Clock, Calendar, FileText, "invoice" as InvoiceIcon } from "lucide-react";
 import { Appointment, Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,13 +70,28 @@ export function AppointmentCard({
         </div>
       </CardContent>
       
-      {(onEdit || onCancel) && <CardFooter className="px-6 py-4 bg-muted/20 flex justify-end gap-2">
-          {onEdit && <Button variant="outline" size="sm" onClick={onEdit}>
-              Modifier
-            </Button>}
-          {onCancel && appointment.status === "SCHEDULED" && <Button variant="destructive" size="sm" onClick={onCancel}>
-              Annuler
-            </Button>}
-        </CardFooter>}
+      <CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
+        {/* Bouton pour créer une facture */}
+        {appointment.status === "COMPLETED" && (
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
+              <InvoiceIcon className="h-4 w-4 mr-1" />
+              Facture
+            </Link>
+          </Button>
+        )}
+
+        {onEdit && (
+          <Button variant="outline" size="sm" onClick={onEdit}>
+            Modifier
+          </Button>
+        )}
+        
+        {onCancel && appointment.status === "SCHEDULED" && (
+          <Button variant="destructive" size="sm" onClick={onCancel}>
+            Annuler
+          </Button>
+        )}
+      </CardFooter>
     </Card>;
 }

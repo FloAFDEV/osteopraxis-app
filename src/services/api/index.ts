@@ -13,7 +13,7 @@ export const api = {
   login: authService.login,
   register: authService.register,
   logout: authService.logout,
-  // Correction : enlever getCurrentUser si la méthode n’existe pas dans l’objet de référence
+  // Correction : enlever getCurrentUser si la méthode n'existe pas dans l'objet de référence
   // getCurrentUser: authService.getCurrentUser || (() => Promise.resolve(null)),
   checkAuth: authService.checkAuth || (() => Promise.resolve({ isAuthenticated: false, user: null })),
   loginWithMagicLink: authService.loginWithMagicLink || ((email: string) => Promise.resolve()),
@@ -36,6 +36,7 @@ export const api = {
   createAppointment: appointmentService.createAppointment,
   updateAppointment: appointmentService.updateAppointment,
   updateAppointmentStatus: appointmentService.updateAppointmentStatus,
+  cancelAppointment: appointmentService.cancelAppointment, // Ajout de la nouvelle méthode
   deleteAppointment: appointmentService.deleteAppointment, // ajout
   
   // Cabinet related
@@ -50,6 +51,7 @@ export const api = {
   // Invoice related
   getInvoices: invoiceService.getInvoices,
   getInvoiceById: invoiceService.getInvoiceById,
+  getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
   createInvoice: invoiceService.createInvoice,
   updateInvoice: invoiceService.updateInvoice,
   deleteInvoice: invoiceService.deleteInvoice, // ajout

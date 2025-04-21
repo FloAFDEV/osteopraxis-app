@@ -144,6 +144,27 @@ export const appointmentService = {
     } as Appointment;
   },
 
+  // Nouvelle méthode spécifique pour annuler un rendez-vous
+  async cancelAppointment(id: number): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.cancelAppointment(id);
+      } catch (error) {
+        console.error("Erreur Supabase cancelAppointment:", error);
+        throw error;
+      }
+    }
+    
+    // Mock: return updated appointment data with CANCELED status
+    await delay(300);
+    const now = new Date().toISOString();
+    return {
+      id,
+      status: "CANCELED",
+      updatedAt: now
+    } as Appointment;
+  },
+
   async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
     return this.updateAppointment(id, { status: normalizeStatus(status) });
   },

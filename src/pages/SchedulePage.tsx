@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock, "invoice" as InvoiceIcon } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -67,6 +67,25 @@ const SchedulePage = () => {
       const timeB = parseISO(b.date);
       return timeA.getTime() - timeB.getTime();
     });
+  };
+
+  // Modifier cette fonction pour utiliser la nouvelle méthode cancelAppointment
+  const handleCancelAppointment = async (appointmentId: number) => {
+    try {
+      await api.cancelAppointment(appointmentId);
+      toast.success("Rendez-vous annulé avec succès");
+      
+      // Mettre à jour la liste des rendez-vous
+      const updatedAppointments = appointments.map(appointment => 
+        appointment.id === appointmentId 
+          ? { ...appointment, status: "CANCELED" } 
+          : appointment
+      );
+      setAppointments(updatedAppointments);
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+      toast.error("Impossible d'annuler le rendez-vous");
+    }
   };
 
   const navigateToPreviousWeek = () => {
@@ -166,6 +185,7 @@ const SchedulePage = () => {
                   date={selectedDate}
                   appointments={getDayAppointments(selectedDate)}
                   getPatientById={getPatientById}
+                  onCancelAppointment={handleCancelAppointment}
                 />
               </div>
             </TabsContent>
@@ -258,12 +278,14 @@ interface DayScheduleProps {
   date: Date;
   appointments: Appointment[];
   getPatientById: (id: number) => Patient | undefined;
+  onCancelAppointment: (id: number) => void;
 }
 
 const DaySchedule = ({
   date,
   appointments,
-  getPatientById
+  getPatientById,
+  onCancelAppointment
 }: DayScheduleProps) => {
   // Generate time slots for the day (8am to 8pm)
   const timeSlots = Array.from({
@@ -311,11 +333,27 @@ const DaySchedule = ({
                       {appointment.reason}
                     </p>
                   </div>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to={`/appointments/${appointment.id}/edit`}>
-                      Détails
-                    </Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
+                        <InvoiceIcon className="h-4 w-4 mr-1" />
+                        Facture
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to={`/appointments/${appointment.id}/edit`}>
+                        Détails
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => onCancelAppointment(appointment.id)}
+                    >
+                      Annuler
+                    </Button>
+                  </div>
                 </div> : <Link to={`/appointments/new?date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}`} className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary">
                   <span className="text-center">Disponible</span>
                 </Link>}
