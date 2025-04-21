@@ -1,3 +1,4 @@
+
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
 import { supabase } from "./utils";
 
@@ -137,76 +138,84 @@ export const patientService = {
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
-    // Use explicit ID for the update operation
-    const id = patient.id;
-    
-    // Add updatedAt timestamp
-    const now = new Date().toISOString();
-    
-    // Convert contraception from IMPLANT to IMPLANTS if needed for Supabase
-    let contraceptionValue = patient.contraception;
-    if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
-      contraceptionValue = "IMPLANTS" as Contraception;
-    }
-    
-    // Handle gender updates for compatibility with Supabase
-    let genderValue = patient.gender;
-    if (genderValue && genderValue.toString() === "Autre") {
-      genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
-    }
-    
-    // Prepare the complete patient data for update
-    const patientData = {
-      firstName: patient.firstName,
-      lastName: patient.lastName,
-      email: patient.email,
-      phone: patient.phone,
-      address: patient.address,
-      gender: genderValue,
-      maritalStatus: patient.maritalStatus,
-      occupation: patient.occupation,
-      hasChildren: patient.hasChildren,
-      childrenAges: patient.childrenAges,
-      birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
-      generalPractitioner: patient.generalPractitioner,
-      surgicalHistory: patient.surgicalHistory,
-      traumaHistory: patient.traumaHistory,
-      rheumatologicalHistory: patient.rheumatologicalHistory,
-      currentTreatment: patient.currentTreatment,
-      handedness: patient.handedness,
-      hasVisionCorrection: patient.hasVisionCorrection,
-      ophtalmologistName: patient.ophtalmologistName,
-      entProblems: patient.entProblems,
-      entDoctorName: patient.entDoctorName,
-      digestiveProblems: patient.digestiveProblems,
-      digestiveDoctorName: patient.digestiveDoctorName,
-      physicalActivity: patient.physicalActivity,
-      isSmoker: patient.isSmoker,
-      isDeceased: patient.isDeceased,
-      contraception: contraceptionValue,
-      hdlm: patient.hdlm,
-      avatarUrl: patient.avatarUrl,
-      cabinetId: patient.cabinetId,
-      userId: patient.userId,
-      osteopathId: patient.osteopathId || 1,
-      updatedAt: now
-    };
+    try {
+      // Use explicit ID for the update operation
+      const id = patient.id;
+      
+      // Add updatedAt timestamp
+      const now = new Date().toISOString();
+      
+      // Convert contraception from IMPLANT to IMPLANTS if needed for Supabase
+      let contraceptionValue = patient.contraception;
+      if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
+        contraceptionValue = "IMPLANTS" as Contraception;
+      }
+      
+      // Handle gender updates for compatibility with Supabase
+      let genderValue = patient.gender;
+      if (genderValue && genderValue.toString() === "Autre") {
+        genderValue = "Homme" as Gender; // Default to "Homme" if "Autre" for Supabase compatibility
+      }
+      
+      // Prepare the complete patient data for update
+      const patientData = {
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        phone: patient.phone,
+        address: patient.address,
+        gender: genderValue,
+        maritalStatus: patient.maritalStatus,
+        occupation: patient.occupation,
+        hasChildren: patient.hasChildren,
+        childrenAges: patient.childrenAges,
+        birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
+        generalPractitioner: patient.generalPractitioner,
+        surgicalHistory: patient.surgicalHistory,
+        traumaHistory: patient.traumaHistory,
+        rheumatologicalHistory: patient.rheumatologicalHistory,
+        currentTreatment: patient.currentTreatment,
+        handedness: patient.handedness,
+        hasVisionCorrection: patient.hasVisionCorrection,
+        ophtalmologistName: patient.ophtalmologistName,
+        entProblems: patient.entProblems,
+        entDoctorName: patient.entDoctorName,
+        digestiveProblems: patient.digestiveProblems,
+        digestiveDoctorName: patient.digestiveDoctorName,
+        physicalActivity: patient.physicalActivity,
+        isSmoker: patient.isSmoker,
+        isDeceased: patient.isDeceased,
+        contraception: contraceptionValue,
+        hdlm: patient.hdlm,
+        avatarUrl: patient.avatarUrl,
+        cabinetId: patient.cabinetId,
+        userId: patient.userId,
+        osteopathId: patient.osteopathId || 1,
+        updatedAt: now
+      };
 
-    // Using POST method instead of PATCH for better CORS compatibility
-    console.log("Updating patient with id:", id);
-    const { data, error } = await supabase
-      .from('Patient')
-      .update(patientData)
-      .eq('id', id)
-      .select()
-      .single();
+      console.log("Updating patient with id:", id);
+      
+      // Solution 1: Utiliser POST au lieu de PATCH (upsert)
+      const { data, error } = await supabase
+        .from('Patient')
+        .upsert({
+          id: id, // Inclure l'ID pour que upsert fonctionne comme mise à jour
+          ...patientData
+        })
+        .select()
+        .single();
 
-    if (error) {
+      if (error) {
+        console.error('Error updating patient:', error);
+        throw error;
+      }
+
+      return adaptPatientFromSupabase(data);
+    } catch (error) {
       console.error('Error updating patient:', error);
       throw error;
     }
-
-    return adaptPatientFromSupabase(data);
   },
   
   async deletePatient(id: number): Promise<{ error: any | null }> {
