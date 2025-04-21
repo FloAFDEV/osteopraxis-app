@@ -3,8 +3,11 @@ import { Patient, Contraception, Gender } from "@/types";
 import { supabase } from "../utils";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 
-// Ne jamais envoyer createdAt/updatedAt à Supabase ; laissez le trigger SQL mettre à jour updatedAt côté serveur
-export async function updatePatient(patient: Patient): Promise<Patient> {
+// Type pour la mise à jour de patient
+type UpdatePatientPayload = Omit<Patient, "createdAt" | "updatedAt">;
+
+export async function updatePatient(patient: UpdatePatientPayload): Promise<Patient> {
+  // Correction pour certaines valeurs d'énumération
   let contraceptionValue = patient.contraception;
   if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
     contraceptionValue = "IMPLANTS" as Contraception;
@@ -14,23 +17,21 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
     genderValue = "Homme" as Gender;
   }
 
-  const {
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    ...updatable
-  } = {
+  // Construction de l'objet à mettre à jour (sans timestamps)
+  const updatable = {
     ...patient,
     contraception: contraceptionValue,
     gender: genderValue,
     birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
     osteopathId: patient.osteopathId || 1,
-  } as any;
+  };
 
-  // Ne pas utiliser upsert ici sauf besoin (et unique index)
+  // Mise à jour avec single() pour obtenir directement l'objet
   const { data, error } = await supabase
     .from("Patient")
     .update(updatable)
     .eq("id", patient.id)
+    .select()
     .single();
 
   if (error) {

@@ -1,7 +1,13 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, addAuthHeaders } from "./utils";
 
-// Map between app and Supabase appointment statuses
+// Type plus spécifique pour la création d'appointment
+type CreateAppointmentPayload = Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>;
+// Type pour les mises à jour d'appointment
+type UpdateAppointmentPayload = Partial<Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>>;
+
+// Map entre les statuts de l'application et ceux de Supabase
 const mapStatusToSupabase = (status: AppointmentStatus): "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW" => {
   return status === "CANCELLED" ? "CANCELED" : status;
 };
@@ -9,9 +15,6 @@ const mapStatusToSupabase = (status: AppointmentStatus): "SCHEDULED" | "COMPLETE
 const mapStatusFromSupabase = (status: string): AppointmentStatus => {
   return status === "CANCELED" ? "CANCELLED" : status as AppointmentStatus;
 };
-
-// Type for appointment creation that omits generated fields
-type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'>;
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -72,22 +75,30 @@ export const supabaseAppointmentService = {
     }
   },
 
-  async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
+  async createAppointment(payload: CreateAppointmentPayload): Promise<Appointment> {
     try {
-      // Exclure id/createdAt/updatedAt pour insert
-      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = appointment as any;
+      const now = new Date().toISOString();
+      
+      // Création de l'objet à insérer avec les champs timestamp
+      const insertable: Omit<Appointment, 'id'> = {
+        ...payload,
+        status: payload.status ?? "SCHEDULED",
+        notificationSent: payload.notificationSent ?? false,
+        createdAt: now,
+        updatedAt: now
+      };
+
       const { data, error } = await supabase
         .from("Appointment")
-        .insert({
-          ...insertable,
-          status: appointment.status ?? "SCHEDULED"
-        })
+        .insert(insertable)
+        .select()
         .single();
 
       if (error) {
         console.error("[SUPABASE ERROR]", error.code, error.message);
         throw error;
       }
+      
       return {
         ...data,
         status: mapStatusFromSupabase(data.status),
@@ -98,15 +109,26 @@ export const supabaseAppointmentService = {
     }
   },
 
-  async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {
+  async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
     try {
-      const { createdAt, updatedAt, ...patch } = update;
-      // Laisser SQL gérer updatedAt via trigger, pas besoin de le surcharger
+      // Ne pas inclure createdAt ou updatedAt dans la mise à jour
+      const now = new Date().toISOString();
+      
+      const updateData: UpdateAppointmentPayload & { updatedAt: string } = {
+        ...update,
+        updatedAt: now
+      };
+
+      // Si status est fourni, s'assurer qu'il est correctement mappé
+      if (update.status) {
+        updateData.status = mapStatusToSupabase(update.status);
+      }
 
       const { data, error } = await supabase
         .from("Appointment")
-        .update(patch)
+        .update(updateData)
         .eq("id", id)
+        .select()
         .single();
 
       if (error) {

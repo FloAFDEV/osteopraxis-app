@@ -3,8 +3,11 @@ import { Patient, Contraception, Gender } from "@/types";
 import { supabase } from "../utils";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 
-// Ne jamais envoyer id / createdAt / updatedAt ; fallback sur DEFAULTs SQL pour les timestamps
-export async function createPatient(patient: Omit<Patient, "id" | "createdAt" | "updatedAt">): Promise<Patient> {
+// Type pour la création de patient, sans les champs générés
+type CreatePatientPayload = Omit<Patient, "id" | "createdAt" | "updatedAt">;
+
+export async function createPatient(patient: CreatePatientPayload): Promise<Patient> {
+  // Correction pour certaines valeurs d'énumération
   let contraceptionValue = patient.contraception;
   if (contraceptionValue && contraceptionValue.toString() === "IMPLANT") {
     contraceptionValue = "IMPLANTS" as Contraception;
@@ -14,19 +17,21 @@ export async function createPatient(patient: Omit<Patient, "id" | "createdAt" | 
     genderValue = "Homme" as Gender;
   }
 
-  const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = {
+  // Création de l'objet à insérer sans id ni timestamps (ils seront gérés par Postgres)
+  const insertable = {
     ...patient,
     contraception: contraceptionValue,
     gender: genderValue,
     birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
     osteopathId: patient.osteopathId || 1,
     userId: patient.userId || null
-  } as any;
+  };
 
-  // Si onConflict: s'assurer que 'email' est bien UNIQUE côté SQL, sinon retirer!
+  // Insertion avec single() pour obtenir directement l'objet
   const { data, error } = await supabase
     .from("Patient")
     .insert(insertable)
+    .select()
     .single();
 
   if (error) {

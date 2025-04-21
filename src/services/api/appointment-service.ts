@@ -1,13 +1,14 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
 
-// Type guard for checking if a value is a Date
+// Type guard pour vérifier si une valeur est une Date
 function isDate(value: unknown): value is Date {
   return value instanceof Date;
 }
 
-// Type for appointment creation that omits generated fields
+// Type pour la création d'un rendez-vous sans les champs générés
 type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'>;
 
 export const appointmentService = {
@@ -65,6 +66,7 @@ export const appointmentService = {
   async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
+        // Convertir la date si nécessaire
         const payload = {
           ...appointment,
           date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
@@ -93,10 +95,14 @@ export const appointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        const payload = {
-          ...appointment,
-          date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
-        };
+        // Convertir la date si nécessaire
+        const payload = appointment.date 
+          ? { 
+              ...appointment,
+              date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
+            }
+          : appointment;
+          
         return await supabaseAppointmentService.updateAppointment(id, payload);
       } catch (error) {
         console.error("Erreur Supabase updateAppointment:", error);
