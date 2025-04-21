@@ -31,6 +31,9 @@ const InvoicesPage = () => {
   const [printPatient, setPrintPatient] = useState<Patient | null>(null);
   const [printOsteopath, setPrintOsteopath] = useState<Osteopath | null>(null);
   const [printCabinet, setPrintCabinet] = useState<Cabinet | null>(null);
+  
+  // Map to store patient data for each invoice
+  const [patientDataMap, setPatientDataMap] = useState<Map<number, Patient>>(new Map());
 
   // Référence pour l'impression
   const printRef = useRef<HTMLDivElement>(null);
@@ -78,6 +81,31 @@ const InvoicesPage = () => {
     queryKey: ["invoices"],
     queryFn: api.getInvoices
   });
+
+  // Fetch patient data for all invoices
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      if (!invoices || invoices.length === 0) return;
+      
+      const patientIds = [...new Set(invoices.map(invoice => invoice.patientId))];
+      const patientMap = new Map<number, Patient>();
+      
+      for (const patientId of patientIds) {
+        try {
+          const patient = await api.getPatientById(patientId);
+          if (patient) {
+            patientMap.set(patientId, patient);
+          }
+        } catch (error) {
+          console.error(`Error fetching patient ${patientId}:`, error);
+        }
+      }
+      
+      setPatientDataMap(patientMap);
+    };
+    
+    fetchPatientData();
+  }, [invoices]);
 
   // Fonction pour charger les données associées à une facture (patient, ostéopathe, cabinet)
   const loadInvoiceRelatedData = async (invoice: Invoice) => {
@@ -131,27 +159,37 @@ const InvoicesPage = () => {
     }
   };
 
-  // Obtenir le nom du patient
+  // Obtenir le nom du patient avec gestion des cas
   const getPatientName = (invoice: Invoice) => {
+    // First check if we have the patient in our map
+    const patient = patientDataMap.get(invoice.patientId);
+    if (patient) {
+      return `${patient.firstName} ${patient.lastName}`;
+    }
+    
+    // Then check if Patient is attached by API
     // @ts-ignore (Patient peut être attaché par API)
     if (invoice.Patient) {
       //@ts-ignore
       return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
     }
+    
     return `Patient #${invoice.patientId}`;
+  };
+  
+  // Get patient gender (for styling)
+  const getPatientGender = (invoice: Invoice) => {
+    const patient = patientDataMap.get(invoice.patientId);
+    return patient?.gender || null;
   };
 
   // Filtrer les factures selon les critères de recherche et de statut
   const filteredInvoices = invoices ? invoices.filter(invoice => {
-    // Tenir compte de la possibilité que Patient soit undefined
-    // @ts-ignore
-    const patientFirstName = invoice.Patient?.firstName || "";
-    // @ts-ignore
-    const patientLastName = invoice.Patient?.lastName || "";
-
+    // Get the patient name
+    const patientName = getPatientName(invoice);
+    
     const matchesQuery =
-      patientFirstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      patientLastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       invoice.id.toString().includes(searchQuery);
 
     const matchesStatus = statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
@@ -315,41 +353,59 @@ const InvoicesPage = () => {
           </div>
         ) : filteredInvoices && filteredInvoices.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredInvoices.map(invoice => (
-              <div key={invoice.id} className="relative group">
-                <InvoiceDetails
-                  invoice={invoice}
-                  patientName={getPatientName(invoice)}
-                  onEdit={() => navigate(`/invoices/${invoice.id}`)}
-                  onDelete={() => {
-                    setSelectedInvoiceId(invoice.id);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  // Bouton Export PDF renommé + style harmonisée, appel nouvelle logique
-                  onDownload={() => handleDownloadInvoice(invoice)}
-                  onPrint={() => handlePrintInvoice(invoice)}
-                />
-                {/* Menu action rapide (Imprimer / Export PDF) */}
-                <div className="absolute top-3 right-4 flex gap-1 opacity-70 group-hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handlePrintInvoice(invoice)}
-                    title="Imprimer"
-                  >
-                    <Printer />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDownloadInvoice(invoice)}
-                    title="Exporter la facture en PDF"
-                  >
-                    <Download />
-                  </Button>
+            {filteredInvoices.map(invoice => {
+              const gender = getPatientGender(invoice);
+              const patientName = getPatientName(invoice);
+              
+              return (
+                <div key={invoice.id} className="relative group">
+                  <InvoiceDetails
+                    invoice={invoice}
+                    patientName={patientName}
+                    onEdit={() => navigate(`/invoices/${invoice.id}`)}
+                    onDelete={() => {
+                      setSelectedInvoiceId(invoice.id);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    onDownload={() => handleDownloadInvoice(invoice)}
+                    onPrint={() => handlePrintInvoice(invoice)}
+                  />
+                  {/* Patient name with gender-based styling */}
+                  <div className="absolute top-12 left-0 right-0 text-center">
+                    <span 
+                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium truncate max-w-[90%]
+                        ${gender === "Femme" 
+                          ? "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300" 
+                          : gender === "Homme" 
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300"
+                        }`}
+                    >
+                      {patientName}
+                    </span>
+                  </div>
+                  {/* Menu action rapide (Imprimer / Export PDF) */}
+                  <div className="absolute top-3 right-4 flex gap-1 opacity-70 group-hover:opacity-100">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handlePrintInvoice(invoice)}
+                      title="Imprimer"
+                    >
+                      <Printer />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDownloadInvoice(invoice)}
+                      title="Exporter la facture en PDF"
+                    >
+                      <Download />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-20">
