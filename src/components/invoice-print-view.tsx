@@ -38,31 +38,25 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
     }
   };
 
-  // Debug des propriétés reçues
-  console.log("Cabinet info in InvoicePrintView:", cabinet);
-  console.log("Osteopath info in InvoicePrintView:", osteopath);
-
   return (
     <div className="bg-white p-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-start mb-8">
         <div>
-          {/* Nom du cabinet en plus gros et gras */}
-          <h1 className="text-4xl font-extrabold mb-2">
-            {cabinet?.name || "PatientHub"}
-          </h1>
-          {cabinet?.logoUrl && (
+          {cabinet && cabinet.logoUrl ? (
             <img 
               src={cabinet.logoUrl} 
               alt={`Logo ${cabinet.name}`} 
               className="h-16 mb-3"
               style={{ maxWidth: '200px', objectFit: 'contain' }}
             />
+          ) : (
+            <h1 className="text-3xl font-bold text-green-700">{cabinet?.name || "PatientHub"}</h1>
           )}
           <p className="text-gray-600">{osteopath?.professional_title || "Ostéopathe D.O."}</p>
           <p className="text-gray-600 mt-2">
             {cabinet ? (
               <>
-                {cabinet.address && <>{cabinet.address}<br /></>}
+                {cabinet.address}<br />
                 {cabinet.phone && <>{cabinet.phone}<br /></>}
                 {cabinet.email && <>{cabinet.email}<br /></>}
               </>
@@ -149,23 +143,25 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           Merci de votre confiance.
         </p>
         
-        <div className="text-center text-gray-500 text-sm mt-8">
-          {/* Nom du site avec dégradé */}
-          <h1
-            className="
-              text-3xl md:text-4xl font-bold
-              bg-clip-text text-transparent
-              bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
-              dark:from-blue-500 dark:via-purple-500 dark:to-purple-500
-            "
-          >
-            PatientHub
-          </h1>
-          <p className="text-gray-500 text-sm">Logiciel de gestion pour ostéopathes</p>
-          <p className="text-gray-400 text-xs mt-1">Document généré le {currentDate}</p>
-        </div>
+      <div className="text-center mt-8 space-y-1">
+  <p className="text-gray-600 text-xs">
+    Document généré le {currentDate}
+  </p>
+  <p className="text-muted-foreground text-[0.75rem]">
+    <span
+      className="
+        bg-clip-text text-transparent
+        bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
+        dark:from-blue-500 dark:via-purple-500 dark:to-purple-500
+      "
+    >
+      PatientHub
+    </span>
+    <span className="mx-1">·</span>
+    Logiciel de gestion pour ostéopathes
+  </p>
+</div>
       </div>
     </div>
   );
 };
-
