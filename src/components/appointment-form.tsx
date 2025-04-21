@@ -104,25 +104,32 @@ export function AppointmentForm({
     },
   });
   
-  // Generate available time slots (current time onward if today)
+  // Generate available time slots (current time onward if today, and between 8h-20h)
   const generateAvailableTimes = () => {
     const now = new Date();
     const selectedDate = form.watch("date");
     const isToday = isSameDay(selectedDate, now);
     
+    // Si c'est aujourd'hui, commencer à partir de l'heure actuelle
+    // Sinon commencer à 8h00 (slots commencent à 8h)
     const currentHour = isToday ? now.getHours() : 8;
     const currentMinute = isToday ? now.getMinutes() : 0;
     
+    // Calculer le slot de départ (chaque slot fait 30 minutes)
     const startSlot = isToday 
       ? Math.ceil((currentHour * 60 + currentMinute) / 30) 
-      : 16; // 16 = 8am (slots start at 8am)
+      : 16; // 16 = 8h00 (les slots commencent à minuit, donc 8h = 16 slots de 30min)
     
-    return Array.from({ length: 28 - startSlot }, (_, i) => {
+    // Générer tous les slots de 30 minutes de l'heure actuelle jusqu'à 20h
+    const totalSlotsInDay = 40; // 20h = 40 slots de 30min depuis minuit
+    const maxSlot = Math.min(totalSlotsInDay, 40); // Ne pas dépasser 20h
+    
+    return Array.from({ length: maxSlot - startSlot }, (_, i) => {
       const totalMinutes = (startSlot + i) * 30;
       const hour = Math.floor(totalMinutes / 60);
       const minute = totalMinutes % 60;
       
-      if (hour >= 20) return null; // Don't offer slots past 8pm
+      if (hour >= 20) return null; // Ne pas proposer de slots après 20h
       return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
     }).filter(Boolean) as string[];
   };
@@ -137,6 +144,14 @@ export function AppointmentForm({
       const dateTime = new Date(data.date);
       const timeToUse = useCustomTime ? customTime : data.time;
       const [hours, minutes] = timeToUse.split(':').map(Number);
+      
+      // Vérifier que l'heure est entre 8h et 20h
+      if (hours < 8 || hours >= 20) {
+        toast.error("Les rendez-vous doivent être pris entre 8h et 20h");
+        setIsSubmitting(false);
+        return;
+      }
+      
       dateTime.setHours(hours, minutes);
       
       // Check if appointment is in the past
@@ -313,11 +328,20 @@ export function AppointmentForm({
                       type="time"
                       value={customTime}
                       onChange={(e) => {
-                        setCustomTime(e.target.value);
-                        field.onChange(e.target.value);
+                        const newTime = e.target.value;
+                        const [hours] = newTime.split(':').map(Number);
+                        
+                        // Vérifier que l'heure est entre 8h et 20h
+                        if (hours < 8 || hours >= 20) {
+                          toast.error("Les rendez-vous doivent être pris entre 8h et 20h");
+                          return;
+                        }
+                        
+                        setCustomTime(newTime);
+                        field.onChange(newTime);
                       }}
                       className="mt-2"
-                      min="08:00"
+                      min="08:00" 
                       max="20:00"
                       disabled={isSubmitting}
                     />

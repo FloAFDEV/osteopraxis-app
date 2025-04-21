@@ -81,6 +81,11 @@ export const appointmentService = {
           status: normalizeStatus(appointment.status),
           date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
         };
+        
+        // Pas besoin d'inclure createdAt/updatedAt car ils seront gérés par la DB
+        delete (payload as any).createdAt;
+        delete (payload as any).updatedAt;
+        
         return await supabaseAppointmentService.createAppointment(payload);
       } catch (error) {
         console.error("Erreur Supabase createAppointment:", error);
@@ -115,6 +120,10 @@ export const appointmentService = {
         if (appointment.status) {
           payload.status = normalizeStatus(appointment.status);
         }
+        
+        // Ne pas inclure ces champs car ils sont gérés automatiquement par la DB
+        delete (payload as any).createdAt;
+        delete (payload as any).updatedAt;
           
         return await supabaseAppointmentService.updateAppointment(id, payload);
       } catch (error) {

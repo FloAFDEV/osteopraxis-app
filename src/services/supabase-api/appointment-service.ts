@@ -20,8 +20,6 @@ type InsertableAppointment = {
   status: AppointmentStatus;
   cabinetId?: number;
   notificationSent: boolean;
-  createdAt: string;
-  updatedAt: string;
 };
 
 // Type pour les mises à jour d'appointment
@@ -85,9 +83,7 @@ export const supabaseAppointmentService = {
 
   async createAppointment(payload: CreateAppointmentPayload): Promise<Appointment> {
     try {
-      const now = new Date().toISOString();
-      
-      // Création de l'objet à insérer avec les champs timestamp
+      // Création de l'objet à insérer - sans les champs timestamp qui sont auto-générés par la DB
       const insertable: InsertableAppointment = {
         date: payload.date,
         patientId: payload.patientId,
@@ -95,8 +91,6 @@ export const supabaseAppointmentService = {
         cabinetId: payload.cabinetId,
         status: normalizeStatus(payload.status),
         notificationSent: payload.notificationSent ?? false,
-        createdAt: now,
-        updatedAt: now
       };
 
       const { data, error } = await supabase
@@ -119,12 +113,8 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
     try {
-      // Ne pas inclure createdAt dans la mise à jour
-      const now = new Date().toISOString();
-      
       const updateData: Partial<InsertableAppointment> = {
         ...update,
-        updatedAt: now
       };
 
       // Si status est fourni, s'assurer qu'il est correctement normalisé

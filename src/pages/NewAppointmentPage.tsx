@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Calendar } from "lucide-react";
@@ -6,12 +7,22 @@ import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
+
 const NewAppointmentPage = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const patientId = queryParams.get('patientId') ? parseInt(queryParams.get('patientId')!) : undefined;
+  
+  // Parse date and time from URL if available
+  const dateParam = queryParams.get('date');
+  const timeParam = queryParams.get('time');
+  
+  // Set default values with parameters from URL if available
+  const defaultDate = dateParam ? new Date(dateParam) : new Date();
+  const defaultTime = timeParam && /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeParam) ? timeParam : "09:00";
+  
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -26,6 +37,7 @@ const NewAppointmentPage = () => {
     };
     fetchPatients();
   }, []);
+  
   return <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
@@ -46,12 +58,13 @@ const NewAppointmentPage = () => {
           </div> : <div className="bg-card rounded-lg border shadow-sm p-6">
             <AppointmentForm patients={patients} defaultValues={{
           patientId,
-          date: new Date(),
-          time: "09:00",
+          date: defaultDate,
+          time: defaultTime,
           status: "SCHEDULED"
         }} />
           </div>}
       </div>
     </Layout>;
 };
+
 export default NewAppointmentPage;
