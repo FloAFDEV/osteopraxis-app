@@ -82,6 +82,18 @@ interface AppointmentFormProps {
   isEditing?: boolean;
 }
 
+// Ajout d'une fonction pour filtrer les patients selon la recherche
+function filterPatients(search: string, patients: Patient[]): Patient[] {
+  const term = search.trim().toLowerCase();
+  if (term === "") return patients;
+  return patients.filter(
+    (p) =>
+      p.firstName.toLowerCase().includes(term) ||
+      p.lastName.toLowerCase().includes(term) ||
+      `${p.firstName} ${p.lastName}`.toLowerCase().includes(term)
+  );
+}
+
 export function AppointmentForm({
   patients,
   defaultValues,
@@ -92,6 +104,7 @@ export function AppointmentForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customTime, setCustomTime] = useState<string>(defaultValues?.time || "09:00");
   const [useCustomTime, setUseCustomTime] = useState(false);
+  const [patientSearch, setPatientSearch] = useState(""); // <-- Ajout de l'état de recherche
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -191,15 +204,29 @@ export function AppointmentForm({
   // Update available times when date changes
   form.watch("date");
 
+  // patients filtrés selon la recherche
+  const filteredPatients = filterPatients(patientSearch, patients);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Champ de recherche + Select */}
         <FormField
           control={form.control}
           name="patientId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Patient</FormLabel>
+              {/* Champ de recherche */}
+              <input
+                type="text"
+                placeholder="Rechercher un patient"
+                className="mb-2 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                value={patientSearch}
+                autoComplete="off"
+                onChange={(e) => setPatientSearch(e.target.value)}
+                disabled={isSubmitting}
+              />
               <Select
                 disabled={isSubmitting}
                 onValueChange={(value) => field.onChange(parseInt(value, 10))}
@@ -211,11 +238,17 @@ export function AppointmentForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {patients.map((patient) => (
-                    <SelectItem key={patient.id} value={patient.id.toString()}>
-                      {patient.firstName} {patient.lastName}
+                  {filteredPatients.length > 0 ? (
+                    filteredPatients.map((patient) => (
+                      <SelectItem key={patient.id} value={patient.id.toString()}>
+                        {patient.firstName} {patient.lastName}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      Aucun patient trouvé
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -289,12 +322,12 @@ export function AppointmentForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <div className="flex items-center">
-                          <Clock className="mr-2 h-4 w-4 text-primary" />
+                      <div className="flex items-center">
+                        <Clock className="mr-2 h-4 w-4 text-primary" />
+                        <SelectTrigger>
                           <SelectValue placeholder="Sélectionner l'heure" />
-                        </div>
-                      </SelectTrigger>
+                        </SelectTrigger>
+                      </div>
                     </FormControl>
                     <SelectContent>
                       {availableTimes.length > 0 ? (
