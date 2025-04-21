@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -105,7 +106,9 @@ export const InvoiceDetails = ({
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Patient :</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-300">{patientName || `Patient #${invoice.patientId}`}</span>
+              <span className="font-semibold text-blue-600 dark:text-blue-300">
+                {patientName || (invoice.Patient ? `${invoice.Patient.firstName} ${invoice.Patient.lastName}` : `Patient #${invoice.patientId}`)}
+              </span>
             </div>
             <div className="flex justify-between mt-3 pt-3 border-t border-dashed border-blue-200 dark:border-blue-800/50">
               <div className="space-x-2">
