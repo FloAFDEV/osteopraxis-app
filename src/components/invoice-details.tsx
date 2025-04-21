@@ -69,70 +69,75 @@ export const InvoiceDetails = ({
 
   return (
     <>
-      <Card className={clsx(
-        "border shadow px-4 pb-4 pt-0 transition-all duration-300",
-        "relative overflow-hidden min-h-[165px]",
-        "bg-gradient-to-br from-white via-blue-50/50 to-blue-100/30",
-        "dark:from-gray-800 dark:via-gray-700 dark:to-gray-900",
-        "border border-gray-200 dark:border-gray-700",
-        "rounded-lg"
-      )}>
-        <CardContent className="p-4 pt-5 flex flex-col h-full">
-          {/* Header section */}
-          <div className="flex justify-between items-start gap-2">
+      <Card className="border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
+        <CardContent className="p-0">
+          {/* Header with invoice number and status */}
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/80 dark:to-blue-800/90 rounded-full p-1.5 shadow-sm border border-blue-100 dark:border-blue-700/50">
-                <FileText className="h-4 w-4 text-blue-600 dark:text-blue-300" />
-              </div>
-              <span className="font-bold text-lg tracking-wide text-blue-700 dark:text-blue-200">
+              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="font-bold text-lg">
                 #{invoice.id.toString().padStart(4, "0")}
               </span>
-              <span className={clsx(
-                "px-2 py-0.5 text-xs rounded-full font-bold border",
-                "bg-white/70 dark:bg-gray-900/80 transition-colors",
-                getStatusColor(invoice.paymentStatus)
-              )}>
-                {getStatusText(invoice.paymentStatus)}
-              </span>
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-500 to-blue-700 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
-              {formatCurrency(invoice.amount)}
-            </span>
+            <div className={clsx(
+              "px-2.5 py-1 text-xs font-semibold rounded-full border",
+              getStatusColor(invoice.paymentStatus)
+            )}>
+              {getStatusText(invoice.paymentStatus)}
+            </div>
           </div>
-          
-          {/* Details section */}
-          <div className="mt-4 space-y-2 text-sm">
-            {patientName && (
-              <div className="flex justify-between items-center">
-                <span className="text-gray-500 dark:text-gray-400">Patient :</span>
-                <span className="font-medium dark:text-gray-200">{patientName}</span>
+
+          {/* Patient and details section */}
+          <div className="space-y-3">
+            <div className="flex justify-between items-start border-b border-gray-100 dark:border-gray-700 pb-3">
+              <div className="space-y-1">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Patient</div>
+                <div className="font-medium">{patientName || "Patient non spécifié"}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Montant</div>
+                <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+                  {formatCurrency(invoice.amount)}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-gray-500 dark:text-gray-400">Date de consultation</div>
+              <div className="font-medium">{formatDate(invoice.date)}</div>
+            </div>
+
+            {invoice.notes && (
+              <div className="text-sm text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
+                <span className="font-medium">Notes : </span>
+                {invoice.notes}
               </div>
             )}
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500 dark:text-gray-400">Date :</span>
-              <span className="font-medium dark:text-gray-200">{formatDate(invoice.date)}</span>
-            </div>
           </div>
-          
+
           {/* Actions section */}
-          <div className="mt-auto pt-4 border-t border-dashed border-blue-200/50 dark:border-blue-800/30 flex justify-between items-center">
-            <div className="space-x-1.5">
+          <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <div className="space-x-2">
               {onEdit && (
-                <Button size="sm" variant="outline" 
-                  className="h-8 px-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 border-blue-200 dark:border-blue-800/60 transition-all dark:bg-blue-950/30 dark:hover:bg-blue-900/40"
+                <Button 
+                  size="sm" 
+                  variant="outline"
                   onClick={onEdit}
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
                 >
                   <Edit className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">Éditer</span>
+                  Éditer
                 </Button>
               )}
               {onDelete && (
-                <Button size="sm" variant="outline"
-                  className="h-8 px-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 border-red-200 dark:border-red-800/60 transition-all dark:bg-red-950/30 dark:hover:bg-red-900/40"
+                <Button 
+                  size="sm" 
+                  variant="outline"
                   onClick={() => setIsDeleteModalOpen(true)}
+                  className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
                 >
                   <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">Supprimer</span>
+                  Supprimer
                 </Button>
               )}
             </div>
