@@ -219,12 +219,15 @@ const SchedulePage = () => {
                       <button
                         type="button"
                         className={cn(
+                          // Amélioration du contraste en mode sombre pour le bouton actif
                           "p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full",
-                          isSameDay(day, new Date()) ? "bg-primary text-primary-foreground" : "bg-muted"
+                          isSameDay(day, new Date())
+                            ? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900"
+                            : "bg-muted dark:bg-muted"
                         )}
                         onClick={() => handleDayHeaderClick(day)}
                         tabIndex={0}
-                        title={`Ajouter un rendez-vous le ${format(day, "d MMMM yyyy", {locale: fr})}`}
+                        title={`Ajouter un rendez-vous le ${format(day, "d MMMM yyyy", { locale: fr })}`}
                       >
                         <div className="font-medium">
                           {format(day, "EEEE", {
