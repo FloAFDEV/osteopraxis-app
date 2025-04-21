@@ -33,10 +33,10 @@ const InvoicesPage = () => {
   const printRef = useRef<HTMLDivElement>(null);
   const [readyToPrint, setReadyToPrint] = useState(false);
 
-  // Configuration de react-to-print avec correction de l'interface TypeScript
+  // Correction de la configuration de react-to-print pour respecter l'interface TypeScript
   const handlePrint = useReactToPrint({
-    // Remplacer 'content' par 'contentRef' pour respecter l'interface UseReactToPrintOptions
-    contentRef: () => printRef.current,
+    // Corriger l'erreur en passant directement la ref au lieu d'une fonction
+    contentRef: printRef,
     documentTitle: printInvoice
       ? `Facture_${printInvoice.id.toString().padStart(4, "0")}`
       : printAllInvoices
