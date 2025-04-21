@@ -1,6 +1,5 @@
-
 import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
-import { supabase, addAuthHeaders } from "./utils";
+import { supabase } from "./utils";
 
 const adaptPatientFromSupabase = (data: any): Patient => ({
   id: data.id,
@@ -129,14 +128,11 @@ export const patientService = {
         updatedAt: now
       };
 
-      // Add auth headers and use upsert instead of insert to avoid permission issues
-      const query = supabase
+      // Use upsert directly without addAuthHeaders
+      const { data, error } = await supabase
         .from('Patient')
         .insert(patientData)
         .select();
-        
-      const result = await addAuthHeaders(query);
-      const { data, error } = await result;
 
       if (error) {
         console.error('Error creating patient:', error);
@@ -215,14 +211,11 @@ export const patientService = {
 
       console.log("Updating patient with id:", id);
       
-      // Use upsert instead of update to avoid permission issues
-      const query = supabase
+      // Use upsert directly without addAuthHeaders
+      const { data, error } = await supabase
         .from('Patient')
         .upsert(patientData)
         .select();
-        
-      const result = await addAuthHeaders(query);
-      const { data, error } = await result;
 
       if (error) {
         console.error('Error updating patient:', error);
@@ -238,13 +231,10 @@ export const patientService = {
   
   async deletePatient(id: number): Promise<{ error: any | null }> {
     try {
-      const query = supabase
+      const { error } = await supabase
         .from('Patient')
         .delete()
         .eq('id', id);
-        
-      const result = await addAuthHeaders(query);
-      const { error } = await result;
         
       if (error) {
         console.error('Error deleting patient:', error);
