@@ -1,4 +1,5 @@
 
+
 import { AppointmentStatus } from "@/types";
 import { supabase as supabaseClient } from "@/integrations/supabase/client";
 
@@ -23,11 +24,14 @@ export const addAuthHeaders = async (query: any) => {
   // Get the current session's authentication token
   const sessionData = await supabase.auth.getSession();
   
+  // Get the Supabase anon key from the client instance
+  const supabaseKey = supabaseClient.supabaseKey;
+  
   // Configure headers to explicitly allow PATCH, DELETE and other methods
   // This resolves the CORS "Method PATCH is not allowed by Access-Control-Allow-Methods" error
   query.headers({
     'Authorization': `Bearer ${sessionData.data?.session?.access_token || ''}`,
-    'apikey': process.env.SUPABASE_KEY || '',
+    'apikey': supabaseKey || '',
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
@@ -41,3 +45,4 @@ export const addAuthHeaders = async (query: any) => {
 export const typedData = <T>(data: any): T => {
   return data as T;
 };
+
