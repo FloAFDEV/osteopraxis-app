@@ -93,12 +93,15 @@ const AppointmentsPage = () => {
         status: "CANCELED"
       });
 
-      // Update local state
+      // Update local state and force refresh from server
       setAppointments(prevAppointments => prevAppointments.map(app => app.id === appointmentToCancel.id ? {
         ...app,
         status: "CANCELED"
       } : app));
       toast.success("Rendez-vous annulé avec succès");
+      
+      // Force a refresh after cancel operation
+      setRefreshKey(prev => prev + 1);
     } catch (error) {
       console.error("Error cancelling appointment:", error);
       toast.error("Une erreur est survenue lors de l'annulation du rendez-vous");
@@ -237,4 +240,5 @@ const AppointmentsPage = () => {
       </Dialog>
     </Layout>;
 };
+
 export default AppointmentsPage;

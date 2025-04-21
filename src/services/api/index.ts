@@ -54,10 +54,9 @@ export const api = {
   deleteInvoice: invoiceService.deleteInvoice,
   
   // Osteopath related
-  getOsteopath: osteopathService.getOsteopath,
   getOsteopaths: osteopathService.getOsteopaths || (() => Promise.resolve([])),
   getOsteopathById: osteopathService.getOsteopathById || ((id: number) => Promise.resolve(undefined)),
   getOsteopathByUserId: osteopathService.getOsteopathByUserId || ((userId: string) => Promise.resolve(undefined)),
   updateOsteopath: osteopathService.updateOsteopath,
-  createOsteopath: osteopathService.createOsteopath || ((data: any) => Promise.resolve({}))
+  createOsteopath: osteopathService.createOsteopath || ((data: any) => Promise.resolve({} as any))
 };

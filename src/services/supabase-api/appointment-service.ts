@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 
@@ -112,59 +113,65 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
     // ============ NOUVELLE LOGIQUE PATCH EN POST + X-HTTP-Method-Override ============
-    // 1. Récupérer le token d'auth utilisateur
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+    try {
+      // 1. Récupérer le token d'auth utilisateur
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-    if (sessionError || !session?.access_token) {
-      throw new Error("Utilisateur non authentifié");
-    }
-    const token = session.access_token;
+      if (sessionError || !session?.access_token) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      const token = session.access_token;
 
-    // 2. Composez l'URL API
-    const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
-    const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
+      // 2. Composez l'URL API - Utilise une constante directement au lieu de process.env
+      // Ne pas utiliser process.env qui cause l'erreur dans le navigateur
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
+      const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
 
-    // 3. Préparer le payload (nettoyage undefined)
-    const updatePayload = {
-      ...update,
-      status: update.status ? normalizeStatus(update.status) : undefined,
-      updatedAt: new Date().toISOString(),
-    };
-    Object.keys(updatePayload).forEach(
-      (k) =>
-        (updatePayload as any)[k] === undefined &&
-        delete (updatePayload as any)[k]
-    );
-
-    // 4. Appel POST en forçant PATCH + token explicite
-    const res = await fetch(PATCH_URL, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-        "X-HTTP-Method-Override": "PATCH",
-      },
-      body: JSON.stringify(updatePayload),
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(
-        `Erreur HTTP ${res.status}: ${JSON.stringify(err)}`
+      // 3. Préparer le payload (nettoyage undefined)
+      const updatePayload = {
+        ...update,
+        status: update.status ? normalizeStatus(update.status) : undefined,
+        updatedAt: new Date().toISOString(),
+      };
+      Object.keys(updatePayload).forEach(
+        (k) =>
+          (updatePayload as any)[k] === undefined &&
+          delete (updatePayload as any)[k]
       );
-    }
 
-    // La réponse est toujours un array d'1 element via PostgREST
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) return data[0];
-    // fallback : parfois selon Prefer/headers c’est un objet direct
-    if (data && typeof data === "object") return data as Appointment;
-    throw new Error("Aucune donnée retournée lors de la modification du rendez-vous");
+      // 4. Appel POST en forçant PATCH + token explicite
+      const res = await fetch(PATCH_URL, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          "X-HTTP-Method-Override": "PATCH",
+        },
+        body: JSON.stringify(updatePayload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(
+          `Erreur HTTP ${res.status}: ${JSON.stringify(err)}`
+        );
+      }
+
+      // La réponse est toujours un array d'1 element via PostgREST
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) return data[0];
+      // fallback : parfois selon Prefer/headers c'est un objet direct
+      if (data && typeof data === "object") return data as Appointment;
+      throw new Error("Aucune donnée retournée lors de la modification du rendez-vous");
+    } catch (error) {
+      console.error("[SUPABASE ERROR]", error);
+      throw error;
+    }
   },
 
   async deleteAppointment(id: number): Promise<boolean> {
