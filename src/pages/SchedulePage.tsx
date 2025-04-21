@@ -253,6 +253,11 @@ const SchedulePage = () => {
   );
 };
 
+// Fonction qui avait pu être oubliée lors des modifications précédentes
+const getPatientById = (patients: Patient[], patientId: number) => {
+  return patients.find((patient) => patient.id === patientId);
+};
+
 interface DayScheduleProps {
   date: Date;
   appointments: Appointment[];
