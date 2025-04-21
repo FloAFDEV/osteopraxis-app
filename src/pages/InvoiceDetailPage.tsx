@@ -12,7 +12,7 @@ import { InvoiceDetails } from '@/components/invoice-details';
 import { toast } from 'sonner';
 import { Invoice, Patient, Osteopath, Cabinet } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { Activity } from 'lucide-react';
+import { Activity, ArrowLeft } from 'lucide-react';
 
 const InvoiceDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -172,6 +172,15 @@ const InvoiceDetailPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto py-6">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/invoices')} 
+          className="mb-6 flex items-center gap-2 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour aux factures
+        </Button>
+
         <div className="flex justify-between items-center mb-6">
            <h1 className="text-3xl font-bold flex items-center gap-3">
             <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
