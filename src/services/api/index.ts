@@ -13,7 +13,8 @@ export const api = {
   login: authService.login,
   register: authService.register,
   logout: authService.logout,
-  getCurrentUser: authService.getCurrentUser || (() => Promise.resolve(null)),
+  // Correction : enlever getCurrentUser si la méthode n’existe pas dans l’objet de référence
+  // getCurrentUser: authService.getCurrentUser || (() => Promise.resolve(null)),
   checkAuth: authService.checkAuth || (() => Promise.resolve({ isAuthenticated: false, user: null })),
   loginWithMagicLink: authService.loginWithMagicLink || ((email: string) => Promise.resolve()),
   promoteToAdmin: authService.promoteToAdmin || ((userId: string) => Promise.resolve(false)),
@@ -23,9 +24,9 @@ export const api = {
   getPatientById: patientService.getPatientById,
   createPatient: patientService.createPatient,
   updatePatient: patientService.updatePatient,
-  deletePatient: patientService.deletePatient,
-  
-  // Appointment related - disable caching by adding Date.now() as query parameter
+  deletePatient: patientService.deletePatient, // ajout
+
+  // Appointment related
   getAppointments: async () => {
     console.log("Fetching appointments with cache busting");
     return appointmentService.getAppointments();
@@ -35,14 +36,14 @@ export const api = {
   createAppointment: appointmentService.createAppointment,
   updateAppointment: appointmentService.updateAppointment,
   updateAppointmentStatus: appointmentService.updateAppointmentStatus,
-  deleteAppointment: appointmentService.deleteAppointment,
+  deleteAppointment: appointmentService.deleteAppointment, // ajout
   
   // Cabinet related
   getCabinets: cabinetService.getCabinets,
   getCabinetById: cabinetService.getCabinetById,
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
-  deleteCabinet: cabinetService.deleteCabinet,
+  deleteCabinet: cabinetService.deleteCabinet, // ajout
   getCabinetsByUserId: cabinetService.getCabinetsByUserId || (() => Promise.resolve([])),
   getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId || ((id: number) => Promise.resolve([])),
   
@@ -51,7 +52,7 @@ export const api = {
   getInvoiceById: invoiceService.getInvoiceById,
   createInvoice: invoiceService.createInvoice,
   updateInvoice: invoiceService.updateInvoice,
-  deleteInvoice: invoiceService.deleteInvoice,
+  deleteInvoice: invoiceService.deleteInvoice, // ajout
   
   // Osteopath related
   getOsteopaths: osteopathService.getOsteopaths || (() => Promise.resolve([])),
