@@ -6,6 +6,7 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { DashboardData } from "@/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   ResponsiveContainer,
   LineChart,
@@ -21,6 +22,8 @@ interface GrowthChartProps {
 }
 
 export function GrowthChart({ data }: GrowthChartProps) {
+  const { isMobile } = useIsMobile();
+
   if (!data || !data.monthlyGrowth) {
     return (
       <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-2 shadow-lg">
@@ -59,7 +62,12 @@ export function GrowthChart({ data }: GrowthChartProps) {
    return (
     <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={formattedData}>
+        <LineChart data={formattedData} margin={{
+          top: 5,
+          right: 10,
+          bottom: 5,
+          left: isMobile ? 0 : 30
+        }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
           <XAxis
             dataKey="month"
