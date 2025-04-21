@@ -29,8 +29,8 @@ export const addAuthHeaders = async (query: any) => {
   const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
   
   // Configure headers to explicitly allow PATCH, DELETE and other methods
-  // This resolves the CORS "Method PATCH is not allowed by Access-Control-Allow-Methods" error
-  query.headers({
+  // IMPORTANT: Use withHeaders instead of headers which is deprecated
+  query = query.withHeaders({
     'Authorization': `Bearer ${sessionData.data?.session?.access_token || ''}`,
     'apikey': anonKey,
     'Content-Type': 'application/json',
