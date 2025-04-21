@@ -405,7 +405,7 @@ export type Database = {
           rheumatologicalHistory?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
-          updatedAt: string
+          updatedAt?: string
           userId?: string | null
         }
         Update: {

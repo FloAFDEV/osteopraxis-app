@@ -40,7 +40,7 @@ export const supabaseAppointmentService = {
         .from("Appointment")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       if (!data) throw new Error(`Appointment with id ${id} not found`);
@@ -77,9 +77,12 @@ export const supabaseAppointmentService = {
 
   async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
     try {
+      // Exclude id from payload to let Postgres sequence handle it
       const payload = {
         ...appointment,
-        status: mapStatusToSupabase(appointment.status)
+        status: appointment.status ? mapStatusToSupabase(appointment.status) : "SCHEDULED",
+        // Don't include ID or timestamps - let Postgres handle them
+        notificationSent: appointment.notificationSent ?? false
       };
       
       const { data, error } = await supabase
@@ -88,7 +91,10 @@ export const supabaseAppointmentService = {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error details:", error.message);
+        throw error;
+      }
       
       return {
         ...data,
@@ -102,9 +108,12 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
     try {
+      // Don't include timestamps in updates - let Postgres handle them with triggers
+      const { createdAt, updatedAt, ...updatePayload } = appointment;
+      
       const payload = {
-        ...appointment,
-        status: appointment.status ? mapStatusToSupabase(appointment.status) : undefined
+        ...updatePayload,
+        status: updatePayload.status ? mapStatusToSupabase(updatePayload.status) : undefined
       };
       
       const query = supabase
@@ -118,7 +127,10 @@ export const supabaseAppointmentService = {
       const authedQuery = await addAuthHeaders(query);
       const { data, error } = await authedQuery;
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error details:", error.message);
+        throw error;
+      }
       
       return {
         ...data,
