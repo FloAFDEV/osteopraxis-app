@@ -15,10 +15,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { InvoicePrintView } from "@/components/invoice-print-view";
 import { useReactToPrint } from "react-to-print";
 
-// Removed duplicate import of useEffect here
-
-// Pour le rendu print invisible
-// Removed duplicate import of useState here - already imported above
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
@@ -31,15 +27,16 @@ const InvoicesPage = () => {
   const printRef = useRef<HTMLDivElement>(null);
   const [readyToPrint, setReadyToPrint] = useState(false);
 
-  // Fixed: useReactToPrint options structure
+  // Correction ici : la prop s'appelle `content` et c'est bien la bonne pour
+  // react-to-print 3.x (cf. https://github.com/gregnb/react-to-print#api)
+  const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
-    // content is correctly a function that returns the ref
-    content: () => printRef.current,
+    content: () => printRef.current!,
     documentTitle: printInvoice ? `Facture_${printInvoice.id.toString().padStart(4, "0")}` : "Facture",
     onAfterPrint: () => {
       setPrintInvoice(null);
       setReadyToPrint(false);
-    }
+    },
   });
 
   useEffect(() => {
