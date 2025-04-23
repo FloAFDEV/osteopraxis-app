@@ -4,7 +4,7 @@ import { User, Calendar, FileText, MapPin, Mail, Phone, Activity, List, Heart, A
 import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
 import { api } from "@/services/api";
-import { Patient, Appointment } from "@/types";
+import { Patient, Appointment, Invoice } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +15,9 @@ import { Badge } from "@/components/ui/badge";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { toast } from "sonner";
+import { InvoiceDetails } from "@/components/invoice-details";
+import { invoiceService } from "@/services/api/invoice-service";
+import { receipt } from "lucide-react";
 
 interface PatientDetailPageProps {}
 
@@ -24,6 +27,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => {
     const fetchPatientData = async () => {
@@ -35,10 +39,15 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
           return;
         }
         const patientId = parseInt(id, 10);
-        const patientData = await api.getPatientById(patientId);
+        const [patientData, appointmentsData, invoicesData] = await Promise.all([
+          api.getPatientById(patientId),
+          api.getAppointmentsByPatientId(patientId),
+          invoiceService.getInvoicesByPatientId(patientId)
+        ]);
+        
         setPatient(patientData);
-        const appointmentsData = await api.getAppointmentsByPatientId(patientId);
         setAppointments(appointmentsData);
+        setInvoices(invoicesData);
       } catch (e: any) {
         setError(e.message || "Failed to load patient data.");
         toast.error("Impossible de charger les informations du patient. Veuillez réessayer.");
@@ -62,6 +71,11 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 
   const upcomingAppointments = appointments.filter(appointment => new Date(appointment.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const pastAppointments = appointments.filter(appointment => new Date(appointment.date) < new Date()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  // Add processed invoices
+  const sortedInvoices = [...invoices].sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 
   if (loading) {
     return (
@@ -190,7 +204,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 
           <div className="lg:col-span-2">
             <Tabs defaultValue="medical-info">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="medical-info">
                   <FileText className="h-4 w-4 mr-2" />
                   Dossier médical
@@ -202,6 +216,10 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
                 <TabsTrigger value="history">
                   <List className="h-4 w-4 mr-2" />
                   Historique
+                </TabsTrigger>
+                <TabsTrigger value="invoices">
+                  <receipt className="h-4 w-4 mr-2" />
+                  Factures
                 </TabsTrigger>
               </TabsList>
               
@@ -286,6 +304,42 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
                       ))}
                     </div>
                   )}
+              </TabsContent>
+
+              <TabsContent value="invoices" className="space-y-4 mt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Factures du patient</h3>
+                  <Button asChild>
+                    <Link to={`/invoices/new?patientId=${patient.id}`}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nouvelle facture
+                    </Link>
+                  </Button>
+                </div>
+
+                {sortedInvoices.length === 0 ? (
+                  <div className="text-center py-8">
+                    <receipt className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <h3 className="text-xl font-medium">Aucune facture</h3>
+                    <p className="text-muted-foreground mt-2">
+                      Ce patient n'a pas encore de factures.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {sortedInvoices.map((invoice) => (
+                      <InvoiceDetails
+                        key={invoice.id}
+                        invoice={invoice}
+                        patientName={`${patient.firstName} ${patient.lastName}`}
+                        onEdit={() => {
+                          // Navigate to invoice edit page
+                          window.location.href = `/invoices/${invoice.id}/edit`;
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </div>
