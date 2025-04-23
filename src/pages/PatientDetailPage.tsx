@@ -6,7 +6,7 @@ import { Patient, Appointment, Invoice } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { toast } from "sonner";
 import { PatientLoadingState } from "@/components/patients/PatientLoadingState";
-import { PatientHeader } from "@/components/patients/PatientHeader";
+import { PatientDetailHeader } from "@/components/patients/PatientDetailHeader";
 import { PatientStats } from "@/components/patients/PatientStats";
 import { PatientProfile } from "@/components/patients/PatientProfile";
 import { PatientTabs } from "@/components/patients/PatientTabs";
@@ -54,11 +54,11 @@ const PatientDetailPage = () => {
   }, [id]);
 
   return (
-    <PatientLoadingState loading={loading} error={error}>
-      {patient && (
-        <Layout>
+    <Layout>
+      <PatientLoadingState isLoading={loading} error={error}>
+        {patient && (
           <div className="flex flex-col space-y-6">
-            <PatientHeader patient={patient} />
+            <PatientDetailHeader patient={patient} />
             
             <PatientStats 
               appointments={appointments} 
@@ -79,9 +79,9 @@ const PatientDetailPage = () => {
               </div>
             </div>
           </div>
-        </Layout>
-      )}
-    </PatientLoadingState>
+        )}
+      </PatientLoadingState>
+    </Layout>
   );
 };
 

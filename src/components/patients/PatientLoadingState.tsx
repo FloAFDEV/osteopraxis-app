@@ -7,11 +7,14 @@ interface PatientLoadingStateProps {
   isLoading: boolean;
   error: Error | string | null | unknown;
   onRetry?: () => void;
+  children?: React.ReactNode; // Add support for children
 }
 
-export function PatientLoadingState({ isLoading, error, onRetry }: PatientLoadingStateProps) {
-  // Only render if there is loading or error state
-  if (!isLoading && !error) return null;
+export function PatientLoadingState({ isLoading, error, onRetry, children }: PatientLoadingStateProps) {
+  // If not loading and no error, render children
+  if (!isLoading && !error) {
+    return <>{children}</>;
+  }
   
   // Convert error to string if it's an Error object
   const errorMessage = error instanceof Error ? error.message : 
