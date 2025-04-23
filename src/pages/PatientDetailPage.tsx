@@ -67,15 +67,18 @@ const PatientDetailPage = () => {
   }, [id]);
 
   if (loading) {
-    return <Layout>
+    return (
+      <Layout>
         <div className="flex justify-center items-center h-full">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
-      </Layout>;
+      </Layout>
+    );
   }
 
   if (error || !patient) {
-    return <Layout>
+    return (
+      <Layout>
         <div className="flex flex-col justify-center items-center h-full">
           <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
           <p className="text-xl font-semibold text-center">
@@ -85,7 +88,8 @@ const PatientDetailPage = () => {
             <Link to="/patients">Retour à la liste des patients</Link>
           </Button>
         </div>
-      </Layout>;
+      </Layout>
+    );
   }
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -132,7 +136,7 @@ const PatientDetailPage = () => {
   const upcomingAppointments = appointments.filter(appointment => new Date(appointment.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const pastAppointments = appointments.filter(appointment => new Date(appointment.date) < new Date()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-return (
+  return (
     <Layout>
       <div className="flex flex-col space-y-6">
         {/* Header section */}
@@ -159,118 +163,118 @@ return (
           </div>
         </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        {stats.map((stat, index) => (
-          <StatCardV2
-            key={index}
-            label={stat.label}
-            value={stat.value}
-            color={stat.color}
-          />
-        ))}
-      </div>
-
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column - Patient info */}
-        <div className="space-y-6">
-            <Card>
-              <CardContent className={`p-6 ${genderColors.lightBg}`}>
-                <div className="flex items-center space-x-4">
-                  <Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
-                    <AvatarFallback>{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
-                      {patient.firstName} {patient.lastName}
-                    </CardTitle>
-                    <CardDescription>
-                      {patient.gender === "Homme" ? "Homme" : patient.gender === "Femme" ? "Femme" : "Non spécifié"}, {differenceInYears(new Date(), parseISO(patient.birthDate))} ans
-                    </CardDescription>
-                  </div>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>{patient.address}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <a href={`mailto:${patient.email}`} className="hover:underline">
-                      {patient.email}
-                    </a>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{patient.phone}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <MedicalInfoCard 
-              title="Informations personnelles"
-              items={[
-                { label: "Statut marital", value: patient.maritalStatus === "SINGLE" ? "Célibataire" : 
-                  patient.maritalStatus === "MARRIED" ? "Marié(e)" :
-                  patient.maritalStatus === "DIVORCED" ? "Divorcé(e)" :
-                  patient.maritalStatus === "WIDOWED" ? "Veuf/Veuve" :
-                  patient.maritalStatus === "PARTNERED" ? "En couple" :
-                  patient.maritalStatus === "ENGAGED" ? "Fiancé(e)" : "Non spécifié"
-                },
-                { 
-                  label: "Enfants", 
-                  value: patient.childrenAges && patient.childrenAges.length > 0 
-                    ? `${patient.childrenAges.length} enfant(s) (${patient.childrenAges.sort((a, b) => a - b).join(", ")} ans)`
-                    : "Pas d'enfants"
-                },
-                { 
-                  label: "Latéralité", 
-                  value: patient.handedness === "RIGHT" ? "Droitier(ère)" :
-                    patient.handedness === "LEFT" ? "Gaucher(ère)" :
-                    patient.handedness === "AMBIDEXTROUS" ? "Ambidextre" : "Non spécifié"
-                },
-                { label: "Fumeur", value: patient.isSmoker ? "Oui" : "Non" },
-                { 
-                  label: "Contraception", 
-                  value: patient.contraception === "NONE" ? "Aucune" :
-                    patient.contraception === "PILLS" ? "Pilule" :
-                    patient.contraception === "PATCH" ? "Patch" :
-                    patient.contraception === "RING" ? "Anneau vaginal" :
-                    patient.contraception === "IUD" ? "Stérilet" :
-                    patient.contraception === "IMPLANTS" ? "Implant" :
-                    patient.contraception === "CONDOM" ? "Préservatif" :
-                    patient.contraception === "DIAPHRAGM" ? "Diaphragme" : "Non spécifié"
-                }
-              ]}
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          {stats.map((stat, index) => (
+            <StatCardV2
+              key={index}
+              label={stat.label}
+              value={stat.value}
+              color={stat.color}
             />
-          </div>
+          ))}
+        </div>
 
-        {/* Right column - Tabs content */}
-        <div className="lg:col-span-2">
-          <Tabs defaultValue="medical-info">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="medical-info">
-                <FileText className="h-4 w-4 mr-2" />
-                Dossier médical
-              </TabsTrigger>
-              <TabsTrigger value="upcoming-appointments">
-                <Calendar className="h-4 w-4 mr-2" />
-                RDV à venir
-              </TabsTrigger>
-              <TabsTrigger value="history">
-                <List className="h-4 w-4 mr-2" />
-                Historique
-              </TabsTrigger>
-              <TabsTrigger value="invoices">
-                <FileText className="h-4 w-4 mr-2" />
-                Factures
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="medical-info" className="space-y-6 mt-6">
+        {/* Main content grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left column - Patient info */}
+          <div className="space-y-6">
+              <Card>
+                <CardContent className={`p-6 ${genderColors.lightBg}`}>
+                  <div className="flex items-center space-x-4">
+                    <Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
+                      <AvatarFallback>{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
+                        {patient.firstName} {patient.lastName}
+                      </CardTitle>
+                      <CardDescription>
+                        {patient.gender === "Homme" ? "Homme" : patient.gender === "Femme" ? "Femme" : "Non spécifié"}, {differenceInYears(new Date(), parseISO(patient.birthDate))} ans
+                      </CardDescription>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span>{patient.address}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <a href={`mailto:${patient.email}`} className="hover:underline">
+                        {patient.email}
+                      </a>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span>{patient.phone}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <MedicalInfoCard 
+                title="Informations personnelles"
+                items={[
+                  { label: "Statut marital", value: patient.maritalStatus === "SINGLE" ? "Célibataire" : 
+                    patient.maritalStatus === "MARRIED" ? "Marié(e)" :
+                    patient.maritalStatus === "DIVORCED" ? "Divorcé(e)" :
+                    patient.maritalStatus === "WIDOWED" ? "Veuf/Veuve" :
+                    patient.maritalStatus === "PARTNERED" ? "En couple" :
+                    patient.maritalStatus === "ENGAGED" ? "Fiancé(e)" : "Non spécifié"
+                  },
+                  { 
+                    label: "Enfants", 
+                    value: patient.childrenAges && patient.childrenAges.length > 0 
+                      ? `${patient.childrenAges.length} enfant(s) (${patient.childrenAges.sort((a, b) => a - b).join(", ")} ans)`
+                      : "Pas d'enfants"
+                  },
+                  { 
+                    label: "Latéralité", 
+                    value: patient.handedness === "RIGHT" ? "Droitier(ère)" :
+                      patient.handedness === "LEFT" ? "Gaucher(ère)" :
+                      patient.handedness === "AMBIDEXTROUS" ? "Ambidextre" : "Non spécifié"
+                  },
+                  { label: "Fumeur", value: patient.isSmoker ? "Oui" : "Non" },
+                  { 
+                    label: "Contraception", 
+                    value: patient.contraception === "NONE" ? "Aucune" :
+                      patient.contraception === "PILLS" ? "Pilule" :
+                      patient.contraception === "PATCH" ? "Patch" :
+                      patient.contraception === "RING" ? "Anneau vaginal" :
+                      patient.contraception === "IUD" ? "Stérilet" :
+                      patient.contraception === "IMPLANTS" ? "Implant" :
+                      patient.contraception === "CONDOM" ? "Préservatif" :
+                      patient.contraception === "DIAPHRAGM" ? "Diaphragme" : "Non spécifié"
+                  }
+                ]}
+              />
+            </div>
+
+          {/* Right column - Tabs content */}
+          <div className="lg:col-span-2">
+            <Tabs defaultValue="medical-info">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="medical-info">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Dossier médical
+                </TabsTrigger>
+                <TabsTrigger value="upcoming-appointments">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  RDV à venir
+                </TabsTrigger>
+                <TabsTrigger value="history">
+                  <List className="h-4 w-4 mr-2" />
+                  Historique
+                </TabsTrigger>
+                <TabsTrigger value="invoices">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Factures
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="medical-info" className="space-y-6 mt-6">
                 <MedicalInfoCard
                   title="Médecins et spécialistes"
                   items={[
