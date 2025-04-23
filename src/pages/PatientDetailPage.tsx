@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -60,9 +61,9 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
   };
 
   const genderColors = {
-    lightBg: patient?.gender === "MALE" ? "bg-blue-50" : patient?.gender === "FEMALE" ? "bg-red-50" : "bg-gray-50",
-    darkBg: patient?.gender === "MALE" ? "dark:bg-blue-900" : patient?.gender === "FEMALE" ? "dark:bg-red-900" : "dark:bg-gray-800",
-    textColor: patient?.gender === "MALE" ? "text-blue-500" : patient?.gender === "FEMALE" ? "text-red-500" : "text-gray-500",
+    lightBg: patient?.gender === "Homme" ? "bg-blue-50" : patient?.gender === "Femme" ? "bg-red-50" : "bg-gray-50",
+    darkBg: patient?.gender === "Homme" ? "dark:bg-blue-900" : patient?.gender === "Femme" ? "dark:bg-red-900" : "dark:bg-gray-800",
+    textColor: patient?.gender === "Homme" ? "text-blue-500" : patient?.gender === "Femme" ? "text-red-500" : "text-gray-500",
   };
 
   const upcomingAppointments = appointments.filter(appointment => new Date(appointment.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -160,7 +161,7 @@ return (
                       {patient.firstName} {patient.lastName}
                     </CardTitle>
                     <CardDescription>
-                      {patient.gender === "MALE" ? "Homme" : patient.gender === "FEMALE" ? "Femme" : "Non spécifié"}, {differenceInYears(new Date(), parseISO(patient.birthDate))} ans
+                      {patient.gender === "Homme" ? "Homme" : patient.gender === "Femme" ? "Femme" : "Non spécifié"}, {differenceInYears(new Date(), parseISO(patient.birthDate))} ans
                     </CardDescription>
                   </div>
                 </div>
