@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -9,7 +10,7 @@ import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
 import { api } from "@/services/api";
 import { Patient, Appointment, Invoice } from "@/types";
-import { Layout } from "@/components/ui/layout";
+import { Layout } from "@/components/ui/layout"; // Make sure this import is correct
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
