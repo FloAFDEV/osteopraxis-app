@@ -9,13 +9,13 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 
-// Import refactored components
+// Import avec exportations nommées plutôt que des exports par défaut
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
 import PatientListItem from "@/components/patients/PatientListItem";
 import EmptyPatientState from "@/components/patients/EmptyPatientState";
 import PatientSearch from "@/components/patients/PatientSearch";
-import PatientLoadingState from "@/components/patients/PatientLoadingState";
-import PatientHeader from "@/components/patients/PatientHeader";
+import { PatientLoadingState } from "@/components/patients/PatientLoadingState";
+import { PatientHeader } from "@/components/patients/PatientHeader";
 import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
 import PatientPagination from "@/components/patients/PatientPagination";
 
