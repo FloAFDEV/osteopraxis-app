@@ -226,7 +226,11 @@ const PatientsPage = () => {
         <AlphabetFilter activeLetter={activeLetter} onLetterChange={handleLetterChange} />
 
         {/* Loading and error states */}
-        <PatientLoadingState isLoading={isLoading} error={error} onRetry={handleRetry} />
+        <PatientLoadingState 
+          isLoading={isLoading} 
+          error={error} 
+          onRetry={handleRetry} 
+        />
 
         {/* Main content - patient list or empty state */}
         {!isLoading && !error && (

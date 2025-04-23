@@ -1,42 +1,48 @@
 
 import React from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 
 interface PatientLoadingStateProps {
-  loading: boolean;
-  error: string | null;
-  children: React.ReactNode;
+  isLoading: boolean;
+  error: Error | string | null | unknown;
+  onRetry?: () => void;
 }
 
-export function PatientLoadingState({ loading, error, children }: PatientLoadingStateProps) {
-  if (loading) {
+export function PatientLoadingState({ isLoading, error, onRetry }: PatientLoadingStateProps) {
+  // Only render if there is loading or error state
+  if (!isLoading && !error) return null;
+  
+  // Convert error to string if it's an Error object
+  const errorMessage = error instanceof Error ? error.message : 
+                      typeof error === 'string' ? error : 
+                      'Une erreur est survenue';
+  
+  if (isLoading) {
     return (
-      <Layout>
-        <div className="flex justify-center items-center h-full">
-          <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="w-full flex justify-center py-10">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
+          <p className="text-muted-foreground">Chargement des patients...</p>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="flex flex-col justify-center items-center h-full">
-          <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-          <p className="text-xl font-semibold text-center">
-            {error || "Patient non trouvé"}
-          </p>
-          <Button variant="outline" asChild className="mt-4">
-            <Link to="/patients">Retour à la liste des patients</Link>
+      <div className="w-full py-10 text-center">
+        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+        <h3 className="font-medium text-lg mb-1">Erreur de chargement</h3>
+        <p className="text-muted-foreground mb-4">{errorMessage}</p>
+        {onRetry && (
+          <Button onClick={onRetry} variant="outline">
+            Réessayer
           </Button>
-        </div>
-      </Layout>
+        )}
+      </div>
     );
   }
 
-  return <>{children}</>;
+  return null;
 }

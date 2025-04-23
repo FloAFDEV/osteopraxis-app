@@ -1,34 +1,51 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Patient } from "@/types";
 
 interface PatientHeaderProps {
-  patient: Patient;
+  patientCount: number;
+  isRefreshing: boolean;
+  onRefresh: () => void;
+  onCreateTestPatient: () => void;
 }
 
-export function PatientHeader({ patient }: PatientHeaderProps) {
+export function PatientHeader({ 
+  patientCount, 
+  isRefreshing, 
+  onRefresh, 
+  onCreateTestPatient 
+}: PatientHeaderProps) {
   return (
-    <div className="flex justify-between items-start">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/patients">Retour</Link>
-        </Button>
+    <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Patients</h1>
+        <p className="text-muted-foreground">
+          {patientCount} patient{patientCount !== 1 ? "s" : ""} enregistré{patientCount !== 1 ? "s" : ""}
+        </p>
       </div>
       
-      <div className="flex gap-2">
-        <Button variant="outline" asChild>
-          <Link to={`/patients/${patient.id}/edit`}>
-            <Edit className="mr-2 h-4 w-4" />
-            Modifier
-          </Link>
+      <div className="flex gap-2 items-center">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={onRefresh} 
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
+          Actualiser
         </Button>
+        
+        <Button variant="outline" size="sm" onClick={onCreateTestPatient}>
+          <Plus className="mr-2 h-4 w-4" />
+          Patient test
+        </Button>
+
         <Button asChild>
-          <Link to={`/appointments/new?patientId=${patient.id}`}>
+          <Link to="/patients/new">
             <Plus className="mr-2 h-4 w-4" />
-            Nouveau rendez-vous
+            Nouveau patient
           </Link>
         </Button>
       </div>
