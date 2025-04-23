@@ -133,7 +133,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 space-y-4 dark:text-slate-800">
                   <div className="flex items-center space-x-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span>{patient.address}</span>
