@@ -251,7 +251,7 @@ const PatientDetailPage = () => {
                   }
                 ]}
               />
-            </div>
+          </div>
 
           {/* Right column - Tabs content */}
           <div className="lg:col-span-2">
@@ -350,10 +350,11 @@ const PatientDetailPage = () => {
                 )}
               </TabsContent>
             
-            <TabsContent value="invoices" className="space-y-6 mt-6">
-              <PatientInvoices invoices={invoices} />
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="invoices" className="space-y-6 mt-6">
+                <PatientInvoices invoices={invoices} />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </Layout>
