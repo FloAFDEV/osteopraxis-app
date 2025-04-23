@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -9,7 +8,7 @@ import {
 import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
 import { api } from "@/services/api";
-import { Patient, Appointment } from "@/types";
+import { Patient, Appointment, Invoice } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,13 +19,16 @@ import { Badge } from "@/components/ui/badge";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { toast } from "sonner";
+import { StatCardV2 } from "@/components/ui/stat-card-v2";
+import { PatientInvoices } from "@/components/patients/patient-invoices";
 
 interface PatientDetailPageProps {}
 
-const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
+const PatientDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,12 +41,20 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
           setError("Patient ID is missing.");
           return;
         }
-        const patientId = parseInt(id, 10);
-        const patientData = await api.getPatientById(patientId);
-        setPatient(patientData);
 
-        const appointmentsData = await api.getAppointmentsByPatientId(patientId);
+        const [patientData, appointmentsData, invoicesData] = await Promise.all([
+          api.getPatientById(parseInt(id)),
+          api.getAppointmentsByPatientId(parseInt(id)),
+          api.getInvoicesByPatientId(parseInt(id))
+        ]);
+        
+        if (!patientData) {
+          throw new Error("Patient non trouvé");
+        }
+
+        setPatient(patientData);
         setAppointments(appointmentsData);
+        setInvoices(invoicesData);
       } catch (e: any) {
         setError(e.message || "Failed to load patient data.");
         toast.error("Impossible de charger les informations du patient. Veuillez réessayer.");
@@ -55,19 +65,6 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 
     fetchPatientData();
   }, [id]);
-
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`;
-  };
-
-  const genderColors = {
-    lightBg: patient?.gender === "Homme" ? "bg-blue-50" : patient?.gender === "Femme" ? "bg-red-50" : "bg-gray-50",
-    darkBg: patient?.gender === "Homme" ? "dark:bg-blue-900" : patient?.gender === "Femme" ? "dark:bg-red-900" : "dark:bg-gray-800",
-    textColor: patient?.gender === "Homme" ? "text-blue-500" : patient?.gender === "Femme" ? "text-red-500" : "text-gray-500",
-  };
-
-  const upcomingAppointments = appointments.filter(appointment => new Date(appointment.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const pastAppointments = appointments.filter(appointment => new Date(appointment.date) < new Date()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   if (loading) {
     return <Layout>
@@ -90,6 +87,50 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
         </div>
       </Layout>;
   }
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // Add null check for birthDate
+  const birthDate = patient?.birthDate ? parseISO(patient.birthDate) : new Date();
+  const age = patient?.birthDate ? differenceInYears(new Date(), birthDate) : 0;
+  
+  // Stats calculation
+  const stats = [
+    {
+      label: "Total RDV",
+      value: appointments.length,
+      color: "blue" as const
+    },
+    {
+      label: "RDV à venir",
+      value: appointments.filter(app => app.status === "SCHEDULED" && new Date(app.date) >= new Date()).length,
+      color: "purple" as const
+    },
+    {
+      label: "Factures",
+      value: invoices.length,
+      color: "amber" as const
+    },
+    {
+      label: "Montant dû",
+      value: `${invoices
+        .filter(inv => inv.paymentStatus === "PENDING")
+        .reduce((acc, inv) => acc + inv.amount, 0)
+        .toFixed(2)} €`,
+      color: "red" as const
+    }
+  ];
+
+  const genderColors = {
+    lightBg: patient?.gender === "Homme" ? "bg-blue-50" : patient?.gender === "Femme" ? "bg-red-50" : "bg-gray-50",
+    darkBg: patient?.gender === "Homme" ? "dark:bg-blue-900" : patient?.gender === "Femme" ? "dark:bg-red-900" : "dark:bg-gray-800",
+    textColor: patient?.gender === "Homme" ? "text-blue-500" : patient?.gender === "Femme" ? "text-red-500" : "text-gray-500",
+  };
+
+  const upcomingAppointments = appointments.filter(appointment => new Date(appointment.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const pastAppointments = appointments.filter(appointment => new Date(appointment.date) < new Date()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 return (
     <Layout>
@@ -118,38 +159,22 @@ return (
           </div>
         </div>
 
-        {/* Patient overview stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <PatientStat
-            title="Total rendez-vous"
-            value={appointments.length}
-            icon={<Calendar className="h-5 w-5" />}
-            colorClass="text-blue-500"
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        {stats.map((stat, index) => (
+          <StatCardV2
+            key={index}
+            label={stat.label}
+            value={stat.value}
+            color={stat.color}
           />
-          <PatientStat
-            title="Rendez-vous à venir"
-            value={upcomingAppointments.length}
-            icon={<ClipboardList className="h-5 w-5" />}
-            colorClass="text-purple-500"
-          />
-          <PatientStat
-            title="En cours de traitement"
-            value={patient.currentTreatment ? "Oui" : "Non"}
-            icon={<Stethoscope className="h-5 w-5" />}
-            colorClass="text-emerald-500"
-          />
-          <PatientStat
-            title="Dernier rendez-vous"
-            value={pastAppointments[0] ? format(new Date(pastAppointments[0].date), "dd/MM/yyyy") : "Aucun"}
-            icon={<History className="h-5 w-5" />}
-            colorClass="text-amber-500"
-          />
-        </div>
+        ))}
+      </div>
 
-        {/* Main content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column - Patient info */}
-          <div className="space-y-6">
+      {/* Main content grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left column - Patient info */}
+        <div className="space-y-6">
             <Card>
               <CardContent className={`p-6 ${genderColors.lightBg}`}>
                 <div className="flex items-center space-x-4">
@@ -223,25 +248,29 @@ return (
             />
           </div>
 
-          {/* Right column - Tabs content */}
-          <div className="lg:col-span-2">
-            <Tabs defaultValue="medical-info">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="medical-info">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Dossier médical
-                </TabsTrigger>
-                <TabsTrigger value="upcoming-appointments">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Rendez-vous à venir
-                </TabsTrigger>
-                <TabsTrigger value="history">
-                  <List className="h-4 w-4 mr-2" />
-                  Historique
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="medical-info" className="space-y-6 mt-6">
+        {/* Right column - Tabs content */}
+        <div className="lg:col-span-2">
+          <Tabs defaultValue="medical-info">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="medical-info">
+                <FileText className="h-4 w-4 mr-2" />
+                Dossier médical
+              </TabsTrigger>
+              <TabsTrigger value="upcoming-appointments">
+                <Calendar className="h-4 w-4 mr-2" />
+                RDV à venir
+              </TabsTrigger>
+              <TabsTrigger value="history">
+                <List className="h-4 w-4 mr-2" />
+                Historique
+              </TabsTrigger>
+              <TabsTrigger value="invoices">
+                <FileText className="h-4 w-4 mr-2" />
+                Factures
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="medical-info" className="space-y-6 mt-6">
                 <MedicalInfoCard
                   title="Médecins et spécialistes"
                   items={[
@@ -315,8 +344,11 @@ return (
                   </div>
                 )}
               </TabsContent>
-            </Tabs>
-          </div>
+            
+            <TabsContent value="invoices" className="space-y-6 mt-6">
+              <PatientInvoices invoices={invoices} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </Layout>
