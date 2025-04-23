@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { User, Calendar, FileText, MapPin, Mail, Phone, Activity, List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users, ClipboardList, Stethoscope, History } from "lucide-react";
@@ -55,9 +54,10 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
   };
 
   const genderColors = {
-    lightBg: patient?.gender === "Homme" ? "bg-blue-50" : patient?.gender === "Femme" ? "bg-red-50" : "bg-gray-50",
-    darkBg: patient?.gender === "Homme" ? "dark:bg-blue-900" : patient?.gender === "Femme" ? "dark:bg-red-900" : "dark:bg-gray-800",
-    textColor: patient?.gender === "Homme" ? "text-blue-500" : patient?.gender === "Femme" ? "text-red-500" : "text-gray-500"
+    lightBg: patient?.gender === "Homme" ? "bg-blue-50" : patient?.gender === "Femme" ? "bg-pink-50" : "bg-gray-50",
+    darkBg: patient?.gender === "Homme" ? "dark:bg-blue-900" : patient?.gender === "Femme" ? "dark:bg-pink-900" : "dark:bg-gray-800",
+    textColor: patient?.gender === "Homme" ? "text-blue-500" : patient?.gender === "Femme" ? "text-pink-500" : "text-gray-500",
+    avatarBg: patient?.gender === "Homme" ? "bg-blue-200" : patient?.gender === "Femme" ? "bg-pink-200" : "bg-gray-200"
   };
 
   const upcomingAppointments = appointments.filter(appointment => new Date(appointment.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -107,6 +107,12 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
                 Modifier
               </Link>
             </Button>
+            <Button variant="outline" asChild>
+              <Link to={`/appointments?patientId=${patient.id}`}>
+                <Calendar className="mr-2 h-4 w-4" />
+                Voir les rendez-vous
+              </Link>
+            </Button>
             <Button asChild>
               <Link to={`/appointments/new?patientId=${patient.id}`}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -116,7 +122,6 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
           </div>
         </div>
 
-        {/* Patient overview stats */}
          <div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <PatientStat title="Total rendez-vous" value={appointments.length} icon={<Calendar className="h-5 w-5" />} colorClass="text-blue-500" />
@@ -127,46 +132,45 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
          </div>
 
         {/* Main content grid */}
-        <div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left column - Patient info */}
-            <div className="space-y-6">
-              <Card>
-                <CardContent className={`p-6 ${genderColors.lightBg}`}>
-                  <div className="flex items-center space-x-4">
-                    <Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
-                      <AvatarFallback className="bg-blue-200">{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
-                        {patient.firstName} {patient.lastName}
-                      </CardTitle>
-                      <CardDescription>
-                        {patient.gender === "Homme" ? "Homme" : patient.gender === "Femme" ? "Femme" : "Non spécifié"}, {differenceInYears(new Date(), parseISO(patient.birthDate))} ans
-                      </CardDescription>
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left column - Patient info */}
+          <div className="space-y-6">
+            <Card>
+              <CardContent className={`p-6 ${genderColors.lightBg}`}>
+                <div className="flex items-center space-x-4">
+                  <Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
+                    <AvatarFallback className={genderColors.avatarBg}>{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
+                      {patient.firstName} {patient.lastName}
+                    </CardTitle>
+                    <CardDescription>
+                      {patient.gender === "Homme" ? "Homme" : patient.gender === "Femme" ? "Femme" : "Non spécifié"}, {differenceInYears(new Date(), parseISO(patient.birthDate))} ans
+                    </CardDescription>
                   </div>
+                </div>
 
-                  <div className="mt-6 space-y-4 dark:text-slate-800">
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span>{patient.address}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <a href={`mailto:${patient.email}`} className="hover:underline">
-                        {patient.email}
-                      </a>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{patient.phone}</span>
-                    </div>
+                <div className="mt-6 space-y-4 dark:text-slate-800">
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{patient.address}</span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <a href={`mailto:${patient.email}`} className="hover:underline">
+                      {patient.email}
+                    </a>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{patient.phone}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              <MedicalInfoCard title="Informations personnelles" items={[{
+            <MedicalInfoCard title="Informations personnelles" items={[{
               label: "Statut marital",
               value: patient.maritalStatus === "SINGLE" ? "Célibataire" : patient.maritalStatus === "MARRIED" ? "Marié(e)" : patient.maritalStatus === "DIVORCED" ? "Divorcé(e)" : patient.maritalStatus === "WIDOWED" ? "Veuf/Veuve" : patient.maritalStatus === "PARTNERED" ? "En couple" : patient.maritalStatus === "ENGAGED" ? "Fiancé(e)" : "Non spécifié"
             }, {
@@ -182,110 +186,108 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
               label: "Contraception",
               value: patient.contraception === "NONE" ? "Aucune" : patient.contraception === "PILLS" ? "Pilule" : patient.contraception === "PATCH" ? "Patch" : patient.contraception === "RING" ? "Anneau vaginal" : patient.contraception === "IUD" ? "Stérilet" : patient.contraception === "IMPLANTS" ? "Implant" : patient.contraception === "CONDOM" ? "Préservatif" : patient.contraception === "DIAPHRAGM" ? "Diaphragme" : "Non spécifié"
             }]} />
-            </div>
+          </div>
 
-            {/* Right column - Tabs content */}
-            <div className="lg:col-span-2">
-              <Tabs defaultValue="medical-info">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="medical-info">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Dossier médical
-                  </TabsTrigger>
-                  <TabsTrigger value="upcoming-appointments">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Rendez-vous à venir
-                  </TabsTrigger>
-                  <TabsTrigger value="history">
-                    <List className="h-4 w-4 mr-2" />
-                    Historique
-                  </TabsTrigger>
-                </TabsList>
+          <div className="lg:col-span-2">
+            <Tabs defaultValue="medical-info">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="medical-info">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Dossier médical
+                </TabsTrigger>
+                <TabsTrigger value="upcoming-appointments">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Rendez-vous à venir
+                </TabsTrigger>
+                <TabsTrigger value="history">
+                  <List className="h-4 w-4 mr-2" />
+                  Historique
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="medical-info" className="space-y-6 mt-6">
+                <MedicalInfoCard title="Médecins et spécialistes" items={[{
+                label: "Médecin traitant",
+                value: patient.generalPractitioner
+              }, {
+                label: "Ophtalmologiste",
+                value: patient.ophtalmologistName
+              }, {
+                label: "ORL",
+                value: patient.entDoctorName
+              }, {
+                label: "Gastro-entérologue",
+                value: patient.digestiveDoctorName
+              }]} />
                 
-                <TabsContent value="medical-info" className="space-y-6 mt-6">
-                  <MedicalInfoCard title="Médecins et spécialistes" items={[{
-                  label: "Médecin traitant",
-                  value: patient.generalPractitioner
-                }, {
-                  label: "Ophtalmologiste",
-                  value: patient.ophtalmologistName
-                }, {
-                  label: "ORL",
-                  value: patient.entDoctorName
-                }, {
-                  label: "Gastro-entérologue",
-                  value: patient.digestiveDoctorName
-                }]} />
-                  
-                  <MedicalInfoCard title="Antécédents médicaux" items={[{
-                  label: "Traitement actuel",
-                  value: patient.currentTreatment,
-                  showSeparatorAfter: true
-                }, {
-                  label: "Antécédents chirurgicaux",
-                  value: patient.surgicalHistory
-                }, {
-                  label: "Antécédents traumatiques",
-                  value: patient.traumaHistory
-                }, {
-                  label: "Antécédents rhumatologiques",
-                  value: patient.rheumatologicalHistory,
-                  showSeparatorAfter: true
-                }, {
-                  label: "Problèmes digestifs",
-                  value: patient.digestiveProblems
-                }, {
-                  label: "Problèmes ORL",
-                  value: patient.entProblems
-                }, {
-                  label: "Correction visuelle",
-                  value: patient.hasVisionCorrection ? "Oui" : "Non"
-                }]} />
-                </TabsContent>
-                
-                <TabsContent value="upcoming-appointments" className="space-y-4 mt-6">
-                  {upcomingAppointments.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                        <h3 className="text-xl font-medium">Aucun rendez-vous à venir</h3>
-                        <p className="text-muted-foreground mt-2">
-                          Ce patient n'a pas de rendez-vous planifié.
-                        </p>
-                        <Button asChild variant="outline">
-                          <Link to={`/appointments/new?patientId=${patient.id}`}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Planifier un rendez-vous
-                          </Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="grid gap-4">
-                        {upcomingAppointments.map(appointment => (
-                          <AppointmentCard key={appointment.id} appointment={appointment} patient={patient} />
-                        ))}
-                      </div>
-                    )}
-                </TabsContent>
+                <MedicalInfoCard title="Antécédents médicaux" items={[{
+                label: "Traitement actuel",
+                value: patient.currentTreatment,
+                showSeparatorAfter: true
+              }, {
+                label: "Antécédents chirurgicaux",
+                value: patient.surgicalHistory
+              }, {
+                label: "Antécédents traumatiques",
+                value: patient.traumaHistory
+              }, {
+                label: "Antécédents rhumatologiques",
+                value: patient.rheumatologicalHistory,
+                showSeparatorAfter: true
+              }, {
+                label: "Problèmes digestifs",
+                value: patient.digestiveProblems
+              }, {
+                label: "Problèmes ORL",
+                value: patient.entProblems
+              }, {
+                label: "Correction visuelle",
+                value: patient.hasVisionCorrection ? "Oui" : "Non"
+              }]} />
+              </TabsContent>
+              
+              <TabsContent value="upcoming-appointments" className="space-y-4 mt-6">
+                {upcomingAppointments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <h3 className="text-xl font-medium">Aucun rendez-vous à venir</h3>
+                      <p className="text-muted-foreground mt-2">
+                        Ce patient n'a pas de rendez-vous planifié.
+                      </p>
+                      <Button asChild variant="outline">
+                        <Link to={`/appointments/new?patientId=${patient.id}`}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Planifier un rendez-vous
+                        </Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {upcomingAppointments.map(appointment => (
+                        <AppointmentCard key={appointment.id} appointment={appointment} patient={patient} />
+                      ))}
+                    </div>
+                  )}
+              </TabsContent>
 
-                <TabsContent value="history" className="space-y-4 mt-6">
-                  {pastAppointments.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Activity className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                        <h3 className="text-xl font-medium">Aucun historique</h3>
-                        <p className="text-muted-foreground mt-2">
-                          Ce patient n'a pas d'historique de rendez-vous.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="grid gap-4">
-                        {pastAppointments.map(appointment => (
-                          <AppointmentCard key={appointment.id} appointment={appointment} patient={patient} />
-                        ))}
-                      </div>
-                    )}
-                </TabsContent>
-              </Tabs>
-            </div>
+              <TabsContent value="history" className="space-y-4 mt-6">
+                {pastAppointments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Activity className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <h3 className="text-xl font-medium">Aucun historique</h3>
+                      <p className="text-muted-foreground mt-2">
+                        Ce patient n'a pas d'historique de rendez-vous.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {pastAppointments.map(appointment => (
+                        <AppointmentCard key={appointment.id} appointment={appointment} patient={patient} />
+                      ))}
+                    </div>
+                  )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
