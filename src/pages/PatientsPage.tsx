@@ -9,13 +9,13 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 
-// Import avec exportations nommées plutôt que des exports par défaut
+// Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
 import PatientListItem from "@/components/patients/PatientListItem";
 import EmptyPatientState from "@/components/patients/EmptyPatientState";
 import PatientSearch from "@/components/patients/PatientSearch";
-import { PatientLoadingState } from "@/components/patients/PatientLoadingState";
-import { PatientHeader } from "@/components/patients/PatientHeader";
+import PatientLoadingState from "@/components/patients/PatientLoadingState";
+import PatientHeader from "@/components/patients/PatientHeader";
 import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
 import PatientPagination from "@/components/patients/PatientPagination";
 
@@ -226,11 +226,7 @@ const PatientsPage = () => {
         <AlphabetFilter activeLetter={activeLetter} onLetterChange={handleLetterChange} />
 
         {/* Loading and error states */}
-        <PatientLoadingState 
-          isLoading={isLoading} 
-          error={error} 
-          onRetry={handleRetry} 
-        />
+        <PatientLoadingState isLoading={isLoading} error={error} onRetry={handleRetry} />
 
         {/* Main content - patient list or empty state */}
         {!isLoading && !error && (

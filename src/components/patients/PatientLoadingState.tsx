@@ -1,51 +1,56 @@
 
 import React from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import PatientFancyLoader from "./PatientFancyLoader";
 
 interface PatientLoadingStateProps {
   isLoading: boolean;
-  error: Error | string | null | unknown;
-  onRetry?: () => void;
-  children?: React.ReactNode; // Add support for children
+  error: any;
+  onRetry: () => void;
 }
 
-export function PatientLoadingState({ isLoading, error, onRetry, children }: PatientLoadingStateProps) {
-  // If not loading and no error, render children
-  if (!isLoading && !error) {
-    return <>{children}</>;
-  }
-  
-  // Convert error to string if it's an Error object
-  const errorMessage = error instanceof Error ? error.message : 
-                      typeof error === 'string' ? error : 
-                      'Une erreur est survenue';
-  
+const PatientLoadingState: React.FC<PatientLoadingStateProps> = ({
+  isLoading,
+  error,
+  onRetry
+}) => {
   if (isLoading) {
     return (
-      <div className="w-full flex justify-center py-10">
-        <div className="flex flex-col items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
-          <p className="text-muted-foreground">Chargement des patients...</p>
-        </div>
-      </div>
+      <Card className="w-full p-6">
+        <PatientFancyLoader message="Chargement des patients..." />
+      </Card>
     );
   }
-
+  
   if (error) {
     return (
-      <div className="w-full py-10 text-center">
-        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-        <h3 className="font-medium text-lg mb-1">Erreur de chargement</h3>
-        <p className="text-muted-foreground mb-4">{errorMessage}</p>
-        {onRetry && (
-          <Button onClick={onRetry} variant="outline">
-            Réessayer
-          </Button>
-        )}
-      </div>
+      <Card className="w-full">
+        <CardContent className="pt-6">
+          <div className="text-center py-10 bg-red-50 dark:bg-red-950/20 rounded-lg border border-dashed border-red-300 dark:border-red-800">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-red-800 dark:text-red-300 mb-2">Erreur de chargement</h3>
+            <p className="text-red-600/70 dark:text-red-400/70 mb-6 max-w-md mx-auto">
+              {error instanceof Error 
+                ? `${error.message}` 
+                : "Impossible de récupérer les patients depuis la base de données."}
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={onRetry} 
+              className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Réessayer
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
-
+  
   return null;
-}
+};
+
+export default PatientLoadingState;
