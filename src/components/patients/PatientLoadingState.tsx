@@ -1,56 +1,42 @@
 
 import React from "react";
-import { AlertCircle, RefreshCw } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
-import PatientFancyLoader from "./PatientFancyLoader";
+import { Link } from "react-router-dom";
 
 interface PatientLoadingStateProps {
-  isLoading: boolean;
-  error: any;
-  onRetry: () => void;
+  loading: boolean;
+  error: string | null;
+  children: React.ReactNode;
 }
 
-const PatientLoadingState: React.FC<PatientLoadingStateProps> = ({
-  isLoading,
-  error,
-  onRetry
-}) => {
-  if (isLoading) {
+export function PatientLoadingState({ loading, error, children }: PatientLoadingStateProps) {
+  if (loading) {
     return (
-      <Card className="w-full p-6">
-        <PatientFancyLoader message="Chargement des patients..." />
-      </Card>
+      <Layout>
+        <div className="flex justify-center items-center h-full">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      </Layout>
     );
   }
-  
+
   if (error) {
     return (
-      <Card className="w-full">
-        <CardContent className="pt-6">
-          <div className="text-center py-10 bg-red-50 dark:bg-red-950/20 rounded-lg border border-dashed border-red-300 dark:border-red-800">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-red-800 dark:text-red-300 mb-2">Erreur de chargement</h3>
-            <p className="text-red-600/70 dark:text-red-400/70 mb-6 max-w-md mx-auto">
-              {error instanceof Error 
-                ? `${error.message}` 
-                : "Impossible de récupérer les patients depuis la base de données."}
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={onRetry} 
-              className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Réessayer
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <Layout>
+        <div className="flex flex-col justify-center items-center h-full">
+          <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+          <p className="text-xl font-semibold text-center">
+            {error || "Patient non trouvé"}
+          </p>
+          <Button variant="outline" asChild className="mt-4">
+            <Link to="/patients">Retour à la liste des patients</Link>
+          </Button>
+        </div>
+      </Layout>
     );
   }
-  
-  return null;
-};
 
-export default PatientLoadingState;
+  return <>{children}</>;
+}
