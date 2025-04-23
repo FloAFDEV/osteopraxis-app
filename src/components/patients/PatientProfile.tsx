@@ -1,7 +1,7 @@
 
 import React from "react";
 import { parseISO, differenceInYears } from "date-fns";
-import { MapPin, Mail, Phone } from "lucide-react";
+import { MapPin, Mail, Phone, UserCheck, UserCircle, Users } from "lucide-react";
 import { Patient } from "@/types";
 import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,22 +17,27 @@ export function PatientProfile({ patient }: PatientProfileProps) {
   };
 
   const genderColors = {
-    lightBg: patient?.gender === "Homme" ? "bg-blue-50" : patient?.gender === "Femme" ? "bg-red-50" : "bg-gray-50",
-    darkBg: patient?.gender === "Homme" ? "dark:bg-blue-900" : patient?.gender === "Femme" ? "dark:bg-red-900" : "dark:bg-gray-800",
-    textColor: patient?.gender === "Homme" ? "text-blue-500" : patient?.gender === "Femme" ? "text-red-500" : "text-gray-500",
+    lightBg: patient?.gender === "Homme" ? "bg-blue-50" : patient?.gender === "Femme" ? "bg-pink-50" : "bg-gray-50",
+    darkBg: patient?.gender === "Homme" ? "bg-blue-500" : patient?.gender === "Femme" ? "bg-pink-500" : "bg-gray-500",
+    textColor: patient?.gender === "Homme" ? "text-blue-500" : patient?.gender === "Femme" ? "text-pink-500" : "text-gray-500",
   };
+
+  const GenderIcon = patient?.gender === "Homme" ? UserCheck : 
+                    patient?.gender === "Femme" ? UserCircle : 
+                    Users;
 
   return (
     <div className="space-y-6">
       <Card>
         <CardContent className={`p-6 ${genderColors.lightBg}`}>
           <div className="flex items-center space-x-4">
-            <Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
+            <Avatar className={`h-16 w-16 ${genderColors.darkBg} text-white`}>
               <AvatarFallback>{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
             </Avatar>
-            <div>
-              <CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
+            <div className="flex-grow">
+              <CardTitle className={`text-2xl font-bold ${genderColors.textColor} flex items-center gap-2`}>
                 {patient.firstName} {patient.lastName}
+                <GenderIcon className={`h-5 w-5 ${genderColors.textColor}`} />
               </CardTitle>
               <CardDescription>
                 {patient.gender === "Homme" ? "Homme" : patient.gender === "Femme" ? "Femme" : "Non spécifié"}, {patient.birthDate ? differenceInYears(new Date(), parseISO(patient.birthDate)) : 0} ans
