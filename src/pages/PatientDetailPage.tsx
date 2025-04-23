@@ -80,7 +80,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
       </Layout>;
   }
   return <Layout>
-      <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-6 max-w-6xl mx-auto px-4">
         {/* Header section */}
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
@@ -106,14 +106,18 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
         </div>
 
         {/* Patient overview stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+         <div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <PatientStat title="Total rendez-vous" value={appointments.length} icon={<Calendar className="h-5 w-5" />} colorClass="text-blue-500" />
           <PatientStat title="Rendez-vous à venir" value={upcomingAppointments.length} icon={<ClipboardList className="h-5 w-5" />} colorClass="text-purple-500" />
           <PatientStat title="En cours de traitement" value={patient.currentTreatment ? "Oui" : "Non"} icon={<Stethoscope className="h-5 w-5" />} colorClass="text-emerald-500" />
           <PatientStat title="Dernier rendez-vous" value={pastAppointments[0] ? format(new Date(pastAppointments[0].date), "dd/MM/yyyy") : "Aucun"} icon={<History className="h-5 w-5" />} colorClass="text-amber-500" />
         </div>
+         </div>
 
         {/* Main content grid */}
+            <div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left column - Patient info */}
           <div className="space-y-6">
@@ -121,7 +125,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
               <CardContent className={`p-6 ${genderColors.lightBg}`}>
                 <div className="flex items-center space-x-4">
                   <Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
-                    <AvatarFallback className="bg-inherit">{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
+                    <AvatarFallback className="bg-blue-200">{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
