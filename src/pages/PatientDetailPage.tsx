@@ -121,7 +121,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
               <CardContent className={`p-6 ${genderColors.lightBg}`}>
                 <div className="flex items-center space-x-4">
                   <Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
-                    <AvatarFallback className="bg-blue-200">{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
+                    <AvatarFallback className="bg-inherit">{getInitials(patient.firstName, patient.lastName)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
