@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -27,20 +26,20 @@ export const InvoiceDetails = ({
   onPrint
 }: InvoiceDetailsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  
+
   const formatDate = (date: string) => {
     return format(new Date(date), "dd MMMM yyyy", {
-      locale: fr
+      locale: fr,
     });
   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
-      currency: "EUR"
+      currency: "EUR",
     }).format(amount);
   };
-  
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PAID":
@@ -71,7 +70,7 @@ export const InvoiceDetails = ({
     <>
       <Card className="border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
         <CardContent className="p-0">
-          {/* Header with invoice number and status */}
+          {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -79,48 +78,55 @@ export const InvoiceDetails = ({
                 #{invoice.id.toString().padStart(4, "0")}
               </span>
             </div>
-            <div className={clsx(
-              "px-2.5 py-1 text-xs font-semibold rounded-full border",
-              getStatusColor(invoice.paymentStatus)
-            )}>
+            <div
+              className={clsx(
+                "px-2.5 py-1 text-xs font-semibold rounded-full border",
+                getStatusColor(invoice.paymentStatus)
+              )}
+            >
               {getStatusText(invoice.paymentStatus)}
             </div>
           </div>
 
-          {/* Patient and details section */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-start border-b border-gray-100 dark:border-gray-700 pb-3">
-              <div className="space-y-1">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Patient</div>
-                <div className="font-medium">{patientName || "Patient non spécifié"}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Montant</div>
-                <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-                  {formatCurrency(invoice.amount)}
-                </div>
+          {/* Infos patient + montant */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700 pb-4">
+            <div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Patient</div>
+              <div className="font-medium text-gray-800 dark:text-white">
+                {patientName || "Patient non spécifié"}
               </div>
             </div>
+            <div className="sm:text-right">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
+              <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+                {formatCurrency(invoice.amount)}
+              </div>
+            </div>
+          </div>
 
+          {/* Date + notes */}
+          <div className="space-y-3 pt-4">
             <div className="flex justify-between items-center">
               <div className="text-sm text-gray-500 dark:text-gray-400">Date de consultation</div>
-              <div className="font-medium">{formatDate(invoice.date)}</div>
+              <div className="font-medium text-gray-800 dark:text-white">
+                {formatDate(invoice.date)}
+              </div>
             </div>
 
             {invoice.notes && (
-              <div className="text-sm text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
-                <span className="font-medium">Notes : </span>
+              <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
+                <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
                 {invoice.notes}
               </div>
             )}
           </div>
 
-          {/* Actions section */}
-          <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+          {/* Actions */}
+          <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="space-x-2">
               {onEdit && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={onEdit}
                   className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
@@ -130,14 +136,14 @@ export const InvoiceDetails = ({
                 </Button>
               )}
               {onDelete && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={() => setIsDeleteModalOpen(true)}
                   className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
                 >
                   <Trash2 className="h-3.5 w-3.5 mr-1" />
-                 
+                  Supprimer
                 </Button>
               )}
             </div>
