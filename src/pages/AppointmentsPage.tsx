@@ -181,7 +181,7 @@ const AppointmentsPage = () => {
                         <h2 className="text-lg font-medium capitalize">
                           {formattedDate}
                         </h2>
-                        {isToday && <span className="ml-2 text-xs bg-amber-500 text-white px-2 py-1 rounded-full">
+                        {isToday && <span className="ml-2 text-base bg-amber-500 text-white px-2 py-1 rounded-full">
                             Aujourd'hui
                           </span>}
                       </div>
