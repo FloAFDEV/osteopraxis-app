@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -66,6 +65,17 @@ export const InvoiceDetails = ({
         return "Statut inconnu";
     }
   };
+  
+  const getPaymentMethodText = (method?: string) => {
+    if (!method) return "Non spécifié";
+    switch (method) {
+      case 'CB': return "Carte bancaire";
+      case 'ESPECES': return "Espèces";
+      case 'CHEQUE': return "Chèque";
+      case 'VIREMENT': return "Virement";
+      default: return method;
+    }
+  };
 
   return (
     <>
@@ -93,6 +103,13 @@ export const InvoiceDetails = ({
               <div className="space-y-1">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Patient</div>
                 <div className="font-medium">{patientName || "Patient non spécifié"}</div>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-3">
+              <div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Mode de règlement</div>
+                <div className="font-medium">{getPaymentMethodText(invoice.paymentMethod)}</div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Montant</div>

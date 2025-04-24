@@ -12,7 +12,7 @@ import { InvoiceDetails } from '@/components/invoice-details';
 import { toast } from 'sonner';
 import { Invoice, Patient, Osteopath, Cabinet } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { Activity, ArrowLeft } from 'lucide-react';
+import { Activity, ArrowLeft, Download, Printer } from 'lucide-react';
 
 const InvoiceDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,23 +25,6 @@ const InvoiceDetailPage = () => {
   const printRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Configuration pour l'impression
-  const handlePrint = useReactToPrint({
-    documentTitle: `Facture_${id}`,
-    contentRef: printRef
-  });
-  
-  // Wrapper function to handle the print event
-  const onPrintClick = () => {
-    handlePrint();
-  };
-  
-  // Wrapper function to handle the download event
-  const onDownloadClick = () => {
-    handlePrint();
-  };
-  
-  // Charger les données de la facture
   useEffect(() => {
     const loadInvoiceData = async () => {
       if (!id) return;
@@ -119,6 +102,41 @@ const InvoiceDetailPage = () => {
     loadInvoiceData();
   }, [id, user, navigate]);
   
+  // Configuration pour l'impression - updated to use contentRef instead of content
+  const handlePrint = useReactToPrint({
+    documentTitle: `Facture_${id}`,
+    contentRef: printRef,
+  });
+  
+  // New download function
+  const handleDownload = () => {
+    if (printRef.current) {
+      const printContent = printRef.current.innerHTML;
+      const blob = new Blob([`
+        <html>
+          <head>
+            <title>Facture_${id}</title>
+            <style>
+              @media print {
+                body { margin: 0; padding: 20px; }
+              }
+            </style>
+          </head>
+          <body>${printContent}</body>
+        </html>
+      `], { type: 'text/html' });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Facture_${id}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  };
+  
   const handleDelete = async () => {
     if (!invoice) return;
     
@@ -171,24 +189,28 @@ const InvoiceDetailPage = () => {
         </Button>
 
         <div className="flex justify-between items-center mb-6">
-           <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
             <Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
-               Facture #{invoice?.id.toString().padStart(4, "0")}
+              Facture #{invoice?.id.toString().padStart(4, "0")}
             </span>
           </h1>          
          
           <div className="space-x-2">
             <Button 
-              onClick={onPrintClick} 
+              onClick={() => handlePrint()}
               variant="outline"
+              className="flex items-center gap-2"
             >
+              <Printer className="h-4 w-4" />
               Imprimer
             </Button>
             <Button 
-              onClick={onDownloadClick} 
+              onClick={handleDownload}
               variant="default"
+              className="flex items-center gap-2"
             >
+              <Download className="h-4 w-4" />
               Télécharger
             </Button>
           </div>
@@ -202,10 +224,10 @@ const InvoiceDetailPage = () => {
               <InvoiceDetails 
                 invoice={invoice}
                 patientName={getPatientName()}
-                onEdit={() => {}} 
+                onEdit={() => navigate(`/invoices/${invoice.id}/edit`)}
                 onDelete={handleDelete}
-                onPrint={onPrintClick}
-                onDownload={onDownloadClick}
+                onPrint={() => handlePrint()}
+                onDownload={handleDownload}
               />
             </div>
             
