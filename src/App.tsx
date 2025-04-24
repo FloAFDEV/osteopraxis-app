@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -6,22 +7,22 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-import { useAuth } from "./hooks/use-auth";
-import { DashboardPage } from "./pages/DashboardPage";
-import { LoginPage } from "./pages/LoginPage";
-import { PatientsPage } from "./pages/PatientsPage";
-import { NewPatientPage } from "./pages/NewPatientPage";
-import { EditPatientPage } from "./pages/EditPatientPage";
-import { AppointmentsPage } from "./pages/AppointmentsPage";
-import { NewAppointmentPage } from "./pages/NewAppointmentPage";
-import { EditAppointmentPage } from "./pages/EditAppointmentPage";
-import { PatientDetailPage } from "./pages/PatientDetailPage";
-import { InvoicesPage } from "./pages/InvoicesPage";
-import { NewInvoicePage } from "./pages/NewInvoicePage";
-import { SettingsPage } from "./pages/SettingsPage";
+import { useAuth } from "./hooks/useAuth";
+import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import PatientsPage from "./pages/PatientsPage";
+import NewPatientPage from "./pages/NewPatientPage";
+import EditPatientPage from "./pages/EditPatientPage";
+import AppointmentsPage from "./pages/AppointmentsPage";
+import NewAppointmentPage from "./pages/NewAppointmentPage";
+import EditAppointmentPage from "./pages/EditAppointmentPage";
+import PatientDetailPage from "./pages/PatientDetailPage";
+import InvoicesPage from "./pages/InvoicesPage";
+import NewInvoicePage from "./pages/NewInvoicePage";
+import SettingsPage from "./pages/SettingsPage";
 import { FancyLoader } from "./components/ui/fancy-loader";
-import { CalendarPage } from "./pages/CalendarPage";
-import { EditInvoicePage } from "./pages/EditInvoicePage";
+import CalendarPage from "./pages/CalendarPage";
+import EditInvoicePage from "./pages/EditInvoicePage";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
