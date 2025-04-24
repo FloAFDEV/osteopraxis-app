@@ -11,8 +11,8 @@ import { Patient, Appointment } from '@/types';
 import { Card } from '@/components/ui/card';
 
 const NewInvoicePage = () => {
-  const { patientId } = useParams<{ patientId: string }>();
   const [searchParams] = useSearchParams();
+  const patientId = searchParams.get('patientId');
   const appointmentId = searchParams.get('appointmentId');
   const [patient, setPatient] = useState<Patient | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -50,7 +50,12 @@ const NewInvoicePage = () => {
 
   const handleInvoiceCreated = () => {
     toast.success("Facture créée avec succès !");
-    navigate('/invoices');
+    // If we came from a patient page, go back to that patient's page
+    if (patientId) {
+      navigate(`/patients/${patientId}`);
+    } else {
+      navigate('/invoices');
+    }
   };
 
   return (
@@ -61,6 +66,7 @@ const NewInvoicePage = () => {
             <Activity className="h-8 w-8 text-amber-500 dark:text-amber-400" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-red-500">
               Nouvelle Facture
+              {patient && ` pour ${patient.firstName} ${patient.lastName}`}
             </span>
           </h1>
         </div>
