@@ -102,10 +102,10 @@ const InvoiceDetailPage = () => {
     loadInvoiceData();
   }, [id, user, navigate]);
   
-  // Configuration pour l'impression
+  // Configuration pour l'impression - updated to use contentRef instead of content
   const handlePrint = useReactToPrint({
     documentTitle: `Facture_${id}`,
-    content: () => printRef.current,
+    contentRef: printRef,
   });
   
   // New download function
