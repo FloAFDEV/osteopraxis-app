@@ -156,9 +156,9 @@ export const InvoicePrintView = ({ invoice, patient, osteopath, cabinet }: Invoi
           Merci de votre confiance.
         </p>
         
-      <div className="flex flex-col items-center mt-12 space-y-1">
+    <div className="flex flex-col items-center mt-12 space-y-1">
   <p className="text-gray-500 text-xs">Document généré le {currentDate}</p>
-  <h2 className="text-sm font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+  <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
     PatientHub
   </h2>
   <p className="text-gray-500 text-xs">Logiciel de gestion pour ostéopathes</p>
