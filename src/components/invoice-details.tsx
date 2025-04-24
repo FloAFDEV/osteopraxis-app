@@ -92,92 +92,108 @@ export const InvoiceDetails = ({
     );
   };
 
-  return (
-    <>
-      <Card className="border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
-        <CardContent className="p-0">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <span className="font-bold text-lg">
-                #{invoice.id.toString().padStart(4, "0")}
+ return (
+  <>
+    <Card className="border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
+      <CardContent className="p-0">
+        {/* Header avec numéro de facture + nom du patient */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <span className="font-bold text-lg">
+              #{invoice.id.toString().padStart(4, "0")}
+            </span>
+            {patient && (
+              <span
+                className={`inline-flex items-center gap-1 font-medium text-sm ${
+                  patient.gender === "Femme"
+                    ? "text-pink-600 dark:text-pink-300"
+                    : patient.gender === "Homme"
+                    ? "text-blue-600 dark:text-blue-300"
+                    : "text-gray-600 dark:text-gray-300"
+                }`}
+              >
+                <span>
+                  {patient.gender === "Femme"
+                    ? "♀️"
+                    : patient.gender === "Homme"
+                    ? "♂️"
+                    : "⚧️"}
+                </span>
+                <span>{patient.firstName} {patient.lastName}</span>
               </span>
-            </div>
-            <div
-              className={clsx(
-                "px-2.5 py-1 text-xs font-semibold rounded-full border",
-                getStatusColor(invoice.paymentStatus)
-              )}
-            >
-              {getStatusText(invoice.paymentStatus)}
-            </div>
-          </div>
-
-          {/* Infos patient + montant */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700 pb-4">
-                       <div className="sm:text-right">
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
-              <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-                {formatCurrency(invoice.amount)}
-              </div>
-            </div>
-          </div>
-
-          {/* Date + notes */}
-          <div className="space-y-3 pt-4">
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Date de consultation</div>
-              <div className="font-medium text-gray-800 dark:text-white">
-                {formatDate(invoice.date)}
-              </div>
-            </div>
-
-            {invoice.notes && (
-              <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
-                <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
-                {invoice.notes}
-              </div>
             )}
           </div>
+          <div
+            className={clsx(
+              "px-2.5 py-1 text-xs font-semibold rounded-full border",
+              getStatusColor(invoice.paymentStatus)
+            )}
+          >
+            {getStatusText(invoice.paymentStatus)}
+          </div>
+        </div>
 
-          {/* Actions */}
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-            <div className="space-x-2">
-              {onEdit && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onEdit}
-                  className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
+        {/* Infos montant + date */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4">
+          <div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
+            <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+              {formatCurrency(invoice.amount)}
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="sm:text-right">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Date de consultation</div>
+            <div className="font-medium text-gray-800 dark:text-white">
+              {formatDate(invoice.date)}
+            </div>
+          </div>
+        </div>
 
-      <ConfirmDeleteInvoiceModal
-        isOpen={isDeleteModalOpen}
-        invoiceNumber={invoice.id.toString().padStart(4, "0")}
-        onCancel={() => setIsDeleteModalOpen(false)}
-        onDelete={() => {
-          if (onDelete) onDelete();
-          setIsDeleteModalOpen(false);
-        }}
-      />
-    </>
-  );
-};
+        {/* Notes éventuelles */}
+        {invoice.notes && (
+          <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
+            <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
+            {invoice.notes}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex justify-end items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <div className="space-x-2">
+            {onEdit && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onEdit}
+                className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    <ConfirmDeleteInvoiceModal
+      isOpen={isDeleteModalOpen}
+      invoiceNumber={invoice.id.toString().padStart(4, "0")}
+      onCancel={() => setIsDeleteModalOpen(false)}
+      onDelete={() => {
+        if (onDelete) onDelete();
+        setIsDeleteModalOpen(false);
+      }}
+    />
+  </>
+);
