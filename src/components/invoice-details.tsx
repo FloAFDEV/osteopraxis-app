@@ -104,6 +104,13 @@ export const InvoiceDetails = ({
                 <div className="text-sm text-gray-500 dark:text-gray-400">Patient</div>
                 <div className="font-medium">{patientName || "Patient non spécifié"}</div>
               </div>
+            </div>
+
+            <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-3">
+              <div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Mode de règlement</div>
+                <div className="font-medium">{getPaymentMethodText(invoice.paymentMethod)}</div>
+              </div>
               <div className="text-right">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Montant</div>
                 <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
@@ -112,31 +119,18 @@ export const InvoiceDetails = ({
               </div>
             </div>
 
-          <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-3">
-            <div className="space-y-1">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Mode de règlement</div>
-              <div className="font-medium">{getPaymentMethodText(invoice.paymentMethod)}</div>
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-gray-500 dark:text-gray-400">Date de consultation</div>
+              <div className="font-medium">{formatDate(invoice.date)}</div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Montant</div>
-              <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-                {formatCurrency(invoice.amount)}
+
+            {invoice.notes && (
+              <div className="text-sm text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
+                <span className="font-medium">Notes : </span>
+                {invoice.notes}
               </div>
-            </div>
+            )}
           </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-500 dark:text-gray-400">Date de consultation</div>
-            <div className="font-medium">{formatDate(invoice.date)}</div>
-          </div>
-
-          {invoice.notes && (
-            <div className="text-sm text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
-              <span className="font-medium">Notes : </span>
-              {invoice.notes}
-            </div>
-          )}
-        </div>
 
           {/* Actions section */}
           <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
