@@ -361,7 +361,7 @@ const InvoicesPage = () => {
                 <div key={invoice.id} className="group relative">
                   <InvoiceDetails
                     invoice={invoice}
-                    patientName={patientName}
+                   patient={patientDataMap.get(invoice.patientId)}
                     onEdit={() => navigate(`/invoices/${invoice.id}`)}
                     onDelete={() => {
                       setSelectedInvoiceId(invoice.id);

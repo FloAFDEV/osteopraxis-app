@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Invoice } from "@/types";
+import { Invoice, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Edit, Trash2 } from "lucide-react";
@@ -10,7 +10,7 @@ import clsx from "clsx";
 
 interface InvoiceDetailsProps {
   invoice: Invoice;
-  patientName?: string;
+  patient?: Patient;
   onEdit?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
@@ -19,7 +19,7 @@ interface InvoiceDetailsProps {
 
 export const InvoiceDetails = ({
   invoice,
-  patientName,
+  patient,
   onEdit,
   onDelete,
   onDownload,
@@ -66,6 +66,32 @@ export const InvoiceDetails = ({
     }
   };
 
+  const renderStyledPatientName = () => {
+    if (!patient) {
+      return <span className="font-medium text-gray-800 dark:text-white">Patient non spécifié</span>;
+    }
+
+    const icon = patient.gender === "Femme"
+      ? "♀️"
+      : patient.gender === "Homme"
+      ? "♂️"
+      : "⚧️";
+
+    const colorClass =
+      patient.gender === "Femme"
+        ? "text-pink-600 dark:text-pink-300"
+        : patient.gender === "Homme"
+        ? "text-blue-600 dark:text-blue-300"
+        : "text-gray-600 dark:text-gray-300";
+
+    return (
+      <span className={`inline-flex items-center gap-1 font-medium ${colorClass}`}>
+        <span>{icon}</span>
+        <span>{patient.firstName} {patient.lastName}</span>
+      </span>
+    );
+  };
+
   return (
     <>
       <Card className="border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
@@ -92,9 +118,7 @@ export const InvoiceDetails = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700 pb-4">
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Patient</div>
-              <div className="font-medium text-gray-800 dark:text-white">
-                {patientName || "Patient non spécifié"}
-              </div>
+              <div>{renderStyledPatientName()}</div>
             </div>
             <div className="sm:text-right">
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
@@ -131,8 +155,7 @@ export const InvoiceDetails = ({
                   onClick={onEdit}
                   className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
                 >
-                  <Edit className="h-3.5 w-3.5 mr-1" />
-                  Éditer
+                  <Edit className="h-4 w-4" />
                 </Button>
               )}
               {onDelete && (
@@ -142,8 +165,7 @@ export const InvoiceDetails = ({
                   onClick={() => setIsDeleteModalOpen(true)}
                   className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
                 >
-                  <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  Supprimer
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               )}
             </div>
