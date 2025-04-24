@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -197,7 +198,7 @@ const InvoiceDetailPage = () => {
          
           <div className="space-x-2">
             <Button 
-              onClick={handlePrint}
+              onClick={() => handlePrint()}
               variant="outline"
               className="flex items-center gap-2"
             >
@@ -225,7 +226,7 @@ const InvoiceDetailPage = () => {
                 patientName={getPatientName()}
                 onEdit={() => navigate(`/invoices/${invoice.id}/edit`)}
                 onDelete={handleDelete}
-                onPrint={handlePrint}
+                onPrint={() => handlePrint()}
                 onDownload={handleDownload}
               />
             </div>
