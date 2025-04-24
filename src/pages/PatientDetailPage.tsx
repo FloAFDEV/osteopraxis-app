@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { User, Calendar, FileText, MapPin, Mail, Phone, Activity, List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users, ClipboardList, Stethoscope, History } from "lucide-react";
+import { User, Calendar, FileText, MapPin, Mail, Phone, Activity, List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users, ClipboardList, Stethoscope, History, Receipt } from "lucide-react";
 import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
 import { api } from "@/services/api";
@@ -17,7 +18,6 @@ import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { toast } from "sonner";
 import { InvoiceDetails } from "@/components/invoice-details";
 import { invoiceService } from "@/services/api/invoice-service";
-import { receipt } from "lucide-react";
 
 interface PatientDetailPageProps {}
 
@@ -218,7 +218,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
                   Historique
                 </TabsTrigger>
                 <TabsTrigger value="invoices">
-                  <receipt className="h-4 w-4 mr-2" />
+                  <Receipt className="h-4 w-4 mr-2" />
                   Factures
                 </TabsTrigger>
               </TabsList>
@@ -319,7 +319,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 
                 {sortedInvoices.length === 0 ? (
                   <div className="text-center py-8">
-                    <receipt className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <Receipt className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                     <h3 className="text-xl font-medium">Aucune facture</h3>
                     <p className="text-muted-foreground mt-2">
                       Ce patient n'a pas encore de factures.
