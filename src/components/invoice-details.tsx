@@ -116,11 +116,7 @@ export const InvoiceDetails = ({
 
           {/* Infos patient + montant */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700 pb-4">
-            <div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Patient</div>
-              <div>{renderStyledPatientName()}</div>
-            </div>
-            <div className="sm:text-right">
+                       <div className="sm:text-right">
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
               <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
                 {formatCurrency(invoice.amount)}
