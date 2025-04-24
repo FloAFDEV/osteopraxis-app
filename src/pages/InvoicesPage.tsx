@@ -16,7 +16,6 @@ import { InvoicePrintView } from "@/components/invoice-print-view";
 import { useReactToPrint } from "react-to-print";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
-import { Badge } from "@/components/ui/badge";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
@@ -372,17 +371,30 @@ const InvoicesPage = () => {
                   
                   {/* Patient name badge */}
                   <div className="absolute top-11 left-0 right-0 text-center">
-                    <Badge 
-                      className={`inline-block px-3 py-1 text-sm font-medium truncate max-w-[90%] shadow-sm
-                        ${gender === "Femme" 
-                          ? "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50" 
-                          : gender === "Homme" 
-                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800/70"
-                        }`}
-                    >
-                      {patientName}
-                    </Badge>
+                    {(() => {
+    const patient = patientDataMap.get(invoice.patientId);
+    if (!patient) return null;
+
+    const icon = patient.gender === "Femme"
+      ? "♀️"
+      : patient.gender === "Homme"
+      ? "♂️"
+      : "⚧️";
+
+    const colorClass =
+      patient.gender === "Femme"
+        ? "text-pink-600 dark:text-pink-300"
+        : patient.gender === "Homme"
+        ? "text-blue-600 dark:text-blue-300"
+        : "text-gray-600 dark:text-gray-300";
+
+    return (
+      <div className={`inline-flex items-center justify-center gap-1 font-medium text-sm ${colorClass}`}>
+        <span>{icon}</span>
+        <span>{patient.firstName} {patient.lastName}</span>
+      </div>
+    );
+  })()}
                   </div>
                   
                   {/* Action buttons for print/export */}
