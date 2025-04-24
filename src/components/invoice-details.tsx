@@ -137,7 +137,7 @@ export const InvoiceDetails = ({
                   className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
                 >
                   <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  Supprimer
+                 
                 </Button>
               )}
             </div>
