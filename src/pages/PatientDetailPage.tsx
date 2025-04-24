@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { User, Calendar, FileText, MapPin, Mail, Phone, Activity, List, Heart, AlertCircle, Loader2, Edit, Plus, UserCheck, UserCircle, Users, ClipboardList, Stethoscope, History, Receipt } from "lucide-react";
 import { format, parseISO, differenceInYears } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -23,6 +22,7 @@ interface PatientDetailPageProps {}
 
 const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +76,11 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
   const sortedInvoices = [...invoices].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
+
+  // Add navigateToInvoiceEdit function to correctly handle navigation
+  const navigateToInvoiceEdit = (invoiceId: number) => {
+    navigate(`/invoices/${invoiceId}/edit`);
+  };
 
   if (loading) {
     return (
@@ -332,10 +337,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
                         key={invoice.id}
                         invoice={invoice}
                         patientName={`${patient.firstName} ${patient.lastName}`}
-                        onEdit={() => {
-                          // Navigate to invoice edit page
-                          window.location.href = `/invoices/${invoice.id}/edit`;
-                        }}
+                        onEdit={() => navigateToInvoiceEdit(invoice.id)}
                       />
                     ))}
                   </div>

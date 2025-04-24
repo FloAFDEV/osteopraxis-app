@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Patient, PaymentStatus, Appointment } from '@/types';
+import { Patient, PaymentStatus, Appointment, Invoice } from '@/types';
 import { api } from '@/services/api';
+import { invoiceService } from '@/services/api/invoice-service';
 import { toast } from 'sonner';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -27,39 +28,41 @@ const formSchema = z.object({
   tvaExoneration: z.boolean().optional(),
   tvaMotif: z.string().optional(),
   notes: z.string().optional(),
-  noConsultation: z.boolean().optional() // New field to indicate no consultation is needed
+  noConsultation: z.boolean().optional() // Field to indicate no consultation is needed
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface InvoiceFormProps {
-  initialPatient?: Patient;
-  initialAppointment?: Appointment;
+  initialPatient?: Patient | null;
+  initialAppointment?: Appointment | null;
+  initialInvoice?: Invoice | null;
   onCreate: () => void;
 }
 
-export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: InvoiceFormProps) => {
+export const InvoiceForm = ({ initialPatient, initialAppointment, initialInvoice, onCreate }: InvoiceFormProps) => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(initialPatient || null);
-  const [noConsultation, setNoConsultation] = useState<boolean>(false);
+  const [noConsultation, setNoConsultation] = useState<boolean>(initialInvoice?.consultationId ? false : true);
+  const isEditMode = !!initialInvoice;
 
   // Fetch patients list if no initial patient is provided
   const { data: patients } = useQuery({
     queryKey: ['patients'],
     queryFn: api.getPatients,
-    enabled: !initialPatient // Only fetch if no initial patient
+    enabled: !initialPatient && !isEditMode // Only fetch if no initial patient and not in edit mode
   });
 
   const defaultValues: FormValues = {
-    patientId: initialPatient?.id || 0,
-    consultationId: initialAppointment?.id || 0,
-    amount: 60,
-    date: initialAppointment?.date || format(new Date(), 'yyyy-MM-dd'),
-    paymentStatus: 'PAID',
-    paymentMethod: 'CB',
-    tvaExoneration: true,
-    tvaMotif: 'TVA non applicable - Article 261-4-1° du CGI',
-    notes: '',
-    noConsultation: false
+    patientId: initialPatient?.id || initialInvoice?.patientId || 0,
+    consultationId: initialAppointment?.id || initialInvoice?.consultationId || 0,
+    amount: initialInvoice?.amount || 60,
+    date: initialInvoice?.date || initialAppointment?.date || format(new Date(), 'yyyy-MM-dd'),
+    paymentStatus: initialInvoice?.paymentStatus || 'PAID',
+    paymentMethod: initialInvoice?.paymentMethod || 'CB',
+    tvaExoneration: initialInvoice?.tvaExoneration ?? true,
+    tvaMotif: initialInvoice?.tvaMotif || 'TVA non applicable - Article 261-4-1° du CGI',
+    notes: initialInvoice?.notes || '',
+    noConsultation: initialInvoice ? !initialInvoice.consultationId : false
   };
 
   const form = useForm<FormValues>({
@@ -69,24 +72,32 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await api.createInvoice({
+      const invoiceData = {
         patientId: selectedPatient?.id || data.patientId,
-        // Set consultationId to 0 or null if noConsultation is checked
-        consultationId: data.noConsultation ? 0 : (data.consultationId || 0),
+        // Set consultationId to undefined if noConsultation is checked
+        consultationId: data.noConsultation ? undefined : (data.consultationId || undefined),
         amount: data.amount,
         date: data.date,
         paymentStatus: data.paymentStatus as PaymentStatus,
-        // Ensure we pass paymentMethod only if defined and non-empty string to avoid API errors
         paymentMethod: data.paymentMethod && data.paymentMethod.trim() !== "" ? data.paymentMethod : undefined,
         tvaExoneration: data.tvaExoneration,
         tvaMotif: data.tvaMotif,
         notes: data.notes
-      });
-      toast.success("Facture créée avec succès");
+      };
+
+      if (isEditMode && initialInvoice) {
+        // Update existing invoice
+        await invoiceService.updateInvoice(initialInvoice.id, invoiceData);
+        toast.success("Facture mise à jour avec succès");
+      } else {
+        // Create new invoice
+        await api.createInvoice(invoiceData);
+        toast.success("Facture créée avec succès");
+      }
       onCreate();
     } catch (error) {
-      console.error("Error creating invoice:", error);
-      toast.error("Erreur lors de la création de la facture");
+      console.error("Error handling invoice:", error);
+      toast.error(isEditMode ? "Erreur lors de la mise à jour de la facture" : "Erreur lors de la création de la facture");
     }
   };
 
@@ -103,13 +114,31 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
     form.setValue('noConsultation', checked);
   };
 
+  // Ensure form values are set correctly when initialInvoice changes
+  useEffect(() => {
+    if (initialInvoice) {
+      form.reset({
+        patientId: initialInvoice.patientId,
+        consultationId: initialInvoice.consultationId || 0,
+        amount: initialInvoice.amount,
+        date: initialInvoice.date,
+        paymentStatus: initialInvoice.paymentStatus,
+        paymentMethod: initialInvoice.paymentMethod || '',
+        tvaExoneration: initialInvoice.tvaExoneration,
+        tvaMotif: initialInvoice.tvaMotif || '',
+        notes: initialInvoice.notes || '',
+        noConsultation: !initialInvoice.consultationId
+      });
+    }
+  }, [initialInvoice, form]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Patient selection or display */}
           <div className="space-y-4">
-            {!initialPatient && (
+            {!initialPatient && !selectedPatient && !isEditMode && (
               <FormField
                 control={form.control}
                 name="patientId"
@@ -313,7 +342,7 @@ export const InvoiceForm = ({ initialPatient, initialAppointment, onCreate }: In
             Annuler
           </Button>
           <Button type="submit">
-            Créer la facture
+            {isEditMode ? "Mettre à jour" : "Créer la facture"}
           </Button>
         </div>
       </form>

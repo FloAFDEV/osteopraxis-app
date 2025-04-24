@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
+
 const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -21,10 +22,10 @@ const AppointmentsPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
   const location = useLocation();
-
+  
   // Add a key to force refresh when needed
   const [refreshKey, setRefreshKey] = useState(0);
-
+  
   // Effect to detect navigation back to this page
   useEffect(() => {
     // Force refresh when navigating to this page
@@ -32,11 +33,16 @@ const AppointmentsPage = () => {
     // Reset loading state to show refresh indicator
     setLoading(true);
   }, [location.key]);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log("Fetching fresh appointments data...");
-        const [appointmentsData, patientsData] = await Promise.all([api.getAppointments(), api.getPatients()]);
+        const [appointmentsData, patientsData] = await Promise.all([
+          api.getAppointments(), 
+          api.getPatients()
+        ]);
+        
         console.log(`Loaded ${appointmentsData.length} appointments`);
         setAppointments(appointmentsData);
         setPatients(patientsData);
@@ -49,7 +55,7 @@ const AppointmentsPage = () => {
     };
     fetchData();
   }, [refreshKey]); // Depend on refreshKey to reload data
-
+  
   const getPatientById = (patientId: number) => {
     return patients.find(patient => patient.id === patientId);
   };
@@ -79,6 +85,7 @@ const AppointmentsPage = () => {
     });
     return grouped;
   };
+
   const handleCancelAppointment = async () => {
     if (!appointmentToCancel) return;
     try {
@@ -92,7 +99,7 @@ const AppointmentsPage = () => {
         status: "CANCELED"
       } : app));
       toast.success("Rendez-vous annulé avec succès");
-
+      
       // Force a refresh after cancel operation
       setRefreshKey(prev => prev + 1);
     } catch (error) {
@@ -102,8 +109,10 @@ const AppointmentsPage = () => {
       setAppointmentToCancel(null);
     }
   };
+
   const filteredAppointments = getFilteredAppointments();
   const groupedAppointments = groupAppointmentsByDate(filteredAppointments);
+  
   return <Layout>
       <div className="flex flex-col min-h-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -114,9 +123,9 @@ const AppointmentsPage = () => {
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => {
-            setLoading(true);
-            setRefreshKey(prev => prev + 1);
-          }}>
+              setLoading(true);
+              setRefreshKey(prev => prev + 1);
+            }}>
               Actualiser
             </Button>
 
@@ -181,7 +190,7 @@ const AppointmentsPage = () => {
                         <h2 className="text-lg font-medium capitalize">
                           {formattedDate}
                         </h2>
-                        {isToday && <span className="ml-2 text-base bg-lime-400 text-black px-2 py-1 rounded-full">
+                        {isToday && <span className="ml-2 text-xs bg-primary text-white px-2 py-1 rounded-full">
                             Aujourd'hui
                           </span>}
                       </div>
@@ -231,4 +240,5 @@ const AppointmentsPage = () => {
       </Dialog>
     </Layout>;
 };
+
 export default AppointmentsPage;
