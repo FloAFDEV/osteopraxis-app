@@ -66,11 +66,11 @@ export const InvoiceDetails = ({
 
  return (
   <>
-  <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
+   <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
   <CardContent className="p-0 flex flex-col h-full relative">
 
-    {/* 🔷 Imprimer / Télécharger en haut à gauche */}
-    <div className="absolute top-4 left-4 flex gap-2">
+    {/* 🔷 Icônes Print / Download - top right */}
+    <div className="absolute top-4 right-4 flex gap-2">
       {onPrint && (
         <Button
           size="icon"
@@ -97,9 +97,8 @@ export const InvoiceDetails = ({
       )}
     </div>
 
-    {/* 🔷 Contenu principal décalé pour ne pas gêner les icônes */}
-    <div className="pt-14 px-2"> {/* décalage vertical pour éviter le chevauchement */}
-      {/* ID + patient */}
+    {/* 🔷 Header : ID + patient */}
+    <div className="mb-4 pr-20">
       <div className="flex items-center gap-2">
         <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
         <span className="font-bold text-lg">
@@ -126,34 +125,34 @@ export const InvoiceDetails = ({
       )}>
         {getStatusText(invoice.paymentStatus)}
       </div>
-
-      {/* Montant & Date */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4 mt-4">
-        <div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
-          <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-            {formatCurrency(invoice.amount)}
-          </div>
-        </div>
-        <div className="sm:text-right">
-          <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Date de consultation</div>
-          <div className="font-medium text-gray-800 dark:text-white">
-            {formatDate(invoice.date)}
-          </div>
-        </div>
-      </div>
-
-      {/* Notes */}
-      {invoice.notes && (
-        <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
-          <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
-          {invoice.notes}
-        </div>
-      )}
     </div>
 
+    {/* 🔷 Montant & Date */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4">
+      <div>
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
+        <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+          {formatCurrency(invoice.amount)}
+        </div>
+      </div>
+      <div className="sm:text-right">
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Date de consultation</div>
+        <div className="font-medium text-gray-800 dark:text-white">
+          {formatDate(invoice.date)}
+        </div>
+      </div>
+    </div>
+
+    {/* 🔷 Notes */}
+    {invoice.notes && (
+      <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
+        <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
+        {invoice.notes}
+      </div>
+    )}
+
     {/* 🔷 Actions bas de carte */}
-    <div className="mt-auto pt-4 px-2 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
+    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
       {onEdit && (
         <Button
           size="icon"
@@ -192,7 +191,6 @@ export const InvoiceDetails = ({
     setIsDeleteModalOpen(false);
   }}
 />
-
 
   </>
 );
