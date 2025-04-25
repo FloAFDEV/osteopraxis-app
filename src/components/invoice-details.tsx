@@ -66,133 +66,135 @@ export const InvoiceDetails = ({
 
  return (
   <>
-    <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
-      <CardContent className="p-0 flex flex-col h-full">
-        {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span className="font-bold text-lg">
-              #{invoice.id.toString().padStart(4, "0")}
-            </span>
-          </div>
+   <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800 relative">
+  <CardContent className="p-0 flex flex-col h-full">
 
-          {patient && (
-            <div className={`pt-1 flex items-center gap-1 text-lg font-medium ${
-              patient.gender === "Femme"
-                ? "text-pink-600 dark:text-pink-300"
-                : patient.gender === "Homme"
-                ? "text-blue-600 dark:text-blue-300"
-                : "text-gray-600 dark:text-gray-300"
-            }`}>
-              <span>{patient.gender === "Femme" ? "♀️" : patient.gender === "Homme" ? "♂️" : "⚧️"}</span>
-              <span>{patient.firstName} {patient.lastName}</span>
-            </div>
-          )}
-
-          <div className={clsx(
-            "mt-2 inline-block px-2.5 py-1 text-xs font-semibold rounded-full border",
-            getStatusColor(invoice.paymentStatus)
-          )}>
-            {getStatusText(invoice.paymentStatus)}
-          </div>
-        </div>
-
-        {/* Montant & Date */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4">
-          <div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
-            <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-              {formatCurrency(invoice.amount)}
-            </div>
-          </div>
-          <div className="sm:text-right">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Date de consultation</div>
-            <div className="font-medium text-gray-800 dark:text-white">
-              {formatDate(invoice.date)}
-            </div>
-          </div>
-        </div>
-
-        {/* Notes */}
-        {invoice.notes && (
-          <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
-            <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
-            {invoice.notes}
-          </div>
+    {/* 🖨️ Print & Download en haut à gauche */}
+    {(onPrint || onDownload) && (
+      <div className="absolute top-4 left-4 flex gap-2 z-10">
+        {onPrint && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={onPrint}
+            title="Imprimer"
+            aria-label="Imprimer la facture"
+            className="h-9 w-9 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+          >
+            <Printer className="h-5 w-5" />
+          </Button>
         )}
-<div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
-  <div className="flex justify-between items-center w-full">
-    <div className="flex gap-2">
-      {onPrint && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={onPrint}
-          title="Imprimer"
-          aria-label="Imprimer"
-          className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-        >
-          <Printer className="h-5 w-5" />
-        </Button>
+        {onDownload && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={onDownload}
+            title="Télécharger"
+            aria-label="Télécharger la facture"
+            className="h-9 w-9 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+          >
+            <Download className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+    )}
+
+    {/* Décalage pour éviter que les boutons haut gauche se superposent */}
+    <div className="pt-14 px-2">
+      <div className="flex items-center gap-2">
+        <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        <span className="font-bold text-lg">
+          #{invoice.id.toString().padStart(4, "0")}
+        </span>
+      </div>
+
+      {patient && (
+        <div className={`pt-1 flex items-center gap-1 text-lg font-medium ${
+          patient.gender === "Femme"
+            ? "text-pink-600 dark:text-pink-300"
+            : patient.gender === "Homme"
+            ? "text-blue-600 dark:text-blue-300"
+            : "text-gray-600 dark:text-gray-300"
+        }`}>
+          <span>{patient.gender === "Femme" ? "♀️" : patient.gender === "Homme" ? "♂️" : "⚧️"}</span>
+          <span>{patient.firstName} {patient.lastName}</span>
+        </div>
       )}
-      {onDownload && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={onDownload}
-          title="Télécharger"
-          aria-label="Télécharger"
-          className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-        >
-          <Download className="h-5 w-5" />
-        </Button>
+
+      <div className={clsx(
+        "mt-2 inline-block px-2.5 py-1 text-xs font-semibold rounded-full border",
+        getStatusColor(invoice.paymentStatus)
+      )}>
+        {getStatusText(invoice.paymentStatus)}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4 mt-4">
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
+          <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+            {formatCurrency(invoice.amount)}
+          </div>
+        </div>
+        <div className="sm:text-right">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Date de consultation</div>
+          <div className="font-medium text-gray-800 dark:text-white">
+            {formatDate(invoice.date)}
+          </div>
+        </div>
+      </div>
+
+      {invoice.notes && (
+        <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
+          <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
+          {invoice.notes}
+        </div>
       )}
     </div>
-    <div className="flex gap-2">
-      {onEdit && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={onEdit}
-          title="Modifier"
-          aria-label="Modifier"
-          className="h-10 w-10 flex items-center justify-center rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
-        >
-          <Edit className="h-5 w-5" />
-        </Button>
-      )}
-      {onDelete && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={() => setIsDeleteModalOpen(true)}
-          title="Supprimer"
-          aria-label="Supprimer"
-          className="h-10 w-10 flex items-center justify-center rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800/60 dark:text-red-400"
-        >
-          <Trash2 className="h-5 w-5" />
-        </Button>
-      )}
-    </div>
-  </div>
-</div>
 
+    {/* ✏️ Boutons bas droite */}
+    {(onEdit || onDelete) && (
+      <div className="mt-auto pt-4 px-2 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
+        {onEdit && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={onEdit}
+            title="Modifier"
+            aria-label="Modifier la facture"
+            className="h-10 w-10 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
+          >
+            <Edit className="h-5 w-5" />
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => setIsDeleteModalOpen(true)}
+            title="Supprimer"
+            aria-label="Supprimer la facture"
+            className="h-10 w-10 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800/60 dark:text-red-400"
+          >
+            <Trash2 className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+    )}
 
+  </CardContent>
+</Card>
 
-      </CardContent>
-    </Card>
+{/* 🗑️ Modal de suppression */}
+<ConfirmDeleteInvoiceModal
+  isOpen={isDeleteModalOpen}
+  invoiceNumber={invoice.id.toString().padStart(4, "0")}
+  onCancel={() => setIsDeleteModalOpen(false)}
+  onDelete={() => {
+    if (onDelete) onDelete();
+    setIsDeleteModalOpen(false);
+  }}
+/>
 
-    {/* Modal suppression */}
-    <ConfirmDeleteInvoiceModal
-      isOpen={isDeleteModalOpen}
-      invoiceNumber={invoice.id.toString().padStart(4, "0")}
-      onCancel={() => setIsDeleteModalOpen(false)}
-      onDelete={() => {
-        if (onDelete) onDelete();
-        setIsDeleteModalOpen(false);
-      }}
-    />
   </>
 );
 
