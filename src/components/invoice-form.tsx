@@ -120,11 +120,8 @@ export const InvoiceForm = ({
 
 	const onSubmit = async (data: FormValues) => {
 		try {
-			await api.createInvoice({
+			const invoiceData: any = {
 				patientId: selectedPatient?.id || data.patientId,
-				consultationId: data.noConsultation
-					? null
-					: data.consultationId ?? null,
 				amount: data.amount,
 				date: data.date,
 				paymentStatus: data.paymentStatus as PaymentStatus,
@@ -135,7 +132,14 @@ export const InvoiceForm = ({
 				tvaExoneration: data.tvaExoneration,
 				tvaMotif: data.tvaMotif,
 				notes: data.notes,
-			});
+			};
+
+			if (!data.noConsultation && data.consultationId) {
+				invoiceData.consultationId = data.consultationId;
+			}
+
+			await api.createInvoice(invoiceData);
+
 			toast.success("Facture créée avec succès");
 			onCreate();
 		} catch (error) {
