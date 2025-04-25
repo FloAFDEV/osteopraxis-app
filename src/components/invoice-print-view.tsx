@@ -141,7 +141,7 @@ export const InvoicePrintView = ({
 							NOTE D'HONORAIRES
 						</h2>
 						<p className="font-medium text-amber-600">
-							#{invoice.id.toString().padStart(4, "0")}
+							n° #{invoice.id.toString().padStart(4, "0")}
 						</p>
 						<p className="mt-4 text-gray-600">
 							Date de consultation: {formattedDate}
