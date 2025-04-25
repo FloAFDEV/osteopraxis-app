@@ -11,8 +11,7 @@ import {
 	FileText,
 	Search,
 	Plus,
-		Filter,
-	Printer,
+	Filter,
 	Download,
 	Calendar,
 } from "lucide-react";
