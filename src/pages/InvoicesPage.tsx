@@ -11,8 +11,7 @@ import {
 	FileText,
 	Search,
 	Plus,
-	Activity,
-	Filter,
+		Filter,
 	Printer,
 	Download,
 	Calendar,
@@ -329,7 +328,7 @@ const InvoicesPage = () => {
 			<div className="mb-6">
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-3">
-						<Activity className="h-6 w-6 text-blue-600 dark:text-blue-500" />
+						<FileText className="h-6 w-6 text-blue-600 dark:text-blue-500" />
 						<span className="text-black font-semibold">
 							Factures
 						</span>
