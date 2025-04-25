@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Invoice, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Edit, Trash2 } from "lucide-react";
+import { FileText, Edit, Trash2, Printer, Download } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ConfirmDeleteInvoiceModal from "./modals/ConfirmDeleteInvoiceModal";
@@ -11,7 +11,6 @@ import clsx from "clsx";
 interface InvoiceDetailsProps {
   invoice: Invoice;
   patient?: Patient;
-  patientName?: string;  // Add this optional prop
   onEdit?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
@@ -21,7 +20,6 @@ interface InvoiceDetailsProps {
 export const InvoiceDetails = ({
   invoice,
   patient,
-  patientName,  // Destructure the new prop
   onEdit,
   onDelete,
   onDownload,
@@ -30,9 +28,7 @@ export const InvoiceDetails = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const formatDate = (date: string) => {
-    return format(new Date(date), "dd MMMM yyyy", {
-      locale: fr,
-    });
+    return format(new Date(date), "dd MMMM yyyy", { locale: fr });
   };
 
   const formatCurrency = (amount: number) => {
@@ -68,50 +64,37 @@ export const InvoiceDetails = ({
     }
   };
 
-  const renderStyledPatientName = () => {
-    // Prioritize patient object, then patientName prop, then fallback
-    if (patient) {
-      const icon = patient.gender === "Femme"
-        ? "♀️"
-        : patient.gender === "Homme"
-        ? "♂️"
-        : "⚧️";
-
-      const colorClass =
-        patient.gender === "Homme"
-          ? "text-blue-600 dark:text-blue-300"
-          : patient.gender === "Femme"
-          ? "text-pink-600 dark:text-pink-300"
-          : "text-gray-600 dark:text-gray-300";
-
-      return (
-        <span className={`inline-flex items-center gap-1 font-medium ${colorClass}`}>
-          <span>{icon}</span>
-          <span>{patient.firstName} {patient.lastName}</span>
-        </span>
-      );
-    }
-
-    // Use patientName if available
-    if (patientName) {
-      return <span className="font-medium text-gray-800 dark:text-white">{patientName}</span>;
-    }
-
-    return <span className="font-medium text-gray-800 dark:text-white">Patient non spécifié</span>;
-  };
-
   return (
     <>
       <Card className="border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
         <CardContent className="p-0">
-          {/* Header avec numéro de facture + nom du patient */}
+          {/* Header : numéro + nom du patient stylisé */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <span className="font-bold text-lg">
                 #{invoice.id.toString().padStart(4, "0")}
               </span>
-              {renderStyledPatientName()}
+              {patient && (
+                <span
+                  className={`inline-flex items-center gap-1 font-medium text-sm ${
+                    patient.gender === "Femme"
+                      ? "text-pink-600 dark:text-pink-300"
+                      : patient.gender === "Homme"
+                      ? "text-blue-600 dark:text-blue-300"
+                      : "text-gray-600 dark:text-gray-300"
+                  }`}
+                >
+                  <span>
+                    {patient.gender === "Femme"
+                      ? "♀️"
+                      : patient.gender === "Homme"
+                      ? "♂️"
+                      : "⚧️"}
+                  </span>
+                  <span>{patient.firstName} {patient.lastName}</span>
+                </span>
+              )}
             </div>
             <div
               className={clsx(
@@ -123,7 +106,7 @@ export const InvoiceDetails = ({
             </div>
           </div>
 
-          {/* Infos montant + date */}
+          {/* Montant + Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4">
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
@@ -139,7 +122,7 @@ export const InvoiceDetails = ({
             </div>
           </div>
 
-          {/* Notes éventuelles */}
+          {/* Notes */}
           {invoice.notes && (
             <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3">
               <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
@@ -148,7 +131,32 @@ export const InvoiceDetails = ({
           )}
 
           {/* Actions */}
-          <div className="flex justify-end items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex gap-2">
+              {onPrint && (
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={onPrint}
+                  title="Imprimer"
+                  className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
+                >
+                  <Printer className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                </Button>
+              )}
+              {onDownload && (
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={onDownload}
+                  title="Exporter en PDF"
+                  className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
+                >
+                  <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                </Button>
+              )}
+            </div>
+
             <div className="space-x-2">
               {onEdit && (
                 <Button

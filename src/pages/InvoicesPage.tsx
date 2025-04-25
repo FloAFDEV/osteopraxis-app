@@ -368,34 +368,7 @@ const InvoicesPage = () => {
                       setIsDeleteModalOpen(true);
                     }}
                   />
-                  
-                  {/* Patient name badge */}
-                  <div className="absolute top-11 left-0 right-0 text-center">
-                    {(() => {
-    const patient = patientDataMap.get(invoice.patientId);
-    if (!patient) return null;
-
-    const icon = patient.gender === "Femme"
-      ? "♀️"
-      : patient.gender === "Homme"
-      ? "♂️"
-      : "⚧️";
-
-    const colorClass =
-      patient.gender === "Femme"
-        ? "text-pink-600 dark:text-pink-300"
-        : patient.gender === "Homme"
-        ? "text-blue-600 dark:text-blue-300"
-        : "text-gray-600 dark:text-gray-300";
-
-    return (
-      <div className={`inline-flex items-center justify-center gap-1 font-medium text-sm ${colorClass}`}>
-        <span>{icon}</span>
-        <span>{patient.firstName} {patient.lastName}</span>
-      </div>
-    );
-  })()}
-                  </div>
+          
                   
                   {/* Action buttons for print/export */}
                   <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
