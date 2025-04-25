@@ -151,7 +151,7 @@ export const InvoiceDetails = ({
     )}
   </div>
 
-  {/* Édition / Suppression */}
+   {/* Édition / Suppression */}
   <div className="flex gap-2">
     {onEdit && (
       <Button
