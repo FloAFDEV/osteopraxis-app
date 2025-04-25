@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -16,10 +17,12 @@ import { InvoicePrintView } from "@/components/invoice-print-view";
 import { useReactToPrint } from "react-to-print";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isMobile } = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -317,13 +320,13 @@ const InvoicesPage = () => {
               </div>
             </div>
 
-            {/* Nouvelle section pour le téléchargement par année */}
+            {/* Nouvelle section pour le téléchargement par année - Améliorée pour la responsivité */}
             <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <div className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-amber-500" />
                 Export annuel:
               </div>
-              <div className="flex gap-3 items-center">
+              <div className="flex flex-wrap w-full sm:w-auto gap-3 items-center mt-2 sm:mt-0">
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                   <SelectTrigger className="w-28">
                     <SelectValue placeholder="Année" />
@@ -337,10 +340,11 @@ const InvoicesPage = () => {
                 <Button 
                   onClick={handleDownloadAllInvoices}
                   variant="outline" 
-                  className="flex items-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:hover:bg-amber-800/30 dark:text-amber-300 dark:border-amber-700/50"
+                  size={isMobile ? "sm" : "default"}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:hover:bg-amber-800/30 dark:text-amber-300 dark:border-amber-700/50"
                 >
                   <Download className="h-4 w-4" />
-                  Télécharger les factures
+                  <span>Télécharger les factures</span>
                 </Button>
               </div>
             </div>
@@ -353,46 +357,21 @@ const InvoicesPage = () => {
           </div>
         ) : filteredInvoices && filteredInvoices.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredInvoices.map(invoice => {
-              const gender = getPatientGender(invoice);
-              const patientName = getPatientName(invoice);
-              
-              return (
-           <div key={invoice.id} className="relative">
-  <InvoiceDetails
-    invoice={invoice}
-    patient={patientDataMap.get(invoice.patientId)}
-    onEdit={() => navigate(`/invoices/${invoice.id}`)}
-    onDelete={() => {
-      setSelectedInvoiceId(invoice.id);
-      setIsDeleteModalOpen(true);
-    }}
-  />
-           {/* Actions toujours visibles en bas à gauche */}
-  <div className="absolute bottom-3 left-3 sm:left-3 sm:justify-start w-full flex justify-center gap-2 z-10 px-4">
-
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-8 w-8 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-sm"
-      onClick={() => handlePrintInvoice(invoice)}
-      title="Imprimer"
-    >
-      <Printer className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-    </Button>
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-8 w-8 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-sm"
-      onClick={() => handleDownloadInvoice(invoice)}
-      title="Exporter la facture en PDF"
-    >
-      <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-    </Button>
-  </div>
-</div>
-              );
-            })}
+            {filteredInvoices.map(invoice => (
+              <div key={invoice.id}>
+                <InvoiceDetails
+                  invoice={invoice}
+                  patient={patientDataMap.get(invoice.patientId)}
+                  onEdit={() => navigate(`/invoices/${invoice.id}`)}
+                  onDelete={() => {
+                    setSelectedInvoiceId(invoice.id);
+                    setIsDeleteModalOpen(true);
+                  }}
+                  onPrint={() => handlePrintInvoice(invoice)}
+                  onDownload={() => handleDownloadInvoice(invoice)}
+                />
+              </div>
+            ))}
           </div>
         ) : (
           <div className="text-center py-20">
@@ -411,7 +390,7 @@ const InvoicesPage = () => {
         )}
       </div>
       
-      {/* Print components hidden section - keep the same */}
+      {/* Print components hidden section */}
       {printInvoice && (
         <div className="hidden">
           <div ref={printRef}>

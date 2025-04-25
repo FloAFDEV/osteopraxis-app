@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ConfirmDeleteInvoiceModal from "./modals/ConfirmDeleteInvoiceModal";
 import clsx from "clsx";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface InvoiceDetailsProps {
   invoice: Invoice;
@@ -29,6 +30,7 @@ export const InvoiceDetails = ({
   onPrint
 }: InvoiceDetailsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { isMobile } = useIsMobile();
 
   const formatDate = (date: string) => {
     return format(new Date(date), "dd MMMM yyyy", { locale: fr });
@@ -123,10 +125,10 @@ export const InvoiceDetails = ({
 
   return (
     <>
-      <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
-        <CardContent className="p-0 flex flex-col h-full relative">
+      <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800 relative">
+        <CardContent className="p-0 flex flex-col h-full">
           {/* 🔷 Icônes Print / Download - top right */}
-          <div className="absolute top-4 right-4 flex gap-2">
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
             {onPrint && (
               <Button
                 size="icon"
@@ -203,9 +205,12 @@ export const InvoiceDetails = ({
               {invoice.notes}
             </div>
           )}
-
-          {/* 🔷 Actions - fixées en bas */}
-          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
+        </CardContent>
+        
+        {/* 🔷 Actions - fixées en bas */}
+        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          {/* Actions à droite (Modifier/Supprimer) */}
+          <div className="flex gap-2 ml-auto">
             {onEdit && (
               <Button
                 size="icon"
@@ -231,7 +236,35 @@ export const InvoiceDetails = ({
               </Button>
             )}
           </div>
-        </CardContent>
+          
+          {/* Actions à gauche (Imprimer/Télécharger) en mobile uniquement */}
+          {isMobile && (
+            <div className="flex gap-2">
+              {onPrint && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onPrint}
+                  className="h-8 px-2 rounded-md border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300 flex items-center"
+                >
+                  <Printer className="h-4 w-4 mr-1" />
+                  <span className="sr-only sm:not-sr-only sm:inline">Imprimer</span>
+                </Button>
+              )}
+              {onDownload && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onDownload}
+                  className="h-8 px-2 rounded-md border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300 flex items-center"
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  <span className="sr-only sm:not-sr-only sm:inline">PDF</span>
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* 🔷 Modal suppression */}
@@ -247,4 +280,3 @@ export const InvoiceDetails = ({
     </>
   );
 };
-
