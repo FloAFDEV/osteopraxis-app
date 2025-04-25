@@ -66,11 +66,10 @@ export const InvoiceDetails = ({
 
  return (
   <>
-    <Card className="min-h-[240px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
-      <CardContent className="p-0 flex flex-col h-full justify-between">
+    <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
+      <CardContent className="p-0 flex flex-col h-full">
         {/* Header */}
         <div className="mb-4">
-          {/* Numéro de facture */}
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <span className="font-bold text-lg">
@@ -78,35 +77,23 @@ export const InvoiceDetails = ({
             </span>
           </div>
 
-          {/* Nom du patient */}
           {patient && (
-            <div
-              className={`pt-1 flex items-center gap-1 text-sm font-medium ${
-                patient.gender === "Femme"
-                  ? "text-pink-600 dark:text-pink-300"
-                  : patient.gender === "Homme"
-                  ? "text-blue-600 dark:text-blue-300"
-                  : "text-gray-600 dark:text-gray-300"
-              }`}
-            >
-              <span>
-                {patient.gender === "Femme"
-                  ? "♀️"
-                  : patient.gender === "Homme"
-                  ? "♂️"
-                  : "⚧️"}
-              </span>
+            <div className={`pt-1 flex items-center gap-1 text-sm font-medium ${
+              patient.gender === "Femme"
+                ? "text-pink-600 dark:text-pink-300"
+                : patient.gender === "Homme"
+                ? "text-blue-600 dark:text-blue-300"
+                : "text-gray-600 dark:text-gray-300"
+            }`}>
+              <span>{patient.gender === "Femme" ? "♀️" : patient.gender === "Homme" ? "♂️" : "⚧️"}</span>
               <span>{patient.firstName} {patient.lastName}</span>
             </div>
           )}
 
-          {/* Statut */}
-          <div
-            className={clsx(
-              "mt-2 inline-block px-2.5 py-1 text-xs font-semibold rounded-full border",
-              getStatusColor(invoice.paymentStatus)
-            )}
-          >
+          <div className={clsx(
+            "mt-2 inline-block px-2.5 py-1 text-xs font-semibold rounded-full border",
+            getStatusColor(invoice.paymentStatus)
+          )}>
             {getStatusText(invoice.paymentStatus)}
           </div>
         </div>
@@ -127,7 +114,7 @@ export const InvoiceDetails = ({
           </div>
         </div>
 
-        {/* Notes éventuelles */}
+        {/* Notes */}
         {invoice.notes && (
           <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
             <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
@@ -135,8 +122,8 @@ export const InvoiceDetails = ({
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex-wrap gap-y-2 gap-x-4">
+        {/* Actions alignées en bas */}
+        <div className="mt-auto pt-4 flex justify-between items-end border-t border-gray-100 dark:border-gray-700 flex-wrap gap-3 sm:gap-4">
           {/* Impression / Export */}
           <div className="flex gap-2">
             {onPrint && (
@@ -145,7 +132,7 @@ export const InvoiceDetails = ({
                 variant="outline"
                 onClick={onPrint}
                 title="Imprimer"
-                className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
+                className="h-10 w-10 sm:h-8 sm:w-8 bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700"
               >
                 <Printer className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </Button>
@@ -156,7 +143,7 @@ export const InvoiceDetails = ({
                 variant="outline"
                 onClick={onDownload}
                 title="Télécharger en PDF"
-                className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
+                className="h-10 w-10 sm:h-8 sm:w-8 bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700"
               >
                 <Download className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </Button>
@@ -167,20 +154,22 @@ export const InvoiceDetails = ({
           <div className="flex gap-2">
             {onEdit && (
               <Button
-                size="sm"
+                size="icon"
                 variant="outline"
                 onClick={onEdit}
-                className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
+                title="Modifier"
+                className="h-10 w-10 sm:h-8 sm:w-8 bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:border-blue-800/60 dark:text-blue-400"
               >
                 <Edit className="h-5 w-5" />
               </Button>
             )}
             {onDelete && (
               <Button
-                size="sm"
+                size="icon"
                 variant="outline"
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
+                title="Supprimer"
+                className="h-10 w-10 sm:h-8 sm:w-8 bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800/60 dark:text-red-400"
               >
                 <Trash2 className="h-5 w-5" />
               </Button>
@@ -190,7 +179,7 @@ export const InvoiceDetails = ({
       </CardContent>
     </Card>
 
-    {/* Modale suppression */}
+    {/* Modal suppression */}
     <ConfirmDeleteInvoiceModal
       isOpen={isDeleteModalOpen}
       invoiceNumber={invoice.id.toString().padStart(4, "0")}
@@ -202,4 +191,5 @@ export const InvoiceDetails = ({
     />
   </>
 );
+
 };
