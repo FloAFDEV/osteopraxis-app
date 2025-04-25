@@ -27,19 +27,6 @@ export const InvoicePrintView = ({
 	});
 	const currentDate = format(new Date(), "dd MMMM yyyy", { locale: fr });
 
-	const getStatusLabel = (status: string) => {
-		switch (status) {
-			case "PAID":
-				return "Payée";
-			case "PENDING":
-				return "En attente";
-			case "CANCELED":
-				return "Annulée";
-			default:
-				return "Inconnue";
-		}
-	};
-
 	const getPaymentMethod = (method?: string) => {
 		if (!method) return "Non spécifié";
 		switch (method) {
@@ -67,7 +54,7 @@ export const InvoicePrintView = ({
 	};
 
 	return (
-		<div className="bg-white p-8 min-h-screen max-w-3xl mx-auto flex flex-col justify-between">
+		<div className="bg-white p-8 min-h-screen max-w-3xl mx-auto flex flex-col justify-between print:min-h-max print:p-4">
 			{/* Partie haute */}
 			<div className="flex-1">
 				{/* En-tête */}
