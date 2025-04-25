@@ -264,7 +264,7 @@ export const InvoiceDetails = ({
 
 					{/* Actions à gauche (Imprimer/Télécharger) en mobile uniquement */}
 					{isMobile && (
-						<div className="flex gap-2">
+						<div className="flex gap-2 hidden">
 							{onPrint && (
 								<Button
 									size="sm"
