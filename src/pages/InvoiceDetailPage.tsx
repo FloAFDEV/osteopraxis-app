@@ -245,13 +245,11 @@ const InvoiceDetailPage = () => {
 				{invoice && (
 					<>
 						<div className="mb-6">
-							<InvoiceDetails
+							<InvoicePrintView
 								invoice={invoice}
-								patientName={getPatientName()}
-								onEdit={() => {}}
-								onDelete={handleDelete}
-								onPrint={onPrintClick}
-								onDownload={onDownloadClick}
+								patient={patient || undefined}
+								osteopath={osteopath || undefined}
+								cabinet={cabinet || undefined}
 							/>
 						</div>
 
