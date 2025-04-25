@@ -147,7 +147,7 @@ export const InvoiceDetails = ({
                 title="Imprimer"
                 className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
               >
-                <Printer className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                <Printer className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </Button>
             )}
             {onDownload && (
@@ -158,7 +158,7 @@ export const InvoiceDetails = ({
                 title="Télécharger en PDF"
                 className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
               >
-                <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                <Download className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </Button>
             )}
           </div>
@@ -172,7 +172,7 @@ export const InvoiceDetails = ({
                 onClick={onEdit}
                 className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
               >
-                <Edit className="h-4 w-4" />
+                <Edit className="h-5 w-5" />
               </Button>
             )}
             {onDelete && (
@@ -182,7 +182,7 @@ export const InvoiceDetails = ({
                 onClick={() => setIsDeleteModalOpen(true)}
                 className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-5 w-5" />
               </Button>
             )}
           </div>
