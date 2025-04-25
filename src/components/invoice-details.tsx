@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Invoice, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,32 @@ export const InvoiceDetails = ({
       default:
         return "Statut inconnu";
     }
+  };
+
+  const renderStyledPatientName = () => {
+    if (!patient) {
+      return <span className="font-medium text-gray-800 dark:text-white">Patient non spécifié</span>;
+    }
+
+    const icon = patient.gender === "Femme"
+      ? "♀️"
+      : patient.gender === "Homme"
+      ? "♂️"
+      : "⚧️";
+
+    const colorClass =
+      patient.gender === "Femme"
+        ? "text-pink-600 dark:text-pink-300"
+        : patient.gender === "Homme"
+        ? "text-blue-600 dark:text-blue-300"
+        : "text-gray-600 dark:text-gray-300";
+
+    return (
+      <span className={`inline-flex items-center gap-1 font-medium ${colorClass}`}>
+        <span>{icon}</span>
+        <span>{patient.firstName} {patient.lastName}</span>
+      </span>
+    );
   };
 
   return (
