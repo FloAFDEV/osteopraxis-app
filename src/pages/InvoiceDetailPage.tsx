@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { InvoicePrintView } from "@/components/invoice-print-view";
-import { InvoiceDetails } from "@/components/invoice-details";
 import { toast } from "sonner";
 import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
-import { Activity, ArrowLeft } from "lucide-react";
+import { Activity, ArrowLeft, Printer, Download } from "lucide-react";
 
 const InvoiceDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -232,9 +231,11 @@ const InvoiceDetailPage = () => {
 
 					<div className="space-x-2">
 						<Button onClick={onPrintClick} variant="outline">
+							<Printer className="h-4 w-4" /> {/* icône */}
 							Imprimer
 						</Button>
 						<Button onClick={onDownloadClick} variant="default">
+							<Download className="h-4 w-4" /> {/* icône */}
 							Télécharger
 						</Button>
 					</div>
