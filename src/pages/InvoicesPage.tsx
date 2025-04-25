@@ -358,39 +358,40 @@ const InvoicesPage = () => {
               const patientName = getPatientName(invoice);
               
               return (
-           <div key={invoice.id} className="relative">
-  <InvoiceDetails
-    invoice={invoice}
-    patient={patientDataMap.get(invoice.patientId)}
-    onEdit={() => navigate(`/invoices/${invoice.id}`)}
-    onDelete={() => {
-      setSelectedInvoiceId(invoice.id);
-      setIsDeleteModalOpen(true);
-    }}
-  />
-           {/* Actions toujours visibles en bas à gauche */}
-  <div className="absolute bottom-3 left-3 sm:left-3 sm:justify-start w-full flex justify-center gap-2 z-10 px-4">
-
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-8 w-8 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-sm"
-      onClick={() => handlePrintInvoice(invoice)}
-      title="Imprimer"
-    >
-      <Printer className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-    </Button>
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-8 w-8 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-sm"
-      onClick={() => handleDownloadInvoice(invoice)}
-      title="Exporter la facture en PDF"
-    >
-      <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-    </Button>
-  </div>
-</div>
+                <div key={invoice.id} className="group relative">
+                  <InvoiceDetails
+                    invoice={invoice}
+                   patient={patientDataMap.get(invoice.patientId)}
+                    onEdit={() => navigate(`/invoices/${invoice.id}`)}
+                    onDelete={() => {
+                      setSelectedInvoiceId(invoice.id);
+                      setIsDeleteModalOpen(true);
+                    }}
+                  />
+          
+                  
+                  {/* Action buttons for print/export */}
+                  <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
+                      onClick={() => handlePrintInvoice(invoice)}
+                      title="Imprimer"
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
+                      onClick={() => handleDownloadInvoice(invoice)}
+                      title="Exporter la facture en PDF"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
               );
             })}
           </div>
