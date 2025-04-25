@@ -160,7 +160,7 @@ export const InvoiceDetails = ({
           onClick={onEdit}
           title="Modifier"
           aria-label="Modifier la facture"
-          className="h-10 w-10 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
+          className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
         >
           <Edit className="h-5 w-5" />
         </Button>
@@ -172,7 +172,7 @@ export const InvoiceDetails = ({
           onClick={() => setIsDeleteModalOpen(true)}
           title="Supprimer"
           aria-label="Supprimer la facture"
-          className="h-10 w-10 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800/60 dark:text-red-400"
+          className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
         >
           <Trash2 className="h-5 w-5" />
         </Button>
