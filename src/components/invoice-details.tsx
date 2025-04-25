@@ -122,7 +122,7 @@ export const InvoiceDetails = ({
           </div>
         )}
 <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
-  <div className="w-full flex flex-wrap justify-center sm:justify-between items-center gap-2">
+  <div className="w-full flex flex-wrap justify-end sm:justify-between items-center gap-2">
     {/* Bloc boutons */}
     {[onPrint, onDownload, onEdit, onDelete].some(Boolean) && (
       <div className="flex gap-2 flex-wrap justify-center w-full sm:w-auto">
