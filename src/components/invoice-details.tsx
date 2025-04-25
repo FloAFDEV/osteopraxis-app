@@ -67,93 +67,94 @@ export const InvoiceDetails = ({
  return (
   <>
     <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
-      <CardContent className="p-0 flex flex-col h-full">
-        {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span className="font-bold text-lg">
-              #{invoice.id.toString().padStart(4, "0")}
-            </span>
-          </div>
-
-          {patient && (
-            <div className={`pt-1 flex items-center gap-1 text-lg font-medium ${
-              patient.gender === "Femme"
-                ? "text-pink-600 dark:text-pink-300"
-                : patient.gender === "Homme"
-                ? "text-blue-600 dark:text-blue-300"
-                : "text-gray-600 dark:text-gray-300"
-            }`}>
-              <span>{patient.gender === "Femme" ? "♀️" : patient.gender === "Homme" ? "♂️" : "⚧️"}</span>
-              <span>{patient.firstName} {patient.lastName}</span>
-            </div>
-          )}
-
-          <div className={clsx(
-            "mt-2 inline-block px-2.5 py-1 text-xs font-semibold rounded-full border",
-            getStatusColor(invoice.paymentStatus)
-          )}>
-            {getStatusText(invoice.paymentStatus)}
-          </div>
+  <CardContent className="p-0 flex flex-col h-full">
+    {/* En-tête */}
+    <div className="mb-4 flex justify-between items-start">
+      {/* Numéro + nom */}
+      <div>
+        <div className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <span className="font-bold text-lg">
+            #{invoice.id.toString().padStart(4, "0")}
+          </span>
         </div>
 
-        {/* Montant & Date */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4">
-          <div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
-            <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-              {formatCurrency(invoice.amount)}
-            </div>
-          </div>
-          <div className="sm:text-right">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Date de consultation</div>
-            <div className="font-medium text-gray-800 dark:text-white">
-              {formatDate(invoice.date)}
-            </div>
-          </div>
-        </div>
-
-        {/* Notes */}
-        {invoice.notes && (
-          <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
-            <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
-            {invoice.notes}
+        {patient && (
+          <div className={`pt-1 flex items-center gap-1 text-lg font-medium ${
+            patient.gender === "Femme"
+              ? "text-pink-600 dark:text-pink-300"
+              : patient.gender === "Homme"
+              ? "text-blue-600 dark:text-blue-300"
+              : "text-gray-600 dark:text-gray-300"
+          }`}>
+            <span>{patient.gender === "Femme" ? "♀️" : patient.gender === "Homme" ? "♂️" : "⚧️"}</span>
+            <span>{patient.firstName} {patient.lastName}</span>
           </div>
         )}
-{/* Actions alignées en bas */}
-<div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
-  <div className="flex justify-between items-center w-full">
-    {/* Imprimer / Télécharger */}
-    <div className="flex gap-2 items-center">
-      {onPrint && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={onPrint}
-          title="Imprimer"
-          aria-label="Imprimer"
-          className="h-10 w-10 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-        >
-          <Printer className="h-5 w-5" />
-        </Button>
-      )}
-      {onDownload && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={onDownload}
-          title="Télécharger"
-          aria-label="Télécharger"
-          className="h-10 w-10 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-        >
-          <Download className="h-5 w-5" />
-        </Button>
-      )}
+
+        <div className={clsx(
+          "mt-2 inline-block px-2.5 py-1 text-xs font-semibold rounded-full border",
+          getStatusColor(invoice.paymentStatus)
+        )}>
+          {getStatusText(invoice.paymentStatus)}
+        </div>
+      </div>
+
+      {/* Imprimer / Télécharger */}
+      <div className="flex gap-2 items-start">
+        {onPrint && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={onPrint}
+            title="Imprimer"
+            aria-label="Imprimer"
+            className="h-9 w-9 sm:h-10 sm:w-10 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+          >
+            <Printer className="h-4 w-4" />
+          </Button>
+        )}
+        {onDownload && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={onDownload}
+            title="Télécharger"
+            aria-label="Télécharger"
+            className="h-9 w-9 sm:h-10 sm:w-10 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
     </div>
 
+    {/* Montant & Date */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-y border-gray-100 dark:border-gray-700 py-4">
+      <div>
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Montant</div>
+        <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+          {formatCurrency(invoice.amount)}
+        </div>
+      </div>
+      <div className="sm:text-right">
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Date de consultation</div>
+        <div className="font-medium text-gray-800 dark:text-white">
+          {formatDate(invoice.date)}
+        </div>
+      </div>
+    </div>
+
+    {/* Notes */}
+    {invoice.notes && (
+      <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
+        <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
+        {invoice.notes}
+      </div>
+    )}
+
     {/* Modifier / Supprimer */}
-    <div className="flex gap-2 items-center">
+    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
       {onEdit && (
         <Button
           size="icon"
@@ -179,10 +180,9 @@ export const InvoiceDetails = ({
         </Button>
       )}
     </div>
-  </div>
-</div>
   </CardContent>
-    </Card>
+</Card>
+
 
     {/* Modal suppression */}
     <ConfirmDeleteInvoiceModal
