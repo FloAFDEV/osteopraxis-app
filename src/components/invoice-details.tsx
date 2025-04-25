@@ -148,8 +148,7 @@ export const InvoiceDetails = ({
           <Download className="h-5 w-5" />
         </Button>
       )}
-    </div>
-    <div className="flex gap-2">
+ 
       {onEdit && (
         <Button
           size="icon"
