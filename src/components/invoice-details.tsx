@@ -175,7 +175,7 @@ export const InvoiceDetails = ({
 						<div className="flex items-center gap-2">
 							<FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
 							<span className="font-bold text-lg">
-								#{invoice.id.toString().padStart(4, "0")}
+								n° #{invoice.id.toString().padStart(4, "0")}
 							</span>
 						</div>
 
