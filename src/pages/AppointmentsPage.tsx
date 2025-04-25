@@ -261,7 +261,7 @@ const AppointmentsPage = () => {
 						{Object.keys(groupedPastAppointments).length > 0 && (
 							<div>
 								<h2
-									className="text-2xl font-bold mb-4 bg-gray-200 text-gray-800 p-2 rounded-lg cursor-pointer"
+									className="text-lg font-bold mb-4 bg-gray-200 text-gray-800 p-2 rounded-lg cursor-pointer"
 									onClick={() => setShowPast(!showPast)}
 								>
 									{showPast ? "▼" : "►"} Rendez-vous passés
@@ -327,7 +327,7 @@ const AppointmentsPage = () => {
 						{Object.keys(groupedTodayAppointments).length > 0 && (
 							<div>
 								<h2
-									className="text-2xl font-bold mb-4 bg-lime-400 text-black p-2 rounded-lg cursor-pointer"
+									className="text-lg font-bold mb-4 bg-lime-400 text-black p-2 rounded-lg cursor-pointer"
 									onClick={() => setShowToday(!showToday)}
 								>
 									{showToday ? "▼" : "►"} Rendez-vous
@@ -394,7 +394,7 @@ const AppointmentsPage = () => {
 						{Object.keys(groupedFutureAppointments).length > 0 && (
 							<div>
 								<h2
-									className="text-2xl font-bold mb-4 bg-blue-200 text-blue-800 p-2 rounded-lg cursor-pointer"
+									className="text-lg font-bold mb-4 bg-blue-200 text-blue-800 p-2 rounded-lg cursor-pointer"
 									onClick={() => setShowFuture(!showFuture)}
 								>
 									{showFuture ? "▼" : "►"} Rendez-vous à venir
