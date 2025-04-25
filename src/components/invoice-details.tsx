@@ -68,10 +68,9 @@ export const InvoiceDetails = ({
   <>
    <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
   <CardContent className="p-0 flex flex-col h-full">
-    
-    {/* En-tête avec actions */}
+
+    {/* Header avec actions à droite */}
     <div className="flex justify-between items-start mb-4">
-      {/* Numéro + nom + statut */}
       <div>
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -99,18 +98,18 @@ export const InvoiceDetails = ({
         </div>
       </div>
 
-      {/* Boutons Impression / Téléchargement */}
-      <div className="flex gap-2 items-start">
+      {/* Icons en haut à droite */}
+      <div className="flex gap-2 items-start shrink-0 ml-2">
         {onPrint && (
           <Button
             size="icon"
             variant="outline"
             onClick={onPrint}
+            aria-label="Imprimer la facture"
             title="Imprimer"
-            aria-label="Imprimer"
-            className="h-9 w-9 sm:h-10 sm:w-10 rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+            className="h-10 w-10 rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
           >
-            <Printer className="h-4 w-4" />
+            <Printer className="h-5 w-5" />
           </Button>
         )}
         {onDownload && (
@@ -118,11 +117,11 @@ export const InvoiceDetails = ({
             size="icon"
             variant="outline"
             onClick={onDownload}
+            aria-label="Télécharger la facture"
             title="Télécharger"
-            aria-label="Télécharger"
-            className="h-9 w-9 sm:h-10 sm:w-10 rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+            className="h-10 w-10 rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-5 w-5" />
           </Button>
         )}
       </div>
@@ -144,7 +143,7 @@ export const InvoiceDetails = ({
       </div>
     </div>
 
-    {/* Notes éventuelles */}
+    {/* Notes */}
     {invoice.notes && (
       <div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
         <span className="font-medium text-gray-800 dark:text-white">Notes : </span>
@@ -152,15 +151,15 @@ export const InvoiceDetails = ({
       </div>
     )}
 
-    {/* Bas de carte : édition / suppression */}
+    {/* Actions édition/suppression en bas */}
     <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
       {onEdit && (
         <Button
           size="icon"
           variant="outline"
           onClick={onEdit}
+          aria-label="Modifier la facture"
           title="Modifier"
-          aria-label="Modifier"
           className="h-10 w-10 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
         >
           <Edit className="h-5 w-5" />
@@ -171,8 +170,8 @@ export const InvoiceDetails = ({
           size="icon"
           variant="outline"
           onClick={() => setIsDeleteModalOpen(true)}
+          aria-label="Supprimer la facture"
           title="Supprimer"
-          aria-label="Supprimer"
           className="h-10 w-10 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800/60 dark:text-red-400"
         >
           <Trash2 className="h-5 w-5" />
