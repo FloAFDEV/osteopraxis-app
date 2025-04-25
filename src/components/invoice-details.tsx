@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Invoice, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import clsx from "clsx";
 interface InvoiceDetailsProps {
   invoice: Invoice;
   patient?: Patient;
+  patientName?: string;  // Ajout de la propriété patientName optionnelle
   onEdit?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
@@ -20,6 +22,7 @@ interface InvoiceDetailsProps {
 export const InvoiceDetails = ({
   invoice,
   patient,
+  patientName,
   onEdit,
   onDelete,
   onDownload,
@@ -36,6 +39,49 @@ export const InvoiceDetails = ({
       style: "currency",
       currency: "EUR",
     }).format(amount);
+  };
+
+  // Fonction pour déterminer le nom du patient selon les props disponibles
+  const renderStyledPatientName = () => {
+    // Si le patient est fourni directement comme objet
+    if (patient) {
+      return (
+        <div className="pt-1">
+          <div className={`flex items-center gap-1 text-lg font-medium ${
+            patient.gender === "Femme"
+              ? "text-pink-600 dark:text-pink-300"
+              : patient.gender === "Homme"
+              ? "text-blue-600 dark:text-blue-300"
+              : "text-gray-600 dark:text-gray-300"
+          }`}>
+            <span>{patient.gender === "Femme" ? "♀️" : patient.gender === "Homme" ? "♂️" : "⚧️"}</span>
+            <span>{patient.firstName} {patient.lastName}</span>
+          </div>
+          {patient.birthDate && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Né(e) le {format(new Date(patient.birthDate), "dd/MM/yyyy")}
+            </div>
+          )}
+          {patient.address && (
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {patient.address}
+            </div>
+          )}
+        </div>
+      );
+    }
+    // Si un nom de patient est fourni comme chaîne
+    else if (patientName) {
+      return (
+        <div className="pt-1">
+          <div className="text-lg font-medium text-gray-700 dark:text-gray-300">
+            {patientName}
+          </div>
+        </div>
+      );
+    }
+    // Si aucune info n'est fournie
+    return null;
   };
 
   const getStatusColor = (status: string) => {
@@ -116,30 +162,7 @@ export const InvoiceDetails = ({
               </span>
             </div>
 
-            {patient && (
-              <div className="pt-1">
-                <div className={`flex items-center gap-1 text-lg font-medium ${
-                  patient.gender === "Femme"
-                    ? "text-pink-600 dark:text-pink-300"
-                    : patient.gender === "Homme"
-                    ? "text-blue-600 dark:text-blue-300"
-                    : "text-gray-600 dark:text-gray-300"
-                }`}>
-                  <span>{patient.gender === "Femme" ? "♀️" : patient.gender === "Homme" ? "♂️" : "⚧️"}</span>
-                  <span>{patient.firstName} {patient.lastName}</span>
-                </div>
-                {patient.birthDate && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Né(e) le {format(new Date(patient.birthDate), "dd/MM/yyyy")}
-                  </div>
-                )}
-                {patient.address && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {patient.address}
-                  </div>
-                )}
-              </div>
-            )}
+            {renderStyledPatientName()}
 
             <div className={clsx(
               "mt-2 inline-block px-2.5 py-1 text-xs font-semibold rounded-full border",
@@ -224,3 +247,4 @@ export const InvoiceDetails = ({
     </>
   );
 };
+
