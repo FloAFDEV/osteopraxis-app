@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -18,6 +17,14 @@ function normalizeStatus(status?: string): AppointmentStatus {
 type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'> & {
   notificationSent?: boolean;
 };
+
+// Error class for appointment conflicts
+export class AppointmentConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AppointmentConflictError';
+  }
+}
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -87,7 +94,10 @@ export const appointmentService = {
         delete (payload as any).updatedAt;
         
         return await supabaseAppointmentService.createAppointment(payload);
-      } catch (error) {
+      } catch (error: any) {
+        if (error.message?.includes('Un rendez-vous existe déjà sur ce créneau horaire')) {
+          throw new AppointmentConflictError('Ce créneau horaire est déjà réservé');
+        }
         console.error("Erreur Supabase createAppointment:", error);
         throw error;
       }
@@ -126,7 +136,10 @@ export const appointmentService = {
         delete (payload as any).updatedAt;
           
         return await supabaseAppointmentService.updateAppointment(id, payload);
-      } catch (error) {
+      } catch (error: any) {
+        if (error.message?.includes('Un rendez-vous existe déjà sur ce créneau horaire')) {
+          throw new AppointmentConflictError('Ce créneau horaire est déjà réservé');
+        }
         console.error("Erreur Supabase updateAppointment:", error);
         throw error;
       }

@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
+import { checkAppointmentConflict, AppointmentConflictError } from "@/utils/appointment-utils";
 
 // Custom validation function to check if appointment time is in the past
 const isAppointmentInPast = (date: Date, timeString: string) => {
@@ -141,6 +142,15 @@ export function AppointmentForm({
         setIsSubmitting(false);
         return;
       }
+
+      // Check for conflicts before submitting
+      const hasConflict = await checkAppointmentConflict(data.date, timeToUse);
+      if (hasConflict && !isEditing) {
+        toast.error("Ce créneau horaire est déjà réservé. Veuillez choisir un autre horaire.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const appointmentData = {
         patientId: data.patientId,
         date: dateTime.toISOString(),
@@ -160,7 +170,11 @@ export function AppointmentForm({
       navigate("/appointments");
     } catch (error) {
       console.error("Error submitting appointment form:", error);
-      toast.error("Une erreur est survenue. Veuillez réessayer.");
+      if (error instanceof AppointmentConflictError) {
+        toast.error("Ce créneau horaire est déjà réservé. Veuillez choisir un autre horaire.");
+      } else {
+        toast.error("Une erreur est survenue. Veuillez réessayer.");
+      }
     } finally {
       setIsSubmitting(false);
     }
