@@ -122,60 +122,64 @@ export const InvoiceDetails = ({
           </div>
         )}
 
-        {/* Actions alignées en bas */}
-        <div className="mt-auto pt-4 flex justify-between items-end border-t border-gray-100 dark:border-gray-700 flex-wrap gap-3 sm:gap-4">
-          {/* Impression / Export */}
-          <div className="flex gap-2">
-            {onPrint && (
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={onPrint}
-                title="Imprimer"
-                className="h-10 w-10 sm:h-8 sm:w-8 bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700"
-              >
-                <Printer className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-              </Button>
-            )}
-            {onDownload && (
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={onDownload}
-                title="Télécharger en PDF"
-                className="h-10 w-10 sm:h-8 sm:w-8 bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700"
-              >
-                <Download className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-              </Button>
-            )}
-          </div>
+       <div className="mt-auto pt-4 flex justify-between items-end border-t border-gray-100 dark:border-gray-700">
+  {/* Impression / Export */}
+  <div className="flex gap-2">
+    {onPrint && (
+      <Button
+        size="icon"
+        variant="outline"
+        onClick={onPrint}
+        title="Imprimer"
+        aria-label="Imprimer"
+        className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300 transition"
+      >
+        <Printer className="h-5 w-5" />
+      </Button>
+    )}
+    {onDownload && (
+      <Button
+        size="icon"
+        variant="outline"
+        onClick={onDownload}
+        title="Télécharger"
+        aria-label="Télécharger en PDF"
+        className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300 transition"
+      >
+        <Download className="h-5 w-5" />
+      </Button>
+    )}
+  </div>
 
-          {/* Édition / Suppression */}
-          <div className="flex gap-2">
-            {onEdit && (
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={onEdit}
-                title="Modifier"
-                className="h-10 w-10 sm:h-8 sm:w-8 bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:border-blue-800/60 dark:text-blue-400"
-              >
-                <Edit className="h-5 w-5" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => setIsDeleteModalOpen(true)}
-                title="Supprimer"
-                className="h-10 w-10 sm:h-8 sm:w-8 bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800/60 dark:text-red-400"
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
-            )}
-          </div>
-        </div>
+  {/* Édition / Suppression */}
+  <div className="flex gap-2">
+    {onEdit && (
+      <Button
+        size="icon"
+        variant="outline"
+        onClick={onEdit}
+        title="Modifier"
+        aria-label="Modifier la facture"
+        className="h-10 w-10 flex items-center justify-center rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400 transition"
+      >
+        <Edit className="h-5 w-5" />
+      </Button>
+    )}
+    {onDelete && (
+      <Button
+        size="icon"
+        variant="outline"
+        onClick={() => setIsDeleteModalOpen(true)}
+        title="Supprimer"
+        aria-label="Supprimer la facture"
+        className="h-10 w-10 flex items-center justify-center rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800/60 dark:text-red-400 transition"
+      >
+        <Trash2 className="h-5 w-5" />
+      </Button>
+    )}
+  </div>
+</div>
+
       </CardContent>
     </Card>
 
