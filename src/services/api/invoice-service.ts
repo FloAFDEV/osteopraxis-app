@@ -6,7 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const invoiceService = {
 	async getInvoices(): Promise<Invoice[]> {
 		try {
-			return await supabaseInvoiceService.getInvoices();
+			const { data, error } = await supabase.from("Invoice").select("*");
+
+			if (error) throw new Error(error.message);
+			return data as Invoice[];
 		} catch (error) {
 			console.error("Erreur getInvoices:", error);
 			throw error;
@@ -15,7 +18,14 @@ export const invoiceService = {
 
 	async getInvoiceById(id: number): Promise<Invoice | undefined> {
 		try {
-			return await supabaseInvoiceService.getInvoiceById(id);
+			const { data, error } = await supabase
+				.from("Invoice")
+				.select("*")
+				.eq("id", id)
+				.single();
+
+			if (error) throw new Error(error.message);
+			return data as Invoice;
 		} catch (error) {
 			console.error("Erreur getInvoiceById:", error);
 			throw error;
@@ -24,9 +34,13 @@ export const invoiceService = {
 
 	async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
 		try {
-			return await supabaseInvoiceService.getInvoicesByPatientId(
-				patientId
-			);
+			const { data, error } = await supabase
+				.from("Invoice")
+				.select("*")
+				.eq("patientId", patientId);
+
+			if (error) throw new Error(error.message);
+			return data as Invoice[];
 		} catch (error) {
 			console.error("Erreur getInvoicesByPatientId:", error);
 			throw error;
@@ -35,7 +49,14 @@ export const invoiceService = {
 
 	async createInvoice(invoiceData: Omit<Invoice, "id">): Promise<Invoice> {
 		try {
-			return await supabaseInvoiceService.createInvoice(invoiceData);
+			const { data, error } = await supabase
+				.from("Invoice")
+				.insert([invoiceData])
+				.select()
+				.single();
+
+			if (error) throw new Error(error.message);
+			return data as Invoice;
 		} catch (error) {
 			console.error("Erreur createInvoice:", error);
 			throw error;
@@ -47,7 +68,15 @@ export const invoiceService = {
 		invoiceData: Partial<Invoice>
 	): Promise<Invoice | undefined> {
 		try {
-			return await supabaseInvoiceService.updateInvoice(id, invoiceData);
+			const { data, error } = await supabase
+				.from("Invoice")
+				.update(invoiceData)
+				.eq("id", id)
+				.select()
+				.single();
+
+			if (error) throw new Error(error.message);
+			return data as Invoice;
 		} catch (error) {
 			console.error("Erreur updateInvoice:", error);
 			throw error;
@@ -58,20 +87,18 @@ export const invoiceService = {
 		id: number,
 		paymentStatus: PaymentStatus
 	): Promise<Invoice | undefined> {
-		try {
-			return await supabaseInvoiceService.updatePaymentStatus(
-				id,
-				paymentStatus
-			);
-		} catch (error) {
-			console.error("Erreur updatePaymentStatus:", error);
-			throw error;
-		}
+		return this.updateInvoice(id, { paymentStatus });
 	},
 
 	async deleteInvoice(id: number): Promise<boolean> {
 		try {
-			return await supabaseInvoiceService.deleteInvoice(id);
+			const { error } = await supabase
+				.from("Invoice")
+				.delete()
+				.eq("id", id);
+
+			if (error) throw new Error(error.message);
+			return true;
 		} catch (error) {
 			console.error("Erreur deleteInvoice:", error);
 			throw error;
@@ -85,7 +112,6 @@ export const invoiceService = {
 			const now = new Date();
 			let startDate = new Date();
 
-			// Déterminer la date de début selon la période
 			if (period === "month") {
 				startDate.setMonth(now.getMonth() - 1);
 			} else if (period === "sixMonths") {
@@ -94,29 +120,15 @@ export const invoiceService = {
 				startDate.setFullYear(now.getFullYear() - 1);
 			}
 
-			// Convertir les dates en chaînes ISO pour la requête
-			const startISO = startDate.toISOString();
-			const endISO = now.toISOString();
-
-			// Récupérer toutes les factures de la période
 			const { data, error } = await supabase
 				.from("Invoice")
 				.select("*")
-				.gte("date", startISO)
-				.lte("date", endISO)
+				.gte("date", startDate.toISOString())
+				.lte("date", now.toISOString())
 				.order("date", { ascending: false });
 
 			if (error) throw new Error(error.message);
-
-			return data.map((invoice) => ({
-				id: invoice.id,
-				patientId: invoice.patientId,
-				consultationId: invoice.consultationId,
-				amount: invoice.amount,
-				date: invoice.date,
-				paymentStatus: invoice.paymentStatus as PaymentStatus,
-				paymentMethod: invoice.paymentMethod,
-			}));
+			return data as Invoice[];
 		} catch (error) {
 			console.error(`Erreur getInvoicesByPeriod (${period}):`, error);
 			throw error;
@@ -142,12 +154,9 @@ export const invoiceService = {
 			};
 
 			invoices.forEach((invoice) => {
-				// Ajouter au montant total, sauf si annulée
 				if (invoice.paymentStatus !== "CANCELED") {
 					summary.total += invoice.amount;
 				}
-
-				// Compter par statut
 				if (invoice.paymentStatus === "PAID") {
 					summary.paid += invoice.amount;
 				} else if (invoice.paymentStatus === "PENDING") {
