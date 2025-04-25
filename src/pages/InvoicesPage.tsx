@@ -329,8 +329,8 @@ const InvoicesPage = () => {
 			<div className="mb-6">
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-3">
-						<Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-						<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
+						<Activity className="h-6 w-6 text-blue-600 dark:text-blue-500" />
+						<span className="text-black font-semibold">
 							Factures
 						</span>
 					</h1>
