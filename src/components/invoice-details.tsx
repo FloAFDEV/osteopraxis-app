@@ -122,62 +122,63 @@ export const InvoiceDetails = ({
           </div>
         )}
 <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
-  <div className="w-full flex flex-wrap justify-end sm:justify-between items-center gap-2">
-    {/* Bloc boutons */}
-    {[onPrint, onDownload, onEdit, onDelete].some(Boolean) && (
-      <div className="flex gap-2 flex-wrap justify-center w-full sm:w-auto">
-        {onPrint && (
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={onPrint}
-            title="Imprimer"
-            aria-label="Imprimer"
-            className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-          >
-            <Printer className="h-5 w-5" />
-          </Button>
-        )}
-        {onDownload && (
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={onDownload}
-            title="Télécharger"
-            aria-label="Télécharger"
-            className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-          >
-            <Download className="h-5 w-5" />
-          </Button>
-        )}
-        {onEdit && (
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={onEdit}
-            title="Modifier"
-            aria-label="Modifier"
-            className="h-10 w-10 flex items-center justify-center rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
-          >
-            <Edit className="h-5 w-5" />
-          </Button>
-        )}
-        {onDelete && (
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => setIsDeleteModalOpen(true)}
-            title="Supprimer"
-            aria-label="Supprimer"
-            className="h-10 w-10 flex items-center justify-center rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800/60 dark:text-red-400"
-          >
-            <Trash2 className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
-    )}
+  <div className="flex justify-between items-center w-full flex-wrap sm:flex-nowrap gap-2 sm:gap-4">
+    <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
+      {onPrint && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onPrint}
+          title="Imprimer"
+          aria-label="Imprimer"
+          className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+        >
+          <Printer className="h-5 w-5" />
+        </Button>
+      )}
+      {onDownload && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onDownload}
+          title="Télécharger"
+          aria-label="Télécharger"
+          className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+        >
+          <Download className="h-5 w-5" />
+        </Button>
+      )}
+    </div>
+
+    <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
+      {onEdit && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onEdit}
+          title="Modifier"
+          aria-label="Modifier"
+          className="h-10 w-10 flex items-center justify-center rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
+        >
+          <Edit className="h-5 w-5" />
+        </Button>
+      )}
+      {onDelete && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => setIsDeleteModalOpen(true)}
+          title="Supprimer"
+          aria-label="Supprimer"
+          className="h-10 w-10 flex items-center justify-center rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800/60 dark:text-red-400"
+        >
+          <Trash2 className="h-5 w-5" />
+        </Button>
+      )}
+    </div>
   </div>
 </div>
+
 
       </CardContent>
     </Card>
