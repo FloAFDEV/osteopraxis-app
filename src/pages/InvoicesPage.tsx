@@ -317,36 +317,33 @@ const InvoicesPage = () => {
               </div>
             </div>
 
-           {/* Nouvelle section pour le téléchargement par année */}
-<div className="flex flex-wrap items-start gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-  <div className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center">
-    <Calendar className="h-4 w-4 mr-2 text-amber-500" />
-    Export annuel :
-  </div>
-
-  <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full sm:w-auto">
-    <Select value={selectedYear} onValueChange={setSelectedYear}>
-      <SelectTrigger className="w-full sm:w-28 min-w-[120px]">
-        <SelectValue placeholder="Année" />
-      </SelectTrigger>
-      <SelectContent>
-        {generateYearOptions().map(year => (
-          <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-
-    <Button 
-      onClick={handleDownloadAllInvoices}
-      variant="outline" 
-      className="w-full sm:w-auto flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:hover:bg-amber-800/30 dark:text-amber-300 dark:border-amber-700/50"
-    >
-      <Download className="h-4 w-4" />
-      Télécharger les factures
-    </Button>
-  </div>
-</div>
-
+            {/* Nouvelle section pour le téléchargement par année */}
+            <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center">
+                <Calendar className="h-4 w-4 mr-2 text-amber-500" />
+                Export annuel:
+              </div>
+              <div className="flex gap-3 items-center">
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue placeholder="Année" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {generateYearOptions().map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  onClick={handleDownloadAllInvoices}
+                  variant="outline" 
+                  className="flex items-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:hover:bg-amber-800/30 dark:text-amber-300 dark:border-amber-700/50"
+                >
+                  <Download className="h-4 w-4" />
+                  Télécharger les factures
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
