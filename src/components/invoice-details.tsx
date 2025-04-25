@@ -69,33 +69,7 @@ export const InvoiceDetails = ({
    <Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800">
   <CardContent className="p-0 flex flex-col h-full relative">
 
-    {/* 🔷 Icônes Print / Download - top right */}
-    <div className="absolute top-4 right-4 flex gap-2">
-      {onPrint && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={onPrint}
-          title="Imprimer"
-          aria-label="Imprimer la facture"
-          className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-        >
-          <Printer className="h-5 w-5" />
-        </Button>
-      )}
-      {onDownload && (
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={onDownload}
-          title="Télécharger"
-          aria-label="Télécharger la facture"
-          className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-        >
-          <Download className="h-5 w-5" />
-        </Button>
-      )}
-    </div>
+  
 
     {/* 🔷 Header : ID + patient */}
     <div className="mb-4 pr-20">
@@ -150,7 +124,33 @@ export const InvoiceDetails = ({
         {invoice.notes}
       </div>
     )}
-
+  {/* 🔷 Icônes Print / Download - top right */}
+    <div className="absolute top-4 right-4 flex gap-2">
+      {onPrint && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onPrint}
+          title="Imprimer"
+          aria-label="Imprimer la facture"
+          className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+        >
+          <Printer className="h-5 w-5" />
+        </Button>
+      )}
+      {onDownload && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onDownload}
+          title="Télécharger"
+          aria-label="Télécharger la facture"
+          className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+        >
+          <Download className="h-5 w-5" />
+        </Button>
+      )}
+    </div>
     {/* 🔷 Actions bas de carte */}
     <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
       {onEdit && (
