@@ -162,7 +162,7 @@ export const InvoiceDetails = ({
           onClick={onEdit}
           title="Modifier"
           aria-label="Modifier la facture"
-          className="h-10 w-10 flex items-center justify-center rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400 transition"
+          className="h-10 w-10 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300 transition"
         >
           <Edit className="h-5 w-5" />
         </Button>
