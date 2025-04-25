@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Invoice, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import clsx from "clsx";
 interface InvoiceDetailsProps {
   invoice: Invoice;
   patient?: Patient;
+  patientName?: string;  // Add this optional prop
   onEdit?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
@@ -21,6 +21,7 @@ interface InvoiceDetailsProps {
 export const InvoiceDetails = ({
   invoice,
   patient,
+  patientName,  // Destructure the new prop
   onEdit,
   onDelete,
   onDownload,
@@ -68,29 +69,35 @@ export const InvoiceDetails = ({
   };
 
   const renderStyledPatientName = () => {
-    if (!patient) {
-      return <span className="font-medium text-gray-800 dark:text-white">Patient non spécifié</span>;
+    // Prioritize patient object, then patientName prop, then fallback
+    if (patient) {
+      const icon = patient.gender === "Femme"
+        ? "♀️"
+        : patient.gender === "Homme"
+        ? "♂️"
+        : "⚧️";
+
+      const colorClass =
+        patient.gender === "Homme"
+          ? "text-blue-600 dark:text-blue-300"
+          : patient.gender === "Femme"
+          ? "text-pink-600 dark:text-pink-300"
+          : "text-gray-600 dark:text-gray-300";
+
+      return (
+        <span className={`inline-flex items-center gap-1 font-medium ${colorClass}`}>
+          <span>{icon}</span>
+          <span>{patient.firstName} {patient.lastName}</span>
+        </span>
+      );
     }
 
-    const icon = patient.gender === "Femme"
-      ? "♀️"
-      : patient.gender === "Homme"
-      ? "♂️"
-      : "⚧️";
+    // Use patientName if available
+    if (patientName) {
+      return <span className="font-medium text-gray-800 dark:text-white">{patientName}</span>;
+    }
 
-    const colorClass =
-      patient.gender === "Femme"
-        ? "text-pink-600 dark:text-pink-300"
-        : patient.gender === "Homme"
-        ? "text-blue-600 dark:text-blue-300"
-        : "text-gray-600 dark:text-gray-300";
-
-    return (
-      <span className={`inline-flex items-center gap-1 font-medium ${colorClass}`}>
-        <span>{icon}</span>
-        <span>{patient.firstName} {patient.lastName}</span>
-      </span>
-    );
+    return <span className="font-medium text-gray-800 dark:text-white">Patient non spécifié</span>;
   };
 
   return (
@@ -104,26 +111,7 @@ export const InvoiceDetails = ({
               <span className="font-bold text-lg">
                 #{invoice.id.toString().padStart(4, "0")}
               </span>
-              {patient && (
-                <span
-                  className={`inline-flex items-center gap-1 font-medium text-sm ${
-                    patient.gender === "Femme"
-                      ? "text-pink-600 dark:text-pink-300"
-                      : patient.gender === "Homme"
-                      ? "text-blue-600 dark:text-blue-300"
-                      : "text-gray-600 dark:text-gray-300"
-                  }`}
-                >
-                  <span>
-                    {patient.gender === "Femme"
-                      ? "♀️"
-                      : patient.gender === "Homme"
-                      ? "♂️"
-                      : "⚧️"}
-                  </span>
-                  <span>{patient.firstName} {patient.lastName}</span>
-                </span>
-              )}
+              {renderStyledPatientName()}
             </div>
             <div
               className={clsx(
