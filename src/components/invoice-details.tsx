@@ -130,56 +130,57 @@ export const InvoiceDetails = ({
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-            <div className="flex gap-2">
-              {onPrint && (
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={onPrint}
-                  title="Imprimer"
-                  className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
-                >
-                  <Printer className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                </Button>
-              )}
-              {onDownload && (
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={onDownload}
-                  title="Exporter en PDF"
-                  className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
-                >
-                  <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                </Button>
-              )}
-            </div>
+         {/* Actions alignées dans une seule ligne en bas */}
+<div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex-wrap gap-2">
+  <div className="flex gap-2">
+    {onPrint && (
+      <Button
+        size="icon"
+        variant="outline"
+        onClick={onPrint}
+        title="Imprimer"
+        className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
+      >
+        <Printer className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+      </Button>
+    )}
+    {onDownload && (
+      <Button
+        size="icon"
+        variant="outline"
+        onClick={onDownload}
+        title="Télécharger en PDF"
+        className="bg-white hover:bg-gray-50 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700"
+      >
+        <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+      </Button>
+    )}
+  </div>
 
-            <div className="space-x-2">
-              {onEdit && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onEdit}
-                  className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
+  <div className="flex gap-2">
+    {onEdit && (
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={onEdit}
+        className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/60"
+      >
+        <Edit className="h-4 w-4" />
+      </Button>
+    )}
+    {onDelete && (
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => setIsDeleteModalOpen(true)}
+        className="bg-red-50 hover:bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-800/60"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    )}
+  </div>
+</div>
+
         </CardContent>
       </Card>
 
