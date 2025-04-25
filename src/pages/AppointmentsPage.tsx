@@ -66,7 +66,7 @@ const AppointmentsPage = () => {
       const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
       const searchLower = searchQuery.toLowerCase();
       return searchQuery === "" || fullName.includes(searchLower) || patient.email.toLowerCase().includes(searchLower) || appointment.reason.toLowerCase().includes(searchLower);
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
   const groupAppointmentsByDate = (appointments: Appointment[]) => {
     const grouped: Record<string, Appointment[]> = {};
