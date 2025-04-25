@@ -184,8 +184,8 @@ export const InvoicePrintView = ({
             </tbody>
             <tfoot>
               <tr className="border-t border-amber-200 bg-amber-50/50">
-                <td className="py-4 px-4 text-right text-amber-700 font-medium">Total</td>
-                <td className="py-4 px-4 text-right text-amber-700 font-bold">
+                <td className="py-2 px-2 text-right text-amber-700 font-medium">Total</td>
+                <td className="py-2 px-2 text-right text-amber-700 font-bold">
                   {formatAmount(invoice.amount)}
                 </td>
               </tr>
