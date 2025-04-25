@@ -122,8 +122,8 @@ export const InvoiceDetails = ({
           </div>
         )}
 <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
-  <div className="flex justify-between items-center w-full flex-wrap sm:flex-nowrap gap-2 sm:gap-4">
-    <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
+  <div className="flex justify-between items-center w-full">
+    <div className="flex gap-2">
       {onPrint && (
         <Button
           size="icon"
@@ -149,8 +149,7 @@ export const InvoiceDetails = ({
         </Button>
       )}
     </div>
-
-    <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
+    <div className="flex gap-2">
       {onEdit && (
         <Button
           size="icon"
@@ -178,6 +177,7 @@ export const InvoiceDetails = ({
     </div>
   </div>
 </div>
+
 
 
       </CardContent>
