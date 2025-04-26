@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
+import { formatAppointmentDate, formatAppointmentTime } from "@/utils/date-utils";
 
 const AppointmentsPage = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -109,37 +110,30 @@ const AppointmentsPage = () => {
 		return grouped;
 	};
 
-	const handleCancelAppointment = async () => {
-		if (!appointmentToCancel) return;
-		try {
-			await api.updateAppointment(appointmentToCancel.id, {
-				status: "CANCELED",
-			});
+  const handleCancelAppointment = async () => {
+    if (!appointmentToCancel) return;
+    try {
+      // Only send the status update, keeping all other fields unchanged
+      await api.updateAppointment(appointmentToCancel.id, {
+        status: "CANCELED"
+      });
 
-			// Update local state and force refresh from server
-			setAppointments((prevAppointments) =>
-				prevAppointments.map((app) =>
-					app.id === appointmentToCancel.id
-						? {
-								...app,
-								status: "CANCELED",
-						  }
-						: app
-				)
-			);
-			toast.success("Rendez-vous annulé avec succès");
-
-			// Force a refresh after cancel operation
-			setRefreshKey((prev) => prev + 1);
-		} catch (error) {
-			console.error("Error cancelling appointment:", error);
-			toast.error(
-				"Une erreur est survenue lors de l'annulation du rendez-vous"
-			);
-		} finally {
-			setAppointmentToCancel(null);
-		}
-	};
+      setAppointments((prevAppointments) =>
+        prevAppointments.map((app) =>
+          app.id === appointmentToCancel.id
+            ? { ...app, status: "CANCELED" }
+            : app
+        )
+      );
+      toast.success("Rendez-vous annulé avec succès");
+      setRefreshKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+      toast.error("Une erreur est survenue lors de l'annulation du rendez-vous");
+    } finally {
+      setAppointmentToCancel(null);
+    }
+  };
 
 	// Categorize appointments by past, today, future
 	const categorizeAppointments = (appointments: Appointment[]) => {
@@ -172,6 +166,93 @@ const AppointmentsPage = () => {
 	const groupedTodayAppointments = groupAppointmentsByDate(todayAppointments);
 	const groupedFutureAppointments =
 		groupAppointmentsByDate(futureAppointments);
+
+  interface DayScheduleProps {
+    date: Date;
+    appointments: Appointment[];
+    getPatientById: (id: number) => Patient | undefined;
+    onCancelAppointment: (id: number) => void;
+  }
+
+  const DaySchedule = ({
+    date,
+    appointments,
+    getPatientById,
+    onCancelAppointment
+  }: DayScheduleProps) => {
+    // Generate time slots for the day (8am to 8pm)
+    const timeSlots = Array.from({
+      length: 25
+    }, (_, i) => {
+      const hour = Math.floor(i / 2) + 8; // Starting from 8 AM
+      const minute = i % 2 * 30; // 0 or 30 minutes
+      return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+    });
+    
+    // Ne pas afficher les créneaux après 20h
+    const displayTimeSlots = timeSlots.filter(slot => {
+      const hour = parseInt(slot.split(':')[0]);
+      return hour < 20;
+    });
+
+    const getAppointmentForTimeSlot = (timeSlot: string) => {
+      return appointments.find(appointment => {
+        const appointmentTime = format(new Date(appointment.date), "HH:mm");
+        return appointmentTime === timeSlot;
+      });
+    };
+
+    const isCurrentTime = (timeSlot: string) => {
+      const now = new Date();
+      const currentHour = now.getHours().toString().padStart(2, '0');
+      const currentMinute = now.getMinutes().toString().padStart(2, '0');
+      const currentTime = `${currentHour}:${currentMinute}`;
+      return timeSlot === currentTime && format(now, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+    };
+
+    return (
+      <div className="rounded-md border">
+        {displayTimeSlots.map(timeSlot => {
+          const appointment = getAppointmentForTimeSlot(timeSlot);
+          const isCurrentTimeSlot = isCurrentTime(timeSlot);
+          return (
+            <div key={timeSlot} className={`flex border-b last:border-b-0 transition-colors ${isCurrentTimeSlot ? "bg-primary/5" : "hover:bg-muted/50"}`}>
+              <div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center">
+                <span className={`text-sm font-medium ${isCurrentTimeSlot ? "text-primary" : "text-muted-foreground"}`}>
+                  {timeSlot}
+                </span>
+              </div>
+              
+              <div className="flex-1 p-3">
+                {appointment ? (
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        {/* User Icon */}
+                        <Link to={`/patients/${appointment.patientId}`} className="font-medium hover:text-primary">
+                          {getPatientById(appointment.patientId)?.firstName || ""} {getPatientById(appointment.patientId)?.lastName || `Patient #${appointment.patientId}`}
+                        </Link>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-6">
+                        {appointment.reason}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      {/* Action Buttons */}
+                    </div>
+                  </div>
+                ) : (
+                  <Link to={`/appointments/new?date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}`} className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary">
+                    <span className="text-center">Disponible</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
 	return (
 		<Layout>
@@ -276,13 +357,7 @@ const AppointmentsPage = () => {
 												dateStr,
 												appointmentsForDate,
 											]) => {
-												const formattedDate = format(
-													new Date(dateStr),
-													"EEEE d MMMM yyyy",
-													{
-														locale: fr,
-													}
-												);
+												const formattedDate = formatAppointmentDate(dateStr, "EEEE d MMMM yyyy");
 												return (
 													<div key={dateStr}>
 														<h3 className="text-lg font-medium mt-4 mb-2">
@@ -343,13 +418,7 @@ const AppointmentsPage = () => {
 												dateStr,
 												appointmentsForDate,
 											]) => {
-												const formattedDate = format(
-													new Date(dateStr),
-													"EEEE d MMMM yyyy",
-													{
-														locale: fr,
-													}
-												);
+												const formattedDate = formatAppointmentDate(dateStr, "EEEE d MMMM yyyy");
 												return (
 													<div key={dateStr}>
 														<h3 className="text-lg font-medium">
@@ -409,13 +478,7 @@ const AppointmentsPage = () => {
 												dateStr,
 												appointmentsForDate,
 											]) => {
-												const formattedDate = format(
-													new Date(dateStr),
-													"EEEE d MMMM yyyy",
-													{
-														locale: fr,
-													}
-												);
+												const formattedDate = formatAppointmentDate(dateStr, "EEEE d MMMM yyyy");
 												return (
 													<div key={dateStr}>
 														<h3 className="text-lg font-medium">
@@ -496,13 +559,7 @@ const AppointmentsPage = () => {
 								Détails du rendez-vous :
 							</p>
 							<p className="text-sm text-muted-foreground">
-								{format(
-									new Date(appointmentToCancel.date),
-									"EEEE d MMMM yyyy 'à' HH:mm",
-									{
-										locale: fr,
-									}
-								)}
+                {formatAppointmentDate(appointmentToCancel.date)}
 							</p>
 							<p className="text-sm text-muted-foreground">
 								Patient :{" "}
@@ -538,8 +595,8 @@ const AppointmentsPage = () => {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-		</Layout>
-	);
+    </Layout>
+  );
 };
 
 export default AppointmentsPage;

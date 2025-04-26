@@ -193,7 +193,7 @@ export type Database = {
       Invoice: {
         Row: {
           amount: number
-          consultationId: number | null
+          appointmentId: number | null
           date: string
           id: number
           notes: string | null
@@ -205,7 +205,7 @@ export type Database = {
         }
         Insert: {
           amount: number
-          consultationId?: number | null
+          appointmentId?: number | null
           date?: string
           id?: number
           notes?: string | null
@@ -217,7 +217,7 @@ export type Database = {
         }
         Update: {
           amount?: number
-          consultationId?: number | null
+          appointmentId?: number | null
           date?: string
           id?: number
           notes?: string | null
@@ -229,13 +229,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_invoice_consultation"
-            columns: ["consultationId"]
-            isOneToOne: false
-            referencedRelation: "Consultation"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_invoice_patient"
             columns: ["patientId"]
             isOneToOne: false
@@ -243,10 +236,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Invoice_consultationId_fkey"
-            columns: ["consultationId"]
+            foreignKeyName: "Invoice_appointmentId_fkey"
+            columns: ["appointmentId"]
             isOneToOne: false
-            referencedRelation: "Consultation"
+            referencedRelation: "Appointment"
             referencedColumns: ["id"]
           },
           {
