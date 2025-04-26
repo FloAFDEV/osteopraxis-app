@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
-import { formatAppointmentDate, formatAppointmentTime } from "@/utils/date-utils";
 
 const AppointmentsPage = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -98,6 +97,34 @@ const AppointmentsPage = () => {
 			);
 	};
 
+	const groupFutureAppointmentsByMonthAndDate = (
+		appointments: Appointment[]
+	) => {
+		const grouped: Record<string, Record<string, Appointment[]>> = {};
+
+		appointments
+			.sort(
+				(a, b) =>
+					new Date(a.date).getTime() - new Date(b.date).getTime()
+			) // 🧹 Trie tous les rendez-vous en premier
+			.forEach((appointment) => {
+				const month = format(new Date(appointment.date), "MMMM yyyy", {
+					locale: fr,
+				}); // Ex: Avril 2025
+				const day = format(new Date(appointment.date), "yyyy-MM-dd");
+
+				if (!grouped[month]) {
+					grouped[month] = {};
+				}
+				if (!grouped[month][day]) {
+					grouped[month][day] = [];
+				}
+				grouped[month][day].push(appointment);
+			});
+
+		return grouped;
+	};
+
 	const groupAppointmentsByDate = (appointments: Appointment[]) => {
 		const grouped: Record<string, Appointment[]> = {};
 		appointments.forEach((appointment) => {
@@ -110,30 +137,34 @@ const AppointmentsPage = () => {
 		return grouped;
 	};
 
-  const handleCancelAppointment = async () => {
-    if (!appointmentToCancel) return;
-    try {
-      // Only send the status update, keeping all other fields unchanged
-      await api.updateAppointment(appointmentToCancel.id, {
-        status: "CANCELED"
-      });
+	const handleCancelAppointment = async () => {
+		if (!appointmentToCancel) return;
+		try {
+			await api.updateAppointment(appointmentToCancel.id, {
+				status: "CANCELED",
+				date: appointmentToCancel.date, // 🔥 important
+			});
 
-      setAppointments((prevAppointments) =>
-        prevAppointments.map((app) =>
-          app.id === appointmentToCancel.id
-            ? { ...app, status: "CANCELED" }
-            : app
-        )
-      );
-      toast.success("Rendez-vous annulé avec succès");
-      setRefreshKey((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error cancelling appointment:", error);
-      toast.error("Une erreur est survenue lors de l'annulation du rendez-vous");
-    } finally {
-      setAppointmentToCancel(null);
-    }
-  };
+			// Update local state and force refresh from server
+			setAppointments((prevAppointments) =>
+				prevAppointments.map((app) =>
+					app.id === appointmentToCancel.id
+						? { ...app, status: "CANCELED" }
+						: app
+				)
+			);
+			toast.success("Rendez-vous annulé avec succès");
+
+			setRefreshKey((prev) => prev + 1);
+		} catch (error) {
+			console.error("Error cancelling appointment:", error);
+			toast.error(
+				"Une erreur est survenue lors de l'annulation du rendez-vous"
+			);
+		} finally {
+			setAppointmentToCancel(null);
+		}
+	};
 
 	// Categorize appointments by past, today, future
 	const categorizeAppointments = (appointments: Appointment[]) => {
@@ -167,93 +198,6 @@ const AppointmentsPage = () => {
 	const groupedFutureAppointments =
 		groupAppointmentsByDate(futureAppointments);
 
-  interface DayScheduleProps {
-    date: Date;
-    appointments: Appointment[];
-    getPatientById: (id: number) => Patient | undefined;
-    onCancelAppointment: (id: number) => void;
-  }
-
-  const DaySchedule = ({
-    date,
-    appointments,
-    getPatientById,
-    onCancelAppointment
-  }: DayScheduleProps) => {
-    // Generate time slots for the day (8am to 8pm)
-    const timeSlots = Array.from({
-      length: 25
-    }, (_, i) => {
-      const hour = Math.floor(i / 2) + 8; // Starting from 8 AM
-      const minute = i % 2 * 30; // 0 or 30 minutes
-      return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-    });
-    
-    // Ne pas afficher les créneaux après 20h
-    const displayTimeSlots = timeSlots.filter(slot => {
-      const hour = parseInt(slot.split(':')[0]);
-      return hour < 20;
-    });
-
-    const getAppointmentForTimeSlot = (timeSlot: string) => {
-      return appointments.find(appointment => {
-        const appointmentTime = format(new Date(appointment.date), "HH:mm");
-        return appointmentTime === timeSlot;
-      });
-    };
-
-    const isCurrentTime = (timeSlot: string) => {
-      const now = new Date();
-      const currentHour = now.getHours().toString().padStart(2, '0');
-      const currentMinute = now.getMinutes().toString().padStart(2, '0');
-      const currentTime = `${currentHour}:${currentMinute}`;
-      return timeSlot === currentTime && format(now, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-    };
-
-    return (
-      <div className="rounded-md border">
-        {displayTimeSlots.map(timeSlot => {
-          const appointment = getAppointmentForTimeSlot(timeSlot);
-          const isCurrentTimeSlot = isCurrentTime(timeSlot);
-          return (
-            <div key={timeSlot} className={`flex border-b last:border-b-0 transition-colors ${isCurrentTimeSlot ? "bg-primary/5" : "hover:bg-muted/50"}`}>
-              <div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center">
-                <span className={`text-sm font-medium ${isCurrentTimeSlot ? "text-primary" : "text-muted-foreground"}`}>
-                  {timeSlot}
-                </span>
-              </div>
-              
-              <div className="flex-1 p-3">
-                {appointment ? (
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        {/* User Icon */}
-                        <Link to={`/patients/${appointment.patientId}`} className="font-medium hover:text-primary">
-                          {getPatientById(appointment.patientId)?.firstName || ""} {getPatientById(appointment.patientId)?.lastName || `Patient #${appointment.patientId}`}
-                        </Link>
-                      </div>
-                      <p className="text-sm text-muted-foreground ml-6">
-                        {appointment.reason}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      {/* Action Buttons */}
-                    </div>
-                  </div>
-                ) : (
-                  <Link to={`/appointments/new?date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}`} className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary">
-                    <span className="text-center">Disponible</span>
-                  </Link>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
 	return (
 		<Layout>
 			<div className="flex flex-col min-h-full">
@@ -266,7 +210,7 @@ const AppointmentsPage = () => {
 					<div className="flex gap-2">
 						<Button
 							variant="outline"
-                            disabled={loading}
+							disabled={loading}
 							onClick={() => {
 								setLoading(true);
 								setRefreshKey((prev) => prev + 1);
@@ -357,7 +301,13 @@ const AppointmentsPage = () => {
 												dateStr,
 												appointmentsForDate,
 											]) => {
-												const formattedDate = formatAppointmentDate(dateStr, "EEEE d MMMM yyyy");
+												const formattedDate = format(
+													new Date(dateStr),
+													"EEEE d MMMM yyyy",
+													{
+														locale: fr,
+													}
+												);
 												return (
 													<div key={dateStr}>
 														<h3 className="text-lg font-medium mt-4 mb-2">
@@ -418,7 +368,13 @@ const AppointmentsPage = () => {
 												dateStr,
 												appointmentsForDate,
 											]) => {
-												const formattedDate = formatAppointmentDate(dateStr, "EEEE d MMMM yyyy");
+												const formattedDate = format(
+													new Date(dateStr),
+													"EEEE d MMMM yyyy",
+													{
+														locale: fr,
+													}
+												);
 												return (
 													<div key={dateStr}>
 														<h3 className="text-lg font-medium">
@@ -472,49 +428,75 @@ const AppointmentsPage = () => {
 								{showFuture && (
 									<div>
 										{Object.entries(
-											groupedFutureAppointments
-										).map(
-											([
-												dateStr,
-												appointmentsForDate,
-											]) => {
-												const formattedDate = formatAppointmentDate(dateStr, "EEEE d MMMM yyyy");
-												return (
-													<div key={dateStr}>
-														<h3 className="text-lg font-medium">
-															{formattedDate}
-														</h3>
-														<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-															{appointmentsForDate.map(
-																(
-																	appointment
-																) => (
-																	<AppointmentCard
-																		key={
-																			appointment.id
-																		}
-																		appointment={
+											groupFutureAppointmentsByMonthAndDate(
+												futureAppointments
+											)
+										).map(([monthName, days]) => (
+											<div
+												key={monthName}
+												className="mb-8"
+											>
+												<h3 className="text-2xl font-bold text-primary mb-4">
+													{monthName}
+												</h3>
+
+												{Object.entries(days).map(
+													([
+														dateStr,
+														appointmentsForDate,
+													]) => {
+														const formattedDate =
+															format(
+																new Date(
+																	dateStr
+																),
+																"EEEE d MMMM yyyy",
+																{ locale: fr }
+															);
+
+														return (
+															<div
+																key={dateStr}
+																className="mb-6"
+															>
+																<h4 className="text-lg font-semibold mb-2">
+																	{
+																		formattedDate
+																	}
+																</h4>
+																<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+																	{appointmentsForDate.map(
+																		(
 																			appointment
-																		}
-																		patient={getPatientById(
-																			appointment.patientId
-																		)}
-																		onEdit={() => {
-																			window.location.href = `/appointments/${appointment.id}/edit`;
-																		}}
-																		onCancel={() =>
-																			setAppointmentToCancel(
-																				appointment
-																			)
-																		}
-																	/>
-																)
-															)}
-														</div>
-													</div>
-												);
-											}
-										)}
+																		) => (
+																			<AppointmentCard
+																				key={
+																					appointment.id
+																				}
+																				appointment={
+																					appointment
+																				}
+																				patient={getPatientById(
+																					appointment.patientId
+																				)}
+																				onEdit={() => {
+																					window.location.href = `/appointments/${appointment.id}/edit`;
+																				}}
+																				onCancel={() =>
+																					setAppointmentToCancel(
+																						appointment
+																					)
+																				}
+																			/>
+																		)
+																	)}
+																</div>
+															</div>
+														);
+													}
+												)}
+											</div>
+										))}
 									</div>
 								)}
 							</div>
@@ -559,7 +541,13 @@ const AppointmentsPage = () => {
 								Détails du rendez-vous :
 							</p>
 							<p className="text-sm text-muted-foreground">
-                {formatAppointmentDate(appointmentToCancel.date)}
+								{format(
+									new Date(appointmentToCancel.date),
+									"EEEE d MMMM yyyy 'à' HH:mm",
+									{
+										locale: fr,
+									}
+								)}
 							</p>
 							<p className="text-sm text-muted-foreground">
 								Patient :{" "}
@@ -595,8 +583,8 @@ const AppointmentsPage = () => {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-    </Layout>
-  );
+		</Layout>
+	);
 };
 
 export default AppointmentsPage;
