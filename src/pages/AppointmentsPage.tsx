@@ -259,7 +259,7 @@ const AppointmentsPage = () => {
 					<>
 						{/* Display Past Appointments */}
 						{Object.keys(groupedPastAppointments).length > 0 && (
-							<div>
+							<div className="mt-2">
 								<h2
 									className="text-lg font-bold mb-4 bg-gray-200 text-gray-800 p-2 rounded-lg cursor-pointer"
 									onClick={() => setShowPast(!showPast)}
@@ -325,7 +325,7 @@ const AppointmentsPage = () => {
 
 						{/* Display Today Appointments */}
 						{Object.keys(groupedTodayAppointments).length > 0 && (
-							<div>
+							<div className="mt-2">
 								<h2
 									className="text-lg font-bold mb-4 bg-lime-400 text-black p-2 rounded-lg cursor-pointer"
 									onClick={() => setShowToday(!showToday)}
@@ -392,7 +392,7 @@ const AppointmentsPage = () => {
 
 						{/* Display Future Appointments */}
 						{Object.keys(groupedFutureAppointments).length > 0 && (
-							<div>
+							<div className="mt-2">
 								<h2
 									className="text-lg font-bold mb-4 bg-blue-200 text-blue-800 p-2 rounded-lg cursor-pointer"
 									onClick={() => setShowFuture(!showFuture)}
