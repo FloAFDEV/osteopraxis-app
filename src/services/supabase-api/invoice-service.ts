@@ -15,18 +15,16 @@ export const supabaseInvoiceService = {
       if (error) throw new Error(error.message);
       
       // Transform data with explicit typing
-      return (data || []).map(item => ({
+      return (data || []).map(item => {
+        return {
           id: item.id,
           patientId: item.patientId,
-          appointmentId: item.appointmentId,
+          consultationId: item.consultationId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          tvaExoneration: item.tvaExoneration,
-          tvaMotif: item.tvaMotif,
-          paymentMethod: item.paymentMethod,
-          notes: item.notes
-      })) as Invoice[];
+          paymentStatus: item.paymentStatus as PaymentStatus
+        } as Invoice;
+      });
     } catch (error) {
       console.error("Erreur getInvoices:", error);
       throw error;
@@ -56,14 +54,10 @@ export const supabaseInvoiceService = {
       return {
         id: data.id,
         patientId: data.patientId,
-        appointmentId: data.appointmentId,
+        consultationId: data.consultationId,
         date: data.date,
         amount: data.amount,
-        paymentStatus: data.paymentStatus as PaymentStatus,
-        tvaExoneration: data.tvaExoneration,
-        tvaMotif: data.tvaMotif,
-        paymentMethod: data.paymentMethod,
-        notes: data.notes
+        paymentStatus: data.paymentStatus as PaymentStatus
       } as Invoice;
     } catch (error) {
       console.error("Erreur getInvoiceById:", error);
@@ -84,18 +78,16 @@ export const supabaseInvoiceService = {
       if (error) throw new Error(error.message);
       
       // Transform data with explicit typing
-      return (data || []).map(item => ({
-        id: item.id,
-        patientId: item.patientId,
-        appointmentId: item.appointmentId,
-        date: item.date,
-        amount: item.amount,
-        paymentStatus: item.paymentStatus as PaymentStatus,
-        tvaExoneration: item.tvaExoneration,
-        tvaMotif: item.tvaMotif,
-        paymentMethod: item.paymentMethod,
-        notes: item.notes
-      })) as Invoice[];
+      return (data || []).map(item => {
+        return {
+          id: item.id,
+          patientId: item.patientId,
+          consultationId: item.consultationId,
+          date: item.date,
+          amount: item.amount,
+          paymentStatus: item.paymentStatus as PaymentStatus
+        } as Invoice;
+      });
     } catch (error) {
       console.error("Erreur getInvoicesByPatientId:", error);
       throw error;
@@ -106,9 +98,9 @@ export const supabaseInvoiceService = {
     try {
       const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...dataToInsert } = invoiceData as any;
       
-      // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
-      if (!dataToInsert.appointmentId || dataToInsert.appointmentId === 0) {
-        delete dataToInsert.appointmentId;
+      // Si consultationId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
+      if (!dataToInsert.consultationId || dataToInsert.consultationId === 0) {
+        delete dataToInsert.consultationId;
       }
       
       const { data, error } = await supabase
@@ -131,9 +123,9 @@ export const supabaseInvoiceService = {
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
-      // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
-      if (invoiceData.appointmentId === 0 || invoiceData.appointmentId === null) {
-        delete invoiceData.appointmentId;
+      // Si consultationId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
+      if (invoiceData.consultationId === 0 || invoiceData.consultationId === null) {
+        delete invoiceData.consultationId;
       }
       
       const query = supabase
