@@ -62,7 +62,7 @@ const AppointmentsPage = () => {
 			}
 		};
 		fetchData();
-	}, []);
+	}, [refreshKey);
 
 	const getPatientById = (patientId: number) => {
 		return patients.find((patient) => patient.id === patientId);
