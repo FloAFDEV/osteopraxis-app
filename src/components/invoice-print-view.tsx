@@ -54,7 +54,7 @@ export const InvoicePrintView = ({
 	};
 
 	return (
-		<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col min-h-[1100px] justify-between print:p-4">
+<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-max print:p-4">
 			{/* Partie haute */}
 			<div className="flex-1">
 				{/* En-tête */}
