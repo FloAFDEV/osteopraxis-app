@@ -12,7 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface InvoiceDetailsProps {
 	invoice: Invoice;
 	patient?: Patient;
-	patientName?: string; // Ajout de la propriété patientName optionnelle
+	patientName?: string;
 	onEdit?: () => void;
 	onDelete?: () => void;
 	onDownload?: () => void;
@@ -175,7 +175,8 @@ export const InvoiceDetails = ({
 						<div className="flex items-center gap-2">
 							<FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
 							<span className="font-bold text-lg">
-								Facture n°{invoice.id.toString().padStart(4, "0")}
+								Facture n°{" "}
+								{invoice.id.toString().padStart(4, "0")}
 							</span>
 						</div>
 
@@ -270,7 +271,7 @@ export const InvoiceDetails = ({
 									size="sm"
 									variant="outline"
 									onClick={onPrint}
-									className="h-8 px-2 rounded-md border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300 flex items-center"
+									className="h-8 px-2 rounded-md border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300 flex items-center hidden"
 								>
 									<Printer className="h-4 w-4 mr-1" />
 									<span className="sr-only sm:not-sr-only sm:inline">
