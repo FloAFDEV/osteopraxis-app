@@ -316,7 +316,7 @@ const AppointmentsPage = () => {
 					{showPast && selectedPastYear !== undefined && (
 						<div className="text-sm text-muted-foreground mb-6">
 							{numberOfAppointments > 0 ? (
-								<span>
+								<span className="text-green-500 font-bold text-xl">
 									{numberOfAppointments} rendez-vous trouvés
 									pour {selectedPastYear}
 								</span>
