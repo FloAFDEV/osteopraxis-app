@@ -1,6 +1,6 @@
+import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
 
 interface InvoicePrintViewProps {
 	invoice: Invoice;
@@ -54,7 +54,7 @@ export const InvoicePrintView = ({
 	};
 
 	return (
-		<div className="bg-white p-8 min-h-screen max-w-3xl mx-auto flex flex-col justify-between print:min-h-max print:p-4">
+		<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col justify-between print:min-h-max print:p-4">
 			{/* Partie haute */}
 			<div className="flex-1">
 				{/* En-tête */}
@@ -142,7 +142,7 @@ export const InvoicePrintView = ({
 						<h3 className="font-medium text-amber-700 mb-3">
 							Facturer à:
 						</h3>
-						<div className="border-l-4 border-amber-200 pl-4">
+						<div className="border-l-4 border-amber-200 pl-4 break-words">
 							<p className="font-medium text-gray-800 text-lg mb-2">
 								{getPatientName()}
 							</p>
