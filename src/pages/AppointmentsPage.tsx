@@ -43,6 +43,9 @@ const AppointmentsPage = () => {
 	const [showPast, setShowPast] = useState(false);
 	const [showToday, setShowToday] = useState(true); // "Aujourd'hui" section is open by default
 	const [showFuture, setShowFuture] = useState(false);
+	const [selectedPastYear, setSelectedPastYear] = useState<
+		number | undefined
+	>(undefined);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -111,6 +114,41 @@ const AppointmentsPage = () => {
 				const month = format(new Date(appointment.date), "MMMM yyyy", {
 					locale: fr,
 				}); // Ex: Avril 2025
+				const day = format(new Date(appointment.date), "yyyy-MM-dd");
+
+				if (!grouped[month]) {
+					grouped[month] = {};
+				}
+				if (!grouped[month][day]) {
+					grouped[month][day] = [];
+				}
+				grouped[month][day].push(appointment);
+			});
+
+		return grouped;
+	};
+
+	const groupPastAppointmentsByMonthAndDate = (
+		appointments: Appointment[],
+		selectedYear?: number
+	) => {
+		const grouped: Record<string, Record<string, Appointment[]>> = {};
+
+		appointments
+			.filter((appointment) => {
+				if (!selectedYear) return true;
+				return (
+					new Date(appointment.date).getFullYear() === selectedYear
+				);
+			})
+			.sort(
+				(a, b) =>
+					new Date(b.date).getTime() - new Date(a.date).getTime()
+			) // 🧹 Tri du plus récent au plus ancien
+			.forEach((appointment) => {
+				const month = format(new Date(appointment.date), "MMMM yyyy", {
+					locale: fr,
+				});
 				const day = format(new Date(appointment.date), "yyyy-MM-dd");
 
 				if (!grouped[month]) {
@@ -197,7 +235,11 @@ const AppointmentsPage = () => {
 	const groupedTodayAppointments = groupAppointmentsByDate(todayAppointments);
 	const groupedFutureAppointments =
 		groupAppointmentsByDate(futureAppointments);
+	const filteredPastAppointments = Object.values(
+		groupPastAppointmentsByMonthAndDate(pastAppointments, selectedPastYear)
+	).flatMap((days) => Object.values(days).flat());
 
+	const numberOfAppointments = filteredPastAppointments.length;
 	return (
 		<Layout>
 			<div className="flex flex-col min-h-full">
@@ -241,6 +283,7 @@ const AppointmentsPage = () => {
 
 					<div className="w-full md:w-64 flex items-center">
 						<Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+
 						<Select
 							value={statusFilter}
 							onValueChange={setStatusFilter}
@@ -270,6 +313,21 @@ const AppointmentsPage = () => {
 							</SelectContent>
 						</Select>
 					</div>
+					{showPast && selectedPastYear !== undefined && (
+						<div className="text-sm text-muted-foreground mb-6">
+							{numberOfAppointments > 0 ? (
+								<span>
+									{numberOfAppointments} rendez-vous trouvés
+									pour {selectedPastYear}
+								</span>
+							) : (
+								<span>
+									Aucun rendez-vous trouvé pour{" "}
+									{selectedPastYear}
+								</span>
+							)}
+						</div>
+					)}
 				</div>
 
 				{loading ? (
@@ -293,58 +351,130 @@ const AppointmentsPage = () => {
 									{showPast ? "▼" : "►"} Rendez-vous passés
 								</h2>
 								{showPast && (
-									<div>
-										{Object.entries(
-											groupedPastAppointments
-										).map(
-											([
-												dateStr,
-												appointmentsForDate,
-											]) => {
-												const formattedDate = format(
-													new Date(dateStr),
-													"EEEE d MMMM yyyy",
-													{
-														locale: fr,
-													}
-												);
-												return (
-													<div key={dateStr}>
-														<h3 className="text-lg font-medium mt-4 mb-2">
-															{formattedDate}
-														</h3>
-														<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-															{appointmentsForDate.map(
-																(
-																	appointment
-																) => (
-																	<AppointmentCard
-																		key={
-																			appointment.id
+									<>
+										<div className="flex items-center gap-2 mb-6">
+											<p className="text-sm font-medium">
+												Filtrer par année :
+											</p>
+											<Select
+												value={
+													selectedPastYear
+														? selectedPastYear.toString()
+														: "all"
+												}
+												onValueChange={(value) =>
+													setSelectedPastYear(
+														value === "all"
+															? undefined
+															: parseInt(value)
+													)
+												}
+											>
+												<SelectTrigger className="w-32">
+													<SelectValue placeholder="Toutes" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="all">
+														Toutes
+													</SelectItem>
+													{Array.from(
+														{ length: 10 },
+														(_, i) => {
+															const year =
+																new Date().getFullYear() -
+																i;
+															return (
+																<SelectItem
+																	key={year}
+																	value={year.toString()}
+																>
+																	{year}
+																</SelectItem>
+															);
+														}
+													)}
+												</SelectContent>
+											</Select>
+										</div>
+
+										<div>
+											{Object.entries(
+												groupPastAppointmentsByMonthAndDate(
+													pastAppointments,
+													selectedPastYear
+												) || {}
+											).map(([monthName, days]) => (
+												<div
+													key={monthName}
+													className="mb-8"
+												>
+													<h3 className="text-2xl font-bold text-primary mb-4">
+														{monthName}
+													</h3>
+
+													{Object.entries(days).map(
+														([
+															dateStr,
+															appointmentsForDate,
+														]) => {
+															const formattedDate =
+																format(
+																	new Date(
+																		dateStr
+																	),
+																	"EEEE d MMMM yyyy",
+																	{
+																		locale: fr,
+																	}
+																);
+
+															return (
+																<div
+																	key={
+																		dateStr
+																	}
+																	className="mb-6"
+																>
+																	<h4 className="text-lg font-semibold mb-2">
+																		{
+																			formattedDate
 																		}
-																		appointment={
-																			appointment
-																		}
-																		patient={getPatientById(
-																			appointment.patientId
-																		)}
-																		onEdit={() => {
-																			window.location.href = `/appointments/${appointment.id}/edit`;
-																		}}
-																		onCancel={() =>
-																			setAppointmentToCancel(
+																	</h4>
+																	<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+																		{appointmentsForDate.map(
+																			(
 																				appointment
+																			) => (
+																				<AppointmentCard
+																					key={
+																						appointment.id
+																					}
+																					appointment={
+																						appointment
+																					}
+																					patient={getPatientById(
+																						appointment.patientId
+																					)}
+																					onEdit={() => {
+																						window.location.href = `/appointments/${appointment.id}/edit`;
+																					}}
+																					onCancel={() =>
+																						setAppointmentToCancel(
+																							appointment
+																						)
+																					}
+																				/>
 																			)
-																		}
-																	/>
-																)
-															)}
-														</div>
-													</div>
-												);
-											}
-										)}
-									</div>
+																		)}
+																	</div>
+																</div>
+															);
+														}
+													)}
+												</div>
+											))}
+										</div>
+									</>
 								)}
 							</div>
 						)}
