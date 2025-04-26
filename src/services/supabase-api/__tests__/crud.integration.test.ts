@@ -139,7 +139,7 @@ describe("Tests d'intégration CRUD sur Supabase (Osteopath, Patient, Cabinet, I
     // Création
     const invoice = await supabaseInvoiceService.createInvoice({
       patientId: patientId!,
-      consultationId: 1,
+      appointmentId: 1, // Changed from consultationId to appointmentId
       date: new Date().toISOString(),
       amount: 65,
       paymentStatus: "PENDING"
