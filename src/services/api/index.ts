@@ -60,6 +60,8 @@ export const api = {
 	getInvoices: invoiceService.getInvoices,
 	getInvoiceById: invoiceService.getInvoiceById,
 	getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
+	getInvoicesByAppointmentId: invoiceService.getInvoicesByAppointmentId,
+
 	createInvoice: invoiceService.createInvoice,
 	updateInvoice: invoiceService.updateInvoice,
 	deleteInvoice: invoiceService.deleteInvoice, // ajout
