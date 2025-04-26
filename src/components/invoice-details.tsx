@@ -223,14 +223,14 @@ export const InvoiceDetails = ({
 					</div>
 
 					{/* 🔷 Notes */}
-					{invoice.notes && (
-						<div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2">
-							<span className="font-medium text-gray-800 dark:text-white">
-								Notes :{" "}
-							</span>
-							{invoice.notes}
-						</div>
-					)}
+					<div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2 min-h-[48px]">
+						<span className="font-medium text-gray-800 dark:text-white">
+							Notes :{" "}
+						</span>
+						{invoice.notes && invoice.notes.trim() !== ""
+							? invoice.notes
+							: "Pas encore de notes pour cet acte."}
+					</div>
 				</CardContent>
 
 				{/* 🔷 Actions - fixées en bas */}
