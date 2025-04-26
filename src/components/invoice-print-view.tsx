@@ -54,7 +54,7 @@ export const InvoicePrintView = ({
 	};
 
 	return (
-		<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col justify-between print:min-h-max print:p-4">
+		<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col min-h-[1100px] justify-between print:p-4">
 			{/* Partie haute */}
 			<div className="flex-1">
 				{/* En-tête */}
@@ -221,7 +221,7 @@ export const InvoicePrintView = ({
 			</div>
 
 			{/* Footer Mentions */}
-			<footer className="mt-12">
+			<footer className="pt-8 mt-8 border-t border-gray-200">
 				<h3 className="font-medium text-amber-700 mb-2">
 					Mentions obligatoires:
 				</h3>
@@ -233,7 +233,7 @@ export const InvoicePrintView = ({
 					En votre aimable règlement à réception. Merci de votre
 					confiance.
 				</p>
-				<div className="flex justify-center items-center space-x-4 text-gray-500 text-xs">
+				<div className="flex flex-wrap justify-center items-center gap-2 text-gray-500 text-xs break-words text-center">
 					<span>Document généré le {currentDate}</span>
 					<span>|</span>
 					<span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">
