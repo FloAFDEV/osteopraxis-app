@@ -185,6 +185,7 @@ const AppointmentsPage = () => {
 					<div className="flex gap-2">
 						<Button
 							variant="outline"
+                            disabled={loading}
 							onClick={() => {
 								setLoading(true);
 								setRefreshKey((prev) => prev + 1);
