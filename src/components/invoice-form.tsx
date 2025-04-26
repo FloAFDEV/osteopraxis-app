@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -31,7 +30,7 @@ import { format } from "date-fns";
 
 const formSchema = z.object({
 	patientId: z.number(),
-	appointmentId: z.number().optional(), // Changed from consultationId to appointmentId
+	appointmentId: z.number().optional(),
 	amount: z.number().min(0, "Le montant doit être positif"),
 	date: z.string(),
 	paymentStatus: z.enum(["PAID", "PENDING", "CANCELED"]),
@@ -61,7 +60,6 @@ export const InvoiceForm = ({
 	const [appointment, setAppointment] = useState<Appointment | null>(
 		initialAppointment || null
 	);
-	const [noConsultation, setNoConsultation] = useState<boolean>(false);
 	const [searchParams] = useSearchParams();
 
 	const appointmentIdParam = searchParams.get("appointmentId");
@@ -76,7 +74,7 @@ export const InvoiceForm = ({
 					);
 					if (fetched) {
 						setAppointment(fetched);
-						form.setValue("appointmentId", fetched.id); // Changed from consultationId to appointmentId
+						form.setValue("appointmentId", fetched.id);
 						form.setValue("date", fetched.date.split("T")[0]); // ISO → yyyy-MM-dd
 						if (!selectedPatient) {
 							const patient = await api.getPatientById(
@@ -105,7 +103,7 @@ export const InvoiceForm = ({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			patientId: initialPatient?.id || 0,
-			appointmentId: initialAppointment?.id || undefined, // Changed from consultationId to appointmentId
+			appointmentId: initialAppointment?.id || undefined,
 			amount: 60,
 			date:
 				initialAppointment?.date?.split("T")[0] ||
@@ -121,8 +119,10 @@ export const InvoiceForm = ({
 
 	const onSubmit = async (data: FormValues) => {
 		try {
+			const patientId = selectedPatient?.id || data.patientId;
+
 			const invoiceData: any = {
-				patientId: selectedPatient?.id || data.patientId,
+				patientId,
 				amount: data.amount,
 				date: data.date,
 				paymentStatus: data.paymentStatus as PaymentStatus,
@@ -135,16 +135,40 @@ export const InvoiceForm = ({
 				notes: data.notes,
 			};
 
-			if (!data.noConsultation && data.appointmentId) { // Changed from consultationId to appointmentId
-				invoiceData.appointmentId = data.appointmentId; // Changed from consultationId to appointmentId
+			if (!data.noConsultation && appointment?.id) {
+				console.log(
+					"[DEBUG] Vérification appointmentId =",
+					appointment.id
+				);
+				// Avant création ➔ On vérifie si une facture existe déjà pour cet appointmentId
+				const existingInvoices = await api.getInvoicesByPatientId(
+					appointment.id
+				);
+
+				if (existingInvoices && existingInvoices.length > 0) {
+					const existingInvoice = existingInvoices[0];
+					toast.warning(
+						`Attention : une facture existe déjà pour ce rendez-vous (Facture n° ${existingInvoice.id
+							.toString()
+							.padStart(4, "0")})`
+					);
+				}
+
+				invoiceData.appointmentId = appointment.id;
+				console.log("[DEBUG] appointmentId trouvé:", appointment.id);
 			}
+
+			console.log(
+				"[DEBUG] Données envoyées à createInvoice:",
+				invoiceData
+			);
 
 			await api.createInvoice(invoiceData);
 
-			toast.success("Facture créée avec succès");
+			toast.success("✅ Facture créée avec succès !");
 			onCreate();
 		} catch (error) {
-			console.error("Error creating invoice:", error);
+			console.error("❌ Error creating invoice:", error);
 			toast.error("Erreur lors de la création de la facture");
 		}
 	};
