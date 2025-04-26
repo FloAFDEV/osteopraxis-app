@@ -2,7 +2,14 @@ import { useState } from "react";
 import { Invoice, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Search, Trash2, Printer, Download } from "lucide-react";
+import {
+	FileText,
+	Search,
+	Trash2,
+	Printer,
+	Download,
+	StickyNote,
+} from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ConfirmDeleteInvoiceModal from "./modals/ConfirmDeleteInvoiceModal";
@@ -223,16 +230,19 @@ export const InvoiceDetails = ({
 					</div>
 
 					{/* 🔷 Notes */}
-				<div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2 min-h-[48px]">
-	<span className="font-medium text-gray-800 dark:text-white">Notes : </span>
-	{invoice.notes && invoice.notes.trim() !== "" ? (
-		<span>{invoice.notes}</span>
-	) : (
-		<span className="italic text-gray-500 dark:text-gray-400">
-			Pas encore de notes pour cet acte.
-		</span>
-	)}
-</div>
+					<div className="text-sm text-gray-700 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-3 mt-2 min-h-[48px]">
+						<div className="flex items-center gap-1 font-medium text-gray-800 dark:text-white mb-1">
+							<StickyNote className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+							<span>Notes :</span>
+						</div>
+						{invoice.notes && invoice.notes.trim() !== "" ? (
+							<span>{invoice.notes}</span>
+						) : (
+							<span className="italic text-gray-500 dark:text-gray-400">
+								Pas encore de notes pour cet acte.
+							</span>
+						)}
+					</div>
 				</CardContent>
 
 				{/* 🔷 Actions - fixées en bas */}
