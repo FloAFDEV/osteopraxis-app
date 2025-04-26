@@ -229,6 +229,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_invoice_appointment"
+            columns: ["appointmentId"]
+            isOneToOne: false
+            referencedRelation: "Appointment"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_invoice_patient"
             columns: ["patientId"]
             isOneToOne: false

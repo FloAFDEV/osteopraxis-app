@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { supabaseOsteopathService } from "../../supabase-api/osteopath-service";
 import { supabasePatientService } from "../../supabase-api/patient-service";
