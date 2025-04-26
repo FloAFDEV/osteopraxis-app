@@ -1,22 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Layout } from "@/components/ui/layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { api } from "@/services/api";
-import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
-import { toast } from "sonner";
-import {
-	FileText,
-	Search,
-	Plus,
-	Filter,
-	Download,
-	Calendar,
-} from "lucide-react";
 import { InvoiceDetails } from "@/components/invoice-details";
+import { InvoicePrintView } from "@/components/invoice-print-view";
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Layout } from "@/components/ui/layout";
 import {
 	Select,
 	SelectContent,
@@ -24,12 +12,23 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { InvoicePrintView } from "@/components/invoice-print-view";
-import { useReactToPrint } from "react-to-print";
-import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { api } from "@/services/api";
+import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import {
+	Calendar,
+	Download,
+	FileText,
+	Filter,
+	Plus,
+	Search,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
+import { toast } from "sonner";
 
 const InvoicesPage = () => {
 	const navigate = useNavigate();
@@ -63,6 +62,7 @@ const InvoicesPage = () => {
 	// Référence pour l'impression
 	const printRef = useRef<HTMLDivElement>(null);
 	const [readyToPrint, setReadyToPrint] = useState(false);
+	const [isPreparingPrint, setIsPreparingPrint] = useState(false);
 
 	// Configuration de react-to-print
 	const handlePrint = useReactToPrint({
@@ -93,6 +93,7 @@ const InvoicesPage = () => {
 		if ((printInvoice || printAllInvoices) && readyToPrint) {
 			setTimeout(() => {
 				handlePrint();
+				setIsPreparingPrint(false);
 			}, 200);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -285,6 +286,7 @@ const InvoicesPage = () => {
 		// Charger les données associées avant l'impression
 		const relatedData = await loadInvoiceRelatedData(invoice);
 
+		setIsPreparingPrint(true);
 		setPrintInvoice(invoice);
 		setPrintPatient(relatedData.patient);
 		setPrintOsteopath(relatedData.osteopath);
@@ -323,215 +325,235 @@ const InvoicesPage = () => {
 	};
 
 	return (
-		<Layout>
-			<div className="mb-6">
-				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-					<h1 className="text-3xl font-bold flex items-center gap-3">
-						<FileText className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-						<span className="text-black dark:text-gray-100 font-semibold">
-							Factures
-						</span>
-					</h1>
-					<Button
-						onClick={() => navigate("/invoices/new")}
-						className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600"
-					>
-						<Plus className="h-5 w-5" />
-						Nouvelle facture
-					</Button>
-				</div>
-
-				<Card className="mb-8">
-					<CardContent className="p-4">
-						<div className="flex flex-col sm:flex-row gap-4">
-							<div className="relative flex-1">
-								<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-								<Input
-									placeholder="Rechercher une facture..."
-									className="pl-9"
-									value={searchQuery}
-									onChange={(e) =>
-										setSearchQuery(e.target.value)
-									}
-								/>
-							</div>
-							<div className="flex items-center gap-2 min-w-[200px]">
-								<Filter className="h-4 w-4 text-gray-400" />
-								<Select
-									value={statusFilter}
-									onValueChange={setStatusFilter}
-								>
-									<SelectTrigger>
-										<SelectValue placeholder="Tous les statuts" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="ALL">
-											Tous les statuts
-										</SelectItem>
-										<SelectItem value="PAID">
-											Payée
-										</SelectItem>
-										<SelectItem value="PENDING">
-											En attente
-										</SelectItem>
-										<SelectItem value="CANCELED">
-											Annulée
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-
-						{/* Nouvelle section pour le téléchargement par année - Améliorée pour la responsivité */}
-						<div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-							<div className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center">
-								<Calendar className="h-5 w-5 mr-2 text-amber-500" />
-								Export annuel:
-							</div>
-							<div className="flex flex-wrap w-full sm:w-auto gap-3 items-center mt-2 sm:mt-0">
-								<Select
-									value={selectedYear}
-									onValueChange={setSelectedYear}
-								>
-									<SelectTrigger className="w-28">
-										<SelectValue placeholder="Année" />
-									</SelectTrigger>
-									<SelectContent>
-										{generateYearOptions().map((year) => (
-											<SelectItem
-												key={year}
-												value={year.toString()}
-											>
-												{year}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<Button
-									onClick={handleDownloadAllInvoices}
-									variant="outline"
-									size={isMobile ? "sm" : "default"}
-									className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50"
-								>
-									<Download className="h-4 w-4" />
-									<span>Télécharger le PDF annuel</span>
-								</Button>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-
-				{isLoading ? (
-					<div className="flex justify-center items-center py-20">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+		<>
+			{isPreparingPrint && (
+				<div className="fixed inset-0 bg-white/80 dark:bg-black/80 flex flex-col items-center justify-center z-50">
+					<div className="flex gap-2">
+						<div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+						<div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+						<div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce"></div>
 					</div>
-				) : filteredInvoices && filteredInvoices.length > 0 ? (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-						{filteredInvoices.map((invoice) => (
-							<div key={invoice.id} className="h-full">
-								<div className="h-full min-h-[400px] flex flex-col">
-									<InvoiceDetails
-										invoice={invoice}
-										patient={patientDataMap.get(
-											invoice.patientId
-										)}
-										onEdit={() =>
-											navigate(`/invoices/${invoice.id}`)
-										}
-										onDelete={() => {
-											setSelectedInvoiceId(invoice.id);
-											setIsDeleteModalOpen(true);
-										}}
-										onPrint={() =>
-											handlePrintInvoice(invoice)
-										}
-										onDownload={() =>
-											handleDownloadInvoice(invoice)
+					<p className="mt-6 text-lg font-semibold text-gray-800 dark:text-gray-200">
+						Préparation du PDF en cours...
+					</p>
+				</div>
+			)}
+			<Layout>
+				<div className="mb-6">
+					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+						<h1 className="text-3xl font-bold flex items-center gap-3">
+							<FileText className="h-8 w-8 text-blue-600 dark:text-blue-500" />
+							<span className="text-black dark:text-gray-100 font-semibold">
+								Factures
+							</span>
+						</h1>
+						<Button
+							onClick={() => navigate("/invoices/new")}
+							className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600"
+						>
+							<Plus className="h-5 w-5" />
+							Nouvelle facture
+						</Button>
+					</div>
+
+					<Card className="mb-8">
+						<CardContent className="p-4">
+							<div className="flex flex-col sm:flex-row gap-4">
+								<div className="relative flex-1">
+									<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+									<Input
+										placeholder="Rechercher une facture..."
+										className="pl-9"
+										value={searchQuery}
+										onChange={(e) =>
+											setSearchQuery(e.target.value)
 										}
 									/>
 								</div>
+								<div className="flex items-center gap-2 min-w-[200px]">
+									<Filter className="h-4 w-4 text-gray-400" />
+									<Select
+										value={statusFilter}
+										onValueChange={setStatusFilter}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Tous les statuts" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="ALL">
+												Tous les statuts
+											</SelectItem>
+											<SelectItem value="PAID">
+												Payée
+											</SelectItem>
+											<SelectItem value="PENDING">
+												En attente
+											</SelectItem>
+											<SelectItem value="CANCELED">
+												Annulée
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
 							</div>
-						))}
-					</div>
-				) : (
-					<div className="text-center py-20">
-						<FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
-						<h3 className="mt-4 text-xl font-medium">
-							Aucune facture trouvée
-						</h3>
-						<p className="mt-2 text-gray-500 dark:text-gray-400">
-							{searchQuery || statusFilter !== "ALL"
-								? "Essayez de modifier vos critères de recherche."
-								: "Commencez par créer votre première facture."}
-						</p>
-						<Button
-							onClick={() => navigate("/invoices/new")}
-							className="mt-6 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600"
-						>
-							<Plus className="h-4 w-4 mr-2" />
-							Créer une facture
-						</Button>
+
+							{/* Nouvelle section pour le téléchargement par année - Améliorée pour la responsivité */}
+							<div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+								<div className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center">
+									<Calendar className="h-5 w-5 mr-2 text-amber-500" />
+									Export annuel:
+								</div>
+								<div className="flex flex-wrap w-full sm:w-auto gap-3 items-center mt-2 sm:mt-0">
+									<Select
+										value={selectedYear}
+										onValueChange={setSelectedYear}
+									>
+										<SelectTrigger className="w-28">
+											<SelectValue placeholder="Année" />
+										</SelectTrigger>
+										<SelectContent>
+											{generateYearOptions().map(
+												(year) => (
+													<SelectItem
+														key={year}
+														value={year.toString()}
+													>
+														{year}
+													</SelectItem>
+												)
+											)}
+										</SelectContent>
+									</Select>
+									<Button
+										onClick={handleDownloadAllInvoices}
+										variant="outline"
+										size={isMobile ? "sm" : "default"}
+										className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50"
+									>
+										<Download className="h-4 w-4" />
+										<span>Télécharger le PDF annuel</span>
+									</Button>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					{isLoading ? (
+						<div className="flex justify-center items-center py-20">
+							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+						</div>
+					) : filteredInvoices && filteredInvoices.length > 0 ? (
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+							{filteredInvoices.map((invoice) => (
+								<div key={invoice.id} className="h-full">
+									<div className="h-full min-h-[400px] flex flex-col">
+										<InvoiceDetails
+											invoice={invoice}
+											patient={patientDataMap.get(
+												invoice.patientId
+											)}
+											onEdit={() =>
+												navigate(
+													`/invoices/${invoice.id}`
+												)
+											}
+											onDelete={() => {
+												setSelectedInvoiceId(
+													invoice.id
+												);
+												setIsDeleteModalOpen(true);
+											}}
+											onPrint={() =>
+												handlePrintInvoice(invoice)
+											}
+											onDownload={() =>
+												handleDownloadInvoice(invoice)
+											}
+										/>
+									</div>
+								</div>
+							))}
+						</div>
+					) : (
+						<div className="text-center py-20">
+							<FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
+							<h3 className="mt-4 text-xl font-medium">
+								Aucune facture trouvée
+							</h3>
+							<p className="mt-2 text-gray-500 dark:text-gray-400">
+								{searchQuery || statusFilter !== "ALL"
+									? "Essayez de modifier vos critères de recherche."
+									: "Commencez par créer votre première facture."}
+							</p>
+							<Button
+								onClick={() => navigate("/invoices/new")}
+								className="mt-6 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600"
+							>
+								<Plus className="h-4 w-4 mr-2" />
+								Créer une facture
+							</Button>
+						</div>
+					)}
+				</div>
+
+				{/* Print components hidden section */}
+				{printInvoice && (
+					<div className="hidden">
+						<div ref={printRef}>
+							<InvoicePrintView
+								invoice={printInvoice}
+								patient={printPatient}
+								osteopath={printOsteopath}
+								cabinet={printCabinet}
+							/>
+						</div>
 					</div>
 				)}
-			</div>
 
-			{/* Print components hidden section */}
-			{printInvoice && (
-				<div className="hidden">
-					<div ref={printRef}>
-						<InvoicePrintView
-							invoice={printInvoice}
-							patient={printPatient}
-							osteopath={printOsteopath}
-							cabinet={printCabinet}
-						/>
-					</div>
-				</div>
-			)}
-
-			{printAllInvoices && (
-				<div className="hidden">
-					<div ref={printRef}>
-						<div className="p-8">
-							<h1 className="text-3xl font-bold text-center mb-8">
-								Factures de l'année {selectedYear}
-							</h1>
-							<div className="space-y-8">
-								{printAllInvoices.map((invoice) => {
-									const patient = patientDataMap.get(
-										invoice.patientId
-									); // 👈 récupérer le patient associé
-									return (
-										<div
-											key={invoice.id}
-											className="page-break-after mb-4"
-										>
-											<InvoicePrintView
-												invoice={invoice}
-												patient={patient} // 👈 et l'envoyer à InvoicePrintView
-												osteopath={printOsteopath}
-												cabinet={printCabinet}
-											/>
-										</div>
-									);
-								})}
+				{printAllInvoices && (
+					<div className="hidden">
+						<div ref={printRef}>
+							<div className="p-8">
+								<h1 className="text-3xl font-bold text-center mb-8">
+									Factures de l'année {selectedYear}
+								</h1>
+								<div className="space-y-8">
+									{printAllInvoices.map((invoice) => {
+										const patient = patientDataMap.get(
+											invoice.patientId
+										); // 👈 récupérer le patient associé
+										return (
+											<div
+												key={invoice.id}
+												className="page-break-after mb-4"
+											>
+												<InvoicePrintView
+													invoice={invoice}
+													patient={patient} // 👈 et l'envoyer à InvoicePrintView
+													osteopath={printOsteopath}
+													cabinet={printCabinet}
+												/>
+											</div>
+										);
+									})}
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			)}
+				)}
 
-			{isDeleteModalOpen && selectedInvoiceId && (
-				<ConfirmDeleteInvoiceModal
-					isOpen={isDeleteModalOpen}
-					invoiceNumber={selectedInvoiceId
-						.toString()
-						.padStart(4, "0")}
-					onCancel={() => setIsDeleteModalOpen(false)}
-					onDelete={handleDeleteInvoice}
-				/>
-			)}
-		</Layout>
+				{isDeleteModalOpen && selectedInvoiceId && (
+					<ConfirmDeleteInvoiceModal
+						isOpen={isDeleteModalOpen}
+						invoiceNumber={selectedInvoiceId
+							.toString()
+							.padStart(4, "0")}
+						onCancel={() => setIsDeleteModalOpen(false)}
+						onDelete={handleDeleteInvoice}
+					/>
+				)}
+			</Layout>
+		</>
 	);
 };
 
