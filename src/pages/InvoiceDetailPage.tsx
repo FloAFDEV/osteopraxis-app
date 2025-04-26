@@ -214,7 +214,7 @@ const InvoiceDetailPage = () => {
 				<Button
 					variant="outline"
 					onClick={() => navigate("/invoices")}
-					className="mb-6 flex items-center gap-2 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+					className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50 mb-4"
 				>
 					<ArrowLeft className="h-4 w-4" />
 					Retour aux factures
