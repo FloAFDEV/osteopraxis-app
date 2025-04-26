@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Activity, Plus } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import { api } from '@/services/api';
 import { Layout } from '@/components/ui/layout';
 import { InvoiceForm } from '@/components/invoice-form';

@@ -140,7 +140,7 @@ export interface Osteopath {
 export interface Invoice {
   id: number;
   patientId: number;
-  consultationId: number;
+  appointmentId?: number; // Changed from consultationId to appointmentId, and made optional
   amount: number;
   date: string;
   paymentStatus: PaymentStatus;

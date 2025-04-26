@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -30,7 +31,7 @@ import { format } from "date-fns";
 
 const formSchema = z.object({
 	patientId: z.number(),
-	consultationId: z.number().optional(),
+	appointmentId: z.number().optional(), // Changed from consultationId to appointmentId
 	amount: z.number().min(0, "Le montant doit être positif"),
 	date: z.string(),
 	paymentStatus: z.enum(["PAID", "PENDING", "CANCELED"]),
@@ -75,7 +76,7 @@ export const InvoiceForm = ({
 					);
 					if (fetched) {
 						setAppointment(fetched);
-						form.setValue("consultationId", fetched.id);
+						form.setValue("appointmentId", fetched.id); // Changed from consultationId to appointmentId
 						form.setValue("date", fetched.date.split("T")[0]); // ISO → yyyy-MM-dd
 						if (!selectedPatient) {
 							const patient = await api.getPatientById(
@@ -104,7 +105,7 @@ export const InvoiceForm = ({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			patientId: initialPatient?.id || 0,
-			consultationId: initialAppointment?.id || undefined,
+			appointmentId: initialAppointment?.id || undefined, // Changed from consultationId to appointmentId
 			amount: 60,
 			date:
 				initialAppointment?.date?.split("T")[0] ||
@@ -134,8 +135,8 @@ export const InvoiceForm = ({
 				notes: data.notes,
 			};
 
-			if (!data.noConsultation && data.consultationId) {
-				invoiceData.consultationId = data.consultationId;
+			if (!data.noConsultation && data.appointmentId) { // Changed from consultationId to appointmentId
+				invoiceData.appointmentId = data.appointmentId; // Changed from consultationId to appointmentId
 			}
 
 			await api.createInvoice(invoiceData);

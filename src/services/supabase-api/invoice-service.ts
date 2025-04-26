@@ -19,7 +19,7 @@ export const supabaseInvoiceService = {
         return {
           id: item.id,
           patientId: item.patientId,
-          consultationId: item.consultationId,
+          appointmentId: item.appointmentId, // Changed from consultationId to appointmentId
           date: item.date,
           amount: item.amount,
           paymentStatus: item.paymentStatus as PaymentStatus
@@ -54,7 +54,7 @@ export const supabaseInvoiceService = {
       return {
         id: data.id,
         patientId: data.patientId,
-        consultationId: data.consultationId,
+        appointmentId: data.appointmentId, // Changed from consultationId to appointmentId
         date: data.date,
         amount: data.amount,
         paymentStatus: data.paymentStatus as PaymentStatus
@@ -82,7 +82,7 @@ export const supabaseInvoiceService = {
         return {
           id: item.id,
           patientId: item.patientId,
-          consultationId: item.consultationId,
+          appointmentId: item.appointmentId, // Changed from consultationId to appointmentId
           date: item.date,
           amount: item.amount,
           paymentStatus: item.paymentStatus as PaymentStatus
@@ -98,9 +98,9 @@ export const supabaseInvoiceService = {
     try {
       const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...dataToInsert } = invoiceData as any;
       
-      // Si consultationId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
-      if (!dataToInsert.consultationId || dataToInsert.consultationId === 0) {
-        delete dataToInsert.consultationId;
+      // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
+      if (!dataToInsert.appointmentId || dataToInsert.appointmentId === 0) { // Changed from consultationId to appointmentId
+        delete dataToInsert.appointmentId; // Changed from consultationId to appointmentId
       }
       
       const { data, error } = await supabase
@@ -123,9 +123,9 @@ export const supabaseInvoiceService = {
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
-      // Si consultationId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
-      if (invoiceData.consultationId === 0 || invoiceData.consultationId === null) {
-        delete invoiceData.consultationId;
+      // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
+      if (invoiceData.appointmentId === 0 || invoiceData.appointmentId === null) { // Changed from consultationId to appointmentId
+        delete invoiceData.appointmentId; // Changed from consultationId to appointmentId
       }
       
       const query = supabase
