@@ -407,11 +407,11 @@ const InvoicesPage = () => {
 										))}
 									</SelectContent>
 								</Select>
-								<Button
+									<Button
 									onClick={handleDownloadAllInvoices}
 									variant="outline"
 									size={isMobile ? "sm" : "default"}
-									className="w-full sm:w-auto flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 border-amber-200 dark:bg-amber-900/20 dark:hover:bg-amber-800/30 dark:text-amber-300 dark:border-amber-700/50"
+									className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50"
 								>
 									<Download className="h-4 w-4" />
 									<span>Télécharger le PDF annuel</span>
