@@ -59,6 +59,7 @@ export interface Patient {
 
 // Mise à jour des interfaces pour les autres entités pour assurer la cohérence des types
 export interface Appointment {
+  	invoiceId?: number | null;
   id: number;
   date: string;  
   patientId: number;
