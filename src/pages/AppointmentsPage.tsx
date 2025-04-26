@@ -321,7 +321,7 @@ const AppointmentsPage = () => {
 									pour {selectedPastYear}
 								</span>
 							) : (
-								<span>
+								<span className="text-red-500 font-bold text-xl">
 									Aucun rendez-vous trouvé pour{" "}
 									{selectedPastYear}
 								</span>
