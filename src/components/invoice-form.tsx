@@ -126,10 +126,7 @@ export const InvoiceForm = ({
 				amount: data.amount,
 				date: data.date,
 				paymentStatus: data.paymentStatus as PaymentStatus,
-				paymentMethod:
-					data.paymentMethod && data.paymentMethod.trim() !== ""
-						? data.paymentMethod
-						: undefined,
+				paymentMethod: data.paymentMethod?.trim() || undefined,
 				tvaExoneration: data.tvaExoneration,
 				tvaMotif: data.tvaMotif,
 				notes: data.notes,
@@ -140,18 +137,20 @@ export const InvoiceForm = ({
 					"[DEBUG] Vérification appointmentId =",
 					appointment.id
 				);
-				// Avant création ➔ On vérifie si une facture existe déjà pour cet appointmentId
-				const existingInvoices = await api.getInvoicesByPatientId(
+
+				// ✅ Vérifier s'il existe déjà une facture pour ce rendez-vous
+				const existingInvoices = await api.getInvoicesByAppointmentId(
 					appointment.id
 				);
 
 				if (existingInvoices && existingInvoices.length > 0) {
 					const existingInvoice = existingInvoices[0];
 					toast.warning(
-						`Attention : une facture existe déjà pour ce rendez-vous (Facture n° ${existingInvoice.id
+						`❗ Une facture existe déjà pour ce rendez-vous (Facture n° ${existingInvoice.id
 							.toString()
-							.padStart(4, "0")})`
+							.padStart(4, "0")}).`
 					);
+					return; // ⛔ Stoppe ici !
 				}
 
 				invoiceData.appointmentId = appointment.id;
