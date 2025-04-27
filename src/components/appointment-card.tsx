@@ -63,23 +63,11 @@ export function AppointmentCard({
 								`Patient #${appointment.patientId}`
 							)}
 						</h3>
-						<p className="text-muted-foreground">
-							Motif du rendez-vous :{appointment.reason}
-						</p>
 					</div>
 					{getStatusBadge(appointment.status)}
 				</div>
 				<div className="space-y-2">
-					<div className="flex items-center gap-2 text-sm">
-						<Calendar className="h-4 w-4 text-primary" />
-						<span className="capitalize">{formattedDate}</span>
-					</div>
-					<div className="flex items-center gap-2 text-sm">
-						<Clock className="h-4 w-4 text-primary" />
-						<span className="text-red-500 font-semibold">
-							{formattedTime}
-						</span>
-					</div>
+					{/* Affichage du traitement en cours */}
 					{patient && (
 						<div className="flex items-center gap-2 text-sm">
 							<FileText className="h-4 w-4 text-primary" />
@@ -91,6 +79,23 @@ export function AppointmentCard({
 							</span>
 						</div>
 					)}
+
+					{/* Affichage du motif */}
+					<div className="flex items-center gap-2 text-sm">
+						<Calendar className="h-4 w-4 text-primary" />
+						<span className="capitalize">{formattedDate}</span>
+					</div>
+					<div className="flex items-center gap-2 text-sm">
+						<Clock className="h-4 w-4 text-primary" />
+						<span className="text-red-500 font-semibold">
+							{formattedTime}
+						</span>
+					</div>
+
+					{/* Affichage du motif du rendez-vous */}
+					<p className="text-muted-foreground">
+						Motif : {appointment.reason}
+					</p>
 				</div>
 			</CardContent>
 			<CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
