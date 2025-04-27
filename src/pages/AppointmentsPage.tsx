@@ -364,26 +364,26 @@ const AppointmentsPage = () => {
 								{" "}
 								{/* Added margin bottom */}
 								<div
-									className="flex justify-between items-center cursor-pointer p-3 rounded-t-md border-l-4 border-lime-500 bg-lime-50 hover:bg-lime-100 transition-colors"
+									className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-green-500 bg-green-50 dark:bg-green-900 dark:text-green-100 hover:bg-green-100 dark:hover:bg-green-700 transition-colors"
 									onClick={() => setShowToday(!showToday)}
 								>
 									<div className="flex items-center gap-3">
-										<Home className="h-5 w-5 text-lime-700" />
-										<span className="text-lg font-semibold text-lime-800">
+										<Home className="h-5 w-5 text-green-700 dark:text-green-300" />
+										<span className="text-lg font-semibold text-green-800 dark:text-green-200">
 											Aujourd'hui
 										</span>
-										<span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-lime-100 bg-lime-600 rounded-full">
+										<span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-green-100 bg-green-600 dark:bg-green-700 rounded-full">
 											{todayAppointments.length}
 										</span>
 									</div>
 									<ChevronDown
-										className={`h-5 w-5 text-lime-700 transition-transform duration-200 ${
+										className={`h-5 w-5 text-green-700 dark:text-green-300 transition-transform duration-200 ${
 											showToday ? "" : "-rotate-90"
 										}`}
 									/>
 								</div>
 								{showToday && (
-									<div className="border-l-4 border-lime-500 pl-4 ml-[1px] py-4 bg-white rounded-b-md shadow-sm">
+									<div className="border-l-4 border-green-500 pl-4 ml-[1px] py-4 bg-white dark:bg-gray-800 rounded-b-md shadow-sm">
 										{" "}
 										{/* Indentation and styling */}
 										{Object.entries(
@@ -438,33 +438,33 @@ const AppointmentsPage = () => {
 						{futureAppointments.length > 0 && (
 							<div className="mb-8">
 								<div
-									className="flex justify-between items-center cursor-pointer p-3 rounded-t-md border-l-4 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-colors"
+									className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900 dark:text-blue-100 hover:bg-blue-100 dark:hover:bg-blue-700 transition-colors"
 									onClick={() => setShowFuture(!showFuture)}
 								>
 									<div className="flex items-center gap-3">
-										<ArrowRight className="h-5 w-5 text-blue-700" />
-										<span className="text-lg font-semibold text-blue-800">
+										<ArrowRight className="h-5 w-5 text-blue-700 dark:text-blue-300" />
+										<span className="text-lg font-semibold text-blue-800 dark:text-blue-200">
 											À venir
 										</span>
-										<span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-blue-100 bg-blue-600 rounded-full">
+										<span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-blue-100 bg-blue-600 dark:bg-blue-700 rounded-full">
 											{futureAppointments.length}
 										</span>
 									</div>
 									<ChevronDown
-										className={`h-5 w-5 text-blue-700 transition-transform duration-200 ${
+										className={`h-5 w-5 text-blue-700 dark:text-blue-300 transition-transform duration-200 ${
 											showFuture ? "" : "-rotate-90"
 										}`}
 									/>
 								</div>
 								{showFuture && (
-									<div className="border-l-4 border-blue-500 pl-4 ml-[1px] py-4 bg-white rounded-b-md shadow-sm space-y-6">
+									<div className="border-l-4 border-blue-500 pl-4 ml-[1px] py-4 bg-white dark:bg-gray-800 rounded-b-md shadow-sm space-y-6">
 										{Object.entries(
 											groupedFutureAppointments
 										).map(
 											([monthYear, days], monthIndex) => (
 												<div key={monthYear}>
 													<h3
-														className={`text-xl font-semibold text-primary mb-4 ${
+														className={`text-xl font-semibold text-amber-600 mb-4 ${
 															monthIndex > 0
 																? "mt-6"
 																: ""
@@ -496,7 +496,7 @@ const AppointmentsPage = () => {
 																			dateStr
 																		}
 																	>
-																		<h4 className="text-md font-medium text-gray-600 mb-3">
+																		<h4 className="text-md font-medium text-primary mb-3">
 																			{
 																				formattedDate
 																			}
@@ -544,27 +544,26 @@ const AppointmentsPage = () => {
 						{pastAppointments.length > 0 && ( // Check if there are *any* past appointments before showing the section
 							<div className="mb-8">
 								<div
-									className="flex justify-between items-center cursor-pointer p-3 rounded-t-md border-l-4 border-gray-400 bg-gray-50 hover:bg-gray-100 transition-colors"
+									className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-gray-400 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 									onClick={() => setShowPast(!showPast)}
 								>
 									<div className="flex items-center gap-3">
-										<Clock className="h-5 w-5 text-gray-600" />
-										<span className="text-lg font-semibold text-gray-700">
+										<Clock className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+										<span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
 											Passés
 										</span>
-										{/* Show total past count, filtered count will be shown inside */}
-										<span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-gray-100 bg-gray-500 rounded-full">
+										<span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-gray-100 bg-gray-500 dark:bg-gray-700 rounded-full">
 											{pastAppointments.length}
 										</span>
 									</div>
 									<ChevronDown
-										className={`h-5 w-5 text-gray-600 transition-transform duration-200 ${
+										className={`h-5 w-5 text-gray-600 dark:text-gray-300 transition-transform duration-200 ${
 											showPast ? "" : "-rotate-90"
 										}`}
 									/>
 								</div>
 								{showPast && (
-									<div className="border-l-4 border-gray-400 pl-4 ml-[1px] py-4 bg-white rounded-b-md shadow-sm space-y-6">
+									<div className="border-l-4 border-gray-400 pl-4 ml-[1px] py-4 bg-white dark:bg-gray-800 rounded-b-md shadow-sm space-y-6">
 										{/* Filter by Year - Placed Inside */}
 										<div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 px-2 pt-2">
 											<p className="text-sm font-medium text-gray-600 whitespace-nowrap">
@@ -638,7 +637,7 @@ const AppointmentsPage = () => {
 												) => (
 													<div key={monthYear}>
 														<h3
-															className={`text-xl font-semibold text-primary mb-4 ${
+															className={`text-xl font-semibold text-amber-500 mb-4 ${
 																monthIndex > 0
 																	? "mt-6"
 																	: ""
@@ -670,7 +669,7 @@ const AppointmentsPage = () => {
 																				dateStr
 																			}
 																		>
-																			<h4 className="text-md font-medium text-gray-600 mb-3">
+																			<h4 className="text-md font-medium text-primary mb-3">
 																				{
 																					formattedDate
 																				}
