@@ -34,15 +34,17 @@ import {
 	Receipt,
 	Stethoscope,
 	User,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface PatientDetailPageProps {}
 
 const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 	const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 	const [patient, setPatient] = useState<Patient | null>(null);
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -127,6 +129,19 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 	const sortedInvoices = [...invoices].sort((a, b) => {
 		return new Date(b.date).getTime() - new Date(a.date).getTime();
 	});
+
+  const handleCancelAppointment = async (appointmentId: number) => {
+    try {
+      await api.cancelAppointment(appointmentId);
+      // Refresh appointments list
+      const updatedAppointments = await api.getAppointmentsByPatientId(parseInt(id!));
+      setAppointments(updatedAppointments);
+      toast.success("Le rendez-vous a été annulé avec succès");
+    } catch (error) {
+      console.error("Error canceling appointment:", error);
+      toast.error("Impossible d'annuler le rendez-vous");
+    }
+  };
 
 	if (loading) {
 		return (
@@ -496,6 +511,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 													key={appointment.id}
 													appointment={appointment}
 													patient={patient}
+                          onCancel={() => handleCancelAppointment(appointment.id)}
 												/>
 											)
 										)}

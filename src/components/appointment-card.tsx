@@ -1,11 +1,11 @@
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Clock, Calendar, FileText } from "lucide-react";
+import { Clock, Calendar, FileText, Edit, X } from "lucide-react";
 import { Appointment, Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { formatAppointmentDate, formatAppointmentTime } from "@/utils/date-utils";
 
 interface AppointmentCardProps {
@@ -23,6 +23,7 @@ export function AppointmentCard({
 }: AppointmentCardProps) {
   const formattedDate = formatAppointmentDate(appointment.date, "EEEE d MMMM yyyy");
   const formattedTime = formatAppointmentTime(appointment.date);
+	const navigate = useNavigate();
 
   const getStatusBadge = (status: Appointment["status"]) => {
 		switch (status) {
@@ -86,7 +87,7 @@ export function AppointmentCard({
         </div>
       </CardContent>
       <CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
-				{/* Bouton pour créer une facture */}
+				{/* Si le rendez-vous est terminé, on montre le bouton pour accéder/créer la facture */}
 				{appointment.status === "COMPLETED" && (
 					<Button variant="outline" size="sm" asChild>
 						<Link
@@ -98,16 +99,28 @@ export function AppointmentCard({
 					</Button>
 				)}
 
-				{onEdit && (
-					<Button variant="outline" size="sm" onClick={onEdit}>
-						Modifier
-					</Button>
-				)}
-
-				{onCancel && appointment.status === "SCHEDULED" && (
-					<Button variant="destructive" size="sm" onClick={onCancel}>
-						Annuler
-					</Button>
+				{/* Pour les rendez-vous à venir, on montre les boutons modifier et annuler */}
+				{appointment.status === "SCHEDULED" && (
+					<>
+						<Button 
+							variant="outline" 
+							size="sm" 
+							asChild
+						>
+							<Link to={`/appointments/${appointment.id}/edit`}>
+								<Edit className="h-4 w-4 mr-1" />
+								Modifier
+							</Link>
+						</Button>
+						<Button 
+							variant="destructive" 
+							size="sm"
+							onClick={onCancel}
+						>
+							<X className="h-4 w-4 mr-1" />
+							Annuler
+						</Button>
+					</>
 				)}
 			</CardFooter>
     </Card>
