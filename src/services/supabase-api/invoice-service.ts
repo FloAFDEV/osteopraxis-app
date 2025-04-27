@@ -1,4 +1,3 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase, typedData } from "./utils";
 
@@ -88,6 +87,35 @@ export const supabaseInvoiceService = {
       });
     } catch (error) {
       console.error("Erreur getInvoicesByPatientId:", error);
+      throw error;
+    }
+  },
+
+  async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {
+    try {
+      const query = supabase
+        .from("Invoice")
+        .select("*")
+        .eq("appointmentId", appointmentId)
+        .order('date', { ascending: false });
+      
+      const { data, error } = await query;
+      
+      if (error) throw new Error(error.message);
+      
+      // Transform data with explicit typing
+      return (data || []).map(item => {
+        return {
+          id: item.id,
+          patientId: item.patientId,
+          appointmentId: item.appointmentId,
+          date: item.date,
+          amount: item.amount,
+          paymentStatus: item.paymentStatus as PaymentStatus
+        } as Invoice;
+      });
+    } catch (error) {
+      console.error("Erreur getInvoicesByAppointmentId:", error);
       throw error;
     }
   },
