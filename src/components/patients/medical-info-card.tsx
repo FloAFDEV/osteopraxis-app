@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 interface MedicalInfoCardProps {
   title: string;
   items: {
-    label: string;
+		label: string | JSX.Element;
     value: string | null | undefined;
     showSeparatorAfter?: boolean;
   }[];
