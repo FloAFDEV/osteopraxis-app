@@ -34,7 +34,6 @@ import {
 	Receipt,
 	Stethoscope,
 	User,
-	UserCheck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -409,39 +408,19 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 									title="Médecins et spécialistes"
 									items={[
 										{
-											label: (
-												<>
-													<UserCheck className="mr-2 h-5 w-5 inline" />
-													Médecin traitant
-												</>
-											),
+											label: "Médecin traitant",
 											value: patient.generalPractitioner,
 										},
 										{
-											label: (
-												<>
-													<UserCheck className="mr-2 h-5 w-5 inline" />
-													Ophtalmologiste
-												</>
-											),
+											label: "Ophtalmologiste",
 											value: patient.ophtalmologistName,
 										},
 										{
-											label: (
-												<>
-													<UserCheck className="mr-2 h-5 w-5 inline" />
-													ORL
-												</>
-											),
+											label: "ORL",
 											value: patient.entDoctorName,
 										},
 										{
-											label: (
-												<>
-													<UserCheck className="mr-2 h-5 w-5 inline" />
-													Gastro-entérologue
-												</>
-											),
+											label: "Gastro-entérologue",
 											value: patient.digestiveDoctorName,
 										},
 									]}
@@ -451,68 +430,33 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 									title="Antécédents médicaux"
 									items={[
 										{
-											label: (
-												<>
-													<FileText className="mr-2 h-5 w-5 inline" />
-													Traitement actuel
-												</>
-											),
+											label: "Traitement actuel",
 											value: patient.currentTreatment,
 											showSeparatorAfter: true,
 										},
 										{
-											label: (
-												<>
-													<FileText className="mr-2 h-5 w-5 inline" />
-													Antécédents chirurgicaux
-												</>
-											),
+											label: "Antécédents chirurgicaux",
 											value: patient.surgicalHistory,
 										},
 										{
-											label: (
-												<>
-													<FileText className="mr-2 h-5 w-5 inline" />
-													Antécédents traumatiques
-												</>
-											),
+											label: "Antécédents traumatiques",
 											value: patient.traumaHistory,
 										},
 										{
-											label: (
-												<>
-													<FileText className="mr-2 h-5 w-5 inline" />
-													Antécédents rhumatologiques
-												</>
-											),
+											label: "Antécédents rhumatologiques",
 											value: patient.rheumatologicalHistory,
 											showSeparatorAfter: true,
 										},
 										{
-											label: (
-												<>
-													<FileText className="mr-2 h-5 w-5 inline" />
-													Problèmes digestifs
-												</>
-											),
+											label: "Problèmes digestifs",
 											value: patient.digestiveProblems,
 										},
 										{
-											label: (
-												<>
-													<FileText className="mr-2 h-5 w-5 inline" />
-													Problèmes ORL
-												</>
-											),
+											label: "Problèmes ORL",
 											value: patient.entProblems,
 										},
 										{
-											label: (
-												<>
-													<FileText className="mr-2 h-5 w-5 inline" />
-													Correction visuelle
-												</>
-											),
+											label: "Correction visuelle",
 											value: patient.hasVisionCorrection
 												? "Oui"
 												: "Non",
