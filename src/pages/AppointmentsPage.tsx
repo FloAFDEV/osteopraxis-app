@@ -580,7 +580,7 @@ const AppointmentsPage = () => {
 												key={monthName}
 												className="mb-8"
 											>
-												<h3 className="text-2xl font-bold text-primary mb-4">
+												<h3 className="text-3xl font-bold text-primary mb-4 dark:text-amber-500 text-gray-800">
 													{monthName}
 												</h3>
 
