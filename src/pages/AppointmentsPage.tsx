@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Calendar, Filter, Search } from "lucide-react";
+import {
+	Plus,
+	Calendar,
+	Filter,
+	Search,
+	RefreshCw,
+	Clock,
+	Home,
+	ArrowRight,
+} from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { api } from "@/services/api";
@@ -9,6 +18,7 @@ import { Layout } from "@/components/ui/layout";
 import { AppointmentCard } from "@/components/appointment-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
 	Select,
 	SelectContent,
@@ -258,6 +268,7 @@ const AppointmentsPage = () => {
 								setRefreshKey((prev) => prev + 1);
 							}}
 						>
+							<RefreshCw className="mr-2 h-4 w-4" />
 							Actualiser
 						</Button>
 
@@ -345,9 +356,10 @@ const AppointmentsPage = () => {
 						{Object.keys(groupedPastAppointments).length > 0 && (
 							<div className="mt-2">
 								<h2
-									className="text-lg font-bold mb-4 bg-gray-200 text-gray-800 p-2 rounded-lg cursor-pointer"
+									className="text-lg font-bold mb-4 bg-gray-200 text-gray-800 p-2 rounded-lg cursor-pointer flex items-center"
 									onClick={() => setShowPast(!showPast)}
 								>
+									<Clock className="mr-2" />
 									{showPast ? "▼" : "►"} Rendez-vous passés
 								</h2>
 								{showPast && (
@@ -483,9 +495,10 @@ const AppointmentsPage = () => {
 						{Object.keys(groupedTodayAppointments).length > 0 && (
 							<div className="mt-2">
 								<h2
-									className="text-lg font-bold mb-4 bg-lime-400 text-black p-2 rounded-lg cursor-pointer"
+									className="text-lg font-bold mb-4 bg-lime-400 text-black p-2 rounded-lg cursor-pointer flex items-center"
 									onClick={() => setShowToday(!showToday)}
 								>
+									<Home className="mr-2 h-6 w-6" />
 									{showToday ? "▼" : "►"} Rendez-vous
 									aujourd'hui
 								</h2>
@@ -550,9 +563,10 @@ const AppointmentsPage = () => {
 						{Object.keys(groupedFutureAppointments).length > 0 && (
 							<div className="mt-2">
 								<h2
-									className="text-lg font-bold mb-4 bg-blue-200 text-blue-800 p-2 rounded-lg cursor-pointer"
+									className="text-lg font-bold mb-4 bg-blue-200 text-blue-800 p-2 rounded-lg cursor-pointer  flex items-center"
 									onClick={() => setShowFuture(!showFuture)}
 								>
+									<ArrowRight className="mr-2" />
 									{showFuture ? "▼" : "►"} Rendez-vous à venir
 								</h2>
 								{showFuture && (
