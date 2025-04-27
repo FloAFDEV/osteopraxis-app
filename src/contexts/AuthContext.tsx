@@ -9,6 +9,7 @@ import React, {
 import { User } from "@/types";
 import { api } from "@/services/api";
 import { supabase } from "@/services/supabase-api/utils";
+import { useAutoLogout } from "@/hooks/use-auto-logout";
 
 interface AuthState {
 	user: User | null;
@@ -327,6 +328,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			setIsLoading(false);
 		}
 	}, []);
+
+  // Add auto logout functionality when user is authenticated
+  const isAuthenticated = authState.isAuthenticated;
+  useAutoLogout();
 
 	return (
 		<AuthContext.Provider
