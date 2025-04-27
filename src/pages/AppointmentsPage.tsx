@@ -252,7 +252,7 @@ const AppointmentsPage = () => {
 	const numberOfAppointments = filteredPastAppointments.length;
 	return (
 		<Layout>
-			<div className="flex flex-col min-h-full">
+			<div className="flex flex-col min-h-full p-6">
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<Calendar className="h-8 w-8 text-purple-600" />
