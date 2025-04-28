@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -158,8 +157,10 @@ export const appointmentService = {
     } as Appointment;
   },
 
-  // Nouvelle méthode spécifique pour annuler un rendez-vous
+  // Méthode spécifique pour annuler un rendez-vous
   async cancelAppointment(id: number): Promise<Appointment> {
+    console.log(`Annulation du rendez-vous ${id}`);
+    
     if (USE_SUPABASE) {
       try {
         return await supabaseAppointmentService.cancelAppointment(id);

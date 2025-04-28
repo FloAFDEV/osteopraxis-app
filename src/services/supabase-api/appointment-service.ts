@@ -142,7 +142,17 @@ export const supabaseAppointmentService = {
           delete (updatePayload as any)[k]
       );
 
-      // 4. Appel POST en forçant PATCH + token explicite
+      // 4. Ajouter une option de bypass des contraintes pour les annulations
+      let extraHeaders = {};
+      if (updatePayload.status === "CANCELED") {
+        // Ajout d'un header spécial qui sera détecté par notre politique RLS
+        // pour autoriser l'annulation sans vérifier les conflits d'horaire
+        extraHeaders = {
+          "X-Cancellation-Override": "true"
+        };
+      }
+
+      // 5. Appel POST en forçant PATCH + token explicite
       const res = await fetch(PATCH_URL, {
         method: "POST",
         headers: {
@@ -151,6 +161,7 @@ export const supabaseAppointmentService = {
           "Content-Type": "application/json",
           Prefer: "return=representation",
           "X-HTTP-Method-Override": "PATCH",
+          ...extraHeaders
         },
         body: JSON.stringify(updatePayload),
       });
