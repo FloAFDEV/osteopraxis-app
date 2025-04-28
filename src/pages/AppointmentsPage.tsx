@@ -245,7 +245,7 @@ const AppointmentsPage = () => {
 				{/* Added responsive padding */}
 				{/* Section Titre et Actions */}
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-					<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800">
+					<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800 dark:text-white">
 						<Calendar className="h-7 w-7 sm:h-8 sm:w-8 text-purple-600" />
 						Rendez-vous
 					</h1>
