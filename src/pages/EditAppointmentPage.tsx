@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, AlertCircle, FileText } from "lucide-react";
+import { Calendar, AlertCircle, FileText, ChevronLeft } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -115,8 +115,20 @@ const EditAppointmentPage = () => {
 
 	return (
 		<Layout>
+			{/* Container for the page content */}
 			<div className="max-w-3xl mx-auto px-4 py-6">
-				{/* Titre et description */}
+				{/* Retour Button */}
+				<Button
+					variant="outline"
+					size="sm"
+					className="mb-6"
+					onClick={() => navigate(-1)} // Retour à la page précédente
+				>
+					<ChevronLeft className="mr-2 h-4 w-4" />
+					Retour
+				</Button>
+
+				{/* Header Section: Title and Description */}
 				<div className="mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<Calendar className="h-8 w-8 text-purple-500" />
@@ -128,7 +140,7 @@ const EditAppointmentPage = () => {
 					</p>
 				</div>
 
-				{/* Badge de statut */}
+				{/* Status Badge */}
 				<div className="mb-4">
 					<Badge
 						className={`${status.color} text-white py-1 px-3 rounded-md`}
@@ -137,7 +149,7 @@ const EditAppointmentPage = () => {
 					</Badge>
 				</div>
 
-				{/* Boutons d'action */}
+				{/* Action Buttons */}
 				<div className="flex flex-wrap gap-2 mb-6">
 					{appointment.status === "SCHEDULED" && (
 						<Button
@@ -162,7 +174,7 @@ const EditAppointmentPage = () => {
 					)}
 				</div>
 
-				{/* Formulaire de modification */}
+				{/* Appointment Form Section */}
 				<div className="bg-card rounded-lg border shadow-sm p-6">
 					<AppointmentForm
 						patients={patients}
