@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -12,6 +13,7 @@ import {
 	Home,
 	FileText,
 	UserPlus,
+	ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +28,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { LiveClock } from "@/components/ui/live-clock";
+
 interface LayoutProps {
 	children: React.ReactNode;
 }
@@ -62,6 +66,14 @@ export function Layout({ children }: LayoutProps) {
 								PatientHub
 							</span>
 						</NavLink>
+					</div>
+
+					{/* Horloge - visible uniquement sur desktop */}
+					<div className="hidden md:flex items-center">
+						<LiveClock 
+							className="text-sm font-medium px-3 py-1 rounded-full bg-muted/50 shadow-sm" 
+							showDate={false} 
+						/>
 					</div>
 
 					<button
@@ -198,6 +210,14 @@ export function Layout({ children }: LayoutProps) {
 			{isMenuOpen && (
 				<div className="md:hidden fixed inset-0 z-30 bg-background/95 pt-16">
 					<nav className="container py-4 flex flex-col gap-4">
+						{/* Horloge - visible uniquement sur mobile quand le menu est ouvert */}
+						<div className="flex items-center justify-center mb-4 py-2">
+							<LiveClock
+								className="text-sm font-medium px-3 py-1 rounded-full bg-muted/50 shadow-sm"
+								showDate={true}
+							/>
+						</div>
+
 						<NavLink
 							to="/"
 							className={({ isActive }) =>
