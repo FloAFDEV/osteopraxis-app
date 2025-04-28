@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -170,7 +171,8 @@ export const appointmentService = {
     
     // Mock: return updated appointment data with CANCELED status
     await delay(300);
-    // Cast as Appointment to fix type error
+    
+    // Pour les tests en mode mock, créer un rendez-vous complet avec date
     const mockedAppointment: Appointment = {
       id,
       status: "CANCELED",

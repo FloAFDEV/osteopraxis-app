@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle, FileText } from "lucide-react";
@@ -54,6 +55,7 @@ const EditAppointmentPage = () => {
     if (!appointment || !id) return;
     
     try {
+      // Nous passons uniquement l'ID, la méthode cancelAppointment s'occupera de préserver la date
       await api.cancelAppointment(parseInt(id));
       toast.success("Rendez-vous annulé avec succès");
       // Mettre à jour l'état local

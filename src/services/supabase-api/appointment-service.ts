@@ -176,7 +176,19 @@ export const supabaseAppointmentService = {
   
   // Méthode spécifique pour annuler un rendez-vous sans modifier l'heure
   async cancelAppointment(id: number): Promise<Appointment> {
-    return this.updateAppointment(id, { status: "CANCELED" });
+    try {
+      // D'abord, récupérer le rendez-vous pour avoir sa date
+      const appointment = await this.getAppointmentById(id);
+      
+      // Ensuite, mettre à jour le statut tout en conservant la date
+      return this.updateAppointment(id, { 
+        status: "CANCELED", 
+        date: appointment.date 
+      });
+    } catch (error) {
+      console.error("[SUPABASE ERROR]", error);
+      throw error;
+    }
   },
 
   async deleteAppointment(id: number): Promise<boolean> {
