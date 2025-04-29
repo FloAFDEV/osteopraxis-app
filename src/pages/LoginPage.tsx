@@ -143,7 +143,7 @@ const LoginPage = () => {
 
                     <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:opacity-90 transition-opacity" disabled={isLoading}>
                       {isLoading ? <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                          <div className="text-white animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
                           Se connecter...
                         </> : "Se connecter"}
                     </Button>
