@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -194,7 +193,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        // Utilisons la méthode du supabaseAppointmentService qui a été améliorée pour conserver la date
+        // Utilisons la méthode du supabaseAppointmentService qui a été améliorée pour ne pas envoyer la date
         return await supabaseAppointmentService.cancelAppointment(id);
       } catch (error) {
         console.error("Erreur Supabase cancelAppointment:", error);
