@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle, FileText, ChevronLeft } from "lucide-react";
@@ -7,7 +6,7 @@ import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatAppointmentDate } from "@/utils/date-utils";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +54,7 @@ const EditAppointmentPage = () => {
 		try {
 			setCancelingAppointment(true);
 			
-			// Utilisation directe de l'API pour annuler le rendez-vous sans conflit
+			// Utilisation directe de l'API pour annuler le rendez-vous
 			const result = await api.cancelAppointment(parseInt(id));
 			toast.success("Rendez-vous annulé avec succès");
 			setAppointment({ ...appointment, status: "CANCELED" });
@@ -115,9 +114,8 @@ const EditAppointmentPage = () => {
 	}
 
 	const appointmentDate = new Date(appointment.date);
-	const date = appointmentDate;
+	const formattedDate = formatAppointmentDate(appointment.date);
 	const time = format(appointmentDate, "HH:mm");
-	const formattedDate = format(appointmentDate, "EEEE d MMMM yyyy");
 
 	const status = getStatusBadge(appointment.status);
 
@@ -197,7 +195,7 @@ const EditAppointmentPage = () => {
 						patients={patients}
 						defaultValues={{
 							patientId: appointment.patientId,
-							date,
+							date: appointmentDate,
 							time,
 							reason: appointment.reason,
 							status: appointment.status,

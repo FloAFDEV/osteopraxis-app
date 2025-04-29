@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 
@@ -202,17 +201,31 @@ export const supabaseAppointmentService = {
       }
       const token = session.access_token;
 
-      // 2. Composez l'URL API - Utilise une constante directement
+      // 2. Récupérer d'abord le rendez-vous pour avoir sa date
+      const { data: appointment, error: fetchError } = await supabase
+        .from("Appointment")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (fetchError || !appointment) {
+        throw new Error(`Erreur lors de la récupération du rendez-vous: ${fetchError?.message || 'Rendez-vous non trouvé'}`);
+      }
+
+      // 3. Composez l'URL API - Utilise une constante directement
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
       const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
       
-      // 3. Préparer le payload avec seulement le status CANCELED
+      // 4. Préparer le payload avec le status CANCELED ET la date existante
       const updatePayload = {
         status: "CANCELED",
+        date: appointment.date, // Conserver la date existante!
         updatedAt: new Date().toISOString()
       };
 
-      // 4. Appel POST en forçant PATCH + token explicite + en-tête pour contourner la vérification de conflit
+      console.log("Payload pour annulation:", updatePayload);
+
+      // 5. Appel POST en forçant PATCH + token explicite + en-tête pour contourner la vérification de conflit
       const res = await fetch(PATCH_URL, {
         method: "POST",
         headers: {
@@ -227,7 +240,8 @@ export const supabaseAppointmentService = {
       });
 
       if (!res.ok) {
-        console.error("Erreur lors de l'annulation:", await res.text());
+        const errorText = await res.text();
+        console.error("Erreur lors de l'annulation:", errorText);
         throw new Error(`Erreur lors de l'annulation du rendez-vous: ${res.status}`);
       }
 
