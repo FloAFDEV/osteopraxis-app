@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle, FileText, ChevronLeft } from "lucide-react";
@@ -6,10 +7,11 @@ import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
-import { formatAppointmentDate } from "@/utils/date-utils";
+import { formatAppointmentDate, formatAppointmentTime } from "@/utils/date-utils";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 const EditAppointmentPage = () => {
 	const { id } = useParams<{ id: string }>();
