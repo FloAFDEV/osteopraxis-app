@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle, FileText, ChevronLeft } from "lucide-react";
@@ -17,6 +18,7 @@ const EditAppointmentPage = () => {
 	const [appointment, setAppointment] = useState<Appointment | null>(null);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [cancelingAppointment, setCancelingAppointment] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -51,12 +53,17 @@ const EditAppointmentPage = () => {
 		if (!appointment || !id) return;
 
 		try {
-			await api.cancelAppointment(parseInt(id));
+			setCancelingAppointment(true);
+			
+			// Utilisation directe de l'API pour annuler le rendez-vous sans conflit
+			const result = await api.cancelAppointment(parseInt(id));
 			toast.success("Rendez-vous annulé avec succès");
 			setAppointment({ ...appointment, status: "CANCELED" });
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
 			toast.error("Impossible d'annuler le rendez-vous.");
+		} finally {
+			setCancelingAppointment(false);
 		}
 	};
 
@@ -79,7 +86,7 @@ const EditAppointmentPage = () => {
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
 						<p className="text-muted-foreground">
-							Chargement des données...
+							Chargement des données du rendez-vous...
 						</p>
 					</div>
 				</div>
@@ -110,6 +117,7 @@ const EditAppointmentPage = () => {
 	const appointmentDate = new Date(appointment.date);
 	const date = appointmentDate;
 	const time = format(appointmentDate, "HH:mm");
+	const formattedDate = format(appointmentDate, "EEEE d MMMM yyyy");
 
 	const status = getStatusBadge(appointment.status);
 
@@ -123,6 +131,7 @@ const EditAppointmentPage = () => {
 					size="sm"
 					className="mb-6"
 					onClick={() => navigate(-1)} // Retour à la page précédente
+					aria-label="Retour à la page précédente"
 				>
 					<ChevronLeft className="mr-2 h-4 w-4" />
 					Retour
@@ -135,7 +144,7 @@ const EditAppointmentPage = () => {
 						Modifier le rendez-vous
 					</h1>
 					<p className="text-muted-foreground mt-1">
-						Modifiez les détails du rendez-vous en utilisant le
+						{formattedDate} à {time} - Modifiez les détails du rendez-vous en utilisant le
 						formulaire ci-dessous.
 					</p>
 				</div>
@@ -143,7 +152,7 @@ const EditAppointmentPage = () => {
 				{/* Status Badge */}
 				<div className="mb-4">
 					<Badge
-						className={`${status.color} text-white py-1 px-3 rounded-md`}
+						className={`${status.color} text-white py-1 px-3 rounded-md shadow-sm border border-white/10`}
 					>
 						{status.label}
 					</Badge>
@@ -156,8 +165,16 @@ const EditAppointmentPage = () => {
 							variant="destructive"
 							onClick={handleCancel}
 							aria-label="Annuler le rendez-vous"
+							disabled={cancelingAppointment}
 						>
-							Annuler le rendez-vous
+							{cancelingAppointment ? (
+								<>
+									<span className="animate-spin mr-2">⏳</span>
+									Annulation en cours...
+								</>
+							) : (
+								"Annuler le rendez-vous"
+							)}
 						</Button>
 					)}
 
@@ -165,7 +182,7 @@ const EditAppointmentPage = () => {
 						<Button variant="outline" asChild>
 							<Link
 								to={`/invoices/new?appointmentId=${appointment.id}`}
-								aria-label="Créer une facture"
+								aria-label="Créer une facture pour ce rendez-vous"
 							>
 								<FileText className="h-4 w-4 mr-2" />
 								Créer une facture

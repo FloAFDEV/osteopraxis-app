@@ -188,14 +188,56 @@ export const supabaseAppointmentService = {
   // Méthode spécifique pour annuler un rendez-vous sans modifier l'heure
   async cancelAppointment(id: number): Promise<Appointment> {
     try {
-      // D'abord, récupérer le rendez-vous pour avoir sa date
-      const appointment = await this.getAppointmentById(id);
+      // Pour contourner le problème de conflit lors de l'annulation,
+      // nous utilisons directement la requête API avec l'en-tête X-Cancellation-Override
       
-      // Ensuite, mettre à jour le statut tout en conservant la date
-      return this.updateAppointment(id, { 
-        status: "CANCELED", 
-        date: appointment.date 
+      // 1. Récupérer le token d'auth utilisateur
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      const token = session.access_token;
+
+      // 2. Composez l'URL API - Utilise une constante directement
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
+      const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
+      
+      // 3. Préparer le payload avec seulement le status CANCELED
+      const updatePayload = {
+        status: "CANCELED",
+        updatedAt: new Date().toISOString()
+      };
+
+      // 4. Appel POST en forçant PATCH + token explicite + en-tête pour contourner la vérification de conflit
+      const res = await fetch(PATCH_URL, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          "X-HTTP-Method-Override": "PATCH",
+          "X-Cancellation-Override": "true" // En-tête spécial pour contourner le contrôle de conflit
+        },
+        body: JSON.stringify(updatePayload),
       });
+
+      if (!res.ok) {
+        console.error("Erreur lors de l'annulation:", await res.text());
+        throw new Error(`Erreur lors de l'annulation du rendez-vous: ${res.status}`);
+      }
+
+      // La réponse est toujours un array d'1 element via PostgREST
+      const data = await res.json();
+      console.log("Réponse d'annulation:", data);
+      if (Array.isArray(data) && data.length > 0) return data[0];
+      // fallback : parfois selon Prefer/headers c'est un objet direct
+      if (data && typeof data === "object") return data as Appointment;
+      throw new Error("Aucune donnée retournée lors de l'annulation du rendez-vous");
     } catch (error) {
       console.error("[SUPABASE ERROR]", error);
       throw error;

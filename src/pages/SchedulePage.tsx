@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -13,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom"; // ajout useNavigate
+import { Link, useNavigate } from "react-router-dom";
 
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -22,7 +23,8 @@ const SchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
   const [view, setView] = useState<"day" | "week">("week");
-  const navigate = useNavigate(); // Hook pour rediriger
+  const [cancelingAppointmentId, setCancelingAppointmentId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,6 +74,7 @@ const SchedulePage = () => {
 
   const handleCancelAppointment = async (appointmentId: number) => {
     try {
+      setCancelingAppointmentId(appointmentId);
       await api.cancelAppointment(appointmentId);
       toast.success("Rendez-vous annulé avec succès");
       const updatedAppointments = appointments.map(appointment => 
@@ -83,6 +86,8 @@ const SchedulePage = () => {
     } catch (error) {
       console.error("Error cancelling appointment:", error);
       toast.error("Impossible d'annuler le rendez-vous");
+    } finally {
+      setCancelingAppointmentId(null);
     }
   };
 
@@ -187,6 +192,7 @@ const SchedulePage = () => {
                   appointments={getDayAppointments(selectedDate)}
                   getPatientById={getPatientById}
                   onCancelAppointment={handleCancelAppointment}
+                  cancelingAppointmentId={cancelingAppointmentId}
                 />
               </div>
             </TabsContent>
@@ -228,6 +234,7 @@ const SchedulePage = () => {
                         onClick={() => handleDayHeaderClick(day)}
                         tabIndex={0}
                         title={`Ajouter un rendez-vous le ${format(day, "d MMMM yyyy", { locale: fr })}`}
+                        aria-label={`Ajouter un rendez-vous le ${format(day, "d MMMM yyyy", { locale: fr })}`}
                       >
                         <div className="font-medium">
                           {format(day, "EEEE", {
@@ -253,6 +260,7 @@ const SchedulePage = () => {
                           {getDayAppointments(day).map((appointment) => {
                             const patient = getPatientById(appointment.patientId);
                             const appointmentTime = format(parseISO(appointment.date), "HH:mm");
+                            const isCanceling = cancelingAppointmentId === appointment.id;
                             return (
                               <Card key={appointment.id} className="hover-scale">
                                 <CardContent className="p-3">
@@ -291,13 +299,15 @@ interface DayScheduleProps {
   appointments: Appointment[];
   getPatientById: (id: number) => Patient | undefined;
   onCancelAppointment: (id: number) => void;
+  cancelingAppointmentId: number | null;
 }
 
 const DaySchedule = ({
   date,
   appointments,
   getPatientById,
-  onCancelAppointment
+  onCancelAppointment,
+  cancelingAppointmentId
 }: DayScheduleProps) => {
   // Generate time slots for the day (8am to 8pm)
   const timeSlots = Array.from({
@@ -325,6 +335,8 @@ const DaySchedule = ({
       {displayTimeSlots.map(timeSlot => {
       const appointment = getAppointmentForTimeSlot(timeSlot);
       const isCurrentTime = format(new Date(), "HH:mm") === timeSlot && isSameDay(date, new Date());
+      const isCanceling = appointment && cancelingAppointmentId === appointment.id;
+      
       return <div key={timeSlot} className={cn("flex border-b last:border-b-0 transition-colors", isCurrentTime ? "bg-primary/5" : "hover:bg-muted/50")}>
             <div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center">
               <span className={cn("text-sm font-medium", isCurrentTime ? "text-primary" : "text-muted-foreground")}>
@@ -347,13 +359,13 @@ const DaySchedule = ({
                   </div>
                   <div className="flex gap-2">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/invoices/new?appointmentId=${appointment.id}`}>
+                      <Link to={`/invoices/new?appointmentId=${appointment.id}`} aria-label="Créer une facture pour ce rendez-vous">
                         <FileText className="h-4 w-4 mr-1" />
                         Facture
                       </Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/appointments/${appointment.id}/edit`}>
+                      <Link to={`/appointments/${appointment.id}/edit`} aria-label="Voir les détails du rendez-vous">
                         Détails
                       </Link>
                     </Button>
@@ -362,11 +374,22 @@ const DaySchedule = ({
                       size="sm" 
                       className="text-destructive hover:bg-destructive/10"
                       onClick={() => onCancelAppointment(appointment.id)}
+                      disabled={isCanceling}
+                      aria-label="Annuler ce rendez-vous"
                     >
-                      Annuler
+                      {isCanceling ? (
+                        <span className="flex items-center">
+                          <span className="animate-spin mr-1">⏳</span>
+                          Annulation...
+                        </span>
+                      ) : "Annuler"}
                     </Button>
                   </div>
-                </div> : <Link to={`/appointments/new?date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}`} className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary">
+                </div> : <Link 
+                  to={`/appointments/new?date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}`} 
+                  className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary"
+                  aria-label={`Créer un rendez-vous le ${format(date, 'd MMMM yyyy', { locale: fr })} à ${timeSlot}`}
+                >
                   <span className="text-center">Disponible</span>
                 </Link>}
             </div>

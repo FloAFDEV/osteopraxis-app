@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -163,7 +164,24 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.cancelAppointment(id);
+        // N'utilisons plus la méthode supabaseAppointmentService.cancelAppointment qui a des problèmes de vérification de conflit
+        // Mais mettons directement à jour le statut sans utiliser la méthode qui vérifie les conflits
+        // Cela contourne le problème de validation de conflit d'horaire lors des annulations
+        
+        // Mise à jour directe du statut à CANCELED, sans passer par la méthode qui vérifie les conflits
+        const { data, error } = await supabase
+          .from("Appointment")
+          .update({ status: "CANCELED" })
+          .eq("id", id)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Erreur lors de l'annulation du rendez-vous:", error);
+          throw error;
+        }
+        
+        return data;
       } catch (error) {
         console.error("Erreur Supabase cancelAppointment:", error);
         throw error;
