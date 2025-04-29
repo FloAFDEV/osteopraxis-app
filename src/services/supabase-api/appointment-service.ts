@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 
@@ -209,13 +210,16 @@ export const supabaseAppointmentService = {
         throw new Error(`Erreur lors de la récupération du rendez-vous: ${fetchError?.message || 'Rendez-vous non trouvé'}`);
       }
 
+      console.log("Rendez-vous récupéré pour annulation:", appointment);
+
       // 3. Composez l'URL API - Utilise une constante directement
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
       const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
       
-      // 4. Préparer le payload avec UNIQUEMENT le status CANCELED (sans date)
+      // 4. Préparer le payload avec le status CANCELED ET la date existante
       const updatePayload = {
         status: "CANCELED",
+        date: appointment.date, // IMPORTANT: Conserver la date existante!
         updatedAt: new Date().toISOString()
       };
 
