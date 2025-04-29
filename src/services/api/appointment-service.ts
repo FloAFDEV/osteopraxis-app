@@ -2,6 +2,8 @@
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
+import { supabase } from "@/integrations/supabase/client";
 
 // Type guard pour vérifier si une valeur est une Date
 function isDate(value: unknown): value is Date {
@@ -27,11 +29,32 @@ export class AppointmentConflictError extends Error {
   }
 }
 
+// Fuseau horaire pour la France
+const TIMEZONE = "Europe/Paris";
+
+// Fonction pour convertir une date locale en UTC
+function convertToUTC(date: Date | string): string {
+  if (isDate(date)) {
+    // Utilise fromZonedTime (anciennement zonedTimeToUtc) pour convertir de l'heure locale à UTC
+    return fromZonedTime(date, TIMEZONE).toISOString();
+  }
+  return date.toString();
+}
+
+// Fonction pour convertir une date UTC en heure locale
+function convertToLocalTime(date: string | Date): Date {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  // Utilise toZonedTime (anciennement utcToZonedTime) pour convertir de UTC à l'heure locale
+  return toZonedTime(dateObj, TIMEZONE);
+}
+
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.getAppointments();
+        const appointments = await supabaseAppointmentService.getAppointments();
+        // Pas besoin de convertir ici car on veut garder le format ISO pour les dates
+        return appointments;
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
         throw error;
@@ -87,7 +110,10 @@ export const appointmentService = {
           ...appointment,
           notificationSent: appointment.notificationSent ?? false,
           status: normalizeStatus(appointment.status),
-          date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date
+          // Conversion de la date locale en UTC pour le stockage
+          date: isDate(appointment.date) 
+            ? convertToUTC(appointment.date) 
+            : appointment.date
         };
         
         // Pas besoin d'inclure createdAt/updatedAt car ils seront gérés par la DB
@@ -110,7 +136,7 @@ export const appointmentService = {
     return {
       ...appointment,
       id: Math.floor(Math.random() * 1000),
-      date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
+      date: isDate(appointment.date) ? convertToUTC(appointment.date) : appointment.date,
       notificationSent: appointment.notificationSent ?? false,
       status: normalizeStatus(appointment.status),
       createdAt: now,
@@ -125,7 +151,9 @@ export const appointmentService = {
         const payload: Partial<Appointment> = { ...appointment };
         
         if (appointment.date) {
-          payload.date = isDate(appointment.date) ? appointment.date.toISOString() : appointment.date;
+          payload.date = isDate(appointment.date) 
+            ? convertToUTC(appointment.date) 
+            : appointment.date;
         }
         
         if (appointment.status) {
@@ -152,7 +180,9 @@ export const appointmentService = {
     return {
       ...appointment,
       id,
-      date: isDate(appointment.date) ? appointment.date.toISOString() : appointment.date,
+      date: isDate(appointment.date) 
+        ? convertToUTC(appointment.date) 
+        : appointment.date,
       status: appointment.status ? normalizeStatus(appointment.status) : "SCHEDULED",
       updatedAt: now
     } as Appointment;
@@ -164,24 +194,8 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        // N'utilisons plus la méthode supabaseAppointmentService.cancelAppointment qui a des problèmes de vérification de conflit
-        // Mais mettons directement à jour le statut sans utiliser la méthode qui vérifie les conflits
-        // Cela contourne le problème de validation de conflit d'horaire lors des annulations
-        
-        // Mise à jour directe du statut à CANCELED, sans passer par la méthode qui vérifie les conflits
-        const { data, error } = await supabase
-          .from("Appointment")
-          .update({ status: "CANCELED" })
-          .eq("id", id)
-          .select()
-          .single();
-        
-        if (error) {
-          console.error("Erreur lors de l'annulation du rendez-vous:", error);
-          throw error;
-        }
-        
-        return data;
+        // Utilisons la méthode du supabaseAppointmentService qui contourne le problème
+        return await supabaseAppointmentService.cancelAppointment(id);
       } catch (error) {
         console.error("Erreur Supabase cancelAppointment:", error);
         throw error;
