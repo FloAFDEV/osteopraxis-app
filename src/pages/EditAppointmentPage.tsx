@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle, FileText, ChevronLeft } from "lucide-react";
-import { api } from "@/services/api";
+import { api } from "@/services/api/index";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
