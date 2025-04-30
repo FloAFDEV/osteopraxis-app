@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 
@@ -207,33 +206,21 @@ export const supabaseAppointmentService = {
       }
       const token = session.access_token;
 
-      // 2. Récupérer d'abord le rendez-vous pour avoir sa date
-      const { data: appointment, error: fetchError } = await supabase
-        .from("Appointment")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (fetchError || !appointment) {
-        throw new Error(`Erreur lors de la récupération du rendez-vous: ${fetchError?.message || 'Rendez-vous non trouvé'}`);
-      }
-
-      console.log("Rendez-vous récupéré pour annulation:", appointment);
-
-      // 3. Composez l'URL API - Utilise une constante directement
+      // Récupérer la constante SUPABASE_ANON_KEY - IMPORTANT: ne pas utiliser process.env dans le navigateur
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
       const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
       
-      // 4. Préparer le payload avec le status CANCELED ET la date existante
+      console.log(`Annulation du rendez-vous ${id} - envoi direct à ${PATCH_URL}`);
+      
+      // Simplifier le payload - UNIQUEMENT le statut et updatedAt
       const updatePayload = {
         status: "CANCELED",
-        date: appointment.date, // IMPORTANT: Conserver la date existante!
         updatedAt: new Date().toISOString()
       };
 
-      console.log("Payload pour annulation:", updatePayload);
+      console.log("Payload d'annulation simplifié:", updatePayload);
 
-      // 5. Appel POST en forçant PATCH + token explicite + en-tête pour contourner la vérification de conflit
+      // Appel avec X-Cancellation-Override pour signaler aux politiques RLS que c'est une annulation
       const res = await fetch(PATCH_URL, {
         method: "POST",
         headers: {
@@ -242,7 +229,7 @@ export const supabaseAppointmentService = {
           "Content-Type": "application/json",
           Prefer: "return=representation",
           "X-HTTP-Method-Override": "PATCH",
-          "X-Cancellation-Override": "true", // En-tête spécial pour contourner le contrôle de conflit
+          "X-Cancellation-Override": "true", // En-tête critique pour contourner la vérification de conflit
           ...corsHeaders
         },
         body: JSON.stringify(updatePayload),
@@ -250,15 +237,14 @@ export const supabaseAppointmentService = {
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("Erreur lors de l'annulation:", errorText);
+        console.error("Erreur HTTP lors de l'annulation:", res.status, errorText);
         throw new Error(`Erreur lors de l'annulation du rendez-vous: ${res.status}`);
       }
 
-      // La réponse est toujours un array d'1 element via PostgREST
+      // Traitement de la réponse
       const data = await res.json();
       console.log("Réponse d'annulation:", data);
       if (Array.isArray(data) && data.length > 0) return data[0];
-      // fallback : parfois selon Prefer/headers c'est un objet direct
       if (data && typeof data === "object") return data as Appointment;
       throw new Error("Aucune donnée retournée lors de l'annulation du rendez-vous");
     } catch (error) {

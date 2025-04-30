@@ -175,7 +175,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        // Utilisons la méthode du supabaseAppointmentService qui a été améliorée pour ne pas envoyer la date
+        // Utiliser directement la méthode du supabaseAppointmentService modifiée pour les annulations
         return await supabaseAppointmentService.cancelAppointment(id);
       } catch (error) {
         console.error("Erreur Supabase cancelAppointment:", error);

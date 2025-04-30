@@ -191,11 +191,8 @@ const AppointmentsPage = () => {
 			setAppointmentToCancel(null); // Close dialog immediately
 			toast.success("Rendez-vous annulé avec succès");
 
-			// Utiliser directement la méthode cancelAppointment au lieu de updateAppointment
+			// Utiliser la méthode spécifique d'annulation
 			await api.cancelAppointment(originalAppointment.id);
-			
-			// Optionally trigger refresh if optimistic update isn't enough
-			// setRefreshKey((prev) => prev + 1);
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
 			toast.error(
@@ -210,7 +207,6 @@ const AppointmentsPage = () => {
 				)
 			);
 		}
-		// No finally block needed for setAppointmentToCancel(null) as it's done earlier
 	};
 
 	// --- Data Preparation for Rendering ---
