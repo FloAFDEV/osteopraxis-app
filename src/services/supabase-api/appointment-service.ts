@@ -31,6 +31,13 @@ function normalizeStatus(status?: string): AppointmentStatus {
   return (status as AppointmentStatus) ?? "SCHEDULED";
 }
 
+// CORS headers configuration
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, X-Cancellation-Override, X-HTTP-Method-Override',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS'
+};
+
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     try {
@@ -161,6 +168,7 @@ export const supabaseAppointmentService = {
           "Content-Type": "application/json",
           Prefer: "return=representation",
           "X-HTTP-Method-Override": "PATCH",
+          ...corsHeaders,
           ...extraHeaders
         },
         body: JSON.stringify(updatePayload),
@@ -234,7 +242,8 @@ export const supabaseAppointmentService = {
           "Content-Type": "application/json",
           Prefer: "return=representation",
           "X-HTTP-Method-Override": "PATCH",
-          "X-Cancellation-Override": "true" // En-tête spécial pour contourner le contrôle de conflit
+          "X-Cancellation-Override": "true", // En-tête spécial pour contourner le contrôle de conflit
+          ...corsHeaders
         },
         body: JSON.stringify(updatePayload),
       });

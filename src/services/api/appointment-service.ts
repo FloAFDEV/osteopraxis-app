@@ -1,7 +1,8 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
+import { convertLocalToUTC, convertUTCToLocal } from "@/utils/date-utils";
 import { supabase } from "@/integrations/supabase/client";
 
 // Type guard pour vérifier si une valeur est une Date
@@ -26,25 +27,6 @@ export class AppointmentConflictError extends Error {
     super(message);
     this.name = 'AppointmentConflictError';
   }
-}
-
-// Fuseau horaire pour la France
-const TIMEZONE = "Europe/Paris";
-
-// Fonction pour convertir une date locale en UTC
-function convertToUTC(date: Date | string): string {
-  if (isDate(date)) {
-    // Utilise fromZonedTime (anciennement zonedTimeToUtc) pour convertir de l'heure locale à UTC
-    return fromZonedTime(date, TIMEZONE).toISOString();
-  }
-  return date.toString();
-}
-
-// Fonction pour convertir une date UTC en heure locale
-function convertToLocalTime(date: string | Date): Date {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  // Utilise toZonedTime (anciennement utcToZonedTime) pour convertir de UTC à l'heure locale
-  return toZonedTime(dateObj, TIMEZONE);
 }
 
 export const appointmentService = {
@@ -104,14 +86,14 @@ export const appointmentService = {
   async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        // Convertir la date si nécessaire et normaliser le status
+        // Convertir la date locale en UTC pour le stockage
         const payload = {
           ...appointment,
           notificationSent: appointment.notificationSent ?? false,
           status: normalizeStatus(appointment.status),
-          // Conversion de la date locale en UTC pour le stockage
+          // Conversion explicite de la date locale en UTC
           date: isDate(appointment.date) 
-            ? convertToUTC(appointment.date) 
+            ? convertLocalToUTC(appointment.date) 
             : appointment.date
         };
         
@@ -135,7 +117,7 @@ export const appointmentService = {
     return {
       ...appointment,
       id: Math.floor(Math.random() * 1000),
-      date: isDate(appointment.date) ? convertToUTC(appointment.date) : appointment.date,
+      date: isDate(appointment.date) ? convertLocalToUTC(appointment.date) : appointment.date,
       notificationSent: appointment.notificationSent ?? false,
       status: normalizeStatus(appointment.status),
       createdAt: now,
@@ -146,12 +128,12 @@ export const appointmentService = {
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        // Convertir la date si nécessaire et normaliser le status
+        // Convertir la date locale en UTC pour le stockage
         const payload: Partial<Appointment> = { ...appointment };
         
         if (appointment.date) {
           payload.date = isDate(appointment.date) 
-            ? convertToUTC(appointment.date) 
+            ? convertLocalToUTC(appointment.date) 
             : appointment.date;
         }
         
@@ -180,7 +162,7 @@ export const appointmentService = {
       ...appointment,
       id,
       date: isDate(appointment.date) 
-        ? convertToUTC(appointment.date) 
+        ? convertLocalToUTC(appointment.date) 
         : appointment.date,
       status: appointment.status ? normalizeStatus(appointment.status) : "SCHEDULED",
       updatedAt: now

@@ -116,7 +116,7 @@ const EditAppointmentPage = () => {
 
 	const appointmentDate = new Date(appointment.date);
 	const formattedDate = formatAppointmentDate(appointment.date);
-	const time = format(appointmentDate, "HH:mm");
+	const time = formatAppointmentTime(appointment.date);
 
 	const status = getStatusBadge(appointment.status);
 
@@ -143,7 +143,7 @@ const EditAppointmentPage = () => {
 						Modifier le rendez-vous
 					</h1>
 					<p className="text-muted-foreground mt-1">
-						{formattedDate} à {time} - Modifiez les détails du rendez-vous en utilisant le
+						{formattedDate} - Modifiez les détails du rendez-vous en utilisant le
 						formulaire ci-dessous.
 					</p>
 				</div>
