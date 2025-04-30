@@ -130,7 +130,7 @@ export const InvoicePrintView = ({
 						<p className="font-medium text-amber-600">
 							n° #{invoice.id.toString().padStart(4, "0")}
 						</p>
-						<p className="mt-4 text-gray-600">
+						<p className="mt-4 text-gray-600 whitespace-nowrap">
 							Date de consultation: {formattedDate}
 						</p>
 					</div>
@@ -234,7 +234,7 @@ export const InvoicePrintView = ({
 					confiance.
 				</p>
 <div className="flex flex-wrap justify-center items-center gap-2 text-gray-500 text-xs break-all text-center">
-					<span>Document généré le {currentDate}</span>
+					<span className="whitespace-nowrap">Document généré le {currentDate}</span>
 					<span>|</span>
 					<span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">
 						PatientHub
