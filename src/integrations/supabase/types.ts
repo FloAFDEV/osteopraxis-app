@@ -20,6 +20,7 @@ export type Database = {
           reason: string
           status: Database["public"]["Enums"]["AppointmentStatus"]
           updatedAt: string
+          user_id: string | null
         }
         Insert: {
           cabinetId?: number | null
@@ -31,6 +32,7 @@ export type Database = {
           reason: string
           status: Database["public"]["Enums"]["AppointmentStatus"]
           updatedAt?: string
+          user_id?: string | null
         }
         Update: {
           cabinetId?: number | null
@@ -42,6 +44,7 @@ export type Database = {
           reason?: string
           status?: Database["public"]["Enums"]["AppointmentStatus"]
           updatedAt?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -79,6 +82,7 @@ export type Database = {
           osteopathId: number
           phone: string | null
           professionalProfileId: number | null
+          tenant_id: string | null
           updatedAt: string
         }
         Insert: {
@@ -92,6 +96,7 @@ export type Database = {
           osteopathId: number
           phone?: string | null
           professionalProfileId?: number | null
+          tenant_id?: string | null
           updatedAt?: string
         }
         Update: {
@@ -105,6 +110,7 @@ export type Database = {
           osteopathId?: number
           phone?: string | null
           professionalProfileId?: number | null
+          tenant_id?: string | null
           updatedAt?: string
         }
         Relationships: [

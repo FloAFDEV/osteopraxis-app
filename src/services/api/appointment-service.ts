@@ -2,8 +2,7 @@
 import { Appointment, AppointmentStatus } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { convertLocalToUTC, convertUTCToLocal } from "@/utils/date-utils";
-import { supabase } from "@/integrations/supabase/client";
+import { convertLocalToUTC } from "@/utils/date-utils";
 
 // Type guard pour vérifier si une valeur est une Date
 function isDate(value: unknown): value is Date {
@@ -34,7 +33,6 @@ export const appointmentService = {
     if (USE_SUPABASE) {
       try {
         const appointments = await supabaseAppointmentService.getAppointments();
-        // Pas besoin de convertir ici car on veut garder le format ISO pour les dates
         return appointments;
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
@@ -144,7 +142,7 @@ export const appointmentService = {
         // Ne pas inclure ces champs car ils sont gérés automatiquement par la DB
         delete (payload as any).createdAt;
         delete (payload as any).updatedAt;
-          
+        
         return await supabaseAppointmentService.updateAppointment(id, payload);
       } catch (error: any) {
         if (error.message?.includes('Un rendez-vous existe déjà sur ce créneau horaire')) {

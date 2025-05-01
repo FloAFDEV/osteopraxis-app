@@ -10,3 +10,6 @@ export { typedData, ensureAppointmentStatus, AppointmentStatusValues } from './s
 
 // Export date utilities
 export { convertLocalToUTC, convertUTCToLocal, formatAppointmentDate, formatAppointmentTime } from '@/utils/date-utils';
+
+// Export API errors for better handling
+export { AppointmentConflictError } from './api/appointment-service';

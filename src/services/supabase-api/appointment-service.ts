@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 
@@ -118,7 +119,6 @@ export const supabaseAppointmentService = {
   },
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
-    // ============ NOUVELLE LOGIQUE PATCH EN POST + X-HTTP-Method-Override ============
     try {
       // 1. Récupérer le token d'auth utilisateur
       const {
@@ -131,10 +131,11 @@ export const supabaseAppointmentService = {
       }
       const token = session.access_token;
 
-      // 2. Composez l'URL API - Utilise une constante directement au lieu de process.env
-      // Ne pas utiliser process.env qui cause l'erreur dans le navigateur
+      // 2. Extraire les constantes pour l'URL et la clé API
+      // Ne pas utiliser les variables d'environnement qui causent des problèmes dans le navigateur
+      const SUPABASE_URL = "https://jpjuvzpqfirymtjwnier.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
-      const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
+      const PATCH_URL = `${SUPABASE_URL}/rest/v1/Appointment?id=eq.${id}`;
 
       // 3. Préparer le payload (nettoyage undefined)
       const updatePayload = {
@@ -142,6 +143,8 @@ export const supabaseAppointmentService = {
         status: update.status ? normalizeStatus(update.status) : undefined,
         updatedAt: new Date().toISOString(),
       };
+      
+      // Supprimer les champs undefined pour ne pas les envoyer dans la requête
       Object.keys(updatePayload).forEach(
         (k) =>
           (updatePayload as any)[k] === undefined &&
@@ -160,13 +163,13 @@ export const supabaseAppointmentService = {
 
       // 5. Appel POST en forçant PATCH + token explicite
       const res = await fetch(PATCH_URL, {
-        method: "POST",
+        method: "POST", // On utilise POST mais avec un override pour PATCH
         headers: {
           apikey: SUPABASE_ANON_KEY,
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Prefer: "return=representation",
-          "X-HTTP-Method-Override": "PATCH",
+          "X-HTTP-Method-Override": "PATCH", // Important pour que PostgREST traite comme PATCH
           ...corsHeaders,
           ...extraHeaders
         },
@@ -206,9 +209,10 @@ export const supabaseAppointmentService = {
       }
       const token = session.access_token;
 
-      // Récupérer la constante SUPABASE_ANON_KEY - IMPORTANT: ne pas utiliser process.env dans le navigateur
+      // Extraire les constantes pour l'URL et la clé API
+      const SUPABASE_URL = "https://jpjuvzpqfirymtjwnier.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
-      const PATCH_URL = `https://jpjuvzpqfirymtjwnier.supabase.co/rest/v1/Appointment?id=eq.${id}`;
+      const PATCH_URL = `${SUPABASE_URL}/rest/v1/Appointment?id=eq.${id}`;
       
       console.log(`Annulation du rendez-vous ${id} - envoi direct à ${PATCH_URL}`);
       
