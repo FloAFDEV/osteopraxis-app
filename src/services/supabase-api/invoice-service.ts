@@ -54,7 +54,9 @@ export const supabaseInvoiceService = {
         appointmentId: data.appointmentId,
         date: data.date,
         amount: data.amount,
-        paymentStatus: data.paymentStatus as PaymentStatus
+        paymentStatus: data.paymentStatus as PaymentStatus,
+        				paymentMethod: data.paymentMethod,
+
       } as Invoice;
     } catch (error) {
       console.error("Erreur getInvoiceById:", error);
