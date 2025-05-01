@@ -45,13 +45,11 @@ const InvoiceDetailPage = () => {
 			if (!id) return;
 
 			try {
-				console.log(`Chargement des données de la facture ID: ${id}`);
 				setLoading(true);
 
 				// Vérification que api.getInvoiceById existe avant de l'appeler
 				if (typeof api.getInvoiceById === "function") {
 					const invoiceData = await api.getInvoiceById(parseInt(id));
-					console.log("Données de facture récupérées:", invoiceData);
 
 					if (invoiceData) {
 						setInvoice(invoiceData);
@@ -59,16 +57,10 @@ const InvoiceDetailPage = () => {
 						// Charger les données du patient associé
 						if (invoiceData.patientId) {
 							try {
-								console.log(
-									`Chargement des données du patient ID: ${invoiceData.patientId}`
-								);
 								const patientData = await api.getPatientById(
 									invoiceData.patientId
 								);
-								console.log(
-									"Données de patient récupérées:",
-									patientData
-								);
+
 								setPatient(patientData || null);
 
 								// Si le patient a un osteopathId, utiliser celui-ci pour charger l'ostéopathe
@@ -78,42 +70,23 @@ const InvoiceDetailPage = () => {
 
 								if (osteopathId) {
 									try {
-										console.log(
-											`Chargement des données de l'ostéopathe ID: ${osteopathId}`
-										);
 										const osteopathData =
 											await api.getOsteopathById(
 												osteopathId
 											);
-										console.log(
-											"Données d'ostéopathe récupérées:",
-											osteopathData
-										);
 										setOsteopath(osteopathData || null);
-
 										// Charger les données du cabinet associé à l'ostéopathe
 										if (osteopathData?.id) {
 											try {
-												console.log(
-													`Chargement des données du cabinet pour l'ostéopathe ID: ${osteopathData.id}`
-												);
 												const cabinets =
 													await api.getCabinetsByOsteopathId(
 														osteopathData.id
 													);
-												console.log(
-													"Données de cabinets récupérées:",
-													cabinets
-												);
 
 												if (
 													cabinets &&
 													cabinets.length > 0
 												) {
-													console.log(
-														"Cabinet sélectionné:",
-														cabinets[0]
-													);
 													setCabinet(cabinets[0]);
 												}
 											} catch (cabinetError) {
