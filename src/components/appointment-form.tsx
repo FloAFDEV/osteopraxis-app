@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
@@ -27,7 +28,7 @@ const isAppointmentInPast = (date: Date, timeString: string) => {
   return isBefore(appointmentDateTime, now);
 };
 
-// Create the schema with proper context
+// Create schema base
 const appointmentFormSchema = z.object({
   patientId: z.number({
     required_error: "Veuillez sélectionner un patient"
@@ -45,19 +46,23 @@ const appointmentFormSchema = z.object({
   status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "CANCELED", "RESCHEDULED", "NO_SHOW"], {
     required_error: "Veuillez sélectionner un statut"
   })
-}).refine((data, ctx) => {
-  // Pour les nouveaux rendez-vous seulement, vérifier que le temps n'est pas dans le passé
-  // We access isEditing from the context
-  const isEditing = ctx.path?.[0] === 'isEditing' ? true : false;
-  
-  if (!isEditing && isSameDay(data.date, new Date())) {
-    return !isAppointmentInPast(data.date, data.time);
-  }
-  return true;
-}, {
-  message: "Vous ne pouvez pas prendre un rendez-vous dans le passé",
-  path: ["time"]
 });
+
+// Create a custom refinement function that properly handles the context
+const refinePastAppointments = (isEditing: boolean) => {
+  return appointmentFormSchema.superRefine((data, ctx) => {
+    // Pour les nouveaux rendez-vous seulement, vérifier que le temps n'est pas dans le passé
+    if (!isEditing && isSameDay(data.date, new Date())) {
+      if (isAppointmentInPast(data.date, data.time)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Vous ne pouvez pas prendre un rendez-vous dans le passé",
+          path: ["time"]
+        });
+      }
+    }
+  });
+};
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
@@ -87,19 +92,20 @@ export function AppointmentForm({
   const [useCustomTime, setUseCustomTime] = useState(false);
   const [patientSearch, setPatientSearch] = useState(""); // <-- Ajout de l'état de recherche
 
+  // Use the custom schema with refinement
+  const schema = refinePastAppointments(isEditing);
+
   const form = useForm<AppointmentFormValues>({
-    resolver: zodResolver(appointmentFormSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       patientId: defaultValues?.patientId,
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
       time: defaultValues?.time || "09:00",
       reason: defaultValues?.reason || "",
       status: defaultValues?.status || "SCHEDULED"
-    },
-    context: { isEditing } // Pass isEditing to the context so it's available in the schema
+    }
   });
 
-  
   // Generate available time slots (current time onward if today, and between 8h-20h)
   const generateAvailableTimes = () => {
     const now = new Date();
