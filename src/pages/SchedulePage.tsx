@@ -301,7 +301,7 @@ const SchedulePage = () => {
                                     <div className="flex gap-1">
                                       <Button 
                                         variant="ghost" 
-                                        size="xs"
+                                        size="sm" // Changed from "xs" to "sm"
                                         className="h-6 px-2 text-destructive hover:bg-destructive/10"
                                         onClick={() => handleCancelAppointment(appointment.id)}
                                         disabled={isProcessingAction}
@@ -509,3 +509,4 @@ const DaySchedule = ({
 };
 
 export default SchedulePage;
+
