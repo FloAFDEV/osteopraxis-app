@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
@@ -27,6 +26,8 @@ const isAppointmentInPast = (date: Date, timeString: string) => {
   const now = new Date();
   return isBefore(appointmentDateTime, now);
 };
+
+// Create the schema with proper context
 const appointmentFormSchema = z.object({
   patientId: z.number({
     required_error: "Veuillez sélectionner un patient"
@@ -44,8 +45,11 @@ const appointmentFormSchema = z.object({
   status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "CANCELED", "RESCHEDULED", "NO_SHOW"], {
     required_error: "Veuillez sélectionner un statut"
   })
-}).refine(data => {
+}).refine((data, ctx) => {
   // Pour les nouveaux rendez-vous seulement, vérifier que le temps n'est pas dans le passé
+  // We access isEditing from the context
+  const isEditing = ctx.path?.[0] === 'isEditing' ? true : false;
+  
   if (!isEditing && isSameDay(data.date, new Date())) {
     return !isAppointmentInPast(data.date, data.time);
   }
@@ -54,7 +58,9 @@ const appointmentFormSchema = z.object({
   message: "Vous ne pouvez pas prendre un rendez-vous dans le passé",
   path: ["time"]
 });
+
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
+
 interface AppointmentFormProps {
   patients: Patient[];
   defaultValues?: Partial<AppointmentFormValues>;
@@ -68,6 +74,7 @@ function filterPatients(search: string, patients: Patient[]): Patient[] {
   if (term === "") return patients;
   return patients.filter(p => p.firstName.toLowerCase().includes(term) || p.lastName.toLowerCase().includes(term) || `${p.firstName} ${p.lastName}`.toLowerCase().includes(term));
 }
+
 export function AppointmentForm({
   patients,
   defaultValues,
@@ -89,9 +96,10 @@ export function AppointmentForm({
       reason: defaultValues?.reason || "",
       status: defaultValues?.status || "SCHEDULED"
     },
-    context: { isEditing } // Passer le contexte d'édition au resolver
+    context: { isEditing } // Pass isEditing to the context so it's available in the schema
   });
 
+  
   // Generate available time slots (current time onward if today, and between 8h-20h)
   const generateAvailableTimes = () => {
     const now = new Date();
