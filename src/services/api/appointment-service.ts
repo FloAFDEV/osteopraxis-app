@@ -128,7 +128,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        // Convertir la date locale en UTC pour le stockage
+        // Convertir la date locale en UTC pour le stockage si elle existe
         const payload: Partial<Appointment> = { ...appointment };
         
         if (appointment.date) {

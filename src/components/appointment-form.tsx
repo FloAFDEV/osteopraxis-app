@@ -45,8 +45,8 @@ const appointmentFormSchema = z.object({
     required_error: "Veuillez sélectionner un statut"
   })
 }).refine(data => {
-  // If it's today, ensure the time is not in the past
-  if (isSameDay(data.date, new Date())) {
+  // Pour les nouveaux rendez-vous seulement, vérifier que le temps n'est pas dans le passé
+  if (!isEditing && isSameDay(data.date, new Date())) {
     return !isAppointmentInPast(data.date, data.time);
   }
   return true;
@@ -88,7 +88,8 @@ export function AppointmentForm({
       time: defaultValues?.time || "09:00",
       reason: defaultValues?.reason || "",
       status: defaultValues?.status || "SCHEDULED"
-    }
+    },
+    context: { isEditing } // Passer le contexte d'édition au resolver
   });
 
   // Generate available time slots (current time onward if today, and between 8h-20h)
@@ -96,6 +97,19 @@ export function AppointmentForm({
     const now = new Date();
     const selectedDate = form.watch("date");
     const isToday = isSameDay(selectedDate, now);
+
+    // Ne pas filtrer les créneaux si en mode édition d'un rendez-vous existant
+    if (isEditing) {
+      // Générer tous les slots de 30 minutes de 8h à 20h
+      return Array.from({ length: 24 }, (_, i) => {
+        const hour = Math.floor(i / 2) + 8; // Starting from 8 AM
+        const minute = i % 2 * 30; // 0 or 30 minutes
+        return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+      }).filter(time => {
+        const hour = parseInt(time.split(":")[0]);
+        return hour < 20; // Ne pas proposer après 20h
+      });
+    }
 
     // Si c'est aujourd'hui, commencer à partir de l'heure actuelle
     // Sinon commencer à 8h00 (slots commencent à 8h)
@@ -120,6 +134,7 @@ export function AppointmentForm({
     }).filter(Boolean) as string[];
   };
   const availableTimes = generateAvailableTimes();
+  
   const onSubmit = async (data: AppointmentFormValues) => {
     try {
       setIsSubmitting(true);
@@ -137,8 +152,8 @@ export function AppointmentForm({
       }
       dateTime.setHours(hours, minutes);
 
-      // Check if appointment is in the past
-      if (isBefore(dateTime, new Date())) {
+      // Check if appointment is in the past - uniquement pour les nouveaux rendez-vous
+      if (!isEditing && isBefore(dateTime, new Date())) {
         toast.error("Vous ne pouvez pas prendre un rendez-vous dans le passé");
         setIsSubmitting(false);
         return;
@@ -244,15 +259,18 @@ export function AppointmentForm({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar mode="single" selected={field.value} onSelect={date => {
                 field.onChange(date);
-                // Reset time selection if date is today and time is in past
-                if (date && isSameDay(date, new Date())) {
+                // Ne pas réinitialiser l'heure en mode édition
+                if (!isEditing && date && isSameDay(date, new Date())) {
                   const now = new Date();
                   const currentTimeSlot = availableTimes[0];
                   if (currentTimeSlot) {
                     form.setValue("time", currentTimeSlot);
                   }
                 }
-              }} disabled={date => isBefore(date, new Date()) && !isSameDay(date, new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
+              }} 
+              // En mode édition, permettre de sélectionner n'importe quelle date
+              disabled={isEditing ? undefined : (date => isBefore(date, new Date()) && !isSameDay(date, new Date()))} 
+              initialFocus className={cn("p-3 pointer-events-auto")} />
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
