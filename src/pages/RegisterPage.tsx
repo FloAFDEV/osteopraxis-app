@@ -58,7 +58,7 @@ const RegisterPage = () => {
       // Redirection vers la configuration du profil après 2 secondes
       setTimeout(() => {
         navigate("/profile/setup");
-      }, 2000);
+      }, 4500);
       
     } catch (error: any) {
       console.error("Register error:", error);
