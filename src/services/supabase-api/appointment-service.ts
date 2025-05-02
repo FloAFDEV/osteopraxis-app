@@ -231,6 +231,7 @@ export const supabaseAppointmentService = {
         throw new Error("Configuration Supabase manquante (URL ou clé API)");
       }
       
+      // Construction correcte de l'URL avec les paramètres de requête
       const PATCH_URL = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
       
       console.log(`Annulation du rendez-vous ${id} - envoi direct à ${PATCH_URL}`);
@@ -244,9 +245,8 @@ export const supabaseAppointmentService = {
       console.log("Payload d'annulation simplifié:", updatePayload);
 
       // Appel avec X-Cancellation-Override pour signaler aux politiques RLS que c'est une annulation
-      // Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
       const res = await fetch(PATCH_URL, {
-        method: "PUT",
+        method: "PATCH", // Utiliser PATCH au lieu de PUT car nous ne mettons à jour que certains champs
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
