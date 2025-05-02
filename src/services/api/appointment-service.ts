@@ -124,6 +124,8 @@ export const appointmentService = {
   },
 
   async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
+    console.log(`Mise à jour du rendez-vous ${id} avec les données:`, appointment);
+    
     if (USE_SUPABASE) {
       try {
         // Convertir la date locale en UTC pour le stockage
@@ -143,7 +145,9 @@ export const appointmentService = {
         delete (payload as any).createdAt;
         delete (payload as any).updatedAt;
         
-        return await supabaseAppointmentService.updateAppointment(id, payload);
+        const result = await supabaseAppointmentService.updateAppointment(id, payload);
+        console.log(`Résultat mise à jour du rendez-vous ${id}:`, result);
+        return result;
       } catch (error: any) {
         if (error.message?.includes('Un rendez-vous existe déjà sur ce créneau horaire')) {
           throw new AppointmentConflictError('Ce créneau horaire est déjà réservé');
@@ -201,6 +205,8 @@ export const appointmentService = {
   },
   
   async deleteAppointment(id: number): Promise<boolean> {
+    console.log(`Suppression du rendez-vous ${id}`);
+    
     if (USE_SUPABASE) {
       try {
         return await supabaseAppointmentService.deleteAppointment(id);

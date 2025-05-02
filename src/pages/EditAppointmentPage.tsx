@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, AlertCircle, FileText, ChevronLeft } from "lucide-react";
-import { api } from "@/services"; // Utiliser l'import centralisé
+import { Calendar, AlertCircle, FileText, ChevronLeft, Trash2 } from "lucide-react";
+import { api } from "@/services";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
@@ -10,7 +11,17 @@ import { formatAppointmentDate, formatAppointmentTime } from "@/utils/date-utils
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const EditAppointmentPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -18,7 +29,7 @@ const EditAppointmentPage = () => {
 	const [appointment, setAppointment] = useState<Appointment | null>(null);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [cancelingAppointment, setCancelingAppointment] = useState(false);
+	const [processingAction, setProcessingAction] = useState<'cancel' | 'delete' | null>(null);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -53,7 +64,7 @@ const EditAppointmentPage = () => {
 		if (!appointment || !id) return;
 
 		try {
-			setCancelingAppointment(true);
+			setProcessingAction('cancel');
 			
 			// Utiliser directement la méthode cancelAppointment de l'API
 			const result = await api.cancelAppointment(parseInt(id));
@@ -63,7 +74,25 @@ const EditAppointmentPage = () => {
 			console.error("Error cancelling appointment:", error);
 			toast.error("Impossible d'annuler le rendez-vous.");
 		} finally {
-			setCancelingAppointment(false);
+			setProcessingAction(null);
+		}
+	};
+	
+	const handleDelete = async () => {
+		if (!appointment || !id) return;
+
+		try {
+			setProcessingAction('delete');
+			
+			// Utiliser la méthode deleteAppointment de l'API
+			await api.deleteAppointment(parseInt(id));
+			toast.success("Rendez-vous supprimé avec succès");
+			navigate("/appointments");
+		} catch (error) {
+			console.error("Error deleting appointment:", error);
+			toast.error("Impossible de supprimer le rendez-vous.");
+		} finally {
+			setProcessingAction(null);
 		}
 	};
 
@@ -74,6 +103,7 @@ const EditAppointmentPage = () => {
 			COMPLETED: { label: "Terminé", color: "bg-green-500" },
 			CANCELED: { label: "Annulé", color: "bg-red-500" },
 			RESCHEDULED: { label: "Reporté", color: "bg-amber-500" },
+			NO_SHOW: { label: "Non présenté", color: "bg-gray-500" },
 		};
 
 		return statusMap[status] || { label: "Inconnu", color: "bg-gray-500" };
@@ -129,7 +159,7 @@ const EditAppointmentPage = () => {
 					variant="outline"
 					size="sm"
 					className="mb-6"
-					onClick={() => navigate(-1)} // Retour à la page précédente
+					onClick={() => navigate(-1)}
 					aria-label="Retour à la page précédente"
 				>
 					<ChevronLeft className="mr-2 h-4 w-4" />
@@ -164,9 +194,9 @@ const EditAppointmentPage = () => {
 							variant="destructive"
 							onClick={handleCancel}
 							aria-label="Annuler le rendez-vous"
-							disabled={cancelingAppointment}
+							disabled={!!processingAction}
 						>
-							{cancelingAppointment ? (
+							{processingAction === 'cancel' ? (
 								<>
 									<span className="animate-spin mr-2">⏳</span>
 									Annulation en cours...
@@ -176,6 +206,42 @@ const EditAppointmentPage = () => {
 							)}
 						</Button>
 					)}
+					
+					{/* Bouton de suppression avec confirmation */}
+					<AlertDialog>
+						<AlertDialogTrigger asChild>
+							<Button 
+								variant="outline" 
+								className="text-destructive border-destructive hover:bg-destructive/10"
+								disabled={!!processingAction}
+							>
+								<Trash2 className="h-4 w-4 mr-2" />
+								Supprimer définitivement
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>Supprimer le rendez-vous</AlertDialogTitle>
+								<AlertDialogDescription>
+									Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ? 
+									Cette action ne peut pas être annulée.
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<AlertDialogCancel>Annuler</AlertDialogCancel>
+								<AlertDialogAction onClick={handleDelete} className="bg-destructive">
+									{processingAction === 'delete' ? (
+										<>
+											<span className="animate-spin mr-2">⏳</span>
+											Suppression...
+										</>
+									) : (
+										"Supprimer"
+									)}
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
 
 					{appointment.status === "COMPLETED" && (
 						<Button variant="outline" asChild>

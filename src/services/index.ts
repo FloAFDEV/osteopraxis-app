@@ -13,3 +13,6 @@ export { convertLocalToUTC, convertUTCToLocal, formatAppointmentDate, formatAppo
 
 // Export API errors for better handling
 export { AppointmentConflictError } from './api/appointment-service';
+
+// Export CORS headers
+export { corsHeaders } from './corsHeaders';

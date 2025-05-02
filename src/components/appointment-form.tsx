@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
@@ -143,12 +144,14 @@ export function AppointmentForm({
         return;
       }
 
-      // Check for conflicts before submitting
-      const hasConflict = await checkAppointmentConflict(data.date, timeToUse);
-      if (hasConflict && !isEditing) {
-        toast.error("Ce créneau horaire est déjà réservé. Veuillez choisir un autre horaire.");
-        setIsSubmitting(false);
-        return;
+      // Check for conflicts before submitting - skip in editing mode for the current appointment
+      if (!isEditing) {
+        const hasConflict = await checkAppointmentConflict(data.date, timeToUse);
+        if (hasConflict) {
+          toast.error("Ce créneau horaire est déjà réservé. Veuillez choisir un autre horaire.");
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       const appointmentData = {
@@ -158,6 +161,9 @@ export function AppointmentForm({
         status: data.status as AppointmentStatus,
         notificationSent: false
       };
+      
+      console.log("Mode:", isEditing ? "Édition" : "Création", "Données:", appointmentData);
+      
       if (isEditing && appointmentId) {
         // Update existing appointment
         await api.updateAppointment(appointmentId, appointmentData);
@@ -322,7 +328,7 @@ export function AppointmentForm({
                 <SelectContent>
                   <SelectItem value="SCHEDULED">Planifié</SelectItem>
                   <SelectItem value="COMPLETED">Terminé</SelectItem>
-                  <SelectItem value="CANCELLED">Annulé</SelectItem>
+                  <SelectItem value="CANCELED">Annulé</SelectItem>
                   <SelectItem value="RESCHEDULED">Reporté</SelectItem>
                   <SelectItem value="NO_SHOW">Non présenté</SelectItem>
                 </SelectContent>

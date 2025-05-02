@@ -1,8 +1,9 @@
 
+// Importations existantes restent inchangées
 import { useState, useEffect } from "react";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock, FileText } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User, Clock, FileText, Trash2 } from "lucide-react";
 import { api } from "@/services/api";
 import { Appointment, Patient, AppointmentStatus } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -15,6 +16,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -23,7 +35,7 @@ const SchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
   const [view, setView] = useState<"day" | "week">("week");
-  const [cancelingAppointmentId, setCancelingAppointmentId] = useState<number | null>(null);
+  const [actionInProgress, setActionInProgress] = useState<{id: number, action: 'cancel' | 'delete'} | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,7 +86,7 @@ const SchedulePage = () => {
 
   const handleCancelAppointment = async (appointmentId: number) => {
     try {
-      setCancelingAppointmentId(appointmentId);
+      setActionInProgress({id: appointmentId, action: 'cancel'});
       await api.cancelAppointment(appointmentId);
       toast.success("Rendez-vous annulé avec succès");
       const updatedAppointments = appointments.map(appointment => 
@@ -87,7 +99,24 @@ const SchedulePage = () => {
       console.error("Error cancelling appointment:", error);
       toast.error("Impossible d'annuler le rendez-vous");
     } finally {
-      setCancelingAppointmentId(null);
+      setActionInProgress(null);
+    }
+  };
+
+  const handleDeleteAppointment = async (appointmentId: number) => {
+    try {
+      setActionInProgress({id: appointmentId, action: 'delete'});
+      await api.deleteAppointment(appointmentId);
+      toast.success("Rendez-vous supprimé avec succès");
+      
+      // Filtrer le rendez-vous supprimé de la liste
+      const updatedAppointments = appointments.filter(appointment => appointment.id !== appointmentId);
+      setAppointments(updatedAppointments);
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+      toast.error("Impossible de supprimer le rendez-vous");
+    } finally {
+      setActionInProgress(null);
     }
   };
 
@@ -192,7 +221,8 @@ const SchedulePage = () => {
                   appointments={getDayAppointments(selectedDate)}
                   getPatientById={getPatientById}
                   onCancelAppointment={handleCancelAppointment}
-                  cancelingAppointmentId={cancelingAppointmentId}
+                  onDeleteAppointment={handleDeleteAppointment}
+                  actionInProgress={actionInProgress}
                 />
               </div>
             </TabsContent>
@@ -260,13 +290,60 @@ const SchedulePage = () => {
                           {getDayAppointments(day).map((appointment) => {
                             const patient = getPatientById(appointment.patientId);
                             const appointmentTime = format(parseISO(appointment.date), "HH:mm");
-                            const isCanceling = cancelingAppointmentId === appointment.id;
+                            const isProcessingAction = actionInProgress?.id === appointment.id;
+                            
                             return (
                               <Card key={appointment.id} className="hover-scale">
                                 <CardContent className="p-3">
                                   <div className="flex items-center justify-between mb-1">
                                     <Badge className="bg-blue-500">{appointmentTime}</Badge>
+                                    
+                                    <div className="flex gap-1">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="xs"
+                                        className="h-6 px-2 text-destructive hover:bg-destructive/10"
+                                        onClick={() => handleCancelAppointment(appointment.id)}
+                                        disabled={isProcessingAction}
+                                        title="Annuler ce rendez-vous"
+                                      >
+                                        {actionInProgress?.id === appointment.id && actionInProgress.action === 'cancel' ? (
+                                          <span className="animate-spin">⏳</span>
+                                        ) : "Annuler"}
+                                      </Button>
+                                      
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-6 w-6 rounded-full text-destructive hover:bg-destructive/10"
+                                            disabled={isProcessingAction}
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>Supprimer le rendez-vous</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ?
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteAppointment(appointment.id)} className="bg-destructive">
+                                              {actionInProgress?.id === appointment.id && actionInProgress.action === 'delete' ? (
+                                                <span className="animate-spin mr-2">⏳</span>
+                                              ) : null}
+                                              Supprimer
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </div>
                                   </div>
+                                  
                                   <Link to={`/appointments/${appointment.id}/edit`} className="block group">
                                     <h3 className="font-medium group-hover:text-primary truncate">
                                       {patient
@@ -299,7 +376,8 @@ interface DayScheduleProps {
   appointments: Appointment[];
   getPatientById: (id: number) => Patient | undefined;
   onCancelAppointment: (id: number) => void;
-  cancelingAppointmentId: number | null;
+  onDeleteAppointment: (id: number) => void;
+  actionInProgress: {id: number, action: 'cancel' | 'delete'} | null;
 }
 
 const DaySchedule = ({
@@ -307,7 +385,8 @@ const DaySchedule = ({
   appointments,
   getPatientById,
   onCancelAppointment,
-  cancelingAppointmentId
+  onDeleteAppointment,
+  actionInProgress
 }: DayScheduleProps) => {
   // Generate time slots for the day (8am to 8pm)
   const timeSlots = Array.from({
@@ -335,7 +414,7 @@ const DaySchedule = ({
       {displayTimeSlots.map(timeSlot => {
       const appointment = getAppointmentForTimeSlot(timeSlot);
       const isCurrentTime = format(new Date(), "HH:mm") === timeSlot && isSameDay(date, new Date());
-      const isCanceling = appointment && cancelingAppointmentId === appointment.id;
+      const isProcessingAction = appointment && actionInProgress?.id === appointment.id;
       
       return <div key={timeSlot} className={cn("flex border-b last:border-b-0 transition-colors", isCurrentTime ? "bg-primary/5" : "hover:bg-muted/50")}>
             <div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center">
@@ -374,16 +453,47 @@ const DaySchedule = ({
                       size="sm" 
                       className="text-destructive hover:bg-destructive/10"
                       onClick={() => onCancelAppointment(appointment.id)}
-                      disabled={isCanceling}
+                      disabled={isProcessingAction}
                       aria-label="Annuler ce rendez-vous"
                     >
-                      {isCanceling ? (
+                      {isProcessingAction && actionInProgress?.action === 'cancel' ? (
                         <span className="flex items-center">
                           <span className="animate-spin mr-1">⏳</span>
                           Annulation...
                         </span>
                       ) : "Annuler"}
                     </Button>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:bg-destructive/10"
+                          disabled={isProcessingAction}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Supprimer
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Supprimer le rendez-vous</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => onDeleteAppointment(appointment.id)} className="bg-destructive">
+                            {isProcessingAction && actionInProgress?.action === 'delete' ? (
+                              <span className="animate-spin mr-2">⏳</span>
+                            ) : null}
+                            Supprimer
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div> : <Link 
                   to={`/appointments/new?date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}`} 

@@ -1,6 +1,7 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase } from "./utils";
+import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
+import { corsHeaders } from "@/services/corsHeaders";
 
 // Type plus spécifique pour la création d'appointment
 type CreateAppointmentPayload = {
@@ -31,21 +32,21 @@ function normalizeStatus(status?: string): AppointmentStatus {
   return (status as AppointmentStatus) ?? "SCHEDULED";
 }
 
-// CORS headers configuration
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, X-Cancellation-Override, X-HTTP-Method-Override',
-  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS'
-};
-
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     try {
+      console.log("Chargement des rendez-vous depuis Supabase");
       const { data, error } = await supabase
         .from("Appointment")
         .select("*")
         .order('date', { ascending: true });
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Erreur de chargement des rendez-vous:", error);
+        throw error;
+      }
+      
+      console.log(`${data?.length || 0} rendez-vous chargés`);
       return data || [];
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -55,6 +56,7 @@ export const supabaseAppointmentService = {
 
   async getAppointmentById(id: number): Promise<Appointment> {
     try {
+      console.log(`Chargement du rendez-vous ${id}`);
       const { data, error } = await supabase
         .from("Appointment")
         .select("*")
@@ -90,6 +92,8 @@ export const supabaseAppointmentService = {
 
   async createAppointment(payload: CreateAppointmentPayload): Promise<Appointment> {
     try {
+      console.log("Création d'un nouveau rendez-vous:", payload);
+      
       // Création de l'objet à insérer - sans les champs timestamp qui sont auto-générés par la DB
       const insertable: InsertableAppointment = {
         date: payload.date,
@@ -111,6 +115,7 @@ export const supabaseAppointmentService = {
         throw error;
       }
       
+      console.log("Rendez-vous créé avec succès:", data);
       return data;
     } catch (error: any) {
       console.error("Error creating appointment:", error);
@@ -120,6 +125,8 @@ export const supabaseAppointmentService = {
 
   async updateAppointment(id: number, update: UpdateAppointmentPayload): Promise<Appointment> {
     try {
+      console.log(`Mise à jour du rendez-vous ${id}:`, update);
+      
       // 1. Récupérer le token d'auth utilisateur
       const {
         data: { session },
@@ -130,12 +137,13 @@ export const supabaseAppointmentService = {
         throw new Error("Utilisateur non authentifié");
       }
       const token = session.access_token;
-
-      // 2. Extraire les constantes pour l'URL et la clé API
-      // Ne pas utiliser les variables d'environnement qui causent des problèmes dans le navigateur
-      const SUPABASE_URL = "https://jpjuvzpqfirymtjwnier.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
-      const PATCH_URL = `${SUPABASE_URL}/rest/v1/Appointment?id=eq.${id}`;
+      
+      // 2. Utiliser les constantes importées pour l'URL et la clé API
+      if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+        throw new Error("Configuration Supabase manquante (URL ou clé API)");
+      }
+      
+      const PATCH_URL = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
 
       // 3. Préparer le payload (nettoyage undefined)
       const updatePayload = {
@@ -161,15 +169,19 @@ export const supabaseAppointmentService = {
         };
       }
 
+      console.log("En-têtes de la requête:", {
+        ...corsHeaders,
+        ...extraHeaders
+      });
+      
       // 5. Appel POST en forçant PATCH + token explicite
       const res = await fetch(PATCH_URL, {
-        method: "POST", // On utilise POST mais avec un override pour PATCH
+        method: "PATCH", // Utiliser PATCH directement
         headers: {
-          apikey: SUPABASE_ANON_KEY,
+          apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Prefer: "return=representation",
-          "X-HTTP-Method-Override": "PATCH", // Important pour que PostgREST traite comme PATCH
           ...corsHeaders,
           ...extraHeaders
         },
@@ -177,14 +189,17 @@ export const supabaseAppointmentService = {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
+        const errText = await res.text();
+        console.error(`Erreur HTTP ${res.status}:`, errText);
         throw new Error(
-          `Erreur HTTP ${res.status}: ${JSON.stringify(err)}`
+          `Erreur HTTP ${res.status}: ${errText}`
         );
       }
 
       // La réponse est toujours un array d'1 element via PostgREST
       const data = await res.json();
+      console.log("Réponse de Supabase:", data);
+      
       if (Array.isArray(data) && data.length > 0) return data[0];
       // fallback : parfois selon Prefer/headers c'est un objet direct
       if (data && typeof data === "object") return data as Appointment;
@@ -198,6 +213,8 @@ export const supabaseAppointmentService = {
   // Méthode spécifique pour annuler un rendez-vous sans modifier l'heure
   async cancelAppointment(id: number): Promise<Appointment> {
     try {
+      console.log(`Annulation du rendez-vous ${id}`);
+      
       // 1. Récupérer le token d'auth utilisateur
       const {
         data: { session },
@@ -209,10 +226,12 @@ export const supabaseAppointmentService = {
       }
       const token = session.access_token;
 
-      // Extraire les constantes pour l'URL et la clé API
-      const SUPABASE_URL = "https://jpjuvzpqfirymtjwnier.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwanV2enBxZmlyeW10anduaWVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg2Mzg4MjIsImV4cCI6MjA0NDIxNDgyMn0.VUmqO5zkRxr1Xucv556GStwCabvZrRckzIzXVPgAthQ";
-      const PATCH_URL = `${SUPABASE_URL}/rest/v1/Appointment?id=eq.${id}`;
+      // Utiliser les constantes importées
+      if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+        throw new Error("Configuration Supabase manquante (URL ou clé API)");
+      }
+      
+      const PATCH_URL = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
       
       console.log(`Annulation du rendez-vous ${id} - envoi direct à ${PATCH_URL}`);
       
@@ -226,13 +245,12 @@ export const supabaseAppointmentService = {
 
       // Appel avec X-Cancellation-Override pour signaler aux politiques RLS que c'est une annulation
       const res = await fetch(PATCH_URL, {
-        method: "POST",
+        method: "PATCH",
         headers: {
-          apikey: SUPABASE_ANON_KEY,
+          apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Prefer: "return=representation",
-          "X-HTTP-Method-Override": "PATCH",
           "X-Cancellation-Override": "true", // En-tête critique pour contourner la vérification de conflit
           ...corsHeaders
         },
@@ -259,6 +277,7 @@ export const supabaseAppointmentService = {
 
   async deleteAppointment(id: number): Promise<boolean> {
     try {
+      console.log(`Suppression du rendez-vous ${id}`);
       const { error } = await supabase
         .from("Appointment")
         .delete()
@@ -268,6 +287,7 @@ export const supabaseAppointmentService = {
         console.error("[SUPABASE ERROR]", error.code, error.message);
         throw error;
       }
+      console.log(`Rendez-vous ${id} supprimé avec succès`);
       return true;
     } catch (error: any) {
       console.error("Error deleting appointment:", error);
