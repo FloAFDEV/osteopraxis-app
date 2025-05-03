@@ -174,9 +174,9 @@ export const supabaseAppointmentService = {
         ...extraHeaders
       });
       
-      // 5. Appel PUT au lieu de PATCH pour contourner les problèmes CORS potentiels
+      // 5. Utiliser PATCH au lieu de PUT - Changement critique ici
       const res = await fetch(PATCH_URL, {
-        method: "PUT", // Utiliser PUT au lieu de PATCH
+        method: "PATCH", // Utiliser PATCH au lieu de PUT
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
@@ -244,9 +244,9 @@ export const supabaseAppointmentService = {
 
       console.log("Payload d'annulation simplifié:", updatePayload);
 
-      // Appel avec X-Cancellation-Override pour signaler aux politiques RLS que c'est une annulation
+      // Utiliser PATCH au lieu de PUT - Changement critique ici
       const res = await fetch(PATCH_URL, {
-        method: "PATCH", // Utiliser PATCH au lieu de PUT car nous ne mettons à jour que certains champs
+        method: "PATCH", // Utiliser PATCH au lieu de PUT
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
