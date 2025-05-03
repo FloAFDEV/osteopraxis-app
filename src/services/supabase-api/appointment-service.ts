@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -143,7 +142,7 @@ export const supabaseAppointmentService = {
         throw new Error("Configuration Supabase manquante (URL ou clé API)");
       }
       
-      const PATCH_URL = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
+      const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
 
       // 3. Préparer le payload (nettoyage undefined)
       const updatePayload = {
@@ -174,9 +173,9 @@ export const supabaseAppointmentService = {
         ...extraHeaders
       });
       
-      // 5. Utiliser PATCH avec les bons en-têtes CORS
-      const res = await fetch(PATCH_URL, {
-        method: "PATCH",
+      // 5. Utiliser PUT au lieu de PATCH (plus compatible avec les configurations CORS)
+      const res = await fetch(URL_ENDPOINT, {
+        method: "PUT", // Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
@@ -232,9 +231,9 @@ export const supabaseAppointmentService = {
       }
       
       // Construction correcte de l'URL avec les paramètres de requête
-      const PATCH_URL = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
+      const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
       
-      console.log(`Annulation du rendez-vous ${id} - envoi direct à ${PATCH_URL}`);
+      console.log(`Annulation du rendez-vous ${id} - envoi direct à ${URL_ENDPOINT}`);
       
       // Simplifier le payload - UNIQUEMENT le statut et updatedAt
       const updatePayload = {
@@ -244,9 +243,9 @@ export const supabaseAppointmentService = {
 
       console.log("Payload d'annulation simplifié:", updatePayload);
 
-      // Utiliser PATCH au lieu de PUT - Changement critique ici
-      const res = await fetch(PATCH_URL, {
-        method: "PATCH", // Utiliser PATCH au lieu de PUT
+      // Utiliser PUT au lieu de PATCH pour la compatibilité CORS
+      const res = await fetch(URL_ENDPOINT, {
+        method: "PUT", 
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
