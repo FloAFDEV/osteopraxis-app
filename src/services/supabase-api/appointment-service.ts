@@ -174,9 +174,9 @@ export const supabaseAppointmentService = {
         ...extraHeaders
       });
       
-      // 5. Utiliser PATCH au lieu de PUT - Changement critique ici
+      // 5. Utiliser PATCH avec les bons en-têtes CORS
       const res = await fetch(PATCH_URL, {
-        method: "PATCH", // Utiliser PATCH au lieu de PUT
+        method: "PATCH",
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,

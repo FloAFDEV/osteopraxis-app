@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, AlertCircle, FileText, ChevronLeft, Trash2 } from "lucide-react";
@@ -67,12 +66,13 @@ const EditAppointmentPage = () => {
 			setProcessingAction('cancel');
 			
 			// Utiliser directement la méthode cancelAppointment de l'API
+			// Cette méthode utilise X-Cancellation-Override dans les en-têtes
 			const result = await api.cancelAppointment(parseInt(id));
 			toast.success("Rendez-vous annulé avec succès");
 			setAppointment({ ...appointment, status: "CANCELED" });
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
-			toast.error("Impossible d'annuler le rendez-vous.");
+			toast.error("Impossible d'annuler le rendez-vous. Erreur réseau ou problème CORS.");
 		} finally {
 			setProcessingAction(null);
 		}
@@ -90,13 +90,12 @@ const EditAppointmentPage = () => {
 			navigate("/appointments");
 		} catch (error) {
 			console.error("Error deleting appointment:", error);
-			toast.error("Impossible de supprimer le rendez-vous.");
+			toast.error("Impossible de supprimer le rendez-vous. Erreur réseau ou problème CORS.");
 		} finally {
 			setProcessingAction(null);
 		}
 	};
 
-	// Retourne un badge de statut
 	const getStatusBadge = (status: string) => {
 		const statusMap: { [key: string]: { label: string; color: string } } = {
 			SCHEDULED: { label: "Planifié", color: "bg-blue-500" },

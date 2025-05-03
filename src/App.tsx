@@ -51,6 +51,28 @@ function App() {
   // Configuration des chemins publics (accessibles sans connexion)
   const publicPaths = ['/privacy-policy', '/terms-of-service'];
   
+  // Ajout d'un intercepteur global pour toutes les requêtes fetch
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+      const modifiedInit = init || {};
+      // Si l'URL contient supabase.co, nous ajoutons les en-têtes CORS
+      if (typeof input === 'string' && input.includes('supabase.co')) {
+        modifiedInit.headers = {
+          ...modifiedInit.headers,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, X-Cancellation-Override, X-HTTP-Method-Override, prefer',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        };
+      }
+      return originalFetch(input, modifiedInit);
+    };
+
+    return () => {
+      window.fetch = originalFetch; // Restauration de la fonction d'origine lors du démontage
+    };
+  }, []);
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
