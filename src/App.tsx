@@ -17,7 +17,7 @@ import SettingsPage from './pages/SettingsPage';
 import InvoicesPage from './pages/InvoicesPage';
 import InvoiceDetailPage from './pages/InvoiceDetailPage';
 import NewInvoicePage from './pages/NewInvoicePage';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/toaster';
 import CabinetsManagementPage from "./pages/CabinetsManagementPage";
 import NewCabinetPage from "./pages/NewCabinetPage";
 import EditCabinetPage from "./pages/EditCabinetPage";
@@ -101,7 +101,7 @@ function App() {
         {/* Redirect cabinet à cabinets */}
         <Route path="/cabinet" element={isAuthenticated ? <Navigate to="/cabinets" /> : <Navigate to="/login" />} />
       </Routes>
-      <Toaster position="bottom-right" />
+      <Toaster />
     </>
   );
 }
