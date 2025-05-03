@@ -1,13 +1,13 @@
 
 import { useToast as useHookToast, toast as hookToast } from "@/hooks/use-toast";
-import type { Toast as ToastType } from "@/hooks/use-toast";
+import type { ToastProps } from "@/components/ui/toast";
 
 // Créer des versions stylisées du toast pour chaque type de message
 const toast = {
   ...hookToast,
   
   // Toast de succès avec style vert
-  success: (title: string, options?: Omit<ToastType, "title" | "variant">) => {
+  success: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title,
       variant: "success",
@@ -17,7 +17,7 @@ const toast = {
   },
   
   // Toast d'erreur avec style rouge
-  error: (title: string, options?: Omit<ToastType, "title" | "variant">) => {
+  error: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title,
       variant: "error",
@@ -27,7 +27,7 @@ const toast = {
   },
   
   // Toast d'avertissement avec style orange/ambre
-  warning: (title: string, options?: Omit<ToastType, "title" | "variant">) => {
+  warning: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title,
       variant: "warning",
@@ -37,7 +37,7 @@ const toast = {
   },
   
   // Toast d'information avec style bleu
-  info: (title: string, options?: Omit<ToastType, "title" | "variant">) => {
+  info: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title,
       variant: "info",
