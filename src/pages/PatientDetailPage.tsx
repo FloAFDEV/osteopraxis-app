@@ -34,7 +34,7 @@ import {
 	Receipt,
 	Stethoscope,
 	User,
-  X,
+	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -44,7 +44,7 @@ interface PatientDetailPageProps {}
 
 const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 	const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 	const [patient, setPatient] = useState<Patient | null>(null);
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -130,18 +130,20 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 		return new Date(b.date).getTime() - new Date(a.date).getTime();
 	});
 
-  const handleCancelAppointment = async (appointmentId: number) => {
-    try {
-      await api.cancelAppointment(appointmentId);
-      // Refresh appointments list
-      const updatedAppointments = await api.getAppointmentsByPatientId(parseInt(id!));
-      setAppointments(updatedAppointments);
-      toast.success("Le rendez-vous a été annulé avec succès");
-    } catch (error) {
-      console.error("Error canceling appointment:", error);
-      toast.error("Impossible d'annuler le rendez-vous");
-    }
-  };
+	const handleCancelAppointment = async (appointmentId: number) => {
+		try {
+			await api.cancelAppointment(appointmentId);
+			// Refresh appointments list
+			const updatedAppointments = await api.getAppointmentsByPatientId(
+				parseInt(id!)
+			);
+			setAppointments(updatedAppointments);
+			toast.success("Le Séance a été annulé avec succès");
+		} catch (error) {
+			console.error("Error canceling appointment:", error);
+			toast.error("Impossible d'annuler la séance");
+		}
+	};
 
 	if (loading) {
 		return (
@@ -196,7 +198,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 						<Button variant="outline" asChild>
 							<Link to={`/appointments?patientId=${patient.id}`}>
 								<Calendar className="mr-2 h-4 w-4" />
-								Voir les rendez-vous
+								Voir les séances
 							</Link>
 						</Button>
 						<Button asChild>
@@ -204,7 +206,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 								to={`/appointments/new?patientId=${patient.id}`}
 							>
 								<Plus className="mr-2 h-4 w-4" />
-								Nouveau rendez-vous
+								Nouvelle séance
 							</Link>
 						</Button>
 					</div>
@@ -213,13 +215,13 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 						<PatientStat
-							title="Total rendez-vous"
+							title="Total Séance"
 							value={appointments.length}
 							icon={<Calendar className="h-5 w-5" />}
 							colorClass="text-blue-500"
 						/>
 						<PatientStat
-							title="Rendez-vous à venir"
+							title="Séance à venir"
 							value={upcomingAppointments.length}
 							icon={<ClipboardList className="h-5 w-5" />}
 							colorClass="text-purple-500"
@@ -231,7 +233,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 							colorClass="text-emerald-500"
 						/>
 						<PatientStat
-							title="Dernier rendez-vous"
+							title="Dernier Séance"
 							value={
 								pastAppointments[0]
 									? format(
@@ -403,7 +405,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 								</TabsTrigger>
 								<TabsTrigger value="upcoming-appointments">
 									<Calendar className="h-4 w-4 mr-2" />
-									Rendez-vous à venir
+									Séances à venir
 								</TabsTrigger>
 								<TabsTrigger value="history">
 									<List className="h-4 w-4 mr-2" />
@@ -411,7 +413,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 								</TabsTrigger>
 								<TabsTrigger value="invoices">
 									<Receipt className="h-4 w-4 mr-2" />
-									Factures
+									Notes d'honoraires
 								</TabsTrigger>
 							</TabsList>
 
@@ -488,18 +490,18 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 									<div className="text-center py-8">
 										<Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
 										<h3 className="text-xl font-medium">
-											Aucun rendez-vous à venir
+											Aucune séance à venir
 										</h3>
-										<p className="text-muted-foreground mt-2">
-											Ce patient n'a pas de rendez-vous
-											planifié.
+										<p className="text-muted-foreground m-2">
+											Ce patient n'a pas de séance
+											planifiée.
 										</p>
 										<Button asChild variant="outline">
 											<Link
 												to={`/appointments/new?patientId=${patient.id}`}
 											>
 												<Plus className="mr-2 h-4 w-4" />
-												Planifier un rendez-vous
+												Planifier un Séance
 											</Link>
 										</Button>
 									</div>
@@ -511,7 +513,11 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 													key={appointment.id}
 													appointment={appointment}
 													patient={patient}
-                          onCancel={() => handleCancelAppointment(appointment.id)}
+													onCancel={() =>
+														handleCancelAppointment(
+															appointment.id
+														)
+													}
 												/>
 											)
 										)}
@@ -531,7 +537,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 										</h3>
 										<p className="text-muted-foreground mt-2">
 											Ce patient n'a pas d'historique de
-											rendez-vous.
+											séance.
 										</p>
 									</div>
 								) : (
@@ -553,14 +559,14 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 							>
 								<div className="flex justify-between items-center mb-4">
 									<h3 className="text-lg font-semibold">
-										Factures du patient
+										Notes d'honoraires du patient
 									</h3>
 									<Button asChild>
 										<Link
 											to={`/invoices/new?patientId=${patient.id}`}
 										>
 											<Plus className="mr-2 h-4 w-4" />
-											Nouvelle facture
+											Nouvelle Note d'honoraire
 										</Link>
 									</Button>
 								</div>
@@ -569,11 +575,11 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 									<div className="text-center py-8">
 										<Receipt className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
 										<h3 className="text-xl font-medium">
-											Aucune facture
+											Aucune Note d'honoraire
 										</h3>
 										<p className="text-muted-foreground mt-2">
-											Ce patient n'a pas encore de
-											factures.
+											Ce patient n'a pas encore de notes
+											d'honoraires.
 										</p>
 									</div>
 								) : (

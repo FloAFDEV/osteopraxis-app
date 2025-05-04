@@ -92,14 +92,14 @@ export function AppointmentCard({
 						</span>
 					</div>
 
-					{/* Affichage du motif du rendez-vous */}
+					{/* Affichage du Motif de la séance */}
 					<p className="text-muted-foreground">
 						Motif : {appointment.reason}
 					</p>
 				</div>
 			</CardContent>
 			<CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
-				{/* Si le rendez-vous est terminé, on montre le bouton pour accéder/créer la facture */}
+				{/* Si le Séance est terminé, on montre le bouton pour accéder/créer la Note d'honoraire */}
 				{appointment.status === "COMPLETED" && (
 					<>
 						<Button variant="outline" size="sm" asChild>
@@ -107,13 +107,13 @@ export function AppointmentCard({
 								to={`/invoices/new?appointmentId=${appointment.id}`}
 							>
 								<FileText className="h-4 w-4 mr-1" />
-								Créer facture
+								Créer une note d'honoraire
 							</Link>
 						</Button>
 					</>
 				)}
 
-				{/* Pour les rendez-vous à venir, on montre les boutons modifier et annuler */}
+				{/* Pour les séances à venir, on montre les boutons modifier et annuler */}
 				{appointment.status === "SCHEDULED" && (
 					<>
 						<Button variant="outline" size="sm" asChild>
