@@ -22,7 +22,7 @@ export function Dashboard() {
     newPatientsThisYear: 0,
     newPatientsLastYear: 0,
     appointmentsToday: 0,
-    nextAppointment: "Aucun rendez-vous prévu",
+    nextAppointment: "Aucune séance prévue",
     patientsLastYearEnd: 0,
     newPatientsLast30Days: 0,
     thirtyDayGrowthPercentage: 0,
@@ -89,7 +89,7 @@ export function Dashboard() {
         
         const nextAppointment = futureAppointments.length > 0 
           ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', { locale: fr })
-          : "Aucun rendez-vous prévu";
+          : "Aucune séance prévue";
 
         // Calcul de la croissance sur 30 jours
         const thirtyDaysAgo = new Date();
