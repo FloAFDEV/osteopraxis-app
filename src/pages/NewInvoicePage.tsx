@@ -69,10 +69,13 @@ const NewInvoicePage = () => {
 
 	const handleInvoiceCreated = () => {
 		toast.success("Facture créée avec succès !");
-		navigate("/invoices");
+		setTimeout(() => {
+			navigate("/invoices");
+		}, 1500);
 	};
 
 	return (
+		
 		<Layout>
 			<div className="mb-6">
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

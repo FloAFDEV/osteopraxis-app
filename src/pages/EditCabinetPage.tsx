@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
@@ -71,7 +70,8 @@ const EditCabinetPage = () => {
       </Layout>;
   }
 
-  return <Layout>
+  return (
+    <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
           <Button 
@@ -94,26 +94,29 @@ const EditCabinetPage = () => {
         </div>
 
         <div className="bg-card rounded-lg border shadow-sm p-6">
-          <CabinetForm 
-            defaultValues={{
-              name: cabinet.name,
-              address: cabinet.address,
-              phone: cabinet.phone || undefined,
-              email: cabinet.email || undefined,
-              imageUrl: cabinet.imageUrl || undefined,
-              logoUrl: cabinet.logoUrl || undefined,
-              osteopathId: cabinet.osteopathId,
-              siret: osteopathData?.siret || undefined,
-              adeliNumber: osteopathData?.adeli_number || undefined,
-              apeCode: osteopathData?.ape_code || "8690F"
-            }} 
-            cabinetId={cabinet.id} 
-            isEditing={true} 
-            osteopathId={cabinet.osteopathId} 
-          />
+          {cabinet && (
+            <CabinetForm 
+              defaultValues={{
+                name: cabinet.name,
+                address: cabinet.address,
+                phone: cabinet.phone || undefined,
+                email: cabinet.email || undefined,
+                imageUrl: cabinet.imageUrl || undefined,
+                logoUrl: cabinet.logoUrl || undefined,
+                osteopathId: cabinet.osteopathId,
+                siret: osteopathData?.siret || undefined,
+                adeliNumber: osteopathData?.adeli_number || undefined,
+                apeCode: osteopathData?.ape_code || "8690F"
+              }} 
+              cabinetId={cabinet.id} 
+              isEditing={true} 
+              osteopathId={cabinet.osteopathId} 
+            />
+          )}
         </div>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
 
 export default EditCabinetPage;

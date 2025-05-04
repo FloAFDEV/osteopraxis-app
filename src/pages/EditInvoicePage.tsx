@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -58,7 +57,7 @@ const EditInvoicePage = () => {
       // Attendre un peu avant de naviguer pour que le toast s'affiche
       setTimeout(() => {
         navigate('/invoices');
-      }, 500);
+      }, 1500);
     } catch (error) {
       console.error('Erreur lors de la mise à jour de la facture:', error);
       toast.error('Erreur lors de la mise à jour de la facture');
@@ -107,7 +106,7 @@ const EditInvoicePage = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
           </Button>
-          <h1 className="text-2xl font-bold">Modifier la facture #{invoice.id.toString().padStart(4, '0')}</h1>
+          <h1 className="text-2xl font-bold">Modifier la facture #{invoice?.id.toString().padStart(4, '0')}</h1>
         </div>
         
         <InvoiceForm 

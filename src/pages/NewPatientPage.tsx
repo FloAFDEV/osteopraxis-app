@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus, Loader2 } from "lucide-react";
@@ -6,9 +7,11 @@ import { Layout } from "@/components/ui/layout";
 import { PatientForm } from "@/components/patient-form";
 import { toast } from "sonner";
 import { Patient } from "@/types";
+
 const NewPatientPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
   const handleAddPatient = async (patientData: any) => {
     try {
       setLoading(true);
@@ -35,11 +38,16 @@ const NewPatientPage = () => {
         // Pour la démo, nous utilisons le cabinet ID 1
         userId: null // Requis par le type mais peut être null
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
+
       console.log("Envoi du patient à l'API:", patientToCreate);
       const newPatient = await api.createPatient(patientToCreate);
       console.log("Patient créé avec succès:", newPatient);
+      
       toast.success(`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`);
-      navigate(`/patients/${newPatient.id}`);
+      
+      setTimeout(() => {
+        navigate(`/patients/${newPatient.id}`);
+      }, 1500);
     } catch (error) {
       console.error("Error adding patient:", error);
       toast.error(error instanceof Error ? `Erreur: ${error.message}` : "Impossible d'ajouter le patient. Veuillez réessayer.");
@@ -47,7 +55,9 @@ const NewPatientPage = () => {
       setLoading(false);
     }
   };
-  return <Layout>
+  
+  return (
+    <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -72,15 +82,21 @@ const NewPatientPage = () => {
           </div>
         </div>
 
-        {loading ? <div className="flex justify-center items-center py-12 bg-card rounded-lg border">
+        {loading ? (
+          <div className="flex justify-center items-center py-12 bg-card rounded-lg border">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-500" />
               <p className="text-muted-foreground">Enregistrement du patient...</p>
             </div>
-          </div> : <div className="bg-card rounded-lg border shadow-sm p-6">
+          </div>
+        ) : (
+          <div className="bg-card rounded-lg border shadow-sm p-6">
             <PatientForm onSave={handleAddPatient} />
-          </div>}
+          </div>
+        )}
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default NewPatientPage;

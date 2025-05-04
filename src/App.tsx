@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
@@ -17,7 +18,7 @@ import InvoicesPage from './pages/InvoicesPage';
 import InvoiceDetailPage from './pages/InvoiceDetailPage';
 import NewInvoicePage from './pages/NewInvoicePage';
 import EditInvoicePage from './pages/EditInvoicePage';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
 import CabinetsManagementPage from "./pages/CabinetsManagementPage";
 import NewCabinetPage from "./pages/NewCabinetPage";
 import EditCabinetPage from "./pages/EditCabinetPage";
@@ -124,7 +125,7 @@ function App() {
         {/* Redirect cabinet à cabinets */}
         <Route path="/cabinet" element={isAuthenticated ? <Navigate to="/cabinets" /> : <Navigate to="/login" />} />
       </Routes>
-      <Toaster />
+      <Toaster position="top-right" richColors closeButton />
     </>
   );
 }

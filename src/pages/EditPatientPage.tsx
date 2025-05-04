@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -58,7 +57,7 @@ const EditPatientPage = () => {
       }
 
       // Use the patientService updatePatient method
-      const result = await patientService.updatePatient({
+      await patientService.updatePatient({
         ...patient,
         ...updatedData,
         updatedAt: new Date().toISOString()
@@ -70,7 +69,7 @@ const EditPatientPage = () => {
       // Attendre un peu avant de naviguer pour laisser le toast s'afficher
       setTimeout(() => {
         navigate('/patients');
-      }, 1000);
+      }, 1500);
     } catch (error: any) {
       console.error("Error updating patient:", error);
       toast.error("Impossible de mettre à jour le patient");
@@ -85,7 +84,9 @@ const EditPatientPage = () => {
     try {
       await patientService.deletePatient(patient.id);
       toast.success("Patient supprimé avec succès !");
-      navigate("/patients");
+      setTimeout(() => {
+        navigate("/patients");
+      }, 1500);
     } catch (err) {
       toast.error("Erreur lors de la suppression du patient");
       setShowDeleteModal(false);
@@ -130,7 +131,7 @@ const EditPatientPage = () => {
         isOpen={showDeleteModal}
         onCancel={() => setShowDeleteModal(false)}
         onDelete={handleDeletePatient}
-        patientName={patient.firstName + " " + patient.lastName}
+        patientName={patient?.firstName + " " + patient?.lastName}
       />
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start gap-2">
@@ -142,16 +143,21 @@ const EditPatientPage = () => {
             <p className="text-muted-foreground mt-1">
               Modifiez les informations du patient
             </p>
-            {childrenInfo && <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md text-blue-700">
-                <span className="font-medium">Enfants : </span>{childrenInfo}
-              </div>}
+            {patient?.hasChildren === "true" && patient?.childrenAges && patient.childrenAges.length > 0 && (
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md text-blue-700">
+                <span className="font-medium">Enfants : </span> 
+                {patient.childrenAges.length} enfant(s): {patient.childrenAges.join(', ')} ans
+              </div>
+            )}
           </div>
           <Button variant="destructive" onClick={() => setShowDeleteModal(true)} className="flex items-center gap-2" size="sm">
             <Trash className="mr-1 h-4 w-4" />
             Supprimer
           </Button>
         </div>
-        <PatientForm patient={patient} onSave={handleSave} isLoading={isSaving} />
+        {patient && (
+          <PatientForm patient={patient} onSave={handleSave} isLoading={isSaving} />
+        )}
       </div>
     </Layout>
   );
