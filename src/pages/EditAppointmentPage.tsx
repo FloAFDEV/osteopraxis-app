@@ -1,301 +1,251 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardData } from "@/types";
+import { Calendar, Clock, User } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-	Calendar,
-	AlertCircle,
-	FileText,
-	ChevronLeft,
-	Trash2,
-} from "lucide-react";
-import { api } from "@/services";
-import { Appointment, Patient } from "@/types";
-import { Layout } from "@/components/ui/layout";
-import { AppointmentForm } from "@/components/appointment-form";
-import { toast } from "sonner";
-import {
-	formatAppointmentDate,
-	formatAppointmentTime,
-} from "@/utils/date-utils";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { api } from "@/services/api";
+import { format, isToday, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
+import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Appointment } from "@/types";
+import { toast } from "sonner";
 
-const EditAppointmentPage = () => {
-	const { id } = useParams<{ id: string }>();
-	const navigate = useNavigate();
-	const [appointment, setAppointment] = useState<Appointment | null>(null);
-	const [patients, setPatients] = useState<Patient[]>([]);
+interface AppointmentsOverviewProps {
+	data: DashboardData;
+	className?: string;
+}
+
+export function AppointmentsOverview({
+	data,
+	className,
+}: AppointmentsOverviewProps) {
+	const [upcomingAppointments, setUpcomingAppointments] = useState<
+		Appointment[]
+	>([]);
+	const [patients, setPatients] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [processingAction, setProcessingAction] = useState<
-		"cancel" | "delete" | null
-	>(null);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchData = async () => {
-			if (!id) return;
-
 			try {
-				const [appointmentData, patientsData] = await Promise.all([
-					api.getAppointmentById(parseInt(id)),
+				// Récupérer les Séance et les patients
+				const [appointmentsData, patientsData] = await Promise.all([
+					api.getAppointments(),
 					api.getPatients(),
 				]);
 
-				if (!appointmentData) {
-					throw new Error("Séance non trouvé");
-				}
+				// Filtrer pour garder seulement les Séance à venir
+				const now = new Date();
+				const filteredAppointments = appointmentsData
+					.filter((appointment) => {
+						const appointmentDate = parseISO(appointment.date);
+						return (
+							appointmentDate >= now &&
+							appointment.status === "SCHEDULED"
+						);
+					})
+					.sort(
+						(a, b) =>
+							parseISO(a.date).getTime() -
+							parseISO(b.date).getTime()
+					)
+					.slice(0, 5); // Garder seulement les 5 prochaines séances
 
-				setAppointment(appointmentData);
-				setPatients(patientsData);
-			} catch (error) {
-				console.error("Error fetching appointment data:", error);
-				toast.error(
-					"Impossible de charger les données du Séance. Veuillez réessayer."
+				console.log(
+					`Appointments for dashboard: ${filteredAppointments.length}`
 				);
-			} finally {
+				setUpcomingAppointments(filteredAppointments);
+				setPatients(patientsData);
+				setLoading(false);
+			} catch (error) {
+				console.error(
+					"Erreur lors de la récupération des Séance:",
+					error
+				);
 				setLoading(false);
 			}
 		};
-
 		fetchData();
-	}, [id]);
+	}, []);
 
-	const handleCancel = async () => {
-		if (!appointment || !id) return;
+	// Obtenir les informations sur un patient par ID
+	const getPatientById = (patientId: number) => {
+		return patients.find((p) => p.id === patientId);
+	};
 
+	const handleAppointmentClick = (appointmentId: number) => {
 		try {
-			setProcessingAction("cancel");
+			// Fix: Assurons-nous que l'ID est un nombre valide
+			if (!appointmentId || isNaN(appointmentId)) {
+				toast.error("ID de Séance invalide");
+				return;
+			}
 
-			// Utiliser directement la méthode cancelAppointment de l'API
-			// Cette méthode utilise X-Cancellation-Override dans les en-têtes
-			const result = await api.cancelAppointment(parseInt(id));
-			toast.success("Séance annulé avec succès");
-			setAppointment({ ...appointment, status: "CANCELED" });
+			console.log(`Navigation vers le Séance #${appointmentId}`);
+
+			// Naviguer vers la page d'édition du Séance avec l'ID
+			navigate(`/appointments/${appointmentId}/edit`);
+
+			// Afficher un toast pour confirmer l'action
+			toast.info(`Chargement des détails du Séance #${appointmentId}`);
 		} catch (error) {
-			console.error("Error cancelling appointment:", error);
-			toast.error(
-				"Impossible d'annuler la séance. Erreur réseau ou problème CORS."
-			);
-		} finally {
-			setProcessingAction(null);
+			console.error("Erreur lors de la navigation:", error);
+			toast.error("Impossible d'afficher les détails de ce Séance");
 		}
 	};
 
-	const handleDelete = async () => {
-		if (!appointment || !id) return;
-
-		try {
-			setProcessingAction("delete");
-
-			// Utiliser la méthode deleteAppointment de l'API
-			await api.deleteAppointment(parseInt(id));
-			toast.success("Séance supprimé avec succès");
-			navigate("/appointments");
-		} catch (error) {
-			console.error("Error deleting appointment:", error);
-			toast.error(
-				"Impossible de supprimer le Séance. Erreur réseau ou problème CORS."
-			);
-		} finally {
-			setProcessingAction(null);
-		}
-	};
-
-	const getStatusBadge = (status: string) => {
-		const statusMap: { [key: string]: { label: string; color: string } } = {
-			SCHEDULED: { label: "Planifié", color: "bg-blue-500" },
-			COMPLETED: { label: "Terminé", color: "bg-green-500" },
-			CANCELED: { label: "Annulé", color: "bg-red-500" },
-			RESCHEDULED: { label: "Reporté", color: "bg-amber-500" },
-			NO_SHOW: { label: "Non présenté", color: "bg-gray-500" },
-		};
-
-		return statusMap[status] || { label: "Inconnu", color: "bg-gray-500" };
-	};
-
-	if (loading) {
-		return (
-			<Layout>
-				<div className="flex justify-center items-center py-12">
-					<div className="text-center">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-						<p className="text-muted-foreground">
-							Chargement des données du Séance...
-						</p>
-					</div>
-				</div>
-			</Layout>
-		);
-	}
-
-	if (!appointment) {
-		return (
-			<Layout>
-				<div className="text-center py-12">
-					<AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-					<h3 className="text-xl font-medium">Séance non trouvé</h3>
-					<p className="text-muted-foreground mt-2 mb-6">
-						Le Séance que vous recherchez n&apos;existe pas ou a été
-						supprimé.
-					</p>
-					<Button asChild>
-						<Link to="/appointments">Retour aux séances</Link>
-					</Button>
-				</div>
-			</Layout>
-		);
-	}
-
-	const appointmentDate = new Date(appointment.date);
-	const formattedDate = formatAppointmentDate(appointment.date);
-	const time = formatAppointmentTime(appointment.date);
-
-	const status = getStatusBadge(appointment.status);
+	// Use default value if data.appointmentsToday is undefined
+	const appointmentsToday = data?.appointmentsToday || 0;
 
 	return (
-		<Layout>
-			{/* Container for the page content */}
-			<div className="max-w-3xl mx-auto px-4 py-6">
-				{/* Retour Button */}
-				<Button
-					variant="outline"
-					size="sm"
-					className="mb-6"
-					onClick={() => navigate(-1)}
-					aria-label="Retour à la page précédente"
-				>
-					<ChevronLeft className="mr-2 h-4 w-4" />
-					Retour
-				</Button>
-
-				{/* Header Section: Title and Description */}
-				<div className="mb-6">
-					<h1 className="text-3xl font-bold flex items-center gap-2">
-						<Calendar className="h-8 w-8 text-purple-500" />
-						Modifier la séance
-					</h1>
-					<p className="text-muted-foreground mt-1">
-						{formattedDate} - Modifiez les détails du Séance en
-						utilisant le formulaire ci-dessous.
-					</p>
-				</div>
-
-				{/* Status Badge */}
-				<div className="mb-4">
+		<Card
+			className={`${className} shadow-sm hover:shadow-md transition-shadow`}
+		>
+			<CardHeader className="border-b bg-slate-50 dark:bg-slate-900/50">
+				<CardTitle className="flex items-center justify-between">
+					<div className="flex items-center gap-2">
+						<Calendar className="h-5 w-5 text-blue-600" />
+						<span>Prochaines séances</span>
+					</div>
 					<Badge
-						className={`${status.color} text-white py-1 px-3 rounded-md shadow-sm border border-white/10`}
+						variant="outline"
+						className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
 					>
-						{status.label}
+						{
+							upcomingAppointments.filter((app) =>
+								isToday(parseISO(app.date))
+							).length
+						}{" "}
+						aujourd'hui
 					</Badge>
-				</div>
+				</CardTitle>
+			</CardHeader>
+			<CardContent className="p-0">
+				{loading ? (
+					<div className="flex justify-center py-8">
+						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+					</div>
+				) : upcomingAppointments.length === 0 ? (
+					<div className="text-center py-8 text-muted-foreground">
+						<Calendar className="h-12 w-12 mx-auto mb-3 text-slate-300" />
+						<p>Aucune séance à venir</p>
+					</div>
+				) : (
+					<div>
+						{upcomingAppointments.map((appointment, index) => {
+							const patient = getPatientById(
+								appointment.patientId
+							);
+							const appointmentDate = parseISO(appointment.date);
+							const isLastItem =
+								index === upcomingAppointments.length - 1;
 
-				{/* Action Buttons */}
-				<div className="flex flex-wrap gap-2 mb-6">
-					{appointment.status === "SCHEDULED" && (
-						<Button
-							variant="destructive"
-							onClick={handleCancel}
-							aria-label="Annuler la séance"
-							disabled={!!processingAction}
-						>
-							{processingAction === "cancel" ? (
-								<>
-									<span className="animate-spin mr-2">
-										⏳
-									</span>
-									Annulation en cours...
-								</>
-							) : (
-								"Annuler la séance"
-							)}
-						</Button>
-					)}
-
-					{/* Bouton de suppression avec confirmation */}
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button
-								variant="outline"
-								className="text-destructive border-destructive hover:bg-destructive/10"
-								disabled={!!processingAction}
-							>
-								<Trash2 className="h-4 w-4 mr-2" />
-								Supprimer définitivement
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle>
-									Supprimer le Séance
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Êtes-vous sûr de vouloir supprimer
-									définitivement ce Séance ? Cette action ne
-									peut pas être annulée.
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogFooter>
-								<AlertDialogCancel>Annuler</AlertDialogCancel>
-								<AlertDialogAction
-									onClick={handleDelete}
-									className="bg-destructive"
+							return (
+								<div
+									key={appointment.id}
+									className={`flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-900/20 transition-colors relative ${
+										!isLastItem ? "border-b" : ""
+									}`}
 								>
-									{processingAction === "delete" ? (
-										<>
-											<span className="animate-spin mr-2">
-												⏳
-											</span>
-											Suppression...
-										</>
-									) : (
-										"Supprimer"
-									)}
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialog>
-
-					{appointment.status === "COMPLETED" && (
-						<Button variant="outline" asChild>
+									<div className="flex-shrink-0 mr-4">
+										<div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
+											<User
+												className={`h-6 w-6 ${
+													patient?.gender === "Femme"
+														? "text-pink-500"
+														: patient?.gender ===
+														  "Homme"
+														? "text-blue-500"
+														: "text-gray-500"
+												}`}
+											/>
+										</div>
+									</div>
+									<div className="flex-1 min-w-0">
+										<Link
+											to={`/patients/${appointment.patientId}`}
+											className={`font-medium hover:underline text-base truncate block ${
+												patient?.gender === "Femme"
+													? "text-pink-700 dark:text-pink-400"
+													: patient?.gender ===
+													  "Homme"
+													? "text-blue-700 dark:text-blue-400"
+													: "text-slate-800 dark:text-white"
+											}`}
+										>
+											{patient
+												? `${patient.firstName} ${patient.lastName}`
+												: `Patient #${appointment.patientId}`}
+										</Link>
+										<p className="text-sm text-muted-foreground truncate">
+											{appointment.reason}
+										</p>
+										<div className="mt-2 flex flex-wrap gap-3">
+											<div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+												<Clock className="h-3 w-3 text-blue-500 mr-1" />
+												<span>
+													{format(
+														appointmentDate,
+														"HH:mm"
+													)}
+												</span>
+											</div>
+											<div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+												<Calendar className="h-3 w-3 text-purple-500 mr-1" />
+												<span>
+													{format(
+														appointmentDate,
+														"dd MMM yyyy",
+														{ locale: fr }
+													)}
+												</span>
+											</div>
+											{isToday(appointmentDate) && (
+												<Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs font-normal">
+													Aujourd'hui
+												</Badge>
+											)}
+										</div>
+									</div>
+									<button
+										onClick={() =>
+											handleAppointmentClick(
+												appointment.id
+											)
+										}
+										className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-xs font-medium transition-colors"
+									>
+										Détails
+									</button>
+								</div>
+							);
+						})}
+						<div className="p-4 bg-slate-50 dark:bg-slate-900/20 text-center">
 							<Link
-								to={`/invoices/new?appointmentId=${appointment.id}`}
-								aria-label="Créer une Note d'honoraire pour ce Séance"
+								to="/appointments"
+								className="text-blue-600 hover:text-gray-400 text-sm font-medium flex items-center justify-center"
 							>
-								<FileText className="h-4 w-4 mr-2" />
-								Créer une Note d'honoraire
+								Voir tous les Séance
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="ml-1"
+								>
+									<path d="m9 18 6-6-6-6" />
+								</svg>
 							</Link>
-						</Button>
-					)}
-				</div>
-
-				{/* Appointment Form Section */}
-				<div className="bg-card rounded-lg border shadow-sm p-6">
-					<AppointmentForm
-						patients={patients}
-						defaultValues={{
-							patientId: appointment.patientId,
-							date: appointmentDate,
-							time,
-							reason: appointment.reason,
-							status: appointment.status,
-						}}
-						appointmentId={appointment.id}
-						isEditing={true}
-					/>
-				</div>
-			</div>
-		</Layout>
+						</div>
+					</div>
+				)}
+			</CardContent>
+		</Card>
 	);
-};
-
-export default EditAppointmentPage;
+}
