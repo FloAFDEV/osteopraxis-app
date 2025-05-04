@@ -114,6 +114,7 @@ const EditInvoicePage = () => {
           initialInvoice={invoice}
           patient={patient}
           onSubmit={handleSubmit}
+          onCreate={() => navigate('/invoices')}
         />
       </div>
     </Layout>

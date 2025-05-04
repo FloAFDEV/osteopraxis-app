@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Patient, PaymentStatus, Appointment } from "@/types";
+import { Patient, PaymentStatus, Appointment, Invoice } from "@/types";
 import { api } from "@/services/api";
 import { toast } from "sonner";
 import {
@@ -46,16 +47,22 @@ type FormValues = z.infer<typeof formSchema>;
 interface InvoiceFormProps {
 	initialPatient?: Patient;
 	initialAppointment?: Appointment;
-	onCreate: () => void;
+	initialInvoice?: Invoice;
+	patient?: Patient | null;
+	onCreate?: () => void;
+	onSubmit?: (data: Invoice) => Promise<void>;
 }
 
 export const InvoiceForm = ({
 	initialPatient,
 	initialAppointment,
+	initialInvoice,
+	patient,
 	onCreate,
+	onSubmit,
 }: InvoiceFormProps) => {
 	const [selectedPatient, setSelectedPatient] = useState<Patient | null>(
-		initialPatient || null
+		initialPatient || patient || null
 	);
 	const [appointment, setAppointment] = useState<Appointment | null>(
 		initialAppointment || null
@@ -96,28 +103,28 @@ export const InvoiceForm = ({
 	const { data: patients } = useQuery({
 		queryKey: ["patients"],
 		queryFn: api.getPatients,
-		enabled: !initialPatient,
+		enabled: !initialPatient && !patient,
 	});
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			patientId: initialPatient?.id || 0,
-			appointmentId: initialAppointment?.id || undefined,
-			amount: 60,
-			date:
-				initialAppointment?.date?.split("T")[0] ||
-				format(new Date(), "yyyy-MM-dd"),
-			paymentStatus: "PAID",
-			paymentMethod: "CB",
-			tvaExoneration: true,
-			tvaMotif: "TVA non applicable - Article 261-4-1° du CGI",
-			notes: "",
-			noConsultation: false,
+			patientId: initialPatient?.id || patient?.id || initialInvoice?.patientId || 0,
+			appointmentId: initialAppointment?.id || initialInvoice?.appointmentId,
+			amount: initialInvoice?.amount || 60,
+			date: initialInvoice?.date?.split("T")[0] || 
+			      initialAppointment?.date?.split("T")[0] ||
+			      format(new Date(), "yyyy-MM-dd"),
+			paymentStatus: initialInvoice?.paymentStatus || "PAID",
+			paymentMethod: initialInvoice?.paymentMethod || "CB",
+			tvaExoneration: initialInvoice?.tvaExoneration ?? true,
+			tvaMotif: initialInvoice?.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
+			notes: initialInvoice?.notes || "",
+			noConsultation: !initialInvoice?.appointmentId,
 		},
 	});
 
-	const onSubmit = async (data: FormValues) => {
+	const handleFormSubmit = async (data: FormValues) => {
 		try {
 			const patientId = selectedPatient?.id || data.patientId;
 
@@ -138,19 +145,22 @@ export const InvoiceForm = ({
 					appointment.id
 				);
 
-				// ✅ Vérifier s'il existe déjà une facture pour ce rendez-vous
-				const existingInvoices = await api.getInvoicesByAppointmentId(
-					appointment.id
-				);
-
-				if (existingInvoices && existingInvoices.length > 0) {
-					const existingInvoice = existingInvoices[0];
-					toast.warning(
-						`❗ Une facture existe déjà pour ce rendez-vous (Facture n° ${existingInvoice.id
-							.toString()
-							.padStart(4, "0")}).`
+				// Si ce n'est pas une mise à jour
+				if (!initialInvoice) {
+					// ✅ Vérifier s'il existe déjà une facture pour ce rendez-vous
+					const existingInvoices = await api.getInvoicesByAppointmentId(
+						appointment.id
 					);
-					return; // ⛔ Stoppe ici !
+
+					if (existingInvoices && existingInvoices.length > 0) {
+						const existingInvoice = existingInvoices[0];
+						toast.warning(
+							`❗ Une facture existe déjà pour ce rendez-vous (Facture n° ${existingInvoice.id
+								.toString()
+								.padStart(4, "0")}).`
+						);
+						return; // ⛔ Stoppe ici !
+					}
 				}
 
 				invoiceData.appointmentId = appointment.id;
@@ -158,17 +168,27 @@ export const InvoiceForm = ({
 			}
 
 			console.log(
-				"[DEBUG] Données envoyées à createInvoice:",
+				"[DEBUG] Données envoyées:",
 				invoiceData
 			);
 
-			await api.createInvoice(invoiceData);
-
-			toast.success("✅ Facture créée avec succès !");
-			onCreate();
+			if (initialInvoice) {
+				// Mode mise à jour
+				if (onSubmit) {
+					await onSubmit({
+						...initialInvoice,
+						...invoiceData
+					});
+				}
+			} else {
+				// Mode création
+				await api.createInvoice(invoiceData);
+				toast.success("✅ Facture créée avec succès !");
+				if (onCreate) onCreate();
+			}
 		} catch (error) {
-			console.error("❌ Error creating invoice:", error);
-			toast.error("Erreur lors de la création de la facture");
+			console.error("❌ Error processing invoice:", error);
+			toast.error("Erreur lors du traitement de la facture");
 		}
 	};
 
@@ -182,10 +202,10 @@ export const InvoiceForm = ({
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+			<form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div className="space-y-4">
-						{!initialPatient && (
+						{!initialPatient && !patient && !initialInvoice && (
 							<FormField
 								control={form.control}
 								name="patientId"
@@ -395,9 +415,11 @@ export const InvoiceForm = ({
 
 				<div className="flex justify-end gap-3 pt-4">
 					<Button variant="outline" type="button" onClick={onCreate}>
-						Annuler
+						{initialInvoice ? "Annuler" : "Retour"}
 					</Button>
-					<Button type="submit">Créer la facture</Button>
+					<Button type="submit">
+						{initialInvoice ? "Mettre à jour" : "Créer la facture"}
+					</Button>
 				</div>
 			</form>
 		</Form>
