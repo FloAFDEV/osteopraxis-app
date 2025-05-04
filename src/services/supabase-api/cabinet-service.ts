@@ -1,6 +1,7 @@
 // Import types
 import { Cabinet } from "@/types";
-import { supabase, typedData } from "./utils";
+import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
+import { corsHeaders } from "@/services/corsHeaders";
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
@@ -89,7 +90,7 @@ export const supabaseCabinetService = {
       throw error;
     }
   },
-
+  
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     // Ne jamais envoyer id/timestamps, Postgres gère
     const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = cabinet as any;
@@ -107,16 +108,71 @@ export const supabaseCabinetService = {
   },
 
   async updateCabinet(id: number, cabinet: Partial<Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Cabinet> {
-    const { data, error } = await supabase
-      .from("Cabinet")
-      .update({ ...cabinet, updatedAt: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
+    try {
+      console.log(`Mise à jour du cabinet ${id}:`, cabinet);
+
+      // 1. Récupérer le token d'authentification utilisateur
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      const token = session.access_token;
+
+      // 2. Utiliser REST pour contourner les problèmes CORS
+      if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+        throw new Error("Configuration Supabase manquante (URL ou clé API)");
+      }
+
+      const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Cabinet?id=eq.${id}`;
+
+      // 3. Préparer le payload avec l'ID inclus
+      const updatePayload = {
+        id: id, // Important: inclure l'ID dans le corps pour les requêtes PATCH/PUT
+        ...cabinet,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // 4. Nettoyer les valeurs undefined
+      Object.keys(updatePayload).forEach(
+        (k) => updatePayload[k] === undefined && delete updatePayload[k]
+      );
+
+      console.log("Payload de mise à jour:", updatePayload);
+
+      // 5. Utiliser PUT au lieu de PATCH
+      const res = await fetch(URL_ENDPOINT, {
+        method: "PUT",
+        headers: {
+          apikey: SUPABASE_API_KEY,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          ...corsHeaders
+        },
+        body: JSON.stringify(updatePayload),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Erreur HTTP ${res.status}:`, errorText);
+        throw new Error(`Erreur lors de la mise à jour du cabinet: ${res.status}`);
+      }
+
+      // Traiter la réponse
+      const data = await res.json();
+      console.log("Réponse de mise à jour:", data);
       
-    if (error) throw new Error(error.message);
-    
-    return data as Cabinet;
+      if (Array.isArray(data) && data.length > 0) return data[0];
+      if (data && typeof data === "object") return data as Cabinet;
+      throw new Error("Aucune donnée retournée lors de la mise à jour du cabinet");
+    } catch (error) {
+      console.error("[SUPABASE ERROR]", error);
+      throw error;
+    }
   },
 
   async updateTimestamps(cabinetId: number): Promise<void> {
