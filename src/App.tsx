@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
@@ -17,6 +16,7 @@ import SettingsPage from './pages/SettingsPage';
 import InvoicesPage from './pages/InvoicesPage';
 import InvoiceDetailPage from './pages/InvoiceDetailPage';
 import NewInvoicePage from './pages/NewInvoicePage';
+import EditInvoicePage from './pages/EditInvoicePage';
 import { Toaster } from '@/components/ui/toaster';
 import CabinetsManagementPage from "./pages/CabinetsManagementPage";
 import NewCabinetPage from "./pages/NewCabinetPage";
@@ -106,6 +106,7 @@ function App() {
         <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
         <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />
         <Route path="/invoices/:id" element={isAuthenticated ? <InvoiceDetailPage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/:id/edit" element={isAuthenticated ? <EditInvoicePage /> : <Navigate to="/login" />} />
         <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
         <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
         <Route path="/cabinets/new" element={isAuthenticated ? <NewCabinetPage /> : <Navigate to="/login" />} />

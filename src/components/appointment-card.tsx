@@ -101,14 +101,16 @@ export function AppointmentCard({
 			<CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
 				{/* Si le rendez-vous est terminé, on montre le bouton pour accéder/créer la facture */}
 				{appointment.status === "COMPLETED" && (
-					<Button variant="outline" size="sm" asChild>
-						<Link
-							to={`/invoices/new?appointmentId=${appointment.id}`}
-						>
-							<FileText className="h-4 w-4 mr-1" />
-							Facture
-						</Link>
-					</Button>
+					<>
+						<Button variant="outline" size="sm" asChild>
+							<Link
+								to={`/invoices/new?appointmentId=${appointment.id}`}
+							>
+								<FileText className="h-4 w-4 mr-1" />
+								Créer facture
+							</Link>
+						</Button>
+					</>
 				)}
 
 				{/* Pour les rendez-vous à venir, on montre les boutons modifier et annuler */}

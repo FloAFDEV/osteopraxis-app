@@ -82,7 +82,10 @@ export const invoiceService = {
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseInvoiceService.updateInvoice(id, invoiceData);
+        const updatedInvoice = await supabaseInvoiceService.updateInvoice(id, invoiceData);
+        // Ne pas afficher de toast ici pour éviter les doublons
+        // Le toast sera affiché dans le composant appelant
+        return updatedInvoice;
       } catch (error) {
         console.error("Erreur Supabase updateInvoice:", error);
         throw error;
