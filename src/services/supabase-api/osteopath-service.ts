@@ -1,5 +1,7 @@
+
 import { Osteopath } from "@/types";
-import { supabase, typedData } from "./utils";
+import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
+import { corsHeaders } from "@/services/corsHeaders";
 
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
@@ -90,20 +92,67 @@ export const supabaseOsteopathService = {
     }
   },
   
-  async updateOsteopath(id: number, data: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {
+  async updateOsteopath(id: number, osteoData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {
     try {
-      console.log(`Mise à jour de l'ostéopathe ID ${id} avec les données:`, data);
-      const { data: updatedOsteo, error } = await supabase
-        .from("Osteopath")
-        .update(data)
-        .eq("id", id)
-        .select()
-        .single();
-        
-      if (error) throw new Error(error.message);
+      // 1. Récupérer le token d'authentification utilisateur
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      const token = session.access_token;
+
+      // 2. Utiliser REST pour contourner les problèmes CORS
+      if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+        throw new Error("Configuration Supabase manquante (URL ou clé API)");
+      }
+
+      const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Osteopath?id=eq.${id}`;
       
-      console.log("Ostéopathe mis à jour avec succès:", updatedOsteo);
-      return updatedOsteo as Osteopath;
+      // 3. Préparer le payload avec l'ID inclus
+      const updatePayload = {
+        id: id, // Important: inclure l'ID dans le corps
+        ...osteoData,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // 4. Nettoyer les valeurs undefined
+      Object.keys(updatePayload).forEach(
+        (k) => updatePayload[k] === undefined && delete updatePayload[k]
+      );
+
+      console.log("Payload de mise à jour de l'ostéopathe:", updatePayload);
+
+      // 5. Utiliser PUT au lieu de PATCH
+      const res = await fetch(URL_ENDPOINT, {
+        method: "PUT",
+        headers: {
+          apikey: SUPABASE_API_KEY,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          ...corsHeaders
+        },
+        body: JSON.stringify(updatePayload),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Erreur HTTP ${res.status}:`, errorText);
+        throw new Error(`Erreur lors de la mise à jour de l'ostéopathe: ${res.status}`);
+      }
+
+      // Traiter la réponse
+      const data = await res.json();
+      console.log("Réponse de mise à jour de l'ostéopathe:", data);
+      
+      if (Array.isArray(data) && data.length > 0) return data[0];
+      if (data && typeof data === "object") return data as Osteopath;
+      
+      throw new Error("Aucune donnée retournée lors de la mise à jour de l'ostéopathe");
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'ostéopathe:", error);
       throw error;

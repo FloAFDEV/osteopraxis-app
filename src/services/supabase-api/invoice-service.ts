@@ -1,5 +1,7 @@
+
 import { Invoice, PaymentStatus } from "@/types";
-import { supabase, typedData } from "./utils";
+import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
+import { corsHeaders } from "@/services/corsHeaders";
 
 export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
@@ -19,7 +21,8 @@ export const supabaseInvoiceService = {
           appointmentId: item.appointmentId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus
+          paymentStatus: item.paymentStatus as PaymentStatus,
+          paymentMethod: item.paymentMethod,
         } as Invoice;
       });
     } catch (error) {
@@ -55,8 +58,7 @@ export const supabaseInvoiceService = {
         date: data.date,
         amount: data.amount,
         paymentStatus: data.paymentStatus as PaymentStatus,
-        				paymentMethod: data.paymentMethod,
-
+        paymentMethod: data.paymentMethod,
       } as Invoice;
     } catch (error) {
       console.error("Erreur getInvoiceById:", error);
@@ -84,7 +86,8 @@ export const supabaseInvoiceService = {
           appointmentId: item.appointmentId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus
+          paymentStatus: item.paymentStatus as PaymentStatus,
+          paymentMethod: item.paymentMethod
         } as Invoice;
       });
     } catch (error) {
@@ -113,7 +116,8 @@ export const supabaseInvoiceService = {
           appointmentId: item.appointmentId,
           date: item.date,
           amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus
+          paymentStatus: item.paymentStatus as PaymentStatus,
+          paymentMethod: item.paymentMethod
         } as Invoice;
       });
     } catch (error) {
@@ -151,23 +155,70 @@ export const supabaseInvoiceService = {
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
+      // 1. Récupérer le token d'authentification utilisateur
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      const token = session.access_token;
+
+      // 2. Utiliser REST pour contourner les problèmes CORS
+      if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+        throw new Error("Configuration Supabase manquante (URL ou clé API)");
+      }
+
+      const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Invoice?id=eq.${id}`;
+      
       // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
       if (invoiceData.appointmentId === 0 || invoiceData.appointmentId === null) {
         delete invoiceData.appointmentId;
       }
       
-      const query = supabase
-        .from("Invoice")
-        .update(invoiceData)
-        .eq("id", id)
-        .select()
-        .single();
+      // 3. Préparer le payload avec l'ID inclus
+      const updatePayload = {
+        id: id, // Important: inclure l'ID dans le corps
+        ...invoiceData,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // 4. Nettoyer les valeurs undefined
+      Object.keys(updatePayload).forEach(
+        (k) => updatePayload[k] === undefined && delete updatePayload[k]
+      );
+
+      console.log("Payload de mise à jour de la facture:", updatePayload);
+
+      // 5. Utiliser PUT au lieu de PATCH
+      const res = await fetch(URL_ENDPOINT, {
+        method: "PUT",
+        headers: {
+          apikey: SUPABASE_API_KEY,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          ...corsHeaders
+        },
+        body: JSON.stringify(updatePayload),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Erreur HTTP ${res.status}:`, errorText);
+        throw new Error(`Erreur lors de la mise à jour de la facture: ${res.status}`);
+      }
+
+      // Traiter la réponse
+      const data = await res.json();
+      console.log("Réponse de mise à jour de la facture:", data);
       
-      const { data, error } = await query;
+      if (Array.isArray(data) && data.length > 0) return data[0];
+      if (data && typeof data === "object") return data as Invoice;
       
-      if (error) throw new Error(error.message);
-      
-      return data as Invoice;
+      throw new Error("Aucune donnée retournée lors de la mise à jour de la facture");
     } catch (error) {
       console.error("Erreur updateInvoice:", error);
       throw error;

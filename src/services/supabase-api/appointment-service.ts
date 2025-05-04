@@ -1,5 +1,6 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
-import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
+import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY, ensureAppointmentStatus } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
 
 // Type plus spécifique pour la création d'appointment
@@ -24,12 +25,6 @@ type InsertableAppointment = {
 
 // Type pour les mises à jour d'appointment
 type UpdateAppointmentPayload = Partial<CreateAppointmentPayload>;
-
-// Fonction pour normaliser les status (si jamais "CANCELLED" est reçu d'anciennes données)
-function normalizeStatus(status?: string): AppointmentStatus {
-  if (status?.toUpperCase() === 'CANCELLED') return "CANCELED";
-  return (status as AppointmentStatus) ?? "SCHEDULED";
-}
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -99,7 +94,7 @@ export const supabaseAppointmentService = {
         patientId: payload.patientId,
         reason: payload.reason,
         cabinetId: payload.cabinetId,
-        status: normalizeStatus(payload.status),
+        status: ensureAppointmentStatus(payload.status),
         notificationSent: payload.notificationSent ?? false,
       };
 
@@ -146,8 +141,9 @@ export const supabaseAppointmentService = {
 
       // 3. Préparer le payload (nettoyage undefined)
       const updatePayload = {
+        id: id, // IMPORTANT: inclure l'ID dans le corps
         ...update,
-        status: update.status ? normalizeStatus(update.status) : undefined,
+        status: update.status ? ensureAppointmentStatus(update.status) : undefined,
         updatedAt: new Date().toISOString(),
       };
       
@@ -237,6 +233,7 @@ export const supabaseAppointmentService = {
       
       // Simplifier le payload - UNIQUEMENT le statut et updatedAt
       const updatePayload = {
+        id: id, // IMPORTANT: inclure l'ID dans le corps
         status: "CANCELED",
         updatedAt: new Date().toISOString()
       };

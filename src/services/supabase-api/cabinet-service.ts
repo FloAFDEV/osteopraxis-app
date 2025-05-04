@@ -1,3 +1,4 @@
+
 // Import types
 import { Cabinet } from "@/types";
 import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
