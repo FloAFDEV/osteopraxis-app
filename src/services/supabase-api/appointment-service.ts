@@ -1,11 +1,11 @@
-import { corsHeaders } from "@/services/corsHeaders";
 import { Appointment, AppointmentStatus } from "@/types";
 import {
-	ensureAppointmentStatus,
 	supabase,
-	SUPABASE_API_KEY,
 	SUPABASE_API_URL,
+	SUPABASE_API_KEY,
+	ensureAppointmentStatus,
 } from "./utils";
+import { corsHeaders } from "@/services/corsHeaders";
 
 // Type plus spécifique pour la création d'appointment
 type CreateAppointmentPayload = {
