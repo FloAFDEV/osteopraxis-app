@@ -167,6 +167,9 @@ export const supabaseCabinetService = {
       const data = await res.json();
       console.log("Réponse de mise à jour:", data);
       
+      // Éviter d'afficher le toast ici pour éviter les doubles toasts
+      // Le composant qui appelle cette fonction affichera le toast
+
       if (Array.isArray(data) && data.length > 0) return data[0];
       if (data && typeof data === "object") return data as Cabinet;
       throw new Error("Aucune donnée retournée lors de la mise à jour du cabinet");

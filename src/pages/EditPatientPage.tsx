@@ -64,12 +64,13 @@ const EditPatientPage = () => {
         updatedAt: new Date().toISOString()
       });
 
+      // Afficher le toast de succès ici
       toast.success("Patient mis à jour avec succès");
       
       // Attendre un peu avant de naviguer pour laisser le toast s'afficher
       setTimeout(() => {
         navigate('/patients');
-      }, 2000);
+      }, 1000);
     } catch (error: any) {
       console.error("Error updating patient:", error);
       toast.error("Impossible de mettre à jour le patient");

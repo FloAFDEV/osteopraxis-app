@@ -169,6 +169,7 @@ export function CabinetForm({
           });
         }
         
+        // Afficher le toast une seule fois ici après toutes les opérations réussies
         toast.success("Cabinet mis à jour avec succès");
       } else {
         // Create new cabinet
@@ -186,10 +187,16 @@ export function CabinetForm({
         toast.success("Cabinet créé avec succès");
       }
       
+      // Si un callback de succès est fourni, l'appeler après un court délai
+      // pour que le toast ait le temps de s'afficher
       if (onSuccess) {
-        onSuccess();
+        setTimeout(() => {
+          onSuccess();
+        }, 300);
       } else {
-        navigate("/cabinets");
+        setTimeout(() => {
+          navigate("/cabinets");
+        }, 500);
       }
     } catch (error) {
       console.error("Error submitting cabinet form:", error);

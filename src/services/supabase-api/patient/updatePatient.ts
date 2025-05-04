@@ -3,6 +3,7 @@ import { Patient, Contraception, Gender } from "@/types";
 import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "../utils";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 import { corsHeaders } from "@/services/corsHeaders";
+import { toast } from "@/components/ui/use-toast";
 
 // Type pour la mise à jour de patient
 type UpdatePatientPayload = Omit<Patient, "createdAt" | "updatedAt">;
@@ -75,6 +76,9 @@ export async function updatePatient(patient: UpdatePatientPayload): Promise<Pati
     // Traiter la réponse
     const data = await res.json();
     console.log("Réponse de mise à jour du patient:", data);
+
+    // Éviter d'afficher le toast ici pour éviter les doubles toasts
+    // Le toast sera affiché dans le composant qui appelle cette fonction
 
     if (Array.isArray(data) && data.length > 0) return adaptPatientFromSupabase(data[0]);
     if (data && typeof data === "object") return adaptPatientFromSupabase(data);

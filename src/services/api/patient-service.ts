@@ -64,6 +64,8 @@ export const patientService = {
       try {
         // Use the supabase patient service for update
         const updatedPatient = await supabasePatientService.updatePatient(patient);
+        // Ne pas afficher de toast ici pour éviter les doublons
+        // Le toast sera affiché dans le composant appelant
         return updatedPatient;
       } catch (error) {
         console.error("Erreur Supabase updatePatient:", error);

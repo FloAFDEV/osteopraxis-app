@@ -1,3 +1,4 @@
+
 import { Cabinet } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseCabinetService } from "../supabase-api/cabinet-service";
@@ -104,7 +105,10 @@ export const cabinetService = {
   async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseCabinetService.updateCabinet(id, cabinetData);
+        const result = await supabaseCabinetService.updateCabinet(id, cabinetData);
+        // Ne pas afficher de toast ici pour éviter les doublons
+        // Le toast sera affiché dans le composant appelant
+        return result;
       } catch (error) {
         console.error("Erreur Supabase updateCabinet:", error);
         throw error;
