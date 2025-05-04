@@ -1,25 +1,34 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, AlertCircle, FileText, ChevronLeft, Trash2 } from "lucide-react";
+import {
+	Calendar,
+	AlertCircle,
+	FileText,
+	ChevronLeft,
+	Trash2,
+} from "lucide-react";
 import { api } from "@/services";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
-import { formatAppointmentDate, formatAppointmentTime } from "@/utils/date-utils";
+import {
+	formatAppointmentDate,
+	formatAppointmentTime,
+} from "@/utils/date-utils";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 const EditAppointmentPage = () => {
@@ -28,7 +37,9 @@ const EditAppointmentPage = () => {
 	const [appointment, setAppointment] = useState<Appointment | null>(null);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [processingAction, setProcessingAction] = useState<'cancel' | 'delete' | null>(null);
+	const [processingAction, setProcessingAction] = useState<
+		"cancel" | "delete" | null
+	>(null);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -41,7 +52,7 @@ const EditAppointmentPage = () => {
 				]);
 
 				if (!appointmentData) {
-					throw new Error("Rendez-vous non trouvé");
+					throw new Error("Séance non trouvé");
 				}
 
 				setAppointment(appointmentData);
@@ -49,7 +60,7 @@ const EditAppointmentPage = () => {
 			} catch (error) {
 				console.error("Error fetching appointment data:", error);
 				toast.error(
-					"Impossible de charger les données du rendez-vous. Veuillez réessayer."
+					"Impossible de charger les données du Séance. Veuillez réessayer."
 				);
 			} finally {
 				setLoading(false);
@@ -63,34 +74,38 @@ const EditAppointmentPage = () => {
 		if (!appointment || !id) return;
 
 		try {
-			setProcessingAction('cancel');
-			
+			setProcessingAction("cancel");
+
 			// Utiliser directement la méthode cancelAppointment de l'API
 			// Cette méthode utilise X-Cancellation-Override dans les en-têtes
 			const result = await api.cancelAppointment(parseInt(id));
-			toast.success("Rendez-vous annulé avec succès");
+			toast.success("Séance annulé avec succès");
 			setAppointment({ ...appointment, status: "CANCELED" });
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
-			toast.error("Impossible d'annuler le rendez-vous. Erreur réseau ou problème CORS.");
+			toast.error(
+				"Impossible d'annuler la séance. Erreur réseau ou problème CORS."
+			);
 		} finally {
 			setProcessingAction(null);
 		}
 	};
-	
+
 	const handleDelete = async () => {
 		if (!appointment || !id) return;
 
 		try {
-			setProcessingAction('delete');
-			
+			setProcessingAction("delete");
+
 			// Utiliser la méthode deleteAppointment de l'API
 			await api.deleteAppointment(parseInt(id));
-			toast.success("Rendez-vous supprimé avec succès");
+			toast.success("Séance supprimé avec succès");
 			navigate("/appointments");
 		} catch (error) {
 			console.error("Error deleting appointment:", error);
-			toast.error("Impossible de supprimer le rendez-vous. Erreur réseau ou problème CORS.");
+			toast.error(
+				"Impossible de supprimer le Séance. Erreur réseau ou problème CORS."
+			);
 		} finally {
 			setProcessingAction(null);
 		}
@@ -115,7 +130,7 @@ const EditAppointmentPage = () => {
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
 						<p className="text-muted-foreground">
-							Chargement des données du rendez-vous...
+							Chargement des données du Séance...
 						</p>
 					</div>
 				</div>
@@ -128,15 +143,13 @@ const EditAppointmentPage = () => {
 			<Layout>
 				<div className="text-center py-12">
 					<AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-					<h3 className="text-xl font-medium">
-						Rendez-vous non trouvé
-					</h3>
+					<h3 className="text-xl font-medium">Séance non trouvé</h3>
 					<p className="text-muted-foreground mt-2 mb-6">
-						Le rendez-vous que vous recherchez n&apos;existe pas ou
-						a été supprimé.
+						Le Séance que vous recherchez n&apos;existe pas ou a été
+						supprimé.
 					</p>
 					<Button asChild>
-						<Link to="/appointments">Retour aux rendez-vous</Link>
+						<Link to="/appointments">Retour aux séances</Link>
 					</Button>
 				</div>
 			</Layout>
@@ -169,11 +182,11 @@ const EditAppointmentPage = () => {
 				<div className="mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<Calendar className="h-8 w-8 text-purple-500" />
-						Modifier le rendez-vous
+						Modifier la séance
 					</h1>
 					<p className="text-muted-foreground mt-1">
-						{formattedDate} - Modifiez les détails du rendez-vous en utilisant le
-						formulaire ci-dessous.
+						{formattedDate} - Modifiez les détails du Séance en
+						utilisant le formulaire ci-dessous.
 					</p>
 				</div>
 
@@ -192,25 +205,27 @@ const EditAppointmentPage = () => {
 						<Button
 							variant="destructive"
 							onClick={handleCancel}
-							aria-label="Annuler le rendez-vous"
+							aria-label="Annuler la séance"
 							disabled={!!processingAction}
 						>
-							{processingAction === 'cancel' ? (
+							{processingAction === "cancel" ? (
 								<>
-									<span className="animate-spin mr-2">⏳</span>
+									<span className="animate-spin mr-2">
+										⏳
+									</span>
 									Annulation en cours...
 								</>
 							) : (
-								"Annuler le rendez-vous"
+								"Annuler la séance"
 							)}
 						</Button>
 					)}
-					
+
 					{/* Bouton de suppression avec confirmation */}
 					<AlertDialog>
 						<AlertDialogTrigger asChild>
-							<Button 
-								variant="outline" 
+							<Button
+								variant="outline"
 								className="text-destructive border-destructive hover:bg-destructive/10"
 								disabled={!!processingAction}
 							>
@@ -220,18 +235,26 @@ const EditAppointmentPage = () => {
 						</AlertDialogTrigger>
 						<AlertDialogContent>
 							<AlertDialogHeader>
-								<AlertDialogTitle>Supprimer le rendez-vous</AlertDialogTitle>
+								<AlertDialogTitle>
+									Supprimer le Séance
+								</AlertDialogTitle>
 								<AlertDialogDescription>
-									Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ? 
-									Cette action ne peut pas être annulée.
+									Êtes-vous sûr de vouloir supprimer
+									définitivement ce Séance ? Cette action ne
+									peut pas être annulée.
 								</AlertDialogDescription>
 							</AlertDialogHeader>
 							<AlertDialogFooter>
 								<AlertDialogCancel>Annuler</AlertDialogCancel>
-								<AlertDialogAction onClick={handleDelete} className="bg-destructive">
-									{processingAction === 'delete' ? (
+								<AlertDialogAction
+									onClick={handleDelete}
+									className="bg-destructive"
+								>
+									{processingAction === "delete" ? (
 										<>
-											<span className="animate-spin mr-2">⏳</span>
+											<span className="animate-spin mr-2">
+												⏳
+											</span>
 											Suppression...
 										</>
 									) : (
@@ -246,10 +269,10 @@ const EditAppointmentPage = () => {
 						<Button variant="outline" asChild>
 							<Link
 								to={`/invoices/new?appointmentId=${appointment.id}`}
-								aria-label="Créer une facture pour ce rendez-vous"
+								aria-label="Créer une Note d'honoraire pour ce Séance"
 							>
 								<FileText className="h-4 w-4 mr-2" />
-								Créer une facture
+								Créer une Note d'honoraire
 							</Link>
 						</Button>
 					)}
