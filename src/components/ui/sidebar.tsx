@@ -111,7 +111,7 @@ export function Sidebar({ className }: SidebarProps) {
 						}
 					>
 						<Calendar className="h-4 w-4" />
-						<span>Séance</span>
+						<span>Séances</span>
 					</NavLink>
 					<NavLink
 						to="/invoices"
