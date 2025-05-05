@@ -117,7 +117,7 @@ export function Layout({ children }: LayoutProps) {
 							}
 						>
 							<Calendar className="h-4 w-4 text-purple-500" />
-							Rendez-vous
+							Séances
 						</NavLink>
 						<NavLink
 							to="/schedule"
