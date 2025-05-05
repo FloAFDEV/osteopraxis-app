@@ -178,7 +178,7 @@ export function Layout({ children }: LayoutProps) {
 										className="flex items-center cursor-pointer"
 									>
 										<FileText className="mr-2 h-4 w-4 text-amber-500" />
-										<span>Factures</span>
+										<span>Notes d'honoraires</span>
 									</NavLink>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
