@@ -189,14 +189,14 @@ const AppointmentsPage = () => {
 				)
 			);
 			setAppointmentToCancel(null); // Close dialog immediately
-			toast.success("Rendez-vous annulé avec succès");
+			toast.success("Séance annulée avec succès");
 
 			// Utiliser la méthode spécifique d'annulation
 			await api.cancelAppointment(originalAppointment.id);
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
 			toast.error(
-				"Une erreur est survenue lors de l'annulation. Le rendez-vous a été restauré."
+				"Une erreur est survenue lors de l'annulation. La séance a été restaurée."
 			);
 			// Rollback optimistic update
 			setAppointments((prevAppointments) =>
@@ -242,7 +242,7 @@ const AppointmentsPage = () => {
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
 					<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800 dark:text-white">
 						<Calendar className="h-7 w-7 sm:h-8 sm:w-8 text-purple-600" />
-						Rendez-vous
+						Séances
 					</h1>
 					<div className="flex gap-2 sm:gap-4">
 						<Button
@@ -271,7 +271,7 @@ const AppointmentsPage = () => {
 							>
 								<Plus className="h-4 w-4" />
 								<span className="hidden sm:inline">
-									Nouveau rendez-vous
+									Nouvelle séance
 								</span>{" "}
 								{/* Hide text on small screens */}
 								<span className="sm:hidden">Nouveau</span>{" "}
@@ -307,19 +307,19 @@ const AppointmentsPage = () => {
 									Tous les statuts
 								</SelectItem>
 								<SelectItem value="SCHEDULED">
-									Planifiés
+									Planifiées
 								</SelectItem>
 								<SelectItem value="COMPLETED">
-									Terminés
+									Terminées
 								</SelectItem>
 								<SelectItem value="CANCELED">
-									Annulés
+									Annulées
 								</SelectItem>
 								<SelectItem value="RESCHEDULED">
-									Reportés
+									Reportées
 								</SelectItem>
 								<SelectItem value="NO_SHOW">
-									Non présentés
+									Non présentées
 								</SelectItem>
 							</SelectContent>
 						</Select>
@@ -545,7 +545,7 @@ const AppointmentsPage = () => {
 									<div className="flex items-center gap-3">
 										<Clock className="h-5 w-5 text-gray-600 dark:text-gray-300" />
 										<span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-											Passés
+											Passées
 										</span>
 										<span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-gray-100 bg-gray-500 dark:bg-gray-700 rounded-full">
 											{pastAppointments.length}
@@ -614,7 +614,7 @@ const AppointmentsPage = () => {
 													{
 														filteredPastAppointmentsByYear.length
 													}{" "}
-													rendez-vous trouvés pour{" "}
+													séances trouvées pour{" "}
 													{selectedPastYear}
 												</p>
 											)}
@@ -709,7 +709,7 @@ const AppointmentsPage = () => {
 											// Message if no past appointments match the year filter
 											<div className="text-center py-8 text-gray-500">
 												<p>
-													Aucun rendez-vous passé
+													Aucune séance passée
 													trouvé{" "}
 													{selectedPastYear
 														? `pour l'année ${selectedPastYear}`
@@ -728,17 +728,17 @@ const AppointmentsPage = () => {
 								<div className="text-center py-16 bg-gray-50 rounded-lg mt-8 border border-dashed">
 									<CalendarX className="h-16 w-16 text-gray-400 mx-auto mb-4" />
 									<h3 className="text-xl font-semibold text-gray-700">
-										Aucun rendez-vous trouvé
+										Aucune séance trouvée
 									</h3>
 									<p className="text-muted-foreground mt-2 mb-6 max-w-md mx-auto">
 										{searchQuery || statusFilter !== "all"
-											? "Aucun rendez-vous ne correspond à vos critères de recherche ou de filtrage."
-											: "Vous n'avez pas encore de rendez-vous."}
+											? "Aucune séance ne correspond à vos critères de recherche ou de filtrage."
+											: "Vous n'avez pas encore de séance."}
 									</p>
 									<Button asChild>
 										<Link to="/appointments/new">
 											<Plus className="mr-2 h-4 w-4" />{" "}
-											Créer un rendez-vous
+											Créer une séance
 										</Link>
 									</Button>
 								</div>
@@ -758,7 +758,7 @@ const AppointmentsPage = () => {
 					<DialogHeader>
 						<DialogTitle>Confirmer l'annulation</DialogTitle>
 						<DialogDescription>
-							Êtes-vous sûr de vouloir annuler ce rendez-vous ?
+							Êtes-vous sûr de vouloir annuler cette séance ?
 							Cette action est irréversible.
 						</DialogDescription>
 					</DialogHeader>
