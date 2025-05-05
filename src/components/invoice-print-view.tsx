@@ -53,8 +53,21 @@ export const InvoicePrintView = ({
 		return `Patient #${invoice.patientId}`;
 	};
 
+	const getPaymentStatusLabel = (status?: string) => {
+		switch (status) {
+			case "PAID":
+				return { label: "ACQUITTÉE", color: "text-green-600" };
+			case "PENDING":
+				return { label: "EN ATTENTE", color: "text-yellow-600" };
+			case "CANCELED":
+				return { label: "ANNULÉE", color: "text-red-600" };
+			default:
+				return { label: "INCONNU", color: "text-gray-500" };
+		}
+	};
+
 	return (
-<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-max print:p-4">
+		<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-max print:p-4">
 			{/* Partie haute */}
 			<div className="flex-1">
 				{/* En-tête */}
@@ -175,9 +188,17 @@ export const InvoicePrintView = ({
 						<p className="font-medium text-gray-800">
 							{getPaymentMethod(invoice.paymentMethod)}
 						</p>
-						{invoice.paymentStatus === "PAID" && (
-							<p className="text-amber-600 font-bold text-lg mt-2">
-								ACQUITTÉE
+						{invoice.paymentStatus && (
+							<p
+								className={`${
+									getPaymentStatusLabel(invoice.paymentStatus)
+										.color
+								} font-bold text-lg mt-2`}
+							>
+								{
+									getPaymentStatusLabel(invoice.paymentStatus)
+										.label
+								}
 							</p>
 						)}
 					</div>
@@ -233,8 +254,10 @@ export const InvoicePrintView = ({
 					En votre aimable règlement à réception. Merci de votre
 					confiance.
 				</p>
-<div className="flex flex-wrap justify-center items-center gap-2 text-gray-500 text-xs break-all text-center">
-					<span className="whitespace-nowrap">Document généré le {currentDate}</span>
+				<div className="flex flex-wrap justify-center items-center gap-2 text-gray-500 text-xs break-all text-center">
+					<span className="whitespace-nowrap">
+						Document généré le {currentDate}
+					</span>
 					<span>|</span>
 					<span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">
 						PatientHub
