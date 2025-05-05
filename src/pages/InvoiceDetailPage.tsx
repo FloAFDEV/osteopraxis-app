@@ -30,7 +30,7 @@ const InvoiceDetailPage = () => {
 
   // Configuration pour l'impression
   const handlePrint = useReactToPrint({
-    documentTitle: `Facture_${id}`,
+    documentTitle: `note d'honoraire_${id}`,
     contentRef: printRef
   });
 
@@ -89,17 +89,17 @@ const InvoiceDetailPage = () => {
               }
             }
           } else {
-            toast.error("Facture non trouvée");
+            toast.error("note d'honoraire non trouvée");
             navigate("/invoices");
           }
         } else {
           console.error("La fonction api.getInvoiceById n'existe pas");
-          toast.error("Impossible de charger la facture: API non disponible");
+          toast.error("Impossible de charger la note d'honoraire: API non disponible");
           navigate("/invoices");
         }
       } catch (error) {
-        console.error("Erreur lors du chargement de la facture:", error);
-        toast.error("Erreur lors du chargement de la facture");
+        console.error("Erreur lors du chargement de la note d'honoraire:", error);
+        toast.error("Erreur lors du chargement de la note d'honoraire");
       } finally {
         setLoading(false);
       }
@@ -112,15 +112,15 @@ const InvoiceDetailPage = () => {
       // Vérification que api.deleteInvoice existe avant de l'appeler
       if (typeof api.deleteInvoice === "function") {
         await api.deleteInvoice(invoice.id);
-        toast.success("Facture supprimée avec succès");
+        toast.success("note d'honoraire supprimée avec succès");
         navigate("/invoices");
       } else {
         console.error("La fonction api.deleteInvoice n'existe pas");
-        toast.error("Impossible de supprimer la facture: API non disponible");
+        toast.error("Impossible de supprimer la note d'honoraire: API non disponible");
       }
     } catch (error) {
-      console.error("Erreur lors de la suppression de la facture:", error);
-      toast.error("Erreur lors de la suppression de la facture");
+      console.error("Erreur lors de la suppression de la note d'honoraire:", error);
+      toast.error("Erreur lors de la suppression de la note d'honoraire");
     }
   };
   const getPatientName = () => {
@@ -135,7 +135,7 @@ const InvoiceDetailPage = () => {
   if (loading) {
     return <Layout>
 				<div className="max-w-4xl mx-auto py-6">
-					<FancyLoader message="Chargement de la facture..." />
+					<FancyLoader message="Chargement de la note d'honoraire..." />
 				</div>
 			</Layout>;
   }
@@ -143,14 +143,14 @@ const InvoiceDetailPage = () => {
 			<div className="max-w-4xl mx-auto py-6">
 				<Button variant="outline" onClick={() => navigate("/invoices")} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50 mb-4">
 					<ArrowLeft className="h-4 w-4" />
-					Retour aux factures
+					Retour aux notes d'honoraires
 				</Button>
 
 				<div className="flex justify-between items-center mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-3">
 						<Activity className="h-8 w-8 text-blue-600 dark:text-blue-500" />
 						<span className="text-amber-400">
-							Facture n° #
+							note d'honoraire n° #
 							{invoice?.id.toString().padStart(4, "0")}
 						</span>
 					</h1>
