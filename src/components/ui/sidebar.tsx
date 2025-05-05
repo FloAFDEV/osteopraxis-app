@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { CabinetSelector } from "@/components/cabinet/cabinet-selector";
+import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile"; // Correction ici: useMobile -> useIsMobile
+import { cn } from "@/lib/utils";
 import {
-	Home,
+	Building,
 	Calendar,
-	Users,
 	CreditCard,
-	Settings,
+	Home,
 	LogOut,
 	Menu,
-	X,
-	Building,
+	Settings,
 	ShieldCheck,
+	Users,
+	X,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile"; // Correction ici: useMobile -> useIsMobile
-import { CabinetSelector } from "@/components/cabinet/cabinet-selector";
-import { api } from "@/services/api";
+import { useEffect, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 interface SidebarProps {
 	className?: string;
