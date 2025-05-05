@@ -158,7 +158,7 @@ export const InvoiceDetails = ({
 								variant="outline"
 								onClick={onPrint}
 								title="Imprimer"
-								aria-label="Imprimer la facture"
+								aria-label="Imprimer la note d'honoraire"
 								className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
 							>
 								<Printer className="h-5 w-5" />
@@ -170,7 +170,7 @@ export const InvoiceDetails = ({
 								variant="outline"
 								onClick={onDownload}
 								title="Télécharger"
-								aria-label="Télécharger la facture"
+								aria-label="Télécharger la note d'honoraire"
 								className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
 							>
 								<Download className="h-5 w-5" />
@@ -183,7 +183,7 @@ export const InvoiceDetails = ({
 						<div className="flex items-center gap-2">
 							<FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
 							<span className="font-bold text-lg">
-								Facture n°{" "}
+								Note d'honoraire n°{" "}
 								{invoice.id.toString().padStart(4, "0")}
 							</span>
 						</div>
