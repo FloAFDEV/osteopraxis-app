@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -90,6 +91,7 @@ export type Contraception =
   | "IMPLANTS"
   | "DIAPHRAGM"
   | "IUD"
+  | "IUD_HORMONAL"
   | "INJECTION"
   | "PATCH"
   | "RING"

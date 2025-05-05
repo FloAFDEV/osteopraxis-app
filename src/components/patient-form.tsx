@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -586,7 +587,10 @@ export function PatientForm({
 															Diaphragme
 														</SelectItem>
 														<SelectItem value="IUD">
-															Stérilet
+															Stérilet (cuivre)
+														</SelectItem>
+														<SelectItem value="IUD_HORMONAL">
+															Stérilet hormonal
 														</SelectItem>
 														<SelectItem value="INJECTION">
 															Injection

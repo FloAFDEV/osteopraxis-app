@@ -653,6 +653,7 @@ export type Database = {
         | "RING"
         | "NATURAL_METHODS"
         | "STERILIZATION"
+        | "IUD_HORMONAL"
       Gender: "Homme" | "Femme"
       Handedness: "LEFT" | "RIGHT" | "AMBIDEXTROUS"
       MaritalStatus:
@@ -799,6 +800,7 @@ export const Constants = {
         "RING",
         "NATURAL_METHODS",
         "STERILIZATION",
+        "IUD_HORMONAL",
       ],
       Gender: ["Homme", "Femme"],
       Handedness: ["LEFT", "RIGHT", "AMBIDEXTROUS"],

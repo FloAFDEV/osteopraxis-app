@@ -1,241 +1,157 @@
-import React, { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-	Home,
-	Calendar,
-	Users,
-	CreditCard,
-	Settings,
-	LogOut,
-	Menu,
-	X,
-	Building,
-	ShieldCheck,
+  Home,
+  Calendar,
+  Users,
+  FileText,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { NavItem } from "@/components/ui/nav-item";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
+import { useMobile } from "@/hooks/useMobile";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile"; // Correction ici: useMobile -> useIsMobile
-import { CabinetSelector } from "@/components/cabinet/cabinet-selector";
-import { api } from "@/services/api";
 
-interface SidebarProps {
-	className?: string;
-}
+export default function Sidebar() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const isMobile = useMobile();
+  const [isOpen, setIsOpen] = useState(!isMobile);
 
-export function Sidebar({ className }: SidebarProps) {
-	const { logout, user } = useAuth();
-	const { isMobile } = useIsMobile();
-	const [isOpen, setIsOpen] = useState(false);
-	const [selectedCabinetId, setSelectedCabinetId] = useState<
-		number | undefined
-	>(undefined);
-	const location = useLocation();
-	const navigate = useNavigate();
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
 
-	// Fermer le menu mobile lorsque la route change
-	useEffect(() => {
-		setIsOpen(false);
-	}, [location]);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+  
+  return (
+    <aside className={`${isOpen ? "w-64" : "w-20"} min-h-screen bg-sidebar border-r transition-all duration-300 ease-in-out fixed left-0 top-0 z-30 ${isMobile && !isOpen ? "-translate-x-full" : ""}`}>
+      <div className={`flex items-center ${isOpen ? "justify-between" : "justify-center"} h-16 border-b px-4`}>
+        {isOpen ? (
+          <div className="flex items-center space-x-2">
+            <img
+              className="h-8 w-8"
+              src="https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80&w=2187&h=2187"
+              alt="Logo"
+            />
+            <h1 className="text-xl font-bold">Ostéo App</h1>
+          </div>
+        ) : (
+          <img
+            className="h-8 w-8"
+            src="https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80&w=2187&h=2187"
+            alt="Logo"
+          />
+        )}
+        <button
+          onClick={toggleSidebar}
+          className={`${isOpen ? "" : "hidden"} p-2 rounded-md hover:bg-sidebar-hover`}
+        >
+          <ChevronLeft size={18} />
+        </button>
+      </div>
 
-	// Récupérer le cabinet préféré depuis le localStorage
-	useEffect(() => {
-		const storedCabinetId = localStorage.getItem("selectedCabinetId");
-		if (storedCabinetId) {
-			setSelectedCabinetId(Number(storedCabinetId));
-		}
-	}, []);
+      <div className="pt-4 pb-2 px-4">
+        <div onClick={toggleSidebar} className={`${isOpen ? "hidden" : "flex justify-center mb-4"} md:flex`}>
+          <button className="p-2 rounded-full hover:bg-sidebar-hover">
+            <ChevronRight size={18} />
+          </button>
+        </div>
 
-	const handleCabinetChange = (cabinetId: number) => {
-		setSelectedCabinetId(cabinetId);
-		localStorage.setItem("selectedCabinetId", cabinetId.toString());
-		// Vous pouvez ajouter une logique pour recharger les données en fonction du cabinet sélectionné
-	};
+        <nav className="space-y-1">
+          <NavItem
+            icon={Home}
+            text="Accueil"
+            to="/"
+            isOpen={isOpen}
+            isActive={location.pathname === "/"}
+          />
+          <NavItem
+            icon={Users}
+            text="Patients"
+            to="/patients"
+            isOpen={isOpen}
+            isActive={location.pathname.includes("/patients")}
+          />
+          <NavItem
+            icon={Calendar}
+            text="Séances"
+            to="/appointments"
+            isOpen={isOpen}
+            isActive={location.pathname.includes("/appointments")}
+          />
+          <NavItem
+            icon={FileText}
+            text="Notes d'honoraire"
+            to="/invoices"
+            isOpen={isOpen}
+            isActive={location.pathname.includes("/invoices")}
+          />
+          <NavItem
+            icon={Settings}
+            text="Paramètres"
+            to="/settings"
+            isOpen={isOpen}
+            isActive={location.pathname.includes("/settings")}
+          />
+          {user?.role === 'ADMIN' && (
+            <NavItem
+              icon={ShieldCheck}
+              text="Administration"
+              to="/admin"
+              isOpen={isOpen}
+              isActive={location.pathname.includes("/admin")}
+            />
+          )}
+        </nav>
+      </div>
 
-	const handleLogout = () => {
-		logout();
-		navigate("/login");
-	};
-
-	const isAdmin = user?.role === "ADMIN";
-
-	const sidebarContent = (
-		<>
-			<div className="px-3 py-2">
-				<h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mb-5">
-					PatientHub
-				</h1>
-				<div className="mb-6">
-					<CabinetSelector
-						selectedCabinetId={selectedCabinetId}
-						onCabinetChange={handleCabinetChange}
-						className="w-full"
-					/>
-				</div>
-				<nav className="space-y-1">
-					<NavLink
-						to="/dashboard"
-						className={({ isActive }) =>
-							cn(
-								"flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-								isActive
-									? "bg-accent text-accent-foreground"
-									: "hover:bg-accent hover:text-accent-foreground"
-							)
-						}
-					>
-						<Home className="h-4 w-4" />
-						<span>Tableau de bord</span>
-					</NavLink>
-					<NavLink
-						to="/patients"
-						className={({ isActive }) =>
-							cn(
-								"flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-								isActive
-									? "bg-accent text-accent-foreground"
-									: "hover:bg-accent hover:text-accent-foreground"
-							)
-						}
-					>
-						<Users className="h-4 w-4" />
-						<span>Patients</span>
-					</NavLink>
-					<NavLink
-						to="/appointments"
-						className={({ isActive }) =>
-							cn(
-								"flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-								isActive
-									? "bg-accent text-accent-foreground"
-									: "hover:bg-accent hover:text-accent-foreground"
-							)
-						}
-					>
-						<Calendar className="h-4 w-4" />
-						<span>Séance</span>
-					</NavLink>
-					<NavLink
-						to="/invoices"
-						className={({ isActive }) =>
-							cn(
-								"flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-								isActive
-									? "bg-accent text-accent-foreground"
-									: "hover:bg-accent hover:text-accent-foreground"
-							)
-						}
-					>
-						<CreditCard className="h-4 w-4" />
-						<span>Notes d'honoraires</span>
-					</NavLink>
-					<NavLink
-						to="/cabinets"
-						className={({ isActive }) =>
-							cn(
-								"flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-								isActive
-									? "bg-accent text-accent-foreground"
-									: "hover:bg-accent hover:text-accent-foreground"
-							)
-						}
-					>
-						<Building className="h-4 w-4" />
-						<span>Cabinets</span>
-					</NavLink>
-
-					{/* Lien Administration visible uniquement pour les admins */}
-					{isAdmin && (
-						<NavLink
-							to="/admin"
-							className={({ isActive }) =>
-								cn(
-									"flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors mt-4 border-t pt-4",
-									isActive
-										? "bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300"
-										: "hover:bg-amber-100 hover:text-amber-800 dark:hover:bg-amber-900/20 dark:hover:text-amber-300"
-								)
-							}
-						>
-							<ShieldCheck className="h-4 w-4" />
-							<span>Administration</span>
-						</NavLink>
-					)}
-				</nav>
-			</div>
-			<div className="px-3 py-2 mt-auto">
-				<div className="space-y-1">
-					<NavLink
-						to="/settings"
-						className={({ isActive }) =>
-							cn(
-								"flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-								isActive
-									? "bg-accent text-accent-foreground"
-									: "hover:bg-accent hover:text-accent-foreground"
-							)
-						}
-					>
-						<Settings className="h-4 w-4" />
-						<span>Paramètres</span>
-					</NavLink>
-					<button
-						onClick={handleLogout}
-						className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
-					>
-						<LogOut className="h-4 w-4 text-red-500" />
-						<span className="text-red-500">Déconnexion</span>
-					</button>
-				</div>
-			</div>
-		</>
-	);
-
-	return (
-		<>
-			{/* Version mobile */}
-			{isMobile && (
-				<div className="lg:hidden">
-					<button
-						onClick={() => setIsOpen(true)}
-						className="fixed top-4 left-4 z-40 flex h-10 w-10 items-center justify-center rounded-md border bg-background"
-						aria-label="Ouvrir le menu"
-					>
-						<Menu className="h-4 w-4" />
-					</button>
-					{isOpen && (
-						<>
-							{/* Overlay */}
-							<div
-								className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
-								onClick={() => setIsOpen(false)}
-							/>
-							{/* Menu Slideover */}
-							<div className="fixed inset-y-0 left-0 z-50 w-80 animate-in slide-in-from-left bg-background border-r p-6">
-								<button
-									onClick={() => setIsOpen(false)}
-									className="absolute top-4 right-4"
-								>
-									<X className="h-4 w-4" />
-								</button>
-								<div className="flex flex-col h-full overflow-y-auto">
-									{sidebarContent}
-								</div>
-							</div>
-						</>
-					)}
-				</div>
-			)}
-			{/* Version desktop */}
-			<div
-				className={cn(
-					"hidden lg:flex lg:flex-col lg:border-r h-screen overflow-y-auto sticky top-0 w-64",
-					className
-				)}
-			>
-				<div className="flex flex-col h-full py-6">
-					{sidebarContent}
-				</div>
-			</div>
-		</>
-	);
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <div className="flex items-center">
+          <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarFallback>
+              {user?.first_name?.[0]}{user?.last_name?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div
+            className={`${
+              isOpen ? "opacity-100 ml-3" : "opacity-0 w-0"
+            } transition-all duration-300 overflow-hidden whitespace-nowrap`}
+          >
+            <div className="font-medium text-sm">
+              {user?.first_name} {user?.last_name}
+            </div>
+            <div
+              className="text-xs text-muted-foreground cursor-pointer hover:underline"
+              onClick={handleLogout}
+            >
+              Se déconnecter
+            </div>
+          </div>
+          {!isOpen && (
+            <button
+              onClick={handleLogout}
+              className="ml-3 p-2 rounded-md hover:bg-sidebar-hover"
+            >
+              <LogOut size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+    </aside>
+  );
 }

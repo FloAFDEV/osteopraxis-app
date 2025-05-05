@@ -1,560 +1,391 @@
-import { InvoiceDetails } from "@/components/invoice-details";
-import { InvoicePrintView } from "@/components/invoice-print-view";
-import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
+
+import React, { useState, useEffect } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Layout } from "@/components/ui/layout";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { useAuth } from "@/contexts/AuthContext";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { api } from "@/services/api";
-import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import {
-	Calendar,
-	Download,
-	FileText,
-	Filter,
-	Plus,
-	Search,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Invoice, PaymentStatus } from "@/types";
 import { useNavigate } from "react-router-dom";
-import { useReactToPrint } from "react-to-print";
+import { Layout } from "@/components/ui/layout";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Input } from "@/components/ui/input";
+import { ChevronDown, ChevronUp, Edit, FileText, Plus, Search, Trash } from "lucide-react";
+import { ConfirmDeleteInvoiceModal } from "@/components/modals/ConfirmDeleteInvoiceModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-const InvoicesPage = () => {
-	const navigate = useNavigate();
-	const { user } = useAuth();
-	const { isMobile } = useIsMobile();
-	const [searchQuery, setSearchQuery] = useState("");
-	const [statusFilter, setStatusFilter] = useState<string>("ALL");
-	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
-		null
-	);
-	const [selectedYear, setSelectedYear] = useState<string>(
-		new Date().getFullYear().toString()
-	);
+interface SortState {
+  column: keyof Invoice | "";
+  direction: "asc" | "desc";
+}
 
-	const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
-	const [printAllInvoices, setPrintAllInvoices] = useState<Invoice[] | null>(
-		null
-	);
-	const [printPatient, setPrintPatient] = useState<Patient | null>(null);
-	const [printOsteopath, setPrintOsteopath] = useState<Osteopath | null>(
-		null
-	);
-	const [printCabinet, setPrintCabinet] = useState<Cabinet | null>(null);
+interface FilterForm {
+  status: string;
+  year: string;
+}
 
-	// Map to store patient data for each invoice
-	const [patientDataMap, setPatientDataMap] = useState<Map<number, Patient>>(
-		new Map()
-	);
+export default function InvoicesPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [sortState, setSortState] = useState<SortState>({
+    column: "date",
+    direction: "desc", // Default to newest first
+  });
+  const [years, setYears] = useState<string[]>([]);
 
-	// Référence pour l'impression
-	const printRef = useRef<HTMLDivElement>(null);
-	const [readyToPrint, setReadyToPrint] = useState(false);
-	const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+  const navigate = useNavigate();
 
-	// Configuration de react-to-print
-	const handlePrint = useReactToPrint({
-		// Référence directe à la div
-		contentRef: printRef,
-		documentTitle: printInvoice
-			? `Facture_${printInvoice.id.toString().padStart(4, "0")}`
-			: printAllInvoices
-			? `Factures_${selectedYear}`
-			: "Facture",
-		onAfterPrint: () => {
-			setPrintInvoice(null);
-			setPrintAllInvoices(null);
-			setPrintPatient(null);
-			setPrintOsteopath(null);
-			setPrintCabinet(null);
-			setReadyToPrint(false);
-		},
-	});
+  const form = useForm<FilterForm>({
+    defaultValues: {
+      status: "all",
+      year: "all"
+    }
+  });
 
-	useEffect(() => {
-		if (printInvoice || printAllInvoices) {
-			setReadyToPrint(true);
-		}
-	}, [printInvoice, printAllInvoices]);
+  const watchStatus = form.watch("status");
+  const watchYear = form.watch("year");
 
-	useEffect(() => {
-		if ((printInvoice || printAllInvoices) && readyToPrint) {
-			setTimeout(() => {
-				handlePrint();
-				setIsPreparingPrint(false);
-			}, 200);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [readyToPrint]);
+  // Get all invoices
+  useEffect(() => {
+    async function fetchInvoices() {
+      try {
+        setLoading(true);
+        const data = await api.getInvoices();
+        setInvoices(data);
 
-	const {
-		data: invoices,
-		isLoading,
-		refetch,
-	} = useQuery({
-		queryKey: ["invoices"],
-		queryFn: api.getInvoices,
-	});
+        // Extract all unique years from invoices for filter
+        const uniqueYears = Array.from(
+          new Set(
+            data.map((invoice) => new Date(invoice.date).getFullYear().toString())
+          )
+        ).sort((a, b) => parseInt(b) - parseInt(a));
+        setYears(uniqueYears);
+      } catch (error) {
+        console.error("Failed to fetch notes d'honoraire:", error);
+        toast.error("Erreur lors du chargement des notes d'honoraire");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-	// Fetch patient data for all invoices
-	useEffect(() => {
-		const fetchPatientData = async () => {
-			if (!invoices || invoices.length === 0) return;
+    fetchInvoices();
+  }, []);
 
-			const patientIds = [
-				...new Set(invoices.map((invoice) => invoice.patientId)),
-			];
-			const patientMap = new Map<number, Patient>();
+  // Apply filtering
+  useEffect(() => {
+    let result = [...invoices];
+    
+    // Text search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((invoice) => {
+        const invoiceId = invoice.id.toString();
+        const amount = invoice.amount.toString();
+        return invoiceId.includes(query) || amount.includes(query);
+      });
+    }
 
-			for (const patientId of patientIds) {
-				try {
-					const patient = await api.getPatientById(patientId);
-					if (patient) {
-						patientMap.set(patientId, patient);
-					}
-				} catch (error) {
-					console.error(
-						`Error fetching patient ${patientId}:`,
-						error
-					);
-				}
-			}
+    // Status filter
+    if (watchStatus !== "all") {
+      result = result.filter(invoice => invoice.paymentStatus === watchStatus);
+    }
 
-			setPatientDataMap(patientMap);
-		};
+    // Year filter
+    if (watchYear !== "all") {
+      result = result.filter(invoice => {
+        const invoiceYear = new Date(invoice.date).getFullYear().toString();
+        return invoiceYear === watchYear;
+      });
+    }
 
-		fetchPatientData();
-	}, [invoices]);
+    // Apply sorting
+    if (sortState.column) {
+      result = [...result].sort((a, b) => {
+        if (sortState.column === "date") {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return sortState.direction === "asc" ? dateA - dateB : dateB - dateA;
+        }
+        if (sortState.column === "id") {
+          return sortState.direction === "asc" 
+            ? a.id - b.id 
+            : b.id - a.id;
+        }
+        if (sortState.column === "amount") {
+          return sortState.direction === "asc" 
+            ? a.amount - b.amount 
+            : b.amount - a.amount;
+        }
+        return 0;
+      });
+    }
 
-	// Fonction pour charger les données associées à une facture (patient, ostéopathe, cabinet)
-	const loadInvoiceRelatedData = async (invoice: Invoice) => {
-		try {
-			// Charger les données du patient
-			let patientData = null;
-			let osteopathData = null;
-			let cabinetData = null;
+    setFilteredInvoices(result);
+  }, [invoices, searchQuery, sortState, watchStatus, watchYear]);
 
-			if (invoice.patientId) {
-				patientData = await api.getPatientById(invoice.patientId);
+  const handleSort = (column: keyof Invoice) => {
+    setSortState(prev => ({
+      column,
+      direction: prev.column === column && prev.direction === "asc" ? "desc" : "asc"
+    }));
+  };
 
-				// Déterminer l'ID de l'ostéopathe à partir du patient ou de l'utilisateur connecté
-				const osteopathId =
-					patientData?.osteopathId || user?.osteopathId;
+  // Confirm delete
+  const confirmDelete = (invoice: Invoice) => {
+    setInvoiceToDelete(invoice);
+    setShowDeleteModal(true);
+  };
 
-				if (osteopathId) {
-					osteopathData = await api.getOsteopathById(osteopathId);
+  // Delete invoice
+  const handleDelete = async () => {
+    if (!invoiceToDelete) return;
 
-					if (osteopathData?.id) {
-						const cabinets = await api.getCabinetsByOsteopathId(
-							osteopathData.id
-						);
-						if (cabinets && cabinets.length > 0) {
-							cabinetData = cabinets[0];
-						}
-					}
-				}
-			}
+    try {
+      await api.deleteInvoice(invoiceToDelete.id);
+      setInvoices(prevInvoices => prevInvoices.filter(i => i.id !== invoiceToDelete.id));
+      toast.success("Note d'honoraire supprimée avec succès");
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Failed to delete note d'honoraire:", error);
+      toast.error("Erreur lors de la suppression de la note d'honoraire");
+    }
+  };
 
-			return {
-				patient: patientData,
-				osteopath: osteopathData,
-				cabinet: cabinetData,
-			};
-		} catch (error) {
-			console.error(
-				"Erreur lors du chargement des données associées:",
-				error
-			);
-			return { patient: null, osteopath: null, cabinet: null };
-		}
-	};
+  const renderSortIcon = (column: keyof Invoice) => {
+    if (sortState.column !== column) return null;
+    return sortState.direction === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />;
+  };
 
-	const handleDeleteInvoice = async () => {
-		if (!selectedInvoiceId) return;
-		try {
-			await api.deleteInvoice(selectedInvoiceId);
-			toast.success("Facture supprimée avec succès");
-			refetch();
-		} catch (error) {
-			console.error("Erreur lors de la suppression:", error);
-			toast.error("Une erreur est survenue lors de la suppression");
-		} finally {
-			setIsDeleteModalOpen(false);
-			setSelectedInvoiceId(null);
-		}
-	};
+  const getStatusBadge = (status: PaymentStatus) => {
+    switch (status) {
+      case "PAID":
+        return <Badge className="bg-green-500 hover:bg-green-600">Payée</Badge>;
+      case "PENDING":
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600">En attente</Badge>;
+      case "CANCELED":
+        return <Badge className="bg-red-500 hover:bg-red-600">Annulée</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
 
-	// Obtenir le nom du patient avec gestion des cas
-	const getPatientName = (invoice: Invoice) => {
-		// First check if we have the patient in our map
-		const patient = patientDataMap.get(invoice.patientId);
-		if (patient) {
-			return `${patient.firstName} ${patient.lastName}`;
-		}
+  return (
+    <Layout>
+      <div className="space-y-6">
+        {/* Header with title and add button */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <FileText className="h-8 w-8 text-blue-500" />
+            Notes d'honoraire
+          </h1>
+          <Button onClick={() => navigate("/invoices/new")} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" /> Nouvelle note
+          </Button>
+        </div>
 
-		// Then check if Patient is attached by API
-		// @ts-ignore (Patient peut être attaché par API)
-		if (invoice.Patient) {
-			//@ts-ignore
-			return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
-		}
+        {/* Filters */}
+        <Card className="bg-card/60 backdrop-blur-sm">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Rechercher une note..." 
+                  className="pl-9"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
 
-		return `Patient #${invoice.patientId}`;
-	};
+              <Form {...form}>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Filtrer par statut" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Tous les statuts</SelectItem>
+                              <SelectItem value="PAID">Payées</SelectItem>
+                              <SelectItem value="PENDING">En attente</SelectItem>
+                              <SelectItem value="CANCELED">Annulées</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-	// Get patient gender (for styling)
-	const getPatientGender = (invoice: Invoice) => {
-		const patient = patientDataMap.get(invoice.patientId);
-		return patient?.gender || null;
-	};
+                  <FormField
+                    control={form.control}
+                    name="year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Filtrer par année" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Toutes les années</SelectItem>
+                              {years.map(year => (
+                                <SelectItem key={year} value={year}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </Form>
 
-	// Filtrer les factures selon les critères de recherche et de statut
-	const filteredInvoices = invoices
-		? invoices.filter((invoice) => {
-				// Get the patient name
-				const patientName = getPatientName(invoice);
+              <div className="text-right text-sm text-muted-foreground pt-2">
+                {filteredInvoices.length} note(s) trouvée(s)
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-				const matchesQuery =
-					patientName
-						.toLowerCase()
-						.includes(searchQuery.toLowerCase()) ||
-					invoice.id.toString().includes(searchQuery);
+        {/* Invoices Table */}
+        <Card>
+          <CardContent className="p-0">
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead 
+                      className="w-[100px] cursor-pointer"
+                      onClick={() => handleSort("id")}
+                    >
+                      N° {renderSortIcon("id")}
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer"
+                      onClick={() => handleSort("date")}
+                    >
+                      Date {renderSortIcon("date")}
+                    </TableHead>
+                    <TableHead>Patient</TableHead>
+                    <TableHead 
+                      className="text-right cursor-pointer"
+                      onClick={() => handleSort("amount")}
+                    >
+                      Montant {renderSortIcon("amount")}
+                    </TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+                          <p className="text-sm text-muted-foreground">Chargement des notes d'honoraire...</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredInvoices.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10">
+                        <p className="text-muted-foreground">Aucune note d'honoraire trouvée</p>
+                        <Button 
+                          variant="outline" 
+                          className="mt-4"
+                          onClick={() => navigate("/invoices/new")}
+                        >
+                          <Plus className="mr-2 h-4 w-4" /> Créer une note
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredInvoices.map((invoice) => (
+                      <TableRow key={invoice.id}>
+                        <TableCell className="font-medium">
+                          {invoice.id.toString().padStart(4, '0')}
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(invoice.date), 'dd/MM/yyyy', { locale: fr })}
+                        </TableCell>
+                        <TableCell>
+                          {invoice.Patient ? (
+                            `${invoice.Patient.firstName} ${invoice.Patient.lastName}`
+                          ) : (
+                            <span className="text-muted-foreground">Patient inconnu</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {invoice.amount.toFixed(2)} €
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(invoice.paymentStatus)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/invoices/${invoice.id}`)}
+                            >
+                              <FileText className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/invoices/${invoice.id}/edit`)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-500 hover:text-red-600"
+                              onClick={() => confirmDelete(invoice)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-				const matchesStatus =
-					statusFilter === "ALL" ||
-					invoice.paymentStatus === statusFilter;
-				return matchesQuery && matchesStatus;
-		  })
-		: [];
-
-	// Filtrer les factures par année
-	const getInvoicesByYear = (year: string): Invoice[] => {
-		if (!invoices) return [];
-
-		return invoices.filter((invoice) => {
-			const invoiceDate = new Date(invoice.date);
-			return invoiceDate.getFullYear().toString() === year;
-		});
-	};
-
-	// Générer les options des années pour le sélecteur
-	const generateYearOptions = (): number[] => {
-		const currentYear = new Date().getFullYear();
-		const years: number[] = [];
-
-		// Générer les 5 dernières années
-		for (let i = 0; i < 5; i++) {
-			years.push(currentYear - i);
-		}
-
-		return years;
-	};
-
-	// Impression et téléchargement d'une facture individuelle
-	const handlePrintInvoice = async (invoice: Invoice) => {
-		setPrintInvoice(invoice);
-		setPrintAllInvoices(null);
-
-		// Charger les données associées
-		const relatedData = await loadInvoiceRelatedData(invoice);
-		setPrintPatient(relatedData.patient);
-		setPrintOsteopath(relatedData.osteopath);
-		setPrintCabinet(relatedData.cabinet);
-
-		console.log("Données pour impression:", {
-			invoice,
-			patient: relatedData.patient,
-			osteopath: relatedData.osteopath,
-			cabinet: relatedData.cabinet,
-		});
-	};
-
-	// Export immédiat en PDF sans toast intermédiaire
-	const handleDownloadInvoice = async (invoice: Invoice) => {
-		// Charger les données associées avant l'impression
-		const relatedData = await loadInvoiceRelatedData(invoice);
-
-		setIsPreparingPrint(true);
-		setPrintInvoice(invoice);
-		setPrintPatient(relatedData.patient);
-		setPrintOsteopath(relatedData.osteopath);
-		setPrintCabinet(relatedData.cabinet);
-		setPrintAllInvoices(null);
-
-		// Lancer directement impression PDF après un petit délai de montage DOM
-		setTimeout(() => {
-			handlePrint();
-		}, 200);
-	};
-
-	// Impression et téléchargement de toutes les factures d'une année
-	const handleDownloadAllInvoices = async () => {
-		const yearInvoices = getInvoicesByYear(selectedYear);
-
-		if (yearInvoices.length === 0) {
-			toast.error(`Aucune facture trouvée pour l'année ${selectedYear}`);
-			return;
-		}
-
-		// Pour l'impression multiple, nous utilisons les données du premier ostéopathe/cabinet
-		// car c'est généralement le même pour toutes les factures d'un utilisateur
-		if (yearInvoices.length > 0) {
-			const relatedData = await loadInvoiceRelatedData(yearInvoices[0]);
-			setPrintPatient(null); // Pas de patient spécifique pour l'impression multiple
-			setPrintOsteopath(relatedData.osteopath);
-			setPrintCabinet(relatedData.cabinet);
-		}
-
-		setPrintAllInvoices(yearInvoices);
-		setPrintInvoice(null);
-		toast.info(
-			`Préparation du téléchargement des ${yearInvoices.length} factures de ${selectedYear}...`
-		);
-	};
-
-	return (
-		<>
-			{isPreparingPrint && (
-				<div className="fixed inset-0 bg-white/80 dark:bg-black/80 flex flex-col items-center justify-center z-50">
-					<div className="flex gap-2">
-						<div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-						<div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-						<div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce"></div>
-					</div>
-					<p className="mt-6 text-lg font-semibold text-gray-800 dark:text-gray-200">
-						Préparation du PDF en cours...
-					</p>
-				</div>
-			)}
-			<Layout>
-				<div className="mb-6">
-					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-						<h1 className="text-3xl font-bold flex items-center gap-3">
-							<FileText className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-							<span className="text-black dark:text-gray-100 font-semibold">
-								Factures
-							</span>
-						</h1>
-						<Button
-							onClick={() => navigate("/invoices/new")}
-							className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600"
-						>
-							<Plus className="h-5 w-5" />
-							Nouvelle facture
-						</Button>
-					</div>
-
-					<Card className="mb-8">
-						<CardContent className="p-4">
-							<div className="flex flex-col sm:flex-row gap-4">
-								<div className="relative flex-1">
-									<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-									<Input
-										placeholder="Rechercher une facture..."
-										className="pl-9"
-										value={searchQuery}
-										onChange={(e) =>
-											setSearchQuery(e.target.value)
-										}
-									/>
-								</div>
-								<div className="flex items-center gap-2 min-w-[200px]">
-									<Filter className="h-4 w-4 text-gray-400" />
-									<Select
-										value={statusFilter}
-										onValueChange={setStatusFilter}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Tous les statuts" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="ALL">
-												Tous les statuts
-											</SelectItem>
-											<SelectItem value="PAID">
-												Payée
-											</SelectItem>
-											<SelectItem value="PENDING">
-												En attente
-											</SelectItem>
-											<SelectItem value="CANCELED">
-												Annulée
-											</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							</div>
-
-							{/* Nouvelle section pour le téléchargement par année - Améliorée pour la responsivité */}
-							<div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-								<div className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center">
-									<Calendar className="h-5 w-5 mr-2 text-amber-500" />
-									Export annuel:
-								</div>
-								<div className="flex flex-wrap w-full sm:w-auto gap-3 items-center mt-2 sm:mt-0">
-									<Select
-										value={selectedYear}
-										onValueChange={setSelectedYear}
-									>
-										<SelectTrigger className="w-28">
-											<SelectValue placeholder="Année" />
-										</SelectTrigger>
-										<SelectContent>
-											{generateYearOptions().map(
-												(year) => (
-													<SelectItem
-														key={year}
-														value={year.toString()}
-													>
-														{year}
-													</SelectItem>
-												)
-											)}
-										</SelectContent>
-									</Select>
-									<Button
-										onClick={handleDownloadAllInvoices}
-										variant="outline"
-										size={isMobile ? "sm" : "default"}
-										className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50"
-									>
-										<Download className="h-4 w-4" />
-										<span>Télécharger le PDF annuel</span>
-									</Button>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{isLoading ? (
-						<div className="flex justify-center items-center py-20">
-							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-						</div>
-					) : filteredInvoices && filteredInvoices.length > 0 ? (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-							{filteredInvoices.map((invoice) => (
-								<div key={invoice.id} className="h-full">
-									<div className="h-full min-h-[400px] flex flex-col">
-										<InvoiceDetails
-											invoice={invoice}
-											patient={patientDataMap.get(
-												invoice.patientId
-											)}
-											onEdit={() =>
-												navigate(
-													`/invoices/${invoice.id}`
-												)
-											}
-											onDelete={() => {
-												setSelectedInvoiceId(
-													invoice.id
-												);
-												setIsDeleteModalOpen(true);
-											}}
-											onPrint={() =>
-												handlePrintInvoice(invoice)
-											}
-											onDownload={() =>
-												handleDownloadInvoice(invoice)
-											}
-										/>
-									</div>
-								</div>
-							))}
-						</div>
-					) : (
-						<div className="text-center py-20">
-							<FileText className="h-16 w-16 mx-auto text-amber-300 dark:text-amber-600" />
-							<h3 className="mt-4 text-xl font-medium">
-								Aucune facture trouvée
-							</h3>
-							<p className="mt-2 text-gray-500 dark:text-gray-400">
-								{searchQuery || statusFilter !== "ALL"
-									? "Essayez de modifier vos critères de recherche."
-									: "Commencez par créer votre première facture."}
-							</p>
-							<Button
-								onClick={() => navigate("/invoices/new")}
-								className="mt-6 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-600"
-							>
-								<Plus className="h-4 w-4 mr-2" />
-								Créer une facture
-							</Button>
-						</div>
-					)}
-				</div>
-
-				{/* Print components hidden section */}
-				{printInvoice && (
-					<div className="hidden">
-						<div ref={printRef}>
-							<InvoicePrintView
-								invoice={printInvoice}
-								patient={printPatient}
-								osteopath={printOsteopath}
-								cabinet={printCabinet}
-							/>
-						</div>
-					</div>
-				)}
-
-				{printAllInvoices && (
-					<div className="hidden">
-						<div ref={printRef}>
-							<div className="p-8">
-								<h1 className="text-3xl font-bold text-center mb-8">
-									Factures de l'année {selectedYear}
-								</h1>
-								<div className="space-y-8">
-									{printAllInvoices.map((invoice) => {
-										const patient = patientDataMap.get(
-											invoice.patientId
-										); // 👈 récupérer le patient associé
-										return (
-											<div
-												key={invoice.id}
-												className="page-break-after mb-4"
-											>
-												<InvoicePrintView
-													invoice={invoice}
-													patient={patient} // 👈 et l'envoyer à InvoicePrintView
-													osteopath={printOsteopath}
-													cabinet={printCabinet}
-												/>
-											</div>
-										);
-									})}
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{isDeleteModalOpen && selectedInvoiceId && (
-					<ConfirmDeleteInvoiceModal
-						isOpen={isDeleteModalOpen}
-						invoiceNumber={selectedInvoiceId
-							.toString()
-							.padStart(4, "0")}
-						onCancel={() => setIsDeleteModalOpen(false)}
-						onDelete={handleDeleteInvoice}
-					/>
-				)}
-			</Layout>
-		</>
-	);
-};
-
-export default InvoicesPage;
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteInvoiceModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        invoice={invoiceToDelete}
+      />
+    </Layout>
+  );
+}
