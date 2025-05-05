@@ -121,3 +121,5 @@ export function InvoicePrintView({ invoice, patient, osteopath, cabinet }: Invoi
     </div>
   );
 }
+
+export default InvoicePrintView;

@@ -1,3 +1,4 @@
+
 export type Role = "ADMIN" | "USER";
 
 export interface User {
@@ -8,9 +9,10 @@ export interface User {
   role: Role;
   createdAt?: string;
   updatedAt?: string;
+  osteopathId?: number; // Adding this property
 }
 
-export type Gender = "MALE" | "FEMALE" | "OTHER";
+export type Gender = "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme"; // Adding French versions
 
 export interface Patient {
   id: number;
@@ -23,8 +25,31 @@ export interface Patient {
   postalCode?: string;
   gender: Gender;
   dateOfBirth?: string;
+  birthDate?: string; // Adding this for compatibility
   createdAt?: string;
   updatedAt?: string;
+  // Adding missing properties used in components
+  avatarUrl?: string;
+  occupation?: string;
+  physicalActivity?: string;
+  hasChildren?: string | boolean;
+  childrenAges?: number[];
+  isSmoker?: boolean;
+  hasVisionCorrection?: boolean;
+  generalPractitioner?: string;
+  ophtalmologistName?: string;
+  entDoctorName?: string;
+  entProblems?: string;
+  digestiveDoctorName?: string;
+  digestiveProblems?: string;
+  surgicalHistory?: string;
+  traumaHistory?: string;
+  rheumatologicalHistory?: string;
+  currentTreatment?: string;
+  maritalStatus?: string;
+  contraception?: string;
+  handedness?: string;
+  familyStatus?: string;
 }
 
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
@@ -40,19 +65,21 @@ export interface Appointment {
   createdAt?: string;
   updatedAt?: string;
   cabinetId?: number;
-  notes?: string; // Add notes field to the Appointment interface
+  notes?: string; // Added notes field
 }
 
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 
 export interface Invoice {
   id: number;
-  appointmentId: number;
+  appointmentId?: number;
+  patientId: number; // Added missing field
   date: string;
   amount: number;
   paymentStatus: PaymentStatus;
   paymentMethod?: string;
   tvaMotif?: string;
+  tvaExoneration?: boolean; // Added missing field
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -68,10 +95,11 @@ export interface Osteopath {
   email?: string;
   address?: string;
   city?: string;
-  zip_code?: string;
+  zip_code?: string; // Changed from postalCode to zip_code
   cabinetId?: number;
   createdAt?: string;
   updatedAt?: string;
+  ape_code?: string; // Added missing field
 }
 
 export interface Cabinet {
@@ -85,4 +113,34 @@ export interface Cabinet {
   website?: string;
   createdAt?: string;
   updatedAt?: string;
+  osteopathId?: number; // Added missing field
+  imageUrl?: string; // Added missing field
+  logoUrl?: string; // Added missing field
+}
+
+// Adding DashboardData interface for charts and stats
+export interface DashboardData {
+  totalPatients: number;
+  newPatientsThisMonth: number;
+  newPatientsThisYear: number;
+  totalAppointments: number;
+  completedAppointments: number;
+  cancelledAppointments: number;
+  totalRevenue: number;
+  paidInvoices: number;
+  pendingInvoices: number;
+  demographics: {
+    male: number;
+    female: number;
+    other: number;
+  };
+  ageGroups: {
+    label: string;
+    value: number;
+  }[];
+  monthlyGrowth: {
+    month: string;
+    patients: number;
+    prevPatients: number;
+  }[];
 }

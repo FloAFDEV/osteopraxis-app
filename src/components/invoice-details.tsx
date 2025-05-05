@@ -152,3 +152,6 @@ export function InvoiceDetails({
     </Card>
   );
 }
+
+// Export the component
+export default InvoiceDetails;

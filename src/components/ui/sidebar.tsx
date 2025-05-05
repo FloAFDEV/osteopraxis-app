@@ -1,3 +1,4 @@
+
 import {
   Home,
   Calendar,
@@ -73,48 +74,54 @@ export default function Sidebar() {
 
         <nav className="space-y-1">
           <NavItem
-            icon={Home}
-            text="Accueil"
             to="/"
-            isOpen={isOpen}
-            isActive={location.pathname === "/"}
-          />
+            icon={<Home size={18} />}
+            isExternal={false}
+            className={location.pathname === "/" ? "bg-accent text-accent-foreground" : ""}
+          >
+            Accueil
+          </NavItem>
           <NavItem
-            icon={Users}
-            text="Patients"
             to="/patients"
-            isOpen={isOpen}
-            isActive={location.pathname.includes("/patients")}
-          />
+            icon={<Users size={18} />}
+            isExternal={false}
+            className={location.pathname.includes("/patients") ? "bg-accent text-accent-foreground" : ""}
+          >
+            Patients
+          </NavItem>
           <NavItem
-            icon={Calendar}
-            text="Séances"
             to="/appointments"
-            isOpen={isOpen}
-            isActive={location.pathname.includes("/appointments")}
-          />
+            icon={<Calendar size={18} />}
+            isExternal={false}
+            className={location.pathname.includes("/appointments") ? "bg-accent text-accent-foreground" : ""}
+          >
+            Séances
+          </NavItem>
           <NavItem
-            icon={FileText}
-            text="Notes d'honoraire"
             to="/invoices"
-            isOpen={isOpen}
-            isActive={location.pathname.includes("/invoices")}
-          />
+            icon={<FileText size={18} />}
+            isExternal={false}
+            className={location.pathname.includes("/invoices") ? "bg-accent text-accent-foreground" : ""}
+          >
+            Notes d'honoraire
+          </NavItem>
           <NavItem
-            icon={Settings}
-            text="Paramètres"
             to="/settings"
-            isOpen={isOpen}
-            isActive={location.pathname.includes("/settings")}
-          />
+            icon={<Settings size={18} />}
+            isExternal={false}
+            className={location.pathname.includes("/settings") ? "bg-accent text-accent-foreground" : ""}
+          >
+            Paramètres
+          </NavItem>
           {user?.role === 'ADMIN' && (
             <NavItem
-              icon={ShieldCheck}
-              text="Administration"
               to="/admin"
-              isOpen={isOpen}
-              isActive={location.pathname.includes("/admin")}
-            />
+              icon={<ShieldCheck size={18} />}
+              isExternal={false}
+              className={location.pathname.includes("/admin") ? "bg-accent text-accent-foreground" : ""}
+            >
+              Administration
+            </NavItem>
           )}
         </nav>
       </div>
