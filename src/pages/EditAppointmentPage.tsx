@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Calendar } from "lucide-react";
 import { api } from "@/services/api";
-import { Appointment, Patient } from "@/types";
+import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
@@ -43,7 +43,10 @@ const EditAppointmentPage = () => {
 					)
 				);
 			} catch (error) {
-				console.error("Erreur lors du chargement des données :", error);
+				console.error(
+					"Erreur lors du chargement des données :",
+					error
+				);
 				toast.error(
 					"Impossible de charger les données. Veuillez réessayer."
 				);
@@ -61,7 +64,7 @@ const EditAppointmentPage = () => {
 				<div className="flex justify-center items-center h-full">
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent mx-auto mb-4" />
-						<p className="text-gray-500 dark:text-gray-400">
+						<p className="text-gray-500">
 							Chargement des données...
 						</p>
 					</div>
@@ -75,7 +78,7 @@ const EditAppointmentPage = () => {
 			<Layout>
 				<div className="flex justify-center items-center h-full">
 					<div className="text-center">
-						<p className="text-red-500 dark:text-red-400">
+						<p className="text-red-500">
 							Séance non trouvée. Veuillez vérifier l'ID.
 						</p>
 					</div>
@@ -89,10 +92,10 @@ const EditAppointmentPage = () => {
 			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<header className="mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-						<Calendar className="h-8 w-8 text-purple-500 dark:text-purple-400" />
+						<Calendar className="h-8 w-8 text-purple-500" />
 						Modifier la séance
 					</h1>
-					<p className="text-gray-500 dark:text-gray-400 mt-2">
+					<p className="text-gray-500 mt-2">
 						Modifiez les informations de la séance en remplissant le
 						formulaire ci-dessous.
 					</p>
@@ -106,10 +109,7 @@ const EditAppointmentPage = () => {
 								id: appointment.id,
 								patientId: appointment.patientId,
 								date: new Date(appointment.date),
-								time: format(
-									new Date(appointment.date),
-									"HH:mm"
-								),
+								time: format(new Date(appointment.date), "HH:mm"),
 								reason: appointment.reason,
 								status: appointment.status,
 								notes: appointment.notes,
