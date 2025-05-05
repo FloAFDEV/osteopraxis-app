@@ -256,7 +256,7 @@ export function Layout({ children }: LayoutProps) {
 							onClick={() => setIsMenuOpen(false)}
 						>
 							<Calendar className="h-5 w-5 text-purple-500" />
-							Rendez-vous
+							Séances
 						</NavLink>
 						<NavLink
 							to="/schedule"
@@ -286,7 +286,7 @@ export function Layout({ children }: LayoutProps) {
 							onClick={() => setIsMenuOpen(false)}
 						>
 							<FileText className="h-5 w-5 text-amber-500" />
-							Factures
+							Notes d'honoraires
 						</NavLink>
 						<NavLink
 							to="/cabinets"
