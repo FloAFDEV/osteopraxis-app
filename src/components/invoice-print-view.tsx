@@ -1,4 +1,3 @@
-
 import React, { useRef } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -57,7 +56,7 @@ export function InvoicePrintView({ invoice, patient, osteopath, cabinet }: Invoi
             <div className="mt-2">
               <p className="text-gray-700">{cabinet.name}</p>
               <p className="text-gray-700">{cabinet.address}</p>
-              <p className="text-gray-700">{cabinet.postalCode} {cabinet.city}</p>
+              <p className="text-gray-700">{cabinet.zip_code} {cabinet.city}</p>
             </div>
           )}
         </div>

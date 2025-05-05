@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 export interface AppointmentCardProps {
-  appointment: Appointment;
+  appointment: Appointment & { notes?: string };
   patient?: Patient;
   onEdit?: (appointment: Appointment) => void;
   onDelete?: (appointment: Appointment) => void;
