@@ -75,7 +75,7 @@ const NewAppointmentPage = () => {
 						</div>
 					</div>
 				) : (
-					<section className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+					<section className="rounded-lg border border-gray-200 shadow-sm p-6">
 						<AppointmentForm
 							patients={patients}
 							defaultValues={{
