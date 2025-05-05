@@ -69,10 +69,10 @@ const InvoicesPage = () => {
 		// Référence directe à la div
 		contentRef: printRef,
 		documentTitle: printInvoice
-			? `Facture_${printInvoice.id.toString().padStart(4, "0")}`
+			? `Note d'honoraire_${printInvoice.id.toString().padStart(4, "0")}`
 			: printAllInvoices
-			? `Factures_${selectedYear}`
-			: "Facture",
+			? `Notes d'honoraires_${selectedYear}`
+			: "Note d'honoraire",
 		onAfterPrint: () => {
 			setPrintInvoice(null);
 			setPrintAllInvoices(null);
