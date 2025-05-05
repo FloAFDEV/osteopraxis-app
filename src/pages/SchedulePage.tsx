@@ -116,7 +116,7 @@ const SchedulePage = () => {
 		try {
 			setActionInProgress({ id: appointmentId, action: "cancel" });
 			await api.cancelAppointment(appointmentId);
-			toast.success("Rendez-vous annulé avec succès");
+			toast.success("Séance annulée avec succès");
 			const updatedAppointments = appointments.map((appointment) =>
 				appointment.id === appointmentId
 					? {
@@ -128,7 +128,7 @@ const SchedulePage = () => {
 			setAppointments(updatedAppointments);
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
-			toast.error("Impossible d'annuler le rendez-vous");
+			toast.error("Impossible d'annuler la séance");
 		} finally {
 			setActionInProgress(null);
 		}
@@ -138,14 +138,14 @@ const SchedulePage = () => {
 		try {
 			setActionInProgress({ id: appointmentId, action: "delete" });
 			await api.deleteAppointment(appointmentId);
-			toast.success("Rendez-vous supprimé avec succès");
+			toast.success("Séance supprimé avec succès");
 			const updatedAppointments = appointments.filter(
 				(appointment) => appointment.id !== appointmentId
 			);
 			setAppointments(updatedAppointments);
 		} catch (error) {
 			console.error("Error deleting appointment:", error);
-			toast.error("Impossible de supprimer le rendez-vous");
+			toast.error("Impossible de supprimer le Séance");
 		} finally {
 			setActionInProgress(null);
 		}
@@ -169,7 +169,7 @@ const SchedulePage = () => {
 	// --- JSX Structure ---
 	return (
 		<Layout>
-			<div className="flex flex-col p-4 sm:p-6 lg:p-8">
+			<div className="flex flex-col p-4 sm:p-6 lg:p-8 mt-20">
 				{/* Header remains the same */}
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
@@ -338,12 +338,12 @@ const SchedulePage = () => {
 													handleDayHeaderClick(day)
 												}
 												tabIndex={0}
-												title={`Ajouter un rendez-vous le ${format(
+												title={`Ajouter un Séance le ${format(
 													day,
 													"d MMMM yyyy",
 													{ locale: fr }
 												)}`}
-												aria-label={`Ajouter un rendez-vous le ${format(
+												aria-label={`Ajouter un Séance le ${format(
 													day,
 													"d MMMM yyyy",
 													{ locale: fr }
@@ -360,7 +360,7 @@ const SchedulePage = () => {
 													})}
 												</div>
 												<span className="sr-only">
-													Ajouter un rendez-vous
+													Ajouter un Séance
 												</span>
 											</button>
 
@@ -369,7 +369,7 @@ const SchedulePage = () => {
 											0 ? (
 												<div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
 													<p className="text-sm text-muted-foreground">
-														Aucun rendez-vous
+														Aucune séance
 													</p>
 												</div>
 											) : (
@@ -447,7 +447,7 @@ const SchedulePage = () => {
 																		disabled={
 																			isProcessingAction
 																		}
-																		title="Annuler ce rendez-vous"
+																		title="Annuler cette séance"
 																	>
 																		{actionInProgress?.id ===
 																			appointment.id &&
@@ -474,7 +474,7 @@ const SchedulePage = () => {
 																				disabled={
 																					isProcessingAction
 																				}
-																				title="Supprimer ce rendez-vous"
+																				title="Supprimer ce Séance"
 																			>
 																				<Trash2 className="h-4 w-4 sm:mr-1" />
 																			</Button>
@@ -484,7 +484,7 @@ const SchedulePage = () => {
 																				<AlertDialogTitle>
 																					Supprimer
 																					le
-																					rendez-vous
+																					Séance
 																				</AlertDialogTitle>
 																				<AlertDialogDescription>
 																					Êtes-vous
@@ -494,7 +494,7 @@ const SchedulePage = () => {
 																					supprimer
 																					définitivement
 																					ce
-																					rendez-vous
+																					Séance
 																					?
 																				</AlertDialogDescription>
 																			</AlertDialogHeader>
@@ -657,10 +657,10 @@ const DaySchedule = ({
 										>
 											<Link
 												to={`/invoices/new?appointmentId=${appointment.id}`}
-												aria-label="Créer une facture pour ce rendez-vous"
+												aria-label="Créer une Note d'honoraire pour ce Séance"
 											>
 												<FileText className="h-4 w-4 mr-1" />{" "}
-												Facture
+												Note d'honoraire
 											</Link>
 										</Button>
 										<Button
@@ -671,7 +671,7 @@ const DaySchedule = ({
 										>
 											<Link
 												to={`/appointments/${appointment.id}/edit`}
-												aria-label="Voir les détails du rendez-vous"
+												aria-label="Voir les détails de la séance"
 											>
 												Détails
 											</Link>
@@ -687,7 +687,7 @@ const DaySchedule = ({
 												)
 											}
 											disabled={isProcessingAction}
-											aria-label="Annuler ce rendez-vous"
+											aria-label="Annuler cette séance"
 										>
 											{isProcessingAction &&
 											actionInProgress?.action ===
@@ -723,12 +723,12 @@ const DaySchedule = ({
 											<AlertDialogContent>
 												<AlertDialogHeader>
 													<AlertDialogTitle>
-														Supprimer le rendez-vous
+														Supprimer le Séance
 													</AlertDialogTitle>
 													<AlertDialogDescription>
 														Êtes-vous sûr de vouloir
 														supprimer définitivement
-														ce rendez-vous ?
+														ce Séance ?
 													</AlertDialogDescription>
 												</AlertDialogHeader>
 												<AlertDialogFooter>
@@ -764,7 +764,7 @@ const DaySchedule = ({
 										"yyyy-MM-dd"
 									)}&time=${timeSlot}`}
 									className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary"
-									aria-label={`Créer un rendez-vous le ${format(
+									aria-label={`Créer un Séance le ${format(
 										date,
 										"d MMMM yyyy",
 										{ locale: fr }
