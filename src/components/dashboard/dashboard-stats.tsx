@@ -43,9 +43,9 @@ export function DashboardStats({ data }: DashboardStatsProps) {
       />
       
       <StatCard
-        title="Rendez-vous aujourd'hui"
+        title="Séance aujourd'hui"
         value={data.appointmentsToday}
-        description={`Prochain: ${data.nextAppointment}`}
+        description={`Prochaine: ${data.nextAppointment}`}
         color="text-green-500"
         icon={<Calendar />}
       />
