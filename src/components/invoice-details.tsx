@@ -14,6 +14,7 @@ interface InvoiceDetailsProps {
   patientName?: string;
   onDelete?: () => void;
   onPrint?: () => void;
+  onEdit?: () => void;
 }
 
 export function InvoiceDetails({
@@ -21,6 +22,7 @@ export function InvoiceDetails({
   patientName,
   onDelete,
   onPrint,
+  onEdit,
 }: InvoiceDetailsProps) {
   const navigate = useNavigate();
   
@@ -104,37 +106,49 @@ export function InvoiceDetails({
       </CardContent>
 
       <CardFooter className="flex justify-end gap-2 pt-2">
-        <Button 
-          variant="outline"
-          size="sm"
-          onClick={onPrint}
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          Imprimer
-        </Button>
+        {onPrint && (
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={onPrint}
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Imprimer
+          </Button>
+        )}
         
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => navigate(`/invoices/${invoice.id}/edit`)}
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          Modifier
-        </Button>
+        {onEdit ? (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={onEdit}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Modifier
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate(`/invoices/${invoice.id}/edit`)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Modifier
+          </Button>
+        )}
         
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={onDelete}
-          className="text-red-500 hover:text-red-600"
-        >
-          <Trash className="h-4 w-4 mr-2" />
-          Supprimer
-        </Button>
+        {onDelete && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={onDelete}
+            className="text-red-500 hover:text-red-600"
+          >
+            <Trash className="h-4 w-4 mr-2" />
+            Supprimer
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
 }
-
-// Export named component
-export { InvoiceDetails };

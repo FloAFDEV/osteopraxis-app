@@ -1,12 +1,14 @@
+
 import React, { useRef } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Invoice, Patient, Osteopath, PaymentStatus } from "@/types";
+import { Invoice, Patient, Osteopath, Cabinet, PaymentStatus } from "@/types";
 
 interface InvoicePrintViewProps {
   invoice: Invoice;
   patient?: Patient;
   osteopath?: Osteopath;
+  cabinet?: Cabinet;
 }
 
 const getPaymentStatusText = (status: PaymentStatus) => {
@@ -39,7 +41,7 @@ const getPaymentMethodText = (method: string) => {
 
 export const printRef = React.createRef<HTMLDivElement>();
 
-export function InvoicePrintView({ invoice, patient, osteopath }: InvoicePrintViewProps) {
+export function InvoicePrintView({ invoice, patient, osteopath, cabinet }: InvoicePrintViewProps) {
   return (
     <div ref={printRef} className="p-8 max-w-3xl mx-auto bg-white text-black">
       <div className="flex justify-between items-start mb-8">
@@ -49,6 +51,15 @@ export function InvoicePrintView({ invoice, patient, osteopath }: InvoicePrintVi
           <p className="text-gray-700">{osteopath?.professional_title || "Ostéopathe D.O."}</p>
           <p className="text-gray-700">ADELI: {osteopath?.adeli_number || "N/A"}</p>
           <p className="text-gray-700">SIRET: {osteopath?.siret || "N/A"}</p>
+          
+          {/* Cabinet details if available */}
+          {cabinet && (
+            <div className="mt-2">
+              <p className="text-gray-700">{cabinet.name}</p>
+              <p className="text-gray-700">{cabinet.address}</p>
+              <p className="text-gray-700">{cabinet.postalCode} {cabinet.city}</p>
+            </div>
+          )}
         </div>
         
         <div className="text-right">

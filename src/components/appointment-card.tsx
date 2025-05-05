@@ -1,259 +1,177 @@
-import {
-  Building2,
-  Calendar,
-  ChevronDown,
-  Edit,
-  FileText,
-  Receipt,
-  Trash,
-  User as UserIcon,
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import {
-  Appointment,
-  AppointmentStatus,
-  Cabinet,
-  Invoice,
-  Patient,
-} from "@/types";
-import { Button } from "@/components/ui/button";
+
+import React from "react";
+import { format, isAfter } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Calendar, User, Clock, FileText, ArrowRight, X } from "lucide-react";
+import { Appointment, Patient } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { api } from "@/services/api";
 
-interface AppointmentCardProps {
+export interface AppointmentCardProps {
   appointment: Appointment;
   patient?: Patient;
-  cabinet?: Cabinet;
-  showPatient?: boolean;
-  showCabinet?: boolean;
-  optionalText?: string;
-  className?: string;
   onEdit?: (appointment: Appointment) => void;
   onDelete?: (appointment: Appointment) => void;
   onAddInvoice?: (appointment: Appointment) => void;
-  allowStatusUpdate?: boolean;
-}
-
-function formatAppointmentTime(date: Date): string {
-  return format(date, "HH:mm", { locale: fr });
-}
-
-function formatDate(date: Date): string {
-  return format(date, "dd/MM/yyyy", { locale: fr });
+  onCancel?: (appointment: Appointment) => void;
 }
 
 export function AppointmentCard({
   appointment,
   patient,
-  cabinet,
-  showPatient = true,
-  showCabinet = true,
-  optionalText = "",
-  className = "",
   onEdit,
   onDelete,
   onAddInvoice,
-  allowStatusUpdate = true,
+  onCancel,
 }: AppointmentCardProps) {
-  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
-  const [hasInvoice, setHasInvoice] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchInvoice = async () => {
-      try {
-        const invoices = await api.getInvoicesByAppointmentId(appointment.id);
-        if (invoices && invoices.length > 0) {
-          setHasInvoice(true);
-          appointment.invoiceId = invoices[0].id;
-        } else {
-          setHasInvoice(false);
-        }
-      } catch (error) {
-        console.error("Error fetching invoice:", error);
-        setHasInvoice(false);
-      }
-    };
-
-    fetchInvoice();
-  }, [appointment.id]);
-
-  const toggleStatusMenu = () => {
-    setIsStatusMenuOpen(!isStatusMenuOpen);
-  };
-
-  const updateStatus = async (newStatus: AppointmentStatus) => {
-    try {
-      await api.updateAppointment(appointment.id, { status: newStatus });
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating appointment status:", error);
-    } finally {
-      setIsStatusMenuOpen(false);
-    }
-  };
-
-  const getStatusText = () => {
-    switch (appointment.status) {
-      case "SCHEDULED":
-        return "Planifié";
-      case "COMPLETED":
-        return "Terminé";
-      case "CANCELED":
-        return "Annulé";
-      case "RESCHEDULED":
-        return "Reporté";
-      case "NO_SHOW":
-        return "Non venu";
-      default:
-        return "Inconnu";
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (appointment.status) {
-      case "SCHEDULED":
-        return "bg-blue-500 hover:bg-blue-600";
-      case "COMPLETED":
-        return "bg-green-500 hover:bg-green-600";
-      case "CANCELED":
-        return "bg-red-500 hover:bg-red-600";
-      case "RESCHEDULED":
-        return "bg-amber-500 hover:bg-amber-600";
-      case "NO_SHOW":
-        return "bg-gray-500 hover:bg-gray-600";
-      default:
-        return "bg-gray-400 hover:bg-gray-500";
-    }
-  };
-
-  const cardClasses = hasInvoice ? "border-green-500" : "";
-
-  const statusOptions = [
-    { value: "SCHEDULED", label: "Planifié", color: "bg-blue-500 hover:bg-blue-600" },
-    { value: "COMPLETED", label: "Terminé", color: "bg-green-500 hover:bg-green-600" },
-    { value: "CANCELED", label: "Annulé", color: "bg-red-500 hover:bg-red-600" },
-    { value: "RESCHEDULED", label: "Reporté", color: "bg-amber-500 hover:bg-amber-600" },
-    { value: "NO_SHOW", label: "Non venu", color: "bg-gray-500 hover:bg-gray-600" },
-  ];
   
-
+  const isUpcoming = isAfter(new Date(appointment.date), new Date());
+  
+  const formattedDate = format(new Date(appointment.date), "EEEE d MMMM yyyy", { locale: fr });
+  const formattedTime = format(new Date(appointment.date), "HH:mm", { locale: fr });
+  
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "SCHEDULED":
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Planifiée</Badge>;
+      case "COMPLETED":
+        return <Badge className="bg-green-500 hover:bg-green-600">Terminée</Badge>;
+      case "CANCELED":
+        return <Badge className="bg-red-500 hover:bg-red-600">Annulée</Badge>;
+      case "RESCHEDULED":
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Reportée</Badge>;
+      case "NO_SHOW":
+        return <Badge className="bg-gray-500 hover:bg-gray-600">Non présenté</Badge>;
+      default:
+        return <Badge className="bg-gray-400">Inconnu</Badge>;
+    }
+  };
+  
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(appointment);
+    } else {
+      navigate(`/appointments/${appointment.id}/edit`);
+    }
+  };
+  
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(appointment);
+    }
+  };
+  
+  const handleAddInvoice = () => {
+    if (onAddInvoice) {
+      onAddInvoice(appointment);
+    } else {
+      navigate(`/invoices/new?appointmentId=${appointment.id}`);
+    }
+  };
+  
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel(appointment);
+    }
+  };
+  
   return (
-    <Card className={cn("hover-scale", className)}>
-      <CardHeader className={cn("flex flex-row items-center gap-2 pb-1", cardClasses)}>
-        <div className="flex items-center flex-1">
-          {/* Date and time */}
-          <div className="mr-4 text-xl font-semibold">
-            {formatAppointmentTime(new Date(appointment.date))}
+    <Card className="border">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
+            <span className="font-medium">{formattedDate}</span>
           </div>
-          
-          {/* Badge for status */}
-          <div>
-            <Badge 
-              className={getStatusColor()}
-              onClick={toggleStatusMenu}
-            >
-              {getStatusText()}
-              {allowStatusUpdate && (
-                <ChevronDown className="ml-1 h-3 w-3" />
-              )}
-            </Badge>
-            
-            {/* Dropdown for changing status */}
-            {isStatusMenuOpen && allowStatusUpdate && (
-              <div className="absolute mt-1 z-50 bg-card border rounded-md shadow-lg p-1 min-w-32">
-                {statusOptions.map(option => (
-                  <div
-                    key={option.value}
-                    className={cn(
-                      "px-3 py-1 text-sm rounded-sm cursor-pointer hover:bg-accent",
-                      appointment.status === option.value && "bg-accent"
-                    )}
-                    onClick={() => updateStatus(option.value as AppointmentStatus)}
-                  >
-                    {option.label}
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="flex items-center">
+            <Clock className="h-4 w-4 text-muted-foreground mr-2" />
+            <span>{formattedTime}</span>
           </div>
         </div>
+        
+        {getStatusBadge(appointment.status)}
       </CardHeader>
-      
-      <CardContent className="pb-2">
-        {/* Patient info */}
-        {patient && showPatient && (
-          <div className="flex items-center mb-2">
-            <UserIcon className="h-4 w-4 text-muted-foreground mr-2" />
-            <span className="font-medium">{patient.firstName} {patient.lastName}</span>
+      <CardContent>
+        {patient ? (
+          <div className="flex items-start space-x-4">
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <User className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-medium">
+                {patient.firstName} {patient.lastName}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {patient.email || patient.phone}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center">
+            <User className="h-4 w-4 text-muted-foreground mr-2" />
+            <span>Patient #{appointment.patientId}</span>
           </div>
         )}
         
-        {/* Cabinet info */}
-        {cabinet && showCabinet && (
-          <div className="flex items-center mb-2">
-            <Building2 className="h-4 w-4 text-muted-foreground mr-2" />
-            <span>{cabinet.name}</span>
+        {appointment.reason && (
+          <div className="mt-4 text-sm">
+            <p className="text-muted-foreground">Motif:</p>
+            <p>{appointment.reason}</p>
           </div>
         )}
         
-        {/* Reason */}
-        <div className="text-sm text-muted-foreground mb-2">
-          <p>{appointment.reason}</p>
-          {optionalText && <p className="mt-1 italic">{optionalText}</p>}
-        </div>
+        {appointment.status === "COMPLETED" && appointment.notes && (
+          <div className="mt-4 text-sm">
+            <p className="text-muted-foreground">Notes:</p>
+            <p>{appointment.notes}</p>
+          </div>
+        )}
       </CardContent>
-      
       <CardFooter className="flex justify-end gap-2 pt-1">
-        {/* Button to create invoice */}
-        {appointment.status === "COMPLETED" && !hasInvoice && (
-          <Button
+        {appointment.status === "SCHEDULED" && isUpcoming && onCancel && (
+          <Button 
+            variant="outline" 
             size="sm"
-            variant="outline"
-            className="text-green-600"
-            onClick={() => onAddInvoice && onAddInvoice(appointment)}
+            onClick={handleCancel}
+            className="text-red-500 hover:text-red-600"
           >
-            <Receipt className="h-4 w-4 mr-2" />
-            Créer note
+            <X className="h-4 w-4 mr-2" />
+            Annuler
           </Button>
         )}
         
-        {/* View invoice button */}
-        {hasInvoice && (
+        {appointment.status === "COMPLETED" && !appointment.invoiceId && (
           <Button
-            size="sm"
             variant="outline"
-            className="text-blue-600"
-            onClick={() => navigate(`/invoices/${appointment.invoiceId}`)}
+            size="sm"
+            onClick={handleAddInvoice}
           >
             <FileText className="h-4 w-4 mr-2" />
-            Voir note
+            Créer note d'honoraire
           </Button>
         )}
         
-        {/* Edit button */}
         <Button
-          size="sm"
           variant="outline"
-          onClick={() => onEdit && onEdit(appointment)}
+          size="sm"
+          onClick={handleEdit}
         >
-          <Edit className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" />
         </Button>
         
-        {/* Delete button */}
-        <Button
-          size="sm"
-          variant="outline"
-          className="text-red-500 hover:text-red-600"
-          onClick={() => onDelete && onDelete(appointment)}
-        >
-          <Trash className="h-4 w-4" />
-        </Button>
+        {onDelete && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDelete}
+            className="text-red-500 hover:text-red-600"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

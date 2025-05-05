@@ -9,22 +9,34 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Invoice } from "@/types";
+import { Appointment } from "@/types";
 
-interface ConfirmDeleteInvoiceModalProps {
+interface ConfirmDeleteAppointmentModalProps {
   show: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  invoice: Invoice | null;
+  appointment: Appointment | null;
 }
 
-export function ConfirmDeleteInvoiceModal({
+export function ConfirmDeleteAppointmentModal({
   show,
   onClose,
   onConfirm,
-  invoice,
-}: ConfirmDeleteInvoiceModalProps) {
-  if (!invoice) return null;
+  appointment,
+}: ConfirmDeleteAppointmentModalProps) {
+  if (!appointment) return null;
+
+  const formattedDate = new Date(appointment.date).toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const formattedTime = new Date(appointment.date).toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
@@ -32,7 +44,7 @@ export function ConfirmDeleteInvoiceModal({
         <DialogHeader>
           <DialogTitle>Confirmer la suppression</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer la note d'honoraire n°{invoice.id.toString().padStart(4, '0')} ?
+            Êtes-vous sûr de vouloir supprimer cette séance du {formattedDate} à {formattedTime} ?
             Cette action ne peut pas être annulée.
           </DialogDescription>
         </DialogHeader>
@@ -48,5 +60,3 @@ export function ConfirmDeleteInvoiceModal({
     </Dialog>
   );
 }
-
-export default ConfirmDeleteInvoiceModal;
