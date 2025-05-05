@@ -1,36 +1,12 @@
-
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-	Calendar,
-	AlertCircle,
-	FileText,
-	ChevronLeft,
-	Trash2,
-} from "lucide-react";
-import { api } from "@/services";
-import { Appointment, Patient } from "@/types";
+import { useNavigate, useParams } from "react-router-dom";
+import { Calendar } from "lucide-react";
+import { api } from "@/services/api";
+import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
 import { toast } from "sonner";
-import {
-	formatAppointmentDate,
-	formatAppointmentTime,
-} from "@/utils/date-utils";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
 
 const EditAppointmentPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -38,100 +14,58 @@ const EditAppointmentPage = () => {
 	const [appointment, setAppointment] = useState<Appointment | null>(null);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [processingAction, setProcessingAction] = useState<
-		"cancel" | "delete" | null
-	>(null);
 
 	useEffect(() => {
-		const fetchData = async () => {
-			if (!id) return;
-
+		const fetchAppointmentAndPatients = async () => {
+			setLoading(true);
 			try {
+				if (!id) {
+					toast.error("L'ID de la séance est manquant.");
+					return;
+				}
+
+				const appointmentId = parseInt(id, 10);
 				const [appointmentData, patientsData] = await Promise.all([
-					api.getAppointmentById(parseInt(id)),
+					api.getAppointmentById(appointmentId),
 					api.getPatients(),
 				]);
 
 				if (!appointmentData) {
-					throw new Error("Séance non trouvée");
+					toast.error("Séance non trouvée.");
+					navigate("/appointments");
+					return;
 				}
 
 				setAppointment(appointmentData);
-				setPatients(patientsData);
+				setPatients(
+					patientsData.sort((a: Patient, b: Patient) =>
+						a.lastName.localeCompare(b.lastName)
+					)
+				);
 			} catch (error) {
-				console.error("Error fetching appointment data:", error);
+				console.error(
+					"Erreur lors du chargement des données :",
+					error
+				);
 				toast.error(
-					"Impossible de charger les données de la séance. Veuillez réessayer."
+					"Impossible de charger les données. Veuillez réessayer."
 				);
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		fetchData();
-	}, [id]);
-
-	const handleCancel = async () => {
-		if (!appointment || !id) return;
-
-		try {
-			setProcessingAction("cancel");
-
-			// Utiliser directement la méthode cancelAppointment de l'API
-			// Cette méthode utilise X-Cancellation-Override dans les en-têtes
-			const result = await api.cancelAppointment(parseInt(id));
-			toast.success("Séance annulée avec succès");
-			setAppointment({ ...appointment, status: "CANCELED" });
-		} catch (error) {
-			console.error("Error cancelling appointment:", error);
-			toast.error(
-				"Impossible d'annuler la séance. Erreur réseau ou problème CORS."
-			);
-		} finally {
-			setProcessingAction(null);
-		}
-	};
-
-	const handleDelete = async () => {
-		if (!appointment || !id) return;
-
-		try {
-			setProcessingAction("delete");
-
-			// Utiliser la méthode deleteAppointment de l'API
-			await api.deleteAppointment(parseInt(id));
-			toast.success("Séance supprimée avec succès");
-			navigate("/appointments");
-		} catch (error) {
-			console.error("Error deleting appointment:", error);
-			toast.error(
-				"Impossible de supprimer la séance. Erreur réseau ou problème CORS."
-			);
-		} finally {
-			setProcessingAction(null);
-		}
-	};
-
-	const getStatusBadge = (status: string) => {
-		const statusMap: { [key: string]: { label: string; color: string } } = {
-			SCHEDULED: { label: "Planifié", color: "bg-blue-500" },
-			COMPLETED: { label: "Terminé", color: "bg-green-500" },
-			CANCELED: { label: "Annulé", color: "bg-red-500" },
-			RESCHEDULED: { label: "Reporté", color: "bg-amber-500" },
-			NO_SHOW: { label: "Non présenté", color: "bg-gray-500" },
-		};
-
-		return statusMap[status] || { label: "Inconnu", color: "bg-gray-500" };
-	};
+		fetchAppointmentAndPatients();
+	}, [id, navigate]);
 
 	if (loading) {
 		return (
 			<Layout>
-				<div className="flex justify-center items-center py-12">
+				<div className="flex justify-center items-center h-full">
 					<div className="text-center">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-						<p className="text-muted-foreground">
-							Chargement des données de la séance...
+						<div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent mx-auto mb-4" />
+						<p className="text-gray-500">
+							Chargement des données...
 						</p>
 					</div>
 				</div>
@@ -142,147 +76,47 @@ const EditAppointmentPage = () => {
 	if (!appointment) {
 		return (
 			<Layout>
-				<div className="text-center py-12">
-					<AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-					<h3 className="text-xl font-medium">Séance non trouvée</h3>
-					<p className="text-muted-foreground mt-2 mb-6">
-						La séance que vous recherchez n&apos;existe pas ou a été
-						supprimée.
-					</p>
-					<Button asChild>
-						<Link to="/appointments">Retour aux séances</Link>
-					</Button>
+				<div className="flex justify-center items-center h-full">
+					<div className="text-center">
+						<p className="text-red-500">
+							Séance non trouvée. Veuillez vérifier l'ID.
+						</p>
+					</div>
 				</div>
 			</Layout>
 		);
 	}
 
-	const appointmentDate = new Date(appointment.date);
-	const formattedDate = formatAppointmentDate(appointment.date);
-	const time = formatAppointmentTime(appointment.date);
-
-	const status = getStatusBadge(appointment.status);
-
 	return (
 		<Layout>
-			{/* Container for the page content */}
-			<div className="max-w-3xl mx-auto px-4 py-6">
-				{/* Retour Button */}
-				<Button
-					variant="outline"
-					size="sm"
-					className="mb-6"
-					onClick={() => navigate(-1)}
-					aria-label="Retour à la page précédente"
-				>
-					<ChevronLeft className="mr-2 h-4 w-4" />
-					Retour
-				</Button>
-
-				{/* Header Section: Title and Description */}
-				<div className="mb-6">
+			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+				<header className="mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<Calendar className="h-8 w-8 text-purple-500" />
 						Modifier la séance
 					</h1>
-					<p className="text-muted-foreground mt-1">
-						{formattedDate} - Modifiez les détails de la séance en
-						utilisant le formulaire ci-dessous.
+					<p className="text-gray-500 mt-2">
+						Modifiez les informations de la séance en remplissant le
+						formulaire ci-dessous.
 					</p>
-				</div>
+				</header>
 
-				{/* Status Badge */}
-				<div className="mb-4">
-					<Badge
-						className={`${status.color} text-white py-1 px-3 rounded-md shadow-sm border border-white/10`}
-					>
-						{status.label}
-					</Badge>
-				</div>
-
-				{/* Action Buttons */}
-				<div className="flex flex-wrap gap-2 mb-6">
-					{appointment.status === "SCHEDULED" && (
-						<Button
-							variant="destructive"
-							onClick={handleCancel}
-							aria-label="Annuler la séance"
-							disabled={!!processingAction}
-						>
-							{processingAction === "cancel" ? (
-								<>
-									<span className="animate-spin mr-2">
-										⏳
-									</span>
-									Annulation en cours...
-								</>
-							) : (
-								"Annuler la séance"
-							)}
-						</Button>
-					)}
-
-					{/* Bouton de suppression avec confirmation */}
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button
-								variant="outline"
-								className="border-destructive text-destructive"
-								disabled={!!processingAction}
-								aria-label="Supprimer la séance"
-							>
-								<Trash2 className="mr-2 h-4 w-4" />
-								{processingAction === "delete" ? (
-									<>
-										<span className="animate-spin mr-2">
-											⏳
-										</span>
-										Suppression...
-									</>
-								) : (
-									"Supprimer"
-								)}
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle>
-									Êtes-vous sûr de vouloir supprimer cette
-									séance ?
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Cette action est irréversible. La séance
-									sera définitivement supprimée.
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogFooter>
-								<AlertDialogCancel>Annuler</AlertDialogCancel>
-								<AlertDialogAction
-									onClick={handleDelete}
-									className="bg-destructive hover:bg-destructive/90"
-								>
-									Supprimer
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialog>
-				</div>
-
-				{/* Appointment Form */}
 				<section className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-					<AppointmentForm
-						patients={patients}
-						defaultValues={{
-							patientId: appointment.patientId,
-							date: appointmentDate,
-							time: time,
-							reason: appointment.reason,
-							notes: appointment.notes,
-							status: appointment.status as AppointmentStatus,
-						}}
-						appointmentId={parseInt(id!)}
-						isEditing={true}
-					/>
+					{appointment && (
+						<AppointmentForm
+							patients={patients}
+							defaultValues={{
+								id: appointment.id,
+								patientId: appointment.patientId,
+								date: new Date(appointment.date),
+								time: format(new Date(appointment.date), "HH:mm"),
+								reason: appointment.reason,
+								status: appointment.status,
+								notes: appointment.notes,
+							}}
+							isEditMode={true}
+						/>
+					)}
 				</section>
 			</div>
 		</Layout>

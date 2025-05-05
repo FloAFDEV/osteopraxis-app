@@ -1,3 +1,4 @@
+
 import { AppointmentCard } from "@/components/appointment-card";
 import { InvoiceDetails } from "@/components/invoice-details";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
@@ -35,10 +36,12 @@ import {
 	Stethoscope,
 	User,
 	X,
+	MessageSquare,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface PatientDetailPageProps {}
 
@@ -50,6 +53,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
+	const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
 	useEffect(() => {
 		const fetchPatientData = async () => {
@@ -138,7 +142,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 				parseInt(id!)
 			);
 			setAppointments(updatedAppointments);
-			toast.success("Le Séance a été annulé avec succès");
+			toast.success("La séance a été annulée avec succès");
 		} catch (error) {
 			console.error("Error canceling appointment:", error);
 			toast.error("Impossible d'annuler la séance");
@@ -215,13 +219,13 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 						<PatientStat
-							title="Total Séance"
+							title="Total Séances"
 							value={appointments.length}
 							icon={<Calendar className="h-5 w-5" />}
 							colorClass="text-blue-500"
 						/>
 						<PatientStat
-							title="Séance à venir"
+							title="Séances à venir"
 							value={upcomingAppointments.length}
 							icon={<ClipboardList className="h-5 w-5" />}
 							colorClass="text-purple-500"
@@ -233,14 +237,14 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 							colorClass="text-emerald-500"
 						/>
 						<PatientStat
-							title="Dernier Séance"
+							title="Dernière Séance"
 							value={
 								pastAppointments[0]
 									? format(
 											new Date(pastAppointments[0].date),
 											"dd/MM/yyyy"
 									  )
-									: "Aucun"
+									: "Aucune"
 							}
 							icon={<History className="h-5 w-5" />}
 							colorClass="text-amber-500"
@@ -408,7 +412,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 									Séances à venir
 								</TabsTrigger>
 								<TabsTrigger value="history">
-									<List className="h-4 w-4 mr-2" />
+									<History className="h-4 w-4 mr-2" />
 									Historique
 								</TabsTrigger>
 								<TabsTrigger value="invoices">
@@ -480,6 +484,52 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 										},
 									]}
 								/>
+
+                                {/* Aperçu des dernières séances */}
+                                <Card className="mt-6">
+                                    <CardContent className="p-6">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-semibold text-lg flex items-center gap-2">
+                                                <MessageSquare className="h-5 w-5 text-purple-500" />
+                                                Dernières séances et comptes rendus
+                                            </h3>
+                                            <Button variant="ghost" size="sm" asChild>
+                                                <Link to="#history" onClick={() => document.querySelector('[data-state="inactive"][value="history"]')?.click()}>
+                                                    Voir tout l'historique
+                                                </Link>
+                                            </Button>
+                                        </div>
+                                        
+                                        {pastAppointments.length === 0 ? (
+                                            <p className="text-center text-muted-foreground py-4">Aucune séance passée</p>
+                                        ) : (
+                                            <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+                                                {pastAppointments.slice(0, 3).map(appointment => (
+                                                    <div key={appointment.id} className="border-b pb-3 last:border-0">
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="font-medium">
+                                                                {format(new Date(appointment.date), "dd/MM/yyyy")} - {formatAppointmentTime(appointment.date)}
+                                                            </div>
+                                                            <Badge className={appointment.status === "COMPLETED" ? "bg-green-500" : "bg-red-500"}>
+                                                                {appointment.status === "COMPLETED" ? "Terminée" : "Annulée"}
+                                                            </Badge>
+                                                        </div>
+                                                        <div className="text-sm text-muted-foreground mt-1">
+                                                            Motif : {appointment.reason}
+                                                        </div>
+                                                        {appointment.notes && (
+                                                            <div className="mt-2 pl-3 border-l-2 border-purple-200">
+                                                                <p className="text-sm text-muted-foreground italic whitespace-pre-line">
+                                                                    {appointment.notes}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
 							</TabsContent>
 
 							<TabsContent
@@ -501,7 +551,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 												to={`/appointments/new?patientId=${patient.id}`}
 											>
 												<Plus className="mr-2 h-4 w-4" />
-												Planifier un Séance
+												Planifier une séance
 											</Link>
 										</Button>
 									</div>
@@ -529,6 +579,28 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 								value="history"
 								className="space-y-4 mt-6"
 							>
+								<div className="flex justify-between items-center mb-4">
+									<h3 className="text-lg font-semibold">
+										Historique des séances
+									</h3>
+									<div className="flex space-x-2">
+										<Button 
+                                            variant={viewMode === "cards" ? "default" : "outline"} 
+                                            size="sm"
+                                            onClick={() => setViewMode("cards")}
+                                        >
+											Vue cards
+										</Button>
+										<Button 
+                                            variant={viewMode === "table" ? "default" : "outline"} 
+                                            size="sm"
+                                            onClick={() => setViewMode("table")}
+                                        >
+											Vue tableau
+										</Button>
+									</div>
+								</div>
+								
 								{pastAppointments.length === 0 ? (
 									<div className="text-center py-8">
 										<Activity className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -540,7 +612,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 											séance.
 										</p>
 									</div>
-								) : (
+								) : viewMode === "cards" ? (
 									<div className="grid gap-4">
 										{pastAppointments.map((appointment) => (
 											<AppointmentCard
@@ -550,6 +622,88 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 											/>
 										))}
 									</div>
+								) : (
+									<div className="rounded-md border">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Date</TableHead>
+                                                    <TableHead>Heure</TableHead>
+                                                    <TableHead>Motif</TableHead>
+                                                    <TableHead>Statut</TableHead>
+                                                    <TableHead>Notes</TableHead>
+                                                    <TableHead className="text-right">Actions</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {pastAppointments.map((appointment) => (
+                                                    <TableRow key={appointment.id}>
+                                                        <TableCell className="font-medium">
+                                                            {formatAppointmentDate(appointment.date, "dd/MM/yyyy")}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {formatAppointmentTime(appointment.date)}
+                                                        </TableCell>
+                                                        <TableCell>{appointment.reason}</TableCell>
+                                                        <TableCell>
+                                                            <Badge className={
+                                                                appointment.status === "COMPLETED" 
+                                                                ? "bg-green-500" 
+                                                                : appointment.status === "CANCELED"
+                                                                ? "bg-red-500"
+                                                                : "bg-amber-500"
+                                                            }>
+                                                                {appointment.status === "COMPLETED" 
+                                                                ? "Terminée" 
+                                                                : appointment.status === "CANCELED"
+                                                                ? "Annulée"
+                                                                : "Reportée"}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {appointment.notes ? (
+                                                                <Button 
+                                                                    variant="ghost" 
+                                                                    size="sm"
+                                                                    className="h-8 flex items-center gap-1"
+                                                                    onClick={() => {
+                                                                        toast.info(
+                                                                            <div>
+                                                                                <h3 className="font-medium mb-1">Notes de séance</h3>
+                                                                                <p className="whitespace-pre-line text-sm">
+                                                                                    {appointment.notes}
+                                                                                </p>
+                                                                            </div>,
+                                                                            { duration: 10000 }
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <MessageSquare className="h-3 w-3" />
+                                                                    Voir
+                                                                </Button>
+                                                            ) : (
+                                                                <span className="text-muted-foreground text-sm">
+                                                                    Aucune
+                                                                </span>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm"
+                                                                asChild
+                                                                className="h-8"
+                                                            >
+                                                                <Link to={`/appointments/${appointment.id}/edit`}>
+                                                                    Détails
+                                                                </Link>
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
 								)}
 							</TabsContent>
 
