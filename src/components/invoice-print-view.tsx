@@ -259,7 +259,7 @@ export const InvoicePrintView = ({
 						Document généré le {currentDate}
 					</span>
 					<span>|</span>
-					<span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">
+					<span className="text-gray-800 dark:text-gray-240 font-semibold text-sm">
 						PatientHub
 					</span>
 					<span>|</span>
