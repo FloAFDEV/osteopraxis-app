@@ -1,6 +1,15 @@
+
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+
+// Create a custom error class for appointment conflicts
+export class AppointmentConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AppointmentConflictError";
+  }
+}
 
 // Mock data (replace with actual data fetching)
 const appointments: Appointment[] = [
@@ -50,6 +59,20 @@ export const appointmentService = {
     await delay(200);
     return appointments.find((appointment) => appointment.id === id);
   },
+  
+  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
+      } catch (error) {
+        console.error("Erreur Supabase getAppointmentsByPatientId:", error);
+        throw error;
+      }
+    }
+
+    await delay(200);
+    return appointments.filter((appointment) => appointment.patientId === patientId);
+  },
 
   async createAppointment(appointment: Omit<Appointment, "id">): Promise<Appointment> {
     if (USE_SUPABASE) {
@@ -87,6 +110,23 @@ export const appointmentService = {
       return appointments[index];
     }
     throw new Error(`Appointment with id ${id} not found`);
+  },
+  
+  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
+    return this.updateAppointment(id, { status });
+  },
+  
+  async cancelAppointment(id: number): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.cancelAppointment(id);
+      } catch (error) {
+        console.error("Error cancelling appointment:", error);
+        throw error;
+      }
+    }
+    
+    return this.updateAppointment(id, { status: "CANCELED" });
   },
 
   async deleteAppointment(id: number): Promise<boolean> {

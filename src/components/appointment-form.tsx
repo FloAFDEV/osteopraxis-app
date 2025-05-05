@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -18,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
-import { checkAppointmentConflict, AppointmentConflictError } from "@/utils/appointment-utils";
+import { checkAppointmentConflict } from "@/utils/appointment-utils";
 
 // Custom validation function to check if appointment time is in the past
 const isAppointmentInPast = (date: Date, timeString: string) => {
@@ -259,7 +258,7 @@ export function AppointmentForm({
       navigate("/appointments");
     } catch (error) {
       console.error("Error submitting appointment form:", error);
-      if (error instanceof AppointmentConflictError) {
+      if (error instanceof Error && error.name === "AppointmentConflictError") {
         toast.error("Ce créneau horaire est déjà réservé. Veuillez choisir un autre horaire.");
       } else {
         toast.error("Une erreur est survenue. Veuillez réessayer.");

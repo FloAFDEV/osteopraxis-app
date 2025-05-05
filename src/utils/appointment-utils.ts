@@ -1,35 +1,54 @@
 
-import { format, setHours, setMinutes } from "date-fns";
 import { api } from "@/services/api";
-import { Appointment } from "@/types";
+import { AppointmentConflictError } from "@/services/api/appointment-service";
 
-// Error class for appointment conflicts
-export class AppointmentConflictError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AppointmentConflictError';
+// Function to check if there is a conflict with existing appointments
+export async function checkAppointmentConflict(
+  date: Date, 
+  time: string, 
+  excludeAppointmentId?: number
+): Promise<boolean> {
+  try {
+    // Get all appointments
+    const allAppointments = await api.getAppointments();
+    
+    // Parse the selected date and time
+    const [hours, minutes] = time.split(':').map(Number);
+    const selectedDateTime = new Date(date);
+    selectedDateTime.setHours(hours, minutes, 0, 0);
+    
+    // Get 30 minutes after the selected time (appointments are assumed to be 30min)
+    const endTime = new Date(selectedDateTime);
+    endTime.setMinutes(endTime.getMinutes() + 30);
+    
+    // Check for conflicts
+    const conflictingAppointment = allAppointments.find(appointment => {
+      // Skip the current appointment being edited
+      if (excludeAppointmentId && appointment.id === excludeAppointmentId) {
+        return false;
+      }
+      
+      // Skip canceled appointments
+      if (appointment.status === "CANCELED" || appointment.status === "NO_SHOW") {
+        return false;
+      }
+      
+      const appointmentDate = new Date(appointment.date);
+      const appointmentEndTime = new Date(appointmentDate);
+      appointmentEndTime.setMinutes(appointmentEndTime.getMinutes() + 30);
+      
+      // Check if times overlap
+      return (
+        (selectedDateTime < appointmentEndTime) && 
+        (endTime > appointmentDate)
+      );
+    });
+    
+    return !!conflictingAppointment;
+  } catch (error) {
+    console.error("Error checking appointment conflicts:", error);
+    return false; // In case of error, allow the appointment to be created
   }
 }
 
-export const checkAppointmentConflict = async (date: Date, time: string): Promise<boolean> => {
-  try {
-    const [hours, minutes] = time.split(':').map(Number);
-    const appointmentTime = setMinutes(setHours(date, hours), minutes);
-    const appointments = await api.getAppointments();
-    
-    // Filter active appointments at the same time
-    const conflictingAppointments = appointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.date);
-      return (
-        appointment.status !== 'CANCELED' &&
-        appointment.status !== 'NO_SHOW' &&
-        format(appointmentDate, 'yyyy-MM-dd HH:mm') === format(appointmentTime, 'yyyy-MM-dd HH:mm')
-      );
-    });
-
-    return conflictingAppointments.length > 0;
-  } catch (error) {
-    console.error('Error checking appointment conflicts:', error);
-    throw error;
-  }
-};
+export { AppointmentConflictError };
