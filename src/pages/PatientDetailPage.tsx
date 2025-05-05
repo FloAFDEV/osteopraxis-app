@@ -210,7 +210,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 						<Button variant="outline" asChild>
 							<Link to={`/appointments?patientId=${patient.id}`}>
 								<Calendar className="mr-2 h-4 w-4" />
-								Voir les séances
+								Voir toutes les séances
 							</Link>
 						</Button>
 						<Button asChild>
@@ -227,7 +227,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 						<PatientStat
-							title="Total Séances"
+							title="Total séances"
 							value={appointments.length}
 							icon={<Calendar className="h-5 w-5" />}
 							colorClass="text-blue-500"
