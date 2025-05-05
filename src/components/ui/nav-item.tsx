@@ -1,39 +1,52 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { NavLink, type To } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 interface NavItemProps {
-  icon: LucideIcon;
-  text: string;
-  to: string;
-  isOpen: boolean;
-  isActive: boolean;
-  onClick?: () => void;
+  to: To;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  isExternal?: boolean;
+  className?: string;
 }
 
-export function NavItem({ icon: Icon, text, to, isOpen, isActive, onClick }: NavItemProps) {
-  return (
-    <Link
-      to={to}
-      className={cn(
-        "flex items-center py-2 px-3 rounded-md transition-colors",
-        isActive
-          ? "bg-sidebar-active text-foreground font-medium"
-          : "hover:bg-sidebar-hover text-muted-foreground"
-      )}
-      onClick={onClick}
-    >
-      <Icon className="h-5 w-5" />
-      <span
+export function NavItem({ to, icon, children, isExternal = false, className }: NavItemProps) {
+  const content = (
+    <div className="flex items-center space-x-3">
+      {icon && <span className="flex-shrink-0">{icon}</span>}
+      <span>{children}</span>
+    </div>
+  );
+
+  if (isExternal) {
+    return (
+      <a
+        href={to.toString()}
+        target="_blank"
+        rel="noopener noreferrer"
         className={cn(
-          "ml-3 transition-all duration-300",
-          isOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
+          "block w-full px-4 py-2 text-sm hover:bg-accent rounded-md transition-colors",
+          className
         )}
       >
-        {text}
-      </span>
-    </Link>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) => 
+        cn(
+          "block w-full px-4 py-2 text-sm rounded-md transition-colors",
+          isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground",
+          className
+        )
+      }
+    >
+      {content}
+    </NavLink>
   );
 }

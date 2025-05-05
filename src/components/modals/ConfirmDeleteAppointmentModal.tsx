@@ -1,62 +1,67 @@
 
-import React from "react";
+import React from 'react';
+import { Trash2 } from 'lucide-react';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Appointment } from "@/types";
 
 interface ConfirmDeleteAppointmentModalProps {
-  show: boolean;
-  onClose: () => void;
   onConfirm: () => void;
-  appointment: Appointment | null;
+  onCancel?: () => void;
+  isLoading?: boolean;
+  triggerText?: string;
 }
 
 export function ConfirmDeleteAppointmentModal({
-  show,
-  onClose,
   onConfirm,
-  appointment,
+  onCancel,
+  isLoading = false,
+  triggerText = "Supprimer",
 }: ConfirmDeleteAppointmentModalProps) {
-  if (!appointment) return null;
-
-  const formattedDate = new Date(appointment.date).toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  const formattedTime = new Date(appointment.date).toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
   return (
-    <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Confirmer la suppression</DialogTitle>
-          <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer cette séance du {formattedDate} à {formattedTime} ?
-            Cette action ne peut pas être annulée.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            Supprimer
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" className="text-destructive border-destructive hover:bg-destructive/10">
+          <Trash2 className="h-4 w-4 mr-2" />
+          {triggerText}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Supprimer la séance</AlertDialogTitle>
+          <AlertDialogDescription>
+            Êtes-vous sûr de vouloir supprimer définitivement cette séance? Cette action ne peut pas être annulée.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onCancel}>Annuler</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className="bg-destructive"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <span className="animate-spin mr-2">⏳</span>
+                Suppression...
+              </>
+            ) : (
+              "Supprimer"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
+
+export default ConfirmDeleteAppointmentModal;
