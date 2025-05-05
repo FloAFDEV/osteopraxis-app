@@ -226,7 +226,7 @@ export function AppointmentsOverview({
 								to="/appointments"
 								className="text-blue-600 hover:text-gray-400 text-sm font-medium flex items-center justify-center"
 							>
-								Voir tous les Séance
+								Voir toutes les séances
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									width="16"
