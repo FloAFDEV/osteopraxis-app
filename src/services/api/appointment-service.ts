@@ -2,6 +2,7 @@
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+import { AppointmentStatus } from "@/types"; // Add this import
 
 // Create a custom error class for appointment conflicts
 export class AppointmentConflictError extends Error {
