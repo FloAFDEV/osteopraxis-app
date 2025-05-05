@@ -437,10 +437,10 @@ export function AppointmentForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="SCHEDULED">Planifié</SelectItem>
-                  <SelectItem value="COMPLETED">Terminé</SelectItem>
-                  <SelectItem value="CANCELED">Annulé</SelectItem>
-                  <SelectItem value="RESCHEDULED">Reporté</SelectItem>
+                  <SelectItem value="SCHEDULED">Planifiée</SelectItem>
+                  <SelectItem value="COMPLETED">Terminée</SelectItem>
+                  <SelectItem value="CANCELED">Annulée</SelectItem>
+                  <SelectItem value="RESCHEDULED">Reportée</SelectItem>
                   <SelectItem value="NO_SHOW">Non présenté</SelectItem>
                 </SelectContent>
               </Select>
