@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isBefore, isSameDay, setHours, setMinutes } from "date-fns";
@@ -51,12 +52,12 @@ const appointmentFormSchema = z.object({
 // Create a custom refinement function that properly handles the context
 const refinePastAppointments = (isEditing: boolean) => {
   return appointmentFormSchema.superRefine((data, ctx) => {
-    // Pour les nouveaux rendez-vous seulement, vérifier que le temps n'est pas dans le passé
+    // Pour les nouvelles séances seulement, vérifier que le temps n'est pas dans le passé
     if (!isEditing && isSameDay(data.date, new Date())) {
       if (isAppointmentInPast(data.date, data.time)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Vous ne pouvez pas prendre un rendez-vous dans le passé",
+          message: "Vous ne pouvez pas prendre une séance dans le passé",
           path: ["time"]
         });
       }
@@ -134,7 +135,7 @@ export function AppointmentForm({
     const selectedDate = form.watch("date");
     const isToday = isSameDay(selectedDate, now);
 
-    // Ne pas filtrer les créneaux si en mode édition d'un rendez-vous existant
+    // Ne pas filtrer les créneaux si en mode édition d'une séance existante
     if (isEditing) {
       // Générer tous les slots de 30 minutes de 8h à 20h
       return Array.from({ length: 24 }, (_, i) => {
@@ -182,15 +183,15 @@ export function AppointmentForm({
 
       // Vérifier que l'heure est entre 8h et 20h
       if (hours < 8 || hours >= 20) {
-        toast.error("Les rendez-vous doivent être pris entre 8h et 20h");
+        toast.error("Les séances doivent être prises entre 8h et 20h");
         setIsSubmitting(false);
         return;
       }
       dateTime.setHours(hours, minutes);
 
-      // Check if appointment is in the past - uniquement pour les nouveaux rendez-vous
+      // Check if appointment is in the past - uniquement pour les nouvelles séances
       if (!isEditing && isBefore(dateTime, new Date())) {
-        toast.error("Vous ne pouvez pas prendre un rendez-vous dans le passé");
+        toast.error("Vous ne pouvez pas prendre une séance dans le passé");
         setIsSubmitting(false);
         return;
       }
@@ -226,11 +227,11 @@ export function AppointmentForm({
       if (isEditing && appointmentId) {
         // Update existing appointment
         result = await api.updateAppointment(appointmentId, appointmentData);
-        toast.success("Rendez-vous mis à jour avec succès");
+        toast.success("Séance mise à jour avec succès");
       } else {
         // Create new appointment
         result = await api.createAppointment(appointmentData);
-        toast.success("Rendez-vous créé avec succès");
+        toast.success("Séance créée avec succès");
       }
 
       // If we need to update the patient's HDLM field with the session notes
@@ -248,16 +249,16 @@ export function AppointmentForm({
             ...selectedPatient,
             hdlm: updatedHdlm
           });
-          console.log("Patient HDLM updated successfully");
+          console.log("HDLM du patient mis à jour avec succès");
         } catch (error) {
-          console.error("Error updating patient HDLM:", error);
-          // Don't block the navigation for this secondary action
+          console.error("Erreur lors de la mise à jour du HDLM du patient:", error);
+          // Ne pas bloquer la navigation pour cette action secondaire
         }
       }
 
       navigate("/appointments");
     } catch (error) {
-      console.error("Error submitting appointment form:", error);
+      console.error("Erreur lors de la soumission du formulaire de séance:", error);
       if (error instanceof Error && error.name === "AppointmentConflictError") {
         toast.error("Ce créneau horaire est déjà réservé. Veuillez choisir un autre horaire.");
       } else {
@@ -380,7 +381,7 @@ export function AppointmentForm({
 
               // Vérifier que l'heure est entre 8h et 20h
               if (hours < 8 || hours >= 20) {
-                toast.error("Les rendez-vous doivent être pris entre 8h et 20h");
+                toast.error("Les séances doivent être prises entre 8h et 20h");
                 return;
               }
               setCustomTime(newTime);
@@ -396,7 +397,7 @@ export function AppointmentForm({
       }) => <FormItem>
               <FormLabel>Motif de la séance</FormLabel>
               <FormControl>
-                <Textarea placeholder="Décrivez le motif du rendez-vous" className="resize-none" disabled={isSubmitting} {...field} />
+                <Textarea placeholder="Décrivez le motif de la séance" className="resize-none" disabled={isSubmitting} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>} />

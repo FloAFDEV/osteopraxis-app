@@ -80,7 +80,7 @@ export const appointmentService = {
       try {
         return await supabaseAppointmentService.createAppointment(appointment);
       } catch (error) {
-        console.error("Error creating appointment:", error);
+        console.error("Erreur lors de la création de la séance:", error);
         throw error;
       }
     }
@@ -99,7 +99,7 @@ export const appointmentService = {
       try {
         return await supabaseAppointmentService.updateAppointment(id, update);
       } catch (error) {
-        console.error("Error updating appointment:", error);
+        console.error("Erreur lors de la mise à jour de la séance:", error);
         throw error;
       }
     }
@@ -110,7 +110,7 @@ export const appointmentService = {
       appointments[index] = { ...appointments[index], ...update };
       return appointments[index];
     }
-    throw new Error(`Appointment with id ${id} not found`);
+    throw new Error(`Séance avec l'identifiant ${id} non trouvée`);
   },
   
   async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
@@ -122,7 +122,7 @@ export const appointmentService = {
       try {
         return await supabaseAppointmentService.cancelAppointment(id);
       } catch (error) {
-        console.error("Error cancelling appointment:", error);
+        console.error("Erreur lors de l'annulation de la séance:", error);
         throw error;
       }
     }

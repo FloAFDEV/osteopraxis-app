@@ -46,8 +46,8 @@ export async function checkAppointmentConflict(
     
     return !!conflictingAppointment;
   } catch (error) {
-    console.error("Error checking appointment conflicts:", error);
-    return false; // In case of error, allow the appointment to be created
+    console.error("Erreur lors de la vérification des conflits de séances:", error);
+    return false; // En cas d'erreur, permettre la séance d'être créée
   }
 }
 

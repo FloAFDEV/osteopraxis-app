@@ -113,7 +113,7 @@ export function AppointmentCard({
 				</div>
 			</CardContent>
 			<CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
-				{/* Si le Séance est terminé, on montre le bouton pour accéder/créer la Note d'honoraire */}
+				{/* Si la séance est terminée, on montre le bouton pour accéder/créer la Note d'honoraire */}
 				{appointment.status === "COMPLETED" && (
 					<>
 						<Button variant="outline" size="sm" asChild>

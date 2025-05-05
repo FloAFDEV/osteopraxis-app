@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -52,7 +53,7 @@ const EditAppointmentPage = () => {
 				]);
 
 				if (!appointmentData) {
-					throw new Error("Séance non trouvé");
+					throw new Error("Séance non trouvée");
 				}
 
 				setAppointment(appointmentData);
@@ -60,7 +61,7 @@ const EditAppointmentPage = () => {
 			} catch (error) {
 				console.error("Error fetching appointment data:", error);
 				toast.error(
-					"Impossible de charger les données du Séance. Veuillez réessayer."
+					"Impossible de charger les données de la séance. Veuillez réessayer."
 				);
 			} finally {
 				setLoading(false);
@@ -79,7 +80,7 @@ const EditAppointmentPage = () => {
 			// Utiliser directement la méthode cancelAppointment de l'API
 			// Cette méthode utilise X-Cancellation-Override dans les en-têtes
 			const result = await api.cancelAppointment(parseInt(id));
-			toast.success("Séance annulé avec succès");
+			toast.success("Séance annulée avec succès");
 			setAppointment({ ...appointment, status: "CANCELED" });
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
@@ -99,12 +100,12 @@ const EditAppointmentPage = () => {
 
 			// Utiliser la méthode deleteAppointment de l'API
 			await api.deleteAppointment(parseInt(id));
-			toast.success("Séance supprimé avec succès");
+			toast.success("Séance supprimée avec succès");
 			navigate("/appointments");
 		} catch (error) {
 			console.error("Error deleting appointment:", error);
 			toast.error(
-				"Impossible de supprimer le Séance. Erreur réseau ou problème CORS."
+				"Impossible de supprimer la séance. Erreur réseau ou problème CORS."
 			);
 		} finally {
 			setProcessingAction(null);
@@ -130,7 +131,7 @@ const EditAppointmentPage = () => {
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
 						<p className="text-muted-foreground">
-							Chargement des données du Séance...
+							Chargement des données de la séance...
 						</p>
 					</div>
 				</div>
@@ -143,10 +144,10 @@ const EditAppointmentPage = () => {
 			<Layout>
 				<div className="text-center py-12">
 					<AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-					<h3 className="text-xl font-medium">Séance non trouvé</h3>
+					<h3 className="text-xl font-medium">Séance non trouvée</h3>
 					<p className="text-muted-foreground mt-2 mb-6">
-						Le Séance que vous recherchez n&apos;existe pas ou a été
-						supprimé.
+						La séance que vous recherchez n&apos;existe pas ou a été
+						supprimée.
 					</p>
 					<Button asChild>
 						<Link to="/appointments">Retour aux séances</Link>
@@ -185,7 +186,7 @@ const EditAppointmentPage = () => {
 						Modifier la séance
 					</h1>
 					<p className="text-muted-foreground mt-1">
-						{formattedDate} - Modifiez les détails du Séance en
+						{formattedDate} - Modifiez les détails de la séance en
 						utilisant le formulaire ci-dessous.
 					</p>
 				</div>
@@ -226,73 +227,63 @@ const EditAppointmentPage = () => {
 						<AlertDialogTrigger asChild>
 							<Button
 								variant="outline"
-								className="text-destructive border-destructive hover:bg-destructive/10"
+								className="border-destructive text-destructive"
 								disabled={!!processingAction}
+								aria-label="Supprimer la séance"
 							>
-								<Trash2 className="h-4 w-4 mr-2" />
-								Supprimer définitivement
+								<Trash2 className="mr-2 h-4 w-4" />
+								{processingAction === "delete" ? (
+									<>
+										<span className="animate-spin mr-2">
+											⏳
+										</span>
+										Suppression...
+									</>
+								) : (
+									"Supprimer"
+								)}
 							</Button>
 						</AlertDialogTrigger>
 						<AlertDialogContent>
 							<AlertDialogHeader>
 								<AlertDialogTitle>
-									Supprimer le Séance
+									Êtes-vous sûr de vouloir supprimer cette
+									séance ?
 								</AlertDialogTitle>
 								<AlertDialogDescription>
-									Êtes-vous sûr de vouloir supprimer
-									définitivement ce Séance ? Cette action ne
-									peut pas être annulée.
+									Cette action est irréversible. La séance
+									sera définitivement supprimée.
 								</AlertDialogDescription>
 							</AlertDialogHeader>
 							<AlertDialogFooter>
 								<AlertDialogCancel>Annuler</AlertDialogCancel>
 								<AlertDialogAction
 									onClick={handleDelete}
-									className="bg-destructive"
+									className="bg-destructive hover:bg-destructive/90"
 								>
-									{processingAction === "delete" ? (
-										<>
-											<span className="animate-spin mr-2">
-												⏳
-											</span>
-											Suppression...
-										</>
-									) : (
-										"Supprimer"
-									)}
+									Supprimer
 								</AlertDialogAction>
 							</AlertDialogFooter>
 						</AlertDialogContent>
 					</AlertDialog>
-
-					{appointment.status === "COMPLETED" && (
-						<Button variant="outline" asChild>
-							<Link
-								to={`/invoices/new?appointmentId=${appointment.id}`}
-								aria-label="Créer une Note d'honoraire pour ce Séance"
-							>
-								<FileText className="h-4 w-4 mr-2" />
-								Créer une Note d'honoraire
-							</Link>
-						</Button>
-					)}
 				</div>
 
-				{/* Appointment Form Section */}
-				<div className="bg-card rounded-lg border shadow-sm p-6">
+				{/* Appointment Form */}
+				<section className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
 					<AppointmentForm
 						patients={patients}
 						defaultValues={{
 							patientId: appointment.patientId,
 							date: appointmentDate,
-							time,
+							time: time,
 							reason: appointment.reason,
-							status: appointment.status,
+							notes: appointment.notes,
+							status: appointment.status as AppointmentStatus,
 						}}
-						appointmentId={appointment.id}
+						appointmentId={parseInt(id!)}
 						isEditing={true}
 					/>
-				</div>
+				</section>
 			</div>
 		</Layout>
 	);
