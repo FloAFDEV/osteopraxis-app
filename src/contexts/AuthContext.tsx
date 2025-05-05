@@ -35,7 +35,7 @@ interface AuthContextType extends AuthState {
 	promoteToAdmin: (userId: string) => Promise<boolean>;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+const AuthContext = createContext<AuthContextType>({
 	user: null,
 	isAuthenticated: false,
 	token: null,

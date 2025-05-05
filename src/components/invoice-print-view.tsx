@@ -1,125 +1,248 @@
-
-import React, { useRef } from "react";
+import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Invoice, Patient, Osteopath, Cabinet, PaymentStatus } from "@/types";
 
 interface InvoicePrintViewProps {
-  invoice: Invoice;
-  patient?: Patient;
-  osteopath?: Osteopath;
-  cabinet?: Cabinet;
+	invoice: Invoice;
+	patient?: Patient;
+	osteopath?: Osteopath;
+	cabinet?: Cabinet;
 }
 
-const getPaymentStatusText = (status: PaymentStatus) => {
-  switch (status) {
-    case "PAID":
-      return "Payée";
-    case "PENDING":
-      return "En attente";
-    case "CANCELED":
-      return "Annulée";
-    default:
-      return "Inconnu";
-  }
+export const InvoicePrintView = ({
+	invoice,
+	patient,
+	osteopath,
+	cabinet,
+}: InvoicePrintViewProps) => {
+	const formatAmount = (amount: number) => {
+		return new Intl.NumberFormat("fr-FR", {
+			style: "currency",
+			currency: "EUR",
+		}).format(amount);
+	};
+
+	const formattedDate = format(new Date(invoice.date), "dd MMMM yyyy", {
+		locale: fr,
+	});
+	const currentDate = format(new Date(), "dd MMMM yyyy", { locale: fr });
+
+	const getPaymentMethod = (method?: string) => {
+		if (!method) return "Non spécifié";
+		switch (method) {
+			case "CB":
+				return "Carte Bancaire";
+			case "ESPECES":
+				return "Espèces";
+			case "CHEQUE":
+				return "Chèque";
+			case "VIREMENT":
+				return "Virement bancaire";
+			default:
+				return method;
+		}
+	};
+
+	const getPatientName = () => {
+		if (patient) {
+			return `${patient.firstName} ${patient.lastName}`;
+		}
+		if (invoice.Patient) {
+			return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
+		}
+		return `Patient #${invoice.patientId}`;
+	};
+
+	return (
+<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-max print:p-4">
+			{/* Partie haute */}
+			<div className="flex-1">
+				{/* En-tête */}
+				<div className="flex justify-between items-start mb-16">
+					<div>
+						<h1 className="text-4xl font-extrabold mb-2 text-amber-700">
+							{cabinet?.name || "PatientHub"}
+						</h1>
+						{cabinet?.logoUrl && (
+							<img
+								src={cabinet.logoUrl}
+								alt={`Logo ${cabinet.name}`}
+								className="h-16 mb-3"
+								style={{
+									maxWidth: "200px",
+									objectFit: "contain",
+								}}
+							/>
+						)}
+						<p className="text-gray-700 font-medium">
+							{osteopath?.professional_title || "Ostéopathe D.O."}
+						</p>
+						<p className="text-gray-600 mt-2">
+							{cabinet ? (
+								<>
+									{cabinet.address}
+									<br />
+									{cabinet.phone && (
+										<>
+											{cabinet.phone}
+											<br />
+										</>
+									)}
+									{cabinet.email && (
+										<>
+											{cabinet.email}
+											<br />
+										</>
+									)}
+								</>
+							) : (
+								<>
+									123 Rue de la Santé
+									<br />
+									75001 Paris, France
+									<br />
+									Tél: 01 23 45 67 89
+								</>
+							)}
+						</p>
+						<div className="text-gray-600 mt-2 text-sm">
+							{osteopath?.siret && (
+								<p className="font-medium">
+									SIRET: {osteopath.siret}
+								</p>
+							)}
+							{osteopath?.adeli_number && (
+								<p className="font-medium">
+									ADELI: {osteopath.adeli_number}
+								</p>
+							)}
+							{osteopath?.ape_code && (
+								<p className="font-medium">
+									Code APE: {osteopath.ape_code}
+								</p>
+							)}
+						</div>
+					</div>
+					<div className="text-right mt-[5.5rem]">
+						<h2 className="text-2xl font-medium text-amber-700 mb-1">
+							NOTE D'HONORAIRES
+						</h2>
+						<p className="font-medium text-amber-600">
+							n° #{invoice.id.toString().padStart(4, "0")}
+						</p>
+						<p className="mt-4 text-gray-600 whitespace-nowrap">
+							Date de consultation: {formattedDate}
+						</p>
+					</div>
+				</div>
+
+				{/* Infos patient + paiement */}
+				<div className="grid grid-cols-2 gap-8 mb-12">
+					<div>
+						<h3 className="font-medium text-amber-700 mb-3">
+							Facturer à:
+						</h3>
+						<div className="border-l-4 border-amber-200 pl-4 break-words">
+							<p className="font-medium text-gray-800 text-lg mb-2">
+								{getPatientName()}
+							</p>
+							{patient?.birthDate && (
+								<p className="text-gray-600 text-sm mb-2">
+									Né(e) le{" "}
+									{format(
+										new Date(patient.birthDate),
+										"dd/MM/yyyy"
+									)}
+								</p>
+							)}
+							{patient?.email && (
+								<p className="text-gray-600">{patient.email}</p>
+							)}
+							{patient?.phone && (
+								<p className="text-gray-600">{patient.phone}</p>
+							)}
+							{patient?.address && (
+								<p className="text-gray-600">
+									{patient.address}
+								</p>
+							)}
+						</div>
+					</div>
+					<div className="text-right">
+						<h3 className="font-medium text-amber-700 mb-3">
+							Mode de règlement:
+						</h3>
+						<p className="font-medium text-gray-800">
+							{getPaymentMethod(invoice.paymentMethod)}
+						</p>
+						{invoice.paymentStatus === "PAID" && (
+							<p className="text-amber-600 font-bold text-lg mt-2">
+								ACQUITTÉE
+							</p>
+						)}
+					</div>
+				</div>
+
+				{/* Tableau prestations */}
+				<div className="rounded-lg border border-amber-200 overflow-hidden mb-12">
+					<table className="w-full">
+						<thead>
+							<tr className="bg-gray-100">
+								<th className="py-3 px-4 text-left text-amber-700 font-semibold">
+									Désignation
+								</th>
+								<th className="py-3 px-4 text-right text-amber-700 font-semibold">
+									Montant
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr className="border-t border-amber-200">
+								<td className="py-4 px-4 text-gray-700">
+									Consultation d'ostéopathie
+								</td>
+								<td className="py-4 px-4 text-right text-amber-700 font-bold">
+									{formatAmount(invoice.amount)}
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr className="border-t border-amber-200 bg-amber-50/50">
+								<td className="py-2 px-2 text-right text-amber-700 font-medium">
+									Total
+								</td>
+								<td className="py-2 px-2 text-right text-amber-700 font-bold">
+									{formatAmount(invoice.amount)}
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</div>
+
+			{/* Footer Mentions */}
+			<footer className="pt-8 mt-8 border-t border-gray-200">
+				<h3 className="font-medium text-amber-700 mb-2">
+					Mentions obligatoires:
+				</h3>
+				<p className="text-gray-700 mb-3 font-medium">
+					{invoice.tvaMotif ||
+						"TVA non applicable - Article 261-4-1° du CGI"}
+				</p>
+				<p className="text-gray-600 mb-6">
+					En votre aimable règlement à réception. Merci de votre
+					confiance.
+				</p>
+<div className="flex flex-wrap justify-center items-center gap-2 text-gray-500 text-xs break-all text-center">
+					<span className="whitespace-nowrap">Document généré le {currentDate}</span>
+					<span>|</span>
+					<span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">
+						PatientHub
+					</span>
+					<span>|</span>
+					<span>Logiciel de gestion pour ostéopathes</span>
+				</div>
+			</footer>
+		</div>
+	);
 };
-
-const getPaymentMethodText = (method: string) => {
-  switch (method) {
-    case "CB":
-      return "Carte bancaire";
-    case "ESPECES":
-      return "Espèces";
-    case "CHEQUE":
-      return "Chèque";
-    case "VIREMENT":
-      return "Virement";
-    default:
-      return "Non spécifié";
-  }
-};
-
-export const printRef = React.createRef<HTMLDivElement>();
-
-export function InvoicePrintView({ invoice, patient, osteopath, cabinet }: InvoicePrintViewProps) {
-  return (
-    <div ref={printRef} className="p-8 max-w-3xl mx-auto bg-white text-black">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          {/* Osteopath details */}
-          <h1 className="text-2xl font-bold">{osteopath?.name || "Ostéopathe"}</h1>
-          <p className="text-gray-700">{osteopath?.professional_title || "Ostéopathe D.O."}</p>
-          <p className="text-gray-700">ADELI: {osteopath?.adeli_number || "N/A"}</p>
-          <p className="text-gray-700">SIRET: {osteopath?.siret || "N/A"}</p>
-          
-          {/* Cabinet details if available */}
-          {cabinet && (
-            <div className="mt-2">
-              <p className="text-gray-700">{cabinet.name}</p>
-              <p className="text-gray-700">{cabinet.address}</p>
-              <p className="text-gray-700">{cabinet.zip_code} {cabinet.city}</p>
-            </div>
-          )}
-        </div>
-        
-        <div className="text-right">
-          <h1 className="text-xl font-bold mb-1">NOTE D'HONORAIRE</h1>
-          <p className="text-gray-700">N° {invoice.id.toString().padStart(4, '0')}</p>
-          <p className="text-gray-700">
-            Date: {format(new Date(invoice.date), "dd MMMM yyyy", { locale: fr })}
-          </p>
-        </div>
-      </div>
-
-      {/* Patient information */}
-      <div className="mb-8 p-4 border border-gray-200 rounded-md">
-        <h2 className="text-gray-700 font-semibold mb-2">Patient:</h2>
-        <p className="font-medium">{patient?.firstName} {patient?.lastName}</p>
-        {patient?.address && <p className="text-gray-600">{patient.address}</p>}
-        {patient?.email && <p className="text-gray-600">{patient.email}</p>}
-        {patient?.phone && <p className="text-gray-600">{patient.phone}</p>}
-      </div>
-
-      {/* Services */}
-      <table className="w-full mb-8 border-collapse">
-        <thead>
-          <tr className="border-b border-gray-300">
-            <th className="text-left p-2">Description</th>
-            <th className="text-right p-2">Montant</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="border-b border-gray-200">
-            <td className="p-2">Consultation d'ostéopathie - Séance</td>
-            <td className="text-right p-2">{invoice.amount.toFixed(2)} €</td>
-          </tr>
-          {/* Add taxes row if applicable */}
-          <tr className="border-b border-gray-200">
-            <td colSpan={1} className="p-2 text-right font-semibold">Total:</td>
-            <td className="text-right p-2 font-bold">{invoice.amount.toFixed(2)} €</td>
-          </tr>
-        </tbody>
-      </table>
-
-      {/* Payment details */}
-      <div className="mb-8">
-        <h2 className="font-semibold mb-2">Détails de paiement:</h2>
-        <p>Statut: <span className="font-medium">{getPaymentStatusText(invoice.paymentStatus)}</span></p>
-        {invoice.paymentMethod && <p>Méthode: <span className="font-medium">{getPaymentMethodText(invoice.paymentMethod)}</span></p>}
-      </div>
-
-      {/* Legal mentions */}
-      <div className="text-sm text-gray-600 mb-8">
-        <p>{invoice.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI"}</p>
-        {invoice.notes && <p className="mt-2">{invoice.notes}</p>}
-      </div>
-
-      {/* Footer */}
-      <div className="text-center text-sm text-gray-500 mt-16">
-        <p>Merci pour votre confiance</p>
-      </div>
-    </div>
-  );
-}
-
-export default InvoicePrintView;

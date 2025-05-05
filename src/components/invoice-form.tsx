@@ -92,7 +92,7 @@ export const InvoiceForm = ({
 						}
 					}
 				} catch (err) {
-					console.error("Erreur chargement séance", err);
+					console.error("Erreur chargement RDV", err);
 				}
 			};
 			fetchAppointment();
@@ -155,7 +155,7 @@ export const InvoiceForm = ({
 					if (existingInvoices && existingInvoices.length > 0) {
 						const existingInvoice = existingInvoices[0];
 						toast.warning(
-							`❗ Une note d'honoraire existe déjà pour cette séance (Note n° ${existingInvoice.id
+							`❗ Une facture existe déjà pour ce rendez-vous (Facture n° ${existingInvoice.id
 								.toString()
 								.padStart(4, "0")}).`
 						);
@@ -183,12 +183,12 @@ export const InvoiceForm = ({
 			} else {
 				// Mode création
 				await api.createInvoice(invoiceData);
-				toast.success("✅ Note d'honoraire créée avec succès !");
+				toast.success("✅ Facture créée avec succès !");
 				if (onCreate) onCreate();
 			}
 		} catch (error) {
 			console.error("❌ Error processing invoice:", error);
-			toast.error("Erreur lors du traitement de la note d'honoraire");
+			toast.error("Erreur lors du traitement de la facture");
 		}
 	};
 
@@ -312,7 +312,7 @@ export const InvoiceForm = ({
 										/>
 									</FormControl>
 									<FormLabel>
-										Note sans séance associée
+										Facture sans consultation associée
 									</FormLabel>
 								</FormItem>
 							)}
@@ -418,7 +418,7 @@ export const InvoiceForm = ({
 						{initialInvoice ? "Annuler" : "Retour"}
 					</Button>
 					<Button type="submit">
-						{initialInvoice ? "Mettre à jour" : "Créer la note"}
+						{initialInvoice ? "Mettre à jour" : "Créer la facture"}
 					</Button>
 				</div>
 			</form>
