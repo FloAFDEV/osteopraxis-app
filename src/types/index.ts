@@ -67,6 +67,7 @@ export interface Appointment {
   status: AppointmentStatus;
   notificationSent: boolean;
   cabinetId?: number;
+  notes?: string; // Added field for session report
 }
 
 // Enums pour les patients

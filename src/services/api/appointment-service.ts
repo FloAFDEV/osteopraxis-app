@@ -1,50 +1,43 @@
-import { Appointment, AppointmentStatus } from "@/types";
+import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { convertLocalToUTC } from "@/utils/date-utils";
 
-// Type guard pour vérifier si une valeur est une Date
-function isDate(value: unknown): value is Date {
-  return value instanceof Date;
-}
-
-// Function to normalize status
-function normalizeStatus(status?: string): AppointmentStatus {
-  if (status?.toUpperCase() === 'CANCELLED') return "CANCELED";
-  return (status as AppointmentStatus) ?? "SCHEDULED";
-}
-
-// Type pour la création d'un rendez-vous sans les champs générés
-type CreateAppointmentInput = Omit<Appointment, 'id' | 'notificationSent' | 'createdAt' | 'updatedAt'> & {
-  notificationSent?: boolean;
-};
-
-// Error class for appointment conflicts
-export class AppointmentConflictError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AppointmentConflictError';
-  }
-}
+// Mock data (replace with actual data fetching)
+const appointments: Appointment[] = [
+  {
+    id: 1,
+    patientId: 1,
+    date: new Date().toISOString(),
+    reason: "Consultation de routine",
+    status: "SCHEDULED",
+    notificationSent: false,
+  },
+  {
+    id: 2,
+    patientId: 2,
+    date: new Date().toISOString(),
+    reason: "Suivi post-opératoire",
+    status: "COMPLETED",
+    notificationSent: false,
+  },
+];
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
-        const appointments = await supabaseAppointmentService.getAppointments();
-        return appointments;
+        return await supabaseAppointmentService.getAppointments();
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
         throw error;
       }
     }
-    
-    // Mock: return empty array instead of undefined
+
     await delay(300);
-    return [];
+    return [...appointments];
   },
 
-  async getAppointmentById(id: number): Promise<Appointment> {
+  async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
         return await supabaseAppointmentService.getAppointmentById(id);
@@ -53,168 +46,66 @@ export const appointmentService = {
         throw error;
       }
     }
-    
-    // Mock: return a minimal mock appointment instead of undefined
+
     await delay(200);
-    return {
-      id,
-      date: new Date().toISOString(),
-      patientId: 1,
-      status: "SCHEDULED",
-      reason: "Mock appointment",
-      notificationSent: false
-    } as Appointment;
+    return appointments.find((appointment) => appointment.id === id);
   },
 
-  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
+  async createAppointment(appointment: Omit<Appointment, "id">): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
+        return await supabaseAppointmentService.createAppointment(appointment);
       } catch (error) {
-        console.error("Erreur Supabase getAppointmentsByPatientId:", error);
+        console.error("Error creating appointment:", error);
         throw error;
       }
     }
     
-    await delay(300);
-    return [];
-  },
-
-  async createAppointment(appointment: CreateAppointmentInput): Promise<Appointment> {
-    if (USE_SUPABASE) {
-      try {
-        // Convertir la date locale en UTC pour le stockage
-        const payload = {
-          ...appointment,
-          notificationSent: appointment.notificationSent ?? false,
-          status: normalizeStatus(appointment.status),
-          // Conversion explicite de la date locale en UTC
-          date: isDate(appointment.date) 
-            ? convertLocalToUTC(appointment.date) 
-            : appointment.date
-        };
-        
-        // Pas besoin d'inclure createdAt/updatedAt car ils seront gérés par la DB
-        delete (payload as any).createdAt;
-        delete (payload as any).updatedAt;
-        
-        return await supabaseAppointmentService.createAppointment(payload);
-      } catch (error: any) {
-        if (error.message?.includes('Un rendez-vous existe déjà sur ce créneau horaire')) {
-          throw new AppointmentConflictError('Ce créneau horaire est déjà réservé');
-        }
-        console.error("Erreur Supabase createAppointment:", error);
-        throw error;
-      }
-    }
-    
-    // Mock: return a complete mock appointment
-    await delay(400);
-    const now = new Date().toISOString();
-    return {
+    await delay(500);
+    const newAppointment = {
       ...appointment,
-      id: Math.floor(Math.random() * 1000),
-      date: isDate(appointment.date) ? convertLocalToUTC(appointment.date) : appointment.date,
-      notificationSent: appointment.notificationSent ?? false,
-      status: normalizeStatus(appointment.status),
-      createdAt: now,
-      updatedAt: now
-    } as Appointment;
-  },
-
-  async updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment> {
-    console.log(`Mise à jour du rendez-vous ${id} avec les données:`, appointment);
-    
-    if (USE_SUPABASE) {
-      try {
-        // Convertir la date locale en UTC pour le stockage si elle existe
-        const payload: Partial<Appointment> = { ...appointment };
-        
-        if (appointment.date) {
-          payload.date = isDate(appointment.date) 
-            ? convertLocalToUTC(appointment.date) 
-            : appointment.date;
-        }
-        
-        if (appointment.status) {
-          payload.status = normalizeStatus(appointment.status);
-        }
-        
-        // Ne pas inclure ces champs car ils sont gérés automatiquement par la DB
-        delete (payload as any).createdAt;
-        delete (payload as any).updatedAt;
-        
-        const result = await supabaseAppointmentService.updateAppointment(id, payload);
-        console.log(`Résultat mise à jour du rendez-vous ${id}:`, result);
-        return result;
-      } catch (error: any) {
-        if (error.message?.includes('Un rendez-vous existe déjà sur ce créneau horaire')) {
-          throw new AppointmentConflictError('Ce créneau horaire est déjà réservé');
-        }
-        console.error("Erreur Supabase updateAppointment:", error);
-        throw error;
-      }
-    }
-    
-    // Mock: return updated appointment data
-    await delay(300);
-    const now = new Date().toISOString();
-    return {
-      ...appointment,
-      id,
-      date: isDate(appointment.date) 
-        ? convertLocalToUTC(appointment.date) 
-        : appointment.date,
-      status: appointment.status ? normalizeStatus(appointment.status) : "SCHEDULED",
-      updatedAt: now
-    } as Appointment;
-  },
-
-  // Méthode spécifique pour annuler un rendez-vous
-  async cancelAppointment(id: number): Promise<Appointment> {
-    console.log(`Annulation du rendez-vous ${id}`);
-    
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseAppointmentService.cancelAppointment(id);
-      } catch (error) {
-        console.error("Erreur Supabase cancelAppointment:", error);
-        throw error;
-      }
-    }
-    
-    // Mock: return updated appointment data with CANCELED status
-    await delay(300);
-    
-    // Pour les tests en mode mock, créer un rendez-vous complet avec date
-    const mockedAppointment: Appointment = {
-      id,
-      status: "CANCELED",
-      date: new Date().toISOString(),
-      patientId: 1,
-      reason: "Cancelled appointment",
-      notificationSent: false
+      id: appointments.length + 1,
     };
-    return mockedAppointment;
+    appointments.push(newAppointment);
+    return newAppointment;
   },
 
-  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
-    return this.updateAppointment(id, { status: normalizeStatus(status) });
-  },
-  
-  async deleteAppointment(id: number): Promise<boolean> {
-    console.log(`Suppression du rendez-vous ${id}`);
-    
+  async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.deleteAppointment(id);
+        return await supabaseAppointmentService.updateAppointment(id, update);
+      } catch (error) {
+        console.error("Error updating appointment:", error);
+        throw error;
+      }
+    }
+    
+    await delay(300);
+    const index = appointments.findIndex((a) => a.id === id);
+    if (index !== -1) {
+      appointments[index] = { ...appointments[index], ...update };
+      return appointments[index];
+    }
+    throw new Error(`Appointment with id ${id} not found`);
+  },
+
+  async deleteAppointment(id: number): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        await supabaseAppointmentService.deleteAppointment(id);
+        return true;
       } catch (error) {
         console.error("Erreur Supabase deleteAppointment:", error);
         throw error;
       }
     }
-    
+
     await delay(300);
-    return true;
-  }
+    const index = appointments.findIndex((a) => a.id === id);
+    if (index !== -1) {
+      appointments.splice(index, 1);
+      return true;
+    }
+    return false;
+  },
 };

@@ -42,6 +42,7 @@ const appointmentFormSchema = z.object({
   reason: z.string().min(3, {
     message: "La raison doit contenir au moins 3 caractères"
   }),
+  notes: z.string().optional(), // Added field for session report
   // Updated to account for both status spellings
   status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "CANCELED", "RESCHEDULED", "NO_SHOW"], {
     required_error: "Veuillez sélectionner un statut"
@@ -90,7 +91,16 @@ export function AppointmentForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customTime, setCustomTime] = useState<string>(defaultValues?.time || "09:00");
   const [useCustomTime, setUseCustomTime] = useState(false);
-  const [patientSearch, setPatientSearch] = useState(""); // <-- Ajout de l'état de recherche
+  const [patientSearch, setPatientSearch] = useState(""); 
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+
+  // Find the selected patient
+  useEffect(() => {
+    if (defaultValues?.patientId) {
+      const patient = patients.find(p => p.id === defaultValues.patientId);
+      setSelectedPatient(patient || null);
+    }
+  }, [patients, defaultValues?.patientId]);
 
   // Use the custom schema with refinement
   const schema = refinePastAppointments(isEditing);
@@ -102,9 +112,22 @@ export function AppointmentForm({
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
       time: defaultValues?.time || "09:00",
       reason: defaultValues?.reason || "",
+      notes: defaultValues?.notes || "",
       status: defaultValues?.status || "SCHEDULED"
     }
   });
+
+  // Observe patientId changes to update selectedPatient
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "patientId" && value.patientId) {
+        const patient = patients.find(p => p.id === value.patientId);
+        setSelectedPatient(patient || null);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form, patients]);
 
   // Generate available time slots (current time onward if today, and between 8h-20h)
   const generateAvailableTimes = () => {
@@ -183,25 +206,56 @@ export function AppointmentForm({
         }
       }
 
+      // If status is COMPLETED and we have notes, update the patient's HDLM
+      let shouldUpdatePatient = false;
+      if (data.status === "COMPLETED" && data.notes && data.notes.trim() !== "" && selectedPatient) {
+        shouldUpdatePatient = true;
+      }
+
       const appointmentData = {
         patientId: data.patientId,
         date: dateTime.toISOString(),
         reason: data.reason,
+        notes: data.notes, // Include the session report
         status: data.status as AppointmentStatus,
         notificationSent: false
       };
       
       console.log("Mode:", isEditing ? "Édition" : "Création", "Données:", appointmentData);
       
+      let result;
       if (isEditing && appointmentId) {
         // Update existing appointment
-        await api.updateAppointment(appointmentId, appointmentData);
+        result = await api.updateAppointment(appointmentId, appointmentData);
         toast.success("Rendez-vous mis à jour avec succès");
       } else {
         // Create new appointment
-        await api.createAppointment(appointmentData);
+        result = await api.createAppointment(appointmentData);
         toast.success("Rendez-vous créé avec succès");
       }
+
+      // If we need to update the patient's HDLM field with the session notes
+      if (shouldUpdatePatient && selectedPatient) {
+        try {
+          const currentDate = new Date().toLocaleDateString('fr-FR');
+          const formattedNotes = `${currentDate} - ${data.reason}: ${data.notes}`;
+          
+          // Prepare the updated HDLM - either append to existing or create new
+          const updatedHdlm = selectedPatient.hdlm 
+            ? `${selectedPatient.hdlm}\n\n${formattedNotes}`
+            : formattedNotes;
+            
+          await api.updatePatient({
+            ...selectedPatient,
+            hdlm: updatedHdlm
+          });
+          console.log("Patient HDLM updated successfully");
+        } catch (error) {
+          console.error("Error updating patient HDLM:", error);
+          // Don't block the navigation for this secondary action
+        }
+      }
+
       navigate("/appointments");
     } catch (error) {
       console.error("Error submitting appointment form:", error);
@@ -220,6 +274,7 @@ export function AppointmentForm({
 
   // patients filtrés selon la recherche
   const filteredPatients = filterPatients(patientSearch, patients);
+  
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Champ de recherche + Select */}
@@ -340,11 +395,35 @@ export function AppointmentForm({
         <FormField control={form.control} name="reason" render={({
         field
       }) => <FormItem>
-              <FormLabel>Motif du rendez-vous</FormLabel>
+              <FormLabel>Motif de la séance</FormLabel>
               <FormControl>
                 <Textarea placeholder="Décrivez le motif du rendez-vous" className="resize-none" disabled={isSubmitting} {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>} />
+
+        {/* New field for session notes/report */}
+        <FormField control={form.control} name="notes" render={({
+        field
+      }) => <FormItem>
+              <FormLabel>Compte rendu de séance</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Entrez vos notes et observations sur cette séance"
+                  className="resize-vertical min-h-[120px]"
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+              {selectedPatient && selectedPatient.hdlm && (
+                <div className="mt-2 p-3 bg-muted/30 border rounded-md">
+                  <p className="text-xs font-semibold mb-1 text-muted-foreground">Historique du patient:</p>
+                  <div className="max-h-24 overflow-y-auto text-sm whitespace-pre-line">
+                    {selectedPatient.hdlm}
+                  </div>
+                </div>
+              )}
             </FormItem>} />
 
         <FormField control={form.control} name="status" render={({
@@ -373,7 +452,7 @@ export function AppointmentForm({
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Créer le rendez-vous"}
+            {isSubmitting ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Créer la séance"}
           </Button>
         </div>
       </form>

@@ -1,6 +1,7 @@
+
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Clock, Calendar, FileText, Edit, X } from "lucide-react";
+import { Clock, Calendar, FileText, Edit, X, MessageSquare } from "lucide-react";
 import { Appointment, Patient } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,6 +97,19 @@ export function AppointmentCard({
 					<p className="text-muted-foreground">
 						Motif : {appointment.reason}
 					</p>
+
+                    {/* Affichage des notes de séance s'il y en a */}
+                    {appointment.notes && (
+                        <div className="mt-2 pt-2 border-t">
+                            <div className="flex items-center gap-2 text-sm font-medium mb-1">
+                                <MessageSquare className="h-4 w-4 text-primary" />
+                                <span>Notes de séance :</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-line">
+                                {appointment.notes}
+                            </p>
+                        </div>
+                    )}
 				</div>
 			</CardContent>
 			<CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
