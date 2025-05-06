@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
@@ -39,9 +40,11 @@ const OsteopathSettingsPage = () => {
       // Mettre à jour le profil de l'ostéopathe
       await api.updateOsteopathProfile(connectedUser?.id || '', data);
       toast.success("Profil mis à jour avec succès!");
+      return Promise.resolve();
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil:", error);
       toast.error("Une erreur est survenue lors de la mise à jour du profil");
+      return Promise.reject(error);
     } finally {
       setIsSaving(false);
     }

@@ -1,6 +1,6 @@
 
 import { Cabinet } from "@/types";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 // Fonction pour récupérer tous les cabinets
 export const getCabinets = async (): Promise<Cabinet[]> => {

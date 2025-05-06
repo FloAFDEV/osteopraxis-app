@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from './hooks/use-auth';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';

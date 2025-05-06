@@ -1,3 +1,4 @@
+
 import { createContext, useState, useEffect } from 'react';
 import { User, AuthState } from '@/types';
 import { api } from '@/services/api';
@@ -13,6 +14,7 @@ interface AuthContextType {
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  loadStoredToken?: () => Promise<void>; // Added to fix the issue in App.tsx
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -162,6 +164,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Add loadStoredToken function to fix the issue in App.tsx
+  const loadStoredToken = async () => {
+    try {
+      const storedAuth = localStorage.getItem('authState');
+      if (storedAuth) {
+        const parsedAuth = JSON.parse(storedAuth);
+        if (parsedAuth && parsedAuth.token) {
+          // Validate the stored token
+          const user = await api.checkAuth();
+          if (user) {
+            setAuthState({
+              isAuthenticated: true,
+              user,
+              loading: false,
+              error: null,
+            });
+            return;
+          }
+        }
+      }
+      
+      // If no valid stored token is found
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        loading: false,
+        error: null,
+      });
+    } catch (error) {
+      console.error('Error loading stored token:', error);
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        loading: false,
+        error: null,
+      });
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -173,9 +214,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         checkAuth,
+        loadStoredToken,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
+
+// Export the useAuth hook directly from here
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Missing import
+import { useContext } from 'react';

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
@@ -35,7 +36,7 @@ const EditCabinetPage = () => {
 
 				// Fetch osteopath data
 				const osteopathData = await api.getOsteopathById(
-					cabinet.osteopathId
+					cabinet.osteopathId as number
 				);
 				setOsteopath(osteopathData);
 			} catch (error) {
@@ -99,7 +100,7 @@ const EditCabinetPage = () => {
 					<CabinetForm
 						osteopathId={osteopathId}
 						onSave={handleSaveCabinet}
-						cabinetId={cabinetData.id}
+						cabinet={cabinetData}
 						isEditing={true}
 					/>
 				)}

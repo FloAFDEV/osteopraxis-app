@@ -82,6 +82,11 @@ export function Dashboard() {
         const totalPatients = patients.length;
         const maleCount = patients.filter(p => p.gender === "Homme").length;
         const femaleCount = patients.filter(p => p.gender === "Femme").length;
+        
+        // Calculate completed and canceled appointments
+        const completedAppointments = appointments.filter(a => a.status === "COMPLETED").length;
+        const canceledAppointments = appointments.filter(a => a.status === "CANCELED" || a.status === "CANCELLED").length;
+        const totalAppointments = appointments.length;
 
         // Calcul des âges et métriques de croissance
         const today = new Date();
@@ -175,6 +180,36 @@ export function Dashboard() {
           };
         });
 
+        // Calculate revenue (mock data for now)
+        const revenue = {
+          today: 0,
+          thisWeek: 0,
+          thisMonth: 0,
+          thisYear: 0
+        };
+
+        // Patient demographics (mock data for now)
+        const patientDemographics = {
+          age: {
+            under18: 0,
+            adults18to30: 0,
+            adults31to45: 0,
+            adults46to60: 0,
+            adults61plus: 0
+          },
+          gender: {
+            male: maleCount,
+            female: femaleCount,
+            other: totalPatients - maleCount - femaleCount
+          }
+        };
+
+        // Growth data (mock data structure for now)
+        const growthData = {
+          patients: monthlyGrowth.map(m => ({ month: m.month, count: m.patients })),
+          appointments: Array(12).fill(0).map((_, i) => ({ month: frenchMonths[i], count: 0 }))
+        };
+
         // Calcul des âges moyens
         const calculateAverageAge = (patientList: any[]) => {
           const patientsWithBirthDate = patientList.filter(p => p.birthDate);
@@ -193,7 +228,7 @@ export function Dashboard() {
         const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
         const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
 
-        // Mettre à jour les données du tableau de bord
+        // Mettre à jour les données du tableau de bord avec tous les champs requis
         setDashboardData({
           totalPatients,
           maleCount,
@@ -210,7 +245,13 @@ export function Dashboard() {
           newPatientsLast30Days,
           thirtyDayGrowthPercentage,
           annualGrowthPercentage,
-          monthlyGrowth
+          monthlyGrowth,
+          totalAppointments,
+          completedAppointments,
+          canceledAppointments,
+          revenue,
+          patientDemographics,
+          growthData
         });
       } catch (error) {
         console.error("Erreur lors du chargement des données du tableau de bord:", error);
