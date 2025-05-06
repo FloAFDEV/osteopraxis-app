@@ -1,74 +1,22 @@
-
-import { AppointmentCard } from "@/components/appointment-card";
-import { InvoiceDetails } from "@/components/invoice-details";
-import { MedicalInfoCard } from "@/components/patients/medical-info-card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardTitle,
-} from "@/components/ui/card";
+import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
 import { invoiceService } from "@/services/api/invoice-service";
 import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
-import { differenceInYears, format, parseISO } from "date-fns";
-import {
-	Activity,
-	AlertCircle,
-	ArrowLeft,
-	Calendar,
-	ClipboardList,
-	Edit,
-	FileText,
-	History,
-	List,
-	Loader2,
-	Mail,
-	MapPin,
-	Phone,
-	Plus,
-	Receipt,
-	Stethoscope,
-	User,
-	X,
-	MessageSquare,
-	Check,
-	Clock,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Activity, AlertCircle, Calendar, ClipboardList, History, Loader2, Stethoscope } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import { formatAppointmentTime } from "@/utils/date-utils";
-import { Badge } from "@/components/ui/badge";
-import { 
-	DropdownMenu,
-	DropdownMenuContent, 
-	DropdownMenuItem, 
-	DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { 
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger, 
-} from "@/components/ui/tooltip";
+import { PatientHeader } from "@/components/patients/detail/PatientHeader";
+import { PatientInfo } from "@/components/patients/detail/PatientInfo";
+import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
+import { MedicalInfoCard } from "@/components/patients/medical-info-card";
+import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
+import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
+import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 
-interface PatientDetailPageProps {}
-
-const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
+const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 	const [patient, setPatient] = useState<Patient | null>(null);
@@ -77,6 +25,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+	const historyTabRef = useRef<HTMLElement | null>(null);
 	
 	useEffect(() => {
 		const fetchPatientData = async () => {
@@ -110,52 +59,25 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 		fetchPatientData();
 	}, [id]);
 
-	const getInitials = (firstName: string, lastName: string) => {
-		return `${firstName.charAt(0)}${lastName.charAt(0)}`;
-	};
-
-	const genderColors = {
-		lightBg:
-			patient?.gender === "Homme"
-				? "bg-blue-50"
-				: patient?.gender === "Femme"
-				? "bg-pink-50"
-				: "bg-gray-50",
-		darkBg:
-			patient?.gender === "Homme"
-				? "dark:bg-blue-900"
-				: patient?.gender === "Femme"
-				? "dark:bg-pink-900"
-				: "dark:bg-gray-800",
-		textColor:
-			patient?.gender === "Homme"
-				? "text-blue-500"
-				: patient?.gender === "Femme"
-				? "text-pink-500"
-				: "text-gray-500",
-		avatarBg:
-			patient?.gender === "Homme"
-				? "bg-blue-200"
-				: patient?.gender === "Femme"
-				? "bg-pink-200"
-				: "bg-gray-200",
-	};
+	useEffect(() => {
+		// Find and set the history tab element ref after the component mounts
+		const historyTabTrigger = document.querySelector('[value="history"]');
+		if (historyTabTrigger) {
+			historyTabRef.current = historyTabTrigger as HTMLElement;
+		}
+	}, []);
 
 	const upcomingAppointments = appointments
 		.filter((appointment) => new Date(appointment.date) >= new Date())
 		.sort(
 			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
 		);
+		
 	const pastAppointments = appointments
 		.filter((appointment) => new Date(appointment.date) < new Date())
 		.sort(
 			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
 		);
-
-	// Add processed invoices
-	const sortedInvoices = [...invoices].sort((a, b) => {
-		return new Date(b.date).getTime() - new Date(a.date).getTime();
-	});
 
 	const handleCancelAppointment = async (appointmentId: number) => {
 		try {
@@ -207,44 +129,9 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 		}
 	};
 
-	const getStatusBadgeColor = (status: AppointmentStatus): string => {
-		switch (status) {
-			case "SCHEDULED":
-				return "bg-blue-500";
-			case "COMPLETED":
-				return "bg-green-500";
-			case "CANCELED":
-				return "bg-red-500";
-			case "RESCHEDULED":
-				return "bg-amber-500";
-			case "NO_SHOW":
-				return "bg-gray-500";
-			default:
-				return "bg-gray-500";
-		}
-	};
-
-	const getStatusIcon = (status: AppointmentStatus) => {
-		switch (status) {
-			case "SCHEDULED":
-				return <Clock className="h-3 w-3 mr-1" />;
-			case "COMPLETED":
-				return <Check className="h-3 w-3 mr-1" />;
-			case "CANCELED":
-				return <X className="h-3 w-3 mr-1" />;
-			case "RESCHEDULED":
-				return <Calendar className="h-3 w-3 mr-1" />;
-			case "NO_SHOW":
-				return <AlertCircle className="h-3 w-3 mr-1" />;
-			default:
-				return null;
-		}
-	};
-
 	const navigateToHistoryTab = () => {
-		const historyTabTrigger = document.querySelector('[value="history"]') as HTMLElement | null;
-		if (historyTabTrigger) {
-			historyTabTrigger.click();
+		if (historyTabRef.current) {
+			historyTabRef.current.click();
 		}
 	};
 
@@ -266,11 +153,6 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 					<p className="text-xl font-semibold text-center">
 						{error || "Patient non trouvé"}
 					</p>
-					<Button variant="outline" asChild>
-						<Link to="/patients">
-							Retour à la liste des patients
-						</Link>
-					</Button>
 				</div>
 			</Layout>
 		);
@@ -280,40 +162,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 		<Layout>
 			<div className="flex flex-col space-y-6 max-w-6xl mx-auto px-4">
 				{/* Header section */}
-				<div className="flex justify-between items-start">
-					<div className="flex items-center gap-2">
-						<Button variant="outline" size="sm" asChild>
-							<Link to="/patients">
-								{" "}
-								<ArrowLeft className="mr-2 h-4 w-4" />
-								Retour
-							</Link>
-						</Button>
-					</div>
-
-					<div className="flex gap-2">
-						<Button variant="outline" asChild>
-							<Link to={`/patients/${patient.id}/edit`}>
-								<Edit className="mr-2 h-4 w-4" />
-								Modifier
-							</Link>
-						</Button>
-						<Button variant="outline" asChild>
-							<Link to={`/appointments?patientId=${patient.id}`}>
-								<Calendar className="mr-2 h-4 w-4" />
-								Voir toutes les séances
-							</Link>
-						</Button>
-						<Button asChild>
-							<Link
-								to={`/appointments/new?patientId=${patient.id}`}
-							>
-								<Plus className="mr-2 h-4 w-4" />
-								Nouvelle séance
-							</Link>
-						</Button>
-					</div>
-				</div>
+				<PatientHeader patientId={patient.id} />
 
 				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -355,69 +204,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					{/* Left column - Patient info */}
 					<div className="space-y-6">
-						<Card>
-							<CardContent
-								className={`p-6 ${genderColors.lightBg}`}
-							>
-								<div className="flex items-center space-x-4">
-									<Avatar
-										className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}
-									>
-										<AvatarFallback
-											className={genderColors.avatarBg}
-										>
-											{getInitials(
-												patient.firstName,
-												patient.lastName
-											)}
-										</AvatarFallback>
-									</Avatar>
-									<div>
-										<CardTitle
-											className={`text-2xl font-bold ${genderColors.textColor}`}
-										>
-											<User className="mr-2 h-6 w-6" />
-											{patient.firstName}{" "}
-											{patient.lastName}
-										</CardTitle>
-										<CardDescription>
-											{patient.gender === "Homme"
-												? "Homme"
-												: patient.gender === "Femme"
-												? "Femme"
-												: "Non spécifié"}
-											,{" "}
-											{differenceInYears(
-												new Date(),
-												parseISO(patient.birthDate)
-											)}{" "}
-											ans
-										</CardDescription>
-									</div>
-								</div>
-
-								{/* Contact Information */}
-								<div className="mt-6 space-y-4 dark:text-slate-800">
-									<div className="flex items-center space-x-2">
-										<MapPin className="h-4 w-4 text-muted-foreground" />
-										<span>{patient.address}</span>
-									</div>
-									<div className="flex items-center space-x-2">
-										<Mail className="h-4 w-4 text-muted-foreground" />
-										<a
-											href={`mailto:${patient.email}`}
-											className="hover:underline"
-										>
-											{patient.email}
-										</a>
-									</div>
-									<div className="flex items-center space-x-2">
-										<Phone className="h-4 w-4 text-muted-foreground" />
-										<span>{patient.phone}</span>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
+						<PatientInfo patient={patient} />
 
 						<MedicalInfoCard
 							title="Informations personnelles"
@@ -503,7 +290,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 						<Tabs defaultValue="medical-info">
 							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="medical-info">
-									<FileText className="h-4 w-4 mr-2" />
+									<Activity className="h-4 w-4 mr-2" />
 									Dossier médical
 								</TabsTrigger>
 								<TabsTrigger value="upcoming-appointments">
@@ -515,595 +302,43 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 									Historique
 								</TabsTrigger>
 								<TabsTrigger value="invoices">
-									<Receipt className="h-4 w-4 mr-2" />
+									<Activity className="h-4 w-4 mr-2" />
 									Notes d'honoraires
 								</TabsTrigger>
 							</TabsList>
 
-							<TabsContent
-								value="medical-info"
-								className="space-y-6 mt-6"
-							>
-								<MedicalInfoCard
-									title="Médecins et spécialistes"
-									items={[
-										{
-											label: "Médecin traitant",
-											value: patient.generalPractitioner,
-										},
-										{
-											label: "Ophtalmologiste",
-											value: patient.ophtalmologistName,
-										},
-										{
-											label: "ORL",
-											value: patient.entDoctorName,
-										},
-										{
-											label: "Gastro-entérologue",
-											value: patient.digestiveDoctorName,
-										},
-									]}
+							<TabsContent value="medical-info">
+								<MedicalInfoTab 
+									patient={patient}
+									pastAppointments={pastAppointments}
+									onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
+									onNavigateToHistory={navigateToHistoryTab}
 								/>
+							</TabsContent>
 
-								<MedicalInfoCard
-									title="Antécédents médicaux"
-									items={[
-										{
-											label: "Traitement actuel",
-											value: patient.currentTreatment,
-											showSeparatorAfter: true,
-										},
-										{
-											label: "Antécédents chirurgicaux",
-											value: patient.surgicalHistory,
-										},
-										{
-											label: "Antécédents traumatiques",
-											value: patient.traumaHistory,
-										},
-										{
-											label: "Antécédents rhumatologiques",
-											value: patient.rheumatologicalHistory,
-											showSeparatorAfter: true,
-										},
-										{
-											label: "Problèmes digestifs",
-											value: patient.digestiveProblems,
-										},
-										{
-											label: "Problèmes ORL",
-											value: patient.entProblems,
-										},
-										{
-											label: "Correction visuelle",
-											value: patient.hasVisionCorrection
-												? "Oui"
-												: "Non",
-										},
-									]}
+							<TabsContent value="upcoming-appointments">
+								<UpcomingAppointmentsTab
+									patient={patient}
+									appointments={upcomingAppointments}
+									onCancelAppointment={handleCancelAppointment}
+									onStatusChange={handleUpdateAppointmentStatus}
 								/>
-
-								{/* Aperçu des dernières séances */}
-								<Card className="mt-6">
-									<CardContent className="p-6">
-										<div className="flex justify-between items-center mb-4">
-											<h3 className="font-semibold text-lg flex items-center gap-2">
-												<MessageSquare className="h-5 w-5 text-purple-500" />
-												Dernières séances et comptes
-												rendus
-											</h3>
-											<Button
-												variant="ghost"
-												size="sm"
-												onClick={navigateToHistoryTab}
-											>
-												Voir tout l'historique
-											</Button>
-										</div>
-
-										{pastAppointments.length === 0 ? (
-											<p className="text-center text-muted-foreground py-4">
-												Aucune séance passée
-											</p>
-										) : (
-											<div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-												{pastAppointments
-													.slice(0, 3)
-													.map((appointment) => (
-														<div
-															key={appointment.id}
-															className="border-b pb-3 last:border-0"
-														>
-															<div className="flex justify-between items-center">
-																<div className="font-medium">
-																	{format(
-																		new Date(
-																			appointment.date
-																		),
-																		"dd/MM/yyyy"
-																	)}{" "}
-																	-{" "}
-																	{formatAppointmentTime(
-																		appointment.date
-																	)}
-																</div>
-																<DropdownMenu>
-																	<DropdownMenuTrigger asChild>
-																		<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
-																			<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
-																				<span className="flex items-center">
-																					{getStatusIcon(appointment.status as AppointmentStatus)}
-																					{getStatusLabel(appointment.status as AppointmentStatus)}
-																				</span>
-																			</Badge>
-																		</Button>
-																	</DropdownMenuTrigger>
-																	<DropdownMenuContent align="end">
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
-																			<Clock className="mr-2 h-4 w-4" />
-																			Planifiée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
-																			<Check className="mr-2 h-4 w-4" />
-																			Terminée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
-																			<X className="mr-2 h-4 w-4" />
-																			Annulée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
-																			<Calendar className="mr-2 h-4 w-4" />
-																			Reportée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
-																			<AlertCircle className="mr-2 h-4 w-4" />
-																			Absence
-																		</DropdownMenuItem>
-																	</DropdownMenuContent>
-																</DropdownMenu>
-															</div>
-															<div className="text-sm text-muted-foreground mt-1">
-																Motif :{" "}
-																{
-																	appointment.reason
-																}
-															</div>
-															{appointment.notes && (
-																<div className="mt-2 pl-3 border-l-2 border-purple-200">
-																	<p className="text-sm text-muted-foreground italic whitespace-pre-line">
-																		{
-																			appointment.notes
-																		}
-																	</p>
-																</div>
-															)}
-														</div>
-													))}
-											</div>
-										)}
-									</CardContent>
-								</Card>
 							</TabsContent>
 
-							<TabsContent
-								value="upcoming-appointments"
-								className="space-y-4 mt-6"
-							>
-								{upcomingAppointments.length === 0 ? (
-									<div className="text-center py-8">
-										<Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-										<h3 className="text-xl font-medium">
-											Aucune séance à venir
-										</h3>
-										<p className="text-muted-foreground m-2">
-											Ce patient n'a pas de séance
-											planifiée.
-										</p>
-										<Button asChild variant="outline">
-											<Link
-												to={`/appointments/new?patientId=${patient.id}`}
-											>
-												<Plus className="mr-2 h-4 w-4" />
-												Planifier une séance
-											</Link>
-										</Button>
-									</div>
-								) : (
-									<div className="grid gap-4">
-										{upcomingAppointments.map(
-											(appointment) => (
-												<div key={appointment.id} className="border rounded-lg p-4">
-													<div className="flex justify-between items-center mb-2">
-														<div>
-															<h3 className="font-medium">
-																{format(new Date(appointment.date), "EEEE dd MMMM yyyy", { locale: require("date-fns/locale/fr") })}
-															</h3>
-															<p className="text-sm text-muted-foreground">
-																{formatAppointmentTime(appointment.date)}
-															</p>
-														</div>
-														<DropdownMenu>
-															<DropdownMenuTrigger asChild>
-																<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
-																	<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
-																		<span className="flex items-center">
-																			{getStatusIcon(appointment.status as AppointmentStatus)}
-																			{getStatusLabel(appointment.status as AppointmentStatus)}
-																		</span>
-																	</Badge>
-																</Button>
-															</DropdownMenuTrigger>
-															<DropdownMenuContent align="end">
-																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
-																	<Clock className="mr-2 h-4 w-4" />
-																	Planifiée
-																</DropdownMenuItem>
-																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
-																	<Check className="mr-2 h-4 w-4" />
-																	Terminée
-																</DropdownMenuItem>
-																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
-																	<X className="mr-2 h-4 w-4" />
-																	Annulée
-																</DropdownMenuItem>
-																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
-																	<Calendar className="mr-2 h-4 w-4" />
-																	Reportée
-																</DropdownMenuItem>
-																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
-																	<AlertCircle className="mr-2 h-4 w-4" />
-																	Absence
-																</DropdownMenuItem>
-															</DropdownMenuContent>
-														</DropdownMenu>
-													</div>
-													<div className="mt-1 text-sm">
-														<span className="font-medium">Motif:</span> {appointment.reason}
-													</div>
-													{appointment.notes && (
-														<div className="mt-2 pl-3 border-l-2 border-purple-200">
-															<p className="text-sm text-muted-foreground italic whitespace-pre-line">
-																{appointment.notes}
-															</p>
-														</div>
-													)}
-													<div className="mt-4 flex justify-end gap-2">
-														<Button 
-															variant="outline" 
-															size="sm" 
-															asChild
-														>
-															<Link to={`/appointments/${appointment.id}/edit`}>
-																<Edit className="mr-1 h-4 w-4" />
-																Modifier
-															</Link>
-														</Button>
-														<Button 
-															variant="destructive" 
-															size="sm" 
-															onClick={() => handleCancelAppointment(appointment.id)}
-														>
-															<X className="mr-1 h-4 w-4" />
-															Annuler
-														</Button>
-													</div>
-												</div>
-											)
-										)}
-									</div>
-								)}
+							<TabsContent value="history">
+								<AppointmentHistoryTab
+									appointments={pastAppointments}
+									onStatusChange={handleUpdateAppointmentStatus}
+									viewMode={viewMode}
+									setViewMode={setViewMode}
+								/>
 							</TabsContent>
 
-							<TabsContent
-								value="history"
-								className="space-y-4 mt-6"
-							>
-								<div className="flex justify-between items-center mb-4">
-									<h3 className="text-lg font-semibold">
-										Historique des séances
-									</h3>
-									<div className="flex space-x-2">
-										<Button
-											variant={
-												viewMode === "cards"
-													? "default"
-													: "outline"
-											}
-											size="sm"
-											onClick={() => setViewMode("cards")}
-										>
-											Vue cards
-										</Button>
-										<Button
-											variant={
-												viewMode === "table"
-													? "default"
-													: "outline"
-											}
-											size="sm"
-											onClick={() => setViewMode("table")}
-										>
-											Vue tableau
-										</Button>
-									</div>
-								</div>
-
-								{pastAppointments.length === 0 ? (
-									<div className="text-center py-8">
-										<Activity className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-										<h3 className="text-xl font-medium">
-											Aucun historique
-										</h3>
-										<p className="text-muted-foreground mt-2">
-											Ce patient n'a pas d'historique de
-											séance.
-										</p>
-									</div>
-								) : viewMode === "cards" ? (
-									<div className="grid gap-4">
-										{pastAppointments.map((appointment) => (
-											<div key={appointment.id} className="border rounded-lg p-4">
-												<div className="flex justify-between items-center mb-2">
-													<div>
-														<h3 className="font-medium">
-															{format(new Date(appointment.date), "dd/MM/yyyy")}
-														</h3>
-														<p className="text-sm text-muted-foreground">
-															{formatAppointmentTime(appointment.date)}
-														</p>
-													</div>
-													<DropdownMenu>
-														<DropdownMenuTrigger asChild>
-															<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
-																<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
-																	<span className="flex items-center">
-																		{getStatusIcon(appointment.status as AppointmentStatus)}
-																		{getStatusLabel(appointment.status as AppointmentStatus)}
-																	</span>
-																</Badge>
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent align="end">
-															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
-																<Clock className="mr-2 h-4 w-4" />
-																Planifiée
-															</DropdownMenuItem>
-															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
-																<Check className="mr-2 h-4 w-4" />
-																Terminée
-															</DropdownMenuItem>
-															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
-																<X className="mr-2 h-4 w-4" />
-																Annulée
-															</DropdownMenuItem>
-															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
-																<Calendar className="mr-2 h-4 w-4" />
-																Reportée
-															</DropdownMenuItem>
-															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
-																<AlertCircle className="mr-2 h-4 w-4" />
-																Absence
-															</DropdownMenuItem>
-														</DropdownMenuContent>
-													</DropdownMenu>
-												</div>
-												<div className="mt-1 text-sm">
-													<span className="font-medium">Motif:</span> {appointment.reason}
-												</div>
-												{appointment.notes && (
-													<div className="mt-2 pl-3 border-l-2 border-purple-200">
-														<p className="text-sm text-muted-foreground italic whitespace-pre-line">
-															{appointment.notes}
-														</p>
-													</div>
-												)}
-												<div className="mt-4 flex justify-end gap-2">
-													<Button 
-														variant="outline" 
-														size="sm" 
-														asChild
-													>
-														<Link to={`/appointments/${appointment.id}/edit`}>
-															<Edit className="mr-1 h-4 w-4" />
-															Détails
-														</Link>
-													</Button>
-												</div>
-											</div>
-										))}
-									</div>
-								) : (
-									<div className="rounded-md border">
-										<Table>
-											<TableHeader>
-												<TableRow>
-													<TableHead>Date</TableHead>
-													<TableHead>Heure</TableHead>
-													<TableHead>Motif</TableHead>
-													<TableHead>
-														Statut
-													</TableHead>
-													<TableHead>Notes</TableHead>
-													<TableHead className="text-right">
-														Actions
-													</TableHead>
-												</TableRow>
-											</TableHeader>
-											<TableBody>
-												{pastAppointments.map(
-													(appointment) => (
-														<TableRow
-															key={appointment.id}
-														>
-															<TableCell className="font-medium">
-																{format(
-																	new Date(
-																		appointment.date
-																	),
-																	"dd/MM/yyyy"
-																)}
-															</TableCell>
-															<TableCell>
-																{formatAppointmentTime(
-																	appointment.date
-																)}
-															</TableCell>
-															<TableCell>
-																{
-																	appointment.reason
-																}
-															</TableCell>
-															<TableCell>
-																<DropdownMenu>
-																	<DropdownMenuTrigger asChild>
-																		<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
-																			<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
-																				<span className="flex items-center">
-																					{getStatusIcon(appointment.status as AppointmentStatus)}
-																					{getStatusLabel(appointment.status as AppointmentStatus)}
-																				</span>
-																			</Badge>
-																		</Button>
-																	</DropdownMenuTrigger>
-																	<DropdownMenuContent align="end">
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
-																			<Clock className="mr-2 h-4 w-4" />
-																			Planifiée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
-																			<Check className="mr-2 h-4 w-4" />
-																			Terminée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
-																			<X className="mr-2 h-4 w-4" />
-																			Annulée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
-																			<Calendar className="mr-2 h-4 w-4" />
-																			Reportée
-																		</DropdownMenuItem>
-																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
-																			<AlertCircle className="mr-2 h-4 w-4" />
-																			Absence
-																		</DropdownMenuItem>
-																	</DropdownMenuContent>
-																</DropdownMenu>
-															</TableCell>
-															<TableCell>
-																{appointment.notes ? (
-																	<TooltipProvider>
-																		<Tooltip>
-																			<TooltipTrigger asChild>
-																				<Button
-																					variant="ghost"
-																					size="sm"
-																					className="h-8 flex items-center gap-1"
-																					onClick={() => {
-																						toast.info(
-																							<div>
-																								<h3 className="font-medium mb-1">
-																									Notes
-																									de
-																									séance
-																								</h3>
-																								<p className="whitespace-pre-line text-sm">
-																									{
-																										appointment.notes
-																									}
-																								</p>
-																							</div>,
-																							{
-																								duration: 10000,
-																							}
-																						);
-																					}}
-																				>
-																					<MessageSquare className="h-3 w-3" />
-																					Voir
-																				</Button>
-																			</TooltipTrigger>
-																			<TooltipContent>
-																				<p className="max-w-xs">
-																					{appointment.notes.slice(0, 60)}
-																					{appointment.notes.length > 60 ? '...' : ''}
-																				</p>
-																			</TooltipContent>
-																		</Tooltip>
-																	</TooltipProvider>
-																) : (
-																	<span className="text-muted-foreground text-sm">
-																		Aucune
-																	</span>
-																)}
-															</TableCell>
-															<TableCell className="text-right">
-																<Button
-																	variant="outline"
-																	size="sm"
-																	asChild
-																	className="h-8"
-																>
-																	<Link
-																		to={`/appointments/${appointment.id}/edit`}
-																	>
-																		Détails
-																	</Link>
-																</Button>
-															</TableCell>
-														</TableRow>
-													)
-												)}
-											</TableBody>
-										</Table>
-									</div>
-								)}
-							</TabsContent>
-
-							<TabsContent
-								value="invoices"
-								className="space-y-4 mt-6"
-							>
-								<div className="flex justify-between items-center mb-4">
-									<h3 className="text-lg font-semibold">
-										Notes d'honoraires du patient
-									</h3>
-									<Button asChild>
-										<Link
-											to={`/invoices/new?patientId=${patient.id}`}
-										>
-											<Plus className="mr-2 h-4 w-4" />
-											Nouvelle Note d'honoraire
-										</Link>
-									</Button>
-								</div>
-
-								{sortedInvoices.length === 0 ? (
-									<div className="text-center py-8">
-										<Receipt className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-										<h3 className="text-xl font-medium">
-											Aucune Note d'honoraire
-										</h3>
-										<p className="text-muted-foreground mt-2">
-											Ce patient n'a pas encore de notes
-											d'honoraires.
-										</p>
-									</div>
-								) : (
-									<div className="grid gap-4">
-										{sortedInvoices.map((invoice) => (
-											<InvoiceDetails
-												key={invoice.id}
-												invoice={invoice}
-												patientName={`${patient.firstName} ${patient.lastName}`}
-												onEdit={() => {
-													// Navigate to invoice edit page
-													window.location.href = `/invoices/${invoice.id}/edit`;
-												}}
-											/>
-										))}
-									</div>
-								)}
+							<TabsContent value="invoices">
+								<InvoicesTab 
+									patient={patient} 
+									invoices={invoices} 
+								/>
 							</TabsContent>
 						</Tabs>
 					</div>
