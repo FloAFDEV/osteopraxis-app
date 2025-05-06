@@ -97,26 +97,10 @@ const EditCabinetPage = () => {
 				<h1 className="text-2xl font-bold mb-4">Edit Cabinet</h1>
 				{cabinetData && (
 					<CabinetForm
-						defaultValues={{
-							name: cabinetData.name,
-							address: cabinetData.address,
-							phone: cabinetData.phone,
-							email: cabinetData.email || "",
-							imageUrl: cabinetData.imageUrl || "",
-							logoUrl: cabinetData.logoUrl || "",
-							osteopathId: cabinetData.osteopathId || osteopathId,
-							siret: osteopath?.siret,
-							adeliNumber: osteopath?.adeli_number,
-							apeCode: osteopath?.ape_code,
-							city: cabinetData.city || '',
-							province: cabinetData.province || '',
-							postalCode: cabinetData.postalCode || '',
-							country: cabinetData.country || '',
-						}}
-						cabinetId={cabinetData.id}
-						isEditing={true}
 						osteopathId={osteopathId}
 						onSave={handleSaveCabinet}
+						cabinetId={cabinetData.id}
+						isEditing={true}
 					/>
 				)}
 			</div>

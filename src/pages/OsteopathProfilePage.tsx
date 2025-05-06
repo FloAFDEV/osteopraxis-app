@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -194,7 +193,7 @@ export default function OsteopathProfilePage() {
                 defaultValues={defaultProfile}
 				osteopathId={parseInt(osteopathId)}
 				isEditing={true}
-				onSuccess={updatedOsteopath => Promise.resolve()}
+				onSuccess={() => Promise.resolve()}
               />
             </section>
 
@@ -202,8 +201,7 @@ export default function OsteopathProfilePage() {
               <h3 className="text-xl font-semibold">Informations du cabinet</h3>
               <CabinetForm
                 osteopathId={parseInt(osteopathId)}
-                onSuccess={() => {}}
-				onSave={handleSaveCabinet}
+                onSave={handleSaveCabinet}
               />
             </section>
           </CardContent>

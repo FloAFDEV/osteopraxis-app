@@ -161,7 +161,7 @@ export interface OsteopathProfile {
   publications?: string[];
 }
 
-// Ajout de l'interface DashboardData pour résoudre les erreurs d'importation
+// Updated DashboardData interface to include all required properties
 export interface DashboardData {
   totalPatients: number;
   newPatientsThisMonth: number;
@@ -193,7 +193,7 @@ export interface DashboardData {
     appointments: Array<{ month: string; count: number }>;
   };
   
-  // Propriétés additionnelles pour résoudre les erreurs
+  // Additional properties used in the dashboard components
   maleCount: number;
   femaleCount: number;
   averageAge: number;

@@ -1,6 +1,8 @@
 
 import { Appointment } from '@/types';
 
+export type SessionStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'CANCELLED' | 'RESCHEDULED' | 'NO_SHOW';
+
 export interface Session extends Appointment {
   plannedTime?: string;
   actualStartTime?: string;

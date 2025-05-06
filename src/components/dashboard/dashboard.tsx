@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -22,11 +23,38 @@ export function Dashboard() {
     newPatientsThisYear: 0,
     newPatientsLastYear: 0,
     appointmentsToday: 0,
+    totalAppointments: 0,
+    completedAppointments: 0,
+    canceledAppointments: 0,
     nextAppointment: "Aucune séance prévue",
     patientsLastYearEnd: 0,
     newPatientsLast30Days: 0,
     thirtyDayGrowthPercentage: 0,
     annualGrowthPercentage: 0,
+    revenue: {
+      today: 0,
+      thisWeek: 0,
+      thisMonth: 0,
+      thisYear: 0
+    },
+    patientDemographics: {
+      age: {
+        under18: 0,
+        adults18to30: 0,
+        adults31to45: 0,
+        adults46to60: 0,
+        adults61plus: 0
+      },
+      gender: {
+        male: 0,
+        female: 0,
+        other: 0
+      }
+    },
+    growthData: {
+      patients: [],
+      appointments: []
+    },
     monthlyGrowth: Array(12).fill(0).map((_, index) => {
       const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
       return {
