@@ -34,7 +34,7 @@ export function DatePicker({
   // Function to format the display date
   const formatDisplayDate = () => {
     if (!date) return <span>Sélectionner une date</span>;
-    return format(date, "PPP", { locale: fr });
+    return format(date, "dd/MM/yyyy", { locale: fr });
   };
 
   return (
