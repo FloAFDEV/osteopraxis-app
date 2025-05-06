@@ -1,25 +1,22 @@
 
-import { AppointmentStatus } from "./index";
+import { Appointment } from '@/types';
 
-export type SessionStatus = AppointmentStatus;
-
-export interface SessionFormData {
-  id?: number;
-  patientId: number;
-  date: Date;
+export interface Session extends Appointment {
   plannedTime?: string;
   actualStartTime?: string;
   actualEndTime?: string;
-  reason: string;
-  notes: string;
-  status: SessionStatus;
+  lastEditedAt?: string;
   autoSaved?: boolean;
-  lastEditedAt?: Date;
-  notificationSent?: boolean;
 }
 
-export interface SessionTimeline {
-  status: SessionStatus;
-  timestamp: Date;
-  userId?: string;
+// Étendre l'interface Appointment pour inclure les propriétés liées aux sessions
+declare module '@/types' {
+  interface Appointment {
+    plannedTime?: string;
+    actualStartTime?: string;
+    actualEndTime?: string;
+    lastEditedAt?: string;
+    autoSaved?: boolean;
+    invoiceId?: number;
+  }
 }

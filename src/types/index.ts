@@ -1,4 +1,3 @@
-
 export interface Patient {
   id: number;
   firstName: string;
@@ -99,11 +98,12 @@ export interface Invoice {
   paymentDate?: string;
   paymentMethod?: string;
   notes?: string;
-  Patient?: any;  // Pour la référence à Invoice.Patient dans invoice-print-view.tsx
+  Patient?: any;
   paymentStatus: PaymentStatus;
   tvaExoneration?: boolean;
   tvaMotif?: string;
   appointmentId?: number;
+  invoiceId?: number;
 }
 
 export interface User {
@@ -192,6 +192,27 @@ export interface DashboardData {
     patients: Array<{ month: string; count: number }>;
     appointments: Array<{ month: string; count: number }>;
   };
+  
+  // Propriétés additionnelles pour résoudre les erreurs
+  maleCount: number;
+  femaleCount: number;
+  averageAge: number;
+  averageAgeMale: number;
+  averageAgeFemale: number;
+  newPatientsThisYear: number;
+  newPatientsLastYear: number;
+  appointmentsToday: number;
+  nextAppointment: string;
+  patientsLastYearEnd: number;
+  newPatientsLast30Days: number;
+  thirtyDayGrowthPercentage: number;
+  annualGrowthPercentage: number;
+  monthlyGrowth: Array<{
+    month: string;
+    patients: number;
+    prevPatients: number;
+    growthText: string;
+  }>;
 }
 
 // Types pour le module de gestion des séances
@@ -203,4 +224,11 @@ export interface Session extends Appointment {
   actualEndTime?: string;
   lastEditedAt?: string;
   autoSaved?: boolean;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  loading: boolean;
+  error: string | null;
 }

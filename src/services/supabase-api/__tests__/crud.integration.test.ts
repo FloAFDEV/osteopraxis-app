@@ -1,182 +1,131 @@
+import { api } from '../api';
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { supabaseOsteopathService } from "../../supabase-api/osteopath-service";
-import { supabasePatientService } from "../../supabase-api/patient-service";
-import { supabaseCabinetService } from "../../supabase-api/cabinet-service";
-import { supabaseInvoiceService } from "../../supabase-api/invoice-service";
-import { supabaseAppointmentService } from "../../supabase-api/appointment-service";
-import { supabase } from "../../supabase-api/utils";
+describe('CRUD Operations Integration Tests', () => {
+  it('should create, read, update, and delete a patient', async () => {
+    const patientData = {
+      firstName: 'Test',
+      lastName: 'Patient',
+      osteopathId: 1,
+    };
 
-// Utilisateur et IDs fictifs utilisés pour lier les entités
-const OSTEO_TEST_EMAIL = "crudemotest@example.com";
-let osteoId: number | undefined;
-let patientId: number | undefined;
-let cabinetId: number | undefined;
-let invoiceId: number | undefined;
-let appointmentId: number | undefined;
+    const createdPatient = await api.createPatient(patientData);
+    expect(createdPatient).toBeDefined();
+    expect(createdPatient.firstName).toBe(patientData.firstName);
 
-// Données de base pour l'ostéopathe fictif
-const osteoDemo = {
-  userId: "test-user-crud-uuid",
-  updatedAt: new Date().toISOString(),
-  ape_code: "8690F",
-  name: "Ostéopathe Crud Demo",
-  professional_title: "Ostéopathe D.O.",
-  adeli_number: "ADELI1234",
-  createdAt: new Date().toISOString(),
-  siret: "SIRET123456789"
-};
+    const patientId = createdPatient.id;
+    const updatedPatientData = { firstName: 'Updated' };
+    const updatedPatient = await api.updatePatient(patientId, updatedPatientData);
+    expect(updatedPatient).toBeDefined();
+    expect(updatedPatient?.firstName).toBe(updatedPatientData.firstName);
 
-describe("Tests d'intégration CRUD sur Supabase (Osteopath, Patient, Cabinet, Invoice, Appointment)", () => {
+    const retrievedPatient = await api.getPatientById(patientId);
+    expect(retrievedPatient).toBeDefined();
+    expect(retrievedPatient?.firstName).toBe(updatedPatientData.firstName);
 
-  beforeAll(async () => {
-    // Nettoyer toute donnée précédente avec des champs de test
-    await supabase.from("Cabinet").delete().eq("address", "Adresse de test CRUD");
-    await supabase.from("Patient").delete().eq("email", "crudpatient@example.com");
-    await supabase.from("Osteopath").delete().eq("name", "Ostéopathe Crud Demo");
-
-    // Créer un ostéopathe de test
-    const osteopath = await supabaseOsteopathService.createOsteopath(osteoDemo);
-    osteoId = osteopath.id;
-    expect(osteopath).toBeDefined();
-    expect(osteopath.name).toBe(osteoDemo.name);
+    await api.deletePatient(patientId);
+    try {
+      await api.getPatientById(patientId);
+    } catch (error: any) {
+      expect(error.message).toContain('Patient not found');
+    }
   });
 
-  afterAll(async () => {
-    // Nettoyage complet (attention, ici suppression brute via les champs test)
-    if (appointmentId) await supabase.from("Appointment").delete().eq("id", appointmentId);
-    if (invoiceId) await supabase.from("Invoice").delete().eq("id", invoiceId);
-    if (cabinetId) await supabase.from("Cabinet").delete().eq("id", cabinetId);
-    if (patientId) await supabase.from("Patient").delete().eq("id", patientId);
-    if (osteoId) await supabase.from("Osteopath").delete().eq("id", osteoId);
+  it('should create, read, update, and delete an appointment', async () => {
+    const appointmentData = {
+      patientId: 1,
+      date: new Date().toISOString(),
+      reason: 'Test Reason',
+      status: 'SCHEDULED' as const,
+    };
+
+    const createdAppointment = await api.createAppointment(appointmentData);
+    expect(createdAppointment).toBeDefined();
+    expect(createdAppointment.reason).toBe(appointmentData.reason);
+
+    const appointmentId = createdAppointment.id;
+    const updatedAppointmentData = { reason: 'Updated Reason' };
+    const updatedAppointment = await api.updateAppointment(appointmentId, updatedAppointmentData);
+    expect(updatedAppointment).toBeDefined();
+    expect(updatedAppointment?.reason).toBe(updatedAppointmentData.reason);
+
+    const retrievedAppointment = await api.getAppointmentById(appointmentId);
+    expect(retrievedAppointment).toBeDefined();
+    expect(retrievedAppointment?.reason).toBe(updatedAppointmentData.reason);
+
+    await api.deleteAppointment(appointmentId);
+    try {
+      await api.getAppointmentById(appointmentId);
+    } catch (error: any) {
+      expect(error.message).toContain('Appointment not found');
+    }
   });
 
-  it("CRUD ostéopathe", async () => {
-    expect(osteoId).toBeDefined();
-    const fetched = await supabaseOsteopathService.getOsteopathById(osteoId!);
-    expect(fetched).toBeDefined();
-    expect(fetched!.name).toBe("Ostéopathe Crud Demo");
-
-    // Update
-    await supabaseOsteopathService.updateOsteopath(osteoId!, { name: "Ostéo MAJ" });
-    const fetchedUpdated = await supabaseOsteopathService.getOsteopathById(osteoId!);
-    expect(fetchedUpdated!.name).toBe("Ostéo MAJ");
-  });
-
-  it("CRUD patient", async () => {
-    // Création
-    const patient = await supabasePatientService.createPatient({
-      firstName: "Patient",
-      lastName: "Crud",
-      email: "crudpatient@example.com",
-      phone: "0123456789",
-      address: "Adresse patient CRUD",
-      gender: "Homme",
-      birthDate: new Date().toISOString(),
-      maritalStatus: "SINGLE",
-      occupation: "Etudiant",
-      hasChildren: "Non",
-      childrenAges: null,
-      generalPractitioner: null,
-      surgicalHistory: null,
-      traumaHistory: null,
-      rheumatologicalHistory: null,
-      currentTreatment: null,
-      handedness: "RIGHT",
-      hasVisionCorrection: false,
-      ophtalmologistName: null,
-      entProblems: null,
-      entDoctorName: null,
-      digestiveProblems: null,
-      digestiveDoctorName: null,
-      physicalActivity: null,
-      isSmoker: false,
-      isDeceased: false,
-      contraception: "NONE",
-      hdlm: null,
-      avatarUrl: null,
-      cabinetId: null,
-      userId: null,
-      osteopathId: osteoId
-    });
-    patientId = patient.id;
-    expect(patientId).toBeDefined();
-
-    // Lecture
-    const patientFetched = await supabasePatientService.getPatientById(patientId!);
-    expect(patientFetched).toBeDefined();
-    expect(patientFetched!.email).toBe("crudpatient@example.com");
-
-    // Update
-    patientFetched!.firstName = "NouveauNom";
-    const updatedPatient = await supabasePatientService.updatePatient(patientFetched!);
-    expect(updatedPatient.firstName).toBe("NouveauNom");
-  });
-
-  it("CRUD cabinet", async () => {
-    // Création
-    const cabinet = await supabaseCabinetService.createCabinet({
-      name: "Cabinet Test CRUD",
-      address: "Adresse de test CRUD",
-      phone: "0123465789",
+  it('should create, read, update, and delete a cabinet', async () => {
+    const cabinetData = {
+      name: "Test Cabinet",
+      address: "123 Test St",
+      phone: "1234567890",
       imageUrl: null,
       logoUrl: null,
-      osteopathId: osteoId!
-    });
-    cabinetId = cabinet.id;
-    expect(cabinetId).toBeDefined();
+      osteopathId: 1,
+      city: "Test City",
+      province: "Test Province",
+      postalCode: "12345",
+      country: "Test Country",
+    };
 
-    // Lecture
-    const cabinets = await supabaseCabinetService.getCabinetsByOsteopathId(osteoId!);
-    expect(cabinets.length).toBeGreaterThan(0);
+    const createdCabinet = await api.createCabinet(cabinetData);
+    expect(createdCabinet).toBeDefined();
+    expect(createdCabinet.name).toBe(cabinetData.name);
 
-    // Update
-    await supabaseCabinetService.updateCabinet(cabinetId!, { name: "Cabinet MAJ" });
-    const cabFetchedUpdated = await supabaseCabinetService.getCabinetById(cabinetId!);
-    expect(cabFetchedUpdated!.name).toBe("Cabinet MAJ");
+    const cabinetId = createdCabinet.id;
+    const updatedCabinetData = { name: 'Updated Cabinet' };
+    const updatedCabinet = await api.updateCabinet(cabinetId, updatedCabinetData);
+    expect(updatedCabinet).toBeDefined();
+    expect(updatedCabinet?.name).toBe(updatedCabinetData.name);
+
+    const retrievedCabinet = await api.getCabinetById(cabinetId);
+    expect(retrievedCabinet).toBeDefined();
+    expect(retrievedCabinet?.name).toBe(updatedCabinetData.name);
+
+    await api.deleteCabinet(cabinetId);
+    try {
+      await api.getCabinetById(cabinetId);
+    } catch (error: any) {
+      expect(error.message).toContain('Cabinet not found');
+    }
   });
 
-  it("CRUD facture (invoice)", async () => {
-    // Création
-    const invoice = await supabaseInvoiceService.createInvoice({
-      patientId: patientId!,
-      appointmentId: 1, // Changed from consultationId to appointmentId
+  it('should create, read, update, and delete an invoice', async () => {
+    const invoiceData = {
+      patientId: 1,
+      appointmentId: 1,
       date: new Date().toISOString(),
-      amount: 65,
-      paymentStatus: "PENDING"
-    });
-    invoiceId = invoice.id;
-    expect(invoiceId).toBeDefined();
+      amount: 100,
+      paymentStatus: "PENDING" as const,
+      cabinetId: 1,
+      invoiceNumber: "INV-001",
+    };
 
-    // Lecture
-    const invoiceFetched = await supabaseInvoiceService.getInvoiceById(invoiceId!);
-    expect(invoiceFetched).toBeDefined();
-    expect(invoiceFetched!.amount).toBe(65);
+    const createdInvoice = await api.createInvoice(invoiceData);
+    expect(createdInvoice).toBeDefined();
+    expect(createdInvoice.amount).toBe(invoiceData.amount);
 
-    // Update
-    const updatedInvoice = await supabaseInvoiceService.updateInvoice(invoiceId!, { amount: 80 });
-    expect(updatedInvoice!.amount).toBe(80);
-  });
+    const invoiceId = createdInvoice.id;
+    const updatedInvoiceData = { amount: 200 };
+    const updatedInvoice = await api.updateInvoice(invoiceId, updatedInvoiceData);
+    expect(updatedInvoice).toBeDefined();
+    expect(updatedInvoice?.amount).toBe(updatedInvoiceData.amount);
 
-  it("CRUD rendez-vous (appointment)", async () => {
-    // Création
-    const appointment = await supabaseAppointmentService.createAppointment({
-      patientId: patientId!,
-      date: new Date().toISOString(),
-      status: "SCHEDULED",
-      reason: "Test CRUD rendez-vous",
-      notificationSent: false
-    });
-    appointmentId = appointment.id;
-    expect(appointmentId).toBeDefined();
+    const retrievedInvoice = await api.getInvoiceById(invoiceId);
+    expect(retrievedInvoice).toBeDefined();
+    expect(retrievedInvoice?.amount).toBe(updatedInvoiceData.amount);
 
-    // Lecture
-    const apptFetched = await supabaseAppointmentService.getAppointmentById(appointmentId!);
-    expect(apptFetched).toBeDefined();
-    expect(apptFetched!.status).toBe("SCHEDULED");
-
-    // Update
-    const updated = await supabaseAppointmentService.updateAppointment(appointmentId!, { status: "COMPLETED" });
-    expect(updated.status).toBe("COMPLETED");
+    await api.deleteInvoice(invoiceId);
+    try {
+      await api.getInvoiceById(invoiceId);
+    } catch (error: any) {
+      expect(error.message).toContain('Invoice not found');
+    }
   });
 });

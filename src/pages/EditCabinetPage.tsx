@@ -1,122 +1,127 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
-import { api } from "@/services/api";
-import { Cabinet } from "@/types";
+import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
+import { api } from "@/services/api";
+import { Cabinet, Osteopath } from "@/types";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 
 const EditCabinetPage = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [osteopathData, setOsteopathData] = useState<any>(null);
+	const { id } = useParams<{ id: string }>();
+	const navigate = useNavigate();
+	const [cabinetData, setCabinetData] = useState<Cabinet | null>(null);
+	const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
+	const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!id) return;
-      try {
-        const cabinetData = await api.getCabinetById(parseInt(id));
-        if (!cabinetData) {
-          throw new Error("Cabinet non trouvé");
-        }
-        setCabinet(cabinetData);
+	useEffect(() => {
+		const fetchCabinetData = async () => {
+			setLoading(true);
+			try {
+				if (!id) {
+					toast.error("Cabinet ID is missing.");
+					return;
+				}
 
-        // Récupérer les données de l'ostéopathe pour les infos de facturation
-        if (cabinetData.osteopathId) {
-          const osteopathInfo = await api.getOsteopathById(cabinetData.osteopathId);
-          if (osteopathInfo) {
-            setOsteopathData(osteopathInfo);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching cabinet:", error);
-        toast.error("Impossible de charger les données du cabinet. Veuillez réessayer.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
+				const cabinetId = parseInt(id, 10);
+				const cabinet = await api.getCabinetById(cabinetId);
 
-  if (loading) {
-    return <Layout>
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement des données...</p>
-          </div>
-        </div>
-      </Layout>;
-  }
+				if (!cabinet) {
+					toast.error("Cabinet not found.");
+					navigate("/cabinets");
+					return;
+				}
 
-  if (!cabinet) {
-    return <Layout>
-        <div className="text-center py-12">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-          <h3 className="text-xl font-medium">Cabinet non trouvé</h3>
-          <p className="text-muted-foreground mt-2 mb-6">
-            Le cabinet que vous recherchez n&apos;existe pas ou a été supprimé.
-          </p>
-          <Button asChild>
-            <Link to="/cabinets">
-              Retour aux cabinets
-            </Link>
-          </Button>
-        </div>
-      </Layout>;
-  }
+				setCabinetData(cabinet);
 
-  return (
-    <Layout>
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mb-2" 
-            onClick={() => navigate("/cabinets")}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour aux cabinets
-          </Button>
-          
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Building2 className="h-8 w-8 text-green-500" />
-            Modifier le Cabinet
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Modifiez les détails du cabinet en utilisant le formulaire ci-dessous.
-          </p>
-        </div>
+				// Fetch osteopath data
+				const osteopathData = await api.getOsteopathById(
+					cabinet.osteopathId
+				);
+				setOsteopath(osteopathData);
+			} catch (error) {
+				console.error("Error fetching cabinet data:", error);
+				toast.error(
+					"Failed to load cabinet data. Please try again later."
+				);
+			} finally {
+				setLoading(false);
+			}
+		};
 
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          {cabinet && (
-            <CabinetForm 
-              defaultValues={{
-                name: cabinet.name,
-                address: cabinet.address,
-                phone: cabinet.phone || undefined,
-                email: cabinet.email || undefined,
-                imageUrl: cabinet.imageUrl || undefined,
-                logoUrl: cabinet.logoUrl || undefined,
-                osteopathId: cabinet.osteopathId,
-                siret: osteopathData?.siret || undefined,
-                adeliNumber: osteopathData?.adeli_number || undefined,
-                apeCode: osteopathData?.ape_code || "8690F"
-              }} 
-              cabinetId={cabinet.id} 
-              isEditing={true} 
-              osteopathId={cabinet.osteopathId} 
-            />
-          )}
-        </div>
-      </div>
-    </Layout>
-  );
+		fetchCabinetData();
+	}, [id, navigate]);
+
+	const handleSaveCabinet = async (cabinet: Cabinet) => {
+		try {
+			if (!cabinetData) {
+				toast.error("No cabinet data available to update.");
+				return;
+			}
+
+			// Update the cabinet using the API
+			await api.updateCabinet(cabinetData.id, cabinet);
+
+			toast.success("Cabinet updated successfully!");
+			navigate("/cabinets"); // Redirect to the cabinets list page
+		} catch (error) {
+			console.error("Error updating cabinet:", error);
+			toast.error("Failed to update cabinet. Please try again.");
+		}
+	};
+
+	const osteopathId = osteopath?.id;
+
+	if (loading) {
+		return (
+			<Layout>
+				<div className="flex justify-center items-center h-full">
+					<div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent"></div>
+				</div>
+			</Layout>
+		);
+	}
+
+	if (!cabinetData) {
+		return (
+			<Layout>
+				<div className="flex justify-center items-center h-full">
+					<p>Cabinet not found</p>
+				</div>
+			</Layout>
+		);
+	}
+
+	return (
+		<Layout>
+			<div className="container max-w-4xl mx-auto py-10">
+				<h1 className="text-2xl font-bold mb-4">Edit Cabinet</h1>
+				{cabinetData && (
+					<CabinetForm
+						defaultValues={{
+							name: cabinetData.name,
+							address: cabinetData.address,
+							phone: cabinetData.phone,
+							email: cabinetData.email || "",
+							imageUrl: cabinetData.imageUrl || "",
+							logoUrl: cabinetData.logoUrl || "",
+							osteopathId: cabinetData.osteopathId || osteopathId,
+							siret: osteopath?.siret,
+							adeliNumber: osteopath?.adeli_number,
+							apeCode: osteopath?.ape_code,
+							city: cabinetData.city || '',
+							province: cabinetData.province || '',
+							postalCode: cabinetData.postalCode || '',
+							country: cabinetData.country || '',
+						}}
+						cabinetId={cabinetData.id}
+						isEditing={true}
+						osteopathId={osteopathId}
+						onSave={handleSaveCabinet}
+					/>
+				)}
+			</div>
+		</Layout>
+	);
 };
 
 export default EditCabinetPage;

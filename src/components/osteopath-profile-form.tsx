@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -48,6 +49,10 @@ interface OsteopathProfileFormProps {
 	onSave: (data: ProfileFormValues) => Promise<void>;
 	isLoading?: boolean;
 	connectedUser?: User | null;
+	defaultValues?: any;
+	osteopathId?: number;
+	isEditing?: boolean;
+	onSuccess?: (updatedOsteopath: any) => Promise<void>;
 }
 
 export function OsteopathProfileForm({
@@ -74,6 +79,7 @@ export function OsteopathProfileForm({
 
 	useEffect(() => {
 		if (connectedUser) {
+			// Utilisez firstName et lastName au lieu de first_name et last_name
 			form.setValue("firstName", connectedUser.firstName || "");
 			form.setValue("lastName", connectedUser.lastName || "");
 		}
