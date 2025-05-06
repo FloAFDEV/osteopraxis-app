@@ -4,108 +4,106 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
 import { api } from "@/services/api";
-import { Cabinet, Osteopath } from "@/types";
 import { toast } from "sonner";
+import { Building2, Loader2 } from "lucide-react";
+import { Cabinet } from "@/types";
+import { Card } from "@/components/ui/card";
 
 const EditCabinetPage = () => {
-	const { id } = useParams<{ id: string }>();
-	const navigate = useNavigate();
-	const [cabinetData, setCabinetData] = useState<Cabinet | null>(null);
-	const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
-	const [loading, setLoading] = useState(true);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const isEditing = !!id;
 
-	useEffect(() => {
-		const fetchCabinetData = async () => {
-			setLoading(true);
-			try {
-				if (!id) {
-					toast.error("Cabinet ID is missing.");
-					return;
-				}
+  useEffect(() => {
+    const fetchCabinet = async () => {
+      if (!isEditing) {
+        setLoading(false);
+        return;
+      }
 
-				const cabinetId = parseInt(id, 10);
-				const cabinet = await api.getCabinetById(cabinetId);
+      try {
+        const cabinetData = await api.getCabinetById(parseInt(id!, 10));
+        if (cabinetData) {
+          setCabinet(cabinetData);
+        } else {
+          toast.error("Cabinet non trouvé");
+          navigate("/cabinets");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération du cabinet", error);
+        toast.error("Impossible de charger le cabinet");
+        navigate("/cabinets");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-				if (!cabinet) {
-					toast.error("Cabinet not found.");
-					navigate("/cabinets");
-					return;
-				}
+    fetchCabinet();
+  }, [id, isEditing, navigate]);
 
-				setCabinetData(cabinet);
+  const handleSaveCabinet = async (cabinetData: Cabinet) => {
+    try {
+      setSaving(true);
 
-				// Fetch osteopath data
-				const osteopathData = await api.getOsteopathById(
-					cabinet.osteopathId as number
-				);
-				setOsteopath(osteopathData);
-			} catch (error) {
-				console.error("Error fetching cabinet data:", error);
-				toast.error(
-					"Failed to load cabinet data. Please try again later."
-				);
-			} finally {
-				setLoading(false);
-			}
-		};
+      if (isEditing && cabinet) {
+        // Update existing cabinet
+        const updatedCabinet = await api.updateCabinet(cabinet.id, {
+          ...cabinetData,
+        });
+        toast.success("Cabinet mis à jour avec succès");
+        navigate(`/cabinet/${updatedCabinet.id}`);
+      } else {
+        // Create new cabinet
+        const newCabinet = await api.createCabinet({
+          ...cabinetData,
+        });
+        toast.success("Cabinet créé avec succès");
+        navigate(`/cabinet/${newCabinet.id}`);
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement du cabinet", error);
+      toast.error("Impossible d'enregistrer le cabinet");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-		fetchCabinetData();
-	}, [id, navigate]);
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </Layout>
+    );
+  }
 
-	const handleSaveCabinet = async (cabinet: Cabinet) => {
-		try {
-			if (!cabinetData) {
-				toast.error("No cabinet data available to update.");
-				return;
-			}
+  return (
+    <Layout>
+      <div className="container max-w-4xl py-8">
+        <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+          <Building2 className="h-8 w-8 text-primary" />
+          {isEditing ? "Modifier le cabinet" : "Nouveau cabinet"}
+        </h1>
+        <p className="text-muted-foreground mb-8">
+          {isEditing
+            ? "Modifiez les informations de votre cabinet"
+            : "Créez un nouveau cabinet pour votre pratique"}
+        </p>
 
-			// Update the cabinet using the API
-			await api.updateCabinet(cabinetData.id, cabinet);
-
-			toast.success("Cabinet updated successfully!");
-			navigate("/cabinets"); // Redirect to the cabinets list page
-		} catch (error) {
-			console.error("Error updating cabinet:", error);
-			toast.error("Failed to update cabinet. Please try again.");
-		}
-	};
-
-	const osteopathId = osteopath?.id;
-
-	if (loading) {
-		return (
-			<Layout>
-				<div className="flex justify-center items-center h-full">
-					<div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent"></div>
-				</div>
-			</Layout>
-		);
-	}
-
-	if (!cabinetData) {
-		return (
-			<Layout>
-				<div className="flex justify-center items-center h-full">
-					<p>Cabinet not found</p>
-				</div>
-			</Layout>
-		);
-	}
-
-	return (
-		<Layout>
-			<div className="container max-w-4xl mx-auto py-10">
-				<h1 className="text-2xl font-bold mb-4">Edit Cabinet</h1>
-				{cabinetData && (
-					<CabinetForm
-						osteopathId={osteopathId}
-						onSave={handleSaveCabinet}
-						cabinet={cabinetData}
-					/>
-				)}
-			</div>
-		</Layout>
-	);
+        <Card className="p-6">
+          <CabinetForm
+            osteopathId={1} // Temporarily hardcoded, should be from auth context
+            onSave={handleSaveCabinet}
+            cabinet={cabinet || undefined}
+          />
+        </Card>
+      </div>
+    </Layout>
+  );
 };
 
 export default EditCabinetPage;

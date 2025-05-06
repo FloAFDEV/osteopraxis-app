@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner";
 
 const LoginPage = () => {
-  const { login, isAuthenticated, loading } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,11 +40,9 @@ const LoginPage = () => {
 
     setIsSubmitting(true);
     try {
-      // Assuming this is an async function that returns a boolean indicating success
-      const result = await login(email, '');
-      if (result !== false) {
-        toast.success("Un lien de connexion a été envoyé à votre adresse email");
-      }
+      // Updated to avoid comparing void with boolean
+      await login(email, '');
+      toast.success("Un lien de connexion a été envoyé à votre adresse email");
     } catch (error) {
       console.error("Magic link error:", error);
       toast.error("Erreur lors de l'envoi du lien magique");
@@ -98,9 +96,9 @@ const LoginPage = () => {
             <Button
               type="submit"
               className="w-full"
-              disabled={isSubmitting || loading}
+              disabled={isSubmitting || isLoading}
             >
-              {isSubmitting || loading ? "Connexion en cours..." : "Se connecter"}
+              {isSubmitting || isLoading ? "Connexion en cours..." : "Se connecter"}
             </Button>
           </form>
           <div className="mt-4 text-center">
@@ -124,7 +122,7 @@ const LoginPage = () => {
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={() => toast.info("Cette fonctionnalité sera disponible bientôt")}
+            onClick={sendMagicLink}
             disabled={isSubmitting}
           >
             Continuer avec email (lien magique)

@@ -102,7 +102,14 @@ export const createCabinet = async (cabinetData: Partial<Cabinet>): Promise<Cabi
       throw new Error(error.message);
     }
 
-    return data as Cabinet;
+    // Transform to match Cabinet type
+    return {
+      ...data,
+      city: data.city || "",
+      province: data.province || "",
+      postalCode: data.postalCode || "",
+      country: data.country || ""
+    } as Cabinet;
   } catch (error) {
     console.error("Erreur lors de la création du cabinet:", error);
     throw error;
@@ -123,7 +130,14 @@ export const updateCabinet = async (id: number, cabinetData: Partial<Cabinet>): 
       throw new Error(error.message);
     }
 
-    return data as Cabinet;
+    // Transform to match Cabinet type
+    return {
+      ...data,
+      city: data.city || "",
+      province: data.province || "",
+      postalCode: data.postalCode || "",
+      country: data.country || ""
+    } as Cabinet;
   } catch (error) {
     console.error(`Erreur lors de la mise à jour du cabinet ${id}:`, error);
     throw error;

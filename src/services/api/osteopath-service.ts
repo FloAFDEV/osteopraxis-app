@@ -1,9 +1,9 @@
 
-import { Osteopath } from "@/types";
+// Import necessary types
 import { supabase } from "@/integrations/supabase/client";
 
-// Fonction pour récupérer un ostéopathe par ID
-export const getOsteopathById = async (id: number): Promise<Osteopath | null> => {
+// Get an osteopath by ID
+export const getOsteopathById = async (id: number) => {
   try {
     const { data, error } = await supabase
       .from("Osteopath")
@@ -11,37 +11,16 @@ export const getOsteopathById = async (id: number): Promise<Osteopath | null> =>
       .eq("id", id)
       .single();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
+    if (error) throw error;
     return data;
   } catch (error) {
-    console.error(`Erreur lors de la récupération de l'ostéopathe ${id}:`, error);
-    return null;
+    console.error("Error fetching osteopath by ID:", error);
+    throw error;
   }
 };
 
-// Function to get all osteopaths
-export const getOsteopaths = async (): Promise<Osteopath[]> => {
-  try {
-    const { data, error } = await supabase
-      .from("Osteopath")
-      .select("*");
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error("Erreur lors de la récupération des ostéopathes:", error);
-    return [];
-  }
-};
-
-// Fonction pour récupérer un ostéopathe par ID d'utilisateur
-export const getOsteopathByUserId = async (userId: string): Promise<Osteopath | null> => {
+// Get an osteopath by user ID
+export const getOsteopathByUserId = async (userId: string) => {
   try {
     const { data, error } = await supabase
       .from("Osteopath")
@@ -49,121 +28,96 @@ export const getOsteopathByUserId = async (userId: string): Promise<Osteopath | 
       .eq("userId", userId)
       .single();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
+    if (error) throw error;
     return data;
   } catch (error) {
-    console.error(`Erreur lors de la récupération de l'ostéopathe pour l'utilisateur ${userId}:`, error);
-    return null;
-  }
-};
-
-// Fonction pour créer un ostéopathe
-export const createOsteopath = async (data: any): Promise<Osteopath> => {
-  try {
-    const { data: createdOsteopath, error } = await supabase
-      .from("Osteopath")
-      .insert([data])
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return createdOsteopath;
-  } catch (error) {
-    console.error("Erreur lors de la création de l'ostéopathe:", error);
+    console.error("Error fetching osteopath by user ID:", error);
     throw error;
   }
 };
 
-// Fonction pour mettre à jour un ostéopathe
-export const updateOsteopath = async (id: number, data: Partial<Osteopath>): Promise<Osteopath> => {
+// Create a new osteopath
+export const createOsteopath = async (osteopathData: any) => {
   try {
-    const { data: updatedOsteopath, error } = await supabase
+    const { data, error } = await supabase
       .from("Osteopath")
-      .update(data)
+      .insert(osteopathData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error creating osteopath:", error);
+    throw error;
+  }
+};
+
+// Update an osteopath
+export const updateOsteopath = async (id: number, osteopathData: any) => {
+  try {
+    const { data, error } = await supabase
+      .from("Osteopath")
+      .update(osteopathData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error updating osteopath:", error);
+    throw error;
+  }
+};
+
+// Get osteopath profile
+export const getOsteopathProfile = async (id: number) => {
+  try {
+    const { data, error } = await supabase
+      .from("Osteopath")
+      .select("*")
       .eq("id", id)
       .single();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return updatedOsteopath;
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error(`Erreur lors de la mise à jour de l'ostéopathe ${id}:`, error);
+    console.error("Error fetching osteopath profile:", error);
     throw error;
   }
 };
 
-// Fonction pour récupérer le profil d'un ostéopathe
-export const getOsteopathProfile = async (userId: string): Promise<any | null> => {
+// Update osteopath profile
+export const updateOsteopathProfile = async (id: number, profileData: any) => {
   try {
     const { data, error } = await supabase
-      .from("User")
-      .select("*, Osteopath(*)")
-      .eq("id", userId)
+      .from("Osteopath")
+      .update(profileData)
+      .eq("id", id)
+      .select()
       .single();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return {
-      id: data.id,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      email: data.email,
-      osteopathId: data.osteopathId,
-      osteopathDetails: data.Osteopath
-    };
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error(`Erreur lors de la récupération du profil de l'ostéopathe pour l'utilisateur ${userId}:`, error);
-    return null;
+    console.error("Error updating osteopath profile:", error);
+    throw error;
   }
 };
 
-// Function to update an osteopath profile
-export const updateOsteopathProfile = async (userId: string, profileData: any): Promise<any> => {
+// Get all osteopaths
+export const getOsteopaths = async () => {
   try {
     const { data, error } = await supabase
-      .from("User")
-      .update({
-        first_name: profileData.firstName,
-        last_name: profileData.lastName,
-        // Add other user fields as necessary
-      })
-      .eq("id", userId)
-      .single();
+      .from("Osteopath")
+      .select("*")
+      .order("name", { ascending: true });
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // If there's osteopath specific data to update and osteopathId exists
-    if (profileData.osteopathId) {
-      const { error: osteopathError } = await supabase
-        .from("Osteopath")
-        .update({
-          name: `${profileData.firstName} ${profileData.lastName}`,
-          professional_title: profileData.professionalTitle,
-          adeli_number: profileData.adeliNumber,
-          siret: profileData.siret,
-          ape_code: profileData.apeCode,
-        })
-        .eq("id", profileData.osteopathId);
-
-      if (osteopathError) {
-        throw new Error(osteopathError.message);
-      }
-    }
-
-    return { success: true, userId };
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error(`Erreur lors de la mise à jour du profil de l'ostéopathe ${userId}:`, error);
+    console.error("Error fetching osteopaths:", error);
     throw error;
   }
 };

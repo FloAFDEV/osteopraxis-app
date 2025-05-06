@@ -1,113 +1,120 @@
 
 import { Patient } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
-import { supabasePatientService } from "../supabase-api/patient-service";
 
-// Empty array for patients to remove fictitious data
-const patients: Patient[] = [];
-
-export const patientService = {
-  async getPatients(): Promise<Patient[]> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabasePatientService.getPatients();
-      } catch (error) {
-        console.error("Erreur Supabase getPatients:", error);
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    return [...patients];
+// Mock data for demonstration
+const patients: Patient[] = [
+  {
+    id: 1,
+    firstName: "Jean",
+    lastName: "Dupont",
+    gender: "Homme",
+    email: "jean.dupont@example.com",
+    phone: "0123456789",
+    address: "123 Rue de Paris",
+    osteopathId: 1,
+    cabinetId: 1,
+    birthDate: "1980-01-01",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    maritalStatus: "MARRIED",
+    handedness: "RIGHT",
+    hasVisionCorrection: false,
+    isSmoker: false,
+    isDeceased: false
   },
-
-  async getPatientById(id: number): Promise<Patient | undefined> {
-    if (USE_SUPABASE) {
-      try {
-        return await supabasePatientService.getPatientById(id);
-      } catch (error) {
-        console.error("Erreur Supabase getPatientById:", error);
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(200);
-    return patients.find(patient => patient.id === id);
-  },
-
-  async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    if (USE_SUPABASE) {
-      try {
-        const createdPatient = await supabasePatientService.createPatient(patient);
-        return createdPatient;
-      } catch (error) {
-        console.error("Erreur Supabase createPatient:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(400);
-    const now = new Date().toISOString();
-    const newPatient = {
-      ...patient,
-      id: patients.length + 1,
-      createdAt: now,
-      updatedAt: now,
-    } as Patient;
-    patients.push(newPatient);
-    return newPatient;
-  },
-
-  async updatePatient(patient: Patient): Promise<Patient> {
-    if (USE_SUPABASE) {
-      try {
-        // Use the supabase patient service for update
-        const updatedPatient = await supabasePatientService.updatePatient(patient);
-        // Ne pas afficher de toast ici pour éviter les doublons
-        // Le toast sera affiché dans le composant appelant
-        return updatedPatient;
-      } catch (error) {
-        console.error("Erreur Supabase updatePatient:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    const index = patients.findIndex(p => p.id === patient.id);
-    if (index !== -1) {
-      patients[index] = { 
-        ...patients[index], 
-        ...patient,
-        updatedAt: new Date().toISOString() 
-      };
-      return patients[index];
-    }
-    throw new Error(`Patient with id ${patient.id} not found`);
-  },
-
-  async deletePatient(id: number): Promise<boolean> {
-    if (USE_SUPABASE) {
-      try {
-        const { error } = await supabasePatientService.deletePatient(id);
-        if (error) {
-          throw error;
-        }
-        return true;
-      } catch (error) {
-        console.error("Erreur Supabase deletePatient:", error);
-        throw error;
-      }
-    }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    const index = patients.findIndex(p => p.id === id);
-    if (index !== -1) {
-      patients.splice(index, 1);
-      return true;
-    }
-    return false;
+  {
+    id: 2,
+    firstName: "Marie",
+    lastName: "Martin",
+    gender: "Femme",
+    email: "marie.martin@example.com",
+    phone: "0123456780",
+    address: "456 Avenue de Lyon",
+    osteopathId: 1,
+    cabinetId: 1,
+    birthDate: "1990-05-15",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    maritalStatus: "SINGLE",
+    handedness: "LEFT",
+    hasVisionCorrection: true,
+    isSmoker: false,
+    isDeceased: false
   }
+];
+
+export const getPatients = async (): Promise<Patient[]> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return [...patients];
+};
+
+export const getPatientById = async (id: number): Promise<Patient | null> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  const patient = patients.find(p => p.id === id);
+  return patient || null;
+};
+
+export const createPatient = async (patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const newPatient: Patient = {
+    ...patientData,
+    id: patients.length + 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  patients.push(newPatient);
+  return newPatient;
+};
+
+export const updatePatient = async (id: number, patientData: Partial<Patient>): Promise<Patient> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const index = patients.findIndex(p => p.id === id);
+  if (index !== -1) {
+    patients[index] = {
+      ...patients[index],
+      ...patientData,
+      updatedAt: new Date().toISOString()
+    };
+    return patients[index];
+  }
+  
+  throw new Error(`Patient with ID ${id} not found`);
+};
+
+export const deletePatient = async (id: number): Promise<boolean> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const index = patients.findIndex(p => p.id === id);
+  if (index !== -1) {
+    patients.splice(index, 1);
+    return true;
+  }
+  
+  return false;
+};
+
+export const searchPatients = async (query: string): Promise<Patient[]> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  const lowerQuery = query.toLowerCase();
+  return patients.filter(patient => 
+    patient.firstName.toLowerCase().includes(lowerQuery) ||
+    patient.lastName.toLowerCase().includes(lowerQuery) ||
+    patient.email.toLowerCase().includes(lowerQuery) ||
+    patient.phone.includes(lowerQuery)
+  );
+};
+
+export const getPatientsByOsteopathId = async (osteopathId: number): Promise<Patient[]> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  return patients.filter(patient => patient.osteopathId === osteopathId);
+};
+
+export const getPatientCount = async (): Promise<number> => {
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return patients.length;
 };

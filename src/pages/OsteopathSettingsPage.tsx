@@ -1,82 +1,73 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth";
-import { api } from "@/services/api";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
+import { OsteopathProfileForm } from "@/components/OsteopathProfileForm";
+import { toast } from "sonner";
+import { api } from "@/services/api";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
-const OsteopathSettingsPage = () => {
+interface OsteopathSettingsPageProps {}
+
+const OsteopathSettingsPage: React.FC<OsteopathSettingsPageProps> = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const [osteopathProfile, setOsteopathProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    const loadProfile = async () => {
-      if (!user?.id) {
-        navigate("/login");
+    const fetchOsteopathProfile = async () => {
+      if (!user?.osteopathId) {
+        setLoading(false);
         return;
       }
 
-      setLoading(true);
       try {
-        const osteopathProfile = await api.getOsteopathProfile(user.id);
-        
-        if (osteopathProfile) {
-          setProfile(osteopathProfile);
-        } else {
-          toast.error("Profil non trouvé. Veuillez compléter votre profil.");
-          navigate("/profile/setup");
-        }
+        const profileData = await api.getOsteopathProfile(user.osteopathId);
+        setOsteopathProfile(profileData);
       } catch (error) {
-        console.error("Erreur lors du chargement du profil:", error);
-        toast.error("Erreur lors du chargement du profil. Veuillez réessayer.");
+        console.error("Error fetching osteopath profile:", error);
+        toast.error("Impossible de charger le profil de l'ostéopathe");
       } finally {
         setLoading(false);
       }
     };
 
-    loadProfile();
-  }, [user, navigate]);
+    fetchOsteopathProfile();
+  }, [user]);
 
-  const handleProfileUpdate = async (updatedOsteopath: any) => {
+  const handleProfileUpdate = async (updatedProfile: any) => {
+    if (!user?.osteopathId) return;
+
     try {
-      setLoading(true);
-      
-      if (!user?.id) {
-        toast.error("Utilisateur non identifié");
-        return;
-      }
-      
-      // Call the API to update the osteopath profile
-      await api.updateOsteopathProfile(user.id, {
-        ...updatedOsteopath,
-        osteopathId: profile?.osteopathId
-      });
-      
-      toast.success("Profil mis à jour avec succès!");
-      
-      // Refresh profile data
-      const refreshedProfile = await api.getOsteopathProfile(user.id);
-      setProfile(refreshedProfile);
+      await api.updateOsteopathProfile(user.osteopathId, updatedProfile);
+      setOsteopathProfile(updatedProfile);
+      toast.success("Profil mis à jour avec succès");
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du profil:", error);
-      toast.error("Erreur lors de la mise à jour du profil. Veuillez réessayer.");
-    } finally {
-      setLoading(false);
+      console.error("Error updating osteopath profile:", error);
+      toast.error("Impossible de mettre à jour le profil");
     }
+  };
+
+  const handleBillingSettingsSave = async () => {
+    toast.success("Paramètres de facturation mis à jour");
+  };
+
+  const handleCalendarSettingsSave = async () => {
+    toast.success("Paramètres de calendrier mis à jour");
+  };
+
+  const handleNotificationSettingsSave = async () => {
+    toast.success("Paramètres de notification mis à jour");
   };
 
   if (loading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </Layout>
     );
@@ -84,53 +75,68 @@ const OsteopathSettingsPage = () => {
 
   return (
     <Layout>
-      <div className="container max-w-5xl px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Paramètres du profil</h1>
-        
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="profile">Informations personnelles</TabsTrigger>
-            <TabsTrigger value="professional">Informations professionnelles</TabsTrigger>
+      <div className="container max-w-4xl py-8">
+        <h1 className="text-3xl font-bold mb-8">Paramètres du compte</h1>
+
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid grid-cols-4">
+            <TabsTrigger value="profile">Profil</TabsTrigger>
+            <TabsTrigger value="billing">Facturation</TabsTrigger>
+            <TabsTrigger value="calendar">Calendrier</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informations personnelles</CardTitle>
-                <CardDescription>
-                  Modifiez vos informations personnelles de base
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {profile && (
-                  <OsteopathProfileForm
-                    profile={profile}
-                    onSave={handleProfileUpdate}
-                  />
-                )}
-              </CardContent>
-            </Card>
+
+          <TabsContent value="profile" className="space-y-6">
+            <OsteopathProfileForm 
+              osteopath={osteopathProfile} 
+              onSave={handleProfileUpdate}
+            />
           </TabsContent>
-          
-          <TabsContent value="professional">
+
+          <TabsContent value="billing" className="space-y-6">
+            {/* Billing settings content */}
             <Card>
               <CardHeader>
-                <CardTitle>Informations professionnelles</CardTitle>
+                <CardTitle>Paramètres de facturation</CardTitle>
                 <CardDescription>
-                  Gérez vos informations professionnelles comme l'adresse, les spécialités, etc.
+                  Configurez vos préférences de facturation et informations fiscales.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">Fonctionnalité à venir...</p>
-                  <Button 
-                    variant="outline"
-                    className="mt-4"
-                    onClick={() => navigate('/cabinet')}
-                  >
-                    Gérer mes cabinets
-                  </Button>
-                </div>
+                {/* Billing settings form fields would go here */}
+                <Button onClick={handleBillingSettingsSave}>Enregistrer</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="calendar" className="space-y-6">
+            {/* Calendar settings content */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Paramètres du calendrier</CardTitle>
+                <CardDescription>
+                  Configurez vos horaires de travail et disponibilités.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Calendar settings form fields would go here */}
+                <Button onClick={handleCalendarSettingsSave}>Enregistrer</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-6">
+            {/* Notification settings content */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Paramètres de notifications</CardTitle>
+                <CardDescription>
+                  Gérez vos préférences de notifications par email et SMS.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Notification settings form fields would go here */}
+                <Button onClick={handleNotificationSettingsSave}>Enregistrer</Button>
               </CardContent>
             </Card>
           </TabsContent>

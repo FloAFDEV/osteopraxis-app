@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/ui/layout";
 import { api } from "@/services/api";
-import { invoiceService } from "@/services/api/invoice-service";
 import { AppointmentStatus } from "@/types";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useParams } from "react-router-dom";
@@ -34,7 +33,7 @@ const PatientDetailPage = () => {
 					await Promise.all([
 						api.getPatientById(patientId),
 						api.getAppointmentsByPatientId(patientId),
-						invoiceService.getInvoicesByPatientId(patientId),
+						api.getInvoicesByPatientId(patientId),
 					]);
 
 				setPatient(patientData);

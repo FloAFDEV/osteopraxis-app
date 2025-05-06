@@ -193,7 +193,7 @@ export const InvoiceForm = ({
 	};
 
 	const handlePatientSelect = (patientId: string) => {
-		const foundPatient = patients.find((p) => p.id === parseInt(patientId));
+		const foundPatient = patients?.find((p) => p.id === parseInt(patientId));
 		setSelectedPatient(foundPatient || null);
 		if (foundPatient) {
 			form.setValue("patientId", foundPatient.id);
@@ -222,7 +222,7 @@ export const InvoiceForm = ({
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{patients.map((p) => (
+												{patients?.map((p) => (
 													<SelectItem
 														key={p.id}
 														value={p.id.toString()}

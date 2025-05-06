@@ -1,5 +1,7 @@
 
-import { login, register, logout, checkAuth, loginWithMagicLink, promoteToAdmin } from './auth-service';
+import {
+  login, register, logout, checkAuth, loginWithMagicLink, promoteToAdmin
+} from './auth-service';
 import {
   getPatients, getPatientById, createPatient, updatePatient, deletePatient,
   searchPatients, getPatientsByOsteopathId, getPatientCount
@@ -8,7 +10,7 @@ import {
   getAppointments, getAppointmentById, createAppointment, updateAppointment,
   deleteAppointment, getUpcomingAppointments, getAppointmentsByPatientId,
   getAppointmentsByOsteopathId, getAppointmentCount, cancelAppointment,
-  rescheduleAppointment
+  rescheduleAppointment, updateAppointmentStatus
 } from './appointment-service';
 import {
   getInvoices, getInvoiceById, createInvoice, updateInvoice, deleteInvoice,
@@ -55,6 +57,7 @@ export const api = {
   getAppointmentCount,
   cancelAppointment,
   rescheduleAppointment,
+  updateAppointmentStatus,
   
   // Invoice services
   getInvoices,

@@ -1,7 +1,8 @@
+
 import { User, AuthState } from '@/types';
 
 // Fonction pour connecter un utilisateur
-export const loginUser = async (email: string, password: string) => {
+export const login = async (email: string, password: string) => {
   // Simulation d'une connexion réussie
   return {
     user: {
@@ -17,7 +18,7 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Fonction pour s'inscrire
-export const registerUser = async (email: string, password: string) => {
+export const register = async (email: string, password: string) => {
   // Simulation d'une inscription réussie
   return {
     user: {
@@ -33,13 +34,13 @@ export const registerUser = async (email: string, password: string) => {
 };
 
 // Fonction pour se déconnecter
-export const logoutUser = async () => {
+export const logout = async () => {
   // Simulation d'une déconnexion réussie
   return true;
 };
 
 // Fonction pour récupérer l'utilisateur connecté
-export const getLoggedInUser = async () => {
+export const checkAuth = async () => {
   // Simulation de la récupération de l'utilisateur connecté
   return {
     id: '1',
@@ -49,6 +50,20 @@ export const getLoggedInUser = async () => {
     lastName: 'Doe',
     osteopathId: 1,
   } as User;
+};
+
+// Login with magic link
+export const loginWithMagicLink = async (email: string) => {
+  // Simulation
+  console.log(`Magic link would be sent to ${email}`);
+  return true;
+};
+
+// Promote to admin
+export const promoteToAdmin = async (userId: string) => {
+  // Simulation
+  console.log(`User ${userId} would be promoted to admin`);
+  return true;
 };
 
 // Fonction pour mettre à jour un utilisateur
