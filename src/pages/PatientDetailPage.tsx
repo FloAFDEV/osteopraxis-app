@@ -1,3 +1,4 @@
+
 import { AppointmentCard } from "@/components/appointment-card";
 import { InvoiceDetails } from "@/components/invoice-details";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
@@ -14,7 +15,7 @@ import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
 import { invoiceService } from "@/services/api/invoice-service";
-import { Appointment, Invoice, Patient } from "@/types";
+import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
 import { differenceInYears, format, parseISO } from "date-fns";
 import {
 	Activity,
@@ -36,6 +37,8 @@ import {
 	User,
 	X,
 	MessageSquare,
+	Check,
+	Clock,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -50,6 +53,18 @@ import {
 } from "@/components/ui/table";
 import { formatAppointmentTime } from "@/utils/date-utils";
 import { Badge } from "@/components/ui/badge";
+import { 
+	DropdownMenu,
+	DropdownMenuContent, 
+	DropdownMenuItem, 
+	DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { 
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger, 
+} from "@/components/ui/tooltip";
 
 interface PatientDetailPageProps {}
 
@@ -62,7 +77,7 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
-
+	
 	useEffect(() => {
 		const fetchPatientData = async () => {
 			setLoading(true);
@@ -154,6 +169,82 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 		} catch (error) {
 			console.error("Error canceling appointment:", error);
 			toast.error("Impossible d'annuler la séance");
+		}
+	};
+
+	const handleUpdateAppointmentStatus = async (appointmentId: number, status: AppointmentStatus) => {
+		try {
+			setLoading(true);
+			await api.updateAppointment(appointmentId, { status });
+			// Refresh appointments list
+			const updatedAppointments = await api.getAppointmentsByPatientId(
+				parseInt(id!)
+			);
+			setAppointments(updatedAppointments);
+			toast.success(`Le statut de la séance a été modifié en "${getStatusLabel(status)}"`);
+		} catch (error) {
+			console.error("Error updating appointment status:", error);
+			toast.error("Impossible de modifier le statut de la séance");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const getStatusLabel = (status: AppointmentStatus): string => {
+		switch (status) {
+			case "SCHEDULED":
+				return "Planifiée";
+			case "COMPLETED":
+				return "Terminée";
+			case "CANCELED":
+				return "Annulée";
+			case "RESCHEDULED":
+				return "Reportée";
+			case "NO_SHOW":
+				return "Absence";
+			default:
+				return status;
+		}
+	};
+
+	const getStatusBadgeColor = (status: AppointmentStatus): string => {
+		switch (status) {
+			case "SCHEDULED":
+				return "bg-blue-500";
+			case "COMPLETED":
+				return "bg-green-500";
+			case "CANCELED":
+				return "bg-red-500";
+			case "RESCHEDULED":
+				return "bg-amber-500";
+			case "NO_SHOW":
+				return "bg-gray-500";
+			default:
+				return "bg-gray-500";
+		}
+	};
+
+	const getStatusIcon = (status: AppointmentStatus) => {
+		switch (status) {
+			case "SCHEDULED":
+				return <Clock className="h-3 w-3 mr-1" />;
+			case "COMPLETED":
+				return <Check className="h-3 w-3 mr-1" />;
+			case "CANCELED":
+				return <X className="h-3 w-3 mr-1" />;
+			case "RESCHEDULED":
+				return <Calendar className="h-3 w-3 mr-1" />;
+			case "NO_SHOW":
+				return <AlertCircle className="h-3 w-3 mr-1" />;
+			default:
+				return null;
+		}
+	};
+
+	const navigateToHistoryTab = () => {
+		const historyTabTrigger = document.querySelector('[value="history"]') as HTMLElement | null;
+		if (historyTabTrigger) {
+			historyTabTrigger.click();
 		}
 	};
 
@@ -505,20 +596,9 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 											<Button
 												variant="ghost"
 												size="sm"
-												asChild
+												onClick={navigateToHistoryTab}
 											>
-												<Link
-													to="#history"
-													onClick={() => {
-														const historyTab =
-															document.querySelector(
-																'[data-state="inactive"][value="history"]'
-															) as HTMLElement | null;
-														historyTab?.click();
-													}}
-												>
-													Voir tout l'historique
-												</Link>
+												Voir tout l'historique
 											</Button>
 										</div>
 
@@ -548,19 +628,40 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 																		appointment.date
 																	)}
 																</div>
-																<Badge
-																	className={
-																		appointment.status ===
-																		"COMPLETED"
-																			? "bg-green-500"
-																			: "bg-red-500"
-																	}
-																>
-																	{appointment.status ===
-																	"COMPLETED"
-																		? "Terminée"
-																		: "Annulée"}
-																</Badge>
+																<DropdownMenu>
+																	<DropdownMenuTrigger asChild>
+																		<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
+																			<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
+																				<span className="flex items-center">
+																					{getStatusIcon(appointment.status as AppointmentStatus)}
+																					{getStatusLabel(appointment.status as AppointmentStatus)}
+																				</span>
+																			</Badge>
+																		</Button>
+																	</DropdownMenuTrigger>
+																	<DropdownMenuContent align="end">
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
+																			<Clock className="mr-2 h-4 w-4" />
+																			Planifiée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
+																			<Check className="mr-2 h-4 w-4" />
+																			Terminée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
+																			<X className="mr-2 h-4 w-4" />
+																			Annulée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
+																			<Calendar className="mr-2 h-4 w-4" />
+																			Reportée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
+																			<AlertCircle className="mr-2 h-4 w-4" />
+																			Absence
+																		</DropdownMenuItem>
+																	</DropdownMenuContent>
+																</DropdownMenu>
 															</div>
 															<div className="text-sm text-muted-foreground mt-1">
 																Motif :{" "}
@@ -612,16 +713,82 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 									<div className="grid gap-4">
 										{upcomingAppointments.map(
 											(appointment) => (
-												<AppointmentCard
-													key={appointment.id}
-													appointment={appointment}
-													patient={patient}
-													onCancel={() =>
-														handleCancelAppointment(
-															appointment.id
-														)
-													}
-												/>
+												<div key={appointment.id} className="border rounded-lg p-4">
+													<div className="flex justify-between items-center mb-2">
+														<div>
+															<h3 className="font-medium">
+																{format(new Date(appointment.date), "EEEE dd MMMM yyyy", { locale: require("date-fns/locale/fr") })}
+															</h3>
+															<p className="text-sm text-muted-foreground">
+																{formatAppointmentTime(appointment.date)}
+															</p>
+														</div>
+														<DropdownMenu>
+															<DropdownMenuTrigger asChild>
+																<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
+																	<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
+																		<span className="flex items-center">
+																			{getStatusIcon(appointment.status as AppointmentStatus)}
+																			{getStatusLabel(appointment.status as AppointmentStatus)}
+																		</span>
+																	</Badge>
+																</Button>
+															</DropdownMenuTrigger>
+															<DropdownMenuContent align="end">
+																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
+																	<Clock className="mr-2 h-4 w-4" />
+																	Planifiée
+																</DropdownMenuItem>
+																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
+																	<Check className="mr-2 h-4 w-4" />
+																	Terminée
+																</DropdownMenuItem>
+																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
+																	<X className="mr-2 h-4 w-4" />
+																	Annulée
+																</DropdownMenuItem>
+																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
+																	<Calendar className="mr-2 h-4 w-4" />
+																	Reportée
+																</DropdownMenuItem>
+																<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
+																	<AlertCircle className="mr-2 h-4 w-4" />
+																	Absence
+																</DropdownMenuItem>
+															</DropdownMenuContent>
+														</DropdownMenu>
+													</div>
+													<div className="mt-1 text-sm">
+														<span className="font-medium">Motif:</span> {appointment.reason}
+													</div>
+													{appointment.notes && (
+														<div className="mt-2 pl-3 border-l-2 border-purple-200">
+															<p className="text-sm text-muted-foreground italic whitespace-pre-line">
+																{appointment.notes}
+															</p>
+														</div>
+													)}
+													<div className="mt-4 flex justify-end gap-2">
+														<Button 
+															variant="outline" 
+															size="sm" 
+															asChild
+														>
+															<Link to={`/appointments/${appointment.id}/edit`}>
+																<Edit className="mr-1 h-4 w-4" />
+																Modifier
+															</Link>
+														</Button>
+														<Button 
+															variant="destructive" 
+															size="sm" 
+															onClick={() => handleCancelAppointment(appointment.id)}
+														>
+															<X className="mr-1 h-4 w-4" />
+															Annuler
+														</Button>
+													</div>
+												</div>
 											)
 										)}
 									</div>
@@ -676,11 +843,74 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 								) : viewMode === "cards" ? (
 									<div className="grid gap-4">
 										{pastAppointments.map((appointment) => (
-											<AppointmentCard
-												key={appointment.id}
-												appointment={appointment}
-												patient={patient}
-											/>
+											<div key={appointment.id} className="border rounded-lg p-4">
+												<div className="flex justify-between items-center mb-2">
+													<div>
+														<h3 className="font-medium">
+															{format(new Date(appointment.date), "dd/MM/yyyy")}
+														</h3>
+														<p className="text-sm text-muted-foreground">
+															{formatAppointmentTime(appointment.date)}
+														</p>
+													</div>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
+																<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
+																	<span className="flex items-center">
+																		{getStatusIcon(appointment.status as AppointmentStatus)}
+																		{getStatusLabel(appointment.status as AppointmentStatus)}
+																	</span>
+																</Badge>
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
+																<Clock className="mr-2 h-4 w-4" />
+																Planifiée
+															</DropdownMenuItem>
+															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
+																<Check className="mr-2 h-4 w-4" />
+																Terminée
+															</DropdownMenuItem>
+															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
+																<X className="mr-2 h-4 w-4" />
+																Annulée
+															</DropdownMenuItem>
+															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
+																<Calendar className="mr-2 h-4 w-4" />
+																Reportée
+															</DropdownMenuItem>
+															<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
+																<AlertCircle className="mr-2 h-4 w-4" />
+																Absence
+															</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+												<div className="mt-1 text-sm">
+													<span className="font-medium">Motif:</span> {appointment.reason}
+												</div>
+												{appointment.notes && (
+													<div className="mt-2 pl-3 border-l-2 border-purple-200">
+														<p className="text-sm text-muted-foreground italic whitespace-pre-line">
+															{appointment.notes}
+														</p>
+													</div>
+												)}
+												<div className="mt-4 flex justify-end gap-2">
+													<Button 
+														variant="outline" 
+														size="sm" 
+														asChild
+													>
+														<Link to={`/appointments/${appointment.id}/edit`}>
+															<Edit className="mr-1 h-4 w-4" />
+															Détails
+														</Link>
+													</Button>
+												</div>
+											</div>
 										))}
 									</div>
 								) : (
@@ -725,55 +955,82 @@ const PatientDetailPage: React.FC<PatientDetailPageProps> = () => {
 																}
 															</TableCell>
 															<TableCell>
-																<Badge
-																	className={
-																		appointment.status ===
-																		"COMPLETED"
-																			? "bg-green-500"
-																			: appointment.status ===
-																			  "CANCELED"
-																			? "bg-red-500"
-																			: "bg-amber-500"
-																	}
-																>
-																	{appointment.status ===
-																	"COMPLETED"
-																		? "Terminée"
-																		: appointment.status ===
-																		  "CANCELED"
-																		? "Annulée"
-																		: "Reportée"}
-																</Badge>
+																<DropdownMenu>
+																	<DropdownMenuTrigger asChild>
+																		<Button variant="ghost" size="sm" className="h-8 px-2 py-1">
+																			<Badge className={getStatusBadgeColor(appointment.status as AppointmentStatus)}>
+																				<span className="flex items-center">
+																					{getStatusIcon(appointment.status as AppointmentStatus)}
+																					{getStatusLabel(appointment.status as AppointmentStatus)}
+																				</span>
+																			</Badge>
+																		</Button>
+																	</DropdownMenuTrigger>
+																	<DropdownMenuContent align="end">
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "SCHEDULED")}>
+																			<Clock className="mr-2 h-4 w-4" />
+																			Planifiée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "COMPLETED")}>
+																			<Check className="mr-2 h-4 w-4" />
+																			Terminée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "CANCELED")}>
+																			<X className="mr-2 h-4 w-4" />
+																			Annulée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "RESCHEDULED")}>
+																			<Calendar className="mr-2 h-4 w-4" />
+																			Reportée
+																		</DropdownMenuItem>
+																		<DropdownMenuItem onClick={() => handleUpdateAppointmentStatus(appointment.id, "NO_SHOW")}>
+																			<AlertCircle className="mr-2 h-4 w-4" />
+																			Absence
+																		</DropdownMenuItem>
+																	</DropdownMenuContent>
+																</DropdownMenu>
 															</TableCell>
 															<TableCell>
 																{appointment.notes ? (
-																	<Button
-																		variant="ghost"
-																		size="sm"
-																		className="h-8 flex items-center gap-1"
-																		onClick={() => {
-																			toast.info(
-																				<div>
-																					<h3 className="font-medium mb-1">
-																						Notes
-																						de
-																						séance
-																					</h3>
-																					<p className="whitespace-pre-line text-sm">
-																						{
-																							appointment.notes
-																						}
-																					</p>
-																				</div>,
-																				{
-																					duration: 10000,
-																				}
-																			);
-																		}}
-																	>
-																		<MessageSquare className="h-3 w-3" />
-																		Voir
-																	</Button>
+																	<TooltipProvider>
+																		<Tooltip>
+																			<TooltipTrigger asChild>
+																				<Button
+																					variant="ghost"
+																					size="sm"
+																					className="h-8 flex items-center gap-1"
+																					onClick={() => {
+																						toast.info(
+																							<div>
+																								<h3 className="font-medium mb-1">
+																									Notes
+																									de
+																									séance
+																								</h3>
+																								<p className="whitespace-pre-line text-sm">
+																									{
+																										appointment.notes
+																									}
+																								</p>
+																							</div>,
+																							{
+																								duration: 10000,
+																							}
+																						);
+																					}}
+																				>
+																					<MessageSquare className="h-3 w-3" />
+																					Voir
+																				</Button>
+																			</TooltipTrigger>
+																			<TooltipContent>
+																				<p className="max-w-xs">
+																					{appointment.notes.slice(0, 60)}
+																					{appointment.notes.length > 60 ? '...' : ''}
+																				</p>
+																			</TooltipContent>
+																		</Tooltip>
+																	</TooltipProvider>
 																) : (
 																	<span className="text-muted-foreground text-sm">
 																		Aucune
