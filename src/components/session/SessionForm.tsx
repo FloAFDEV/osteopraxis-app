@@ -578,7 +578,7 @@ export function SessionForm({
             <div className="flex justify-end gap-2 mt-6">
               <Button 
                 variant="outline" 
-                onClick={() => onCancel?.()}>
+                onClick={onCancel ? () => onCancel() : undefined}>
                 Annuler
               </Button>
               <Button 
@@ -655,7 +655,7 @@ export function SessionForm({
             <div className="flex justify-end gap-2 mt-6">
               <Button 
                 variant="outline" 
-                onClick={() => onCancel?.()}
+                onClick={onCancel ? () => onCancel() : undefined}
                 disabled={isSubmitting}>
                 Annuler
               </Button>
@@ -731,7 +731,7 @@ export function SessionForm({
             <div className="flex justify-end gap-2 mt-6">
               <Button 
                 variant="outline" 
-                onClick={() => onCancel?.()}
+                onClick={onCancel ? () => onCancel() : undefined}
                 disabled={isSubmitting}>
                 Annuler
               </Button>
@@ -750,7 +750,7 @@ export function SessionForm({
         <div className="flex justify-end gap-2 mt-6 border-t pt-6">
           <Button 
             variant="outline" 
-            onClick={() => onCancel?.() || navigate(-1)}
+            onClick={onCancel ? () => onCancel() : navigate(-1)}
             disabled={isSubmitting}>
             Annuler
           </Button>
