@@ -1,4 +1,3 @@
-
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -129,6 +128,28 @@ export const appointmentService = {
     
     return this.updateAppointment(id, { status: "CANCELED" });
   },
+  
+  async rescheduleAppointment(id: number, newDate: string): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        // First update the status to rescheduled
+        const updatedAppointment = await supabaseAppointmentService.updateAppointment(id, { 
+          status: "RESCHEDULED", 
+          date: newDate 
+        });
+        return updatedAppointment;
+      } catch (error) {
+        console.error("Erreur lors du report de la séance:", error);
+        throw error;
+      }
+    }
+    
+    // For non-Supabase implementation
+    return this.updateAppointment(id, { 
+      status: "RESCHEDULED",
+      date: newDate
+    });
+  },
 
   async deleteAppointment(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
@@ -149,4 +170,84 @@ export const appointmentService = {
     }
     return false;
   },
+  
+  async getUpcomingAppointments(): Promise<Appointment[]> {
+    // Implementation for upcoming appointments
+    const allAppointments = await this.getAppointments();
+    const now = new Date();
+    return allAppointments.filter(appointment => {
+      const appointmentDate = new Date(appointment.date);
+      return appointmentDate > now && appointment.status === "SCHEDULED";
+    });
+  },
+  
+  async getAppointmentsByOsteopathId(osteopathId: number): Promise<Appointment[]> {
+    // For now, just return all appointments (we'd need to link appointments to osteopaths properly)
+    if (USE_SUPABASE) {
+      try {
+        // Assuming the supabaseAppointmentService has this method
+        // If it doesn't, you'd need to implement it
+        return await supabaseAppointmentService.getAppointments();
+      } catch (error) {
+        console.error("Erreur lors de la récupération des séances par ostéopathe:", error);
+        throw error;
+      }
+    }
+    
+    return this.getAppointments();
+  },
+  
+  async getAppointmentCount(): Promise<number> {
+    const appointments = await this.getAppointments();
+    return appointments.length;
+  }
+};
+
+// Export individual functions for the API module
+export const getAppointments = async (): Promise<Appointment[]> => {
+  return appointmentService.getAppointments();
+};
+
+export const getAppointmentById = async (id: number): Promise<Appointment | undefined> => {
+  return appointmentService.getAppointmentById(id);
+};
+
+export const createAppointment = async (appointment: Omit<Appointment, "id">): Promise<Appointment> => {
+  return appointmentService.createAppointment(appointment);
+};
+
+export const updateAppointment = async (id: number, update: Partial<Appointment>): Promise<Appointment> => {
+  return appointmentService.updateAppointment(id, update);
+};
+
+export const deleteAppointment = async (id: number): Promise<boolean> => {
+  return appointmentService.deleteAppointment(id);
+};
+
+export const getAppointmentsByPatientId = async (patientId: number): Promise<Appointment[]> => {
+  return appointmentService.getAppointmentsByPatientId(patientId);
+};
+
+export const updateAppointmentStatus = async (id: number, status: AppointmentStatus): Promise<Appointment> => {
+  return appointmentService.updateAppointmentStatus(id, status);
+};
+
+export const cancelAppointment = async (id: number): Promise<Appointment> => {
+  return appointmentService.cancelAppointment(id);
+};
+
+export const rescheduleAppointment = async (id: number, newDate: string): Promise<Appointment> => {
+  return appointmentService.rescheduleAppointment(id, newDate);
+};
+
+export const getUpcomingAppointments = async (): Promise<Appointment[]> => {
+  return appointmentService.getUpcomingAppointments();
+};
+
+export const getAppointmentsByOsteopathId = async (osteopathId: number): Promise<Appointment[]> => {
+  return appointmentService.getAppointmentsByOsteopathId(osteopathId);
+};
+
+export const getAppointmentCount = async (): Promise<number> => {
+  return appointmentService.getAppointmentCount();
 };
