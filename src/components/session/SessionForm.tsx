@@ -30,8 +30,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { DatePicker } from "@/components/ui/date-picker"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { Separator } from "@/components/ui/separator"
 import { toast } from 'sonner';
@@ -39,7 +38,6 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from "@/services/api";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { useAutoSave } from "@/hooks/useAutoSave";
-import { Loader2 } from "lucide-react";
 import { SessionStatus } from "@/types/session";
 
 const sessionFormSchema = z.object({
@@ -97,14 +95,17 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
       }
 
       const sessionData = {
-        ...data,
         date: data.date.toISOString(),
+        patientId: data.patientId,
+        reason: data.reason,
+        status: data.status as AppointmentStatus,
         plannedTime: data.plannedTime || undefined,
         actualStartTime: data.actualStartTime || undefined,
         actualEndTime: data.actualEndTime || undefined,
         lastEditedAt: new Date().toISOString(),
         autoSaved: true,
         notificationSent: false,
+        notes: data.notes || '',
       };
 
       try {
@@ -171,11 +172,14 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
     setIsSubmitting(true);
     try {
       const sessionData = {
-        ...values,
         date: values.date.toISOString(),
+        patientId: values.patientId,
+        reason: values.reason,
+        status: values.status as AppointmentStatus,
         plannedTime: values.plannedTime || undefined,
         actualStartTime: values.actualStartTime || undefined,
         actualEndTime: values.actualEndTime || undefined,
+        notes: values.notes || '',
         notificationSent: false,
       };
 
@@ -204,7 +208,7 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
     try {
       setIsSubmitting(true);
       await api.updateAppointment(parseInt(id, 10), { status: newStatus });
-      form.setValue('status', newStatus);
+      form.setValue('status', newStatus as any);
       toast.success(`Statut mis à jour à ${newStatus}`);
     } catch (error) {
       console.error("Erreur lors de la mise à jour du statut:", error);

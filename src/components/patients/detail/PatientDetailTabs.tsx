@@ -29,7 +29,7 @@ export function PatientDetailTabs({
 	viewMode,
 	setViewMode
 }: PatientDetailTabsProps) {
-	const historyTabRef = useRef<HTMLButtonElement | null>(null);
+	const historyTabRef = useRef<HTMLButtonElement>(null);
 	
 	const navigateToHistoryTab = () => {
 		if (historyTabRef.current) {
