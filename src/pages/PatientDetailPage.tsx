@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
@@ -15,6 +16,7 @@ import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
+import { format } from "date-fns";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
