@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,18 +22,21 @@ interface AdminUser {
 }
 
 const AdminPage = () => {
-  const { isAdmin, isLoading: authLoading, promoteToAdmin } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const isAdmin = user?.role === "ADMIN";
+  const isLoading = loading;
+
   // Redirection si non admin
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
+    if (!loading && !isAdmin) {
       toast.error("Accès non autorisé");
       navigate("/");
     }
-  }, [isAdmin, authLoading, navigate]);
+  }, [isAdmin, loading, navigate]);
 
   // Charger les utilisateurs
   useEffect(() => {
@@ -73,7 +76,7 @@ const AdminPage = () => {
 
   const handlePromoteToAdmin = async (userId: string) => {
     try {
-      await promoteToAdmin(userId);
+      await api.promoteToAdmin(userId);
       // Mettre à jour la liste des utilisateurs
       setUsers(users.map(user => {
         if (user.id === userId) {
@@ -86,7 +89,7 @@ const AdminPage = () => {
     }
   };
 
-  if (authLoading) {
+  if (loading) {
     return (
       <Layout>
         <div className="flex justify-center items-center h-64">

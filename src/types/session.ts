@@ -1,24 +1,18 @@
 
-import { Appointment } from '@/types';
+import { AppointmentStatus } from "./index";
 
-export type SessionStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'CANCELLED' | 'RESCHEDULED' | 'NO_SHOW';
+// Types pour le module de gestion des séances
+export type SessionStatus = AppointmentStatus;
 
-export interface Session extends Appointment {
+export interface SessionData {
+  id: number;
+  patientId: number;
+  date: string;
+  status: SessionStatus;
+  notes?: string;
   plannedTime?: string;
   actualStartTime?: string;
   actualEndTime?: string;
   lastEditedAt?: string;
   autoSaved?: boolean;
-}
-
-// Étendre l'interface Appointment pour inclure les propriétés liées aux sessions
-declare module '@/types' {
-  interface Appointment {
-    plannedTime?: string;
-    actualStartTime?: string;
-    actualEndTime?: string;
-    lastEditedAt?: string;
-    autoSaved?: boolean;
-    invoiceId?: number;
-  }
 }

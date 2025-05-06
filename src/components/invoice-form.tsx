@@ -100,7 +100,7 @@ export const InvoiceForm = ({
 	}, [appointmentIdParam, initialAppointment]);
 
 	// Patient list si non fourni
-	const { data: patients } = useQuery({
+	const { data: patients = [] } = useQuery({
 		queryKey: ["patients"],
 		queryFn: api.getPatients,
 		enabled: !initialPatient && !patient,
@@ -193,10 +193,10 @@ export const InvoiceForm = ({
 	};
 
 	const handlePatientSelect = (patientId: string) => {
-		const patient = patients?.find((p) => p.id === parseInt(patientId));
-		setSelectedPatient(patient || null);
-		if (patient) {
-			form.setValue("patientId", patient.id);
+		const foundPatient = patients.find((p) => p.id === parseInt(patientId));
+		setSelectedPatient(foundPatient || null);
+		if (foundPatient) {
+			form.setValue("patientId", foundPatient.id);
 		}
 	};
 
@@ -222,7 +222,7 @@ export const InvoiceForm = ({
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{patients?.map((p) => (
+												{patients.map((p) => (
 													<SelectItem
 														key={p.id}
 														value={p.id.toString()}

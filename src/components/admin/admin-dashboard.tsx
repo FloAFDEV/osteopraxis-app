@@ -30,17 +30,17 @@ export function AdminDashboard() {
         
         // Dans un environnement réel, vous auriez une API dédiée pour les statistiques d'admin
         // Pour l'instant, nous utilisons des appels API existants pour simuler
-        const [users, osteopaths, cabinets, patients, appointments] = await Promise.all([
-          api.getOsteopaths(), // Utilisé comme proxy pour les utilisateurs
-          api.getOsteopaths(),
-          api.getCabinets(),
-          api.getPatients(),
-          api.getAppointments()
-        ]);
+        const cabinets = await api.getCabinets();
+        const patients = await api.getPatients();
+        const appointments = await api.getAppointments();
+        
+        // Get osteopaths - use the correct method
+        const osteopaths = await api.getOsteopaths();
+        const osteopathsCount = osteopaths?.length || 0;
         
         setStats({
-          totalUsers: osteopaths.length || 0,
-          totalOsteopaths: osteopaths.length || 0,
+          totalUsers: osteopathsCount,
+          totalOsteopaths: osteopathsCount,
           totalCabinets: cabinets.length || 0,
           totalPatients: patients.length || 0,
           totalAppointments: appointments.length || 0

@@ -1,5 +1,5 @@
 
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { User, AuthState } from '@/types';
 import { api } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
@@ -10,11 +10,15 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  isLoading: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
-  loadStoredToken?: () => Promise<void>; // Added to fix the issue in App.tsx
+  loadStoredToken?: () => Promise<void>;
+  loginWithMagicLink?: (email: string) => Promise<boolean>;
+  promoteToAdmin?: (userId: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -22,6 +26,8 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   error: null,
+  isLoading: true,
+  isAdmin: false,
   login: async () => {},
   register: async () => {},
   logout: async () => {},
@@ -54,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         toast.success('Connexion réussie!');
         navigate('/dashboard');
+        return;
       } else {
         setAuthState({
           ...authState,
@@ -72,6 +79,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error: "Erreur lors de la connexion. Veuillez réessayer.",
       });
       toast.error("Erreur lors de la connexion. Veuillez réessayer.");
+    }
+  };
+
+  const loginWithMagicLink = async (email: string): Promise<boolean> => {
+    setAuthState({ ...authState, loading: true, error: null });
+    try {
+      await api.loginWithMagicLink(email);
+      toast.success('Lien de connexion envoyé à votre adresse email.');
+      return true;
+    } catch (error: any) {
+      console.error('Erreur lors de l\'envoi du lien magique:', error);
+      setAuthState({
+        ...authState,
+        loading: false,
+        error: "Erreur lors de l'envoi du lien. Veuillez réessayer.",
+      });
+      toast.error("Erreur lors de l'envoi du lien. Veuillez réessayer.");
+      return false;
     }
   };
 
@@ -203,6 +228,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Add promoteToAdmin function
+  const promoteToAdmin = async (userId: string) => {
+    try {
+      await api.promoteToAdmin(userId);
+      toast.success('Utilisateur promu administrateur avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la promotion en administrateur:', error);
+      toast.error('Erreur lors de la promotion en administrateur');
+      throw error;
+    }
+  };
+
+  const isAdmin = authState.user?.role === "ADMIN";
+  const isLoading = authState.loading;
+
   return (
     <AuthContext.Provider
       value={{
@@ -210,11 +250,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user: authState.user,
         loading: authState.loading,
         error: authState.error,
+        isLoading,
+        isAdmin,
         login,
         register,
         logout,
         checkAuth,
         loadStoredToken,
+        loginWithMagicLink,
+        promoteToAdmin,
       }}
     >
       {children}
@@ -222,14 +266,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-// Export the useAuth hook directly from here
-export const useAuth = () => {
+// Export the useAuth hook
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
-
-// Missing import
-import { useContext } from 'react';

@@ -13,24 +13,27 @@ import {
 import {
   getInvoices, getInvoiceById, createInvoice, updateInvoice, deleteInvoice,
   getInvoicesByPatientId, getInvoicesByOsteopathId, getInvoiceCount,
-  markInvoiceAsPaid
+  markInvoiceAsPaid, getInvoicesByAppointmentId
 } from './invoice-service';
 import { 
   getOsteopathById, getOsteopathByUserId, createOsteopath, updateOsteopath,
-  getOsteopathProfile, updateOsteopathProfile
+  getOsteopathProfile, updateOsteopathProfile, getOsteopaths
 } from './osteopath-service';
 import {
   getCabinets, getCabinetById, createCabinet, updateCabinet, deleteCabinet,
-  getCabinetsByOsteopathId
+  getCabinetsByOsteopathId, getCabinetsByUserId
 } from './cabinet-service';
 
 export const api = {
+  // Auth services
   login,
   register,
   logout,
   checkAuth,
   loginWithMagicLink,
   promoteToAdmin,
+  
+  // Patient services
   getPatients,
   getPatientById,
   createPatient,
@@ -39,6 +42,8 @@ export const api = {
   searchPatients,
   getPatientsByOsteopathId,
   getPatientCount,
+  
+  // Appointment services
   getAppointments,
   getAppointmentById,
   createAppointment,
@@ -50,6 +55,8 @@ export const api = {
   getAppointmentCount,
   cancelAppointment,
   rescheduleAppointment,
+  
+  // Invoice services
   getInvoices,
   getInvoiceById,
   createInvoice,
@@ -59,16 +66,23 @@ export const api = {
   getInvoicesByOsteopathId,
   getInvoiceCount,
   markInvoiceAsPaid,
+  getInvoicesByAppointmentId,
+  
+  // Osteopath services
   getOsteopathById,
   getOsteopathByUserId,
   createOsteopath,
   updateOsteopath,
   getOsteopathProfile,
   updateOsteopathProfile,
+  getOsteopaths,
+  
+  // Cabinet services
   getCabinets,
   getCabinetById,
   createCabinet,
   updateCabinet,
   deleteCabinet,
-  getCabinetsByOsteopathId
+  getCabinetsByOsteopathId,
+  getCabinetsByUserId
 };

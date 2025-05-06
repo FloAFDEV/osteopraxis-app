@@ -11,7 +11,23 @@ export const getCabinets = async (): Promise<Cabinet[]> => {
       throw new Error(error.message);
     }
 
-    return data || [];
+    // Make sure the returned data matches the Cabinet type
+    return (data || []).map(cabinet => ({
+      id: cabinet.id,
+      name: cabinet.name,
+      address: cabinet.address,
+      phone: cabinet.phone || "",
+      email: cabinet.email || null,
+      imageUrl: cabinet.imageUrl || null,
+      logoUrl: cabinet.logoUrl || null,
+      osteopathId: cabinet.osteopathId,
+      createdAt: cabinet.createdAt,
+      updatedAt: cabinet.updatedAt,
+      city: cabinet.city || "",
+      province: cabinet.province || "",
+      postalCode: cabinet.postalCode || "",
+      country: cabinet.country || ""
+    }) as Cabinet);
   } catch (error) {
     console.error("Erreur lors de la récupération des cabinets:", error);
     return [];
@@ -31,7 +47,23 @@ export const getCabinetById = async (id: number): Promise<Cabinet | null> => {
       throw new Error(error.message);
     }
 
-    return data;
+    // Transform data to match Cabinet type
+    return {
+      id: data.id,
+      name: data.name,
+      address: data.address,
+      phone: data.phone || "",
+      email: data.email || null,
+      imageUrl: data.imageUrl || null,
+      logoUrl: data.logoUrl || null,
+      osteopathId: data.osteopathId,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      city: data.city || "",
+      province: data.province || "",
+      postalCode: data.postalCode || "",
+      country: data.country || ""
+    } as Cabinet;
   } catch (error) {
     console.error(`Erreur lors de la récupération du cabinet ${id}:`, error);
     return {
@@ -55,6 +87,11 @@ export const getCabinetById = async (id: number): Promise<Cabinet | null> => {
 // Fonction pour créer un nouveau cabinet
 export const createCabinet = async (cabinetData: Partial<Cabinet>): Promise<Cabinet> => {
   try {
+    // Ensure all required fields are present
+    if (!cabinetData.name || !cabinetData.address || !cabinetData.osteopathId) {
+      throw new Error("Les champs name, address et osteopathId sont requis");
+    }
+
     const { data, error } = await supabase
       .from("Cabinet")
       .insert([cabinetData])
@@ -65,7 +102,7 @@ export const createCabinet = async (cabinetData: Partial<Cabinet>): Promise<Cabi
       throw new Error(error.message);
     }
 
-    return data;
+    return data as Cabinet;
   } catch (error) {
     console.error("Erreur lors de la création du cabinet:", error);
     throw error;
@@ -86,7 +123,7 @@ export const updateCabinet = async (id: number, cabinetData: Partial<Cabinet>): 
       throw new Error(error.message);
     }
 
-    return data;
+    return data as Cabinet;
   } catch (error) {
     console.error(`Erreur lors de la mise à jour du cabinet ${id}:`, error);
     throw error;
@@ -119,9 +156,52 @@ export const getCabinetsByOsteopathId = async (osteopathId: number): Promise<Cab
       throw new Error(error.message);
     }
 
-    return data || [];
+    return (data || []).map(cabinet => ({
+      id: cabinet.id,
+      name: cabinet.name,
+      address: cabinet.address,
+      phone: cabinet.phone || "",
+      email: cabinet.email || null,
+      imageUrl: cabinet.imageUrl || null,
+      logoUrl: cabinet.logoUrl || null,
+      osteopathId: cabinet.osteopathId,
+      createdAt: cabinet.createdAt,
+      updatedAt: cabinet.updatedAt,
+      city: cabinet.city || "",
+      province: cabinet.province || "",
+      postalCode: cabinet.postalCode || "",
+      country: cabinet.country || ""
+    }) as Cabinet);
   } catch (error) {
     console.error(`Erreur lors de la récupération des cabinets de l'ostéopathe ${osteopathId}:`, error);
     return [];
+  }
+};
+
+// Function to get cabinets by user ID
+export const getCabinetsByUserId = async (userId: string): Promise<Cabinet[]> => {
+  try {
+    // First get the osteopath ID for this user
+    const { data: osteopathData, error: osteopathError } = await supabase
+      .from("Osteopath")
+      .select("id")
+      .eq("userId", userId)
+      .maybeSingle();
+      
+    if (osteopathError) {
+      console.error("Error finding osteopath:", osteopathError);
+      throw new Error(osteopathError.message);
+    }
+    
+    if (!osteopathData) {
+      console.log("No osteopath found for userId:", userId);
+      return [];
+    }
+    
+    // Now get cabinets with this osteopath ID
+    return getCabinetsByOsteopathId(osteopathData.id);
+  } catch (error) {
+    console.error("Exception while searching for cabinets:", error);
+    throw error;
   }
 };

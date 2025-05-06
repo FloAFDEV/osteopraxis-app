@@ -1,165 +1,157 @@
 
-import React, { useState, useEffect } from 'react';
-import { Layout } from "@/components/ui/layout";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
-import { Settings, Building2, UserCog, FileText } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/services/api";
-import { Osteopath } from "@/types";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/use-auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SettingsPage = () => {
-  const { isAdmin, user } = useAuth();
-  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadOsteopathData = async () => {
-      if (user?.osteopathId) {
-        try {
-          const osteopathData = await api.getOsteopathById(user.osteopathId);
-          setOsteopath(osteopathData || null);
-        } catch (error) {
-          console.error("Error fetching osteopath data:", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    };
-
-    loadOsteopathData();
-  }, [user]);
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("profile");
+  
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Settings className="h-8 w-8 text-primary" />
-            Paramètres
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gérez les paramètres de votre application
-          </p>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Chargement des informations...</p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserCog className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Profil professionnel
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos informations professionnelles
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {osteopath ? (
-                  <>
-                    <div className="mb-4 space-y-1">
-                      <p className="text-sm">
-                        <span className="font-medium">Nom:</span> {osteopath.name}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Titre:</span> {osteopath.professional_title || "Non spécifié"}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Numéro ADELI:</span> {osteopath.adeli_number || "Non spécifié"}
-                      </p>
-                    </div>
-                    <Button asChild variant="outline">
-                      <Link to="/settings/profile">Modifier mon profil</Link>
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <p className="mb-4 text-sm">
-                      Complétez votre profil professionnel pour accéder à toutes les fonctionnalités.
-                    </p>
-                    <Button asChild>
-                      <Link to="/settings/profile">Compléter mon profil</Link>
-                    </Button>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Cabinets
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos cabinets d'ostéopathie
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm">
-                  Ajoutez, modifiez ou supprimez des cabinets pour votre pratique.
-                </p>
-                <Button asChild variant="outline">
-                  <Link to="/cabinets">Gérer les cabinets</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Ajout de la carte pour les factures */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Factures
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos factures patients
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm">
-                  Créez et gérez les factures pour vos patients.
-                </p>
-                <Button asChild variant="outline">
-                  <Link to="/invoices">Gérer les factures</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {isAdmin && (
+      <div className="container max-w-6xl px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Paramètres</h1>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 lg:grid-cols-5 h-auto gap-2">
+            <TabsTrigger value="profile">Profil</TabsTrigger>
+            <TabsTrigger value="cabinet">Cabinet</TabsTrigger>
+            <TabsTrigger value="account">Compte</TabsTrigger>
+            <TabsTrigger value="billing">Facturation</TabsTrigger>
+            {isAdmin && <TabsTrigger value="admin" className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400">Admin</TabsTrigger>}
+          </TabsList>
+          
+          <div className="mt-6">
+            <TabsContent value="profile">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserCog className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                    Administration
-                  </CardTitle>
+                  <CardTitle>Paramètres de profil</CardTitle>
                   <CardDescription>
-                    Paramètres administrateur
+                    Gérez vos informations personnelles et professionnelles
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Informations personnelles</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Modifiez vos informations personnelles comme votre nom, prénom, email, etc.
+                    </p>
+                    <Button asChild>
+                      <Link to="/settings/profile">Modifier le profil</Link>
+                    </Button>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Préférences de notification</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Gérez comment et quand vous recevez des notifications
+                    </p>
+                    <Button variant="outline" disabled>Fonctionnalité à venir</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="cabinet">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Paramètres de cabinet</CardTitle>
+                  <CardDescription>
+                    Gérez vos cabinets d'ostéopathie
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Mes cabinets</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Gérez les informations de vos cabinets: adresse, téléphone, horaires, etc.
+                    </p>
+                    <Button asChild>
+                      <Link to="/settings/cabinet">Gérer mes cabinets</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="account">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Paramètres du compte</CardTitle>
+                  <CardDescription>
+                    Gérez votre compte et la sécurité
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Mot de passe</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Changez votre mot de passe pour sécuriser davantage votre compte
+                    </p>
+                    <Button variant="outline" disabled>Fonctionnalité à venir</Button>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium text-destructive">Zone de danger</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Une fois que vous supprimez votre compte, il n'y a pas de retour en arrière. Soyez certain.
+                    </p>
+                    <Button variant="destructive" disabled>Fonctionnalité à venir</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="billing">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Paramètres de facturation</CardTitle>
+                  <CardDescription>
+                    Gérez vos méthodes de paiement et abonnements
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="mb-4 text-sm">
-                    Accédez aux paramètres d'administration (réservé aux administrateurs).
-                  </p>
-                  <Button asChild variant="outline">
-                    <Link to="/admin">Panneau d'administration</Link>
-                  </Button>
+                  <p className="text-muted-foreground">Cette fonctionnalité sera disponible prochainement.</p>
                 </CardContent>
+                <CardFooter>
+                  <Button variant="outline" disabled>Fonctionnalité à venir</Button>
+                </CardFooter>
               </Card>
+            </TabsContent>
+            
+            {isAdmin && (
+              <TabsContent value="admin">
+                <Card className="border-amber-200 dark:border-amber-800">
+                  <CardHeader className="bg-amber-50 dark:bg-amber-950/30">
+                    <CardTitle className="text-amber-800 dark:text-amber-300">Administration</CardTitle>
+                    <CardDescription>
+                      Accédez aux fonctionnalités d'administration
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <p className="mb-4">
+                      En tant qu'administrateur, vous avez accès à des fonctionnalités supplémentaires pour gérer l'ensemble de la plateforme.
+                    </p>
+                    <Button asChild>
+                      <Link to="/admin">Accéder à l'administration</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             )}
           </div>
-        )}
+        </Tabs>
       </div>
     </Layout>
   );

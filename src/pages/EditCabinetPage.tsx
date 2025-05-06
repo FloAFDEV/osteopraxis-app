@@ -101,7 +101,6 @@ const EditCabinetPage = () => {
 						osteopathId={osteopathId}
 						onSave={handleSaveCabinet}
 						cabinet={cabinetData}
-						isEditing={true}
 					/>
 				)}
 			</div>
