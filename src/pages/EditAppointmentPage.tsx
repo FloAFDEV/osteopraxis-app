@@ -112,7 +112,7 @@ const EditAppointmentPage = () => {
 									"HH:mm"
 								),
 								reason: appointment.reason,
-								status: appointment.status,
+								status: appointment.status as any, // Cast to resolve type issue
 								notes: appointment.notes,
 							}}
 							isEditing={true}

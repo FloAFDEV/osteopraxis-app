@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
@@ -113,7 +112,7 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
           await api.updateAppointment(parseInt(id, 10), sessionData);
           toast.success("Session auto-sauvegardée");
         } else {
-          await api.createAppointment(sessionData);
+          await api.createAppointment(sessionData as any); // Cast to resolve type issues
           toast.success("Session auto-sauvegardée");
         }
       } catch (error) {
