@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,8 +82,8 @@ export default function OsteopathProfilePage() {
         const profileData = await api.getOsteopathProfile(osteopathId);
         setOsteopathProfile(profileData || initialOsteopathProfile);
 
-        const cabinetData = await api.get первыеCabinetByOsteopathId(osteopathId);
-        setCabinet(cabinetData);
+        const cabinetData = await api.getCabinetsByOsteopathId(parseInt(osteopathId));
+        setCabinet(cabinetData?.[0] || null);
       } catch (error) {
         console.error("Failed to fetch osteopath profile:", error);
         toast.error("Failed to load profile. Please try again.");

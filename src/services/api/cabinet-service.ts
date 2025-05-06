@@ -1,3 +1,4 @@
+
 import { Cabinet } from "@/types";
 import { supabase } from "@/lib/supabase";
 
