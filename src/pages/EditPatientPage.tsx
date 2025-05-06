@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -5,7 +6,7 @@ import { PatientForm } from '@/components/patient-form';
 import { Patient } from '@/types';
 import { toast } from 'sonner';
 import { UserRound, Trash } from 'lucide-react';
-import { patientService } from '@/services/api/patient-service';
+import { api } from '@/services/api';
 import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
 import { Button } from "@/components/ui/button";
 
@@ -24,7 +25,7 @@ const EditPatientPage = () => {
       try {
         setIsLoading(true);
         const patientId = parseInt(id);
-        const patient = await patientService.getPatientById(patientId);
+        const patient = await api.getPatientById(patientId);
 
         if (!patient) {
           toast.error("Patient non trouvé");
@@ -56,12 +57,14 @@ const EditPatientPage = () => {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
       }
 
-      // Use the patientService updatePatient method
-      await patientService.updatePatient({
-        ...patient,
+      // Use the API's updatePatient method
+      const updatedPatient = await api.updatePatient(patient.id, {
         ...updatedData,
         updatedAt: new Date().toISOString()
       });
+
+      // Mettre à jour l'état local avec les données mises à jour
+      setPatient(updatedPatient);
 
       // Afficher le toast de succès ici
       toast.success("Patient mis à jour avec succès");
@@ -82,7 +85,7 @@ const EditPatientPage = () => {
     setShowDeleteModal(false);
     if (!patient) return;
     try {
-      await patientService.deletePatient(patient.id);
+      await api.deletePatient(patient.id);
       toast.success("Patient supprimé avec succès !");
       setTimeout(() => {
         navigate("/patients");

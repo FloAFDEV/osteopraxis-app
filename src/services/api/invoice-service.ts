@@ -1,182 +1,147 @@
 
 import { Invoice, PaymentStatus } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
 
-export const invoiceService = {
-  async getInvoices(): Promise<Invoice[]> {
-    try {
-      const { data, error } = await supabase
-        .from('Invoice')
-        .select('*');
-        
-      if (error) throw new Error(error.message);
-      return data as Invoice[];
-    } catch (error) {
-      console.error("Error fetching invoices:", error);
-      return [];
-    }
+// Données de démonstration
+const invoices: Invoice[] = [
+  {
+    id: 1,
+    patientId: 1,
+    appointmentId: 1,
+    amount: 60.0,
+    date: new Date().toISOString(),
+    paymentStatus: "PENDING",
+    paymentMethod: "CB",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
-  
-  async getInvoiceById(id: number): Promise<Invoice | null> {
-    try {
-      const { data, error } = await supabase
-        .from('Invoice')
-        .select('*')
-        .eq('id', id)
-        .single();
-        
-      if (error) {
-        if (error.code === 'PGRST116') return null;
-        throw new Error(error.message);
-      }
-      
-      return data as Invoice;
-    } catch (error) {
-      console.error(`Error fetching invoice ${id}:`, error);
-      return null;
-    }
-  },
-  
-  async createInvoice(invoice: Omit<Invoice, 'id'>): Promise<Invoice> {
-    try {
-      const { data, error } = await supabase
-        .from('Invoice')
-        .insert(invoice)
-        .select()
-        .single();
-        
-      if (error) throw new Error(error.message);
-      return data as Invoice;
-    } catch (error) {
-      console.error("Error creating invoice:", error);
-      throw error;
-    }
-  },
-  
-  async updateInvoice(id: number, update: Partial<Invoice>): Promise<Invoice> {
-    try {
-      const { data, error } = await supabase
-        .from('Invoice')
-        .update(update)
-        .eq('id', id)
-        .select()
-        .single();
-        
-      if (error) throw new Error(error.message);
-      return data as Invoice;
-    } catch (error) {
-      console.error(`Error updating invoice ${id}:`, error);
-      throw error;
-    }
-  },
-  
-  async deleteInvoice(id: number): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('Invoice')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw new Error(error.message);
-      return true;
-    } catch (error) {
-      console.error(`Error deleting invoice ${id}:`, error);
-      return false;
-    }
-  },
-  
-  async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
-    try {
-      const { data, error } = await supabase
-        .from('Invoice')
-        .select('*')
-        .eq('patientId', patientId);
-        
-      if (error) throw new Error(error.message);
-      return data as Invoice[];
-    } catch (error) {
-      console.error(`Error fetching invoices for patient ${patientId}:`, error);
-      return [];
-    }
-  },
-  
-  async getInvoicesByOsteopathId(osteopathId: number): Promise<Invoice[]> {
-    // In a real implementation, we'd join with patients or appointments
-    // For now, just return all invoices as a mock
-    return this.getInvoices();
-  },
-  
-  async getInvoiceCount(): Promise<number> {
-    try {
-      const { count, error } = await supabase
-        .from('Invoice')
-        .select('*', { count: 'exact', head: true });
-        
-      if (error) throw new Error(error.message);
-      return count || 0;
-    } catch (error) {
-      console.error("Error counting invoices:", error);
-      return 0;
-    }
-  },
-  
-  async markInvoiceAsPaid(id: number): Promise<Invoice> {
-    return this.updateInvoice(id, { paymentStatus: 'PAID' });
-  },
-  
-  async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {
-    try {
-      const { data, error } = await supabase
-        .from('Invoice')
-        .select('*')
-        .eq('appointmentId', appointmentId);
-        
-      if (error) throw new Error(error.message);
-      return data as Invoice[];
-    } catch (error) {
-      console.error(`Error fetching invoices for appointment ${appointmentId}:`, error);
-      return [];
-    }
+  {
+    id: 2,
+    patientId: 2,
+    appointmentId: 3,
+    amount: 60.0,
+    date: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
+    paymentStatus: "PAID",
+    paymentMethod: "ESPECES",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
-};
+];
 
-// Export individual functions for the API module
+// Récupérer toutes les factures
 export const getInvoices = async (): Promise<Invoice[]> => {
-  return invoiceService.getInvoices();
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return [...invoices];
 };
 
+// Récupérer une facture par ID
 export const getInvoiceById = async (id: number): Promise<Invoice | null> => {
-  return invoiceService.getInvoiceById(id);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  const invoice = invoices.find(i => i.id === id);
+  return invoice || null;
 };
 
-export const createInvoice = async (invoice: Omit<Invoice, 'id'>): Promise<Invoice> => {
-  return invoiceService.createInvoice(invoice);
+// Créer une nouvelle facture
+export const createInvoice = async (invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const newInvoice: Invoice = {
+    ...invoiceData,
+    id: invoices.length + 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  invoices.push(newInvoice);
+  return newInvoice;
 };
 
-export const updateInvoice = async (id: number, update: Partial<Invoice>): Promise<Invoice> => {
-  return invoiceService.updateInvoice(id, update);
+// Mettre à jour une facture
+export const updateInvoice = async (id: number, invoiceData: Partial<Invoice>): Promise<Invoice> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const index = invoices.findIndex(i => i.id === id);
+  if (index !== -1) {
+    invoices[index] = {
+      ...invoices[index],
+      ...invoiceData,
+      updatedAt: new Date().toISOString()
+    };
+    return invoices[index];
+  }
+  
+  throw new Error(`Invoice with ID ${id} not found`);
 };
 
+// Supprimer une facture
 export const deleteInvoice = async (id: number): Promise<boolean> => {
-  return invoiceService.deleteInvoice(id);
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const index = invoices.findIndex(i => i.id === id);
+  if (index !== -1) {
+    invoices.splice(index, 1);
+    return true;
+  }
+  
+  return false;
 };
 
+// Récupérer les factures par patient ID
 export const getInvoicesByPatientId = async (patientId: number): Promise<Invoice[]> => {
-  return invoiceService.getInvoicesByPatientId(patientId);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  return invoices.filter(i => i.patientId === patientId)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
+// Récupérer les factures par ostéopathe ID
 export const getInvoicesByOsteopathId = async (osteopathId: number): Promise<Invoice[]> => {
-  return invoiceService.getInvoicesByOsteopathId(osteopathId);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  // Dans un vrai système, nous filtrerions par ostéopathe ID
+  // Comme nos données mock n'ont pas de champ ostéopathe, nous retournons tout
+  return [...invoices].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
+// Compter le nombre de factures
 export const getInvoiceCount = async (): Promise<number> => {
-  return invoiceService.getInvoiceCount();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return invoices.length;
 };
 
-export const markInvoiceAsPaid = async (id: number): Promise<Invoice> => {
-  return invoiceService.markInvoiceAsPaid(id);
+// Marquer une facture comme payée
+export const markInvoiceAsPaid = async (id: number, paymentMethod: string): Promise<Invoice> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const index = invoices.findIndex(i => i.id === id);
+  if (index !== -1) {
+    invoices[index] = {
+      ...invoices[index],
+      paymentStatus: "PAID",
+      paymentMethod,
+      updatedAt: new Date().toISOString()
+    };
+    return invoices[index];
+  }
+  
+  throw new Error(`Invoice with ID ${id} not found`);
 };
 
+// Récupérer les factures par rendez-vous ID
 export const getInvoicesByAppointmentId = async (appointmentId: number): Promise<Invoice[]> => {
-  return invoiceService.getInvoicesByAppointmentId(appointmentId);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  return invoices.filter(i => i.appointmentId === appointmentId);
 };
+
+// Exporter le service
+export const invoiceService = {
+  getInvoices,
+  getInvoiceById,
+  createInvoice,
+  updateInvoice,
+  deleteInvoice,
+  getInvoicesByPatientId,
+  getInvoicesByOsteopathId,
+  getInvoiceCount,
+  markInvoiceAsPaid,
+  getInvoicesByAppointmentId
+};
+
+export default invoiceService;

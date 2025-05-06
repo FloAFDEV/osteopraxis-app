@@ -104,8 +104,8 @@ export const searchPatients = async (query: string): Promise<Patient[]> => {
   return patients.filter(patient => 
     patient.firstName.toLowerCase().includes(lowerQuery) ||
     patient.lastName.toLowerCase().includes(lowerQuery) ||
-    patient.email.toLowerCase().includes(lowerQuery) ||
-    patient.phone.includes(lowerQuery)
+    patient.email?.toLowerCase().includes(lowerQuery) ||
+    patient.phone?.includes(lowerQuery)
   );
 };
 
@@ -118,3 +118,18 @@ export const getPatientCount = async (): Promise<number> => {
   await new Promise(resolve => setTimeout(resolve, 100));
   return patients.length;
 };
+
+// Export patientService pour les fichiers qui en ont besoin
+export const patientService = {
+  getPatients,
+  getPatientById,
+  createPatient,
+  updatePatient,
+  deletePatient,
+  searchPatients,
+  getPatientsByOsteopathId,
+  getPatientCount
+};
+
+// Pour permettre both import styles
+export default patientService;

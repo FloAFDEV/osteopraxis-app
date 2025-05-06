@@ -84,3 +84,6 @@ export const deleteUser = async (id: string) => {
   // Simulation de la suppression d'un utilisateur réussie
   return true;
 };
+
+// Export default pour faciliter les imports
+export default { login, register, logout, checkAuth, loginWithMagicLink, promoteToAdmin, updateUser, deleteUser };
