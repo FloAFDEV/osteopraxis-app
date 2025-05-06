@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
@@ -29,6 +28,8 @@ import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import { api } from './services/api';
+import NewSessionPage from './pages/NewSessionPage';
+import EditSessionPage from './pages/EditSessionPage';
 
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
@@ -124,6 +125,10 @@ function App() {
         
         {/* Redirect cabinet à cabinets */}
         <Route path="/cabinet" element={isAuthenticated ? <Navigate to="/cabinets" /> : <Navigate to="/login" />} />
+        
+        {/* Routes pour les sessions */}
+        <Route path="/sessions/new" element={isAuthenticated ? <NewSessionPage /> : <Navigate to="/login" />} />
+        <Route path="/sessions/:id/edit" element={isAuthenticated ? <EditSessionPage /> : <Navigate to="/login" />} />
       </Routes>
       <Toaster position="top-right" richColors closeButton />
     </>
