@@ -1,3 +1,4 @@
+
 // Re-exporting services for the application API
 import { appointmentService } from "./appointment-service";
 import { patientService } from "./patient-service";
@@ -5,6 +6,7 @@ import { osteopathService } from "./osteopath-service";
 import { cabinetService } from "./cabinet-service";
 import { invoiceService } from "./invoice-service";
 import { authService } from "./auth-service";
+import { sessionService } from "./session-service";
 
 // Export services with a clean API surface
 export const api = {
@@ -29,7 +31,7 @@ export const api = {
 	getPatientById: patientService.getPatientById,
 	createPatient: patientService.createPatient,
 	updatePatient: patientService.updatePatient,
-	deletePatient: patientService.deletePatient, // ajout
+	deletePatient: patientService.deletePatient,
 
 	// Appointment related
 	getAppointments: async () => {
@@ -41,15 +43,27 @@ export const api = {
 	createAppointment: appointmentService.createAppointment,
 	updateAppointment: appointmentService.updateAppointment,
 	updateAppointmentStatus: appointmentService.updateAppointmentStatus,
-	cancelAppointment: appointmentService.cancelAppointment, // Ajout de la nouvelle méthode
-	deleteAppointment: appointmentService.deleteAppointment, // ajout
+	cancelAppointment: appointmentService.cancelAppointment,
+	deleteAppointment: appointmentService.deleteAppointment,
+
+	// Session related (nouveau système de séances)
+	getSessions: sessionService.getSessions,
+	getSessionById: sessionService.getSessionById,
+	getSessionsByPatientId: sessionService.getSessionsByPatientId,
+	createSession: sessionService.createSession,
+	updateSession: sessionService.updateSession,
+	updateSessionStatus: sessionService.updateSessionStatus,
+	cancelSession: sessionService.cancelSession,
+	deleteSession: sessionService.deleteSession,
+	createImmediateSession: sessionService.createImmediateSession,
+	autoSaveSession: sessionService.autoSaveSession,
 
 	// Cabinet related
 	getCabinets: cabinetService.getCabinets,
 	getCabinetById: cabinetService.getCabinetById,
 	createCabinet: cabinetService.createCabinet,
 	updateCabinet: cabinetService.updateCabinet,
-	deleteCabinet: cabinetService.deleteCabinet, // ajout
+	deleteCabinet: cabinetService.deleteCabinet,
 	getCabinetsByUserId:
 		cabinetService.getCabinetsByUserId || (() => Promise.resolve([])),
 	getCabinetsByOsteopathId:
@@ -61,10 +75,9 @@ export const api = {
 	getInvoiceById: invoiceService.getInvoiceById,
 	getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
 	getInvoicesByAppointmentId: invoiceService.getInvoicesByAppointmentId,
-
 	createInvoice: invoiceService.createInvoice,
 	updateInvoice: invoiceService.updateInvoice,
-	deleteInvoice: invoiceService.deleteInvoice, // ajout
+	deleteInvoice: invoiceService.deleteInvoice,
 
 	// Osteopath related
 	getOsteopaths:

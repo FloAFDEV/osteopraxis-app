@@ -29,11 +29,11 @@ export function PatientHeader({ patientId }: PatientHeaderProps) {
 				<Button variant="outline" asChild>
 					<Link to={`/appointments?patientId=${patientId}`}>
 						<Calendar className="mr-2 h-4 w-4" />
-						Voir toutes les séances
+						Toutes les séances
 					</Link>
 				</Button>
 				<Button asChild>
-					<Link to={`/appointments/new?patientId=${patientId}`}>
+					<Link to={`/sessions/new?patientId=${patientId}`}>
 						<Plus className="mr-2 h-4 w-4" />
 						Nouvelle séance
 					</Link>
