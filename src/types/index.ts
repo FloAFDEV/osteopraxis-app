@@ -1,3 +1,4 @@
+
 export interface Patient {
   id: number;
   firstName: string;
@@ -19,6 +20,32 @@ export interface Patient {
   insuranceProvider?: string;
   insurancePolicyNumber?: string;
   hdlm?: string;
+  // Propriétés additionnelles pour la fiche patient
+  createdAt?: string;
+  updatedAt?: string;
+  avatarUrl?: string;
+  hasChildren?: boolean | string;
+  isSmoker?: boolean;
+  isDeceased?: boolean;
+  hasVisionCorrection?: boolean;
+  childrenAges?: number[];
+  maritalStatus?: string;
+  contraception?: string;
+  physicalActivity?: string;
+  handedness?: string;
+  generalPractitioner?: string;
+  ophtalmologistName?: string;
+  entDoctorName?: string;
+  entProblems?: string;
+  digestiveDoctorName?: string;
+  digestiveProblems?: string;
+  surgicalHistory?: string;
+  traumaHistory?: string;
+  rheumatologicalHistory?: string;
+  currentTreatment?: string;
+  osteopathId?: number;
+  cabinetId?: number;
+  userId?: string;
 }
 
 export type AppointmentStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "CANCELLED" | "RESCHEDULED" | "NO_SHOW";
@@ -31,6 +58,10 @@ export interface Appointment {
   status: AppointmentStatus;
   notificationSent: boolean;
   notes?: string;
+  cabinetId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  user_id?: string;
 }
 
 export interface Cabinet {
@@ -45,7 +76,16 @@ export interface Cabinet {
   email?: string;
   website?: string;
   notes?: string;
+  imageUrl?: string;
+  logoUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  osteopathId?: number;
+  tenant_id?: string;
+  professionalProfileId?: number;
 }
+
+export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 
 export interface Invoice {
   id: number;
@@ -59,6 +99,11 @@ export interface Invoice {
   paymentDate?: string;
   paymentMethod?: string;
   notes?: string;
+  Patient?: any;  // Pour la référence à Invoice.Patient dans invoice-print-view.tsx
+  paymentStatus: PaymentStatus;
+  tvaExoneration?: boolean;
+  tvaMotif?: string;
+  appointmentId?: number;
 }
 
 export interface User {
@@ -73,6 +118,19 @@ export interface User {
   province?: string;
   postalCode?: string;
   country?: string;
+  osteopathId?: number;
+}
+
+export interface Osteopath {
+  id: number;
+  userId: string;
+  name: string;
+  professional_title?: string;
+  adeli_number?: string;
+  siret?: string;
+  ape_code?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface OsteopathProfile {
@@ -101,4 +159,48 @@ export interface OsteopathProfile {
   certifications?: string[];
   awards?: string[];
   publications?: string[];
+}
+
+// Ajout de l'interface DashboardData pour résoudre les erreurs d'importation
+export interface DashboardData {
+  totalPatients: number;
+  newPatientsThisMonth: number;
+  totalAppointments: number;
+  completedAppointments: number;
+  canceledAppointments: number;
+  revenue: {
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+    thisYear: number;
+  };
+  patientDemographics: {
+    age: {
+      under18: number;
+      adults18to30: number;
+      adults31to45: number;
+      adults46to60: number;
+      adults61plus: number;
+    };
+    gender: {
+      male: number;
+      female: number;
+      other: number;
+    };
+  };
+  growthData: {
+    patients: Array<{ month: string; count: number }>;
+    appointments: Array<{ month: string; count: number }>;
+  };
+}
+
+// Types pour le module de gestion des séances
+export type SessionStatus = AppointmentStatus;
+
+export interface Session extends Appointment {
+  plannedTime?: string;
+  actualStartTime?: string;
+  actualEndTime?: string;
+  lastEditedAt?: string;
+  autoSaved?: boolean;
 }
