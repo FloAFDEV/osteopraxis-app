@@ -18,7 +18,7 @@ const PatientDetailPage = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [invoices, setInvoices] = useState([]);
-	const [viewMode, setViewMode] = useState("cards");
+	const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 	
 	useEffect(() => {
 		const fetchPatientData = async () => {

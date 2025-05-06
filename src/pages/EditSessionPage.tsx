@@ -8,17 +8,16 @@ import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { SessionForm } from "@/components/session/SessionForm";
 import { toast } from "sonner";
-import { format } from "date-fns";
 
 const EditSessionPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 	const [session, setSession] = useState<Appointment | null>(null);
-	const [patients, setPatients] = useState<Patient[]>([]);
+	const [patient, setPatient] = useState<Patient | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const fetchSessionAndPatients = async () => {
+		const fetchSessionAndPatient = async () => {
 			setLoading(true);
 			try {
 				if (!id) {
@@ -27,10 +26,7 @@ const EditSessionPage = () => {
 				}
 
 				const sessionId = parseInt(id, 10);
-				const [sessionData, patientsData] = await Promise.all([
-					sessionService.getSessionById(sessionId),
-					api.getPatients(),
-				]);
+				const sessionData = await sessionService.getSessionById(sessionId);
 
 				if (!sessionData) {
 					toast.error("Séance non trouvée.");
@@ -39,11 +35,12 @@ const EditSessionPage = () => {
 				}
 
 				setSession(sessionData);
-				setPatients(
-					patientsData.sort((a: Patient, b: Patient) =>
-						a.lastName.localeCompare(b.lastName)
-					)
-				);
+				
+				// Fetch patient data
+				if (sessionData.patientId) {
+					const patientData = await api.getPatientById(sessionData.patientId);
+					setPatient(patientData);
+				}
 			} catch (error) {
 				console.error("Erreur lors du chargement des données :", error);
 				toast.error(
@@ -54,7 +51,7 @@ const EditSessionPage = () => {
 			}
 		};
 
-		fetchSessionAndPatients();
+		fetchSessionAndPatient();
 	}, [id, navigate]);
 
 	if (loading) {
@@ -102,20 +99,7 @@ const EditSessionPage = () => {
 				<section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
 					{session && (
 						<SessionForm
-							patients={patients}
-							sessionId={session.id}
-							defaultValues={{
-								patientId: session.patientId,
-								date: new Date(session.date),
-								time: format(
-									new Date(session.date),
-									"HH:mm"
-								),
-								reason: session.reason,
-								status: session.status,
-								notes: session.notes || "",
-							}}
-							isEditing={true}
+							patient={patient || undefined}
 							onCancel={() => navigate(-1)}
 						/>
 					)}

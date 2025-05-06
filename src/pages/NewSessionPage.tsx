@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { sessionService } from "@/services/api/session-service";
 
 const NewSessionPage = () => {
-	const [patients, setPatients] = useState<Patient[]>([]);
+	const [patient, setPatient] = useState<Patient | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	const location = useLocation();
@@ -21,37 +21,27 @@ const NewSessionPage = () => {
 		? parseInt(queryParams.get("patientId")!)
 		: undefined;
 
-	const dateParam = queryParams.get("date");
-	const timeParam = queryParams.get("time");
-
-	const defaultDate = dateParam ? new Date(dateParam) : new Date();
-	const defaultTime =
-		timeParam && /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeParam)
-			? timeParam
-			: "09:00";
-
 	useEffect(() => {
-		const fetchPatients = async () => {
+		const fetchPatient = async () => {
 			try {
-				const data = await api.getPatients();
-				const sorted = data.sort((a: Patient, b: Patient) =>
-					a.lastName.localeCompare(b.lastName)
-				);
-				setPatients(sorted);
+				if (patientId) {
+					const data = await api.getPatientById(patientId);
+					setPatient(data);
+				}
 			} catch (error) {
 				console.error(
-					"Erreur lors du chargement des patients :",
+					"Erreur lors du chargement du patient :",
 					error
 				);
 				toast.error(
-					"Impossible de charger les patients. Veuillez réessayer."
+					"Impossible de charger le patient. Veuillez réessayer."
 				);
 			} finally {
 				setLoading(false);
 			}
 		};
-		fetchPatients();
-	}, []);
+		fetchPatient();
+	}, [patientId]);
 
 	const createImmediateSession = async () => {
 		if (!patientId) {
@@ -110,17 +100,7 @@ const NewSessionPage = () => {
 					</div>
 				) : (
 					<section className="rounded-lg border border-gray-200 shadow-sm p-6">
-						<SessionForm
-							patients={patients}
-							defaultValues={{
-								patientId,
-								date: defaultDate,
-								time: defaultTime,
-								status: "SCHEDULED",
-								reason: "",
-								notes: ""
-							}}
-						/>
+						<SessionForm patient={patient || undefined} />
 					</section>
 				)}
 			</div>

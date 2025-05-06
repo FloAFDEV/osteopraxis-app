@@ -68,6 +68,9 @@ export interface Appointment {
   notificationSent: boolean;
   cabinetId?: number;
   notes?: string; // Added field for session report
+  plannedTime?: string;
+  actualStartTime?: string;
+  actualEndTime?: string;
 }
 
 // Enums pour les patients
@@ -98,13 +101,13 @@ export type Contraception =
   | "STERILIZATION";
 
 // Interface pour les rendez-vous
-// Updated to only use "CANCELED" (one L) for consistency
 export type AppointmentStatus = 
   | "SCHEDULED" 
   | "COMPLETED" 
-  | "CANCELED"  // Using single L spelling consistently
+  | "CANCELED"
   | "RESCHEDULED"
-  | "NO_SHOW";
+  | "NO_SHOW"
+  | "IN_PROGRESS";
 
 // Interface pour les cabinets
 export interface Cabinet {

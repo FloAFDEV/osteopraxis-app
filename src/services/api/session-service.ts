@@ -117,8 +117,8 @@ export const sessionService = {
     }
   },
   
-  async updateSessionStatus(id: number, status: SessionStatus): Promise<Appointment> {
-    return this.updateSession(id, { status: status as AppointmentStatus });
+  async updateSessionStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
+    return this.updateSession(id, { status });
   },
   
   async cancelSession(id: number): Promise<Appointment> {
@@ -131,7 +131,7 @@ export const sessionService = {
       }
     }
     
-    return this.updateSession(id, { status: "CANCELED" as AppointmentStatus });
+    return this.updateSession(id, { status: "CANCELED" });
   },
 
   async deleteSession(id: number): Promise<boolean> {

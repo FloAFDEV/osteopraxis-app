@@ -1,13 +1,7 @@
 
 import { AppointmentStatus } from "./index";
 
-export type SessionStatus = 
-  | "SCHEDULED"   // Planifiée
-  | "IN_PROGRESS" // En cours
-  | "COMPLETED"   // Terminée
-  | "CANCELED"    // Annulée
-  | "RESCHEDULED" // Reportée
-  | "NO_SHOW";    // Absence
+export type SessionStatus = AppointmentStatus;
 
 export interface SessionFormData {
   id?: number;

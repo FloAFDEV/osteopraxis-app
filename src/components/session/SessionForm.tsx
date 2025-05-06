@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
@@ -29,20 +30,22 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { DatePicker } from "@/components/ui/date-picker"
-import { CalendarIcon } from "@radix-ui/react-icons"
+import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { Separator } from "@/components/ui/separator"
 import { toast } from 'sonner';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from "@/services/api";
-import { Patient } from "@/types";
+import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { Loader2 } from "lucide-react";
-import { SessionFormData, SessionStatus } from "@/types/session";
+import { SessionStatus } from "@/types/session";
 
 const sessionFormSchema = z.object({
-  patientId: z.number(),
+  patientId: z.number({
+    required_error: "Patient requis",
+  }),
   date: z.date({
     required_error: "Une date doit être sélectionnée.",
   }),
@@ -56,6 +59,8 @@ const sessionFormSchema = z.object({
   status: z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELED', 'RESCHEDULED', 'NO_SHOW']),
 })
 
+type FormValues = z.infer<typeof sessionFormSchema>;
+
 interface SessionFormProps {
   patient?: Patient;
   onCancel?: () => void;
@@ -67,11 +72,11 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const [isNew, setIsNew] = useState(true);
-  const [initialValues, setInitialValues] = useState<SessionFormData | null>(null);
+  const [initialValues, setInitialValues] = useState<Appointment | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof sessionFormSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(sessionFormSchema),
     defaultValues: {
       patientId: patient?.id || (patientIdFromParams ? parseInt(patientIdFromParams, 10) : 0),
@@ -83,7 +88,7 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
     mode: "onChange",
   })
 
-  const { save, isSaving, lastSaved, error } = useAutoSave<SessionFormData>(
+  const { save, isSaving, lastSaved, error } = useAutoSave<FormValues>(
     form.getValues(),
     async (data) => {
       if (!data.patientId) {
@@ -94,19 +99,20 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
       const sessionData = {
         ...data,
         date: data.date.toISOString(),
-        plannedTime: data.plannedTime || null,
-        actualStartTime: data.actualStartTime || null,
-        actualEndTime: data.actualEndTime || null,
+        plannedTime: data.plannedTime || undefined,
+        actualStartTime: data.actualStartTime || undefined,
+        actualEndTime: data.actualEndTime || undefined,
         lastEditedAt: new Date().toISOString(),
         autoSaved: true,
+        notificationSent: false,
       };
 
       try {
         if (id) {
-          await api.updateSession(parseInt(id, 10), sessionData);
+          await api.updateAppointment(parseInt(id, 10), sessionData);
           toast.success("Session auto-sauvegardée");
         } else {
-          await api.createSession(sessionData);
+          await api.createAppointment(sessionData);
           toast.success("Session auto-sauvegardée");
         }
       } catch (error) {
@@ -126,26 +132,19 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
         setIsLoading(true);
         setIsNew(false);
         try {
-          const sessionData = await api.getSessionById(parseInt(id, 10));
+          const sessionData = await api.getAppointmentById(parseInt(id, 10));
           if (sessionData) {
             // Convertir la date de la chaîne ISO 8601 à un objet Date
             const parsedDate = new Date(sessionData.date);
 
-            // Formater l'heure si elle existe
-            const formatTime = (timeString: string | undefined): string => {
-              if (!timeString) return '';
-              const [hours, minutes] = timeString.split(':');
-              return `${hours}:${minutes}`;
-            };
-
             form.setValue("patientId", sessionData.patientId);
             form.setValue("date", parsedDate);
-            form.setValue("plannedTime", formatTime(sessionData.plannedTime));
-            form.setValue("actualStartTime", formatTime(sessionData.actualStartTime));
-            form.setValue("actualEndTime", formatTime(sessionData.actualEndTime));
+            form.setValue("plannedTime", sessionData.plannedTime || "");
+            form.setValue("actualStartTime", sessionData.actualStartTime || "");
+            form.setValue("actualEndTime", sessionData.actualEndTime || "");
             form.setValue("reason", sessionData.reason);
-            form.setValue("notes", sessionData.notes);
-            form.setValue("status", sessionData.status);
+            form.setValue("notes", sessionData.notes || "");
+            form.setValue("status", sessionData.status as any);
 
             setInitialValues(sessionData);
           }
@@ -168,22 +167,23 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
     fetchSessionData();
   }, [id, patient, patientIdFromParams, form]);
 
-  const onSubmit = async (values: z.infer<typeof sessionFormSchema>) => {
+  const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
       const sessionData = {
         ...values,
         date: values.date.toISOString(),
-        plannedTime: values.plannedTime || null,
-        actualStartTime: values.actualStartTime || null,
-        actualEndTime: values.actualEndTime || null,
+        plannedTime: values.plannedTime || undefined,
+        actualStartTime: values.actualStartTime || undefined,
+        actualEndTime: values.actualEndTime || undefined,
+        notificationSent: false,
       };
 
       if (id) {
-        await api.updateSession(parseInt(id, 10), sessionData);
+        await api.updateAppointment(parseInt(id, 10), sessionData);
         toast.success("Session mise à jour avec succès!");
       } else {
-        await api.createSession(sessionData);
+        await api.createAppointment(sessionData);
         toast.success("Session créée avec succès!");
       }
       navigate('/appointments');
@@ -195,7 +195,7 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
     }
   }
 
-  const handleStatusChange = async (newStatus: SessionStatus) => {
+  const handleStatusChange = async (newStatus: AppointmentStatus) => {
     if (!id) {
       toast.error("Impossible de modifier le statut: Session ID manquant.");
       return;
@@ -203,7 +203,7 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
 
     try {
       setIsSubmitting(true);
-      await api.updateSession(parseInt(id, 10), { status: newStatus });
+      await api.updateAppointment(parseInt(id, 10), { status: newStatus });
       form.setValue('status', newStatus);
       toast.success(`Statut mis à jour à ${newStatus}`);
     } catch (error) {
@@ -252,8 +252,6 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {/* Assuming you have a way to fetch and display patients */}
-                        {/* Replace this with your actual patient data */}
                         {patient ? (
                           <SelectItem key={patient.id} value={patient.id.toString()}>
                             {patient.firstName} {patient.lastName}
@@ -418,6 +416,7 @@ export function SessionForm({ patient, onCancel }: SessionFormProps) {
               <div className="flex justify-end gap-4">
                 <Button 
                   variant="outline" 
+                  type="button"
                   onClick={() => onCancel ? onCancel() : navigate(-1)}
                   disabled={isSubmitting}>
                   Annuler

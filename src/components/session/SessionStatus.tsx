@@ -4,11 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Clock, CheckCircle, XCircle, AlertCircle, MoreHorizontal, Play, Pause } from "lucide-react";
-import { SessionStatus as SessionStatusType } from "@/types/session";
+import { AppointmentStatus } from "@/types";
 
 interface SessionStatusProps {
-  status: SessionStatusType;
-  onStatusChange: (status: SessionStatusType) => void;
+  status: AppointmentStatus;
+  onStatusChange: (status: AppointmentStatus) => void;
   isEditing?: boolean;
   showActions?: boolean;
 }
@@ -21,7 +21,7 @@ export function SessionStatus({
 }: SessionStatusProps) {
   const [isChanging, setIsChanging] = useState(false);
 
-  const getStatusConfig = (status: SessionStatusType): {
+  const getStatusConfig = (status: AppointmentStatus): {
     label: string;
     color: string;
     icon: React.ReactNode;
@@ -74,7 +74,7 @@ export function SessionStatus({
 
   const statusConfig = getStatusConfig(status);
 
-  const handleStatusChange = (newStatus: SessionStatusType) => {
+  const handleStatusChange = (newStatus: AppointmentStatus) => {
     setIsChanging(true);
     onStatusChange(newStatus);
     setTimeout(() => setIsChanging(false), 500);
