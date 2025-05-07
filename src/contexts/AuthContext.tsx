@@ -1,3 +1,4 @@
+
 import React, {
 	createContext,
 	useContext,
@@ -33,9 +34,10 @@ interface AuthContextType extends AuthState {
 	isLoading: boolean;
 	loginWithMagicLink: (email: string) => Promise<void>;
 	promoteToAdmin: (userId: string) => Promise<boolean>;
+  checkAuth: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
 	user: null,
 	isAuthenticated: false,
 	token: null,
@@ -48,6 +50,7 @@ const AuthContext = createContext<AuthContextType>({
 	updateUser: () => true,
 	loginWithMagicLink: async () => {},
 	promoteToAdmin: async () => false,
+  checkAuth: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -159,6 +162,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 		return false;
 	}, []);
+
+  // Added checkAuth method to fix the App.tsx issue
+  const checkAuth = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const success = await loadStoredToken();
+      if (success) {
+        console.log("Authentication restored from stored token");
+      } else {
+        console.log("No stored authentication found");
+      }
+    } catch (error) {
+      console.error("Error during auth check:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadStoredToken]);
 
 	// Then use useEffect with loadStoredToken
 	useEffect(() => {
@@ -346,11 +366,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				isLoading,
 				loginWithMagicLink,
 				promoteToAdmin,
+        checkAuth,
 			}}
 		>
 			{children}
 		</AuthContext.Provider>
 	);
 }
-
-export const useAuth = () => useContext(AuthContext);
