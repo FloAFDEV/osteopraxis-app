@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { ArrowDownIcon, ArrowUpIcon, Users, UserPlus, Calendar, TrendingUp } from "lucide-react";
 import StatCard from "@/components/ui/stat-card";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { formatAppointmentDate } from "@/utils/date-utils";
 
 interface DashboardStatsProps {
   data: DashboardData;
@@ -13,12 +14,34 @@ interface DashboardStatsProps {
 export function DashboardStats({ data }: DashboardStatsProps) {
   // Get current day and year for the appointments card
   const today = new Date();
-  const dayAndYear = format(today, "EEEE, yyyy", { locale: fr });
+  const formattedToday = format(today, "EEEE d MMMM yyyy", { locale: fr });
 
-  // Format next appointment with day and year if available
-  const nextAppointmentText = data && data.nextAppointment !== "Aucune séance prévue" 
-    ? `Prochaine: ${data.nextAppointment} (${dayAndYear})`
-    : `Prochaine: ${data.nextAppointment}`;
+  // Format next appointment with day and date if available
+  let nextAppointmentText = "Prochaine: Aucune séance prévue";
+  
+  if (data && data.nextAppointment !== "Aucune séance prévue") {
+    // Extract date from the nextAppointment string if it contains a date
+    // Assuming the nextAppointment contains both time and date information in ISO format
+    try {
+      // Try to parse from appointments data
+      // This is a simple approach - in a real app we would ensure nextAppointment contains the full date
+      // If nextAppointment only has time (HH:mm, dd MMM), we need a different approach
+      const appointmentData = data.nextAppointment.split(',');
+      if (appointmentData.length > 1) {
+        const nextDate = new Date();
+        // Format: "HH:mm, dd MMM" - we need to extract the date part
+        const datePart = appointmentData[1].trim();
+        
+        // Format with the full date information including day of week
+        nextAppointmentText = `Prochaine: ${data.nextAppointment} (${format(nextDate, "EEEE d MMMM yyyy", { locale: fr })})`;
+      } else {
+        nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
+      }
+    } catch (error) {
+      console.error("Error formatting next appointment date:", error);
+      nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
+    }
+  }
 
   if (!data) {
     return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -55,7 +78,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
       
       <StatCard
         title="Séance aujourd'hui"
-        subtitle={dayAndYear}
+        subtitle={formattedToday}
         value={data.appointmentsToday}
         description={nextAppointmentText}
         color="text-green-500"
