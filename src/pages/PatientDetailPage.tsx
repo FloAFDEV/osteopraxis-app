@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
@@ -5,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
 import { invoiceService } from "@/services/api/invoice-service";
 import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
-import { Activity, AlertCircle, Calendar, ClipboardList, History, Loader2, Stethoscope, FileText } from "lucide-react";
+import { Activity, AlertCircle, Calendar, ClipboardList, History, Loader2, Stethoscope } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { PatientHeader } from "@/components/patients/detail/PatientHeader";
@@ -16,7 +17,6 @@ import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAp
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { format } from "date-fns";
-import { SessionHistoryTab } from "@/components/patients/detail/SessionHistoryTab";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -290,7 +290,7 @@ const PatientDetailPage = () => {
 
 					<div className="lg:col-span-2">
 						<Tabs defaultValue="medical-info">
-							<TabsList className="grid w-full grid-cols-5">
+							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="medical-info">
 									<Activity className="h-4 w-4 mr-2" />
 									Dossier médical
@@ -306,10 +306,6 @@ const PatientDetailPage = () => {
 								<TabsTrigger value="invoices">
 									<Activity className="h-4 w-4 mr-2" />
 									Notes d'honoraires
-								</TabsTrigger>
-								<TabsTrigger value="sessions">
-									<FileText className="h-4 w-4 mr-2" />
-									Séances
 								</TabsTrigger>
 							</TabsList>
 
@@ -345,9 +341,6 @@ const PatientDetailPage = () => {
 									patient={patient} 
 									invoices={invoices} 
 								/>
-							</TabsContent>
-							<TabsContent value="sessions">
-								<SessionHistoryTab patient={patient} />
 							</TabsContent>
 						</Tabs>
 					</div>

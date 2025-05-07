@@ -5,7 +5,6 @@ import { osteopathService } from "./osteopath-service";
 import { cabinetService } from "./cabinet-service";
 import { invoiceService } from "./invoice-service";
 import { authService } from "./auth-service";
-import { sessionService } from "./session-service";
 
 // Export services with a clean API surface
 export const api = {
@@ -80,15 +79,6 @@ export const api = {
 	createOsteopath:
 		osteopathService.createOsteopath ||
 		((data: any) => Promise.resolve({} as any)),
-
-  // Session related
-  getSessions: sessionService.getSessions,
-  getSessionsByPatientId: sessionService.getSessionsByPatientId,
-  getSessionById: sessionService.getSessionById,
-  createSession: sessionService.createSession,
-  updateSession: sessionService.updateSession,
-  deleteSession: sessionService.deleteSession,
-  updatePatientHDLM: sessionService.updatePatientHDLM,
 };
 
 export * from "./invoice-service";
