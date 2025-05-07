@@ -9,6 +9,7 @@ interface StatCardProps {
   description: string;
   color?: string; // ex: "text-blue-500"
   icon?: React.ReactNode;
+  subtitle?: string; // Added subtitle prop
 }
 
 const StatCard = ({
@@ -16,7 +17,8 @@ const StatCard = ({
   value,
   description,
   color = "text-blue-500",
-  icon
+  icon,
+  subtitle
 }: StatCardProps) => {
   // Extract the color name (like "blue-500") from the class (like "text-blue-500")
   const colorName = color.replace("text-", "");
@@ -36,7 +38,10 @@ const StatCard = ({
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div>
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+        </div>
         {icon && <div className={cn("h-7 w-7 font-medium", color)}>{icon}</div>}
       </CardHeader>
       <CardContent>

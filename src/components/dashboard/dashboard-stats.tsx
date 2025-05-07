@@ -3,12 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import { ArrowDownIcon, ArrowUpIcon, Users, UserPlus, Calendar, TrendingUp } from "lucide-react";
 import StatCard from "@/components/ui/stat-card";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface DashboardStatsProps {
   data: DashboardData;
 }
 
 export function DashboardStats({ data }: DashboardStatsProps) {
+  // Get current day and year for the appointments card
+  const today = new Date();
+  const dayAndYear = format(today, "EEEE, yyyy", { locale: fr });
+
   if (!data) {
     return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map(item => <Card key={item} className="overflow-hidden shadow-sm border-t-4 border-t-blue-300">
@@ -44,6 +50,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
       
       <StatCard
         title="Séance aujourd'hui"
+        subtitle={dayAndYear}
         value={data.appointmentsToday}
         description={`Prochaine: ${data.nextAppointment}`}
         color="text-green-500"
