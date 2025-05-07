@@ -15,6 +15,11 @@ export function DashboardStats({ data }: DashboardStatsProps) {
   const today = new Date();
   const dayAndYear = format(today, "EEEE, yyyy", { locale: fr });
 
+  // Format next appointment with day and year if available
+  const nextAppointmentText = data && data.nextAppointment !== "Aucune séance prévue" 
+    ? `Prochaine: ${data.nextAppointment} (${dayAndYear})`
+    : `Prochaine: ${data.nextAppointment}`;
+
   if (!data) {
     return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map(item => <Card key={item} className="overflow-hidden shadow-sm border-t-4 border-t-blue-300">
@@ -52,7 +57,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
         title="Séance aujourd'hui"
         subtitle={dayAndYear}
         value={data.appointmentsToday}
-        description={`Prochaine: ${data.nextAppointment}`}
+        description={nextAppointmentText}
         color="text-green-500"
         icon={<Calendar />}
       />
