@@ -10,24 +10,24 @@ import { InvoicesTab } from "./InvoicesTab";
 
 interface PatientDetailTabsProps {
 	patient: Patient;
-	upcomingAppointments: Appointment[];
-	pastAppointments: Appointment[];
-	invoices: Invoice[];
-	onCancelAppointment: (appointmentId: number) => Promise<void>;
-	onUpdateAppointmentStatus: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
-	viewMode: "cards" | "table";
-	setViewMode: (mode: "cards" | "table") => void;
+	upcomingAppointments?: Appointment[];
+	pastAppointments?: Appointment[];
+	invoices?: Invoice[];
+	onCancelAppointment?: (appointmentId: number) => Promise<void>;
+	onUpdateAppointmentStatus?: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
+	viewMode?: "cards" | "table";
+	setViewMode?: (mode: "cards" | "table") => void;
 }
 
 export function PatientDetailTabs({
 	patient,
-	upcomingAppointments,
-	pastAppointments,
-	invoices,
-	onCancelAppointment,
-	onUpdateAppointmentStatus,
-	viewMode,
-	setViewMode
+	upcomingAppointments = [],
+	pastAppointments = [],
+	invoices = [],
+	onCancelAppointment = async () => {},
+	onUpdateAppointmentStatus = async () => {},
+	viewMode = "cards",
+	setViewMode = () => {}
 }: PatientDetailTabsProps) {
 	const historyTabRef = useRef<HTMLButtonElement>(null);
 	
@@ -94,3 +94,6 @@ export function PatientDetailTabs({
 		</Tabs>
 	);
 }
+
+// Export both as default and named export
+export default PatientDetailTabs;

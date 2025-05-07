@@ -1,13 +1,10 @@
 
-// If the file exists already, we'll need to ensure it includes all necessary types
-// We'll add the missing types for Appointment and other entities
-
+// AppointmentStatus standardisé (utilise CANCELED au lieu de CANCELLED)
 export type AppointmentStatus = 
   | 'SCHEDULED'
   | 'IN_PROGRESS'
   | 'COMPLETED'
   | 'CANCELED'
-  | 'CANCELLED'
   | 'RESCHEDULED'
   | 'NO_SHOW';
 
@@ -28,7 +25,8 @@ export interface Appointment {
   updatedAt?: string;
 }
 
-export type PaymentStatus = 'PAID' | 'PENDING' | 'CANCELED' | 'CANCELLED';
+// PaymentStatus standardisé
+export type PaymentStatus = 'PAID' | 'PENDING' | 'CANCELED';
 
 export interface Invoice {
   id: number;
@@ -48,8 +46,8 @@ export interface Cabinet {
   id: number;
   name: string;
   address: string;
-  phone: string;
-  email?: string | null;
+  phone?: string;
+  email?: string;
   imageUrl?: string | null;
   logoUrl?: string | null;
   osteopathId: number;
@@ -58,7 +56,7 @@ export interface Cabinet {
   createdAt: string;
   updatedAt: string;
   city: string;
-  province: string;
+  province?: string;
   postalCode: string;
   country: string;
 }
@@ -80,6 +78,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLoading: boolean;
+  error?: string | null;
 }
 
 export interface AuthContextType {
@@ -87,14 +86,17 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLoading: boolean;
+  error?: string | null;
   login: (email: string, password: string) => Promise<any>;
   register: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
   loginWithMagicLink: (email: string) => Promise<boolean>;
   promoteToAdmin: (userId: string) => Promise<void>;
+  checkAuth: () => Promise<void>;
+  loadStoredToken?: () => Promise<void>;
 }
 
-// Type Patient
+// Type Patient avec contraception standardisé
 export interface Patient {
   id: number;
   firstName: string;
@@ -196,4 +198,12 @@ export interface DashboardData {
     prevPatients: number;
     growthText: string;
   }[];
+}
+
+// Type pour les cartes démographiques
+export interface GenderChartData {
+  name: string;
+  value: number;
+  percentage: number;
+  icon: React.ReactNode;
 }

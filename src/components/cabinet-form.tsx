@@ -57,10 +57,17 @@ export function CabinetForm({ osteopathId, onSave, cabinet }: CabinetFormProps) 
     try {
       setIsSubmitting(true);
       const cabinetData: Cabinet = {
-        ...values,
         id: cabinet?.id ?? 0,
+        name: values.name,
+        address: values.address,
+        city: values.city,
+        province: values.province,
+        postalCode: values.postalCode,
+        country: values.country,
+        phone: values.phone,
+        email: values.email,
         osteopathId,
-        // These fields will be filled by the backend or are optional
+        // Ces champs seront remplis par le backend ou sont optionnels
         imageUrl: cabinet?.imageUrl || null,
         logoUrl: cabinet?.logoUrl || null,
         createdAt: cabinet?.createdAt || new Date().toISOString(),

@@ -8,9 +8,8 @@ import { toast } from 'sonner';
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  loading: boolean;
-  error: string | null;
   isLoading: boolean;
+  error: string | null;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: any) => Promise<void>;
@@ -24,9 +23,8 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   user: null,
-  loading: true,
-  error: null,
   isLoading: true,
+  error: null,
   isAdmin: false,
   login: async () => {},
   register: async () => {},
@@ -38,8 +36,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
-    loading: true,
-    error: null,
+    isLoading: true,
+    isAdmin: false,
+    token: null,
+    error: null
   });
   const navigate = useNavigate();
 
@@ -48,14 +48,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    setAuthState({ ...authState, loading: true, error: null });
+    setAuthState({ ...authState, isLoading: true, error: null });
     try {
-      const user = await api.login(email, password);
-      if (user) {
+      const result = await api.login(email, password);
+      if (result && result.user) {
         setAuthState({
           isAuthenticated: true,
-          user: user,
-          loading: false,
+          user: result.user,
+          isLoading: false,
+          isAdmin: result.user.role === 'ADMIN',
+          token: result.token,
           error: null,
         });
         toast.success('Connexion réussie!');
@@ -64,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setAuthState({
           ...authState,
-          loading: false,
+          isLoading: false,
           error: 'Identifiants invalides.',
         });
         toast.error('Identifiants invalides.');
@@ -75,7 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...authState,
         isAuthenticated: false,
         user: null,
-        loading: false,
+        isLoading: false,
+        isAdmin: false,
+        token: null,
         error: "Erreur lors de la connexion. Veuillez réessayer.",
       });
       toast.error("Erreur lors de la connexion. Veuillez réessayer.");
@@ -83,16 +87,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithMagicLink = async (email: string): Promise<boolean> => {
-    setAuthState({ ...authState, loading: true, error: null });
+    setAuthState({ ...authState, isLoading: true, error: null });
     try {
       await api.loginWithMagicLink(email);
       toast.success('Lien de connexion envoyé à votre adresse email.');
+      setAuthState({ ...authState, isLoading: false });
       return true;
     } catch (error: any) {
       console.error('Erreur lors de l\'envoi du lien magique:', error);
       setAuthState({
         ...authState,
-        loading: false,
+        isLoading: false,
         error: "Erreur lors de l'envoi du lien. Veuillez réessayer.",
       });
       toast.error("Erreur lors de l'envoi du lien. Veuillez réessayer.");
@@ -101,14 +106,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (userData: any) => {
-    setAuthState({ ...authState, loading: true, error: null });
+    setAuthState({ ...authState, isLoading: true, error: null });
     try {
-      const user = await api.register(userData);
-      if (user) {
+      const result = await api.register(userData.email, userData.password);
+      if (result && result.user) {
         setAuthState({
           isAuthenticated: true,
-          user: user,
-          loading: false,
+          user: result.user,
+          isLoading: false,
+          isAdmin: result.user.role === 'ADMIN',
+          token: result.token,
           error: null,
         });
         toast.success('Inscription réussie!');
@@ -116,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setAuthState({
           ...authState,
-          loading: false,
+          isLoading: false,
           error: 'Erreur lors de l\'inscription.',
         });
         toast.error('Erreur lors de l\'inscription.');
@@ -127,7 +134,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...authState,
         isAuthenticated: false,
         user: null,
-        loading: false,
+        isLoading: false,
+        isAdmin: false,
+        token: null,
         error: "Erreur lors de l'inscription. Veuillez réessayer.",
       });
       toast.error("Erreur lors de l'inscription. Veuillez réessayer.");
@@ -135,13 +144,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    setAuthState({ ...authState, loading: true, error: null });
+    setAuthState({ ...authState, isLoading: true, error: null });
     try {
       await api.logout();
       setAuthState({
         isAuthenticated: false,
         user: null,
-        loading: false,
+        isLoading: false,
+        isAdmin: false,
+        token: null,
         error: null,
       });
       navigate('/login');
@@ -150,7 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Erreur de déconnexion:', error);
       setAuthState({
         ...authState,
-        loading: false,
+        isLoading: false,
         error: "Erreur lors de la déconnexion. Veuillez réessayer.",
       });
       toast.error("Erreur lors de la déconnexion. Veuillez réessayer.");
@@ -158,14 +169,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const checkAuth = async () => {
-    setAuthState({ ...authState, loading: true, error: null });
+    setAuthState({ ...authState, isLoading: true, error: null });
     try {
       const user = await api.checkAuth();
       if (user) {
         setAuthState({
           isAuthenticated: true,
           user: user,
-          loading: false,
+          isLoading: false,
+          isAdmin: user.role === 'ADMIN',
+          token: localStorage.getItem('auth_token'), // Assumer que le token est stocké dans localStorage
           error: null,
         });
       } else {
@@ -173,7 +186,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...authState,
           isAuthenticated: false,
           user: null,
-          loading: false,
+          isLoading: false,
+          isAdmin: false,
+          token: null,
           error: null,
         });
       }
@@ -183,82 +198,86 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...authState,
         isAuthenticated: false,
         user: null,
-        loading: false,
+        isLoading: false,
+        isAdmin: false,
+        token: null,
         error: "Erreur lors de la vérification de l'authentification.",
       });
     }
   };
 
-  // Add loadStoredToken function to fix the issue in App.tsx
+  // Fonction pour charger le token stocké
   const loadStoredToken = async () => {
-    try {
-      const storedAuth = localStorage.getItem('authState');
-      if (storedAuth) {
-        const parsedAuth = JSON.parse(storedAuth);
-        if (parsedAuth && parsedAuth.token) {
-          // Validate the stored token
-          const user = await api.checkAuth();
-          if (user) {
-            setAuthState({
-              isAuthenticated: true,
-              user,
-              loading: false,
-              error: null,
-            });
-            return;
-          }
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      try {
+        const user = await api.checkAuth();
+        if (user) {
+          setAuthState({
+            isAuthenticated: true,
+            user: user,
+            isLoading: false,
+            isAdmin: user.role === 'ADMIN',
+            token: token,
+            error: null,
+          });
+        } else {
+          // Token invalide ou expiré
+          localStorage.removeItem('auth_token');
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false,
+            isAdmin: false,
+            token: null,
+            error: null,
+          });
         }
+      } catch (error) {
+        localStorage.removeItem('auth_token');
+        setAuthState({
+          isAuthenticated: false,
+          user: null,
+          isLoading: false,
+          isAdmin: false,
+          token: null,
+          error: "Erreur lors de la validation du token stocké.",
+        });
       }
-      
-      // If no valid stored token is found
+    } else {
       setAuthState({
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
-      });
-    } catch (error) {
-      console.error('Error loading stored token:', error);
-      setAuthState({
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
+        ...authState,
+        isLoading: false,
       });
     }
   };
 
-  // Add promoteToAdmin function
   const promoteToAdmin = async (userId: string) => {
     try {
       await api.promoteToAdmin(userId);
-      toast.success('Utilisateur promu administrateur avec succès');
+      toast.success("Utilisateur promu administrateur avec succès");
+      checkAuth(); // Rafraîchir les données utilisateur
     } catch (error) {
-      console.error('Erreur lors de la promotion en administrateur:', error);
-      toast.error('Erreur lors de la promotion en administrateur');
-      throw error;
+      console.error("Erreur lors de la promotion au statut d'administrateur:", error);
+      toast.error("Erreur lors de la promotion au statut d'administrateur");
     }
   };
-
-  const isAdmin = authState.user?.role === "ADMIN";
-  const isLoading = authState.loading;
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated: authState.isAuthenticated,
         user: authState.user,
-        loading: authState.loading,
-        error: authState.error,
-        isLoading,
-        isAdmin,
+        isLoading: authState.isLoading,
+        error: authState.error || null,
+        isAdmin: authState.isAdmin,
         login,
         register,
         logout,
         checkAuth,
         loadStoredToken,
         loginWithMagicLink,
-        promoteToAdmin,
+        promoteToAdmin
       }}
     >
       {children}
@@ -266,11 +285,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-// Export the useAuth hook
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

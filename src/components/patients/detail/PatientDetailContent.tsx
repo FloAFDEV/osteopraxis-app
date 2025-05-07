@@ -89,22 +89,12 @@ export function PatientDetailContent({
 							value:
 								patient.contraception === "NONE"
 									? "Aucune"
-									: patient.contraception === "PILLS"
+									: patient.contraception === "PILL"
 									? "Pilule"
-									: patient.contraception === "PATCH"
-									? "Patch"
-									: patient.contraception === "RING"
-									? "Anneau vaginal"
 									: patient.contraception === "IUD"
 									? "Stérilet"
-									: patient.contraception ===
-									  "IMPLANTS"
-									? "Implant"
-									: patient.contraception === "CONDOM"
-									? "Préservatif"
-									: patient.contraception ===
-									  "DIAPHRAGM"
-									? "Diaphragme"
+									: patient.contraception === "OTHER"
+									? "Autre"
 									: "Non spécifié",
 						},
 					]}
