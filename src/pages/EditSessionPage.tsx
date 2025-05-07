@@ -4,13 +4,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '@/services/api';
 import { SessionForm } from '@/components/session/SessionForm';
 import { Layout } from '@/components/ui/layout';
-import { Patient } from '@/types';
+import { Patient, Appointment } from '@/types';
 import { toast } from 'sonner';
 
 const EditSessionPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | undefined>(undefined);
+  const [appointment, setAppointment] = useState<Appointment | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -30,6 +31,8 @@ const EditSessionPage = () => {
           navigate("/sessions");
           return;
         }
+
+        setAppointment(sessionData);
         
         // Récupérer les infos du patient
         const patientData = await api.getPatientById(sessionData.patientId);
@@ -64,7 +67,9 @@ const EditSessionPage = () => {
     <Layout>
       {patient && (
         <SessionForm 
+          patients={[patient]}
           patient={patient}
+          appointment={appointment}
           onCancel={handleCancel} 
         />
       )}

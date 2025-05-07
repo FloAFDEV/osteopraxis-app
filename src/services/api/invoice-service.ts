@@ -10,9 +10,7 @@ const invoices: Invoice[] = [
     amount: 60.0,
     date: new Date().toISOString(),
     paymentStatus: "PENDING",
-    paymentMethod: "CB",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    paymentMethod: "CB"
   },
   {
     id: 2,
@@ -21,9 +19,7 @@ const invoices: Invoice[] = [
     amount: 60.0,
     date: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
     paymentStatus: "PAID",
-    paymentMethod: "ESPECES",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    paymentMethod: "ESPECES"
   }
 ];
 
@@ -41,14 +37,12 @@ export const getInvoiceById = async (id: number): Promise<Invoice | null> => {
 };
 
 // Créer une nouvelle facture
-export const createInvoice = async (invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice> => {
+export const createInvoice = async (invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   
   const newInvoice: Invoice = {
     ...invoiceData,
-    id: invoices.length + 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    id: invoices.length + 1
   };
   
   invoices.push(newInvoice);
@@ -63,8 +57,7 @@ export const updateInvoice = async (id: number, invoiceData: Partial<Invoice>): 
   if (index !== -1) {
     invoices[index] = {
       ...invoices[index],
-      ...invoiceData,
-      updatedAt: new Date().toISOString()
+      ...invoiceData
     };
     return invoices[index];
   }
@@ -115,8 +108,7 @@ export const markInvoiceAsPaid = async (id: number, paymentMethod: string): Prom
     invoices[index] = {
       ...invoices[index],
       paymentStatus: "PAID",
-      paymentMethod,
-      updatedAt: new Date().toISOString()
+      paymentMethod
     };
     return invoices[index];
   }

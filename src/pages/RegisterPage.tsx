@@ -35,7 +35,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const RegisterPage = () => {
-  const { register, loading } = useAuth();
+  const { register, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
@@ -57,7 +57,7 @@ const RegisterPage = () => {
         firstName: values.firstName,
         lastName: values.lastName,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
       // Error toast is displayed by the context
     } finally {

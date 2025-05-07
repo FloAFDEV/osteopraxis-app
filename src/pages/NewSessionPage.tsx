@@ -51,6 +51,7 @@ const NewSessionPage = () => {
   return (
     <Layout>
       <SessionForm 
+        patients={patient ? [patient] : []} 
         patient={patient}
         onCancel={handleCancel}
       />

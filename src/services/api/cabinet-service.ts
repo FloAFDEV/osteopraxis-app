@@ -88,8 +88,8 @@ export const getCabinetById = async (id: number): Promise<Cabinet | null> => {
 export const createCabinet = async (cabinetData: Partial<Cabinet>): Promise<Cabinet> => {
   try {
     // Ensure all required fields are present
-    if (!cabinetData.name || !cabinetData.address || !cabinetData.osteopathId) {
-      throw new Error("Les champs name, address et osteopathId sont requis");
+    if (!cabinetData.name || !cabinetData.address || !cabinetData.osteopathId || !cabinetData.city || !cabinetData.postalCode || !cabinetData.country) {
+      throw new Error("Les champs name, address, osteopathId, city, postalCode et country sont requis");
     }
 
     const { data, error } = await supabase

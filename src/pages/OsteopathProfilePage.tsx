@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -161,6 +162,8 @@ export default function OsteopathProfilePage() {
   const firstName = connectedUser?.firstName || '';
   const lastName = connectedUser?.lastName || '';
 
+  const parsedOsteopathId = osteopathId ? parseInt(osteopathId) : 0;
+
   return (
     <Layout>
       <div className="container mx-auto py-10">
@@ -191,17 +194,18 @@ export default function OsteopathProfilePage() {
                 isLoading={isSaving}
                 connectedUser={connectedUser}
                 defaultValues={defaultProfile}
-				osteopathId={parseInt(osteopathId)}
-				isEditing={true}
-				onSuccess={() => Promise.resolve()}
+                osteopathId={parsedOsteopathId}
+                isEditing={true}
+                onSuccess={() => Promise.resolve()}
               />
             </section>
 
             <section className="space-y-4">
               <h3 className="text-xl font-semibold">Informations du cabinet</h3>
               <CabinetForm
-                osteopathId={parseInt(osteopathId)}
+                osteopathId={parsedOsteopathId}
                 onSave={handleSaveCabinet}
+                cabinet={cabinet || undefined}
               />
             </section>
           </CardContent>

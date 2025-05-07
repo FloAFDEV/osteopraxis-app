@@ -207,3 +207,33 @@ export interface GenderChartData {
   percentage: number;
   icon: React.ReactNode;
 }
+
+// Interface pour le profil de l'ostéopathe
+export interface OsteopathProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  bio?: string;
+  website?: string;
+  linkedin?: string;
+  facebook?: string;
+  twitter?: string;
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  specialties?: string[];
+  services?: string[];
+  education?: string[];
+  certifications?: string[];
+  awards?: string[];
+  publications?: string[];
+}
+
+// Interface pour les props du SessionForm
+export interface SessionFormProps {
+  patients?: Patient[];
+  patient?: Patient;
+  onCancel?: () => void;
+  appointment?: Appointment;
+  isLoading?: boolean;
+}
