@@ -1,149 +1,353 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/ui/layout";
-import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
+import { PatientStat } from "@/components/ui/patient-stat";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
-import { PatientDetailTabs } from '@/components/patients/detail/PatientDetailTabs';
-import { toast } from 'sonner';
-import PatientFancyLoader from '@/components/patients/PatientFancyLoader';
+import { invoiceService } from "@/services/api/invoice-service";
+import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
+import { Activity, AlertCircle, Calendar, ClipboardList, History, Loader2, Stethoscope } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { PatientHeader } from "@/components/patients/detail/PatientHeader";
+import { PatientInfo } from "@/components/patients/detail/PatientInfo";
+import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
+import { MedicalInfoCard } from "@/components/patients/medical-info-card";
+import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
+import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
+import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
+import { format } from "date-fns";
 
 const PatientDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
-  const [pastAppointments, setPastAppointments] = useState<Appointment[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+	const { id } = useParams<{ id: string }>();
+	const navigate = useNavigate();
+	const [patient, setPatient] = useState<Patient | null>(null);
+	const [appointments, setAppointments] = useState<Appointment[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [invoices, setInvoices] = useState<Invoice[]>([]);
+	const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+	const historyTabRef = useRef<HTMLElement | null>(null);
+	
+	useEffect(() => {
+		const fetchPatientData = async () => {
+			setLoading(true);
+			setError(null);
+			try {
+				if (!id) {
+					setError("Patient ID is missing.");
+					return;
+				}
+				const patientId = parseInt(id, 10);
+				const [patientData, appointmentsData, invoicesData] =
+					await Promise.all([
+						api.getPatientById(patientId),
+						api.getAppointmentsByPatientId(patientId),
+						invoiceService.getInvoicesByPatientId(patientId),
+					]);
 
-  useEffect(() => {
-    if (!id) return;
+				setPatient(patientData);
+				setAppointments(appointmentsData);
+				setInvoices(invoicesData);
+			} catch (e: any) {
+				setError(e.message || "Failed to load patient data.");
+				toast.error(
+					"Impossible de charger les informations du patient. Veuillez réessayer."
+				);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchPatientData();
+	}, [id]);
 
-    const loadPatient = async () => {
-      try {
-        setLoading(true);
-        const patientData = await api.getPatientById(parseInt(id));
-        
-        if (!patientData) {
-          toast.error("Patient non trouvé");
-          return;
-        }
-        
-        setPatient(patientData as Patient);
+	useEffect(() => {
+		// Find and set the history tab element ref after the component mounts
+		const historyTabTrigger = document.querySelector('[value="history"]');
+		if (historyTabTrigger) {
+			historyTabRef.current = historyTabTrigger as HTMLElement;
+		}
+	}, []);
 
-        // Charger les rendez-vous du patient
-        if (patientData) {
-          try {
-            const appointments = await api.getAppointmentsByPatientId(patientData.id);
-            
-            // Séparer les rendez-vous à venir et passés
-            const now = new Date();
-            const upcoming = appointments.filter(a => new Date(a.date) >= now && a.status !== "CANCELED");
-            const past = appointments.filter(a => new Date(a.date) < now || a.status === "CANCELED");
-            
-            setUpcomingAppointments(upcoming);
-            setPastAppointments(past);
-          } catch (error) {
-            console.error("Erreur lors du chargement des rendez-vous:", error);
-          }
-          
-          // Charger les factures du patient
-          try {
-            const invoicesData = await api.getInvoicesByPatientId(patientData.id);
-            setInvoices(invoicesData);
-          } catch (error) {
-            console.error("Erreur lors du chargement des factures:", error);
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement du patient:", error);
-        toast.error("Impossible de charger les données du patient");
-      } finally {
-        setLoading(false);
-      }
-    };
+	const upcomingAppointments = appointments
+		.filter((appointment) => new Date(appointment.date) >= new Date())
+		.sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+		);
+		
+	const pastAppointments = appointments
+		.filter((appointment) => new Date(appointment.date) < new Date())
+		.sort(
+			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+		);
 
-    loadPatient();
-  }, [id]);
+	const handleCancelAppointment = async (appointmentId: number) => {
+		try {
+			await api.cancelAppointment(appointmentId);
+			// Refresh appointments list
+			const updatedAppointments = await api.getAppointmentsByPatientId(
+				parseInt(id!)
+			);
+			setAppointments(updatedAppointments);
+			toast.success("La séance a été annulée avec succès");
+		} catch (error) {
+			console.error("Error canceling appointment:", error);
+			toast.error("Impossible d'annuler la séance");
+		}
+	};
 
-  const handleCancelAppointment = async (appointmentId: number) => {
-    try {
-      await api.cancelAppointment(appointmentId);
-      toast.success("Rendez-vous annulé avec succès");
-      
-      // Mettre à jour la liste des rendez-vous
-      setUpcomingAppointments(prev => 
-        prev.filter(a => a.id !== appointmentId)
-      );
-      setPastAppointments(prev => [
-        ...prev, 
-        { ...upcomingAppointments.find(a => a.id === appointmentId)!, status: "CANCELED" }
-      ]);
-    } catch (error) {
-      console.error("Erreur lors de l'annulation du rendez-vous:", error);
-      toast.error("Impossible d'annuler le rendez-vous");
-    }
-  };
+	const handleUpdateAppointmentStatus = async (appointmentId: number, status: AppointmentStatus) => {
+		try {
+			setLoading(true);
+			await api.updateAppointment(appointmentId, { status });
+			// Refresh appointments list
+			const updatedAppointments = await api.getAppointmentsByPatientId(
+				parseInt(id!)
+			);
+			setAppointments(updatedAppointments);
+			toast.success(`Le statut de la séance a été modifié en "${getStatusLabel(status)}"`);
+		} catch (error) {
+			console.error("Error updating appointment status:", error);
+			toast.error("Impossible de modifier le statut de la séance");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  const handleUpdateAppointmentStatus = async (appointmentId: number, status: AppointmentStatus) => {
-    try {
-      await api.updateAppointmentStatus(appointmentId, status);
-      toast.success("Statut du rendez-vous mis à jour");
-      
-      // Mettre à jour les listes de rendez-vous
-      if (status === "CANCELED") {
-        setUpcomingAppointments(prev => 
-          prev.filter(a => a.id !== appointmentId)
-        );
-        setPastAppointments(prev => [
-          ...prev.filter(a => a.id !== appointmentId),
-          { ...upcomingAppointments.find(a => a.id === appointmentId)!, status }
-        ]);
-      } else {
-        // Mettre à jour le statut dans la liste appropriée
-        setUpcomingAppointments(prev => 
-          prev.map(a => a.id === appointmentId ? { ...a, status } : a)
-        );
-        setPastAppointments(prev => 
-          prev.map(a => a.id === appointmentId ? { ...a, status } : a)
-        );
-      }
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour du statut:", error);
-      toast.error("Impossible de mettre à jour le statut");
-    }
-  };
+	const getStatusLabel = (status: AppointmentStatus): string => {
+		switch (status) {
+			case "SCHEDULED":
+				return "Planifiée";
+			case "COMPLETED":
+				return "Terminée";
+			case "CANCELED":
+				return "Annulée";
+			case "RESCHEDULED":
+				return "Reportée";
+			case "NO_SHOW":
+				return "Absence";
+			default:
+				return status;
+		}
+	};
 
-  return (
-    <Layout>
-      {loading ? (
-        <PatientFancyLoader message="Chargement du patient..." />
-      ) : patient ? (
-        <PatientDetailTabs 
-          patient={patient}
-          upcomingAppointments={upcomingAppointments}
-          pastAppointments={pastAppointments}
-          invoices={invoices}
-          onCancelAppointment={handleCancelAppointment}
-          onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-        />
-      ) : (
-        <div className="flex flex-col items-center justify-center p-10">
-          <div className="bg-red-100 dark:bg-red-900/20 p-6 rounded-lg text-center max-w-lg">
-            <h2 className="text-xl font-bold text-red-800 dark:text-red-300 mb-2">
-              Patient non trouvé
-            </h2>
-            <p className="text-red-700 dark:text-red-400">
-              Le patient que vous recherchez n'existe pas ou a été supprimé.
-            </p>
-          </div>
-        </div>
-      )}
-    </Layout>
-  );
+	const navigateToHistoryTab = () => {
+		if (historyTabRef.current) {
+			historyTabRef.current.click();
+		}
+	};
+
+	if (loading) {
+		return (
+			<Layout>
+				<div className="flex justify-center items-center h-full">
+					<Loader2 className="h-6 w-6 animate-spin" />
+				</div>
+			</Layout>
+		);
+	}
+
+	if (error || !patient) {
+		return (
+			<Layout>
+				<div className="flex flex-col justify-center items-center h-full">
+					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+					<p className="text-xl font-semibold text-center">
+						{error || "Patient non trouvé"}
+					</p>
+				</div>
+			</Layout>
+		);
+	}
+
+	return (
+		<Layout>
+			<div className="flex flex-col space-y-6 max-w-6xl mx-auto px-4">
+				{/* Header section */}
+				<PatientHeader patientId={patient.id} />
+
+				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+						<PatientStat
+							title="Total séances"
+							value={appointments.length}
+							icon={<Calendar className="h-5 w-5" />}
+							colorClass="text-blue-500"
+						/>
+						<PatientStat
+							title="Séances à venir"
+							value={upcomingAppointments.length}
+							icon={<ClipboardList className="h-5 w-5" />}
+							colorClass="text-purple-500"
+						/>
+						<PatientStat
+							title="En cours de traitement"
+							value={patient.currentTreatment ? "Oui" : "Non"}
+							icon={<Stethoscope className="h-5 w-5" />}
+							colorClass="text-emerald-500"
+						/>
+						<PatientStat
+							title="Dernière Séance"
+							value={
+								pastAppointments[0]
+									? format(
+											new Date(pastAppointments[0].date),
+											"dd/MM/yyyy"
+									  )
+									: "Aucune"
+							}
+							icon={<History className="h-5 w-5" />}
+							colorClass="text-amber-500"
+						/>
+					</div>
+				</div>
+
+				{/* Main content grid */}
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+					{/* Left column - Patient info */}
+					<div className="space-y-6">
+						<PatientInfo patient={patient} />
+
+						<MedicalInfoCard
+							title="Informations personnelles"
+							items={[
+								{
+									label: "Statut marital",
+									value:
+										patient.maritalStatus === "SINGLE"
+											? "Célibataire"
+											: patient.maritalStatus ===
+											  "MARRIED"
+											? "Marié(e)"
+											: patient.maritalStatus ===
+											  "DIVORCED"
+											? "Divorcé(e)"
+											: patient.maritalStatus ===
+											  "WIDOWED"
+											? "Veuf/Veuve"
+											: patient.maritalStatus ===
+											  "PARTNERED"
+											? "En couple"
+											: patient.maritalStatus ===
+											  "ENGAGED"
+											? "Fiancé(e)"
+											: "Non spécifié",
+								},
+								{
+									label: "Enfants",
+									value:
+										patient.childrenAges &&
+										patient.childrenAges.length > 0
+											? `${
+													patient.childrenAges.length
+											  } enfant(s) (${patient.childrenAges
+													.sort((a, b) => a - b)
+													.join(", ")} ans)`
+											: "Pas d'enfants",
+								},
+								{
+									label: "Latéralité",
+									value:
+										patient.handedness === "RIGHT"
+											? "Droitier(ère)"
+											: patient.handedness === "LEFT"
+											? "Gaucher(ère)"
+											: patient.handedness ===
+											  "AMBIDEXTROUS"
+											? "Ambidextre"
+											: "Non spécifié",
+								},
+								{
+									label: "Fumeur",
+									value: patient.isSmoker ? "Oui" : "Non",
+								},
+								{
+									label: "Contraception",
+									value:
+										patient.contraception === "NONE"
+											? "Aucune"
+											: patient.contraception === "PILLS"
+											? "Pilule"
+											: patient.contraception === "PATCH"
+											? "Patch"
+											: patient.contraception === "RING"
+											? "Anneau vaginal"
+											: patient.contraception === "IUD"
+											? "Stérilet"
+											: patient.contraception ===
+											  "IMPLANTS"
+											? "Implant"
+											: patient.contraception === "CONDOM"
+											? "Préservatif"
+											: patient.contraception ===
+											  "DIAPHRAGM"
+											? "Diaphragme"
+											: "Non spécifié",
+								},
+							]}
+						/>
+					</div>
+
+					<div className="lg:col-span-2">
+						<Tabs defaultValue="medical-info">
+							<TabsList className="grid w-full grid-cols-4">
+								<TabsTrigger value="medical-info">
+									<Activity className="h-4 w-4 mr-2" />
+									Dossier médical
+								</TabsTrigger>
+								<TabsTrigger value="upcoming-appointments">
+									<Calendar className="h-4 w-4 mr-2" />
+									Séances à venir
+								</TabsTrigger>
+								<TabsTrigger value="history">
+									<History className="h-4 w-4 mr-2" />
+									Historique
+								</TabsTrigger>
+								<TabsTrigger value="invoices">
+									<Activity className="h-4 w-4 mr-2" />
+									Notes d'honoraires
+								</TabsTrigger>
+							</TabsList>
+
+							<TabsContent value="medical-info">
+								<MedicalInfoTab 
+									patient={patient}
+									pastAppointments={pastAppointments}
+									onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
+									onNavigateToHistory={navigateToHistoryTab}
+								/>
+							</TabsContent>
+
+							<TabsContent value="upcoming-appointments">
+								<UpcomingAppointmentsTab
+									patient={patient}
+									appointments={upcomingAppointments}
+									onCancelAppointment={handleCancelAppointment}
+									onStatusChange={handleUpdateAppointmentStatus}
+								/>
+							</TabsContent>
+
+							<TabsContent value="history">
+								<AppointmentHistoryTab
+									appointments={pastAppointments}
+									onStatusChange={handleUpdateAppointmentStatus}
+									viewMode={viewMode}
+									setViewMode={setViewMode}
+								/>
+							</TabsContent>
+
+							<TabsContent value="invoices">
+								<InvoicesTab 
+									patient={patient} 
+									invoices={invoices} 
+								/>
+							</TabsContent>
+						</Tabs>
+					</div>
+				</div>
+			</div>
+		</Layout>
+	);
 };
 
 export default PatientDetailPage;

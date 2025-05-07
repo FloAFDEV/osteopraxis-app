@@ -1,185 +1,152 @@
 
-import { Appointment, AppointmentStatus } from '@/types';
+import { Appointment } from "@/types";
+import { delay, USE_SUPABASE } from "./config";
+import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+import { AppointmentStatus } from "@/types"; // Add this import
 
-// Données de démonstration
+// Create a custom error class for appointment conflicts
+export class AppointmentConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AppointmentConflictError";
+  }
+}
+
+// Mock data (replace with actual data fetching)
 const appointments: Appointment[] = [
   {
     id: 1,
     patientId: 1,
-    date: new Date(new Date().setHours(10, 0, 0)).toISOString(),
-    reason: "Douleur au dos",
+    date: new Date().toISOString(),
+    reason: "Consultation de routine",
     status: "SCHEDULED",
-    notificationSent: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    notificationSent: false,
   },
   {
     id: 2,
     patientId: 2,
-    date: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
-    reason: "Consultation de routine",
-    status: "SCHEDULED",
-    notificationSent: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    patientId: 1,
-    date: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
-    reason: "Suivi post-traitement",
+    date: new Date().toISOString(),
+    reason: "Suivi post-opératoire",
     status: "COMPLETED",
-    notificationSent: true,
-    notes: "Le patient se sent beaucoup mieux. Douleur au bas du dos a diminué de 70%.",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
+    notificationSent: false,
+  },
 ];
 
-// Récupérer tous les rendez-vous
-export const getAppointments = async (): Promise<Appointment[]> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return [...appointments];
-};
+export const appointmentService = {
+  async getAppointments(): Promise<Appointment[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.getAppointments();
+      } catch (error) {
+        console.error("Erreur Supabase getAppointments:", error);
+        throw error;
+      }
+    }
 
-// Récupérer un rendez-vous par ID
-export const getAppointmentById = async (id: number): Promise<Appointment | null> => {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  const appointment = appointments.find(a => a.id === id);
-  return appointment || null;
-};
+    await delay(300);
+    return [...appointments];
+  },
 
-// Créer un nouveau rendez-vous
-export const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Appointment> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  const newAppointment: Appointment = {
-    ...appointmentData,
-    id: appointments.length + 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  
-  appointments.push(newAppointment);
-  return newAppointment;
-};
+  async getAppointmentById(id: number): Promise<Appointment | undefined> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.getAppointmentById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getAppointmentById:", error);
+        throw error;
+      }
+    }
 
-// Mettre à jour un rendez-vous
-export const updateAppointment = async (id: number, appointmentData: Partial<Appointment>): Promise<Appointment> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
+    await delay(200);
+    return appointments.find((appointment) => appointment.id === id);
+  },
   
-  const index = appointments.findIndex(a => a.id === id);
-  if (index !== -1) {
-    appointments[index] = {
-      ...appointments[index],
-      ...appointmentData,
-      updatedAt: new Date().toISOString()
+  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
+      } catch (error) {
+        console.error("Erreur Supabase getAppointmentsByPatientId:", error);
+        throw error;
+      }
+    }
+
+    await delay(200);
+    return appointments.filter((appointment) => appointment.patientId === patientId);
+  },
+
+  async createAppointment(appointment: Omit<Appointment, "id">): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.createAppointment(appointment);
+      } catch (error) {
+        console.error("Erreur lors de la création de la séance:", error);
+        throw error;
+      }
+    }
+    
+    await delay(500);
+    const newAppointment = {
+      ...appointment,
+      id: appointments.length + 1,
     };
-    return appointments[index];
-  }
-  
-  throw new Error(`Appointment with ID ${id} not found`);
-};
+    appointments.push(newAppointment);
+    return newAppointment;
+  },
 
-// Supprimer un rendez-vous
-export const deleteAppointment = async (id: number): Promise<boolean> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.updateAppointment(id, update);
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour de la séance:", error);
+        throw error;
+      }
+    }
+    
+    await delay(300);
+    const index = appointments.findIndex((a) => a.id === id);
+    if (index !== -1) {
+      appointments[index] = { ...appointments[index], ...update };
+      return appointments[index];
+    }
+    throw new Error(`Séance avec l'identifiant ${id} non trouvée`);
+  },
   
-  const index = appointments.findIndex(a => a.id === id);
-  if (index !== -1) {
-    appointments.splice(index, 1);
-    return true;
-  }
+  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
+    return this.updateAppointment(id, { status });
+  },
   
-  return false;
-};
+  async cancelAppointment(id: number): Promise<Appointment> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.cancelAppointment(id);
+      } catch (error) {
+        console.error("Erreur lors de l'annulation de la séance:", error);
+        throw error;
+      }
+    }
+    
+    return this.updateAppointment(id, { status: "CANCELED" });
+  },
 
-// Récupérer les rendez-vous à venir
-export const getUpcomingAppointments = async (): Promise<Appointment[]> => {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  const now = new Date();
-  return appointments.filter(a => new Date(a.date) >= now && a.status === "SCHEDULED")
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-};
+  async deleteAppointment(id: number): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        await supabaseAppointmentService.deleteAppointment(id);
+        return true;
+      } catch (error) {
+        console.error("Erreur Supabase deleteAppointment:", error);
+        throw error;
+      }
+    }
 
-// Récupérer les rendez-vous par patient ID
-export const getAppointmentsByPatientId = async (patientId: number): Promise<Appointment[]> => {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  return appointments.filter(a => a.patientId === patientId)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    await delay(300);
+    const index = appointments.findIndex((a) => a.id === id);
+    if (index !== -1) {
+      appointments.splice(index, 1);
+      return true;
+    }
+    return false;
+  },
 };
-
-// Récupérer les rendez-vous par ostéopathe ID
-export const getAppointmentsByOsteopathId = async (osteopathId: number): Promise<Appointment[]> => {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  // Dans un vrai système, nous filtrerions par ostéopathe ID
-  // Comme nos données mock n'ont pas de champ ostéopathe, nous retournons tout
-  return [...appointments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-};
-
-// Compter le nombre de rendez-vous
-export const getAppointmentCount = async (): Promise<number> => {
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return appointments.length;
-};
-
-// Annuler un rendez-vous
-export const cancelAppointment = async (id: number, reason?: string): Promise<Appointment> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const index = appointments.findIndex(a => a.id === id);
-  if (index !== -1) {
-    appointments[index] = {
-      ...appointments[index],
-      status: "CANCELED",
-      notes: reason ? `${appointments[index].notes || ''}\nAnnulé: ${reason}` : appointments[index].notes,
-      updatedAt: new Date().toISOString()
-    };
-    return appointments[index];
-  }
-  
-  throw new Error(`Appointment with ID ${id} not found`);
-};
-
-// Reprogrammer un rendez-vous
-export const rescheduleAppointment = async (id: number, newDate: string): Promise<Appointment> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const index = appointments.findIndex(a => a.id === id);
-  if (index !== -1) {
-    appointments[index] = {
-      ...appointments[index],
-      date: newDate,
-      status: "RESCHEDULED", 
-      updatedAt: new Date().toISOString()
-    };
-    return appointments[index];
-  }
-  
-  throw new Error(`Appointment with ID ${id} not found`);
-};
-
-// Mettre à jour le statut d'un rendez-vous
-export const updateAppointmentStatus = async (id: number, status: AppointmentStatus): Promise<Appointment> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const index = appointments.findIndex(a => a.id === id);
-  if (index !== -1) {
-    appointments[index] = {
-      ...appointments[index],
-      status,
-      updatedAt: new Date().toISOString()
-    };
-    return appointments[index];
-  }
-  
-  throw new Error(`Appointment with ID ${id} not found`);
-};
-
-// Classes d'erreur personnalisées
-export class AppointmentConflictError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AppointmentConflictError';
-  }
-}

@@ -1,216 +1,313 @@
 
-import React, { useState, useEffect, useContext } from 'react';
-import { Layout } from '@/components/ui/layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
-import { CabinetForm } from "@/components/cabinet-form";
+import { useState, useEffect, useCallback } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
-import { User, OsteopathProfile, Cabinet } from "@/types";
-import { AuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { Layout } from "@/components/ui/layout";
+import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
+import { UserCog, Building } from "lucide-react";
 import { toast } from "sonner";
-import { useParams } from 'react-router-dom';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Osteopath, Cabinet } from "@/types";
+import { Button } from "@/components/ui/button";
+import { CabinetForm } from "@/components/cabinet-form";
+import { FancyLoader } from "@/components/ui/fancy-loader";
 
-const defaultProfile = {
-  firstName: "John",
-  lastName: "Doe",
-  bio: "A brief bio goes here.",
-  website: "https://example.com",
-  linkedin: "https://linkedin.com/in/example",
-  facebook: "https://facebook.com/example",
-  twitter: "https://twitter.com/example",
-  instagram: "https://instagram.com/example",
-  youtube: "https://youtube.com/example",
-  tiktok: "https://tiktok.com/example",
-};
-
-const defaultCabinet = {
-  name: "Cabinet Name",
-  address: "123 Main St",
-  city: "Anytown",
-  province: "State",
-  postalCode: "12345",
-  country: "Country",
-  phone: "123-456-7890",
-  email: "email@example.com",
-  website: "https://example.com",
-  notes: "Additional notes here.",
-  imageUrl: "https://example.com/image.jpg",
-  logoUrl: "https://example.com/logo.jpg",
-};
-
-const initialOsteopathProfile: OsteopathProfile = {
-  id: '',
-  firstName: '',
-  lastName: '',
-  bio: '',
-  website: '',
-  linkedin: '',
-  facebook: '',
-  twitter: '',
-  instagram: '',
-  youtube: '',
-  tiktok: '',
-  specialties: [],
-  services: [],
-  education: [],
-  certifications: [],
-  awards: [],
-  publications: [],
-};
-
-export default function OsteopathProfilePage() {
-  const { user: connectedUser } = useContext(AuthContext);
-  const { id: osteopathId } = useParams<{ id: string }>();
-  const [osteopathProfile, setOsteopathProfile] = useState<OsteopathProfile>(initialOsteopathProfile);
-  const [cabinet, setCabinet] = useState<Cabinet | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setIsLoading(true);
-      try {
-        if (!osteopathId) {
-          console.warn("No osteopathId provided.");
-          return;
+const OsteopathProfilePage = () => {
+  const { user, updateUser, loadStoredToken } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
+  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
+  const [showCabinetForm, setShowCabinetForm] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [showAuthSheet, setShowAuthSheet] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+  const navigate = useNavigate();
+  
+  // Générer un nom par défaut si first_name et last_name sont manquants
+  const getDefaultName = useCallback(() => {
+    if (user) {
+      if (user.first_name && user.last_name) {
+        return `${user.first_name} ${user.last_name}`;
+      } else if (user.first_name) {
+        return user.first_name;
+      } else if (user.last_name) {
+        return user.last_name;
+      } else if (user.email) {
+        // Extraire un nom à partir de l'email
+        const emailName = user.email.split('@')[0];
+        // Capitaliser le nom extrait de l'email et remplacer les points/tirets par des espaces
+        return emailName
+          .split(/[._-]/)
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+          .join(' ');
+      }
+    }
+    return "";
+  }, [user]);
+  
+  // Vérifier si l'utilisateur a déjà un ostéopathe et des cabinets
+  const checkExistingData = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      console.log("Vérification des données existantes pour l'utilisateur:", user.id);
+      setLoading(true);
+      
+      // Vérifions d'abord si un ostéopathe existe
+      const existingOsteopath = await api.getOsteopathByUserId(user.id);
+      console.log("Résultat de la recherche d'ostéopathe:", existingOsteopath || "Aucun trouvé");
+      
+      if (existingOsteopath && existingOsteopath.id) {
+        console.log("Ostéopathe trouvé avec ID:", existingOsteopath.id);
+        setOsteopath(existingOsteopath);
+        
+        // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
+        if (!user.osteopathId) {
+          console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", existingOsteopath.id);
+          const updatedUser = { ...user, osteopathId: existingOsteopath.id };
+          updateUser(updatedUser);
         }
-        const profileData = await api.getOsteopathProfile(osteopathId);
-        setOsteopathProfile(profileData || initialOsteopathProfile);
+        
+        // Vérifier s'il y a des cabinets existants
+        const existingCabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
+        console.log(`${existingCabinets.length} cabinet(s) trouvé(s) pour l'ostéopathe`);
+        setCabinets(existingCabinets);
+        
+        // Si des cabinets existent, rediriger vers le tableau de bord
+        if (existingCabinets && existingCabinets.length > 0) {
+          console.log("Cabinets existants trouvés, redirection vers le tableau de bord dans 1 seconde");
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1000);
+          return;
+        } else {
+          // Sinon, afficher le formulaire de cabinet
+          setShowCabinetForm(true);
+        }
+      } else {
+        // Aucun ostéopathe trouvé, rester sur le formulaire de création
+        console.log("Aucun ostéopathe trouvé, formulaire de création nécessaire");
+        setOsteopath(null);
+        setShowCabinetForm(false);
+      }
+      
+    } catch (error) {
+      console.error("Erreur lors de la vérification des données existantes:", error);
+      setLoadError("Une erreur est survenue lors de la vérification de vos données");
+    } finally {
+      setLoading(false);
+      setHasAttemptedLoad(true);
+    }
+  }, [user, navigate, updateUser]);
 
-        const cabinetData = await api.getCabinetsByOsteopathId(parseInt(osteopathId));
-        setCabinet(cabinetData?.[0] || null);
+  // Rechargement du token d'authentification au montage du composant
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        console.log("Vérification de l'authentification...");
+        await loadStoredToken();
+        setAuthChecked(true);
       } catch (error) {
-        console.error("Failed to fetch osteopath profile:", error);
-        toast.error("Failed to load profile. Please try again.");
-      } finally {
-        setIsLoading(false);
+        console.error("Erreur lors de la vérification d'authentification:", error);
+        setAuthChecked(true);
       }
     };
 
-    fetchProfile();
-  }, [osteopathId]);
+    checkAuthentication();
+  }, [loadStoredToken]);
 
-  const handleSaveProfile = async (data: OsteopathProfile) => {
-    setIsSaving(true);
-    try {
-      if (!connectedUser) {
-        console.error("No connected user.");
-        toast.error("No user is currently logged in.");
-        return;
-      }
-
-      const updatedProfile = { ...osteopathProfile, ...data };
-      await api.updateOsteopathProfile(connectedUser.id, updatedProfile);
-      setOsteopathProfile(updatedProfile);
-      toast.success("Profile updated successfully!");
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      toast.error("Failed to update profile. Please try again.");
-    } finally {
-      setIsSaving(false);
+  // Chargement des données quand l'authentification est vérifiée
+  useEffect(() => {
+    if (authChecked && user && !hasAttemptedLoad) {
+      checkExistingData();
     }
+  }, [authChecked, user, checkExistingData, hasAttemptedLoad]);
+
+  const handleRetry = () => {
+    setLoading(true);
+    setLoadError(null);
+    setHasAttemptedLoad(false); // Reset pour permettre une nouvelle tentative
+    loadStoredToken().then(() => {
+      setTimeout(() => checkExistingData(), 500);
+    });
   };
 
-  const handleSaveCabinet = async (data: Cabinet) => {
-    setIsSaving(true);
-    try {
-      if (!osteopathId) {
-        console.error("No osteopathId provided.");
-        toast.error("Osteopath ID is missing.");
-        return;
-      }
-
-      const cabinetData = { ...cabinet, ...data, osteopathId: parseInt(osteopathId) };
-      if (cabinet) {
-        await api.updateCabinet(cabinet.id, cabinetData);
-        setCabinet(cabinetData as Cabinet);
-        toast.success("Cabinet updated successfully!");
-      } else {
-        await api.createCabinet(cabinetData);
-        setCabinet(cabinetData as Cabinet);
-        toast.success("Cabinet created successfully!");
-      }
-    } catch (error) {
-      console.error("Failed to save cabinet:", error);
-      toast.error("Failed to save cabinet. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center h-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent"></div>
-        </div>
-      </Layout>
-    );
+  // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
+  if (authChecked && !user && !showAuthSheet) {
+    console.log("Redirection vers login: Utilisateur non connecté");
+    return <Navigate to="/login" />;
   }
 
-  const fullName = connectedUser 
-    ? `${connectedUser.firstName || ''} ${connectedUser.lastName || ''}`
-    : 'Nom du professionnel';
-  const formattedName = connectedUser 
-    ? `${connectedUser.firstName || ''} ${connectedUser.lastName || ''}` 
-    : 'Nom du professionnel';
-  const firstName = connectedUser?.firstName || '';
-  const lastName = connectedUser?.lastName || '';
+  const handleOsteopathSuccess = async (updatedOsteopath: Osteopath) => {
+    console.log("Succès de la mise à jour/création de l'ostéopathe:", updatedOsteopath);
+    
+    // Si c'est une mise à jour d'un ostéopathe existant
+    if (osteopath && osteopath.id) {
+      toast.success("Profil mis à jour avec succès");
+      
+      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe si nécessaire
+      if (!user?.osteopathId && updatedOsteopath.id) {
+        const updatedUser = { ...user!, osteopathId: updatedOsteopath.id };
+        updateUser(updatedUser);
+      }
+    } else {
+      // Pour un nouveau profil
+      toast.success("Profil créé avec succès");
+      
+      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
+      if (updatedOsteopath && updatedOsteopath.id && user) {
+        const updatedUser = { ...user, osteopathId: updatedOsteopath.id };
+        updateUser(updatedUser);
+      }
+    }
+    
+    // Mettre à jour l'état local avec l'ostéopathe mis à jour
+    setOsteopath(updatedOsteopath);
+    
+    // Vérifier si des cabinets existent déjà pour cet ostéopathe
+    try {
+      if (updatedOsteopath.id) {
+        const existingCabinets = await api.getCabinetsByOsteopathId(updatedOsteopath.id);
+        setCabinets(existingCabinets || []);
+        
+        // Si des cabinets existent, rediriger vers le tableau de bord
+        if (existingCabinets && existingCabinets.length > 0) {
+          toast.success("Configuration terminée, redirection vers le tableau de bord");
+          navigate("/dashboard");
+          return;
+        }
+      }
+      
+      // Sinon, afficher le formulaire de cabinet
+      setShowCabinetForm(true);
+    } catch (error) {
+      console.error("Erreur lors de la vérification des cabinets après création de l'ostéopathe:", error);
+    }
+  };
+  
+  const handleCabinetSuccess = () => {
+    toast.success("Cabinet créé avec succès");
+    navigate("/dashboard");
+  };
 
-  const parsedOsteopathId = osteopathId ? parseInt(osteopathId) : 0;
+  const handleRelogin = () => {
+    // Supprimer les données d'authentification en local et forcer un rechargement complet
+    localStorage.removeItem("authState");
+    
+    // Redirection vers la page de connexion avec le chemin de retour
+    window.location.href = `/login?returnTo=${encodeURIComponent('/dashboard')}`;
+  };
+
+  if (loading) {
+    return <FancyLoader message="Chargement de votre profil..." />;
+  }
 
   return (
     <Layout>
-      <div className="container mx-auto py-10">
-        <Card className="w-full max-w-4xl mx-auto">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Profil de {formattedName}</CardTitle>
-            <CardDescription>Gérez votre profil et les informations de votre cabinet.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-6">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src="/avatars/01.png" alt={fullName} />
-                <AvatarFallback>{firstName?.charAt(0)}{lastName?.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-lg font-semibold">{fullName}</h2>
-                <p className="text-sm text-gray-500">
-                  {connectedUser?.email}
-                </p>
-              </div>
+      <div className="max-w-3xl mx-auto">
+        {!showCabinetForm ? (
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <UserCog className="h-8 w-8 text-primary" />
+                {osteopath && osteopath.id ? "Mettre à jour votre profil professionnel" : "Compléter votre profil professionnel"}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Ces informations sont nécessaires pour configurer votre cabinet et générer des factures conformes.
+              </p>
             </div>
 
-            <section className="space-y-4">
-              <h3 className="text-xl font-semibold">Informations du profil</h3>
-              <OsteopathProfileForm
-                osteopathProfile={osteopathProfile}
-                onSave={handleSaveProfile}
-                isLoading={isSaving}
-                connectedUser={connectedUser}
-                defaultValues={defaultProfile}
-                osteopathId={parsedOsteopathId}
-                isEditing={true}
-                onSuccess={() => Promise.resolve()}
-              />
-            </section>
+            <div className="bg-card rounded-lg border shadow-sm p-6">
+              {loadError ? (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded mb-6">
+                  <p className="font-medium">Erreur lors du chargement</p>
+                  <p className="text-sm">{loadError}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button
+                      onClick={handleRelogin}
+                      variant="secondary"
+                      className="bg-red-100 hover:bg-red-200 dark:bg-red-800/30 dark:hover:bg-red-800/50 text-red-800 dark:text-red-300"
+                    >
+                      Se reconnecter
+                    </Button>
+                    <Button
+                      onClick={handleRetry}
+                      variant="outline"
+                    >
+                      Réessayer
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <OsteopathProfileForm 
+                  defaultValues={{
+                    ...osteopath,
+                    // Pré-remplir le nom si l'ostéopathe n'en a pas déjà un
+                    name: osteopath?.name || getDefaultName()
+                  }}
+                  osteopathId={osteopath?.id}
+                  isEditing={!!osteopath?.id}
+                  onSuccess={handleOsteopathSuccess}
+                />
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Building className="h-8 w-8 text-primary" />
+                Créer votre premier cabinet
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Votre profil professionnel a été créé. Configurez maintenant votre cabinet pour commencer à utiliser l'application.
+              </p>
+            </div>
 
-            <section className="space-y-4">
-              <h3 className="text-xl font-semibold">Informations du cabinet</h3>
-              <CabinetForm
-                osteopathId={parsedOsteopathId}
-                onSave={handleSaveCabinet}
-                cabinet={cabinet || undefined}
-              />
-            </section>
-          </CardContent>
-        </Card>
+            <div className="bg-card rounded-lg border shadow-sm p-6">
+              {osteopath && (
+                <CabinetForm 
+                  osteopathId={osteopath.id}
+                  onSuccess={handleCabinetSuccess}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
+      
+      {/* Authentication Sheet */}
+      <Sheet open={showAuthSheet} onOpenChange={setShowAuthSheet}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Authentification requise</SheetTitle>
+          </SheetHeader>
+          <div className="py-6">
+            <p className="text-muted-foreground mb-4">
+              Vous devez être connecté pour accéder à cette page. Il semble que votre session a expiré ou est invalide.
+            </p>
+            <div className="space-y-2">
+              <Button 
+                onClick={handleRelogin}
+                className="w-full bg-primary text-primary-foreground rounded"
+              >
+                Se connecter
+              </Button>
+              <Button 
+                onClick={() => navigate("/register")}
+                variant="secondary"
+                className="w-full"
+              >
+                S'inscrire
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </Layout>
   );
-}
+};
+
+export default OsteopathProfilePage;

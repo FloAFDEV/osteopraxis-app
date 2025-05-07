@@ -1,106 +1,119 @@
-
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
+import { api } from "@/services/api";
+import { Cabinet } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
-import { api } from "@/services/api";
 import { toast } from "sonner";
-import { Building2, Loader2 } from "lucide-react";
-import { Cabinet } from "@/types";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const EditCabinetPage = () => {
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const isEditing = !!id;
+  const [osteopathData, setOsteopathData] = useState<any>(null);
 
   useEffect(() => {
-    const fetchCabinet = async () => {
-      if (!isEditing) {
-        setLoading(false);
-        return;
-      }
-
+    const fetchData = async () => {
+      if (!id) return;
       try {
-        const cabinetData = await api.getCabinetById(parseInt(id!, 10));
-        if (cabinetData) {
-          setCabinet(cabinetData);
-        } else {
-          toast.error("Cabinet non trouvé");
-          navigate("/cabinets");
+        const cabinetData = await api.getCabinetById(parseInt(id));
+        if (!cabinetData) {
+          throw new Error("Cabinet non trouvé");
+        }
+        setCabinet(cabinetData);
+
+        // Récupérer les données de l'ostéopathe pour les infos de facturation
+        if (cabinetData.osteopathId) {
+          const osteopathInfo = await api.getOsteopathById(cabinetData.osteopathId);
+          if (osteopathInfo) {
+            setOsteopathData(osteopathInfo);
+          }
         }
       } catch (error) {
-        console.error("Erreur lors de la récupération du cabinet", error);
-        toast.error("Impossible de charger le cabinet");
-        navigate("/cabinets");
+        console.error("Error fetching cabinet:", error);
+        toast.error("Impossible de charger les données du cabinet. Veuillez réessayer.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchCabinet();
-  }, [id, isEditing, navigate]);
-
-  const handleSaveCabinet = async (cabinetData: Cabinet) => {
-    try {
-      setSaving(true);
-
-      if (isEditing && cabinet) {
-        // Update existing cabinet
-        const updatedCabinet = await api.updateCabinet(cabinet.id, {
-          ...cabinetData,
-        });
-        toast.success("Cabinet mis à jour avec succès");
-        navigate(`/cabinet/${updatedCabinet.id}`);
-      } else {
-        // Create new cabinet
-        const newCabinet = await api.createCabinet({
-          ...cabinetData,
-        });
-        toast.success("Cabinet créé avec succès");
-        navigate(`/cabinet/${newCabinet.id}`);
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement du cabinet", error);
-      toast.error("Impossible d'enregistrer le cabinet");
-    } finally {
-      setSaving(false);
-    }
-  };
+    fetchData();
+  }, [id]);
 
   if (loading) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+    return <Layout>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Chargement des données...</p>
+          </div>
         </div>
-      </Layout>
-    );
+      </Layout>;
+  }
+
+  if (!cabinet) {
+    return <Layout>
+        <div className="text-center py-12">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
+          <h3 className="text-xl font-medium">Cabinet non trouvé</h3>
+          <p className="text-muted-foreground mt-2 mb-6">
+            Le cabinet que vous recherchez n&apos;existe pas ou a été supprimé.
+          </p>
+          <Button asChild>
+            <Link to="/cabinets">
+              Retour aux cabinets
+            </Link>
+          </Button>
+        </div>
+      </Layout>;
   }
 
   return (
     <Layout>
-      <div className="container max-w-4xl py-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-          <Building2 className="h-8 w-8 text-primary" />
-          {isEditing ? "Modifier le cabinet" : "Nouveau cabinet"}
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          {isEditing
-            ? "Modifiez les informations de votre cabinet"
-            : "Créez un nouveau cabinet pour votre pratique"}
-        </p>
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mb-2" 
+            onClick={() => navigate("/cabinets")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour aux cabinets
+          </Button>
+          
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Building2 className="h-8 w-8 text-green-500" />
+            Modifier le Cabinet
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Modifiez les détails du cabinet en utilisant le formulaire ci-dessous.
+          </p>
+        </div>
 
-        <Card className="p-6">
-          <CabinetForm
-            osteopathId={1} // Temporarily hardcoded, should be from auth context
-            onSave={handleSaveCabinet}
-            cabinet={cabinet || undefined}
-          />
-        </Card>
+        <div className="bg-card rounded-lg border shadow-sm p-6">
+          {cabinet && (
+            <CabinetForm 
+              defaultValues={{
+                name: cabinet.name,
+                address: cabinet.address,
+                phone: cabinet.phone || undefined,
+                email: cabinet.email || undefined,
+                imageUrl: cabinet.imageUrl || undefined,
+                logoUrl: cabinet.logoUrl || undefined,
+                osteopathId: cabinet.osteopathId,
+                siret: osteopathData?.siret || undefined,
+                adeliNumber: osteopathData?.adeli_number || undefined,
+                apeCode: osteopathData?.ape_code || "8690F"
+              }} 
+              cabinetId={cabinet.id} 
+              isEditing={true} 
+              osteopathId={cabinet.osteopathId} 
+            />
+          )}
+        </div>
       </div>
     </Layout>
   );

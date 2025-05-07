@@ -11,8 +11,7 @@ export const AppointmentStatusValues = [
   "COMPLETED", 
   "CANCELED",
   "RESCHEDULED", 
-  "NO_SHOW",
-  "IN_PROGRESS"
+  "NO_SHOW"
 ] as const;
 
 /**

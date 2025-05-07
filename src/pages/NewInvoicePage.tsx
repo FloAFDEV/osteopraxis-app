@@ -1,4 +1,3 @@
-
 import { InvoiceForm } from "@/components/invoice-form";
 import { Card } from "@/components/ui/card";
 import { FancyLoader } from "@/components/ui/fancy-loader";
@@ -10,17 +9,12 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
-// Extend the Appointment type to include invoiceId
-interface ExtendedAppointment extends Appointment {
-  invoiceId?: number;
-}
-
 const NewInvoicePage = () => {
 	const { patientId } = useParams<{ patientId: string }>();
 	const [searchParams] = useSearchParams();
 	const appointmentId = searchParams.get("appointmentId");
 	const [patient, setPatient] = useState<Patient | null>(null);
-	const [appointment, setAppointment] = useState<ExtendedAppointment | null>(null);
+	const [appointment, setAppointment] = useState<Appointment | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const navigate = useNavigate();
 
@@ -33,9 +27,7 @@ const NewInvoicePage = () => {
 					);
 
 					if (appointmentData) {
-						// Check if there's already an invoice for this appointment
-						// This requires that we've extended the appointment type to include invoiceId
-						if ((appointmentData as ExtendedAppointment).invoiceId) {
+						if (appointmentData.invoiceId) {
 							// ✅ Facture existe : on bloque, toast + redirection sans afficher le formulaire
 							toast.error(
 								"Une facture existe déjà pour ce rendez-vous."
@@ -48,7 +40,7 @@ const NewInvoicePage = () => {
 							return; // ⛔ STOP ici, on ne fait rien d'autre
 						}
 
-						setAppointment(appointmentData as ExtendedAppointment);
+						setAppointment(appointmentData);
 
 						// Chargement du patient lié au rendez-vous
 						const patientData = await api.getPatientById(
@@ -83,6 +75,7 @@ const NewInvoicePage = () => {
 	};
 
 	return (
+		
 		<Layout>
 			<div className="mb-6">
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

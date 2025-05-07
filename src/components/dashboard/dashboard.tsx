@@ -1,302 +1,256 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { GenderChart } from "@/components/charts/gender-chart";
-import { GrowthChart } from "@/components/charts/growth-chart";
-import { MonthlyGrowthChart } from "@/components/charts/monthly-growth-chart";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { DashboardStats } from "@/components/dashboard/dashboard-stats";
+import { AppointmentsOverview } from "@/components/dashboard/appointments-overview";
+import { DemographicsCard } from "@/components/dashboard/demographics-card";
+import { GrowthChart } from "@/components/dashboard/growth-chart";
+import { DashboardData } from "@/types";
 import { api } from "@/services/api";
-import { AuthContext } from "@/contexts/AuthContext";
-import { DashboardData, Appointment } from "@/types";
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Link } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CardDescription } from '../ui/card';
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Loader2 } from "lucide-react";
 
 export function Dashboard() {
-  const { user } = useContext(AuthContext);
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    totalPatients: 0,
+    maleCount: 0,
+    femaleCount: 0,
+    averageAge: 0,
+    averageAgeMale: 0,
+    averageAgeFemale: 0,
+    newPatientsThisMonth: 0,
+    newPatientsThisYear: 0,
+    newPatientsLastYear: 0,
+    appointmentsToday: 0,
+    nextAppointment: "Aucune séance prévue",
+    patientsLastYearEnd: 0,
+    newPatientsLast30Days: 0,
+    thirtyDayGrowthPercentage: 0,
+    annualGrowthPercentage: 0,
+    monthlyGrowth: Array(12).fill(0).map((_, index) => {
+      const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+      return {
+        month: frenchMonths[index],
+        patients: 0,
+        prevPatients: 0,
+        growthText: "0%"
+      };
+    })
+  });
+  
   const [loading, setLoading] = useState(true);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loadingAppointments, setLoadingAppointments] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadDashboardData = async () => {
       setLoading(true);
       try {
-        const data = await api.getDashboardData();
-        setDashboardData(data);
+        // Récupération des données réelles uniquement
+        const [patients, appointments] = await Promise.all([
+          api.getPatients(), 
+          api.getAppointments()
+        ]);
+
+        // Calcul des statistiques avec uniquement les données réelles
+        const totalPatients = patients.length;
+        const maleCount = patients.filter(p => p.gender === "Homme").length;
+        const femaleCount = patients.filter(p => p.gender === "Femme").length;
+
+        // Calcul des âges et métriques de croissance
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+
+        // Nouveaux patients ce mois-ci et cette année
+        const newPatientsThisMonth = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
+        }).length;
+        
+        const newPatientsThisYear = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getFullYear() === currentYear;
+        }).length;
+        
+        const newPatientsLastYear = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getFullYear() === currentYear - 1;
+        }).length;
+
+        // Rendez-vous aujourd'hui
+        const appointmentsToday = appointments.filter(a => {
+          const appDate = new Date(a.date);
+          return appDate.toDateString() === today.toDateString();
+        }).length;
+
+        // Prochain rendez-vous
+        const futureAppointments = appointments
+          .filter(a => new Date(a.date) > today)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        
+        const nextAppointment = futureAppointments.length > 0 
+          ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', { locale: fr })
+          : "Aucune séance prévue";
+
+        // Calcul de la croissance sur 30 jours
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const newPatientsLast30Days = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt >= thirtyDaysAgo;
+        }).length;
+        
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+        
+        const patientsPrevious30Days = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo;
+        }).length;
+
+        // Taux de croissance
+        const thirtyDayGrowthPercentage = patientsPrevious30Days > 0 
+          ? Math.round((newPatientsLast30Days - patientsPrevious30Days) / patientsPrevious30Days * 100) 
+          : newPatientsLast30Days > 0 ? 100 : 0;
+        
+        const patientsLastYearEnd = patients.filter(p => {
+          const createdAt = new Date(p.createdAt);
+          return createdAt.getFullYear() < currentYear;
+        }).length;
+        
+        const annualGrowthPercentage = patientsLastYearEnd > 0 
+          ? Math.round(newPatientsThisYear / patientsLastYearEnd * 100) 
+          : newPatientsThisYear > 0 ? 100 : 0;
+
+        // Données de croissance mensuelle
+        const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+        const monthlyGrowth = frenchMonths.map((month, index) => {
+          const thisYearPatients = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear;
+          }).length;
+          
+          const lastYearPatients = patients.filter(p => {
+            const createdAt = new Date(p.createdAt);
+            return createdAt.getMonth() === index && createdAt.getFullYear() === currentYear - 1;
+          }).length;
+          
+          const growthRate = lastYearPatients > 0 
+            ? Math.round((thisYearPatients - lastYearPatients) / lastYearPatients * 100) 
+            : thisYearPatients > 0 ? 100 : 0;
+          
+          return {
+            month,
+            patients: thisYearPatients,
+            prevPatients: lastYearPatients,
+            growthText: `${growthRate}%`
+          };
+        });
+
+        // Calcul des âges moyens
+        const calculateAverageAge = (patientList: any[]) => {
+          const patientsWithBirthDate = patientList.filter(p => p.birthDate);
+          if (patientsWithBirthDate.length === 0) return 0;
+          
+          const totalAge = patientsWithBirthDate.reduce((sum, patient) => {
+            const birthDate = new Date(patient.birthDate);
+            const age = currentYear - birthDate.getFullYear();
+            return sum + age;
+          }, 0);
+          
+          return Math.round(totalAge / patientsWithBirthDate.length);
+        };
+        
+        const averageAge = calculateAverageAge(patients);
+        const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
+        const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
+
+        // Mettre à jour les données du tableau de bord
+        setDashboardData({
+          totalPatients,
+          maleCount,
+          femaleCount,
+          averageAge,
+          averageAgeMale,
+          averageAgeFemale,
+          newPatientsThisMonth,
+          newPatientsThisYear,
+          newPatientsLastYear,
+          appointmentsToday,
+          nextAppointment,
+          patientsLastYearEnd,
+          newPatientsLast30Days,
+          thirtyDayGrowthPercentage,
+          annualGrowthPercentage,
+          monthlyGrowth
+        });
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("Erreur lors du chargement des données du tableau de bord:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    const fetchAppointments = async () => {
-      setLoadingAppointments(true);
-      try {
-        if (user?.osteopathId) {
-          const appointmentsData = await api.getAppointmentsByOsteopathId(user.osteopathId);
-          setAppointments(appointmentsData);
-        }
-      } catch (error) {
-        console.error("Error fetching appointments:", error);
-      } finally {
-        setLoadingAppointments(false);
-      }
-    };
-
-    fetchData();
-    fetchAppointments();
-  }, [user?.osteopathId]);
-
-  const completedAppointments = appointments.filter(appointment => appointment.status === 'COMPLETED').length;
-  const canceledAppointments = appointments.filter(appointment => appointment.status === 'CANCELED').length;
-
-  const appointmentRows = appointments.map((appointment) => {
-    const appointmentDate = new Date(appointment.date);
-    const formattedDate = format(appointmentDate, 'dd MMMM yyyy', { locale: fr });
-    const formattedTime = format(appointmentDate, 'HH:mm', { locale: fr });
-
-    let appointmentStatus = 'Planifiée';
-    if (appointment.status !== 'SCHEDULED' && appointment.status !== 'CANCELED') {
-      appointmentStatus = 'Terminée';
-    }
-
-    return (
-      <TableRow key={appointment.id}>
-        <TableCell className="font-medium">{formattedDate}</TableCell>
-        <TableCell>{formattedTime}</TableCell>
-        <TableCell>{appointment.reason}</TableCell>
-        <TableCell>{appointmentStatus}</TableCell>
-      </TableRow>
-    );
-  });
-
-  const genderChartData = [
-    {
-      name: "Hommes",
-      value: dashboardData?.maleCount || 0,
-      percentage: dashboardData?.maleCount ? (dashboardData?.maleCount / dashboardData?.totalPatients) * 100 : 0,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="w-4 h-4 mr-2"
-        >
-          <path
-            fillRule="evenodd"
-            d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.914 0-5.683-.342-8.062-.9a.75.75 0 01-.437-.695z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Femmes",
-      value: dashboardData?.femaleCount || 0,
-      percentage: dashboardData?.femaleCount ? (dashboardData?.femaleCount / dashboardData?.totalPatients) * 100 : 0,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="w-4 h-4 mr-2"
-        >
-          <path
-            fillRule="evenodd"
-            d="M12 1.5a5.25 5.25 0 00-5.25 5.25c0 .682.083 1.341.23 1.973l-1.047 1.047a.75.75 0 01-1.06 0l-2.25-2.25a.75.75 0 011.06-1.06L5.906 4.81A12.733 12.733 0 0112 1.5zm0 7.5a3 3 0 100-6 3 3 0 000 6zm9.375.75a1.5 1.5 0 00-1.5-1.5h-.75v-1.03a4.5 4.5 0 00-8.99 1.03v1.03h-.75a1.5 1.5 0 00-1.5 1.5v5.625a1.5 1.5 0 001.5 1.5h9.75a1.5 1.5 0 001.5-1.5V9zm-3 0h-6.75a.75.75 0 01-.75-.75V6a.75.75 0 01.75-.75h6.75a.75.75 0 01.75.75v1.5a.75.75 0 01-.75.75z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Autre",
-      value: 0,
-      percentage: 0,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="w-4 h-4 mr-2"
-        >
-          <path d="M12 1.5a5.25 5.25 0 00-5.25 5.25c0 .682.083 1.341.23 1.973l-1.047 1.047a.75.75 0 01-1.06 0l-2.25-2.25a.75.75 0 011.06-1.06L5.906 4.81A12.733 12.733 0 0112 1.5zm0 7.5a3 3 0 100-6 3 3 0 000 6zm9.375.75a1.5 1.5 0 00-1.5-1.5h-.75v-1.03a4.5 4.5 0 00-8.99 1.03v1.03h-.75a1.5 1.5 0 00-1.5 1.5v5.625a1.5 1.5 0 001.5 1.5h9.75a1.5 1.5 0 001.5-1.5V9zm-3 0h-6.75a.75.75 0 01-.75-.75V6a.75.75 0 01.75-.75h6.75a.75.75 0 01.75.75v1.5a.75.75 0 01-.75.75z" />
-        </svg>
-      ),
-    },
-  ];
+    
+    loadDashboardData();
+  }, []);
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Patients Totaux</CardTitle>
-            <CardDescription>Nombre total de patients enregistrés</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-4 w-[100px]" />
-            ) : (
-              <div className="text-2xl font-bold">{dashboardData?.totalPatients || 0}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Nouveaux Patients (Ce Mois)</CardTitle>
-            <CardDescription>Nombre de nouveaux patients ce mois-ci</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-4 w-[100px]" />
-            ) : (
-              <div className="text-2xl font-bold">{dashboardData?.newPatientsThisMonth || 0}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Séances Aujourd'hui</CardTitle>
-            <CardDescription>Nombre de séances prévues aujourd'hui</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-4 w-[100px]" />
-            ) : (
-              <div className="text-2xl font-bold">{dashboardData?.appointmentsToday || 0}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Prochaine Séance</CardTitle>
-            <CardDescription>Date et heure de la prochaine séance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-4 w-[150px]" />
-            ) : (
-              <div className="text-xl">
-                {dashboardData?.nextAppointment ? (
-                  <>
-                    <Calendar className="h-4 w-4 mr-2 inline-block" />
-                    {format(new Date(dashboardData.nextAppointment), 'dd MMMM yyyy HH:mm', { locale: fr })}
-                  </>
-                ) : (
-                  "Aucune séance prévue"
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Répartition par Genre</CardTitle>
-            <CardDescription>Pourcentage des patients par genre</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-64" />
-            ) : (
-              <GenderChart data={genderChartData} />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Croissance des Patients</CardTitle>
-            <CardDescription>Nombre de nouveaux patients par mois</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-64" />
-            ) : (
-              <GrowthChart data={dashboardData?.growthData?.patients || []} />
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Croissance Mensuelle</CardTitle>
-            <CardDescription>Comparaison de la croissance mensuelle des patients</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-64" />
-            ) : (
-              <MonthlyGrowthChart data={dashboardData?.monthlyGrowth || []} />
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Séances Récentes</CardTitle>
-            <CardDescription>Aperçu des dernières séances</CardDescription>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            {loadingAppointments ? (
-              <Skeleton className="h-4 w-full" />
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Heure</TableHead>
-                    <TableHead>Motif</TableHead>
-                    <TableHead>Statut</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {appointmentRows.length > 0 ? (
-                    appointmentRows
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center">
-                        Aucune séance récente
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-          <div className="p-4 flex justify-end">
-            <Link to="/sessions">
-              <Button>Voir toutes les séances</Button>
-            </Link>
+    <div className="space-y-8">
+      {/* Header Image Banner */}
+      <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg mb-8 animate-fade-in shadow-lg transform hover:scale-[1.01] transition-all duration-500">
+        <img 
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400" 
+          alt="Cabinet d'ostéopathie" 
+          className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex items-center">
+          <div className="px-6 md:px-10 max-w-2xl animate-fade-in animate-delay-100">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl text-white font-bold mb-2">
+              Tableau de bord
+            </h1>
+            <p className="text-white/90 text-sm md:text-base lg:text-lg max-w-md">
+              Bienvenue sur votre espace de gestion. Suivez vos activités et consultez vos statistiques en temps réel.
+            </p>
           </div>
-        </Card>
+        </div>
       </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+            <p className="text-lg text-gray-600 dark:text-gray-300 animate-pulse">
+              Chargement des données...
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="animate-fade-in">
+            <DashboardStats data={dashboardData} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-2 sm:px-0">
+            <div className="animate-fade-in animate-delay-100">
+              <AppointmentsOverview data={dashboardData} />
+            </div>
+            <div className="animate-fade-in animate-delay-200">
+              <DemographicsCard data={dashboardData} />
+            </div>
+          </div>
+
+          <div className="animate-fade-in animate-delay-300 px-2 sm:px-0">
+            <Card className="hover-scale">
+              <CardContent className="p-6 bg-inherit">
+                <h2 className="text-xl font-bold mb-4">Évolution de l'activité</h2>
+                <div className="h-full">
+                  <GrowthChart data={dashboardData} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }

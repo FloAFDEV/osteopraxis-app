@@ -1,239 +1,184 @@
-
-// AppointmentStatus standardisé (utilise CANCELED au lieu de CANCELLED)
-export type AppointmentStatus = 
-  | 'SCHEDULED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CANCELED'
-  | 'RESCHEDULED'
-  | 'NO_SHOW';
-
-export interface Appointment {
-  id: number;
-  patientId: number;
-  date: string;
-  reason: string;
-  status: AppointmentStatus;
-  notificationSent: boolean;
-  notes?: string;
-  cabinetId?: number;
-  invoiceId?: number;
-  plannedTime?: string;
-  actualStartTime?: string;
-  actualEndTime?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-// PaymentStatus standardisé
-export type PaymentStatus = 'PAID' | 'PENDING' | 'CANCELED';
-
-export interface Invoice {
-  id: number;
-  patientId: number;
-  appointmentId?: number;
-  amount: number;
-  date: string;
-  paymentStatus: PaymentStatus;
-  paymentMethod?: string;
-  notes?: string;
-  tvaExoneration?: boolean;
-  tvaMotif?: string;
-  Patient?: Patient; // Relation avec le patient (pour les jointures)
-}
-
-export interface Cabinet {
-  id: number;
-  name: string;
-  address: string;
-  phone?: string;
-  email?: string;
-  imageUrl?: string | null;
-  logoUrl?: string | null;
-  osteopathId: number;
-  professionalProfileId?: number;
-  tenant_id?: string;
-  createdAt: string;
-  updatedAt: string;
-  city: string;
-  province?: string;
-  postalCode: string;
-  country: string;
-}
-
-export type UserRole = 'USER' | 'OSTEOPATH' | 'ADMIN';
-
 export interface User {
   id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
-  role: UserRole;
-  osteopathId?: number;
+  first_name: string | null;
+  last_name: string | null;
+  role: "ADMIN" | "OSTEOPATH";
+  created_at: string;
+  updated_at: string;
+  osteopathId: number | null;
 }
 
 export interface AuthState {
   user: User | null;
+  isAuthenticated: boolean;
   token: string | null;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  isLoading: boolean;
-  error?: string | null;
+  message?: string; // Optional message field for auth feedback
 }
 
-export interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  isLoading: boolean;
-  error?: string | null;
-  login: (email: string, password: string) => Promise<any>;
-  register: (email: string, password: string) => Promise<any>;
-  logout: () => Promise<void>;
-  loginWithMagicLink: (email: string) => Promise<boolean>;
-  promoteToAdmin: (userId: string) => Promise<void>;
-  checkAuth: () => Promise<void>;
-  loadStoredToken?: () => Promise<void>;
-}
+export type Role = "ADMIN" | "OSTEOPATH";
 
-// Type Patient avec contraception standardisé
+// Interfaces pour les patients
 export interface Patient {
   id: number;
   firstName: string;
   lastName: string;
-  gender?: 'Homme' | 'Femme' | 'Autre';
-  email?: string;
-  phone?: string;
-  address?: string;
-  birthDate?: string;
-  osteopathId: number;
-  cabinetId?: number;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  birthDate: string | null;
+  gender: Gender | null;
+  avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;
-  maritalStatus?: 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
-  handedness?: 'RIGHT' | 'LEFT' | 'AMBIDEXTROUS';
-  hasVisionCorrection: boolean;
+  osteopathId: number;
+  cabinetId: number | null;
+  occupation: string | null;
+  maritalStatus: MaritalStatus | null;
+  hasChildren: string | null;
+  childrenAges: number[] | null;
+  generalPractitioner: string | null;
+  currentTreatment: string | null;
   isSmoker: boolean;
+  physicalActivity: string | null;
+  hasVisionCorrection: boolean;
+  contraception: Contraception | null;
+  handedness: Handedness | null;
   isDeceased: boolean;
-  occupation?: string;
-  currentTreatment?: string;
-  physicalActivity?: string;
-  hasChildren?: string;
-  childrenAges?: number[];
-  contraception?: 'NONE' | 'PILL' | 'IUD' | 'OTHER';
-  hdlm?: string; // histoire de la maladie
-  generalPractitioner?: string;
-  ophtalmologistName?: string;
-  digestiveDoctorName?: string;
-  digestiveProblems?: string;
-  entDoctorName?: string;
-  entProblems?: string;
-  rheumatologicalHistory?: string;
-  surgicalHistory?: string;
-  traumaHistory?: string;
-  userId?: string;
-  avatarUrl?: string;
+  digestiveProblems: string | null;
+  digestiveDoctorName: string | null;
+  entProblems: string | null;
+  entDoctorName: string | null;
+  ophtalmologistName: string | null;
+  surgicalHistory: string | null;
+  traumaHistory: string | null;
+  rheumatologicalHistory: string | null;
+  hdlm: string | null;
+  userId: string | null;
 }
 
-// Interface Osteopath
+// Mise à jour des interfaces pour les autres entités pour assurer la cohérence des types
+export interface Appointment {
+  	invoiceId?: number | null;
+  id: number;
+  date: string;  
+  patientId: number;
+  reason: string;
+  status: AppointmentStatus;
+  notificationSent: boolean;
+  cabinetId?: number;
+  notes?: string; // Added field for session report
+}
+
+// Enums pour les patients
+export type Gender = "Homme" | "Femme";
+
+export type MaritalStatus = 
+  | "SINGLE" 
+  | "MARRIED" 
+  | "DIVORCED" 
+  | "WIDOWED" 
+  | "SEPARATED" 
+  | "ENGAGED" 
+  | "PARTNERED";
+
+export type Handedness = "LEFT" | "RIGHT" | "AMBIDEXTROUS";
+
+export type Contraception =
+  | "NONE"
+  | "PILLS"
+  | "CONDOM"
+  | "IMPLANTS"
+  | "DIAPHRAGM"
+  | "IUD"
+  | "INJECTION"
+  | "PATCH"
+  | "RING"
+  | "NATURAL_METHODS"
+  | "STERILIZATION";
+
+// Interface pour les rendez-vous
+// Updated to only use "CANCELED" (one L) for consistency
+export type AppointmentStatus = 
+  | "SCHEDULED" 
+  | "COMPLETED" 
+  | "CANCELED"  // Using single L spelling consistently
+  | "RESCHEDULED"
+  | "NO_SHOW";
+
+// Interface pour les cabinets
+export interface Cabinet {
+  id: number;
+  name: string;
+  address: string;
+  phone: string | null;
+  email?: string | null;
+  imageUrl: string | null;
+  logoUrl: string | null;
+  osteopathId: number;
+  createdAt: string;
+  updatedAt: string;
+  // Add missing properties
+  city?: string;
+  zip_code?: string;
+  country?: string;
+}
+
+// Interface pour les ostéopathes
 export interface Osteopath {
   id: number;
   name: string;
   userId: string;
-  professional_title?: string;
-  adeli_number?: string;
-  siret?: string;
-  ape_code?: string;
+  professional_title: string | null;
+  adeli_number: string | null;
+  siret: string | null;
+  ape_code: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-// Dashboard data interface
+// Interface pour les factures
+export interface Invoice {
+  id: number;
+  patientId: number;
+  appointmentId?: number; // Changed from consultationId to appointmentId, and made optional
+  amount: number;
+  date: string;
+  paymentStatus: PaymentStatus;
+  Patient?: {
+    firstName: string;
+    lastName: string;
+  };
+  // Nouveaux champs pour les mentions légales françaises
+  tvaExoneration?: boolean;
+  tvaMotif?: string;
+  paymentMethod?: string;
+  notes?: string;
+}
+
+export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
+
+// Interface pour les données du dashboard
 export interface DashboardData {
   totalPatients: number;
   maleCount: number;
   femaleCount: number;
-  averageAge?: number;
-  averageAgeMale?: number;
-  averageAgeFemale?: number;
+  averageAge: number;
+  averageAgeMale: number;
+  averageAgeFemale: number;
   newPatientsThisMonth: number;
   newPatientsThisYear: number;
-  newPatientsLastYear?: number;
+  newPatientsLastYear: number;
   appointmentsToday: number;
-  totalAppointments?: number;
-  completedAppointments?: number;
-  canceledAppointments?: number;
   nextAppointment: string;
   patientsLastYearEnd: number;
   newPatientsLast30Days: number;
   thirtyDayGrowthPercentage: number;
   annualGrowthPercentage: number;
-  revenue?: {
-    today: number;
-    thisWeek: number;
-    thisMonth: number;
-    thisYear: number;
-  };
-  patientDemographics?: {
-    age: {
-      under18: number;
-      adults18to30: number;
-      adults31to45: number;
-      adults46to60: number;
-      adults61plus: number;
-    };
-    gender: {
-      male: number;
-      female: number;
-      other: number;
-    };
-  };
-  growthData?: {
-    patients: { month: string; count: number }[];
-    appointments: { month: string; count: number }[];
-  };
   monthlyGrowth: {
     month: string;
     patients: number;
     prevPatients: number;
     growthText: string;
   }[];
-}
-
-// Type pour les cartes démographiques
-export interface GenderChartData {
-  name: string;
-  value: number;
-  percentage: number;
-  icon: React.ReactNode;
-}
-
-// Interface pour le profil de l'ostéopathe
-export interface OsteopathProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  bio?: string;
-  website?: string;
-  linkedin?: string;
-  facebook?: string;
-  twitter?: string;
-  instagram?: string;
-  youtube?: string;
-  tiktok?: string;
-  specialties?: string[];
-  services?: string[];
-  education?: string[];
-  certifications?: string[];
-  awards?: string[];
-  publications?: string[];
-}
-
-// Interface pour les props du SessionForm
-export interface SessionFormProps {
-  patients?: Patient[];
-  patient?: Patient;
-  onCancel?: () => void;
-  appointment?: Appointment;
-  isLoading?: boolean;
 }

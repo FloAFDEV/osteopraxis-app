@@ -55,25 +55,3 @@ export function convertUTCToLocal(date: string | Date): Date {
   // Use toZonedTime to convert from UTC to local timezone
   return toZonedTime(dateObj, timeZone);
 }
-
-// Format date in French format (jour/mois/année)
-export function formatDateFR(date: Date | string): string {
-  try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return format(dateObj, 'dd/MM/yyyy', { locale: fr });
-  } catch (error) {
-    console.error("Error formatting date in French format:", error);
-    return "Date invalide";
-  }
-}
-
-// Format date and time in French format
-export function formatDateTimeFR(date: Date | string): string {
-  try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return format(dateObj, 'dd/MM/yyyy HH:mm', { locale: fr });
-  } catch (error) {
-    console.error("Error formatting date and time in French format:", error);
-    return "Date/heure invalide";
-  }
-}

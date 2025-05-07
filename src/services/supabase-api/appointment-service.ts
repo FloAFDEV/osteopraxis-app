@@ -98,10 +98,9 @@ export const supabaseAppointmentService = {
         notificationSent: payload.notificationSent ?? false,
       };
 
-      // Cast explicite pour résoudre le problème de type avec IN_PROGRESS
       const { data, error } = await supabase
         .from("Appointment")
-        .insert(insertable as any)
+        .insert(insertable)
         .select()
         .single();
 
