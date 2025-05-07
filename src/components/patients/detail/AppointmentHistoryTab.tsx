@@ -106,7 +106,7 @@ export function AppointmentHistoryTab({
 																			Notes de séance
 																		</h3>
 																		<p className="whitespace-pre-line text-sm">
-																			<span className="font-medium text-purple-700 dark:text-purple-400">hdlm: </span>
+																			<span className="font-medium text-purple-700 dark:text-purple-400">Hdlm: </span>
 																			{appointment.notes}
 																		</p>
 																	</div>, {
