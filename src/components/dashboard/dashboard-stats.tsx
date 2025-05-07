@@ -21,19 +21,45 @@ export function DashboardStats({ data }: DashboardStatsProps) {
   
   if (data && data.nextAppointment !== "Aucune séance prévue") {
     // Extract date from the nextAppointment string if it contains a date
-    // Assuming the nextAppointment contains both time and date information in ISO format
     try {
-      // Try to parse from appointments data
-      // This is a simple approach - in a real app we would ensure nextAppointment contains the full date
-      // If nextAppointment only has time (HH:mm, dd MMM), we need a different approach
+      // Parse the appointment data - assuming format like "HH:mm, dd MMM"
       const appointmentData = data.nextAppointment.split(',');
       if (appointmentData.length > 1) {
-        const nextDate = new Date();
-        // Format: "HH:mm, dd MMM" - we need to extract the date part
-        const datePart = appointmentData[1].trim();
+        // Try to construct a valid date from the appointment information
+        const timePart = appointmentData[0].trim(); // "HH:mm"
+        const datePart = appointmentData[1].trim(); // "dd MMM"
         
-        // Format with the full date information including day of week
-        nextAppointmentText = `Prochaine: ${data.nextAppointment} (${format(nextDate, "EEEE d MMMM yyyy", { locale: fr })})`;
+        // Create a date object based on the current year
+        const nextDate = new Date();
+        
+        // Parse month and day from datePart (e.g., "23 mai")
+        const [day, month] = datePart.split(' ');
+        
+        // Map French month names to numbers (simplified approach)
+        const monthNames = {
+          'jan': 0, 'fév': 1, 'mar': 2, 'avr': 3, 'mai': 4, 'juin': 5,
+          'juil': 6, 'août': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'déc': 11
+        };
+        
+        // Find the matching month number
+        let monthIndex = -1;
+        for (const [key, value] of Object.entries(monthNames)) {
+          if (month.toLowerCase().startsWith(key.toLowerCase())) {
+            monthIndex = value;
+            break;
+          }
+        }
+        
+        if (monthIndex !== -1) {
+          nextDate.setMonth(monthIndex);
+          nextDate.setDate(parseInt(day));
+          
+          // Format with the day of week and full date information
+          const formattedNextDate = format(nextDate, "EEEE d MMMM yyyy", { locale: fr });
+          nextAppointmentText = `Prochaine: ${data.nextAppointment} (${formattedNextDate})`;
+        } else {
+          nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
+        }
       } else {
         nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
       }
