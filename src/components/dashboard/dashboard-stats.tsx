@@ -54,9 +54,16 @@ export function DashboardStats({ data }: DashboardStatsProps) {
           nextDate.setMonth(monthIndex);
           nextDate.setDate(parseInt(day));
           
-          // Format with the day of week and full date information
-          const formattedNextDate = format(nextDate, "EEEE d MMMM yyyy", { locale: fr });
-          nextAppointmentText = `Prochaine: ${data.nextAppointment} (${formattedNextDate})`;
+          // Format with the day of week, full date and time in the requested format
+          const dayName = format(nextDate, "EEEE", { locale: fr });
+          const dayNumber = format(nextDate, "dd", { locale: fr });
+          const monthName = format(nextDate, "MMMM", { locale: fr });
+          const yearNumber = format(nextDate, "yyyy", { locale: fr });
+          
+          // Capitalize the first letter of the day name
+          const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+          
+          nextAppointmentText = `Prochaine: ${capitalizedDayName} ${dayNumber} ${monthName} ${yearNumber}, ${timePart}`;
         } else {
           nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
         }
