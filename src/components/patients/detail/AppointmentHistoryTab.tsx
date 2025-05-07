@@ -59,7 +59,7 @@ export function AppointmentHistoryTab({
 							</div>
 							{appointment.notes && <div className="mt-2 pl-3 border-l-2 border-purple-200">
 									<p className="text-sm text-muted-foreground italic whitespace-pre-line">
-										<span className="font-medium text-purple-700 dark:text-purple-400">hdlm: </span>
+										<span className="font-medium text-purple-700 dark:text-purple-400">Hdlm: </span>
 										{appointment.notes}
 									</p>
 								</div>}
@@ -80,7 +80,7 @@ export function AppointmentHistoryTab({
 								<TableHead>Heure</TableHead>
 								<TableHead>Motif</TableHead>
 								<TableHead>Statut</TableHead>
-								<TableHead>Hdlm</TableHead>
+								<TableHead className="text-purple-700 dark:text-purple-400">Hdlm</TableHead>
 								<TableHead className="text-right">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
