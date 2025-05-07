@@ -214,7 +214,7 @@ export function AppointmentsOverview({
 												appointment.id
 											)
 										}
-										className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-xs font-medium transition-colors"
+										className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-sky-700 dark:hover:bg-sky-800 dark:text-white text-blue-600 rounded text-xs font-medium transition-colors"
 									>
 										Détails
 									</button>
