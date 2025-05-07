@@ -80,7 +80,7 @@ export function AppointmentHistoryTab({
 								<TableHead>Heure</TableHead>
 								<TableHead>Motif</TableHead>
 								<TableHead>Statut</TableHead>
-								<TableHead className="Renomme hdlm ici stp aussi stp (juste en Front)\n">Notes</TableHead>
+								<TableHead>Hdlm</TableHead>
 								<TableHead className="text-right">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
