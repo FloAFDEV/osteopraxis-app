@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Edit, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, Edit, FileText, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface PatientHeaderProps {
@@ -30,6 +30,12 @@ export function PatientHeader({ patientId }: PatientHeaderProps) {
 					<Link to={`/appointments?patientId=${patientId}`}>
 						<Calendar className="mr-2 h-4 w-4" />
 						Voir toutes les séances
+					</Link>
+				</Button>
+				<Button variant="outline" asChild>
+					<Link to={`/sessions/new?patientId=${patientId}`}>
+						<FileText className="mr-2 h-4 w-4" />
+						Séance immédiate
 					</Link>
 				</Button>
 				<Button asChild>
