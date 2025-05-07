@@ -55,6 +55,7 @@ export function RecentAppointmentsCard({
 								{appointment.notes && (
 									<div className="mt-2 pl-3 border-l-2 border-purple-200">
 										<p className="text-sm text-muted-foreground italic whitespace-pre-line">
+											<span className="font-medium text-purple-700 dark:text-purple-400">hdlm: </span>
 											{appointment.notes}
 										</p>
 									</div>
