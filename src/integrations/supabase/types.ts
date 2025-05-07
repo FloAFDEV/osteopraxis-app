@@ -15,6 +15,7 @@ export type Database = {
           createdAt: string
           date: string
           id: number
+          notes: string | null
           notificationSent: boolean
           patientId: number
           reason: string
@@ -27,6 +28,7 @@ export type Database = {
           createdAt?: string
           date: string
           id?: number
+          notes?: string | null
           notificationSent?: boolean
           patientId: number
           reason: string
@@ -39,6 +41,7 @@ export type Database = {
           createdAt?: string
           date?: string
           id?: number
+          notes?: string | null
           notificationSent?: boolean
           patientId?: number
           reason?: string

@@ -1,54 +1,68 @@
-
+import { Appointment } from "@/types";
 import { api } from "@/services/api";
-import { AppointmentConflictError } from "@/services/api/appointment-service";
 
-// Function to check if there is a conflict with existing appointments
-export async function checkAppointmentConflict(
-  date: Date, 
-  time: string, 
-  excludeAppointmentId?: number
-): Promise<boolean> {
+export const checkAppointmentConflict = async (date: Date, time: string): Promise<boolean> => {
   try {
-    // Get all appointments
-    const allAppointments = await api.getAppointments();
-    
-    // Parse the selected date and time
     const [hours, minutes] = time.split(':').map(Number);
-    const selectedDateTime = new Date(date);
-    selectedDateTime.setHours(hours, minutes, 0, 0);
+    const appointmentDateTime = new Date(date);
+    appointmentDateTime.setHours(hours, minutes, 0, 0);
+
+    // Fetch all appointments for the given date
+    const appointments = await api.getAppointments();
     
-    // Get 30 minutes after the selected time (appointments are assumed to be 30min)
-    const endTime = new Date(selectedDateTime);
-    endTime.setMinutes(endTime.getMinutes() + 30);
-    
-    // Check for conflicts
-    const conflictingAppointment = allAppointments.find(appointment => {
-      // Skip the current appointment being edited
-      if (excludeAppointmentId && appointment.id === excludeAppointmentId) {
-        return false;
-      }
+    // Check if there are any conflicting appointments
+    const hasConflict = appointments.some(existingAppointment => {
+      const existingAppointmentTime = new Date(existingAppointment.date);
       
-      // Skip canceled appointments
-      if (appointment.status === "CANCELED" || appointment.status === "NO_SHOW") {
-        return false;
-      }
-      
-      const appointmentDate = new Date(appointment.date);
-      const appointmentEndTime = new Date(appointmentDate);
-      appointmentEndTime.setMinutes(appointmentEndTime.getMinutes() + 30);
-      
-      // Check if times overlap
       return (
-        (selectedDateTime < appointmentEndTime) && 
-        (endTime > appointmentDate)
+        existingAppointmentTime.getDate() === appointmentDateTime.getDate() &&
+        existingAppointmentTime.getMonth() === appointmentDateTime.getMonth() &&
+        existingAppointmentTime.getFullYear() === appointmentDateTime.getFullYear() &&
+        existingAppointmentTime.getHours() === appointmentDateTime.getHours() &&
+        existingAppointmentTime.getMinutes() === appointmentDateTime.getMinutes()
       );
     });
-    
-    return !!conflictingAppointment;
-  } catch (error) {
-    console.error("Erreur lors de la vérification des conflits de séances:", error);
-    return false; // En cas d'erreur, permettre la séance d'être créée
-  }
-}
 
-export { AppointmentConflictError };
+    return hasConflict;
+  } catch (error) {
+    console.error("Error checking appointment conflicts:", error);
+    return false;
+  }
+};
+
+/**
+ * Sets up browser inactivity detection
+ * @param onInactive Callback to execute when inactivity is detected
+ * @param timeout Timeout in milliseconds (default: 10 minutes)
+ */
+export const setupInactivityDetection = (
+  onInactive: () => void, 
+  timeout: number = 600000 // 10 minutes
+) => {
+  let inactivityTimer: NodeJS.Timeout;
+  
+  // Reset the timer on user activity
+  const resetInactivityTimer = () => {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(onInactive, timeout);
+  };
+  
+  // Set up event listeners for user activity
+  const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+  
+  // Add event listeners
+  events.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+  });
+  
+  // Initialize timer
+  resetInactivityTimer();
+  
+  // Return cleanup function
+  return () => {
+    clearTimeout(inactivityTimer);
+    events.forEach(event => {
+      document.removeEventListener(event, resetInactivityTimer, true);
+    });
+  };
+};

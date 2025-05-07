@@ -12,6 +12,7 @@ import PatientDetailPage from './pages/PatientDetailPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import NewAppointmentPage from './pages/NewAppointmentPage';
 import EditAppointmentPage from './pages/EditAppointmentPage';
+import ImmediateAppointmentPage from './pages/ImmediateAppointmentPage';
 import SchedulePage from './pages/SchedulePage';
 import SettingsPage from './pages/SettingsPage';
 import InvoicesPage from './pages/InvoicesPage';
@@ -98,6 +99,7 @@ function App() {
         <Route path="/patients/:id" element={isAuthenticated ? <PatientDetailPage /> : <Navigate to="/login" />} />
         <Route path="/appointments" element={isAuthenticated ? <AppointmentsPage /> : <Navigate to="/login" />} />
         <Route path="/appointments/new" element={isAuthenticated ? <NewAppointmentPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments/immediate" element={isAuthenticated ? <ImmediateAppointmentPage /> : <Navigate to="/login" />} />
         <Route path="/appointments/:id/edit" element={isAuthenticated ? <EditAppointmentPage /> : <Navigate to="/login" />} />
         <Route path="/schedule" element={isAuthenticated ? <SchedulePage /> : <Navigate to="/login" />} />
         <Route path="/settings" element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" />} />
