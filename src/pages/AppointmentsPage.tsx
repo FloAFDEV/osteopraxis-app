@@ -235,7 +235,7 @@ const AppointmentsPage = () => {
 	// --- Component Return ---
 	return (
 		<Layout>
-			<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8">
+			<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8 mt-20">
 				{" "}
 				{/* Added responsive padding */}
 				{/* Section Titre et Actions */}
