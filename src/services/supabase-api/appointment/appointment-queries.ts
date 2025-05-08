@@ -26,17 +26,20 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    // Using explicit type casting to break dependency on deep Supabase types
+    const response = await supabase
       .from("Appointment")
       .select("*")
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true });
-
-    if (error) throw error;
+      .order("date", { ascending: true }) as unknown as {
+        data: AppointmentRow[] | null;
+        error: any;
+      };
+      
+    if (response.error) throw response.error;
     
-    // Utiliser typedData pour éviter l'inférence de type profonde
-    const typedAppointments = typedData<AppointmentRow[]>(data || []);
-    return typedAppointments.map(adaptAppointmentFromSupabase);
+    const appointments = response.data || [];
+    return appointments.map(adaptAppointmentFromSupabase);
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -50,20 +53,23 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    // Using explicit type casting to break dependency on deep Supabase types
+    const response = await supabase
       .from("Appointment")
       .select("*")
       .eq("id", id)
       .eq("osteopathId", osteopathId)
-      .single();
+      .single() as unknown as {
+        data: AppointmentRow | null;
+        error: any;
+      };
 
-    if (error) {
-      console.error("Error fetching appointment:", error);
+    if (response.error) {
+      console.error("Error fetching appointment:", response.error);
       return null;
     }
-
-    // Utiliser typedData pour un type sûr
-    return data ? adaptAppointmentFromSupabase(typedData<AppointmentRow>(data)) : null;
+    
+    return response.data ? adaptAppointmentFromSupabase(response.data) : null;
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -77,18 +83,21 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    // Using explicit type casting to break dependency on deep Supabase types
+    const response = await supabase
       .from("Appointment")
       .select("*")
       .eq("patientId", patientId)
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true });
+      .order("date", { ascending: true }) as unknown as {
+        data: AppointmentRow[] | null;
+        error: any;
+      };
 
-    if (error) throw error;
+    if (response.error) throw response.error;
     
-    // Utiliser typedData pour éviter l'inférence de type profonde
-    const typedAppointments = typedData<AppointmentRow[]>(data || []);
-    return typedAppointments.map(adaptAppointmentFromSupabase);
+    const appointments = response.data || [];
+    return appointments.map(adaptAppointmentFromSupabase);
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;
