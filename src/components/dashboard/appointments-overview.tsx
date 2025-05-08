@@ -10,6 +10,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Appointment } from "@/types";
 import { toast } from "sonner";
+import { formatAppointmentDate } from "@/utils/date-utils";
 
 interface AppointmentsOverviewProps {
 	data: DashboardData;
@@ -37,14 +38,16 @@ export function AppointmentsOverview({
 					api.getPatients(),
 				]);
 
-				// Filtrer pour garder seulement les Séance à venir
+				// Filtrer pour garder seulement les Séance à venir (incluant les COMPLETED)
 				const now = new Date();
 				const filteredAppointments = appointmentsData
 					.filter((appointment) => {
 						const appointmentDate = parseISO(appointment.date);
+						// Inclure maintenant aussi les rendez-vous avec le statut SCHEDULED ou COMPLETED
 						return (
 							appointmentDate >= now &&
-							appointment.status === "SCHEDULED"
+							(appointment.status === "SCHEDULED" || 
+							 appointment.status === "COMPLETED")
 						);
 					})
 					.sort(
@@ -194,6 +197,11 @@ export function AppointmentsOverview({
 						{isHighlighted && !isToday(appointmentDate) && (
 							<Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-normal">
 								Prochain
+							</Badge>
+						)}
+						{appointment.status === "COMPLETED" && (
+							<Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-xs font-normal">
+								Terminé
 							</Badge>
 						)}
 					</div>

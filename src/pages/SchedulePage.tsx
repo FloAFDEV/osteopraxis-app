@@ -1,3 +1,4 @@
+
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -95,13 +96,15 @@ const SchedulePage = () => {
 		return patients.find((patient) => patient.id === patientId);
 	};
 
+	// Mise à jour pour inclure les séances avec statut COMPLETED
 	const getDayAppointments = (date: Date) => {
 		return appointments
 			.filter((appointment) => {
 				const appointmentDate = parseISO(appointment.date);
 				return (
 					isSameDay(appointmentDate, date) &&
-					appointment.status === "SCHEDULED"
+					(appointment.status === "SCHEDULED" || 
+					 appointment.status === "COMPLETED")
 				);
 			})
 			.sort((a, b) => {
@@ -413,6 +416,11 @@ const SchedulePage = () => {
 																				appointmentTime
 																			}
 																		</Badge>
+																		{appointment.status === "COMPLETED" && (
+                                                                            <Badge className="bg-amber-500">
+                                                                                Terminé
+                                                                            </Badge>
+                                                                        )}
 																		{/* Buttons removed from here */}
 																	</div>
 																	{/* Middle section: Link to patient/reason */}
@@ -445,7 +453,7 @@ const SchedulePage = () => {
 																			)
 																		}
 																		disabled={
-																			isProcessingAction
+																			isProcessingAction || appointment.status === "COMPLETED"
 																		}
 																		title="Annuler cette séance"
 																	>
@@ -586,6 +594,7 @@ const DaySchedule = ({
 					isSameDay(date, new Date());
 				const isProcessingAction =
 					appointment && actionInProgress?.id === appointment.id;
+                const isCompleted = appointment?.status === "COMPLETED";
 
 				return (
 					<div
@@ -637,6 +646,11 @@ const DaySchedule = ({
 												)?.lastName ||
 													`Patient #${appointment.patientId}`}
 											</Link>
+                                            {isCompleted && (
+                                                <Badge className="bg-amber-500 text-white">
+                                                    Terminé
+                                                </Badge>
+                                            )}
 										</div>
 										<p className="text-sm text-muted-foreground ml-6 truncate">
 											{" "}
@@ -686,7 +700,7 @@ const DaySchedule = ({
 													appointment.id
 												)
 											}
-											disabled={isProcessingAction}
+											disabled={isProcessingAction || isCompleted}
 											aria-label="Annuler cette séance"
 										>
 											{isProcessingAction &&

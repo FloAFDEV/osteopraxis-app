@@ -9,15 +9,15 @@ import {
 	Clock,
 	Home,
 	ArrowRight,
-	ChevronDown, // Import ChevronDown for expand/collapse indication
-	CalendarX, // Use a different icon for empty state
+	ChevronDown, 
+	CalendarX,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
-import { AppointmentCard } from "@/components/appointment-card"; // Assuming this component exists and is well-styled
+import { AppointmentCard } from "@/components/appointment-card"; 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,9 +36,10 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for loading state
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AppointmentsPage = () => {
+	// ... keep existing code (états, variables, etc.)
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -127,12 +128,15 @@ const AppointmentsPage = () => {
 		filteredApps.forEach((appointment) => {
 			const appointmentDate = new Date(appointment.date);
 			const appointmentDateStr = format(appointmentDate, "yyyy-MM-dd");
-
-			if (appointmentDateStr < todayStr) {
+			
+			// Mettre les rendez-vous COMPLETED dans "past" même si leur date est future
+			if (appointmentDateStr < todayStr || (appointment.status === "COMPLETED" && appointmentDateStr < todayStr)) {
 				past.push(appointment);
 			} else if (appointmentDateStr === todayStr) {
+				// Pour aujourd'hui, montrer même les COMPLETED
 				today.push(appointment);
 			} else {
+				// Pour les dates futures, inclure les rendez-vous COMPLETED
 				future.push(appointment);
 			}
 		});
@@ -155,6 +159,7 @@ const AppointmentsPage = () => {
 		};
 	};
 
+	// ... keep existing code (grouping functions, handlers, etc.)
 	// Grouping functions (could be memoized or moved to utils)
 	const groupAppointmentsByMonthAndDay = (
 		apps: Appointment[]
@@ -232,12 +237,10 @@ const AppointmentsPage = () => {
 	const groupedTodayAppointments =
 		groupAppointmentsByMonthAndDay(todayAppointments); // Grouping just to get the date key easily
 
-	// --- Component Return ---
+	// ... keep existing code (rendering the component)
 	return (
 		<Layout>
 			<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8 mt-20">
-				{" "}
-				{/* Added responsive padding */}
 				{/* Section Titre et Actions */}
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
 					<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800 dark:text-white">
@@ -351,13 +354,10 @@ const AppointmentsPage = () => {
 					</div>
 				) : (
 					<>
-						{" "}
 						{/* Use Fragment to avoid unnecessary divs */}
 						{/* --- Today's Appointments --- */}
 						{todayAppointments.length > 0 && (
 							<div className="mb-8">
-								{" "}
-								{/* Added margin bottom */}
 								<div
 									className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-green-500 bg-green-50 dark:bg-green-900 dark:text-green-100 hover:bg-green-100 dark:hover:bg-green-700 transition-colors"
 									onClick={() => setShowToday(!showToday)}
@@ -379,8 +379,6 @@ const AppointmentsPage = () => {
 								</div>
 								{showToday && (
 									<div className="border-l-4 border-green-500 pl-4 ml-[1px] py-4 bg-white dark:bg-gray-800 rounded-b-md shadow-sm">
-										{" "}
-										{/* Indentation and styling */}
 										{Object.entries(
 											groupedTodayAppointments
 										).map(([monthYear, days]) =>
@@ -536,7 +534,7 @@ const AppointmentsPage = () => {
 							</div>
 						)}
 						{/* --- Past Appointments --- */}
-						{pastAppointments.length > 0 && ( // Check if there are *any* past appointments before showing the section
+						{pastAppointments.length > 0 && (
 							<div className="mb-8">
 								<div
 									className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-gray-400 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -558,6 +556,7 @@ const AppointmentsPage = () => {
 									/>
 								</div>
 								{showPast && (
+									// ... keep existing code (section du contenu past appointments)
 									<div className="border-l-4 border-gray-400 pl-4 ml-[1px] py-4 bg-white dark:bg-gray-800 rounded-b-md shadow-sm space-y-6">
 										{/* Filter by Year - Placed Inside */}
 										<div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 px-2 pt-2">
@@ -724,7 +723,7 @@ const AppointmentsPage = () => {
 						)}
 						{/* --- Overall Empty State --- */}
 						{!loading &&
-							filteredAppointments.length === 0 && ( // Check based on filtered list, not individual categories
+							filteredAppointments.length === 0 && (
 								<div className="text-center py-16 bg-gray-50 rounded-lg mt-8 border border-dashed">
 									<CalendarX className="h-16 w-16 text-gray-400 mx-auto mb-4" />
 									<h3 className="text-xl font-semibold text-gray-700">
@@ -809,6 +808,7 @@ const AppointmentsPage = () => {
 						<Button
 							variant="destructive"
 							onClick={handleCancelAppointment}
+							disabled={appointmentToCancel?.status === "COMPLETED"}
 						>
 							Confirmer l'annulation
 						</Button>
