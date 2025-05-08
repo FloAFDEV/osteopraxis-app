@@ -1,10 +1,11 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
-import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase } from "./appointment-adapter";
+import { adaptAppointmentFromSupabase } from "./appointment-adapter";
 import { corsHeaders } from "@/services/corsHeaders";
 
 // Interface simplifiée pour les requêtes Supabase
+// This is a flat type to avoid excessive type instantiation depth
 type AppointmentInsert = {
   patientId: number;
   date: string;
@@ -13,7 +14,7 @@ type AppointmentInsert = {
   osteopathId: number;
   notificationSent?: boolean;
   notes?: string;
-  cabinetId?: number;
+  cabinetId?: number | null;
 };
 
 export const supabaseAppointmentService = {
@@ -151,8 +152,8 @@ export const supabaseAppointmentService = {
         throw new Error("Unable to get osteopath ID");
       }
 
-      // Create the insert object directly with proper typing
-      const insertData: AppointmentInsert = {
+      // Create the insert object with explicit primitive types to avoid deep type instantiation
+      const insertData = {
         patientId: appointmentData.patientId,
         date: appointmentData.date,
         reason: appointmentData.reason || "",
@@ -198,8 +199,8 @@ export const supabaseAppointmentService = {
         return null;
       }
 
-      // Create an update object with explicit typing
-      const updateData: Partial<AppointmentInsert> = {};
+      // Create an update object with explicit typing - avoid using Partial<AppointmentInsert> directly
+      const updateData = {} as Record<string, any>;
       
       if (appointmentData.patientId !== undefined) updateData.patientId = appointmentData.patientId;
       if (appointmentData.date !== undefined) updateData.date = appointmentData.date;
