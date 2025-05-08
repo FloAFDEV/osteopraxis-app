@@ -5,7 +5,7 @@ import { Appointment } from "@/types";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentStatus } from "./appointment-types";
 
-// Define a type for the database response structure - simplified version
+// Définir un type simple pour les lignes retournées par la base de données
 interface AppointmentRow {
   id: number;
   date: string;
@@ -32,9 +32,8 @@ export async function getAppointments(): Promise<Appointment[]> {
 
     if (error) throw error;
     
-    // Use type assertion with a simplified type
-    const appointments = data as unknown as AppointmentRow[];
-    return (appointments || []).map(adaptAppointmentFromSupabase);
+    // Utiliser une assertion de type simple
+    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -60,7 +59,7 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
       return null;
     }
 
-    // Use type assertion with a simplified type
+    // Utiliser une assertion de type simple
     return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
@@ -84,9 +83,8 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
 
     if (error) throw error;
     
-    // Use type assertion with a simplified type
-    const appointments = data as unknown as AppointmentRow[];
-    return (appointments || []).map(adaptAppointmentFromSupabase);
+    // Utiliser une assertion de type simple
+    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;

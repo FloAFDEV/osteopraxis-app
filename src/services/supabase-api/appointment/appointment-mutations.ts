@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentInsertData, AppointmentStatus, AppointmentUpdateData } from "./appointment-types";
 
-// Define simplified type for Supabase response rows
+// Définir un type simple et non récursif pour les réponses Supabase
 interface AppointmentRow {
   id: number;
   date: string;
@@ -42,8 +42,7 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
     const { data, error } = await supabase
       .from("Appointment")
       .insert(insertData)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       toast.error("Erreur lors de la création du rendez-vous");
@@ -52,7 +51,9 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
     
     toast.success("Rendez-vous créé avec succès");
     
-    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
+    // Utiliser une assertion de type simple
+    const row = data[0] as unknown as AppointmentRow;
+    return adaptAppointmentFromSupabase(row);
   } catch (error) {
     console.error("Error in createAppointment:", error);
     throw error;

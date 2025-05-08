@@ -23,34 +23,54 @@ serve(async (req: Request) => {
     )
   }
 
-  // Créer un client Supabase avec le token auth
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') || '',
-    Deno.env.get('SUPABASE_ANON_KEY') || '',
-    {
-      global: {
-        headers: { Authorization: authHeader },
-      },
-    }
-  )
-
-  // Récupérer la session utilisateur
-  console.log("Récupération de l'utilisateur...");
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
-  
-  if (userError || !user) {
-    console.error("Erreur de récupération de l'utilisateur:", userError);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Erreur de récupération de l\'utilisateur', 
-        details: userError,
-        auth: authHeader ? "Token présent" : "Pas de token"
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-    )
-  }
-
   try {
+    // Récupérer les variables d'environnement
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    // Vérifier si les variables d'environnement sont correctement configurées
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Variables d'environnement manquantes:", { 
+        hasUrl: !!supabaseUrl, 
+        hasKey: !!supabaseKey 
+      });
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Configuration des variables d\'environnement incomplète', 
+          details: 'SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant' 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    // Créer un client Supabase avec le token auth
+    const supabaseClient = createClient(
+      supabaseUrl,
+      supabaseKey,
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    )
+
+    // Récupérer la session utilisateur
+    console.log("Récupération de l'utilisateur...");
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+    
+    if (userError || !user) {
+      console.error("Erreur de récupération de l'utilisateur:", userError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Erreur de récupération de l\'utilisateur', 
+          details: userError,
+          auth: authHeader ? "Token présent" : "Pas de token"
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      )
+    }
+
     // Support both PATCH and POST with X-HTTP-Method-Override
     const method = req.headers.get('X-HTTP-Method-Override') || req.method;
     console.log("Méthode effective:", method);
@@ -85,8 +105,8 @@ serve(async (req: Request) => {
     
     // Accéder à la base de données avec des privilèges élevés
     const adminClient = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
+      supabaseUrl,
+      supabaseKey,
       { auth: { persistSession: false } }
     );
 
