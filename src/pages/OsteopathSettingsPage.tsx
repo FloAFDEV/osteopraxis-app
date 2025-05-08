@@ -16,10 +16,14 @@ const OsteopathSettingsPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("OsteopathSettingsPage: Component mounted", { user });
+    
     const loadOsteopathData = async () => {
       if (user?.osteopathId) {
+        console.log("OsteopathSettingsPage: Fetching osteopath data for ID:", user.osteopathId);
         try {
           const osteopathData = await api.getOsteopathById(user.osteopathId);
+          console.log("OsteopathSettingsPage: Received osteopath data:", osteopathData);
           setOsteopath(osteopathData || null);
         } catch (error) {
           console.error("Error fetching osteopath data:", error);
@@ -28,7 +32,7 @@ const OsteopathSettingsPage = () => {
           setLoading(false);
         }
       } else {
-        console.log("No osteopathId found in user data, showing profile creation form", user);
+        console.log("OsteopathSettingsPage: No osteopathId found, showing profile creation form", user);
         setLoading(false);
       }
     };
@@ -42,7 +46,7 @@ const OsteopathSettingsPage = () => {
   };
 
   if (!user) {
-    console.log("No user found, redirecting to login");
+    console.log("OsteopathSettingsPage: No user found, redirecting to login");
     return null; // Will be handled by route protection
   }
 

@@ -1,5 +1,5 @@
 
-import { supabase } from "../utils";
+import { supabase } from "@/integrations/supabase/client";
 import { adaptAppointmentFromSupabase } from "../appointment-adapter";
 import { Appointment, AppointmentStatus } from "@/types";
 import { getCurrentUserOsteopathId } from "./appointment-utils";

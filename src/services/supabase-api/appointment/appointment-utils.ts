@@ -1,5 +1,5 @@
 
-import { supabase } from "../utils";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Get current user's osteopath ID
