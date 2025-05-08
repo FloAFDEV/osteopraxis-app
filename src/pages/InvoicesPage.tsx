@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FileText, Plus } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
@@ -374,4 +376,3 @@ const InvoicesPage = () => {
 };
 
 export default InvoicesPage;
-

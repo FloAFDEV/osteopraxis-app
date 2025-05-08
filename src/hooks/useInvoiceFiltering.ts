@@ -1,6 +1,6 @@
 
 import { useMemo } from "react";
-import { Invoice } from "@/types";
+import { Invoice, Patient } from "@/types";
 import { format } from "date-fns";
 
 export const useInvoiceFiltering = (
@@ -9,24 +9,6 @@ export const useInvoiceFiltering = (
   statusFilter: string,
   patientDataMap: Map<number, Patient>
 ) => {
-  const filteredInvoices = useMemo(() => {
-    if (!invoices) return [];
-
-    return invoices.filter((invoice) => {
-      // Get the patient name
-      const patientName = getPatientName(invoice, patientDataMap);
-
-      const matchesQuery =
-        patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        invoice.id.toString().includes(searchQuery);
-
-      const matchesStatus =
-        statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
-        
-      return matchesQuery && matchesStatus;
-    });
-  }, [invoices, searchQuery, statusFilter, patientDataMap]);
-
   // Helper function to get patient name
   const getPatientName = (invoice: Invoice, patientDataMap: Map<number, Patient>) => {
     // First check if we have the patient in our map
@@ -44,6 +26,24 @@ export const useInvoiceFiltering = (
 
     return `Patient #${invoice.patientId}`;
   };
+
+  const filteredInvoices = useMemo(() => {
+    if (!invoices) return [];
+
+    return invoices.filter((invoice) => {
+      // Get the patient name
+      const patientName = getPatientName(invoice, patientDataMap);
+
+      const matchesQuery =
+        patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        invoice.id.toString().includes(searchQuery);
+
+      const matchesStatus =
+        statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
+        
+      return matchesQuery && matchesStatus;
+    });
+  }, [invoices, searchQuery, statusFilter, patientDataMap]);
 
   // Group invoices by year and month
   const groupInvoicesByYearAndMonth = useMemo(() => {
@@ -80,7 +80,7 @@ export const useInvoiceFiltering = (
   }, [filteredInvoices]);
 
   // Generate years for filter options
-  const generateYearOptions = useMemo(() => {
+  const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
     const years: number[] = [];
 
@@ -90,7 +90,7 @@ export const useInvoiceFiltering = (
     }
 
     return years;
-  }, []);
+  };
 
   // Generate months for filter options
   const generateMonthOptions = (selectedYear: string, filteredInvoices: Invoice[]) => {
