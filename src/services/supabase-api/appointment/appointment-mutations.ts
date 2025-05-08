@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Appointment } from "@/types";
 import { adaptAppointmentFromSupabase } from "../appointment-adapter";
@@ -6,21 +5,17 @@ import { toast } from "sonner";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentInsertData, AppointmentStatus, AppointmentUpdateData } from "./appointment-types";
 
-// Define type for Supabase response rows
-type AppointmentRow = {
+// Define simplified type for Supabase response rows
+interface AppointmentRow {
   id: number;
   date: string;
   reason: string;
   status: AppointmentStatus;
   patientId: number;
-  osteopathId: number;
   notes?: string | null;
   notificationSent: boolean;
   cabinetId?: number | null;
-  createdAt?: string;
-  updatedAt?: string;
-  user_id?: string | null;
-};
+}
 
 /**
  * Create a new appointment
@@ -56,7 +51,7 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
     
     toast.success("Rendez-vous créé avec succès");
     
-    return adaptAppointmentFromSupabase(data as AppointmentRow);
+    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in createAppointment:", error);
     throw error;
@@ -97,7 +92,7 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     
     toast.success("Rendez-vous mis à jour avec succès");
     
-    return adaptAppointmentFromSupabase(data as AppointmentRow);
+    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in updateAppointment:", error);
     throw error;
@@ -129,7 +124,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
     
     toast.success("Rendez-vous annulé avec succès");
     
-    return adaptAppointmentFromSupabase(data as AppointmentRow);
+    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in cancelAppointment:", error);
     throw error;

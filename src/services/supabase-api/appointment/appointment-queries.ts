@@ -5,20 +5,17 @@ import { Appointment } from "@/types";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentStatus } from "./appointment-types";
 
-// Define a type for the database response structure
-type AppointmentRow = {
+// Define a type for the database response structure - simplified version
+interface AppointmentRow {
   id: number;
   date: string;
   reason: string;
   status: AppointmentStatus;
   patientId: number;
-  osteopathId: number;
   notes?: string | null;
   notificationSent: boolean;
   cabinetId?: number | null;
-  createdAt?: string;
-  updatedAt?: string;
-};
+}
 
 /**
  * Get all appointments for the current osteopath
@@ -27,7 +24,6 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Use explicit field selection and proper typing without using .returns()
     const { data, error } = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
@@ -36,7 +32,9 @@ export async function getAppointments(): Promise<Appointment[]> {
 
     if (error) throw error;
     
-    return (data as AppointmentRow[] || []).map(item => adaptAppointmentFromSupabase(item));
+    // Use type assertion with a simplified type
+    const appointments = data as unknown as AppointmentRow[];
+    return (appointments || []).map(adaptAppointmentFromSupabase);
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -62,7 +60,8 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
       return null;
     }
 
-    return adaptAppointmentFromSupabase(data as AppointmentRow);
+    // Use type assertion with a simplified type
+    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -85,7 +84,9 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
 
     if (error) throw error;
     
-    return (data as AppointmentRow[] || []).map(item => adaptAppointmentFromSupabase(item));
+    // Use type assertion with a simplified type
+    const appointments = data as unknown as AppointmentRow[];
+    return (appointments || []).map(adaptAppointmentFromSupabase);
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;
