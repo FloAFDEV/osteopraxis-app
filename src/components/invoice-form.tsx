@@ -183,7 +183,6 @@ export const InvoiceForm = ({
 			} else {
 				// Mode création
 				await api.createInvoice(invoiceData);
-				toast.success("✅ Facture créée avec succès !");
 				if (onCreate) onCreate();
 			}
 		} catch (error) {
