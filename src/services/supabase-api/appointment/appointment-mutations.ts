@@ -27,14 +27,12 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
       osteopathId
     };
 
-    type ResponseType = { data: any; error: any };
-    const result: ResponseType = await supabase
+    const { data, error } = await supabase
       .from("Appointment")
       .insert(insertData)
       .select()
-      .single();
+      .single() as { data: any; error: any };
 
-    const { data, error } = result;
     if (error) {
       toast.error("Erreur lors de la création du rendez-vous");
       throw error;
@@ -68,18 +66,14 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     if (appointmentData.notes !== undefined) updateData.notes = appointmentData.notes;
     if (appointmentData.cabinetId !== undefined) updateData.cabinetId = appointmentData.cabinetId;
 
-    // Utilisation d'un type explicite pour résoudre l'erreur d'instanciation excessive
-    type ResponseType = { data: any; error: any };
-    const result: ResponseType = await supabase
+    const { data, error } = await supabase
       .from("Appointment")
       .update(updateData)
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single();
+      .single() as { data: any; error: any };
     
-    const { data, error } = result;
-
     if (error) {
       toast.error("Erreur lors de la mise à jour du rendez-vous");
       throw error;
@@ -101,8 +95,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
   try {
     const osteopathId = await getCurrentUserOsteopathId();
     
-    type ResponseType = { data: any; error: any };
-    const result: ResponseType = await supabase
+    const { data, error } = await supabase
       .from("Appointment")
       .update({ 
         status: "CANCELED" as AppointmentStatus,
@@ -111,9 +104,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single();
-
-    const { data, error } = result;
+      .single() as { data: any; error: any };
 
     if (error) {
       toast.error("Erreur lors de l'annulation du rendez-vous");
@@ -136,14 +127,11 @@ export async function deleteAppointment(id: number): Promise<void> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
     
-    type ResponseType = { error: any };
-    const result: ResponseType = await supabase
+    const { error } = await supabase
       .from("Appointment")
       .delete()
       .eq("id", id)
-      .eq("osteopathId", osteopathId);
-
-    const { error } = result;
+      .eq("osteopathId", osteopathId) as { error: any };
 
     if (error) {
       toast.error("Erreur lors de la suppression du rendez-vous");
