@@ -1,7 +1,7 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
 
-// Type pour les données d'un rendez-vous venant de Supabase
+// Type for Supabase Appointment data
 export type SupabaseAppointment = {
   id: number;
   patientId: number;
@@ -11,10 +11,14 @@ export type SupabaseAppointment = {
   status: string;
   notificationSent: boolean;
   notes?: string;
+  cabinetId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  user_id?: string;
 };
 
 /**
- * Adapte les données d'un rendez-vous de Supabase au format attendu par l'application
+ * Adapts appointment data from Supabase to the application format
  */
 export function adaptAppointmentFromSupabase(data: any): Appointment {
   return {
@@ -24,23 +28,25 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
     reason: data.reason || "",
     status: data.status as AppointmentStatus,
     notificationSent: data.notificationSent || false,
-    notes: data.notes || ""
+    notes: data.notes || "",
+    cabinetId: data.cabinetId || null
   };
 }
 
 /**
- * Adapte les données d'un rendez-vous de l'application au format attendu par Supabase
+ * Adapts appointment data from application to Supabase format
  */
 export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): Record<string, any> {
   const result: Record<string, any> = {};
   
-  if (appointment.id) result.id = appointment.id;
+  if (appointment.id !== undefined) result.id = appointment.id;
   if (appointment.patientId !== undefined) result.patientId = appointment.patientId;
-  if (appointment.date) result.date = appointment.date;
+  if (appointment.date !== undefined) result.date = appointment.date;
   if (appointment.reason !== undefined) result.reason = appointment.reason;
-  if (appointment.status) result.status = appointment.status;
+  if (appointment.status !== undefined) result.status = appointment.status;
   if (appointment.notificationSent !== undefined) result.notificationSent = appointment.notificationSent;
   if (appointment.notes !== undefined) result.notes = appointment.notes;
+  if (appointment.cabinetId !== undefined) result.cabinetId = appointment.cabinetId;
   
   return result;
 }

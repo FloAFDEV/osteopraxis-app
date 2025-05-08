@@ -77,10 +77,13 @@ export const supabaseInvoiceService = {
         return undefined;
       }
 
-      // Get the invoice
+      // Get the invoice with related patient data
       const { data, error } = await supabase
         .from("Invoice")
-        .select("*, Patient(id, osteopathId)")
+        .select(`
+          *,
+          Patient:patientId (id, osteopathId)
+        `)
         .eq("id", id)
         .single();
       
@@ -91,8 +94,8 @@ export const supabaseInvoiceService = {
         throw new Error(error.message);
       }
       
-      // Verify this invoice belongs to the current osteopath
-      if (!data.Patient || data.Patient?.osteopathId !== userData.osteopathId) {
+      // Verify this invoice belongs to the current osteopath via the patient
+      if (!data.Patient || data.Patient.osteopathId !== userData.osteopathId) {
         console.error("Invoice does not belong to the current osteopath");
         return undefined;
       }

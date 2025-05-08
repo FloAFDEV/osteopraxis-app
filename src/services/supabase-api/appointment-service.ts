@@ -34,8 +34,8 @@ export const supabaseAppointmentService = {
 
       if (error) throw error;
       
-      // Explicitly type data as any[] to avoid excessive type instantiation
-      return (data as any[]).map(adaptAppointmentFromSupabase);
+      // Convert data to proper appointment types
+      return (data || []).map(item => adaptAppointmentFromSupabase(item));
     } catch (error) {
       console.error("Error in getAppointments:", error);
       throw error;
@@ -112,7 +112,7 @@ export const supabaseAppointmentService = {
 
       if (error) throw error;
       
-      return data.map(adaptAppointmentFromSupabase);
+      return (data || []).map(item => adaptAppointmentFromSupabase(item));
     } catch (error) {
       console.error("Error in getAppointmentsByPatientId:", error);
       throw error;
@@ -140,14 +140,12 @@ export const supabaseAppointmentService = {
       }
 
       // Add the osteopathId to the appointment data
-      const dataWithOsteopath = {
-        ...adaptAppointmentToSupabase(appointmentData),
-        osteopathId: userData.osteopathId
-      };
+      const supabaseData = adaptAppointmentToSupabase(appointmentData);
+      supabaseData.osteopathId = userData.osteopathId;
 
       const { data, error } = await supabase
         .from("Appointment")
-        .insert(dataWithOsteopath)
+        .insert(supabaseData)
         .select()
         .single();
 
