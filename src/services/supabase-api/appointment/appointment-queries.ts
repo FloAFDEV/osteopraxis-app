@@ -33,8 +33,8 @@ export async function getAppointments(): Promise<Appointment[]> {
 
     if (error) throw error;
     
-    // Convertir les données en utilisant un simple casting au lieu d'un generics complexe
-    return (data || []).map((item) => adaptAppointmentFromSupabase(item));
+    // Utiliser un type simple et éviter les génériques complexes
+    return (data || []).map(item => adaptAppointmentFromSupabase(item as AppointmentRow));
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -61,7 +61,7 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
     }
 
     // Simplifier l'assertion de type
-    return data ? adaptAppointmentFromSupabase(data) : null;
+    return data ? adaptAppointmentFromSupabase(data as AppointmentRow) : null;
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -85,7 +85,7 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
     if (error) throw error;
     
     // Simplifier l'assertion de type
-    return (data || []).map((item) => adaptAppointmentFromSupabase(item));
+    return (data || []).map(item => adaptAppointmentFromSupabase(item as AppointmentRow));
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;

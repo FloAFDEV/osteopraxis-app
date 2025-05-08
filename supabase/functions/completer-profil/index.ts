@@ -1,4 +1,3 @@
-
 import { corsHeaders } from '../_shared/cors.ts'
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -26,19 +25,19 @@ serve(async (req: Request) => {
   try {
     // Récupérer les variables d'environnement
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); // Nom corrigé
 
     // Vérifier si les variables d'environnement sont correctement configurées
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
       console.error("Variables d'environnement manquantes:", { 
         hasUrl: !!supabaseUrl, 
-        hasKey: !!supabaseKey 
+        hasServiceRoleKey: !!supabaseServiceRoleKey // Nom corrigé
       });
       
       return new Response(
         JSON.stringify({ 
           error: 'Configuration des variables d\'environnement incomplète', 
-          details: 'SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant' 
+          details: 'SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant' // Nom corrigé
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       );
@@ -47,7 +46,7 @@ serve(async (req: Request) => {
     // Créer un client Supabase avec le token auth
     const supabaseClient = createClient(
       supabaseUrl,
-      supabaseKey,
+      supabaseServiceRoleKey, // Nom corrigé
       {
         global: {
           headers: { Authorization: authHeader },
@@ -106,7 +105,7 @@ serve(async (req: Request) => {
     // Accéder à la base de données avec des privilèges élevés
     const adminClient = createClient(
       supabaseUrl,
-      supabaseKey,
+      supabaseServiceRoleKey, // Nom corrigé
       { auth: { persistSession: false } }
     );
 
