@@ -30,7 +30,7 @@ const NewInvoicePage = () => {
 						if (appointmentData.invoiceId) {
 							// ✅ Facture existe : on bloque, toast + redirection sans afficher le formulaire
 							toast.error(
-								"Une facture existe déjà pour ce rendez-vous."
+								"⛔ Une facture existe déjà pour ce rendez-vous."
 							);
 
 							setTimeout(() => {
@@ -68,7 +68,7 @@ const NewInvoicePage = () => {
 	}, [patientId, appointmentId, navigate]);
 
 	const handleInvoiceCreated = () => {
-		toast.success("Facture créée avec succès !");
+		toast.success("✅ Facture créée avec succès !");
 		setTimeout(() => {
 			navigate("/invoices");
 		}, 1500);

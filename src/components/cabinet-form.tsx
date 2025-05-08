@@ -80,7 +80,7 @@ export function CabinetForm({
             setOsteopathData(data);
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données de l'ostéopathe:", error);
+          console.error("⛔ Erreur lors de la récupération des données de l'ostéopathe:", error);
         }
       }
     };
@@ -170,7 +170,7 @@ export function CabinetForm({
         }
         
         // Afficher le toast une seule fois ici après toutes les opérations réussies
-        toast.success("Cabinet mis à jour avec succès");
+        toast.success("✅ Cabinet mis à jour avec succès");
       } else {
         // Create new cabinet
         const newCabinet = await api.createCabinet(cabinetData as Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>);
