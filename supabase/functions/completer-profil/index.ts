@@ -23,21 +23,21 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Récupérer les variables d'environnement
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); // Nom corrigé
+    // Récupérer les variables d'environnement - utilisation correcte de Deno.env.get
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
     // Vérifier si les variables d'environnement sont correctement configurées
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       console.error("Variables d'environnement manquantes:", { 
         hasUrl: !!supabaseUrl, 
-        hasServiceRoleKey: !!supabaseServiceRoleKey // Nom corrigé
+        hasServiceRoleKey: !!supabaseServiceRoleKey
       });
       
       return new Response(
         JSON.stringify({ 
           error: 'Configuration des variables d\'environnement incomplète', 
-          details: 'SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant' // Nom corrigé
+          details: 'SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       );
@@ -46,7 +46,7 @@ serve(async (req: Request) => {
     // Créer un client Supabase avec le token auth
     const supabaseClient = createClient(
       supabaseUrl,
-      supabaseServiceRoleKey, // Nom corrigé
+      supabaseServiceRoleKey,
       {
         global: {
           headers: { Authorization: authHeader },
@@ -105,7 +105,7 @@ serve(async (req: Request) => {
     // Accéder à la base de données avec des privilèges élevés
     const adminClient = createClient(
       supabaseUrl,
-      supabaseServiceRoleKey, // Nom corrigé
+      supabaseServiceRoleKey,
       { auth: { persistSession: false } }
     );
 
@@ -122,13 +122,13 @@ serve(async (req: Request) => {
       
       // Vérifier si l'erreur est liée aux permissions
       if (findError.code === "42501") {
-        console.error("Erreur de permission. Vérification des paramètres du service_role_key.");
+        console.error("Erreur de permission. Vérification des paramètres de SUPABASE_SERVICE_ROLE_KEY.");
         
         return new Response(
           JSON.stringify({ 
             error: 'Erreur de permission lors de l\'accès à la base de données',
             details: findError,
-            suggestion: 'Vérifiez que le SERVICE_ROLE_KEY est correctement configuré'
+            suggestion: 'Vérifiez que le SUPABASE_SERVICE_ROLE_KEY est correctement configuré'
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
         )
