@@ -1,4 +1,3 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";

@@ -140,17 +140,18 @@ export const supabaseAppointmentService = {
       }
 
       // Add the osteopathId to the appointment data
-      const supabaseData = adaptAppointmentToSupabase(appointmentData);
+      const adaptedData = adaptAppointmentToSupabase(appointmentData);
+      
       // Ensure required fields are present
-      if (!supabaseData.date || !supabaseData.patientId || !supabaseData.reason || !supabaseData.status) {
+      if (!adaptedData.date || !adaptedData.patientId || !adaptedData.reason || !adaptedData.status) {
         throw new Error("Missing required appointment fields");
       }
       
-      // Add osteopathId explicitly
+      // Create the full insert data with osteopathId
       const dataToInsert = {
-        ...supabaseData,
+        ...adaptedData,
         osteopathId: userData.osteopathId
-      };
+      } as any; // Use any to avoid type issues with osteopathId
 
       const { data, error } = await supabase
         .from("Appointment")

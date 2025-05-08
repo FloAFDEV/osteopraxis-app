@@ -5,10 +5,10 @@ import { Appointment, AppointmentStatus } from "@/types";
 export type SupabaseAppointment = {
   id: number;
   patientId: number;
-  osteopathId: number;
+  osteopathId?: number;
   date: string;
   reason: string;
-  status: string;
+  status: AppointmentStatus;
   notificationSent: boolean;
   notes?: string;
   cabinetId?: number;
@@ -36,7 +36,7 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 /**
  * Adapts appointment data from application to Supabase format
  */
-export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): SupabaseAppointment {
+export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): Partial<SupabaseAppointment> {
   const result: Partial<SupabaseAppointment> = {};
   
   if (appointment.id !== undefined) result.id = appointment.id;
@@ -48,5 +48,5 @@ export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): S
   if (appointment.notes !== undefined) result.notes = appointment.notes;
   if (appointment.cabinetId !== undefined) result.cabinetId = appointment.cabinetId;
   
-  return result as SupabaseAppointment;
+  return result;
 }
