@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -8,6 +9,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -242,8 +244,8 @@ export function PatientForm({
 												<FormLabel>Date de naissance</FormLabel>
 												<FormControl>
 													<DateInput
-														date={field.value}
-														onDateChange={field.onChange}
+														value={field.value}
+														onChange={field.onChange}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -735,28 +737,30 @@ export function PatientForm({
 					<TabsContent value="contact" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4">
-								
-								
-										
-													Email
-													{emailRequired && (
-														<span className="text-red-500">
-															*
-														</span>
-													)}
-												
-												
-													<Input
-														placeholder="Email"
-														{...field}
-														value={
-															field.value || ""
-														}
-													/>
-												
-												
-											
-										
+								<FormField
+									control={form.control}
+									name="email"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Email
+												{emailRequired && (
+													<span className="text-red-500">
+														*
+													</span>
+												)}
+											</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="Email"
+													{...field}
+													value={field.value || ""}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
 								<FormField
 									control={form.control}

@@ -57,7 +57,11 @@ const NewPatientPage = () => {
       }, 1500);
     } catch (error) {
       console.error("Error adding patient:", error);
-      toast.error(error instanceof Error ? `Erreur: ${error.message}` : "Impossible d'ajouter le patient. Veuillez réessayer.");
+      if (error instanceof Error && error.message.includes("duplicate key value")) {
+        toast.error("Cet email est déjà utilisé par un autre patient.");
+      } else {
+        toast.error(error instanceof Error ? `Erreur: ${error.message}` : "Impossible d'ajouter le patient. Veuillez réessayer.");
+      }
     } finally {
       setLoading(false);
     }
