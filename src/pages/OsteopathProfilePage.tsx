@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -20,7 +21,6 @@ const OsteopathProfilePage = () => {
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
   const [showCabinetForm, setShowCabinetForm] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [showAuthSheet, setShowAuthSheet] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   const navigate = useNavigate();
@@ -95,6 +95,8 @@ const OsteopathProfilePage = () => {
         }
       } catch (apiError: any) {
         // En cas d'erreur CORS ou réseau, tenter de récupérer l'ostéopathe directement
+        console.error("Erreur lors de la récupération de l'ostéopathe:", apiError);
+        
         if (apiError.message && (
             apiError.message.includes('CORS') || 
             apiError.message.includes('fetch') || 
@@ -166,8 +168,8 @@ const OsteopathProfilePage = () => {
     });
   };
 
-  // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
-  if (authChecked && !user && !showAuthSheet) {
+  // Si l'utilisateur n'est pas connecté, rediriger vers la connexion
+  if (authChecked && !user) {
     console.log("Redirection vers login: Utilisateur non connecté");
     return <Navigate to="/login" />;
   }
@@ -309,35 +311,6 @@ const OsteopathProfilePage = () => {
           </>
         )}
       </div>
-      
-      {/* Authentication Sheet */}
-      <Sheet open={showAuthSheet} onOpenChange={setShowAuthSheet}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Authentification requise</SheetTitle>
-          </SheetHeader>
-          <div className="py-6">
-            <p className="text-muted-foreground mb-4">
-              Vous devez être connecté pour accéder à cette page. Il semble que votre session a expiré ou est invalide.
-            </p>
-            <div className="space-y-2">
-              <Button 
-                onClick={handleRelogin}
-                className="w-full bg-primary text-primary-foreground rounded"
-              >
-                Se connecter
-              </Button>
-              <Button 
-                onClick={() => navigate("/register")}
-                variant="secondary"
-                className="w-full"
-              >
-                S'inscrire
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
     </Layout>
   );
 };

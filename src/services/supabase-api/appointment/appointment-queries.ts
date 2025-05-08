@@ -3,7 +3,7 @@ import { supabase } from "../utils";
 import { adaptAppointmentFromSupabase } from "../appointment-adapter";
 import { Appointment } from "@/types";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
-import { AppointmentInsertData, AppointmentStatus, AppointmentUpdateData } from "./appointment-types";
+import { AppointmentStatus } from "./appointment-types";
 
 /**
  * Get all appointments for the current osteopath
@@ -12,6 +12,7 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
+    // Utilisation explicite du type dans la requête pour éviter une inférence trop profonde
     const { data, error } = await supabase
       .from("Appointment")
       .select("*")
@@ -20,7 +21,7 @@ export async function getAppointments(): Promise<Appointment[]> {
 
     if (error) throw error;
     
-    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
+    return (data || []).map((item: Record<string, any>) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -69,7 +70,7 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
 
     if (error) throw error;
     
-    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
+    return (data || []).map((item: Record<string, any>) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;
