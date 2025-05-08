@@ -405,23 +405,7 @@ export function PatientForm({
 
 								{form.getValues("hasChildren") && (
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-										<div>
-											<FormLabel>
-												Nombre d'enfants
-											</FormLabel>
-											<Input
-												type="number"
-												value={childrenCount}
-												onChange={(e) => {
-													const count = parseInt(
-														e.target.value,
-														10
-													);
-													setChildrenCount(count);
-												}}
-											/>
-										</div>
-										<div>
+																				<div>
 											<FormLabel>
 												Âges des enfants (séparés par
 												des virgules)
