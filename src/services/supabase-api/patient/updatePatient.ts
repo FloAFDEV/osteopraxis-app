@@ -31,13 +31,32 @@ export async function updatePatient(patient: UpdatePatientPayload): Promise<Pati
       genderValue = "Homme" as Gender;
     }
 
+    // Récupérer d'abord le patient existant pour vérification
+    const { data: existingPatient } = await supabase
+      .from("Patient")
+      .select("osteopathId")
+      .eq("id", patient.id)
+      .single();
+      
+    // Vérifier l'accès de l'utilisateur actuel
+    const { data: userOsteopath } = await supabase
+      .from("User")
+      .select("osteopathId")
+      .eq("id", session.user.id)
+      .single();
+      
+    // S'assurer que l'utilisateur actuel est associé à l'ostéopathe du patient
+    if (existingPatient && userOsteopath && existingPatient.osteopathId !== userOsteopath.osteopathId) {
+      throw new Error("Vous n'êtes pas autorisé à modifier ce patient");
+    }
+
     // Construction de l'objet à mettre à jour (sans timestamps)
     const updatable = {
       ...patient,
       contraception: contraceptionValue,
       gender: genderValue,
       birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
-      osteopathId: patient.osteopathId || 1,
+      osteopathId: patient.osteopathId || existingPatient?.osteopathId,
     };
     
     // 2. Utiliser REST pour contourner les problèmes CORS

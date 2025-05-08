@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY, removeNullProperties } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -136,9 +137,10 @@ export const supabaseOsteopathService = {
 
       console.log("Payload de mise à jour de l'ostéopathe:", updatePayload);
 
-      // 6. Utiliser PATCH au lieu de PUT pour ne mettre à jour que les champs fournis
+      // On utilise PUT au lieu de PATCH car certaines configurations CORS peuvent bloquer PATCH
+      // Cela fonctionnera comme un PATCH car nous définissons Prefer: return=representation
       const res = await fetch(URL_ENDPOINT, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,

@@ -1,3 +1,4 @@
+
 import { corsHeaders } from '../_shared/cors.ts'
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -121,6 +122,14 @@ serve(async (req: Request) => {
     let result;
     
     if (existingOsteopath) {
+      // Vérifier que l'utilisateur ne modifie que son propre ostéopathe
+      if (existingOsteopath.userId !== user.id) {
+        return new Response(
+          JSON.stringify({ error: 'Vous ne pouvez pas modifier les données d\'un autre utilisateur' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+        );
+      }
+      
       // Mettre à jour l'ostéopathe existant
       console.log("Mise à jour de l'ostéopathe existant:", existingOsteopath.id);
       
@@ -154,13 +163,14 @@ serve(async (req: Request) => {
       const now = new Date().toISOString();
       
       // S'assurer que nous avons les données minimales requises
+      // et s'assurer que userId correspond à l'utilisateur authentifié
       const osteopathToCreate = {
         name: osteopathData.name || user.email?.split('@')[0] || "Ostéopathe",
         professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
         adeli_number: osteopathData.adeli_number || null,
         siret: osteopathData.siret || null,
         ape_code: osteopathData.ape_code || "8690F",
-        userId: user.id,
+        userId: user.id, // S'assurer que l'userId est celui de l'utilisateur authentifié
         createdAt: now,
         updatedAt: now
       };
