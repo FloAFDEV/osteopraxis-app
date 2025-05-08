@@ -53,20 +53,15 @@ function App() {
   // Configuration des chemins publics (accessibles sans connexion)
   const publicPaths = ['/privacy-policy', '/terms-of-service'];
   
-  // Ajout d'un intercepteur global pour toutes les requêtes fetch
+  // Intercepteur de fetch pour gérer les CORS - MODIFIÉ
   useEffect(() => {
     const originalFetch = window.fetch;
     window.fetch = function(input, init) {
       const modifiedInit = init || {};
-      // Si l'URL contient supabase.co, nous ajoutons les en-têtes CORS
-      if (typeof input === 'string' && input.includes('supabase.co')) {
-        modifiedInit.headers = {
-          ...modifiedInit.headers,
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, X-Cancellation-Override, X-HTTP-Method-Override, prefer',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-        };
-      }
+      
+      // Ne pas ajouter les headers CORS aux requêtes, ils doivent être configurés côté serveur
+      // Seul le backend peut définir les headers CORS de réponse
+      
       return originalFetch(input, modifiedInit);
     };
 
