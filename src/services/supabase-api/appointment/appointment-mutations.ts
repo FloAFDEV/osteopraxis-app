@@ -3,7 +3,6 @@ import { supabase } from "../utils";
 import { Appointment } from "@/types";
 import { adaptAppointmentFromSupabase } from "../appointment-adapter";
 import { toast } from "sonner";
-import { Check, AlertTriangle } from "lucide-react";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentInsertData, AppointmentStatus, AppointmentUpdateData } from "./appointment-types";
 
@@ -35,15 +34,11 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
       .single();
 
     if (error) {
-      toast.error("Erreur lors de la création du rendez-vous", {
-        icon: <AlertTriangle className="h-4 w-4" />
-      });
+      toast.error("Erreur lors de la création du rendez-vous");
       throw error;
     }
     
-    toast.success("Rendez-vous créé avec succès", {
-      icon: <Check className="h-4 w-4" />
-    });
+    toast.success("Rendez-vous créé avec succès");
     
     return adaptAppointmentFromSupabase(data);
   } catch (error) {
@@ -80,15 +75,11 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
       .single();
 
     if (error) {
-      toast.error("Erreur lors de la mise à jour du rendez-vous", {
-        icon: <AlertTriangle className="h-4 w-4" />
-      });
+      toast.error("Erreur lors de la mise à jour du rendez-vous");
       throw error;
     }
     
-    toast.success("Rendez-vous mis à jour avec succès", {
-      icon: <Check className="h-4 w-4" />
-    });
+    toast.success("Rendez-vous mis à jour avec succès");
     
     return adaptAppointmentFromSupabase(data);
   } catch (error) {
@@ -116,15 +107,11 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
       .single();
 
     if (error) {
-      toast.error("Erreur lors de l'annulation du rendez-vous", {
-        icon: <AlertTriangle className="h-4 w-4" />
-      });
+      toast.error("Erreur lors de l'annulation du rendez-vous");
       throw error;
     }
     
-    toast.success("Rendez-vous annulé avec succès", {
-      icon: <Check className="h-4 w-4" />
-    });
+    toast.success("Rendez-vous annulé avec succès");
     
     return adaptAppointmentFromSupabase(data);
   } catch (error) {
@@ -147,15 +134,11 @@ export async function deleteAppointment(id: number): Promise<void> {
       .eq("osteopathId", osteopathId);
 
     if (error) {
-      toast.error("Erreur lors de la suppression du rendez-vous", {
-        icon: <AlertTriangle className="h-4 w-4" />
-      });
+      toast.error("Erreur lors de la suppression du rendez-vous");
       throw error;
     }
     
-    toast.success("Rendez-vous supprimé avec succès", {
-      icon: <Check className="h-4 w-4" />
-    });
+    toast.success("Rendez-vous supprimé avec succès");
   } catch (error) {
     console.error("Error in deleteAppointment:", error);
     throw error;

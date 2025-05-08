@@ -12,7 +12,6 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utilisation explicite du type dans la requête pour éviter une inférence trop profonde
     const { data, error } = await supabase
       .from("Appointment")
       .select("*")
@@ -21,7 +20,7 @@ export async function getAppointments(): Promise<Appointment[]> {
 
     if (error) throw error;
     
-    return (data || []).map((item: Record<string, any>) => adaptAppointmentFromSupabase(item));
+    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -70,7 +69,7 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
 
     if (error) throw error;
     
-    return (data || []).map((item: Record<string, any>) => adaptAppointmentFromSupabase(item));
+    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;
