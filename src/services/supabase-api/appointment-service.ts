@@ -3,12 +3,12 @@ import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 import { adaptAppointmentFromSupabase } from "./appointment-adapter";
 
-// Simple flat type definition to avoid deep type instantiation
+// Properly typed definition with literal AppointmentStatus union type
 type AppointmentData = {
   patientId: number;
   date: string;
   reason: string;
-  status: string; // Using string instead of AppointmentStatus enum to avoid complex type inference
+  status: AppointmentStatus; // Using the enum type directly for proper typing
   osteopathId: number;
   notificationSent?: boolean;
   notes?: string;
@@ -117,12 +117,12 @@ export const supabaseAppointmentService = {
     try {
       const osteopathId = await getCurrentUserOsteopathId();
 
-      // Create simple object with primitive types to avoid deep type instantiation
+      // Create properly typed object with correct status type
       const insertData: AppointmentData = {
         patientId: appointmentData.patientId,
         date: appointmentData.date,
         reason: appointmentData.reason || "",
-        status: appointmentData.status,
+        status: appointmentData.status as AppointmentStatus, // Ensure correct type
         osteopathId: osteopathId,
         notificationSent: appointmentData.notificationSent || false,
         notes: appointmentData.notes || "",
@@ -191,7 +191,7 @@ export const supabaseAppointmentService = {
 
       const { data, error } = await supabase
         .from("Appointment")
-        .update({ status: "CANCELED" })
+        .update({ status: "CANCELED" as AppointmentStatus })
         .eq("id", id)
         .eq("osteopathId", osteopathId)
         .select()

@@ -2,11 +2,11 @@
 import { useToast as useHookToast, toast as hookToast } from "@/hooks/use-toast";
 import type { ToastProps } from "@/components/ui/toast";
 
-// Créer des versions stylisées du toast pour chaque type de message
+// Create styled versions of toast for each message type
 const toast = {
   ...hookToast,
   
-  // Toast de succès avec style vert
+  // Success toast with green style and checkmark icon
   success: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title: `✅ ${title}`,
@@ -16,7 +16,7 @@ const toast = {
     });
   },
   
-  // Toast d'erreur avec style rouge
+  // Error toast with red style and X icon
   error: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title: `❌ ${title}`,
@@ -26,7 +26,7 @@ const toast = {
     });
   },
   
-  // Toast d'avertissement avec style orange/ambre
+  // Warning toast with amber/orange style and warning icon
   warning: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title: `⚠️ ${title}`,
@@ -36,7 +36,7 @@ const toast = {
     });
   },
   
-  // Toast d'information avec style bleu
+  // Info toast with blue style and info icon
   info: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
     return hookToast({
       title: `ℹ️ ${title}`,
@@ -47,5 +47,5 @@ const toast = {
   }
 };
 
-// Exporter les fonctions avec le wrapper personnalisé
+// Export the functions with the custom wrapper
 export { useHookToast as useToast, toast };

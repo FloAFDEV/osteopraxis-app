@@ -1,4 +1,3 @@
-
 import * as React from "react"
 
 import type {
@@ -170,23 +169,7 @@ function toast({ ...props }: Toast) {
   }
 }
 
-// Add variant-specific toast methods
-toast.success = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title: `✅ ${title}`, variant: "success", ...options });
-};
-
-toast.error = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title: `❌ ${title}`, variant: "error", ...options });
-};
-
-toast.warning = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title: `⚠️ ${title}`, variant: "warning", ...options });
-};
-
-toast.info = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title: `ℹ️ ${title}`, variant: "info", ...options });
-};
-
+// Removed duplicate methods since they will be defined in components/ui/use-toast.ts
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
