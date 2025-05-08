@@ -184,7 +184,7 @@ export function CabinetForm({
           });
         }
         
-        toast.success("Cabinet créé avec succès");
+        toast.success("✅  Cabinet créé avec succès");
       }
       
       // Si un callback de succès est fourni, l'appeler après un court délai
@@ -200,7 +200,7 @@ export function CabinetForm({
       }
     } catch (error) {
       console.error("Error submitting cabinet form:", error);
-      toast.error("Une erreur est survenue. Veuillez réessayer.");
+      toast.error("⛔ Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
     }
