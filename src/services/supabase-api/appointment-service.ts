@@ -2,52 +2,58 @@
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 import { adaptAppointmentFromSupabase } from "./appointment-adapter";
-import { corsHeaders } from "@/services/corsHeaders";
 
-// Interface simplifiée pour les requêtes Supabase
-// This is a flat type to avoid excessive type instantiation depth
-type AppointmentInsert = {
+// Simple flat type definition to avoid deep type instantiation
+type AppointmentData = {
   patientId: number;
   date: string;
   reason: string;
-  status: AppointmentStatus;
+  status: string; // Using string instead of AppointmentStatus enum to avoid complex type inference
   osteopathId: number;
   notificationSent?: boolean;
   notes?: string;
   cabinetId?: number | null;
 };
 
+/**
+ * Get current user's osteopath ID
+ */
+async function getCurrentUserOsteopathId(): Promise<number> {
+  const { data: session } = await supabase.auth.getSession();
+  if (!session.session) {
+    throw new Error("No authenticated session");
+  }
+
+  const { data: userData, error: userError } = await supabase
+    .from("User")
+    .select("osteopathId")
+    .eq("id", session.session.user.id)
+    .single();
+
+  if (userError || !userData || !userData.osteopathId) {
+    console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
+    throw new Error("Unable to get osteopath ID");
+  }
+
+  return userData.osteopathId;
+}
+
 export const supabaseAppointmentService = {
+  /**
+   * Get all appointments for the current osteopath
+   */
   async getAppointments(): Promise<Appointment[]> {
     try {
-      // First get the current user's osteopath ID
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
+      const osteopathId = await getCurrentUserOsteopathId();
 
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError || !userData || !userData.osteopathId) {
-        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
-        return [];
-      }
-
-      // Now get appointments for this osteopath only
       const { data, error } = await supabase
         .from("Appointment")
         .select("*")
-        .eq("osteopathId", userData.osteopathId)
+        .eq("osteopathId", osteopathId)
         .order("date", { ascending: true });
 
       if (error) throw error;
       
-      // Convert data to proper appointment types
       return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
     } catch (error) {
       console.error("Error in getAppointments:", error);
@@ -55,32 +61,18 @@ export const supabaseAppointmentService = {
     }
   },
 
+  /**
+   * Get a specific appointment by ID
+   */
   async getAppointmentById(id: number): Promise<Appointment | null> {
     try {
-      // First get the current user's osteopath ID
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
+      const osteopathId = await getCurrentUserOsteopathId();
 
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError || !userData || !userData.osteopathId) {
-        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
-        return null;
-      }
-
-      // Now get the appointment, ensuring it belongs to the user's osteopath
       const { data, error } = await supabase
         .from("Appointment")
         .select("*")
         .eq("id", id)
-        .eq("osteopathId", userData.osteopathId)
+        .eq("osteopathId", osteopathId)
         .single();
 
       if (error) {
@@ -95,32 +87,18 @@ export const supabaseAppointmentService = {
     }
   },
 
+  /**
+   * Get appointments for a specific patient
+   */
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     try {
-      // First get the current user's osteopath ID
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
+      const osteopathId = await getCurrentUserOsteopathId();
 
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError || !userData || !userData.osteopathId) {
-        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
-        return [];
-      }
-
-      // Now get appointments for this patient and osteopath
       const { data, error } = await supabase
         .from("Appointment")
         .select("*")
         .eq("patientId", patientId)
-        .eq("osteopathId", userData.osteopathId)
+        .eq("osteopathId", osteopathId)
         .order("date", { ascending: true });
 
       if (error) throw error;
@@ -132,33 +110,20 @@ export const supabaseAppointmentService = {
     }
   },
   
+  /**
+   * Create a new appointment
+   */
   async createAppointment(appointmentData: Omit<Appointment, "id">): Promise<Appointment> {
     try {
-      // First make sure we have the current user's osteopathId
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
+      const osteopathId = await getCurrentUserOsteopathId();
 
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError || !userData || !userData.osteopathId) {
-        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
-        throw new Error("Unable to get osteopath ID");
-      }
-
-      // Create the insert object with explicit primitive types to avoid deep type instantiation
-      const insertData = {
+      // Create simple object with primitive types to avoid deep type instantiation
+      const insertData: AppointmentData = {
         patientId: appointmentData.patientId,
         date: appointmentData.date,
         reason: appointmentData.reason || "",
         status: appointmentData.status,
-        osteopathId: userData.osteopathId,
+        osteopathId: osteopathId,
         notificationSent: appointmentData.notificationSent || false,
         notes: appointmentData.notes || "",
         cabinetId: appointmentData.cabinetId || null,
@@ -179,28 +144,15 @@ export const supabaseAppointmentService = {
     }
   },
 
+  /**
+   * Update an existing appointment
+   */
   async updateAppointment(id: number, appointmentData: Partial<Appointment>): Promise<Appointment | null> {
     try {
-      // First get the current user's osteopath ID
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
+      const osteopathId = await getCurrentUserOsteopathId();
 
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError || !userData || !userData.osteopathId) {
-        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
-        return null;
-      }
-
-      // Create an update object with explicit typing - avoid using Partial<AppointmentInsert> directly
-      const updateData = {} as Record<string, any>;
+      // Use a simple Record type to avoid deep type inference issues
+      const updateData: Record<string, any> = {};
       
       if (appointmentData.patientId !== undefined) updateData.patientId = appointmentData.patientId;
       if (appointmentData.date !== undefined) updateData.date = appointmentData.date;
@@ -210,12 +162,11 @@ export const supabaseAppointmentService = {
       if (appointmentData.notes !== undefined) updateData.notes = appointmentData.notes;
       if (appointmentData.cabinetId !== undefined) updateData.cabinetId = appointmentData.cabinetId;
 
-      // Now update the appointment, ensuring it belongs to the user's osteopath
       const { data, error } = await supabase
         .from("Appointment")
         .update(updateData)
         .eq("id", id)
-        .eq("osteopathId", userData.osteopathId)
+        .eq("osteopathId", osteopathId)
         .select()
         .single();
 
@@ -231,32 +182,18 @@ export const supabaseAppointmentService = {
     }
   },
 
+  /**
+   * Cancel an appointment
+   */
   async cancelAppointment(id: number): Promise<Appointment | null> {
     try {
-      // First get the current user's osteopath ID
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
+      const osteopathId = await getCurrentUserOsteopathId();
 
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError || !userData || !userData.osteopathId) {
-        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
-        return null;
-      }
-
-      // Now update the appointment status to "CANCELED", ensuring it belongs to the user's osteopath
       const { data, error } = await supabase
         .from("Appointment")
         .update({ status: "CANCELED" })
         .eq("id", id)
-        .eq("osteopathId", userData.osteopathId)
+        .eq("osteopathId", osteopathId)
         .select()
         .single();
 
@@ -272,32 +209,18 @@ export const supabaseAppointmentService = {
     }
   },
 
+  /**
+   * Delete an appointment
+   */
   async deleteAppointment(id: number): Promise<boolean> {
     try {
-      // First get the current user's osteopath ID
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
+      const osteopathId = await getCurrentUserOsteopathId();
 
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError || !userData || !userData.osteopathId) {
-        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
-        return false;
-      }
-
-      // Now delete the appointment, ensuring it belongs to the user's osteopath
       const { error } = await supabase
         .from("Appointment")
         .delete()
         .eq("id", id)
-        .eq("osteopathId", userData.osteopathId);
+        .eq("osteopathId", osteopathId);
 
       if (error) {
         console.error("Error deleting appointment:", error);

@@ -172,19 +172,19 @@ function toast({ ...props }: Toast) {
 
 // Add variant-specific toast methods
 toast.success = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title, variant: "success", ...options });
+  return toast({ title: `✅ ${title}`, variant: "success", ...options });
 };
 
 toast.error = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title, variant: "error", ...options });
+  return toast({ title: `❌ ${title}`, variant: "error", ...options });
 };
 
 toast.warning = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title, variant: "warning", ...options });
+  return toast({ title: `⚠️ ${title}`, variant: "warning", ...options });
 };
 
 toast.info = (title: string, options?: Omit<Toast, "title" | "variant">) => {
-  return toast({ title, variant: "info", ...options });
+  return toast({ title: `ℹ️ ${title}`, variant: "info", ...options });
 };
 
 function useToast() {
