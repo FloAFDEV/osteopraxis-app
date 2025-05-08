@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -40,6 +41,10 @@ export interface Patient {
   generalPractitioner: string | null;
   currentTreatment: string | null;
   isSmoker: boolean;
+  isExSmoker?: boolean;
+  smokingSince?: string | null;
+  smokingAmount?: string | null;
+  quitSmokingDate?: string | null;
   physicalActivity: string | null;
   hasVisionCorrection: boolean;
   contraception: Contraception | null;

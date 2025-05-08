@@ -32,7 +32,12 @@ export async function createPatient(patient: CreatePatientPayload): Promise<Pati
     // Email est maintenant facultatif
     email: patient.email || null,
     osteopathId: patient.osteopathId,
-    userId: patient.userId || null
+    userId: patient.userId || null,
+    // Nouveaux champs pour le tabagisme
+    smokingSince: patient.smokingSince || null,
+    smokingAmount: patient.smokingAmount || null,
+    isExSmoker: patient.isExSmoker || false,
+    quitSmokingDate: patient.quitSmokingDate || null
   };
 
   console.log("Création d'un patient avec les données:", insertable);

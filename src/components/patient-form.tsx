@@ -50,6 +50,10 @@ const getPatientSchema = (emailRequired: boolean) => z.object({
 	contraception: z.string().optional().nullable(),
 	physicalActivity: z.string().optional().nullable(),
 	isSmoker: z.boolean().optional().nullable(),
+	isExSmoker: z.boolean().optional().nullable(),
+	smokingSince: z.string().optional().nullable(),
+	smokingAmount: z.string().optional().nullable(),
+	quitSmokingDate: z.string().optional().nullable(),
 	generalPractitioner: z.string().optional().nullable(),
 	ophtalmologistName: z.string().optional().nullable(),
 	hasVisionCorrection: z.boolean().optional().nullable(),
@@ -117,15 +121,24 @@ export function PatientForm({
 					rheumatologicalHistory:
 						patient.rheumatologicalHistory || "",
 					currentTreatment: patient.currentTreatment || "",
+					// Nouveaux champs pour le tabagisme
+					isExSmoker: false,
+					smokingSince: "",
+					smokingAmount: "",
+					quitSmokingDate: "",
 			  }
 			: {
 					firstName: "",
 					lastName: "",
 					hasChildren: false,
 					isSmoker: false,
+					isExSmoker: false,
 					hasVisionCorrection: false,
 					email: "",
 					phone: "",
+					smokingSince: "",
+					smokingAmount: "",
+					quitSmokingDate: "",
 			  },
 	});
 
@@ -472,32 +485,142 @@ export function PatientForm({
 									/>
 								</div>
 
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<FormField
-										control={form.control}
-										name="isSmoker"
-										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-												<div className="space-y-0.5">
-													<FormLabel className="text-base">
-														Fumeur ?
-													</FormLabel>
-													<FormDescription>
-														Indiquez si le patient
-														fume.
-													</FormDescription>
-												</div>
-												<FormControl>
-													<Switch
-														checked={field.value}
-														onCheckedChange={
-															field.onChange
-														}
-													/>
-												</FormControl>
-											</FormItem>
+								{/* Section Tabagisme */}
+								<div className="border p-4 rounded-lg space-y-4">
+									<h3 className="font-medium text-lg">Habitudes tabagiques</h3>
+									<div className="grid grid-cols-1 gap-4">
+										<FormField
+											control={form.control}
+											name="isSmoker"
+											render={({ field }) => (
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+													<div className="space-y-0.5">
+														<FormLabel className="text-base">
+															Fumeur ?
+														</FormLabel>
+														<FormDescription>
+															Indiquez si le patient
+															fume actuellement.
+														</FormDescription>
+													</div>
+													<FormControl>
+														<Switch
+															checked={field.value}
+															onCheckedChange={(checked) => {
+																field.onChange(checked);
+																if (checked) {
+																	form.setValue("isExSmoker", false);
+																}
+															}}
+														/>
+													</FormControl>
+												</FormItem>
+											)}
+										/>
+
+										{form.watch("isSmoker") && (
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
+												<FormField
+													control={form.control}
+													name="smokingSince"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Depuis quand ?</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Ex: 2010, depuis 5 ans..."
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name="smokingAmount"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Quantité</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Ex: 10 cigarettes/jour"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											</div>
 										)}
-									/>
+
+										<FormField
+											control={form.control}
+											name="isExSmoker"
+											render={({ field }) => (
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+													<div className="space-y-0.5">
+														<FormLabel className="text-base">
+															Ex-fumeur ?
+														</FormLabel>
+														<FormDescription>
+															Indiquez si le patient
+															a arrêté de fumer.
+														</FormDescription>
+													</div>
+													<FormControl>
+														<Switch
+															checked={field.value}
+															onCheckedChange={(checked) => {
+																field.onChange(checked);
+																if (checked) {
+																	form.setValue("isSmoker", false);
+																}
+															}}
+														/>
+													</FormControl>
+												</FormItem>
+											)}
+										/>
+
+										{form.watch("isExSmoker") && (
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
+												<FormField
+													control={form.control}
+													name="quitSmokingDate"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Arrêt depuis</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Ex: 2018, depuis 3 ans..."
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name="smokingAmount"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Quantité avant arrêt</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Ex: 15 cigarettes/jour"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											</div>
+										)}
+									</div>
 								</div>
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
