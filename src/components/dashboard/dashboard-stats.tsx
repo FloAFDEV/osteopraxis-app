@@ -16,64 +16,12 @@ export function DashboardStats({ data }: DashboardStatsProps) {
   const today = new Date();
   const formattedToday = format(today, "EEEE d MMMM yyyy", { locale: fr });
 
-  // Format next appointment with day and date if available
-  let nextAppointmentText = "Prochaine: Aucune séance prévue";
+  // Display the real next appointment information
+  let nextAppointmentText = "Aucune séance prévue";
   
-  if (data && data.nextAppointment !== "Aucune séance prévue") {
-    // Extract date from the nextAppointment string if it contains a date
-    try {
-      // Parse the appointment data - assuming format like "HH:mm, dd MMM"
-      const appointmentData = data.nextAppointment.split(',');
-      if (appointmentData.length > 1) {
-        // Try to construct a valid date from the appointment information
-        const timePart = appointmentData[0].trim(); // "HH:mm"
-        const datePart = appointmentData[1].trim(); // "dd MMM"
-        
-        // Create a date object based on the current year
-        const nextDate = new Date();
-        
-        // Parse month and day from datePart (e.g., "23 mai")
-        const [day, month] = datePart.split(' ');
-        
-        // Map French month names to numbers (simplified approach)
-        const monthNames = {
-          'jan': 0, 'fév': 1, 'mar': 2, 'avr': 3, 'mai': 4, 'juin': 5,
-          'juil': 6, 'août': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'déc': 11
-        };
-        
-        // Find the matching month number
-        let monthIndex = -1;
-        for (const [key, value] of Object.entries(monthNames)) {
-          if (month.toLowerCase().startsWith(key.toLowerCase())) {
-            monthIndex = value;
-            break;
-          }
-        }
-        
-        if (monthIndex !== -1) {
-          nextDate.setMonth(monthIndex);
-          nextDate.setDate(parseInt(day));
-          
-          // Format with the day of week, full date and time in the requested format
-          const dayName = format(nextDate, "EEEE", { locale: fr });
-          const dayNumber = format(nextDate, "dd", { locale: fr });
-          const monthName = format(nextDate, "MMMM", { locale: fr });
-          const yearNumber = format(nextDate, "yyyy", { locale: fr });
-          
-          // Capitalize the first letter of the day name
-          const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-          
-          nextAppointmentText = `Prochaine: ${capitalizedDayName} ${dayNumber} ${monthName} ${yearNumber}, ${timePart}`;
-        } else {
-          nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
-        }
-      } else {
-        nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
-      }
-    } catch (error) {
-      console.error("Error formatting next appointment date:", error);
-      nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
-    }
+  if (data && data.nextAppointment && data.nextAppointment !== "Aucune séance prévue") {
+    // Use the actual next appointment data from the API
+    nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
   }
 
   if (!data) {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -9,6 +10,7 @@ import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
+import { formatAppointmentDate } from "@/utils/date-utils";
 
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -82,14 +84,22 @@ export function Dashboard() {
           return appDate.toDateString() === today.toDateString();
         }).length;
 
-        // Prochain rendez-vous
+        // Prochain rendez-vous - vérifier les rendez-vous à venir et prendre le plus proche
         const futureAppointments = appointments
-          .filter(a => new Date(a.date) > today)
+          .filter(a => {
+            // Filtrer les rendez-vous à venir et non annulés
+            const appDate = new Date(a.date);
+            return appDate > today && a.status !== "CANCELED" && a.status !== "NO_SHOW";
+          })
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         
-        const nextAppointment = futureAppointments.length > 0 
-          ? format(new Date(futureAppointments[0].date), 'HH:mm, dd MMM', { locale: fr })
-          : "Aucune séance prévue";
+        // Obtenir les informations détaillées du prochain rendez-vous
+        let nextAppointment = "Aucune séance prévue";
+        if (futureAppointments.length > 0) {
+          const nextApp = futureAppointments[0];
+          // Formater la date complète pour afficher le jour, la date et l'heure
+          nextAppointment = formatAppointmentDate(nextApp.date, "EEEE d MMMM yyyy 'à' HH:mm");
+        }
 
         // Calcul de la croissance sur 30 jours
         const thirtyDaysAgo = new Date();
