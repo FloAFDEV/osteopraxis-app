@@ -33,8 +33,12 @@ export async function getAppointments(): Promise<Appointment[]> {
 
     if (error) throw error;
     
-    // Utiliser un type simple et éviter les génériques complexes
-    return (data || []).map(item => adaptAppointmentFromSupabase(item as AppointmentRow));
+    // Éviter les assertions de type complexes
+    const appointments: Appointment[] = [];
+    for (const item of (data || [])) {
+      appointments.push(adaptAppointmentFromSupabase(item as unknown as AppointmentRow));
+    }
+    return appointments;
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -60,8 +64,8 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
       return null;
     }
 
-    // Simplifier l'assertion de type
-    return data ? adaptAppointmentFromSupabase(data as AppointmentRow) : null;
+    // Simplifier l'assertion de type avec unknown comme intermédiaire
+    return data ? adaptAppointmentFromSupabase(data as unknown as AppointmentRow) : null;
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -84,8 +88,12 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
 
     if (error) throw error;
     
-    // Simplifier l'assertion de type
-    return (data || []).map(item => adaptAppointmentFromSupabase(item as AppointmentRow));
+    // Éviter les assertions de type complexes avec une boucle plus explicite
+    const appointments: Appointment[] = [];
+    for (const item of (data || [])) {
+      appointments.push(adaptAppointmentFromSupabase(item as unknown as AppointmentRow));
+    }
+    return appointments;
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;

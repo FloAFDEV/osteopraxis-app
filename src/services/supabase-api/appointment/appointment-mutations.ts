@@ -51,8 +51,11 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
     
     toast.success("Rendez-vous créé avec succès");
     
-    // Simplifier l'assertion de type
-    return adaptAppointmentFromSupabase(data[0] as AppointmentRow);
+    // Éviter les assertions de type complexes
+    if (!data || data.length === 0) {
+      throw new Error("Aucune donnée retournée après création");
+    }
+    return adaptAppointmentFromSupabase(data[0] as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in createAppointment:", error);
     throw error;
@@ -94,7 +97,7 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     toast.success("Rendez-vous mis à jour avec succès");
     
     // Simplifier l'assertion de type
-    return adaptAppointmentFromSupabase(data as AppointmentRow);
+    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in updateAppointment:", error);
     throw error;
@@ -127,7 +130,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
     toast.success("Rendez-vous annulé avec succès");
     
     // Simplifier l'assertion de type
-    return adaptAppointmentFromSupabase(data as AppointmentRow);
+    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
   } catch (error) {
     console.error("Error in cancelAppointment:", error);
     throw error;
