@@ -257,7 +257,7 @@ export function PatientForm({
 										control={form.control}
 										name="gender"
 										render={({ field }) => (
-											<FormItem>
+											<FormItem className="flex flex-col space-y-1.5">
 												<FormLabel>Genre</FormLabel>
 												<Select
 													onValueChange={
