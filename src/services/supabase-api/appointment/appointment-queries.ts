@@ -5,6 +5,19 @@ import { Appointment } from "@/types";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentStatus } from "./appointment-types";
 
+// Type intermédiaire simplifié pour éviter l'inférence de type profonde
+type RawAppointmentData = {
+  id: number;
+  date: string;
+  reason: string;
+  status: string;
+  notificationSent: boolean;
+  notes?: string | null;
+  patientId: number;
+  cabinetId?: number | null;
+  // Ajoutez d'autres champs si nécessaire, mais gardez-les simples
+};
+
 /**
  * Get all appointments for the current osteopath
  */
@@ -12,20 +25,22 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Effectuer la requête sans inférence de type complexe
-    const response = await supabase
+    // Utiliser any pour éviter l'inférence de type profonde
+    const { data, error } = await supabase
       .from("Appointment")
       .select("*")
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true });
+      .order("date", { ascending: true }) as { data: any[], error: any };
 
-    if (response.error) throw response.error;
+    if (error) throw error;
     
-    // Traiter les données sans laisser TypeScript faire d'inférences profondes
+    // Convertir manuellement en utilisant notre adaptateur
     const appointments: Appointment[] = [];
-    if (response.data) {
-      for (const item of response.data) {
-        appointments.push(adaptAppointmentFromSupabase(item));
+    
+    if (data && Array.isArray(data)) {
+      for (let i = 0; i < data.length; i++) {
+        const rawItem = data[i] as RawAppointmentData;
+        appointments.push(adaptAppointmentFromSupabase(rawItem));
       }
     }
     
@@ -43,21 +58,21 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Effectuer la requête sans inférence de type complexe
-    const response = await supabase
+    // Utiliser any pour éviter l'inférence de type
+    const { data, error } = await supabase
       .from("Appointment")
       .select("*")
       .eq("id", id)
       .eq("osteopathId", osteopathId)
-      .single();
+      .single() as { data: any, error: any };
 
-    if (response.error) {
-      console.error("Error fetching appointment:", response.error);
+    if (error) {
+      console.error("Error fetching appointment:", error);
       return null;
     }
 
-    // Éviter l'inférence de type profonde
-    return response.data ? adaptAppointmentFromSupabase(response.data) : null;
+    // Conversion manuelle contrôlée
+    return data ? adaptAppointmentFromSupabase(data as RawAppointmentData) : null;
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -71,21 +86,23 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Effectuer la requête sans inférence de type complexe
-    const response = await supabase
+    // Utiliser any pour éviter l'inférence de type
+    const { data, error } = await supabase
       .from("Appointment")
       .select("*")
       .eq("patientId", patientId)
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true });
+      .order("date", { ascending: true }) as { data: any[], error: any };
 
-    if (response.error) throw response.error;
+    if (error) throw error;
     
-    // Traiter les données sans laisser TypeScript faire d'inférences profondes
+    // Convertir manuellement avec notre adaptateur
     const appointments: Appointment[] = [];
-    if (response.data) {
-      for (const item of response.data) {
-        appointments.push(adaptAppointmentFromSupabase(item));
+    
+    if (data && Array.isArray(data)) {
+      for (let i = 0; i < data.length; i++) {
+        const rawItem = data[i] as RawAppointmentData;
+        appointments.push(adaptAppointmentFromSupabase(rawItem));
       }
     }
     
