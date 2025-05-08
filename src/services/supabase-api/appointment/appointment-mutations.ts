@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentInsertData, AppointmentStatus, AppointmentUpdateData } from "./appointment-types";
 
-// Définir un type simple et non récursif pour les réponses Supabase
-interface AppointmentRow {
+// Définir un type simple non récursif pour les réponses Supabase
+type AppointmentRow = {
   id: number;
   date: string;
   reason: string;
@@ -16,7 +16,7 @@ interface AppointmentRow {
   notes?: string | null;
   notificationSent: boolean;
   cabinetId?: number | null;
-}
+};
 
 /**
  * Create a new appointment
@@ -51,9 +51,8 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
     
     toast.success("Rendez-vous créé avec succès");
     
-    // Utiliser une assertion de type simple
-    const row = data[0] as unknown as AppointmentRow;
-    return adaptAppointmentFromSupabase(row);
+    // Simplifier l'assertion de type
+    return adaptAppointmentFromSupabase(data[0]);
   } catch (error) {
     console.error("Error in createAppointment:", error);
     throw error;
@@ -94,7 +93,8 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     
     toast.success("Rendez-vous mis à jour avec succès");
     
-    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
+    // Simplifier l'assertion de type
+    return adaptAppointmentFromSupabase(data);
   } catch (error) {
     console.error("Error in updateAppointment:", error);
     throw error;
@@ -126,7 +126,8 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
     
     toast.success("Rendez-vous annulé avec succès");
     
-    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
+    // Simplifier l'assertion de type
+    return adaptAppointmentFromSupabase(data);
   } catch (error) {
     console.error("Error in cancelAppointment:", error);
     throw error;

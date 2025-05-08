@@ -6,7 +6,8 @@ import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentStatus } from "./appointment-types";
 
 // Définir un type simple pour les lignes retournées par la base de données
-interface AppointmentRow {
+// Éviter les types complexes pour éviter la récursion infinie
+type AppointmentRow = {
   id: number;
   date: string;
   reason: string;
@@ -15,7 +16,7 @@ interface AppointmentRow {
   notes?: string | null;
   notificationSent: boolean;
   cabinetId?: number | null;
-}
+};
 
 /**
  * Get all appointments for the current osteopath
@@ -32,8 +33,8 @@ export async function getAppointments(): Promise<Appointment[]> {
 
     if (error) throw error;
     
-    // Utiliser une assertion de type simple
-    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
+    // Convertir les données en utilisant un simple casting au lieu d'un generics complexe
+    return (data || []).map((item) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -59,8 +60,8 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
       return null;
     }
 
-    // Utiliser une assertion de type simple
-    return adaptAppointmentFromSupabase(data as unknown as AppointmentRow);
+    // Simplifier l'assertion de type
+    return data ? adaptAppointmentFromSupabase(data) : null;
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -83,8 +84,8 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
 
     if (error) throw error;
     
-    // Utiliser une assertion de type simple
-    return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
+    // Simplifier l'assertion de type
+    return (data || []).map((item) => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;
