@@ -1,3 +1,4 @@
+
 // Import types
 import { Cabinet } from "@/types";
 import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
@@ -5,40 +6,13 @@ import { corsHeaders } from "@/services/corsHeaders";
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
-    try {
-      // First get the current user's session
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        throw new Error("No authenticated session");
-      }
-
-      // Get the user's osteopathId
-      const { data: userData, error: userError } = await supabase
-        .from("User")
-        .select("osteopathId")
-        .eq("id", session.session.user.id)
-        .single();
-
-      if (userError) throw userError;
-
-      // If no osteopathId is found, return empty array
-      if (!userData || !userData.osteopathId) {
-        return [];
-      }
-
-      // Now get cabinets only for this osteopath
-      const { data, error } = await supabase
-        .from("Cabinet")
-        .select("*")
-        .eq("osteopathId", userData.osteopathId);
-        
-      if (error) throw error;
+    const { data, error } = await supabase
+      .from("Cabinet")
+      .select("*");
       
-      return (data || []) as Cabinet[];
-    } catch (error) {
-      console.error("Error getting cabinets:", error);
-      throw error;
-    }
+    if (error) throw new Error(error.message);
+    
+    return (data || []) as Cabinet[];
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
@@ -119,48 +93,19 @@ export const supabaseCabinetService = {
   },
   
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
-    try {
-      // Get osteopathId from user if not provided
-      if (!cabinet.osteopathId) {
-        const { data: session } = await supabase.auth.getSession();
-        if (!session.session) {
-          throw new Error("No authenticated session");
-        }
+    // Ne jamais envoyer id/timestamps, Postgres gère
+    const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = cabinet as any;
+    const { data, error } = await supabase
+      .from("Cabinet")
+      .insert(insertable)
+      .single();
 
-        // Get the user's osteopathId
-        const { data: userData, error: userError } = await supabase
-          .from("User")
-          .select("osteopathId")
-          .eq("id", session.session.user.id)
-          .single();
-
-        if (userError || !userData || !userData.osteopathId) {
-          throw new Error("Unable to determine osteopathId");
-        }
-
-        cabinet = {
-          ...cabinet,
-          osteopathId: userData.osteopathId
-        };
-      }
-
-      // Ne jamais envoyer id/timestamps, Postgres gère
-      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...insertable } = cabinet as any;
-      const { data, error } = await supabase
-        .from("Cabinet")
-        .insert(insertable)
-        .single();
-
-      if (error) {
-        console.error("[SUPABASE ERROR]", error.code, error.message);
-        throw error;
-      }
-
-      return data as Cabinet;
-    } catch (error) {
-      console.error("Error creating cabinet:", error);
+    if (error) {
+      console.error("[SUPABASE ERROR]", error.code, error.message);
       throw error;
     }
+
+    return data as Cabinet;
   },
 
   async updateCabinet(id: number, cabinet: Partial<Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Cabinet> {

@@ -53,21 +53,21 @@ const RegisterPage = () => {
       });
       
       setRegistrationSuccess(true);
-      toast.success("✅ Votre compte a été créé avec succès !");
+      toast.success("Votre compte a été créé avec succès !");
       
-      // Redirection vers la page de profil ostéopathe au lieu de profile/setup
+      // Redirection vers la configuration du profil après 2 secondes
       setTimeout(() => {
-        navigate("/profile/osteopath");
-      }, 2500);
+        navigate("/profile/setup");
+      }, 4500);
       
     } catch (error: any) {
       console.error("Register error:", error);
       setRegisterError(error.message || "Erreur lors de la création du compte");
-      toast.error(`❌ ${error.message || "Erreur lors de la création du compte"}`);
+      toast.error(error.message || "Erreur lors de la création du compte");
     }
   };
   
-  // Si l'inscription a réussie, afficher un message de confirmation
+  // Si l'inscription a réussi, afficher un message de confirmation
   if (registrationSuccess) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[#0d1117]">
@@ -86,7 +86,7 @@ const RegisterPage = () => {
               <div className="bg-blue-500/30 rounded-full h-2 w-24"></div>
             </div>
             <p className="text-gray-400 text-sm">
-              Redirection automatique vers la configuration de votre profil professionnel...
+              Redirection automatique vers la configuration de votre profil...
             </p>
           </div>
         </div>

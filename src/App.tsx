@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -29,12 +29,12 @@ import OsteopathProfilePage from "./pages/OsteopathProfilePage";
 import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "./pages/CabinetSettingsPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import { api } from './services/api';
 
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
-  
+
   // Chargement initial du token stocké au démarrage de l'application
   useEffect(() => {
     const initAuth = async () => {
@@ -49,32 +49,31 @@ function App() {
     };
     initAuth();
   }, [loadStoredToken]);
-
-  // Vérifier si l'utilisateur a un profil complet et rediriger si nécessaire
-  useEffect(() => {
-    if (isAuthenticated && user && !loading) {
-      // Si l'utilisateur est connecté mais n'a pas d'osteopathId, rediriger vers la page de profil
-      if (!user.osteopathId) {
-        // Éviter une redirection en boucle vers la page de profil ostéopathe
-        if (location.pathname !== '/profile/osteopath') {
-          console.log("Utilisateur sans profil complet, redirection vers la création de profil");
-          window.location.href = '/profile/osteopath';
-        }
-      }
-    }
-  }, [isAuthenticated, user, loading, location.pathname]);
   
   // Configuration des chemins publics (accessibles sans connexion)
   const publicPaths = ['/privacy-policy', '/terms-of-service'];
   
-  // Fonction pour vérifier si l'utilisateur doit être redirigé vers la page de profil
-  const shouldRedirectToProfile = (pathname: string) => {
-    return isAuthenticated && user && !user.osteopathId && 
-           pathname !== '/login' && 
-           pathname !== '/register' && 
-           pathname !== '/profile/osteopath' &&
-           !publicPaths.includes(pathname);
-  };
+  // Ajout d'un intercepteur global pour toutes les requêtes fetch
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+      const modifiedInit = init || {};
+      // Si l'URL contient supabase.co, nous ajoutons les en-têtes CORS
+      if (typeof input === 'string' && input.includes('supabase.co')) {
+        modifiedInit.headers = {
+          ...modifiedInit.headers,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, X-Cancellation-Override, X-HTTP-Method-Override, prefer',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        };
+      }
+      return originalFetch(input, modifiedInit);
+    };
+
+    return () => {
+      window.fetch = originalFetch; // Restauration de la fonction d'origine lors du démontage
+    };
+  }, []);
   
   if (loading) {
     return (
@@ -86,11 +85,6 @@ function App() {
   
   const isAdmin = user?.role === "ADMIN";
   
-  // Rediriger vers la page de profil si nécessaire
-  if (shouldRedirectToProfile(location.pathname)) {
-    return <Navigate to="/profile/osteopath" />;
-  }
-  
   return (
     <>
       <Routes>
@@ -98,168 +92,28 @@ function App() {
         <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />} />
         
         {/* Routes protégées qui nécessitent une authentification */}
-        <Route 
-          path="/dashboard" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <DashboardPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/patients" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <PatientsPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/patients/new" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <NewPatientPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/patients/:id/edit" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <EditPatientPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/patients/:id" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <PatientDetailPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/appointments" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <AppointmentsPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/appointments/new" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <NewAppointmentPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/appointments/immediate" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <ImmediateAppointmentPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/appointments/:id/edit" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <EditAppointmentPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/schedule" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <SchedulePage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/settings" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <SettingsPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/settings/profile" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <OsteopathSettingsPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route path="/profile/osteopath" element={isAuthenticated ? <OsteopathProfilePage /> : <Navigate to="/login" />} />
-        <Route 
-          path="/settings/cabinet" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <CabinetSettingsPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/invoices" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <InvoicesPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/invoices/new" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <NewInvoicePage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/invoices/:id" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <InvoiceDetailPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/invoices/:id/edit" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <EditInvoicePage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
+        <Route path="/dashboard" element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} />
+        <Route path="/patients" element={isAuthenticated ? <PatientsPage /> : <Navigate to="/login" />} />
+        <Route path="/patients/new" element={isAuthenticated ? <NewPatientPage /> : <Navigate to="/login" />} />
+        <Route path="/patients/:id/edit" element={isAuthenticated ? <EditPatientPage /> : <Navigate to="/login" />} />
+        <Route path="/patients/:id" element={isAuthenticated ? <PatientDetailPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments" element={isAuthenticated ? <AppointmentsPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments/new" element={isAuthenticated ? <NewAppointmentPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments/immediate" element={isAuthenticated ? <ImmediateAppointmentPage /> : <Navigate to="/login" />} />
+        <Route path="/appointments/:id/edit" element={isAuthenticated ? <EditAppointmentPage /> : <Navigate to="/login" />} />
+        <Route path="/schedule" element={isAuthenticated ? <SchedulePage /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" />} />
+        <Route path="/settings/profile" element={isAuthenticated ? <OsteopathSettingsPage /> : <Navigate to="/login" />} />
+        <Route path="/profile/setup" element={isAuthenticated ? <OsteopathProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/settings/cabinet" element={isAuthenticated ? <CabinetSettingsPage /> : <Navigate to="/login" />} />
+        <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/:id" element={isAuthenticated ? <InvoiceDetailPage /> : <Navigate to="/login" />} />
+        <Route path="/invoices/:id/edit" element={isAuthenticated ? <EditInvoicePage /> : <Navigate to="/login" />} />
         <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
-        <Route 
-          path="/cabinets" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <CabinetsManagementPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/cabinets/new" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <NewCabinetPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/cabinets/:id/edit" 
-          element={
-            isAuthenticated ? 
-              (user?.osteopathId ? <EditCabinetPage /> : <Navigate to="/profile/osteopath" />) : 
-              <Navigate to="/login" />
-          } 
-        />
+        <Route path="/cabinets" element={isAuthenticated ? <CabinetsManagementPage /> : <Navigate to="/login" />} />
+        <Route path="/cabinets/new" element={isAuthenticated ? <NewCabinetPage /> : <Navigate to="/login" />} />
+        <Route path="/cabinets/:id/edit" element={isAuthenticated ? <EditCabinetPage /> : <Navigate to="/login" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         

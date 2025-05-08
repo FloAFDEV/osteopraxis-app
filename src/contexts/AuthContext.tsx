@@ -1,4 +1,3 @@
-
 import React, {
 	createContext,
 	useContext,
@@ -9,7 +8,7 @@ import React, {
 } from "react";
 import { User } from "@/types";
 import { api } from "@/services/api";
-import { supabase } from "@/integrations/supabase/client"; // Import direct
+import { supabase } from "@/services/supabase-api/utils";
 import { useAutoLogout } from "@/hooks/use-auto-logout";
 
 interface AuthState {
@@ -255,46 +254,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	const register = useCallback(
-    async (userData: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      password: string;
-    }) => {
-      try {
-        setIsLoading(true);
-        const response = await api.register(userData);
+		async (userData: {
+			firstName: string;
+			lastName: string;
+			email: string;
+			password: string;
+		}) => {
+			try {
+				setIsLoading(true);
+				const response = await api.register(userData);
 
-        if (response.token) {
-          const authData = {
-            user: response.user,
-            isAuthenticated: true,
-            token: response.token,
-          };
+				if (response.token) {
+					const authData = {
+						user: response.user,
+						isAuthenticated: true,
+						token: response.token,
+					};
 
-          localStorage.setItem("authState", JSON.stringify(authData));
-          setAuthState(authData);
-          
-          // Add a flag to localStorage to indicate this is a new user
-          // who needs to complete their profile
-          localStorage.setItem("newUserProfileSetup", "true");
-          console.log("User registered successfully, newUserProfileSetup flag set");
+					localStorage.setItem("authState", JSON.stringify(authData));
+					setAuthState(authData);
 
-          // Forcer un court délai pour s'assurer que l'état est bien mis à jour
-          await new Promise((resolve) => setTimeout(resolve, 300));
+					// Forcer un court délai pour s'assurer que l'état est bien mis à jour
+					await new Promise((resolve) => setTimeout(resolve, 300));
 
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error("Registration error:", error);
-        throw error;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
+					return true;
+				}
+				return false;
+			} catch (error) {
+				console.error("Registration error:", error);
+				throw error;
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[]
+	);
 
 	const logout = useCallback(() => {
 		localStorage.removeItem("authState");

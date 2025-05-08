@@ -12,7 +12,6 @@ import { Osteopath, Cabinet } from "@/types";
 import { Button } from "@/components/ui/button";
 import { CabinetForm } from "@/components/cabinet-form";
 import { FancyLoader } from "@/components/ui/fancy-loader";
-import { supabase } from "@/integrations/supabase/client"; // Import direct depuis l'intégration
 
 const OsteopathProfilePage = () => {
   const { user, updateUser, loadStoredToken } = useAuth();
@@ -21,6 +20,7 @@ const OsteopathProfilePage = () => {
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
   const [showCabinetForm, setShowCabinetForm] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showAuthSheet, setShowAuthSheet] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   const navigate = useNavigate();
@@ -55,78 +55,44 @@ const OsteopathProfilePage = () => {
       console.log("Vérification des données existantes pour l'utilisateur:", user.id);
       setLoading(true);
       
-      try {
-        // Vérifions d'abord si un ostéopathe existe
-        const existingOsteopath = await api.getOsteopathByUserId(user.id);
-        console.log("Résultat de la recherche d'ostéopathe:", existingOsteopath || "Aucun trouvé");
+      // Vérifions d'abord si un ostéopathe existe
+      const existingOsteopath = await api.getOsteopathByUserId(user.id);
+      console.log("Résultat de la recherche d'ostéopathe:", existingOsteopath || "Aucun trouvé");
+      
+      if (existingOsteopath && existingOsteopath.id) {
+        console.log("Ostéopathe trouvé avec ID:", existingOsteopath.id);
+        setOsteopath(existingOsteopath);
         
-        if (existingOsteopath && existingOsteopath.id) {
-          console.log("Ostéopathe trouvé avec ID:", existingOsteopath.id);
-          setOsteopath(existingOsteopath);
-          
-          // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
-          if (!user.osteopathId) {
-            console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", existingOsteopath.id);
-            const updatedUser = { ...user, osteopathId: existingOsteopath.id };
-            updateUser(updatedUser);
-          }
-          
-          // Vérifier s'il y a des cabinets existants
-          const existingCabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
-          console.log(`${existingCabinets.length} cabinet(s) trouvé(s) pour l'ostéopathe`);
-          setCabinets(existingCabinets);
-          
-          // Si des cabinets existent, rediriger vers le tableau de bord
-          if (existingCabinets && existingCabinets.length > 0) {
-            console.log("Cabinets existants trouvés, redirection vers le tableau de bord dans 1 seconde");
-            setTimeout(() => {
-              navigate("/dashboard");
-            }, 1000);
-            return;
-          } else {
-            // Sinon, afficher le formulaire de cabinet
-            setShowCabinetForm(true);
-          }
-        } else {
-          // Aucun ostéopathe trouvé, rester sur le formulaire de création
-          console.log("Aucun ostéopathe trouvé, formulaire de création nécessaire");
-          setOsteopath(null);
-          setShowCabinetForm(false);
+        // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
+        if (!user.osteopathId) {
+          console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", existingOsteopath.id);
+          const updatedUser = { ...user, osteopathId: existingOsteopath.id };
+          updateUser(updatedUser);
         }
-      } catch (apiError: any) {
-        // En cas d'erreur CORS ou réseau, tenter de récupérer l'ostéopathe directement
-        console.error("Erreur lors de la récupération de l'ostéopathe:", apiError);
         
-        if (apiError.message && (
-            apiError.message.includes('CORS') || 
-            apiError.message.includes('fetch') || 
-            apiError.message.includes('Failed to fetch'))
-        ) {
-          console.log("Erreur CORS/réseau détectée, tentative de récupération directe");
-          
-          // Récupération directe via Supabase
-          const { data } = await supabase
-            .from("Osteopath")
-            .select("*")
-            .eq("userId", user.id)
-            .maybeSingle();
-            
-          if (data) {
-            console.log("Ostéopathe récupéré directement:", data);
-            setOsteopath(data as Osteopath);
-            
-            if (!user.osteopathId && data.id) {
-              const updatedUser = { ...user, osteopathId: data.id };
-              updateUser(updatedUser);
-            }
-          } else {
-            console.log("Aucun ostéopathe trouvé via récupération directe");
-            setOsteopath(null);
-          }
+        // Vérifier s'il y a des cabinets existants
+        const existingCabinets = await api.getCabinetsByOsteopathId(existingOsteopath.id);
+        console.log(`${existingCabinets.length} cabinet(s) trouvé(s) pour l'ostéopathe`);
+        setCabinets(existingCabinets);
+        
+        // Si des cabinets existent, rediriger vers le tableau de bord
+        if (existingCabinets && existingCabinets.length > 0) {
+          console.log("Cabinets existants trouvés, redirection vers le tableau de bord dans 1 seconde");
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1000);
+          return;
         } else {
-          throw apiError; // Propager l'erreur si ce n'est pas une erreur CORS
+          // Sinon, afficher le formulaire de cabinet
+          setShowCabinetForm(true);
         }
+      } else {
+        // Aucun ostéopathe trouvé, rester sur le formulaire de création
+        console.log("Aucun ostéopathe trouvé, formulaire de création nécessaire");
+        setOsteopath(null);
+        setShowCabinetForm(false);
       }
+      
     } catch (error) {
       console.error("Erreur lors de la vérification des données existantes:", error);
       setLoadError("Une erreur est survenue lors de la vérification de vos données");
@@ -159,19 +125,6 @@ const OsteopathProfilePage = () => {
     }
   }, [authChecked, user, checkExistingData, hasAttemptedLoad]);
 
-  // Ajoutons des logs pour savoir où nous en sommes dans le processus
-  useEffect(() => {
-    console.log("État actuel OsteopathProfilePage:", {
-      authChecked,
-      loading,
-      hasUser: !!user,
-      hasAttemptedLoad,
-      hasOsteopath: !!osteopath,
-      cabinetsCount: cabinets.length,
-      showCabinetForm
-    });
-  }, [authChecked, loading, user, hasAttemptedLoad, osteopath, cabinets, showCabinetForm]);
-
   const handleRetry = () => {
     setLoading(true);
     setLoadError(null);
@@ -181,8 +134,8 @@ const OsteopathProfilePage = () => {
     });
   };
 
-  // Si l'utilisateur n'est pas connecté, rediriger vers la connexion
-  if (authChecked && !user) {
+  // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
+  if (authChecked && !user && !showAuthSheet) {
     console.log("Redirection vers login: Utilisateur non connecté");
     return <Navigate to="/login" />;
   }
@@ -324,6 +277,35 @@ const OsteopathProfilePage = () => {
           </>
         )}
       </div>
+      
+      {/* Authentication Sheet */}
+      <Sheet open={showAuthSheet} onOpenChange={setShowAuthSheet}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Authentification requise</SheetTitle>
+          </SheetHeader>
+          <div className="py-6">
+            <p className="text-muted-foreground mb-4">
+              Vous devez être connecté pour accéder à cette page. Il semble que votre session a expiré ou est invalide.
+            </p>
+            <div className="space-y-2">
+              <Button 
+                onClick={handleRelogin}
+                className="w-full bg-primary text-primary-foreground rounded"
+              >
+                Se connecter
+              </Button>
+              <Button 
+                onClick={() => navigate("/register")}
+                variant="secondary"
+                className="w-full"
+              >
+                S'inscrire
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </Layout>
   );
 };

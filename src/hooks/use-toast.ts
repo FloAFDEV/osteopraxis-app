@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -5,9 +6,8 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-// Reduced to 1 to prevent duplicates
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 5000
+const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -169,7 +169,23 @@ function toast({ ...props }: Toast) {
   }
 }
 
-// Removed duplicate methods since they will be defined in components/ui/use-toast.ts
+// Add variant-specific toast methods
+toast.success = (title: string, options?: Omit<Toast, "title" | "variant">) => {
+  return toast({ title, variant: "success", ...options });
+};
+
+toast.error = (title: string, options?: Omit<Toast, "title" | "variant">) => {
+  return toast({ title, variant: "error", ...options });
+};
+
+toast.warning = (title: string, options?: Omit<Toast, "title" | "variant">) => {
+  return toast({ title, variant: "warning", ...options });
+};
+
+toast.info = (title: string, options?: Omit<Toast, "title" | "variant">) => {
+  return toast({ title, variant: "info", ...options });
+};
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

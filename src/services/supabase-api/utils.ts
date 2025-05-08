@@ -1,64 +1,45 @@
 
-import { SUPABASE_API_URL, SUPABASE_API_KEY, supabase } from "@/integrations/supabase/client";
-import { AppointmentStatus } from "./appointment/appointment-types";
+import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "../../integrations/supabase/client";
+import { AppointmentStatus } from "@/types";
 
-// Re-export the Supabase client and constants so they can be imported from utils
-export { supabase, SUPABASE_API_URL, SUPABASE_API_KEY };
+// Fonction de typage des données
+const typedData = <T>(data: any): T => data as T;
 
-/**
- * Function to convert a base64 string to a file
- */
-export function base64ToFile(base64String: string, filename: string): File {
-    const arr = base64String.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1] || '';
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
-}
+// Valeurs valides pour le statut des rendez-vous
+export const AppointmentStatusValues = [
+  "SCHEDULED", 
+  "COMPLETED", 
+  "CANCELED",
+  "RESCHEDULED", 
+  "NO_SHOW"
+] as const;
 
 /**
- * Function to convert a File to a base64 string
+ * Vérifie et normalise le statut d'un rendez-vous
+ * @param status Statut à vérifier
+ * @returns Statut normalisé et validé
  */
-export function fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
-}
+export const ensureAppointmentStatus = (status?: string): AppointmentStatus => {
+  // Normaliser le statut en majuscules
+  const normalizedStatus = status?.toUpperCase();
+  
+  // Corriger le cas particulier "CANCELLED" (orthographe UK) vers "CANCELED" (orthographe US)
+  if (normalizedStatus === "CANCELLED") {
+    return "CANCELED";
+  }
+  
+  // Vérifier si le statut est valide
+  if (normalizedStatus && AppointmentStatusValues.includes(normalizedStatus as AppointmentStatus)) {
+    return normalizedStatus as AppointmentStatus;
+  }
+  
+  // Par défaut, retourner SCHEDULED
+  return "SCHEDULED";
+};
 
-/**
- * Utility function to ensure a value is a valid AppointmentStatus
- * @param value The value to check
- * @returns The value if it is a valid AppointmentStatus, otherwise throws an error
- */
-export function ensureAppointmentStatus(value: any): AppointmentStatus {
-    if (!AppointmentStatusValues.includes(value)) {
-        throw new Error(`Invalid AppointmentStatus: ${value}`);
-    }
-    return value as AppointmentStatus;
-}
-
-/**
- * Array of valid AppointmentStatus values
- */
-export const AppointmentStatusValues: AppointmentStatus[] = [
-    "SCHEDULED",
-    "COMPLETED",
-    "CANCELED",
-    "NO_SHOW",
-    "RESCHEDULED"
-];
-
-/**
- * Fonction utilitaire pour typer correctement les résultats des requêtes Supabase
- * Cette fonction aide à éviter les erreurs "Type instantiation is excessively deep and possibly infinite"
- */
-export function typedData<T>(data: any): T {
-  return data as T;
-}
+export { 
+  supabase, 
+  typedData,
+  SUPABASE_API_URL,
+  SUPABASE_API_KEY
+};
