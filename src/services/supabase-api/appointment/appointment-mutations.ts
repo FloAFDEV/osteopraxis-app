@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Appointment } from "@/types";
 import { adaptAppointmentFromSupabase } from "../appointment-adapter";
