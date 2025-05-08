@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -33,7 +34,8 @@ import { api } from './services/api';
 function App() {
   const { isAuthenticated, loadStoredToken, user } = useAuth();
   const [loading, setLoading] = useState(true);
-
+  const location = useLocation();
+  
   // Chargement initial du token stocké au démarrage de l'application
   useEffect(() => {
     const initAuth = async () => {
@@ -48,11 +50,23 @@ function App() {
     };
     initAuth();
   }, [loadStoredToken]);
+
+  // Vérifier si l'utilisateur a un profil complet et rediriger si nécessaire
+  useEffect(() => {
+    if (isAuthenticated && user && !loading) {
+      // Si l'utilisateur est connecté mais n'a pas d'osteopathId, rediriger vers la page de profil
+      if (!user.osteopathId) {
+        // Éviter une redirection en boucle vers la page de profil ostéopathe
+        if (location.pathname !== '/profile/osteopath') {
+          console.log("Utilisateur sans profil complet, redirection vers la création de profil");
+          window.location.href = '/profile/osteopath';
+        }
+      }
+    }
+  }, [isAuthenticated, user, loading, location.pathname]);
   
   // Configuration des chemins publics (accessibles sans connexion)
   const publicPaths = ['/privacy-policy', '/terms-of-service'];
-  
-  // Suppression de l'intercepteur fetch CORS qui causait des problèmes
   
   if (loading) {
     return (

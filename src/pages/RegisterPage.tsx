@@ -53,17 +53,17 @@ const RegisterPage = () => {
       });
       
       setRegistrationSuccess(true);
-      toast.success("Votre compte a été créé avec succès !");
+      toast.success("✅ Votre compte a été créé avec succès !");
       
       // Redirection vers la page de profil ostéopathe au lieu de profile/setup
       setTimeout(() => {
         navigate("/profile/osteopath");
-      }, 4500);
+      }, 2500);
       
     } catch (error: any) {
       console.error("Register error:", error);
       setRegisterError(error.message || "Erreur lors de la création du compte");
-      toast.error(error.message || "Erreur lors de la création du compte");
+      toast.error(`❌ ${error.message || "Erreur lors de la création du compte"}`);
     }
   };
   
