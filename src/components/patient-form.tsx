@@ -162,11 +162,11 @@ export function PatientForm({
 
 			// Naviguer vers la liste des patients après la sauvegarde réussie
 			navigate("/patients");
-			toast.success("Patient enregistré avec succès !");
+			toast.success("✅  Patient enregistré avec succès !");
 		} catch (error) {
-			console.error("Erreur lors de l'enregistrement du patient:", error);
+			console.error("⛔ rreur lors de l'enregistrement du patient:", error);
 			toast.error(
-				"Erreur lors de l'enregistrement du patient. Veuillez réessayer."
+				"⛔ Erreur lors de l'enregistrement du patient. Veuillez réessayer."
 			);
 		}
 	};
