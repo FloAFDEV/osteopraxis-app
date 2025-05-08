@@ -66,13 +66,16 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     if (appointmentData.notes !== undefined) updateData.notes = appointmentData.notes;
     if (appointmentData.cabinetId !== undefined) updateData.cabinetId = appointmentData.cabinetId;
 
-    const { data, error } = await supabase
+    // Using explicit type annotation to fix excessive type instantiation error
+    const result: { data: any; error: any } = await supabase
       .from("Appointment")
       .update(updateData)
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
       .single();
+    
+    const { data, error } = result;
 
     if (error) {
       toast.error("Erreur lors de la mise à jour du rendez-vous");
