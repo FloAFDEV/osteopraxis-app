@@ -1,8 +1,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { adaptAppointmentFromSupabase } from "../appointment-adapter";
-import { Appointment, AppointmentStatus } from "@/types";
+import { Appointment } from "@/types";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
+import { AppointmentStatus } from "./appointment-types";
 
 // Define a type for the database response structure
 type AppointmentRow = {
@@ -26,17 +27,16 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Use explicit field selection and proper typing with .returns()
+    // Use explicit field selection and proper typing without using .returns()
     const { data, error } = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true })
-      .returns<AppointmentRow[]>();
+      .order("date", { ascending: true });
 
     if (error) throw error;
     
-    return (data || []).map(item => adaptAppointmentFromSupabase(item));
+    return (data as AppointmentRow[] || []).map(item => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -55,15 +55,14 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("id", id)
       .eq("osteopathId", osteopathId)
-      .single()
-      .returns<AppointmentRow>();
+      .single();
 
     if (error) {
       console.error("Error fetching appointment:", error);
       return null;
     }
 
-    return adaptAppointmentFromSupabase(data);
+    return adaptAppointmentFromSupabase(data as AppointmentRow);
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -82,12 +81,11 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("patientId", patientId)
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true })
-      .returns<AppointmentRow[]>();
+      .order("date", { ascending: true });
 
     if (error) throw error;
     
-    return (data || []).map(item => adaptAppointmentFromSupabase(item));
+    return (data as AppointmentRow[] || []).map(item => adaptAppointmentFromSupabase(item));
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;

@@ -47,8 +47,7 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
       .from("Appointment")
       .insert(insertData)
       .select()
-      .single()
-      .returns<AppointmentRow>();
+      .single();
 
     if (error) {
       toast.error("Erreur lors de la création du rendez-vous");
@@ -57,7 +56,7 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
     
     toast.success("Rendez-vous créé avec succès");
     
-    return adaptAppointmentFromSupabase(data);
+    return adaptAppointmentFromSupabase(data as AppointmentRow);
   } catch (error) {
     console.error("Error in createAppointment:", error);
     throw error;
@@ -89,8 +88,7 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single()
-      .returns<AppointmentRow>();
+      .single();
     
     if (error) {
       toast.error("Erreur lors de la mise à jour du rendez-vous");
@@ -99,7 +97,7 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     
     toast.success("Rendez-vous mis à jour avec succès");
     
-    return adaptAppointmentFromSupabase(data);
+    return adaptAppointmentFromSupabase(data as AppointmentRow);
   } catch (error) {
     console.error("Error in updateAppointment:", error);
     throw error;
@@ -122,8 +120,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single()
-      .returns<AppointmentRow>();
+      .single();
 
     if (error) {
       toast.error("Erreur lors de l'annulation du rendez-vous");
@@ -132,7 +129,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
     
     toast.success("Rendez-vous annulé avec succès");
     
-    return adaptAppointmentFromSupabase(data);
+    return adaptAppointmentFromSupabase(data as AppointmentRow);
   } catch (error) {
     console.error("Error in cancelAppointment:", error);
     throw error;
