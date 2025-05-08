@@ -151,24 +151,16 @@ export const supabaseAppointmentService = {
         throw new Error("Unable to get osteopath ID");
       }
 
-      // Create a flat object for insertion using the adapter
-      const adaptedData = adaptAppointmentToSupabase(appointmentData);
-      
-      // Ensure required fields are present
-      if (!adaptedData.date || !adaptedData.patientId || !adaptedData.reason || !adaptedData.status) {
-        throw new Error("Missing required appointment fields");
-      }
-      
-      // Créer un objet plat conforme à AppointmentInsert pour l'insertion
+      // Create the insert object directly with proper typing
       const insertData: AppointmentInsert = {
-        patientId: adaptedData.patientId,
-        date: adaptedData.date,
-        reason: adaptedData.reason,
-        status: adaptedData.status as AppointmentStatus,
+        patientId: appointmentData.patientId,
+        date: appointmentData.date,
+        reason: appointmentData.reason || "",
+        status: appointmentData.status,
         osteopathId: userData.osteopathId,
-        notificationSent: adaptedData.notificationSent,
-        notes: adaptedData.notes,
-        cabinetId: adaptedData.cabinetId,
+        notificationSent: appointmentData.notificationSent || false,
+        notes: appointmentData.notes || "",
+        cabinetId: appointmentData.cabinetId || null,
       };
 
       const { data, error } = await supabase
@@ -206,13 +198,21 @@ export const supabaseAppointmentService = {
         return null;
       }
 
-      // Adapt the appointment data to Supabase format
-      const adaptedData = adaptAppointmentToSupabase(appointmentData);
+      // Create an update object with explicit typing
+      const updateData: Partial<AppointmentInsert> = {};
+      
+      if (appointmentData.patientId !== undefined) updateData.patientId = appointmentData.patientId;
+      if (appointmentData.date !== undefined) updateData.date = appointmentData.date;
+      if (appointmentData.reason !== undefined) updateData.reason = appointmentData.reason;
+      if (appointmentData.status !== undefined) updateData.status = appointmentData.status;
+      if (appointmentData.notificationSent !== undefined) updateData.notificationSent = appointmentData.notificationSent;
+      if (appointmentData.notes !== undefined) updateData.notes = appointmentData.notes;
+      if (appointmentData.cabinetId !== undefined) updateData.cabinetId = appointmentData.cabinetId;
 
       // Now update the appointment, ensuring it belongs to the user's osteopath
       const { data, error } = await supabase
         .from("Appointment")
-        .update(adaptedData)
+        .update(updateData)
         .eq("id", id)
         .eq("osteopathId", userData.osteopathId)
         .select()
