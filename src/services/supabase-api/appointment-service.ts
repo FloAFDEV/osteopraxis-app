@@ -1,7 +1,7 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
-import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase } from "./appointment-adapter";
+import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase, SupabaseAppointment } from "./appointment-adapter";
 import { corsHeaders } from "@/services/corsHeaders";
 
 export const supabaseAppointmentService = {
@@ -35,7 +35,7 @@ export const supabaseAppointmentService = {
       if (error) throw error;
       
       // Convert data to proper appointment types
-      return (data || []).map(item => adaptAppointmentFromSupabase(item));
+      return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
     } catch (error) {
       console.error("Error in getAppointments:", error);
       throw error;
@@ -112,7 +112,7 @@ export const supabaseAppointmentService = {
 
       if (error) throw error;
       
-      return (data || []).map(item => adaptAppointmentFromSupabase(item));
+      return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
     } catch (error) {
       console.error("Error in getAppointmentsByPatientId:", error);
       throw error;
@@ -141,11 +141,20 @@ export const supabaseAppointmentService = {
 
       // Add the osteopathId to the appointment data
       const supabaseData = adaptAppointmentToSupabase(appointmentData);
-      supabaseData.osteopathId = userData.osteopathId;
+      // Ensure required fields are present
+      if (!supabaseData.date || !supabaseData.patientId || !supabaseData.reason || !supabaseData.status) {
+        throw new Error("Missing required appointment fields");
+      }
+      
+      // Add osteopathId explicitly
+      const dataToInsert = {
+        ...supabaseData,
+        osteopathId: userData.osteopathId
+      };
 
       const { data, error } = await supabase
         .from("Appointment")
-        .insert(supabaseData)
+        .insert(dataToInsert)
         .select()
         .single();
 

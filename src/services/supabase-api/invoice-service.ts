@@ -77,14 +77,30 @@ export const supabaseInvoiceService = {
         return undefined;
       }
 
-      // Get the invoice with related patient data
+      // First get patient IDs for this osteopath to ensure we only access data we're allowed to
+      const { data: patients, error: patientsError } = await supabase
+        .from("Patient")
+        .select("id")
+        .eq("osteopathId", userData.osteopathId);
+
+      if (patientsError) {
+        console.error("Error getting patients:", patientsError);
+        return undefined;
+      }
+
+      if (!patients || patients.length === 0) {
+        return undefined;
+      }
+
+      // Extract patient IDs
+      const patientIds = patients.map(p => p.id);
+
+      // Get the invoice
       const { data, error } = await supabase
         .from("Invoice")
-        .select(`
-          *,
-          Patient:patientId (id, osteopathId)
-        `)
+        .select("*")
         .eq("id", id)
+        .in("patientId", patientIds)
         .single();
       
       if (error) {
@@ -94,16 +110,8 @@ export const supabaseInvoiceService = {
         throw new Error(error.message);
       }
       
-      // Verify this invoice belongs to the current osteopath via the patient
-      if (!data.Patient || data.Patient.osteopathId !== userData.osteopathId) {
-        console.error("Invoice does not belong to the current osteopath");
-        return undefined;
-      }
-      
-      // Remove the Patient property as it's not part of the Invoice type
-      const { Patient, ...invoice } = data;
-      
-      return invoice as Invoice;
+      // Convert to Invoice type
+      return data as Invoice;
     } catch (error) {
       console.error("Error in getInvoiceById:", error);
       throw error;

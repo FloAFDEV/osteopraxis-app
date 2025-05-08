@@ -36,8 +36,8 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 /**
  * Adapts appointment data from application to Supabase format
  */
-export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): Record<string, any> {
-  const result: Record<string, any> = {};
+export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): SupabaseAppointment {
+  const result: Partial<SupabaseAppointment> = {};
   
   if (appointment.id !== undefined) result.id = appointment.id;
   if (appointment.patientId !== undefined) result.patientId = appointment.patientId;
@@ -48,5 +48,5 @@ export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): R
   if (appointment.notes !== undefined) result.notes = appointment.notes;
   if (appointment.cabinetId !== undefined) result.cabinetId = appointment.cabinetId;
   
-  return result;
+  return result as SupabaseAppointment;
 }
