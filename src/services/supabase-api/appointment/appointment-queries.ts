@@ -25,15 +25,18 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utiliser une assertion de type simplifiée pour éviter l'erreur de profondeur excessive
-    const result = await supabase
+    // Briser la chaîne d'inférence pour éviter l'erreur TS2589
+    const response = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("osteopathId", osteopathId)
       .order("date", { ascending: true });
     
-    const data = result.data as AppointmentRow[] | null;
-    const error = result.error;
+    // Cast explicite pour éviter l'inférence de type profonde
+    const { data, error } = response as {
+      data: AppointmentRow[] | null;
+      error: any;
+    };
 
     if (error) throw error;
     
@@ -56,16 +59,19 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utiliser une assertion de type simplifiée pour éviter l'erreur de profondeur excessive
-    const result = await supabase
+    // Briser la chaîne d'inférence pour éviter l'erreur TS2589
+    const response = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .single();
 
-    const data = result.data as AppointmentRow | null;
-    const error = result.error;
+    // Cast explicite pour éviter l'inférence de type profonde
+    const { data, error } = response as {
+      data: AppointmentRow | null;
+      error: any;
+    };
 
     if (error) {
       console.error("Error fetching appointment:", error);
@@ -87,16 +93,19 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utiliser une assertion de type simplifiée pour éviter l'erreur de profondeur excessive
-    const result = await supabase
+    // Briser la chaîne d'inférence pour éviter l'erreur TS2589
+    const response = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("patientId", patientId)
       .eq("osteopathId", osteopathId)
       .order("date", { ascending: true });
 
-    const data = result.data as AppointmentRow[] | null;
-    const error = result.error;
+    // Cast explicite pour éviter l'inférence de type profonde
+    const { data, error } = response as {
+      data: AppointmentRow[] | null;
+      error: any;
+    };
 
     if (error) throw error;
     
