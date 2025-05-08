@@ -1,5 +1,9 @@
-import { SUPABASE_API_URL, SUPABASE_API_KEY } from "@/integrations/supabase/client";
+
+import { SUPABASE_API_URL, SUPABASE_API_KEY, supabase } from "@/integrations/supabase/client";
 import { AppointmentStatus } from "./appointment/appointment-types";
+
+// Re-export the Supabase client and constants so they can be imported from utils
+export { supabase, SUPABASE_API_URL, SUPABASE_API_KEY };
 
 /**
  * Function to convert a base64 string to a file
