@@ -37,6 +37,23 @@ export const ensureAppointmentStatus = (status?: string): AppointmentStatus => {
   return "SCHEDULED";
 };
 
+/**
+ * Filtre les propriétés nulles d'un objet
+ * @param obj Objet à nettoyer
+ * @returns Un nouvel objet sans les propriétés nulles ou undefined
+ */
+export const removeNullProperties = <T extends Record<string, any>>(obj: T): Partial<T> => {
+  const result: Partial<T> = {};
+  
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      result[key as keyof T] = value;
+    }
+  });
+  
+  return result;
+};
+
 export { 
   supabase, 
   typedData,

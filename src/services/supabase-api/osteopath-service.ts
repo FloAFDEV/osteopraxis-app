@@ -1,6 +1,5 @@
-
 import { Osteopath } from "@/types";
-import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
+import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY, removeNullProperties } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
 
 export const supabaseOsteopathService = {
@@ -94,15 +93,16 @@ export const supabaseOsteopathService = {
   
   async updateOsteopath(id: number, osteoData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {
     try {
-      // 1. Récupérer l'ostéopathe actuel pour préserver l'userId
+      // 1. Récupérer l'ostéopathe actuel pour préserver ses données existantes
       const currentOsteopath = await this.getOsteopathById(id);
       
       if (!currentOsteopath) {
         throw new Error("Ostéopathe non trouvé");
       }
       
-      // Conserver l'userId existant
+      // S'assurer que les champs obligatoires sont préservés
       const userId = currentOsteopath.userId;
+      const name = currentOsteopath.name;
       
       if (!userId) {
         throw new Error("L'ostéopathe n'a pas d'userId valide");
@@ -126,24 +126,19 @@ export const supabaseOsteopathService = {
 
       const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Osteopath?id=eq.${id}`;
       
-      // 4. Préparer le payload avec l'ID inclus et l'userId préservé
+      // 4. Préparer le payload en combinant les données existantes et les nouvelles
       const updatePayload = {
-        id: id,
-        ...osteoData,
-        userId: userId, // Important: s'assurer que l'userId est toujours présent
+        ...removeNullProperties(osteoData), // Ne conserver que les valeurs non nulles
+        name: osteoData.name || currentOsteopath.name, // Préserver le nom s'il n'est pas fourni
+        userId: userId, // S'assurer que l'userId est toujours présent
         updatedAt: new Date().toISOString(),
       };
 
-      // 5. Nettoyer les valeurs undefined
-      Object.keys(updatePayload).forEach(
-        (k) => updatePayload[k] === undefined && delete updatePayload[k]
-      );
-
       console.log("Payload de mise à jour de l'ostéopathe:", updatePayload);
 
-      // 6. Utiliser PUT au lieu de PATCH
+      // 6. Utiliser PATCH au lieu de PUT pour ne mettre à jour que les champs fournis
       const res = await fetch(URL_ENDPOINT, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
