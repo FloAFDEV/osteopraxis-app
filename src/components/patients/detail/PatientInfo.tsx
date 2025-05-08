@@ -1,6 +1,10 @@
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardTitle,
+} from "@/components/ui/card";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
 import { Mail, MapPin, Phone, User } from "lucide-react";
@@ -17,15 +21,15 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 	const genderColors = {
 		lightBg:
 			patient?.gender === "Homme"
-				? "bg-blue-50"
+				? "bg-blue-100"
 				: patient?.gender === "Femme"
-				? "bg-pink-50"
-				: "bg-gray-50",
+				? "bg-pink-100"
+				: "bg-gray-100",
 		darkBg:
 			patient?.gender === "Homme"
 				? "dark:bg-blue-900"
 				: patient?.gender === "Femme"
-				? "dark:bg-pink-900"
+				? "dark:bg-fuchsia-900"
 				: "dark:bg-gray-800",
 		textColor:
 			patient?.gender === "Homme"
@@ -43,15 +47,21 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 
 	return (
 		<Card>
-			<CardContent className={`p-6 ${genderColors.lightBg}`}>
+			<CardContent
+				className={`p-6 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
+			>
 				<div className="flex items-center space-x-4">
-					<Avatar className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}>
+					<Avatar
+						className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}
+					>
 						<AvatarFallback className={genderColors.avatarBg}>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
 					</Avatar>
 					<div>
-						<CardTitle className={`text-2xl font-bold ${genderColors.textColor}`}>
+						<CardTitle
+							className={`text-2xl font-bold ${genderColors.textColor}`}
+						>
 							<User className="mr-2 h-6 w-6" />
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
@@ -72,14 +82,17 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				</div>
 
 				{/* Contact Information */}
-				<div className="mt-6 space-y-4 dark:text-slate-800">
+				<div className="mt-6 space-y-4">
 					<div className="flex items-center space-x-2">
 						<MapPin className="h-4 w-4 text-muted-foreground" />
 						<span>{patient.address}</span>
 					</div>
 					<div className="flex items-center space-x-2">
 						<Mail className="h-4 w-4 text-muted-foreground" />
-						<a href={`mailto:${patient.email}`} className="hover:underline">
+						<a
+							href={`mailto:${patient.email}`}
+							className="hover:underline"
+						>
 							{patient.email}
 						</a>
 					</div>
