@@ -19,6 +19,8 @@ export const directOsteopathService = {
     // Construire les données à insérer
     const insertData = {
       ...data,
+      // S'assurer que name est défini (requis)
+      name: data.name || "À compléter",
       userId: data.userId || sessionData.session.user.id,
       createdAt: now,
       updatedAt: now

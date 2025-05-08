@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
@@ -53,22 +52,7 @@ function App() {
   // Configuration des chemins publics (accessibles sans connexion)
   const publicPaths = ['/privacy-policy', '/terms-of-service'];
   
-  // Intercepteur de fetch pour gérer les CORS - MODIFIÉ
-  useEffect(() => {
-    const originalFetch = window.fetch;
-    window.fetch = function(input, init) {
-      const modifiedInit = init || {};
-      
-      // Ne pas ajouter les headers CORS aux requêtes, ils doivent être configurés côté serveur
-      // Seul le backend peut définir les headers CORS de réponse
-      
-      return originalFetch(input, modifiedInit);
-    };
-
-    return () => {
-      window.fetch = originalFetch; // Restauration de la fonction d'origine lors du démontage
-    };
-  }, []);
+  // Suppression de l'intercepteur fetch CORS qui causait des problèmes
   
   if (loading) {
     return (
