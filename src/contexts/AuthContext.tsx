@@ -1,3 +1,4 @@
+
 import React, {
 	createContext,
 	useContext,
@@ -277,6 +278,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Add a flag to localStorage to indicate this is a new user
           // who needs to complete their profile
           localStorage.setItem("newUserProfileSetup", "true");
+          console.log("User registered successfully, newUserProfileSetup flag set");
 
           // Forcer un court délai pour s'assurer que l'état est bien mis à jour
           await new Promise((resolve) => setTimeout(resolve, 300));
