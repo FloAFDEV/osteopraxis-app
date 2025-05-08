@@ -1,3 +1,4 @@
+
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -79,7 +80,7 @@ export const supabaseInvoiceService = {
       // Get the invoice
       const { data, error } = await supabase
         .from("Invoice")
-        .select("*, Patient(osteopathId)")
+        .select("*, Patient(id, osteopathId)")
         .eq("id", id)
         .single();
       
@@ -91,12 +92,15 @@ export const supabaseInvoiceService = {
       }
       
       // Verify this invoice belongs to the current osteopath
-      if (data.Patient?.osteopathId !== userData.osteopathId) {
+      if (!data.Patient || data.Patient?.osteopathId !== userData.osteopathId) {
         console.error("Invoice does not belong to the current osteopath");
         return undefined;
       }
       
-      return data as Invoice;
+      // Remove the Patient property as it's not part of the Invoice type
+      const { Patient, ...invoice } = data;
+      
+      return invoice as Invoice;
     } catch (error) {
       console.error("Error in getInvoiceById:", error);
       throw error;

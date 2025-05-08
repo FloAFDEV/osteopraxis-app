@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase } from "./appointment-adapter";

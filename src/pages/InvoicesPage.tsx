@@ -21,10 +21,12 @@ import { InvoiceEmptyState } from "@/components/invoices/InvoiceEmptyState";
 import { InvoiceYearGroup } from "@/components/invoices/InvoiceYearGroup";
 import { InvoicePrintWrapper } from "@/components/invoices/InvoicePrintWrapper";
 import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const InvoicesPage = () => {
 	const navigate = useNavigate();
 	const { user } = useAuth();
+	const { isMobile } = useIsMobile();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<string>("ALL");
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -311,32 +313,28 @@ const InvoicesPage = () => {
 						</div>
 					) : filteredInvoices && filteredInvoices.length > 0 ? (
 						<div className="space-y-6">
-							{/* Invoices by year/month */}
-							{Object.entries(groupedInvoices)
-								.sort((a, b) => b[0].localeCompare(a[0]))
-								.map(([year, months]) => {
-									// Filter by selected year
-									if (year !== selectedYear) return null;
-									
-									return (
-										<Accordion type="multiple" className="space-y-4" key={year}>
-											<InvoiceYearGroup
-												year={year}
-												months={months}
-												selectedMonth={selectedMonth}
-												patientDataMap={patientDataMap}
-												onEditInvoice={(id) => navigate(`/invoices/${id}`)}
-												onDeleteInvoice={(id) => {
-													setSelectedInvoiceId(id);
-													setIsDeleteModalOpen(true);
-												}}
-												onPrintInvoice={handlePrintInvoice}
-												onDownloadInvoice={handleDownloadInvoice}
-												onDownloadMonthInvoices={handleDownloadMonthInvoices}
-											/>
-										</Accordion>
-									);
-								})}
+							{/* Show all years, not just the selected one */}
+							<Accordion type="multiple" className="space-y-4">
+								{Object.entries(groupedInvoices)
+									.sort((a, b) => b[0].localeCompare(a[0]))
+									.map(([year, months]) => (
+										<InvoiceYearGroup
+											key={year}
+											year={year}
+											months={months}
+											selectedMonth={selectedMonth}
+											patientDataMap={patientDataMap}
+											onEditInvoice={(id) => navigate(`/invoices/${id}`)}
+											onDeleteInvoice={(id) => {
+												setSelectedInvoiceId(id);
+												setIsDeleteModalOpen(true);
+											}}
+											onPrintInvoice={handlePrintInvoice}
+											onDownloadInvoice={handleDownloadInvoice}
+											onDownloadMonthInvoices={handleDownloadMonthInvoices}
+										/>
+									))}
+							</Accordion>
 						</div>
 					) : (
 						<InvoiceEmptyState 
