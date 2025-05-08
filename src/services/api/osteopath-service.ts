@@ -93,6 +93,13 @@ export const osteopathService = {
   
   async updateOsteopath(id: number, data: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {
     try {
+      console.log(`Mise à jour de l'ostéopathe avec ID: ${id}`, data);
+      
+      // S'assurer que nous ne transmettons pas un undefined pour userId qui écraserait la valeur en base
+      if (data.userId === undefined) {
+        delete data.userId; // Supprimer la propriété si elle est undefined pour éviter d'écraser la valeur en base
+      }
+      
       return await supabaseOsteopathService.updateOsteopath(id, data);
     } catch (error) {
       console.error("Erreur Supabase updateOsteopath:", error);

@@ -94,7 +94,21 @@ export const supabaseOsteopathService = {
   
   async updateOsteopath(id: number, osteoData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {
     try {
-      // 1. Récupérer le token d'authentification utilisateur
+      // 1. Récupérer l'ostéopathe actuel pour préserver l'userId
+      const currentOsteopath = await this.getOsteopathById(id);
+      
+      if (!currentOsteopath) {
+        throw new Error("Ostéopathe non trouvé");
+      }
+      
+      // Conserver l'userId existant
+      const userId = currentOsteopath.userId;
+      
+      if (!userId) {
+        throw new Error("L'ostéopathe n'a pas d'userId valide");
+      }
+      
+      // 2. Récupérer le token d'authentification utilisateur
       const {
         data: { session },
         error: sessionError,
@@ -105,28 +119,29 @@ export const supabaseOsteopathService = {
       }
       const token = session.access_token;
 
-      // 2. Utiliser REST pour contourner les problèmes CORS
+      // 3. Utiliser REST pour contourner les problèmes CORS
       if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
         throw new Error("Configuration Supabase manquante (URL ou clé API)");
       }
 
       const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Osteopath?id=eq.${id}`;
       
-      // 3. Préparer le payload avec l'ID inclus
+      // 4. Préparer le payload avec l'ID inclus et l'userId préservé
       const updatePayload = {
-        id: id, // Important: inclure l'ID dans le corps
+        id: id,
         ...osteoData,
+        userId: userId, // Important: s'assurer que l'userId est toujours présent
         updatedAt: new Date().toISOString(),
       };
 
-      // 4. Nettoyer les valeurs undefined
+      // 5. Nettoyer les valeurs undefined
       Object.keys(updatePayload).forEach(
         (k) => updatePayload[k] === undefined && delete updatePayload[k]
       );
 
       console.log("Payload de mise à jour de l'ostéopathe:", updatePayload);
 
-      // 5. Utiliser PUT au lieu de PATCH
+      // 6. Utiliser PUT au lieu de PATCH
       const res = await fetch(URL_ENDPOINT, {
         method: "PUT",
         headers: {

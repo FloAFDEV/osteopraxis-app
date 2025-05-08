@@ -17,6 +17,12 @@ export async function createPatient(patient: CreatePatientPayload): Promise<Pati
     genderValue = "Homme" as Gender;
   }
 
+  // Vérification de l'osteopathId
+  if (!patient.osteopathId) {
+    console.error("Erreur: osteopathId manquant lors de la création du patient");
+    throw new Error("L'ID de l'ostéopathe est requis pour créer un patient");
+  }
+
   // Création de l'objet à insérer sans id ni timestamps (ils seront gérés par Postgres)
   const insertable = {
     ...patient,
@@ -28,6 +34,8 @@ export async function createPatient(patient: CreatePatientPayload): Promise<Pati
     osteopathId: patient.osteopathId,
     userId: patient.userId || null
   };
+
+  console.log("Création d'un patient avec les données:", insertable);
 
   // Insertion avec single() pour obtenir directement l'objet
   const { data, error } = await supabase
