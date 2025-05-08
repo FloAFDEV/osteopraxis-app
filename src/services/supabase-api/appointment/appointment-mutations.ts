@@ -6,6 +6,22 @@ import { toast } from "sonner";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentInsertData, AppointmentStatus, AppointmentUpdateData } from "./appointment-types";
 
+// Define type for Supabase response rows
+type AppointmentRow = {
+  id: number;
+  date: string;
+  reason: string;
+  status: AppointmentStatus;
+  patientId: number;
+  osteopathId: number;
+  notes?: string | null;
+  notificationSent: boolean;
+  cabinetId?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
+  user_id?: string | null;
+};
+
 /**
  * Create a new appointment
  */
@@ -31,7 +47,8 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
       .from("Appointment")
       .insert(insertData)
       .select()
-      .single();
+      .single()
+      .returns<AppointmentRow>();
 
     if (error) {
       toast.error("Erreur lors de la création du rendez-vous");
@@ -72,7 +89,8 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single();
+      .single()
+      .returns<AppointmentRow>();
     
     if (error) {
       toast.error("Erreur lors de la mise à jour du rendez-vous");
@@ -104,7 +122,8 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single();
+      .single()
+      .returns<AppointmentRow>();
 
     if (error) {
       toast.error("Erreur lors de l'annulation du rendez-vous");
