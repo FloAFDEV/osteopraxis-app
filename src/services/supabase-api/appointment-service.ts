@@ -1,7 +1,7 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
-import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase, SupabaseAppointment } from "./appointment-adapter";
+import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase } from "./appointment-adapter";
 import { corsHeaders } from "@/services/corsHeaders";
 
 // Interface simplifiée pour les requêtes Supabase
