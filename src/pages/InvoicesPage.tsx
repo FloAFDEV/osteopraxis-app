@@ -1,6 +1,7 @@
 import { InvoiceDetails } from "@/components/invoice-details";
 import { InvoicePrintView } from "@/components/invoice-print-view";
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import {
 	Calendar,
+	ChevronDown,
 	Download,
 	FileText,
 	Filter,
@@ -29,8 +31,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
+import { format, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const InvoicesPage = () => {
+	// ... keep existing code (navigation, auth, state variables declarations)
 	const navigate = useNavigate();
 	const { user } = useAuth();
 	const { isMobile } = useIsMobile();
@@ -54,7 +59,11 @@ const InvoicesPage = () => {
 	);
 	const [printCabinet, setPrintCabinet] = useState<Cabinet | null>(null);
 
-	// Map to store patient data for each invoice
+	// Ajout: État pour le groupement des factures par mois/année
+	const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({});
+	const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+
+	// ... keep existing code (patient map, print handling)
 	const [patientDataMap, setPatientDataMap] = useState<Map<number, Patient>>(
 		new Map()
 	);
@@ -139,6 +148,7 @@ const InvoicesPage = () => {
 	}, [invoices]);
 
 	// Fonction pour charger les données associées à une facture (patient, ostéopathe, cabinet)
+	// ... keep existing code (loadInvoiceRelatedData function)
 	const loadInvoiceRelatedData = async (invoice: Invoice) => {
 		try {
 			// Charger les données du patient
@@ -182,6 +192,7 @@ const InvoicesPage = () => {
 	};
 
 	const handleDeleteInvoice = async () => {
+		// ... keep existing code (handleDeleteInvoice function)
 		if (!selectedInvoiceId) return;
 		try {
 			await api.deleteInvoice(selectedInvoiceId);
@@ -198,6 +209,7 @@ const InvoicesPage = () => {
 
 	// Obtenir le nom du patient avec gestion des cas
 	const getPatientName = (invoice: Invoice) => {
+		// ... keep existing code (getPatientName function)
 		// First check if we have the patient in our map
 		const patient = patientDataMap.get(invoice.patientId);
 		if (patient) {
@@ -239,18 +251,53 @@ const InvoicesPage = () => {
 		  })
 		: [];
 
-	// Filtrer les factures par année
-	const getInvoicesByYear = (year: string): Invoice[] => {
-		if (!invoices) return [];
+	// Amélioration: Grouper les factures par année et mois
+	const groupInvoicesByYearAndMonth = () => {
+		if (!filteredInvoices) return {};
 
-		return invoices.filter((invoice) => {
-			const invoiceDate = new Date(invoice.date);
-			return invoiceDate.getFullYear().toString() === year;
+		const groupedInvoices: Record<string, Record<string, Invoice[]>> = {};
+
+		filteredInvoices.forEach(invoice => {
+			const date = new Date(invoice.date);
+			const year = date.getFullYear().toString();
+			const monthKey = format(date, 'yyyy-MM');
+			
+			if (!groupedInvoices[year]) {
+				groupedInvoices[year] = {};
+			}
+			
+			if (!groupedInvoices[year][monthKey]) {
+				groupedInvoices[year][monthKey] = [];
+			}
+			
+			groupedInvoices[year][monthKey].push(invoice);
 		});
+
+		// Trier les factures dans chaque mois par date (plus récent en premier)
+		Object.keys(groupedInvoices).forEach(year => {
+			Object.keys(groupedInvoices[year]).forEach(monthKey => {
+				groupedInvoices[year][monthKey].sort((a, b) => 
+					new Date(b.date).getTime() - new Date(a.date).getTime()
+				);
+			});
+		});
+
+		return groupedInvoices;
+	};
+
+	const groupedInvoices = groupInvoicesByYearAndMonth();
+
+	// Fonction pour basculer l'état d'expansion d'un mois
+	const toggleMonth = (monthKey: string) => {
+		setExpandedMonths(prev => ({
+			...prev,
+			[monthKey]: !prev[monthKey]
+		}));
 	};
 
 	// Générer les options des années pour le sélecteur
 	const generateYearOptions = (): number[] => {
+		// ... keep existing code (generateYearOptions function)
 		const currentYear = new Date().getFullYear();
 		const years: number[] = [];
 
@@ -262,7 +309,27 @@ const InvoicesPage = () => {
 		return years;
 	};
 
+	// Générer les options des mois pour le sélecteur actif seulement pour l'année sélectionnée
+	const generateMonthOptions = (): string[] => {
+		if (!invoices) return [];
+		
+		const monthsInYear = new Set<string>();
+		
+		filteredInvoices.forEach(invoice => {
+			const date = new Date(invoice.date);
+			const invoiceYear = date.getFullYear().toString();
+			
+			if (invoiceYear === selectedYear) {
+				const monthKey = format(date, 'yyyy-MM');
+				monthsInYear.add(monthKey);
+			}
+		});
+		
+		return Array.from(monthsInYear).sort((a, b) => b.localeCompare(a)); // Trier par ordre décroissant
+	};
+
 	// Impression et téléchargement d'une facture individuelle
+	// ... keep existing code (handlePrintInvoice, handleDownloadInvoice, handleDownloadAllInvoices functions)
 	const handlePrintInvoice = async (invoice: Invoice) => {
 		setPrintInvoice(invoice);
 		setPrintAllInvoices(null);
@@ -301,7 +368,10 @@ const InvoicesPage = () => {
 
 	// Impression et téléchargement de toutes les factures d'une année
 	const handleDownloadAllInvoices = async () => {
-		const yearInvoices = getInvoicesByYear(selectedYear);
+		const yearInvoices = filteredInvoices.filter(invoice => {
+			const date = new Date(invoice.date);
+			return date.getFullYear().toString() === selectedYear;
+		});
 
 		if (yearInvoices.length === 0) {
 			toast.error(`Aucune facture trouvée pour l'année ${selectedYear}`);
@@ -321,6 +391,39 @@ const InvoicesPage = () => {
 		setPrintInvoice(null);
 		toast.info(
 			`Préparation du téléchargement des ${yearInvoices.length} factures de ${selectedYear}...`
+		);
+	};
+
+	// Téléchargement des factures d'un mois spécifique
+	const handleDownloadMonthInvoices = async (year: string, monthKey: string) => {
+		if (!invoices) return;
+
+		const monthInvoices = filteredInvoices.filter(invoice => {
+			const date = new Date(invoice.date);
+			const invoiceMonthKey = format(date, 'yyyy-MM');
+			return invoiceMonthKey === monthKey;
+		});
+
+		if (monthInvoices.length === 0) {
+			const monthLabel = format(parseISO(`${monthKey}-01`), 'MMMM yyyy', { locale: fr });
+			toast.error(`Aucune facture trouvée pour ${monthLabel}`);
+			return;
+		}
+
+		// Pour l'impression multiple, nous utilisons les données du premier ostéopathe/cabinet
+		if (monthInvoices.length > 0) {
+			const relatedData = await loadInvoiceRelatedData(monthInvoices[0]);
+			setPrintPatient(null);
+			setPrintOsteopath(relatedData.osteopath);
+			setPrintCabinet(relatedData.cabinet);
+		}
+
+		setPrintAllInvoices(monthInvoices);
+		setPrintInvoice(null);
+		
+		const monthLabel = format(parseISO(`${monthKey}-01`), 'MMMM yyyy', { locale: fr });
+		toast.info(
+			`Préparation du téléchargement des ${monthInvoices.length} factures de ${monthLabel}...`
 		);
 	};
 
@@ -397,13 +500,13 @@ const InvoicesPage = () => {
 								</div>
 							</div>
 
-							{/* Nouvelle section pour le téléchargement par année - Améliorée pour la responsivité */}
+							{/* Filtres améliorés par année et mois */}
 							<div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
 								<div className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center">
 									<Calendar className="h-5 w-5 mr-2 text-amber-500" />
-									Export annuel:
+									Filtrer par période:
 								</div>
-								<div className="flex flex-wrap w-full sm:w-auto gap-3 items-center mt-2 sm:mt-0">
+								<div className="flex flex-wrap gap-3 items-center">
 									<Select
 										value={selectedYear}
 										onValueChange={setSelectedYear}
@@ -424,6 +527,24 @@ const InvoicesPage = () => {
 											)}
 										</SelectContent>
 									</Select>
+									
+									<Select 
+										value={selectedMonth || ""} 
+										onValueChange={setSelectedMonth}
+									>
+										<SelectTrigger className="w-40">
+											<SelectValue placeholder="Tous les mois" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="">Tous les mois</SelectItem>
+											{generateMonthOptions().map((monthKey) => (
+												<SelectItem key={monthKey} value={monthKey}>
+													{format(parseISO(`${monthKey}-01`), 'MMMM yyyy', { locale: fr })}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									
 									<Button
 										onClick={handleDownloadAllInvoices}
 										variant="outline"
@@ -431,7 +552,7 @@ const InvoicesPage = () => {
 										className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50"
 									>
 										<Download className="h-4 w-4" />
-										<span>Télécharger le PDF annuel</span>
+										<span>Télécharger le PDF {selectedMonth ? "du mois" : "annuel"}</span>
 									</Button>
 								</div>
 							</div>
@@ -443,36 +564,96 @@ const InvoicesPage = () => {
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
 						</div>
 					) : filteredInvoices && filteredInvoices.length > 0 ? (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-							{filteredInvoices.map((invoice) => (
-								<div key={invoice.id} className="h-full">
-									<div className="h-full min-h-[400px] flex flex-col">
-										<InvoiceDetails
-											invoice={invoice}
-											patient={patientDataMap.get(
-												invoice.patientId
-											)}
-											onEdit={() =>
-												navigate(
-													`/invoices/${invoice.id}`
-												)
-											}
-											onDelete={() => {
-												setSelectedInvoiceId(
-													invoice.id
-												);
-												setIsDeleteModalOpen(true);
-											}}
-											onPrint={() =>
-												handlePrintInvoice(invoice)
-											}
-											onDownload={() =>
-												handleDownloadInvoice(invoice)
-											}
-										/>
+						<div className="space-y-6">
+							{/* Visualisation par année et mois */}
+							{Object.entries(groupedInvoices).sort((a, b) => b[0].localeCompare(a[0])).map(([year, months]) => {
+								// Filtrer par l'année sélectionnée
+								if (year !== selectedYear) return null;
+								
+								return (
+									<div key={year} className="space-y-4">
+										<h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+											<Calendar className="h-5 w-5 text-amber-500" />
+											Factures {year}
+										</h2>
+										
+										<Accordion type="multiple" className="space-y-4">
+											{Object.entries(months)
+												.sort((a, b) => b[0].localeCompare(a[0])) // Trier par mois (dernier d'abord)
+												.filter(([monthKey, _]) => {
+													// Filtrer par le mois sélectionné s'il y en a un
+													if (selectedMonth) {
+														return monthKey === selectedMonth;
+													}
+													return true;
+												})
+												.map(([monthKey, monthInvoices]) => {
+													const monthLabel = format(parseISO(`${monthKey}-01`), 'MMMM yyyy', { locale: fr });
+													
+													return (
+														<AccordionItem key={monthKey} value={monthKey} className="border rounded-lg overflow-hidden">
+															<AccordionTrigger className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+																<div className="flex justify-between items-center w-full pr-4">
+																	<span className="font-medium capitalize">{monthLabel}</span>
+																	<div className="flex items-center gap-2">
+																		<span className="text-sm text-muted-foreground">
+																			{monthInvoices.length} {monthInvoices.length > 1 ? 'factures' : 'facture'}
+																		</span>
+																		<Button 
+																			variant="ghost" 
+																			size="sm" 
+																			className="ml-2 text-amber-600 hover:text-amber-700"
+																			onClick={(e) => {
+																				e.stopPropagation();
+																				handleDownloadMonthInvoices(year, monthKey);
+																			}}
+																		>
+																			<Download className="h-4 w-4 mr-1" />
+																			<span className="text-xs">PDF</span>
+																		</Button>
+																	</div>
+																</div>
+															</AccordionTrigger>
+															<AccordionContent className="p-0">
+																<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+																	{monthInvoices.map((invoice) => (
+																		<div key={invoice.id} className="h-full">
+																			<div className="h-full flex flex-col">
+																				<InvoiceDetails
+																					invoice={invoice}
+																					patient={patientDataMap.get(
+																						invoice.patientId
+																					)}
+																					onEdit={() =>
+																						navigate(
+																							`/invoices/${invoice.id}`
+																						)
+																					}
+																					onDelete={() => {
+																						setSelectedInvoiceId(
+																							invoice.id
+																						);
+																						setIsDeleteModalOpen(true);
+																					}}
+																					onPrint={() =>
+																						handlePrintInvoice(invoice)
+																					}
+																					onDownload={() =>
+																						handleDownloadInvoice(invoice)
+																					}
+																				/>
+																			</div>
+																		</div>
+																	))}
+																</div>
+															</AccordionContent>
+														</AccordionItem>
+													);
+												})}
+										</Accordion>
 									</div>
-								</div>
-							))}
+								);
+							})}
 						</div>
 					) : (
 						<div className="text-center py-20">
@@ -481,7 +662,7 @@ const InvoicesPage = () => {
 								Aucune note d'honoraire trouvée
 							</h3>
 							<p className="mt-2 text-gray-500 dark:text-gray-400">
-								{searchQuery || statusFilter !== "ALL"
+								{searchQuery || statusFilter !== "ALL" || selectedMonth
 									? "Essayez de modifier vos critères de recherche."
 									: "Commencez par créer votre première note d'honoraire."}
 							</p>
@@ -515,13 +696,17 @@ const InvoicesPage = () => {
 						<div ref={printRef}>
 							<div className="p-8">
 								<h1 className="text-3xl font-bold text-center mb-8">
-									Notes d'honoraires de l'année {selectedYear}
+									Notes d'honoraires 
+									{selectedMonth 
+										? ` de ${format(parseISO(`${selectedMonth}-01`), 'MMMM yyyy', { locale: fr })}`
+										: ` de l'année ${selectedYear}`
+									}
 								</h1>
 								<div className="space-y-8">
 									{printAllInvoices.map((invoice) => {
 										const patient = patientDataMap.get(
 											invoice.patientId
-										); // 👈 récupérer le patient associé
+										);
 										return (
 											<div
 												key={invoice.id}
@@ -529,7 +714,7 @@ const InvoicesPage = () => {
 											>
 												<InvoicePrintView
 													invoice={invoice}
-													patient={patient} // 👈 et l'envoyer à InvoicePrintView
+													patient={patient}
 													osteopath={printOsteopath}
 													cabinet={printCabinet}
 												/>
