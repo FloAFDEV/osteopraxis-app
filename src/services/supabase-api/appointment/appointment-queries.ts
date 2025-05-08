@@ -25,19 +25,22 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    // Utiliser une assertion de type simplifiée pour éviter l'erreur de profondeur excessive
+    const result = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("osteopathId", osteopathId)
       .order("date", { ascending: true });
+    
+    const data = result.data as AppointmentRow[] | null;
+    const error = result.error;
 
     if (error) throw error;
     
     // Éviter les assertions de type complexes
     const appointments: Appointment[] = [];
     for (const item of (data || [])) {
-      const typedItem = item as any;
-      appointments.push(adaptAppointmentFromSupabase(typedItem));
+      appointments.push(adaptAppointmentFromSupabase(item));
     }
     return appointments;
   } catch (error) {
@@ -53,12 +56,16 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    // Utiliser une assertion de type simplifiée pour éviter l'erreur de profondeur excessive
+    const result = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .single();
+
+    const data = result.data as AppointmentRow | null;
+    const error = result.error;
 
     if (error) {
       console.error("Error fetching appointment:", error);
@@ -66,7 +73,7 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
     }
 
     // Simplifier l'assertion de type
-    return data ? adaptAppointmentFromSupabase(data as any) : null;
+    return data ? adaptAppointmentFromSupabase(data) : null;
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -80,20 +87,23 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    // Utiliser une assertion de type simplifiée pour éviter l'erreur de profondeur excessive
+    const result = await supabase
       .from("Appointment")
       .select("id, date, reason, status, patientId, notes, notificationSent, cabinetId")
       .eq("patientId", patientId)
       .eq("osteopathId", osteopathId)
       .order("date", { ascending: true });
 
+    const data = result.data as AppointmentRow[] | null;
+    const error = result.error;
+
     if (error) throw error;
     
     // Éviter les assertions de type complexes avec une boucle plus explicite
     const appointments: Appointment[] = [];
     for (const item of (data || [])) {
-      const typedItem = item as any;
-      appointments.push(adaptAppointmentFromSupabase(typedItem));
+      appointments.push(adaptAppointmentFromSupabase(item));
     }
     return appointments;
   } catch (error) {
