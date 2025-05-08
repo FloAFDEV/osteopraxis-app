@@ -5,6 +5,8 @@ import { adaptAppointmentFromSupabase } from "../appointment-adapter";
 import { toast } from "sonner";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentInsertData, AppointmentStatus, AppointmentUpdateData } from "./appointment-types";
+import { typedData } from "../utils";
+import { AppointmentRow } from "./appointment-queries";
 
 /**
  * Create a new appointment
@@ -39,11 +41,12 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
     
     toast.success("Rendez-vous créé avec succès");
     
-    // Simplifier l'assertion de type
     if (!data || data.length === 0) {
       throw new Error("Aucune donnée retournée après création");
     }
-    return adaptAppointmentFromSupabase(data[0] as any);
+    
+    // Utiliser typedData pour un type sûr
+    return adaptAppointmentFromSupabase(typedData<AppointmentRow>(data[0]));
   } catch (error) {
     console.error("Error in createAppointment:", error);
     throw error;
@@ -84,8 +87,8 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     
     toast.success("Rendez-vous mis à jour avec succès");
     
-    // Simplifier l'assertion de type
-    return adaptAppointmentFromSupabase(data as any);
+    // Utiliser typedData pour un type sûr
+    return adaptAppointmentFromSupabase(typedData<AppointmentRow>(data));
   } catch (error) {
     console.error("Error in updateAppointment:", error);
     throw error;
@@ -117,8 +120,8 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
     
     toast.success("Rendez-vous annulé avec succès");
     
-    // Simplifier l'assertion de type
-    return adaptAppointmentFromSupabase(data as any);
+    // Utiliser typedData pour un type sûr
+    return adaptAppointmentFromSupabase(typedData<AppointmentRow>(data));
   } catch (error) {
     console.error("Error in cancelAppointment:", error);
     throw error;

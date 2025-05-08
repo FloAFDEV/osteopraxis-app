@@ -4,9 +4,10 @@ import { adaptAppointmentFromSupabase } from "../appointment-adapter";
 import { Appointment } from "@/types";
 import { getCurrentUserOsteopathId } from "./appointment-utils";
 import { AppointmentStatus } from "./appointment-types";
+import { typedData } from "../utils";
 
-// Type intermédiaire simplifié pour éviter l'inférence de type profonde
-type RawAppointmentData = {
+// Type simplifié pour les données brutes d'appointment retournées par Supabase
+export type AppointmentRow = {
   id: number;
   date: string;
   reason: string;
@@ -15,7 +16,7 @@ type RawAppointmentData = {
   notes?: string | null;
   patientId: number;
   cabinetId?: number | null;
-  // Ajoutez d'autres champs si nécessaire, mais gardez-les simples
+  osteopathId: number;
 };
 
 /**
@@ -25,26 +26,17 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utiliser any pour éviter l'inférence de type profonde
     const { data, error } = await supabase
       .from("Appointment")
       .select("*")
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true }) as { data: any[], error: any };
+      .order("date", { ascending: true });
 
     if (error) throw error;
     
-    // Convertir manuellement en utilisant notre adaptateur
-    const appointments: Appointment[] = [];
-    
-    if (data && Array.isArray(data)) {
-      for (let i = 0; i < data.length; i++) {
-        const rawItem = data[i] as RawAppointmentData;
-        appointments.push(adaptAppointmentFromSupabase(rawItem));
-      }
-    }
-    
-    return appointments;
+    // Utiliser typedData pour éviter l'inférence de type profonde
+    const typedAppointments = typedData<AppointmentRow[]>(data || []);
+    return typedAppointments.map(adaptAppointmentFromSupabase);
   } catch (error) {
     console.error("Error in getAppointments:", error);
     throw error;
@@ -58,21 +50,20 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utiliser any pour éviter l'inférence de type
     const { data, error } = await supabase
       .from("Appointment")
       .select("*")
       .eq("id", id)
       .eq("osteopathId", osteopathId)
-      .single() as { data: any, error: any };
+      .single();
 
     if (error) {
       console.error("Error fetching appointment:", error);
       return null;
     }
 
-    // Conversion manuelle contrôlée
-    return data ? adaptAppointmentFromSupabase(data as RawAppointmentData) : null;
+    // Utiliser typedData pour un type sûr
+    return data ? adaptAppointmentFromSupabase(typedData<AppointmentRow>(data)) : null;
   } catch (error) {
     console.error("Error in getAppointmentById:", error);
     return null;
@@ -86,27 +77,18 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utiliser any pour éviter l'inférence de type
     const { data, error } = await supabase
       .from("Appointment")
       .select("*")
       .eq("patientId", patientId)
       .eq("osteopathId", osteopathId)
-      .order("date", { ascending: true }) as { data: any[], error: any };
+      .order("date", { ascending: true });
 
     if (error) throw error;
     
-    // Convertir manuellement avec notre adaptateur
-    const appointments: Appointment[] = [];
-    
-    if (data && Array.isArray(data)) {
-      for (let i = 0; i < data.length; i++) {
-        const rawItem = data[i] as RawAppointmentData;
-        appointments.push(adaptAppointmentFromSupabase(rawItem));
-      }
-    }
-    
-    return appointments;
+    // Utiliser typedData pour éviter l'inférence de type profonde
+    const typedAppointments = typedData<AppointmentRow[]>(data || []);
+    return typedAppointments.map(adaptAppointmentFromSupabase);
   } catch (error) {
     console.error("Error in getAppointmentsByPatientId:", error);
     throw error;

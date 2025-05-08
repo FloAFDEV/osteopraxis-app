@@ -1,26 +1,11 @@
 
 import { Appointment, AppointmentStatus } from "@/types";
-
-// Type for Supabase Appointment data
-export type SupabaseAppointment = {
-  id: number;
-  patientId: number;
-  osteopathId?: number;
-  date: string;
-  reason: string;
-  status: AppointmentStatus;
-  notificationSent: boolean;
-  notes?: string;
-  cabinetId?: number;
-  createdAt?: string;
-  updatedAt?: string;
-  user_id?: string;
-};
+import { AppointmentRow } from "./appointment/appointment-queries";
 
 /**
  * Adapts appointment data from Supabase to the application format
  */
-export function adaptAppointmentFromSupabase(data: any): Appointment {
+export function adaptAppointmentFromSupabase(data: AppointmentRow): Appointment {
   return {
     id: data.id,
     patientId: data.patientId,
@@ -36,8 +21,8 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 /**
  * Adapts appointment data from application to Supabase format
  */
-export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): Partial<SupabaseAppointment> {
-  const result: Partial<SupabaseAppointment> = {};
+export function adaptAppointmentToSupabase(appointment: Partial<Appointment>): Partial<AppointmentRow> {
+  const result: Partial<AppointmentRow> = {};
   
   if (appointment.id !== undefined) result.id = appointment.id;
   if (appointment.patientId !== undefined) result.patientId = appointment.patientId;
