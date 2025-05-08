@@ -104,7 +104,7 @@ function App() {
         <Route path="/schedule" element={isAuthenticated ? <SchedulePage /> : <Navigate to="/login" />} />
         <Route path="/settings" element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" />} />
         <Route path="/settings/profile" element={isAuthenticated ? <OsteopathSettingsPage /> : <Navigate to="/login" />} />
-        <Route path="/profile/setup" element={isAuthenticated ? <OsteopathProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/profile/osteopath" element={isAuthenticated ? <OsteopathProfilePage /> : <Navigate to="/login" />} />
         <Route path="/settings/cabinet" element={isAuthenticated ? <CabinetSettingsPage /> : <Navigate to="/login" />} />
         <Route path="/invoices" element={isAuthenticated ? <InvoicesPage /> : <Navigate to="/login" />} />
         <Route path="/invoices/new" element={isAuthenticated ? <NewInvoicePage /> : <Navigate to="/login" />} />
