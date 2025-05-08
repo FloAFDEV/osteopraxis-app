@@ -12,7 +12,7 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    // Utilisation d'un type simple et explicite pour éviter l'erreur d'instanciation excessive
+    // Utiliser any pour éviter l'erreur de type excessivement profond
     const { data, error } = await supabase
       .from("Appointment")
       .select("*")

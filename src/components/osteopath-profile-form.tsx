@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { FancyLoader } from "@/components/ui/fancy-loader";
-import { supabase } from "@/services/supabase-api/utils";
+import { supabase } from "@/integrations/supabase/client"; // Importer directement du client
 
 import { Button } from "@/components/ui/button";
 import {

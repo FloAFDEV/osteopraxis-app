@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { User } from "@/types";
 import { api } from "@/services/api";
-import { supabase } from "@/services/supabase-api/utils";
+import { supabase } from "@/integrations/supabase/client"; // Import direct
 import { useAutoLogout } from "@/hooks/use-auto-logout";
 
 interface AuthState {

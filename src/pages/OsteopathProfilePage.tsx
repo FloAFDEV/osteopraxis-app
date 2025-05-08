@@ -12,7 +12,7 @@ import { Osteopath, Cabinet } from "@/types";
 import { Button } from "@/components/ui/button";
 import { CabinetForm } from "@/components/cabinet-form";
 import { FancyLoader } from "@/components/ui/fancy-loader";
-import { supabase } from "@/services/supabase-api/utils";
+import { supabase } from "@/integrations/supabase/client"; // Import direct depuis l'intégration
 
 const OsteopathProfilePage = () => {
   const { user, updateUser, loadStoredToken } = useAuth();
@@ -158,6 +158,19 @@ const OsteopathProfilePage = () => {
       checkExistingData();
     }
   }, [authChecked, user, checkExistingData, hasAttemptedLoad]);
+
+  // Ajoutons des logs pour savoir où nous en sommes dans le processus
+  useEffect(() => {
+    console.log("État actuel OsteopathProfilePage:", {
+      authChecked,
+      loading,
+      hasUser: !!user,
+      hasAttemptedLoad,
+      hasOsteopath: !!osteopath,
+      cabinetsCount: cabinets.length,
+      showCabinetForm
+    });
+  }, [authChecked, loading, user, hasAttemptedLoad, osteopath, cabinets, showCabinetForm]);
 
   const handleRetry = () => {
     setLoading(true);
