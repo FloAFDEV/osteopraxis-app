@@ -1,16 +1,14 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardData } from "@/types";
-import { Calendar, Clock, User, AlertCircle } from "lucide-react";
+import { Calendar, Clock, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
-import { format, isToday, parseISO, isTomorrow } from "date-fns";
+import { format, isToday, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Appointment } from "@/types";
 import { toast } from "sonner";
-import { formatAppointmentDate } from "@/utils/date-utils";
 
 interface AppointmentsOverviewProps {
 	data: DashboardData;
@@ -100,10 +98,6 @@ export function AppointmentsOverview({
 	// Use default value if data.appointmentsToday is undefined
 	const appointmentsToday = data?.appointmentsToday || 0;
 
-	// Déterminer le prochain rendez-vous (le premier de la liste triée)
-	const nextAppointment = upcomingAppointments.length > 0 ? upcomingAppointments[0] : null;
-	const nextPatient = nextAppointment ? getPatientById(nextAppointment.patientId) : null;
-
 	return (
 		<Card
 			className={`${className} shadow-sm hover:shadow-md transition-shadow`}
@@ -139,91 +133,13 @@ export function AppointmentsOverview({
 					</div>
 				) : (
 					<div>
-						{/* Section pour le prochain rendez-vous (mis en évidence) */}
-						{nextAppointment && (
-							<div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b-2 border-blue-200 dark:border-blue-700">
-								<div className="flex items-center justify-between mb-2">
-									<div className="flex items-center">
-										<AlertCircle className="h-4 w-4 text-blue-600 mr-2" />
-										<h3 className="font-semibold text-blue-800 dark:text-blue-300">Prochain rendez-vous</h3>
-									</div>
-									<Badge 
-										variant="outline" 
-										className={`
-											${isToday(parseISO(nextAppointment.date)) 
-												? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
-												: isTomorrow(parseISO(nextAppointment.date))
-													? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-													: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-											}
-										`}
-									>
-										{isToday(parseISO(nextAppointment.date)) 
-											? "Aujourd'hui" 
-											: isTomorrow(parseISO(nextAppointment.date))
-												? "Demain"
-												: formatAppointmentDate(nextAppointment.date, "EEEE d MMMM")}
-									</Badge>
-								</div>
-								
-								<div className="flex items-center mb-3">
-									<div className="flex-shrink-0 mr-3">
-										<div className="w-10 h-10 rounded-full bg-slate-500/10 flex items-center justify-center">
-											<User
-												className={`h-5 w-5 ${
-													nextPatient?.gender === "Femme"
-														? "text-pink-500"
-														: nextPatient?.gender === "Homme"
-														? "text-blue-500"
-														: "text-gray-500"
-												}`}
-											/>
-										</div>
-									</div>
-									<div>
-										<Link
-											to={`/patients/${nextAppointment.patientId}`}
-											className={`font-medium hover:underline text-base ${
-												nextPatient?.gender === "Femme"
-													? "text-pink-700 dark:text-pink-400"
-													: nextPatient?.gender === "Homme"
-													? "text-blue-700 dark:text-blue-400"
-													: "text-slate-800 dark:text-white"
-											}`}
-										>
-											{nextPatient
-												? `${nextPatient.firstName} ${nextPatient.lastName}`
-												: `Patient #${nextAppointment.patientId}`}
-										</Link>
-										<div className="flex items-center text-sm text-blue-700 dark:text-blue-400">
-											<Clock className="h-3 w-3 mr-1" />
-											{format(parseISO(nextAppointment.date), "HH:mm")} - 
-											<Calendar className="h-3 w-3 mx-1" />
-											{formatAppointmentDate(nextAppointment.date, "EEEE d MMMM")}
-										</div>
-									</div>
-									<button
-										onClick={() => handleAppointmentClick(nextAppointment.id)}
-										className="ml-auto px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors"
-									>
-										Détails
-									</button>
-								</div>
-								
-								<div className="text-sm bg-white dark:bg-slate-800 p-2 rounded border border-blue-100 dark:border-blue-800">
-									<span className="font-medium">Motif:</span> {nextAppointment.reason}
-								</div>
-							</div>
-						)}
-						
-						{/* Liste des autres rendez-vous à venir */}
-						{upcomingAppointments.slice(1).map((appointment, index) => {
+						{upcomingAppointments.map((appointment, index) => {
 							const patient = getPatientById(
 								appointment.patientId
 							);
 							const appointmentDate = parseISO(appointment.date);
 							const isLastItem =
-								index === upcomingAppointments.length - 2; // -2 because we're starting from the second item
+								index === upcomingAppointments.length - 1;
 
 							return (
 								<div
@@ -238,7 +154,8 @@ export function AppointmentsOverview({
 												className={`h-6 w-6 ${
 													patient?.gender === "Femme"
 														? "text-pink-500"
-														: patient?.gender === "Homme"
+														: patient?.gender ===
+														  "Homme"
 														? "text-blue-500"
 														: "text-gray-500"
 												}`}
@@ -251,7 +168,8 @@ export function AppointmentsOverview({
 											className={`font-medium hover:underline text-base truncate block ${
 												patient?.gender === "Femme"
 													? "text-pink-700 dark:text-pink-400"
-													: patient?.gender === "Homme"
+													: patient?.gender ===
+													  "Homme"
 													? "text-blue-700 dark:text-blue-400"
 													: "text-slate-800 dark:text-white"
 											}`}
