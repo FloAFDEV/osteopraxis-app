@@ -23,7 +23,9 @@ export async function createPatient(patient: CreatePatientPayload): Promise<Pati
     contraception: contraceptionValue,
     gender: genderValue,
     birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
-    osteopathId: patient.osteopathId || 1,
+    // Email est maintenant facultatif
+    email: patient.email || null,
+    osteopathId: patient.osteopathId,
     userId: patient.userId || null
   };
 

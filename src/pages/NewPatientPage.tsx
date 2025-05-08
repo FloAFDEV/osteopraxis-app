@@ -7,10 +7,19 @@ import { Layout } from "@/components/ui/layout";
 import { PatientForm } from "@/components/patient-form";
 import { toast } from "sonner";
 import { Patient } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NewPatientPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  
+  // Redirection si l'utilisateur n'est pas connecté
+  if (!isAuthenticated || !user) {
+    toast.error("Vous devez être connecté pour ajouter un patient");
+    navigate("/login");
+    return null;
+  }
   
   const handleAddPatient = async (patientData: any) => {
     try {
@@ -29,17 +38,15 @@ const NewPatientPage = () => {
       }
       console.log("Données patient avant création:", patientData);
 
-      // Ajouter les données par défaut nécessaires
+      // Utiliser l'ID de l'ostéopathe connecté au lieu de la valeur en dur
       const patientToCreate = {
         ...patientData,
-        osteopathId: 1,
-        // Pour la démo, nous utilisons l'ostéopathe ID 1
-        cabinetId: 1,
-        // Pour la démo, nous utilisons le cabinet ID 1
+        osteopathId: user.osteopathId || user.id, // Utilise osteopathId ou id selon ce qui est disponible
+        cabinetId: 1, // Pour la démo, nous utilisons toujours le cabinet ID 1
         userId: null // Requis par le type mais peut être null
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
 
-      console.log("Envoi du patient à l'API:", patientToCreate);
+      console.log("Envoi du patient à l'API avec osteopathId:", patientToCreate.osteopathId);
       const newPatient = await api.createPatient(patientToCreate);
       console.log("Patient créé avec succès:", newPatient);
       
@@ -91,7 +98,7 @@ const NewPatientPage = () => {
           </div>
         ) : (
           <div className="bg-card rounded-lg border shadow-sm p-6">
-            <PatientForm onSave={handleAddPatient} />
+            <PatientForm onSave={handleAddPatient} emailRequired={false} />
           </div>
         )}
       </div>
