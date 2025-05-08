@@ -31,7 +31,7 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
       .from("Appointment")
       .insert(insertData)
       .select()
-      .single() as { data: any; error: any };
+      .single();
 
     if (error) {
       toast.error("Erreur lors de la création du rendez-vous");
@@ -72,7 +72,7 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single() as { data: any; error: any };
+      .single();
     
     if (error) {
       toast.error("Erreur lors de la mise à jour du rendez-vous");
@@ -104,7 +104,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single() as { data: any; error: any };
+      .single();
 
     if (error) {
       toast.error("Erreur lors de l'annulation du rendez-vous");
@@ -131,7 +131,7 @@ export async function deleteAppointment(id: number): Promise<void> {
       .from("Appointment")
       .delete()
       .eq("id", id)
-      .eq("osteopathId", osteopathId) as { error: any };
+      .eq("osteopathId", osteopathId);
 
     if (error) {
       toast.error("Erreur lors de la suppression du rendez-vous");
