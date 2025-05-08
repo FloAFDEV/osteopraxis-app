@@ -1,7 +1,20 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase } from "./utils";
 import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase, SupabaseAppointment } from "./appointment-adapter";
 import { corsHeaders } from "@/services/corsHeaders";
+
+// Interface simplifiée pour les requêtes Supabase
+type AppointmentInsert = {
+  patientId: number;
+  date: string;
+  reason: string;
+  status: AppointmentStatus;
+  osteopathId: number;
+  notificationSent?: boolean;
+  notes?: string;
+  cabinetId?: number;
+};
 
 export const supabaseAppointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -138,7 +151,7 @@ export const supabaseAppointmentService = {
         throw new Error("Unable to get osteopath ID");
       }
 
-      // Add the osteopathId to the appointment data
+      // Create a flat object for insertion using the adapter
       const adaptedData = adaptAppointmentToSupabase(appointmentData);
       
       // Ensure required fields are present
@@ -146,15 +159,21 @@ export const supabaseAppointmentService = {
         throw new Error("Missing required appointment fields");
       }
       
-      // Create the full insert data with osteopathId
-      const dataToInsert = {
-        ...adaptedData,
-        osteopathId: userData.osteopathId
-      } as any; // Use any to avoid type issues with osteopathId
+      // Créer un objet plat conforme à AppointmentInsert pour l'insertion
+      const insertData: AppointmentInsert = {
+        patientId: adaptedData.patientId,
+        date: adaptedData.date,
+        reason: adaptedData.reason,
+        status: adaptedData.status as AppointmentStatus,
+        osteopathId: userData.osteopathId,
+        notificationSent: adaptedData.notificationSent,
+        notes: adaptedData.notes,
+        cabinetId: adaptedData.cabinetId,
+      };
 
       const { data, error } = await supabase
         .from("Appointment")
-        .insert(dataToInsert)
+        .insert(insertData)
         .select()
         .single();
 
@@ -188,12 +207,12 @@ export const supabaseAppointmentService = {
       }
 
       // Adapt the appointment data to Supabase format
-      const adaptedAppointmentData = adaptAppointmentToSupabase(appointmentData);
+      const adaptedData = adaptAppointmentToSupabase(appointmentData);
 
       // Now update the appointment, ensuring it belongs to the user's osteopath
       const { data, error } = await supabase
         .from("Appointment")
-        .update(adaptedAppointmentData)
+        .update(adaptedData)
         .eq("id", id)
         .eq("osteopathId", userData.osteopathId)
         .select()
