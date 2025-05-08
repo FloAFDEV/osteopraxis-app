@@ -57,31 +57,96 @@ export const supabaseInvoiceService = {
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
-    const { data, error } = await supabase
-      .from("Invoice")
-      .select("*")
-      .eq("id", id)
-      .single();
-      
-    if (error) {
-      if (error.code === "PGRST116") {
+    try {
+      // First get the current user's osteopath ID
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error("No authenticated session");
+      }
+
+      // Get the user's osteopathId
+      const { data: userData, error: userError } = await supabase
+        .from("User")
+        .select("osteopathId")
+        .eq("id", session.session.user.id)
+        .single();
+
+      if (userError || !userData || !userData.osteopathId) {
+        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
         return undefined;
       }
-      throw new Error(error.message);
+
+      // Get the invoice
+      const { data, error } = await supabase
+        .from("Invoice")
+        .select("*, Patient(osteopathId)")
+        .eq("id", id)
+        .single();
+      
+      if (error) {
+        if (error.code === "PGRST116") {
+          return undefined;
+        }
+        throw new Error(error.message);
+      }
+      
+      // Verify this invoice belongs to the current osteopath
+      if (data.Patient?.osteopathId !== userData.osteopathId) {
+        console.error("Invoice does not belong to the current osteopath");
+        return undefined;
+      }
+      
+      return data as Invoice;
+    } catch (error) {
+      console.error("Error in getInvoiceById:", error);
+      throw error;
     }
-    
-    return data as Invoice;
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
-    const { data, error } = await supabase
-      .from("Invoice")
-      .select("*")
-      .eq("patientId", patientId);
+    try {
+      // First get the current user's osteopath ID
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error("No authenticated session");
+      }
+
+      // Get the user's osteopathId
+      const { data: userData, error: userError } = await supabase
+        .from("User")
+        .select("osteopathId")
+        .eq("id", session.session.user.id)
+        .single();
+
+      if (userError || !userData || !userData.osteopathId) {
+        console.error("Error getting user's osteopathId:", userError || "No osteopathId found");
+        return [];
+      }
+
+      // Verify this patient belongs to the current osteopath
+      const { data: patient, error: patientError } = await supabase
+        .from("Patient")
+        .select("osteopathId")
+        .eq("id", patientId)
+        .single();
+
+      if (patientError || !patient || patient.osteopathId !== userData.osteopathId) {
+        console.error("Patient does not belong to the current osteopath");
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from("Invoice")
+        .select("*")
+        .eq("patientId", patientId);
       
-    if (error) throw new Error(error.message);
-    
-    return (data || []) as Invoice[];
+      if (error) throw new Error(error.message);
+      
+      return (data || []) as Invoice[];
+    } catch (error) {
+      console.error("Error in getInvoicesByPatientId:", error);
+      throw error;
+    }
   },
 
   async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {

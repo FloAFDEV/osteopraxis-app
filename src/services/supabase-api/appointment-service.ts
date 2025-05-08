@@ -33,7 +33,8 @@ export const supabaseAppointmentService = {
 
       if (error) throw error;
       
-      return data.map(adaptAppointmentFromSupabase);
+      // Explicitly type data as any[] to avoid excessive type instantiation
+      return (data as any[]).map(adaptAppointmentFromSupabase);
     } catch (error) {
       console.error("Error in getAppointments:", error);
       throw error;
