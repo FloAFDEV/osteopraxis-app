@@ -12,12 +12,15 @@ export async function getAppointments(): Promise<Appointment[]> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    // Utilisation de type explicite pour éviter l'erreur d'instanciation excessive
+    type ResponseType = { data: any[]; error: any };
+    const result: ResponseType = await supabase
       .from("Appointment")
       .select("*")
       .eq("osteopathId", osteopathId)
       .order("date", { ascending: true });
 
+    const { data, error } = result;
     if (error) throw error;
     
     return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
@@ -34,13 +37,15 @@ export async function getAppointmentById(id: number): Promise<Appointment | null
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    type ResponseType = { data: any; error: any };
+    const result: ResponseType = await supabase
       .from("Appointment")
       .select("*")
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .single();
 
+    const { data, error } = result;
     if (error) {
       console.error("Error fetching appointment:", error);
       return null;
@@ -60,13 +65,15 @@ export async function getAppointmentsByPatientId(patientId: number): Promise<App
   try {
     const osteopathId = await getCurrentUserOsteopathId();
 
-    const { data, error } = await supabase
+    type ResponseType = { data: any[]; error: any };
+    const result: ResponseType = await supabase
       .from("Appointment")
       .select("*")
       .eq("patientId", patientId)
       .eq("osteopathId", osteopathId)
       .order("date", { ascending: true });
 
+    const { data, error } = result;
     if (error) throw error;
     
     return (data || []).map((item: any) => adaptAppointmentFromSupabase(item));
