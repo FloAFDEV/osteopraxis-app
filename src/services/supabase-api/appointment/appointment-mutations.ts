@@ -1,5 +1,5 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseRaw } from "@/integrations/supabase/client-raw";
 import { Appointment } from "@/types";
 import { adaptAppointmentFromSupabase } from "../appointment-adapter";
 import { toast } from "sonner";
@@ -28,27 +28,23 @@ export async function createAppointment(appointmentData: Omit<Appointment, "id">
       osteopathId
     };
 
-    // Using explicit type casting to break dependency on deep Supabase types
-    const response = await supabase
+    const { data, error } = await supabaseRaw
       .from("Appointment")
       .insert(insertData)
-      .select() as unknown as {
-        data: AppointmentRow[] | null;
-        error: any;
-      };
+      .select();
 
-    if (response.error) {
+    if (error) {
       toast.error("Erreur lors de la création du rendez-vous");
-      throw response.error;
+      throw error;
     }
     
     toast.success("Rendez-vous créé avec succès");
     
-    if (!response.data || response.data.length === 0) {
+    if (!data || data.length === 0) {
       throw new Error("Aucune donnée retournée après création");
     }
     
-    return adaptAppointmentFromSupabase(response.data[0]);
+    return adaptAppointmentFromSupabase(data[0] as AppointmentRow);
   } catch (error) {
     console.error("Error in createAppointment:", error);
     throw error;
@@ -74,30 +70,26 @@ export async function updateAppointment(id: number, appointmentData: Partial<App
     if (appointmentData.notes !== undefined) updateData.notes = appointmentData.notes;
     if (appointmentData.cabinetId !== undefined) updateData.cabinetId = appointmentData.cabinetId;
 
-    // Using explicit type casting to break dependency on deep Supabase types
-    const response = await supabase
+    const { data, error } = await supabaseRaw
       .from("Appointment")
       .update(updateData)
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single() as unknown as {
-        data: AppointmentRow | null;
-        error: any;
-      };
+      .single();
     
-    if (response.error) {
+    if (error) {
       toast.error("Erreur lors de la mise à jour du rendez-vous");
-      throw response.error;
+      throw error;
     }
     
     toast.success("Rendez-vous mis à jour avec succès");
     
-    if (!response.data) {
+    if (!data) {
       throw new Error("Aucune donnée retournée après mise à jour");
     }
     
-    return adaptAppointmentFromSupabase(response.data);
+    return adaptAppointmentFromSupabase(data as AppointmentRow);
   } catch (error) {
     console.error("Error in updateAppointment:", error);
     throw error;
@@ -111,8 +103,7 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
   try {
     const osteopathId = await getCurrentUserOsteopathId();
     
-    // Using explicit type casting to break dependency on deep Supabase types
-    const response = await supabase
+    const { data, error } = await supabaseRaw
       .from("Appointment")
       .update({ 
         status: "CANCELED" as AppointmentStatus,
@@ -121,23 +112,20 @@ export async function cancelAppointment(id: number, reason?: string): Promise<Ap
       .eq("id", id)
       .eq("osteopathId", osteopathId)
       .select()
-      .single() as unknown as {
-        data: AppointmentRow | null;
-        error: any;
-      };
+      .single();
 
-    if (response.error) {
+    if (error) {
       toast.error("Erreur lors de l'annulation du rendez-vous");
-      throw response.error;
+      throw error;
     }
     
     toast.success("Rendez-vous annulé avec succès");
     
-    if (!response.data) {
+    if (!data) {
       throw new Error("Aucune donnée retournée après annulation");
     }
     
-    return adaptAppointmentFromSupabase(response.data);
+    return adaptAppointmentFromSupabase(data as AppointmentRow);
   } catch (error) {
     console.error("Error in cancelAppointment:", error);
     throw error;
@@ -151,18 +139,15 @@ export async function deleteAppointment(id: number): Promise<void> {
   try {
     const osteopathId = await getCurrentUserOsteopathId();
     
-    // Using explicit type casting to break dependency on deep Supabase types
-    const response = await supabase
+    const { error } = await supabaseRaw
       .from("Appointment")
       .delete()
       .eq("id", id)
-      .eq("osteopathId", osteopathId) as unknown as {
-        error: any;
-      };
+      .eq("osteopathId", osteopathId);
 
-    if (response.error) {
+    if (error) {
       toast.error("Erreur lors de la suppression du rendez-vous");
-      throw response.error;
+      throw error;
     }
     
     toast.success("Rendez-vous supprimé avec succès");
