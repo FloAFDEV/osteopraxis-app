@@ -1,3 +1,4 @@
+
 import { InvoiceDetails } from "@/components/invoice-details";
 import { InvoicePrintView } from "@/components/invoice-print-view";
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
@@ -529,14 +530,14 @@ const InvoicesPage = () => {
 									</Select>
 									
 									<Select 
-										value={selectedMonth || ""} 
-										onValueChange={setSelectedMonth}
+										value={selectedMonth || "all_months"}
+										onValueChange={(value) => setSelectedMonth(value === "all_months" ? null : value)}
 									>
 										<SelectTrigger className="w-40">
 											<SelectValue placeholder="Tous les mois" />
 										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value="">Tous les mois</SelectItem>
+											<SelectItem value="all_months">Tous les mois</SelectItem>
 											{generateMonthOptions().map((monthKey) => (
 												<SelectItem key={monthKey} value={monthKey}>
 													{format(parseISO(`${monthKey}-01`), 'MMMM yyyy', { locale: fr })}
