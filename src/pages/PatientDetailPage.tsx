@@ -1,22 +1,29 @@
-
-import { useState, useEffect, useRef } from "react";
+import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
+import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
+import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
+import { PatientHeader } from "@/components/patients/detail/PatientHeader";
+import { PatientInfo } from "@/components/patients/detail/PatientInfo";
+import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
+import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
 import { invoiceService } from "@/services/api/invoice-service";
 import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
-import { Activity, AlertCircle, Calendar, ClipboardList, History, Loader2, Stethoscope } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { PatientHeader } from "@/components/patients/detail/PatientHeader";
-import { PatientInfo } from "@/components/patients/detail/PatientInfo";
-import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
-import { MedicalInfoCard } from "@/components/patients/medical-info-card";
-import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
-import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
-import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { format } from "date-fns";
+import {
+	Activity,
+	AlertCircle,
+	Calendar,
+	ClipboardList,
+	History,
+	Loader2,
+	Stethoscope,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -28,7 +35,23 @@ const PatientDetailPage = () => {
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 	const historyTabRef = useRef<HTMLElement | null>(null);
-	
+	const getSmokerInfo = () => {
+		if (patient.isSmoker) {
+			return `Fumeur${
+				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
+			}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ""}`;
+		} else if (patient.isExSmoker) {
+			return `Ex-fumeur${
+				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
+			}${
+				patient.quitSmokingDate
+					? `, arrêt depuis ${patient.quitSmokingDate}`
+					: ""
+			}`;
+		} else {
+			return "Non-fumeur";
+		}
+	};
 	useEffect(() => {
 		const fetchPatientData = async () => {
 			setLoading(true);
@@ -74,7 +97,7 @@ const PatientDetailPage = () => {
 		.sort(
 			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
 		);
-		
+
 	const pastAppointments = appointments
 		.filter((appointment) => new Date(appointment.date) < new Date())
 		.sort(
@@ -96,7 +119,10 @@ const PatientDetailPage = () => {
 		}
 	};
 
-	const handleUpdateAppointmentStatus = async (appointmentId: number, status: AppointmentStatus) => {
+	const handleUpdateAppointmentStatus = async (
+		appointmentId: number,
+		status: AppointmentStatus
+	) => {
 		try {
 			setLoading(true);
 			await api.updateAppointment(appointmentId, { status });
@@ -105,7 +131,11 @@ const PatientDetailPage = () => {
 				parseInt(id!)
 			);
 			setAppointments(updatedAppointments);
-			toast.success(`Le statut de la séance a été modifié en "${getStatusLabel(status)}"`);
+			toast.success(
+				`Le statut de la séance a été modifié en "${getStatusLabel(
+					status
+				)}"`
+			);
 		} catch (error) {
 			console.error("Error updating appointment status:", error);
 			toast.error("Impossible de modifier le statut de la séance");
@@ -259,7 +289,7 @@ const PatientDetailPage = () => {
 								},
 								{
 									label: "Fumeur",
-									value: patient.isSmoker ? "Oui" : "Non",
+									value: getSmokerInfo(),
 								},
 								{
 									label: "Contraception",
@@ -310,10 +340,12 @@ const PatientDetailPage = () => {
 							</TabsList>
 
 							<TabsContent value="medical-info">
-								<MedicalInfoTab 
+								<MedicalInfoTab
 									patient={patient}
 									pastAppointments={pastAppointments}
-									onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
+									onUpdateAppointmentStatus={
+										handleUpdateAppointmentStatus
+									}
 									onNavigateToHistory={navigateToHistoryTab}
 								/>
 							</TabsContent>
@@ -322,24 +354,30 @@ const PatientDetailPage = () => {
 								<UpcomingAppointmentsTab
 									patient={patient}
 									appointments={upcomingAppointments}
-									onCancelAppointment={handleCancelAppointment}
-									onStatusChange={handleUpdateAppointmentStatus}
+									onCancelAppointment={
+										handleCancelAppointment
+									}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
 								/>
 							</TabsContent>
 
 							<TabsContent value="history">
 								<AppointmentHistoryTab
 									appointments={pastAppointments}
-									onStatusChange={handleUpdateAppointmentStatus}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
 									viewMode={viewMode}
 									setViewMode={setViewMode}
 								/>
 							</TabsContent>
 
 							<TabsContent value="invoices">
-								<InvoicesTab 
-									patient={patient} 
-									invoices={invoices} 
+								<InvoicesTab
+									patient={patient}
+									invoices={invoices}
 								/>
 							</TabsContent>
 						</Tabs>
