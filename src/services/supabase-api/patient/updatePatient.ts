@@ -34,7 +34,7 @@ export async function updatePatient(patient: UpdatePatientPayload): Promise<Pati
     // Récupérer d'abord le patient existant pour vérification
     const { data: existingPatient } = await supabase
       .from("Patient")
-      .select("osteopathId")
+      .select("osteopathId, cabinetId")
       .eq("id", patient.id)
       .single();
       
@@ -57,6 +57,7 @@ export async function updatePatient(patient: UpdatePatientPayload): Promise<Pati
       gender: genderValue,
       birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
       osteopathId: patient.osteopathId || existingPatient?.osteopathId,
+      cabinetId: patient.cabinetId || existingPatient?.cabinetId,
       // S'assurer que les champs de tabagisme sont correctement formatés
       isExSmoker: patient.isExSmoker || false,
       isSmoker: patient.isSmoker || false,

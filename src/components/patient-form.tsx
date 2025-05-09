@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -68,6 +67,7 @@ const getPatientSchema = (emailRequired: boolean) => z.object({
 	currentTreatment: z.string().optional().nullable(),
 	handedness: z.string().optional().nullable(),
 	familyStatus: z.string().optional().nullable(),
+	cabinetId: z.number().optional(), // Ajout du champ cabinetId
 	// Nouveaux champs pour tous les patients
 	complementaryExams: z.string().optional().nullable(),
 	generalSymptoms: z.string().optional().nullable(),
@@ -88,18 +88,23 @@ interface PatientFormProps {
 	onSave: (patient: PatientFormValues) => Promise<void>;
 	isLoading?: boolean;
 	emailRequired?: boolean; // Ajout de la prop emailRequired comme optionnelle
+	selectedCabinetId?: number | null; // Ajout du cabinetId sélectionné
 }
 export function PatientForm({
 	patient,
 	onSave,
 	isLoading = false,
 	emailRequired = true, // Valeur par défaut à true pour maintenir le comportement existant
+	selectedCabinetId = null,
 }: PatientFormProps) {
 	const navigate = useNavigate();
 	const [activeTab, setActiveTab] = useState("general");
 	const [childrenCount, setChildrenCount] = useState<number>(0);
 	const [childrenAgesInput, setChildrenAgesInput] = useState<string>("");
 	const [isChild, setIsChild] = useState<boolean>(false);
+	const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
+		patient?.cabinetId ? String(patient.cabinetId) : selectedCabinetId ? String(selectedCabinetId) : null
+	);
 
 	// Initialiser le form avec les valeurs existantes ou valeurs par défaut
 	const form = useForm<PatientFormValues>({
@@ -207,11 +212,12 @@ export function PatientForm({
 				childrenAgesArray = [];
 			}
 
-			// Préparer les données à enregistrer
+			// Préparer les données à enregistrer avec le cabinetId
 			const patientData: PatientFormValues = {
 				...values,
 				childrenAges: childrenAgesArray,
 				hasChildren: values.hasChildren,
+				cabinetId: currentCabinetId ? parseInt(currentCabinetId) : undefined,
 			};
 
 			// Appeler la fonction de sauvegarde
@@ -296,6 +302,32 @@ export function PatientForm({
 										)}
 									/>
 								</div>
+
+								{/* Nouveau champ pour le cabinet */}
+								<FormField
+									control={form.control}
+									name="cabinetId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Cabinet</FormLabel>
+											<FormDescription>
+												Sélectionnez le cabinet auquel ce patient est rattaché
+											</FormDescription>
+											<FormControl>
+												<TranslatedSelect
+													value={currentCabinetId}
+													onValueChange={(value) => {
+														setCurrentCabinetId(value);
+														field.onChange(parseInt(value));
+													}}
+													enumType="Cabinet"
+													placeholder="Sélectionner un cabinet"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
@@ -1084,99 +1116,3 @@ export function PatientForm({
 
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 											<FormField
-												control={form.control}
-												name="sleepingPattern"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Sommeil</FormLabel>
-														<FormControl>
-															<Textarea
-																placeholder="Habitudes de sommeil"
-																className="resize-none"
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="feeding"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Alimentation</FormLabel>
-														<FormControl>
-															<Textarea
-																placeholder="Habitudes alimentaires"
-																className="resize-none"
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-										</div>
-
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-											<FormField
-												control={form.control}
-												name="behavior"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Comportement général</FormLabel>
-														<FormControl>
-															<Textarea
-																placeholder="Comportement, tempérament..."
-																className="resize-none"
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="childCareContext"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Contexte de garde</FormLabel>
-														<FormControl>
-															<Textarea
-																placeholder="Crèche, école, nounou..."
-																className="resize-none"
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</TabsContent>
-					)}
-				</Tabs>
-
-				<div className="flex justify-end gap-2">
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => navigate(-1)}
-					>
-						Annuler
-					</Button>
-					<Button type="submit" disabled={isLoading}>
-						{isLoading ? "Enregistrement..." : "Enregistrer"}
-					</Button>
-				</div>
-			</form>
-		</Form>
-	);
-}

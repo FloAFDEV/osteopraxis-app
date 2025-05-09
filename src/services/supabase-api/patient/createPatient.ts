@@ -23,6 +23,11 @@ export async function createPatient(patient: CreatePatientPayload): Promise<Pati
     throw new Error("L'ID de l'ostéopathe est requis pour créer un patient");
   }
 
+  // Vérification que cabinetId est défini
+  if (!patient.cabinetId) {
+    console.warn("Attention: cabinetId manquant lors de la création du patient. Utilisation du cabinet par défaut.");
+  }
+
   // Création de l'objet à insérer sans id ni timestamps (ils seront gérés par Postgres)
   const insertable = {
     ...patient,
@@ -32,6 +37,7 @@ export async function createPatient(patient: CreatePatientPayload): Promise<Pati
     // Email est maintenant facultatif
     email: patient.email || null,
     osteopathId: patient.osteopathId,
+    cabinetId: patient.cabinetId,
     userId: patient.userId || null,
     // Nouveaux champs pour le tabagisme
     smokingSince: patient.smokingSince || null,

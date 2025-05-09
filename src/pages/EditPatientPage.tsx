@@ -17,6 +17,15 @@ const EditPatientPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
+
+  // Récupérer le cabinet sélectionné depuis le localStorage
+  useEffect(() => {
+    const storedCabinetId = localStorage.getItem("selectedCabinetId");
+    if (storedCabinetId) {
+      setSelectedCabinetId(Number(storedCabinetId));
+    }
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -61,6 +70,8 @@ const EditPatientPage = () => {
       const patientUpdate = {
         ...patient,
         ...updatedData,
+        // Préserver le cabinetId existant ou utiliser celui du formulaire ou celui de la navbar
+        cabinetId: updatedData.cabinetId || patient.cabinetId || selectedCabinetId || 1,
         updatedAt: new Date().toISOString(),
         // Make sure these fields are properly set for the update
         gender: updatedData.gender || patient.gender,
@@ -78,6 +89,8 @@ const EditPatientPage = () => {
         behavior: updatedData.behavior || patient.behavior || null,
         childCareContext: updatedData.childCareContext || patient.childCareContext || null
       };
+
+      console.log("Mise à jour du patient avec cabinetId:", patientUpdate.cabinetId);
 
       // Use the patientService updatePatient method
       await patientService.updatePatient(patientUpdate);
@@ -175,7 +188,12 @@ const EditPatientPage = () => {
           </Button>
         </div>
         {patient && (
-          <PatientForm patient={patient} onSave={handleSave} isLoading={isSaving} />
+          <PatientForm 
+            patient={patient} 
+            onSave={handleSave} 
+            isLoading={isSaving} 
+            selectedCabinetId={selectedCabinetId}
+          />
         )}
       </div>
     </Layout>

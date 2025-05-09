@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus, Loader2 } from "lucide-react";
 import { api } from "@/services/api";
@@ -11,8 +11,17 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const NewPatientPage = () => {
   const [loading, setLoading] = useState(false);
+  const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  
+  // Récupérer le cabinet sélectionné depuis le localStorage
+  useEffect(() => {
+    const storedCabinetId = localStorage.getItem("selectedCabinetId");
+    if (storedCabinetId) {
+      setSelectedCabinetId(Number(storedCabinetId));
+    }
+  }, []);
   
   // Redirection si l'utilisateur n'est pas connecté
   if (!isAuthenticated || !user) {
@@ -39,11 +48,11 @@ const NewPatientPage = () => {
       
       console.log("Données patient avant création:", patientData);
 
-      // Utiliser l'ID de l'ostéopathe connecté au lieu de la valeur en dur
+      // Utiliser l'ID de l'ostéopathe connecté et le cabinet sélectionné
       const patientToCreate = {
         ...patientData,
         osteopathId: user.osteopathId || user.id, // Utilise osteopathId ou id selon ce qui est disponible
-        cabinetId: 1, // Pour la démo, nous utilisons toujours le cabinet ID 1
+        cabinetId: patientData.cabinetId || selectedCabinetId || 1, // Utiliser le cabinetId du formulaire ou celui sélectionné dans la navbar
         userId: null, // Requis par le type mais peut être null
         // Ajout des nouveaux champs requis pour la compatibilité des types
         complementaryExams: patientData.complementaryExams || null,
@@ -61,7 +70,7 @@ const NewPatientPage = () => {
         quitSmokingDate: patientData.quitSmokingDate || null
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
 
-      console.log("Envoi du patient à l'API avec osteopathId:", patientToCreate.osteopathId);
+      console.log("Envoi du patient à l'API avec cabinetId:", patientToCreate.cabinetId);
       const newPatient = await api.createPatient(patientToCreate);
       console.log("Patient créé avec succès:", newPatient);
       
@@ -117,7 +126,11 @@ const NewPatientPage = () => {
           </div>
         ) : (
           <div className="bg-card rounded-lg border shadow-sm p-6">
-            <PatientForm onSave={handleAddPatient} emailRequired={false} />
+            <PatientForm 
+              onSave={handleAddPatient} 
+              emailRequired={false} 
+              selectedCabinetId={selectedCabinetId}
+            />
           </div>
         )}
       </div>
