@@ -57,6 +57,12 @@ export async function updatePatient(patient: UpdatePatientPayload): Promise<Pati
       gender: genderValue,
       birthDate: patient.birthDate ? new Date(patient.birthDate).toISOString() : null,
       osteopathId: patient.osteopathId || existingPatient?.osteopathId,
+      // S'assurer que les champs de tabagisme sont correctement formatés
+      isExSmoker: patient.isExSmoker || false,
+      isSmoker: patient.isSmoker || false,
+      smokingAmount: patient.smokingAmount || null,
+      smokingSince: patient.smokingSince || null,
+      quitSmokingDate: patient.quitSmokingDate || null
     };
     
     // 2. Utiliser REST pour contourner les problèmes CORS
@@ -95,9 +101,6 @@ export async function updatePatient(patient: UpdatePatientPayload): Promise<Pati
     // Traiter la réponse
     const data = await res.json();
     console.log("Réponse de mise à jour du patient:", data);
-
-    // Éviter d'afficher le toast ici pour éviter les doubles toasts
-    // Le toast sera affiché dans le composant qui appelle cette fonction
 
     if (Array.isArray(data) && data.length > 0) return adaptPatientFromSupabase(data[0]);
     if (data && typeof data === "object") return adaptPatientFromSupabase(data);

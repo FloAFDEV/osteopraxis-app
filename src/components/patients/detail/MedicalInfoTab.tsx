@@ -1,3 +1,4 @@
+
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { RecentAppointmentsCard } from "./RecentAppointmentsCard";
@@ -18,6 +19,17 @@ export function MedicalInfoTab({
 	onUpdateAppointmentStatus,
 	onNavigateToHistory,
 }: MedicalInfoTabProps) {
+	// Créer un affichage formaté pour le tabagisme
+	const getSmokerInfo = () => {
+		if (patient.isSmoker) {
+			return `Fumeur${patient.smokingAmount ? ` (${patient.smokingAmount})` : ''}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ''}`;
+		} else if (patient.isExSmoker) {
+			return `Ex-fumeur${patient.smokingAmount ? ` (${patient.smokingAmount})` : ''}${patient.quitSmokingDate ? `, arrêt depuis ${patient.quitSmokingDate}` : ''}`;
+		} else {
+			return "Non-fumeur";
+		}
+	};
+
 	return (
 		<div className="space-y-6 mt-6">
 			<MedicalInfoCard
@@ -75,6 +87,10 @@ export function MedicalInfoTab({
 						label: "Correction visuelle",
 						value: patient.hasVisionCorrection ? "Oui" : "Non",
 					},
+					{
+						label: "Tabagisme",
+						value: getSmokerInfo(),
+					},
 				]}
 			/>
 
@@ -82,6 +98,7 @@ export function MedicalInfoTab({
 			<RecentAppointmentsCard
 				appointments={pastAppointments}
 				onStatusChange={onUpdateAppointmentStatus}
+				onNavigateToHistory={onNavigateToHistory}
 			/>
 		</div>
 	);

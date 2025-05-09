@@ -1,3 +1,4 @@
+
 import {
 	Accordion,
 	AccordionContent,
@@ -19,11 +20,13 @@ interface RecentAppointmentsCardProps {
 		appointmentId: number,
 		status: AppointmentStatus
 	) => Promise<void>;
+	onNavigateToHistory: () => void;
 }
 
 export function RecentAppointmentsCard({
 	appointments,
 	onStatusChange,
+	onNavigateToHistory,
 }: RecentAppointmentsCardProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 
@@ -136,6 +139,18 @@ export function RecentAppointmentsCard({
 							</AccordionItem>
 						</Accordion>
 					)
+				)}
+				
+				{appointments.length > 3 && (
+					<div className="mt-4 flex justify-center">
+						<Button 
+							variant="outline" 
+							size="sm" 
+							onClick={onNavigateToHistory}
+						>
+							Voir l'historique complet
+						</Button>
+					</div>
 				)}
 			</CardContent>
 		</Card>

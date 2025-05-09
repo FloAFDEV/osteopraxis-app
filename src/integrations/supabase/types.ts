@@ -378,6 +378,7 @@ export type Database = {
           hdlm: string | null
           id: number
           isDeceased: boolean
+          isExSmoker: boolean | null
           isSmoker: boolean
           lastName: string
           maritalStatus: Database["public"]["Enums"]["MaritalStatus"] | null
@@ -386,7 +387,10 @@ export type Database = {
           osteopathId: number
           phone: string | null
           physicalActivity: string | null
+          quitSmokingDate: string | null
           rheumatologicalHistory: string | null
+          smokingAmount: string | null
+          smokingSince: string | null
           surgicalHistory: string | null
           traumaHistory: string | null
           updatedAt: string
@@ -415,6 +419,7 @@ export type Database = {
           hdlm?: string | null
           id?: number
           isDeceased?: boolean
+          isExSmoker?: boolean | null
           isSmoker?: boolean
           lastName: string
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
@@ -423,7 +428,10 @@ export type Database = {
           osteopathId: number
           phone?: string | null
           physicalActivity?: string | null
+          quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
+          smokingAmount?: string | null
+          smokingSince?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
           updatedAt?: string
@@ -452,6 +460,7 @@ export type Database = {
           hdlm?: string | null
           id?: number
           isDeceased?: boolean
+          isExSmoker?: boolean | null
           isSmoker?: boolean
           lastName?: string
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
@@ -460,7 +469,10 @@ export type Database = {
           osteopathId?: number
           phone?: string | null
           physicalActivity?: string | null
+          quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
+          smokingAmount?: string | null
+          smokingSince?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
           updatedAt?: string
