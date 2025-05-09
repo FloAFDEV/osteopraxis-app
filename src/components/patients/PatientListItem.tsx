@@ -79,30 +79,31 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 
 							<div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
 								{patient.email && (
-									<span className="flex items-center text-gray-300">
-										<Mail className="h-3 w-3 mr-1 text-blue-500" />
-										<a
-											href={`mailto:${patient.email}`}
-											className="hover:underline text-blue-500 hover:text-blue-700 transition-colors"
-										>
-											{patient.email}
-										</a>
-									</span>
-								)}
+	<span className="flex items-center text-gray-700 dark:text-gray-200">
+		<Mail className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
+		<a
+			href={`mailto:${patient.email}`}
+			className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+		>
+			{patient.email}
+		</a>
+	</span>
+)}
 
-								{patient.phone && (
-									<span className="text-gray-400">
-										<a
-											href={`tel:${patient.phone}`}
-											className="hover:underline text-blue-500 hover:text-blue-700 transition-colors"
-										>
-											{patient.phone}
-										</a>
-									</span>
-								)}
+{patient.phone && (
+	<span className="text-gray-700 dark:text-gray-200">
+		<a
+			href={`tel:${patient.phone}`}
+			className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+		>
+			{patient.phone}
+		</a>
+	</span>
+)}
+
 
 								{patient.occupation && (
-									<span className="text-gray-500 italic">
+									<span className="text-gray-400 italic">
 										{patient.occupation}
 									</span>
 								)}
