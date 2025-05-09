@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 // Fonction pour convertir hasChildren de string à boolean
@@ -104,4 +105,29 @@ export function getEnumOptions(enumType: 'MaritalStatus' | 'Handedness' | 'Contr
     default:
       return [];
   }
+}
+
+// Fonctions de traduction pour les valeurs d'enum
+export function translateMaritalStatus(status: string | null | undefined): string {
+  if (!status) return 'Non spécifié';
+  
+  const options = getEnumOptions('MaritalStatus');
+  const option = options.find(opt => opt.value === status);
+  return option ? option.label : 'Non spécifié';
+}
+
+export function translateHandedness(handedness: string | null | undefined): string {
+  if (!handedness) return 'Non spécifié';
+  
+  const options = getEnumOptions('Handedness');
+  const option = options.find(opt => opt.value === handedness);
+  return option ? option.label : 'Non spécifié';
+}
+
+export function translateContraception(contraception: string | null | undefined): string {
+  if (!contraception) return 'Non spécifiée';
+  
+  const options = getEnumOptions('Contraception');
+  const option = options.find(opt => opt.value === contraception);
+  return option ? option.label : 'Non spécifiée';
 }
