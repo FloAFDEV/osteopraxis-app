@@ -52,7 +52,7 @@ export function RecentAppointmentsCard({
 								className="border-b pb-3 last:border-0"
 							>
 								<div className="flex justify-between items-center">
-									<div className="font-medium">
+									<div className="font-medium text-amber-800 dark:text-amber-500">
 										{format(
 											new Date(appointment.date),
 											"dd/MM/yyyy"
