@@ -1,13 +1,10 @@
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { differenceInYears, format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, History, X, Check } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 
 interface MedicalInfoTabProps {
@@ -26,9 +23,8 @@ export function MedicalInfoTab({
 	onUpdateAppointmentStatus,
 	onNavigateToHistory,
 }: MedicalInfoTabProps) {
-	const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus>(
-		"COMPLETED"
-	);
+	const [selectedStatus, setSelectedStatus] =
+		useState<AppointmentStatus>("COMPLETED");
 	const [isChild, setIsChild] = useState<boolean>(false);
 
 	const lastAppointment =
@@ -50,14 +46,18 @@ export function MedicalInfoTab({
 	return (
 		<div className="space-y-6 mt-6">
 			{lastAppointment && (
-				<Card className="border-blue-100 dark:border-blue-900/50">
+				<Card className="border-blue-100 dark:border-slate-900/50">
 					<CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-t-lg">
 						<CardTitle className="text-lg flex flex-wrap items-center gap-2">
 							<Calendar className="h-5 w-5 text-blue-500" />
 							Dernière séance (
-							{format(new Date(lastAppointment.date), "dd MMMM yyyy", {
-								locale: fr,
-							})}
+							{format(
+								new Date(lastAppointment.date),
+								"dd MMMM yyyy",
+								{
+									locale: fr,
+								}
+							)}
 							) :
 							<AppointmentStatusBadge
 								status={lastAppointment.status}
@@ -71,6 +71,9 @@ export function MedicalInfoTab({
 								{lastAppointment.reason}
 							</p>
 							<div className="pl-4 border-l-2 border-gray-200 dark:border-gray-700 italic text-muted-foreground my-2">
+								<span className="font-medium">
+									Compte-rendu :
+								</span>{" "}
 								{lastAppointment.notes
 									? lastAppointment.notes
 									: "Pas de notes pour cette séance"}
@@ -102,7 +105,8 @@ export function MedicalInfoTab({
 					{
 						label: "Rhumatologie",
 						value:
-							patient.rheumatologicalHistory || "Aucun antécédent",
+							patient.rheumatologicalHistory ||
+							"Aucun antécédent",
 					},
 				]}
 			/>
@@ -179,7 +183,9 @@ export function MedicalInfoTab({
 						},
 						{
 							label: "Développement moteur",
-							value: patient.developmentMilestones || "Non renseigné",
+							value:
+								patient.developmentMilestones ||
+								"Non renseigné",
 						},
 						{
 							label: "Sommeil",
@@ -199,19 +205,6 @@ export function MedicalInfoTab({
 						},
 					]}
 				/>
-			)}
-
-			{pastAppointments.length > 1 && (
-				<div className="flex justify-end mt-6">
-					<Button
-						variant="outline"
-						onClick={onNavigateToHistory}
-						className="flex items-center"
-					>
-						<History className="w-4 h-4 mr-2" />
-						Voir historique complet ({pastAppointments.length} séances)
-					</Button>
-				</div>
 			)}
 		</div>
 	);
