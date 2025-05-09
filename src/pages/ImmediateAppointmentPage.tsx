@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FileText, Save } from "lucide-react";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -328,7 +327,7 @@ const ImmediateAppointmentPage = () => {
 								)}
 
 								{appointmentStatus === "COMPLETED" && (
-									<Alert className="mt-4" variant="info">
+									<Alert className="mt-4">
 										<AlertCircle className="h-4 w-4" />
 										<AlertDescription>
 											Pour terminer la séance, veuillez remplir le compte-rendu ci-dessus.

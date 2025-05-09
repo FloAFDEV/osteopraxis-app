@@ -1,6 +1,6 @@
 
-import { useToast as useHookToast, toast as hookToast } from "@/hooks/use-toast";
-import type { ToastProps } from "@/components/ui/toast";
+import { useToast as useHookToast, toast as hookToast } from "@/hooks/use-toast"
+import type { ToastProps } from "@/components/ui/toast"
 
 // Créer des versions stylisées du toast pour chaque type de message
 const toast = {
