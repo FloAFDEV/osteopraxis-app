@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -1127,3 +1128,55 @@ export function PatientForm({
 													<FormItem>
 														<FormLabel>Comportement général</FormLabel>
 														<FormControl>
+															<Textarea
+																placeholder="Comportement, tempérament..."
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={form.control}
+												name="childCareContext"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Contexte de garde</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Crèche, école, nounou..."
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						</TabsContent>
+					)}
+				</Tabs>
+
+				<div className="flex justify-end gap-2">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => navigate(-1)}
+					>
+						Annuler
+					</Button>
+					<Button type="submit" disabled={isLoading}>
+						{isLoading ? "Enregistrement..." : "Enregistrer"}
+					</Button>
+				</div>
+			</form>
+		</Form>
+	);
+}
