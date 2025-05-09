@@ -1,22 +1,24 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Appointment, AppointmentStatus } from "@/types";
 import { formatAppointmentTime } from "@/utils/date-utils";
 import { format } from "date-fns";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ChevronRight } from "lucide-react";
 import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
 
 interface RecentAppointmentsCardProps {
 	appointments: Appointment[];
-	onStatusChange: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
+	onStatusChange: (
+		appointmentId: number,
+		status: AppointmentStatus
+	) => Promise<void>;
 	onNavigateToHistory: () => void;
 }
 
 export function RecentAppointmentsCard({
 	appointments,
 	onStatusChange,
-	onNavigateToHistory
+	onNavigateToHistory,
 }: RecentAppointmentsCardProps) {
 	return (
 		<Card className="mt-6">
@@ -26,27 +28,50 @@ export function RecentAppointmentsCard({
 						<MessageSquare className="h-5 w-5 text-purple-500" />
 						Dernières séances et comptes rendus
 					</h3>
-					<Button variant="ghost" size="sm" onClick={onNavigateToHistory}>
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={onNavigateToHistory}
+						aria-label="Voir tout l'historique des rendez-vous"
+					>
 						Voir tout l'historique
+						<ChevronRight className="ml-2 h-4 w-4" />
 					</Button>
 				</div>
 
 				{appointments.length === 0 ? (
 					<p className="text-center text-muted-foreground py-4">
 						Aucune séance passée
+						<span className="italic">Chargement...</span>
 					</p>
 				) : (
 					<div className="space-y-4 max-h-80 overflow-y-auto pr-2">
 						{appointments.slice(0, 3).map((appointment) => (
-							<div key={appointment.id} className="border-b pb-3 last:border-0">
+							<div
+								key={appointment.id}
+								className="border-b pb-3 last:border-0"
+							>
 								<div className="flex justify-between items-center">
 									<div className="font-medium">
-										{format(new Date(appointment.date), "dd/MM/yyyy")}{" "}
-										- {formatAppointmentTime(appointment.date)}
+										{format(
+											new Date(appointment.date),
+											"dd/MM/yyyy"
+										)}{" "}
+										-{" "}
+										{formatAppointmentTime(
+											appointment.date
+										)}
 									</div>
-									<AppointmentStatusDropdown 
-										status={appointment.status as AppointmentStatus}
-										onStatusChange={(status) => onStatusChange(appointment.id, status)}
+									<AppointmentStatusDropdown
+										status={
+											appointment.status as AppointmentStatus
+										}
+										onStatusChange={(status) =>
+											onStatusChange(
+												appointment.id,
+												status
+											)
+										}
 									/>
 								</div>
 								<div className="text-sm text-muted-foreground mt-1">
@@ -55,7 +80,9 @@ export function RecentAppointmentsCard({
 								{appointment.notes && (
 									<div className="mt-2 pl-3 border-l-2 border-purple-200">
 										<p className="text-sm text-muted-foreground italic whitespace-pre-line">
-											<span className="font-medium text-purple-700 dark:text-purple-400">hdlm: </span>
+											<span className="font-medium text-purple-700 dark:text-purple-400">
+												hdlm:{" "}
+											</span>
 											{appointment.notes}
 										</p>
 									</div>
