@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -1116,3 +1117,101 @@ export function PatientForm({
 
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 											<FormField
+												control={form.control}
+												name="sleepingPattern"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Habitudes de sommeil</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Habitudes de sommeil"
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+											
+											<FormField
+												control={form.control}
+												name="feeding"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Alimentation</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Habitudes alimentaires"
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+											<FormField
+												control={form.control}
+												name="behavior"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Comportement général</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Comportement général de l'enfant"
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+											
+											<FormField
+												control={form.control}
+												name="childCareContext"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Contexte de garde</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Mode de garde, scolarité, etc."
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						</TabsContent>
+					)}
+				</Tabs>
+
+				<div className="flex justify-end space-x-2">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => navigate(-1)}
+						disabled={isLoading}
+					>
+						Annuler
+					</Button>
+					<Button type="submit" disabled={isLoading}>
+						{isLoading ? "Enregistrement..." : "Enregistrer"}
+					</Button>
+				</div>
+			</form>
+		</Form>
+	);
+}
+
