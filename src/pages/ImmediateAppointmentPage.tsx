@@ -17,6 +17,8 @@ import { AppointmentStatusDropdown } from "@/components/patients/detail/Appointm
 import { AppointmentStatus } from "@/types";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { AutoSaveIndicator } from "@/components/ui/auto-save-indicator";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ImmediateAppointmentPage = () => {
 	const [patient, setPatient] = useState<Patient | null>(null);
@@ -69,8 +71,22 @@ const ImmediateAppointmentPage = () => {
 		
 		return () => subscription.unsubscribe();
 	}, [form, appointmentId]);
+	
+	// Ajout d'une confirmation avant de quitter la page si modifications non enregistrées
+	useEffect(() => {
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			if (form.formState.isDirty) {
+				const message = "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter cette page ?";
+				e.returnValue = message;
+				return message;
+			}
+		};
+		
+		window.addEventListener('beforeunload', handleBeforeUnload);
+		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+	}, [form.formState.isDirty]);
 
-	// Load patient data
+	// Load patient data and check for existing appointment today
 	useEffect(() => {
 		const fetchPatient = async () => {
 			if (!patientId) {
@@ -82,10 +98,30 @@ const ImmediateAppointmentPage = () => {
 			setLoading(true);
 			try {
 				const patientData = await api.getPatientById(patientId);
+				if (!patientData) {
+					toast.error("Patient non trouvé");
+					navigate("/patients");
+					return;
+				}
+				
 				setPatient(patientData);
 				
-				// Create an immediate appointment when the page loads
-				createInitialAppointment(patientId);
+				// Check if there's already an appointment today for this patient
+				const existingAppointment = await api.getTodayAppointmentForPatient(patientId);
+				
+				if (existingAppointment) {
+					console.log("Rendez-vous existant aujourd'hui trouvé:", existingAppointment);
+					setAppointmentId(existingAppointment.id);
+					setAppointmentStatus(existingAppointment.status);
+					form.reset({ 
+						reason: existingAppointment.reason || "Séance immédiate", 
+						notes: existingAppointment.notes || "" 
+					});
+					toast.info("Une séance existe déjà pour aujourd'hui");
+				} else {
+					// Create a new immediate appointment
+					createInitialAppointment(patientId);
+				}
 			} catch (error) {
 				console.error("Erreur lors du chargement des données du patient:", error);
 				toast.error("Impossible de charger les données du patient");
@@ -124,6 +160,12 @@ const ImmediateAppointmentPage = () => {
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		if (!appointmentId || !patient) return;
 		
+		// Validation supplémentaire pour les séances complétées
+		if (appointmentStatus === "COMPLETED" && !data.notes?.trim()) {
+			toast.error("Veuillez ajouter des notes pour terminer la séance");
+			return;
+		}
+		
 		setSaving(true);
 		try {
 			await api.updateAppointment(appointmentId, {
@@ -160,6 +202,7 @@ const ImmediateAppointmentPage = () => {
 	// Handle manual save
 	const handleManualSave = async () => {
 		await autoSave.forceSave();
+		toast.success("Modifications enregistrées");
 		form.formState.dirtyFields = {};
 	};
 
@@ -283,6 +326,15 @@ const ImmediateAppointmentPage = () => {
 										</div>
 									</div>
 								)}
+
+								{appointmentStatus === "COMPLETED" && (
+									<Alert className="mt-4" variant="info">
+										<AlertCircle className="h-4 w-4" />
+										<AlertDescription>
+											Pour terminer la séance, veuillez remplir le compte-rendu ci-dessus.
+										</AlertDescription>
+									</Alert>
+								)}
 							</CardContent>
 							
 							<CardFooter className="flex justify-between pt-6">
@@ -305,7 +357,7 @@ const ImmediateAppointmentPage = () => {
 									</Button>
 									<Button 
 										type="submit" 
-										disabled={saving || !form.formState.isValid}
+										disabled={saving || !form.formState.isValid || (appointmentStatus === "COMPLETED" && !form.getValues().notes?.trim())}
 									>
 										Terminer la séance
 									</Button>

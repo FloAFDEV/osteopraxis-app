@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY, ensureAppointmentStatus } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -80,6 +79,38 @@ export const supabaseAppointmentService = {
       return data || [];
     } catch (error) {
       console.error("Error fetching patient appointments:", error);
+      throw error;
+    }
+  },
+
+  // Nouvelle fonction pour récupérer les rendez-vous du jour pour un patient
+  async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | null> {
+    try {
+      // Obtenir la date du jour (début et fin)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      console.log(`Recherche des rendez-vous pour le patient ${patientId} aujourd'hui (${today.toISOString()} - ${tomorrow.toISOString()})`);
+      
+      const { data, error } = await supabase
+        .from("Appointment")
+        .select("*")
+        .eq("patientId", patientId)
+        .gte("date", today.toISOString())
+        .lt("date", tomorrow.toISOString())
+        .order('date', { ascending: false })
+        .maybeSingle();
+
+      if (error) {
+        console.error("Erreur lors de la recherche des rendez-vous du jour:", error);
+        throw error;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error fetching today's appointments:", error);
       throw error;
     }
   },

@@ -1,3 +1,4 @@
+
 // Re-exporting services for the application API
 import { appointmentService } from "./appointment-service";
 import { patientService } from "./patient-service";
@@ -38,11 +39,12 @@ export const api = {
 	},
 	getAppointmentById: appointmentService.getAppointmentById,
 	getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
+	getTodayAppointmentForPatient: appointmentService.getTodayAppointmentForPatient, // Ajout de la nouvelle méthode
 	createAppointment: appointmentService.createAppointment,
 	updateAppointment: appointmentService.updateAppointment,
 	updateAppointmentStatus: appointmentService.updateAppointmentStatus,
-	cancelAppointment: appointmentService.cancelAppointment, // Ajout de la nouvelle méthode
-	deleteAppointment: appointmentService.deleteAppointment, // ajout
+	cancelAppointment: appointmentService.cancelAppointment,
+	deleteAppointment: appointmentService.deleteAppointment,
 
 	// Cabinet related
 	getCabinets: cabinetService.getCabinets,

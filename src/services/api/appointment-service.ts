@@ -1,8 +1,7 @@
-
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { AppointmentStatus } from "@/types"; // Add this import
+import { AppointmentStatus } from "@/types"; 
 
 // Create a custom error class for appointment conflicts
 export class AppointmentConflictError extends Error {
@@ -73,6 +72,30 @@ export const appointmentService = {
 
     await delay(200);
     return appointments.filter((appointment) => appointment.patientId === patientId);
+  },
+  
+  async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | null> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseAppointmentService.getTodayAppointmentForPatient(patientId);
+      } catch (error) {
+        console.error("Erreur Supabase getTodayAppointmentForPatient:", error);
+        throw error;
+      }
+    }
+    
+    // Mock implementation for non-Supabase mode
+    await delay(200);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    return appointments.find(a => 
+      a.patientId === patientId && 
+      new Date(a.date) >= today && 
+      new Date(a.date) < tomorrow
+    ) || null;
   },
 
   async createAppointment(appointment: Omit<Appointment, "id">): Promise<Appointment> {
