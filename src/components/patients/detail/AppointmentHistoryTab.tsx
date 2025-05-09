@@ -8,10 +8,10 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import {
+	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-	Tooltip,
 } from "@/components/ui/tooltip";
 import { Appointment, AppointmentStatus } from "@/types";
 import { formatAppointmentTime } from "@/utils/date-utils";
@@ -36,7 +36,7 @@ export function AppointmentHistoryTab({
 	setViewMode,
 }: AppointmentHistoryTabProps) {
 	return (
-		<div className="space-y-4 mt-6">
+		<div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow space-y-4 mt-6">
 			<div className="flex justify-between items-center mb-4">
 				<h3 className="text-lg font-semibold">
 					Historique des séances
