@@ -288,7 +288,7 @@ const PatientDetailPage = () => {
 											: "Non spécifié",
 								},
 								{
-									label: "Fumeur",
+									label: "Tabagisme",
 									value: getSmokerInfo(),
 								},
 								{
