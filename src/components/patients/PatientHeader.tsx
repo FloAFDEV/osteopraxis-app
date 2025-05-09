@@ -26,11 +26,11 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({
 					)}
 				</h1>
 
-				<div className="flex flex-wrap gap-2 w-full md:w-auto">
+				<div className="flex flex-wrap gap-2 w-full md:w-auto ">
 					<Button
 						onClick={onRefresh}
 						variant="outline"
-						className="w-auto"
+						className="w-auto hover:bg-slate-500"
 						disabled={isRefreshing}
 					>
 						<RefreshCw
@@ -42,8 +42,9 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({
 					</Button>
 
 					<Button
+						variant="default"
 						asChild
-						className="bg-blue-500 hover:bg-blue-700 w-full md:w-auto"
+						className="bg-blue-500 hover:bg-blue-700 hover:text-white w-full md:w-auto"
 					>
 						<Link to="/patients/new">
 							<Users className="mr-2 h-4 w-4" /> Nouveau patient
