@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -33,7 +32,7 @@ import { z } from "zod";
 
 // Schéma de validation pour le formulaire patient
 const getPatientSchema = (emailRequired: boolean) => z.object({
-	address: z.string().optional(),
+	address: z.string().optional().nullable(),
 	email: emailRequired 
 		? z.string().email("Email invalide").min(1, "Email requis")
 		: z.string().email("Email invalide").optional().nullable(),
@@ -67,6 +66,17 @@ const getPatientSchema = (emailRequired: boolean) => z.object({
 	currentTreatment: z.string().optional().nullable(),
 	handedness: z.string().optional().nullable(),
 	familyStatus: z.string().optional().nullable(),
+	// Nouveaux champs pour tous les patients
+	complementaryExams: z.string().optional().nullable(),
+	generalSymptoms: z.string().optional().nullable(),
+	// Nouveaux champs pour les enfants
+	pregnancyHistory: z.string().optional().nullable(),
+	birthDetails: z.string().optional().nullable(),
+	developmentMilestones: z.string().optional().nullable(),
+	sleepingPattern: z.string().optional().nullable(),
+	feeding: z.string().optional().nullable(),
+	behavior: z.string().optional().nullable(),
+	childCareContext: z.string().optional().nullable(),
 });
 
 // Utiliser le schéma avec emailRequired à false pour type PatientFormValues
@@ -87,6 +97,7 @@ export function PatientForm({
 	const [activeTab, setActiveTab] = useState("general");
 	const [childrenCount, setChildrenCount] = useState<number>(0);
 	const [childrenAgesInput, setChildrenAgesInput] = useState<string>("");
+	const [isChild, setIsChild] = useState<boolean>(false);
 
 	// Initialiser le form avec les valeurs existantes ou valeurs par défaut
 	const form = useForm<PatientFormValues>({
@@ -121,11 +132,22 @@ export function PatientForm({
 					rheumatologicalHistory:
 						patient.rheumatologicalHistory || "",
 					currentTreatment: patient.currentTreatment || "",
-					// Nouveaux champs pour le tabagisme
-					isExSmoker: false,
-					smokingSince: "",
-					smokingAmount: "",
-					quitSmokingDate: "",
+					// Nouveaux champs pour tous les patients
+					complementaryExams: patient.complementaryExams || "",
+					generalSymptoms: patient.generalSymptoms || "",
+					// Nouveaux champs pour les enfants
+					pregnancyHistory: patient.pregnancyHistory || "",
+					birthDetails: patient.birthDetails || "",
+					developmentMilestones: patient.developmentMilestones || "",
+					sleepingPattern: patient.sleepingPattern || "",
+					feeding: patient.feeding || "",
+					behavior: patient.behavior || "",
+					childCareContext: patient.childCareContext || "",
+					// Autres champs liés au tabagisme
+					isExSmoker: patient.isExSmoker || false,
+					smokingSince: patient.smokingSince || "",
+					smokingAmount: patient.smokingAmount || "",
+					quitSmokingDate: patient.quitSmokingDate || "",
 			  }
 			: {
 					firstName: "",
@@ -139,8 +161,28 @@ export function PatientForm({
 					smokingSince: "",
 					smokingAmount: "",
 					quitSmokingDate: "",
+					complementaryExams: "",
+					generalSymptoms: "",
+					pregnancyHistory: "",
+					birthDetails: "",
+					developmentMilestones: "",
+					sleepingPattern: "",
+					feeding: "",
+					behavior: "",
+					childCareContext: "",
 			  },
 	});
+
+	// Vérifier si le patient est un enfant (moins de 17 ans)
+	useEffect(() => {
+		const birthDate = form.watch("birthDate");
+		if (birthDate) {
+			const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
+			setIsChild(age < 17);
+		} else {
+			setIsChild(false);
+		}
+	}, [form.watch("birthDate")]);
 
 	useEffect(() => {
 		// Mettre à jour le nombre d'enfants et les âges lors du chargement du patient
@@ -195,11 +237,16 @@ export function PatientForm({
 					onValueChange={setActiveTab}
 					className="w-full space-y-4"
 				>
-					<TabsList>
+					<TabsList className="grid grid-cols-5 sm:grid-cols-5">
 						<TabsTrigger value="general">Général</TabsTrigger>
 						<TabsTrigger value="medical">Médical</TabsTrigger>
 						<TabsTrigger value="contact">Contact</TabsTrigger>
+						<TabsTrigger value="anamnese">Anamnèse</TabsTrigger>
+						{isChild && (
+							<TabsTrigger value="pediatric">Pédiatrie</TabsTrigger>
+						)}
 					</TabsList>
+					
 					<TabsContent value="general" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4">
@@ -923,17 +970,169 @@ export function PatientForm({
 							</CardContent>
 						</Card>
 					</TabsContent>
-				</Tabs>
 
-				<CardFooter className="flex justify-between">
-					<Button variant="outline" onClick={() => navigate("/patients")}>
-						Annuler
-					</Button>
-					<Button type="submit" disabled={isLoading}>
-						{isLoading ? "Enregistrement..." : "Enregistrer"}
-					</Button>
-				</CardFooter>
-			</form>
-		</Form>
-	);
-}
+					{/* Nouvel onglet d'anamnèse pour tous les patients */}
+					<TabsContent value="anamnese" className="space-y-4">
+						<Card>
+							<CardContent className="space-y-4">
+								<div className="py-4">
+									<h3 className="font-medium text-lg mb-4">Informations complémentaires</h3>
+
+									<FormField
+										control={form.control}
+										name="complementaryExams"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Examens complémentaires</FormLabel>
+												<FormDescription>
+													Radios, IRM, bilans, etc.
+												</FormDescription>
+												<FormControl>
+													<Textarea
+														placeholder="Examens complémentaires"
+														className="resize-none h-32"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="generalSymptoms"
+										render={({ field }) => (
+											<FormItem className="mt-4">
+												<FormLabel>Symptômes généraux</FormLabel>
+												<FormDescription>
+													Digestion, sommeil, stress, etc.
+												</FormDescription>
+												<FormControl>
+													<Textarea
+														placeholder="Symptômes généraux du patient"
+														className="resize-none h-32"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					</TabsContent>
+
+					{/* Nouvel onglet pour les patients pédiatriques (moins de 17 ans) */}
+					{isChild && (
+						<TabsContent value="pediatric" className="space-y-4">
+							<Card>
+								<CardContent className="space-y-6">
+									<div className="py-4">
+										<h3 className="font-medium text-lg mb-4">Informations pédiatriques</h3>
+
+										<FormField
+											control={form.control}
+											name="pregnancyHistory"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Déroulement de la grossesse</FormLabel>
+													<FormControl>
+														<Textarea
+															placeholder="Déroulement de la grossesse"
+															className="resize-none"
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="birthDetails"
+											render={({ field }) => (
+												<FormItem className="mt-4">
+													<FormLabel>Détails de l'accouchement</FormLabel>
+													<FormDescription>
+														Voie, durée, poids, complications...
+													</FormDescription>
+													<FormControl>
+														<Textarea
+															placeholder="Détails de l'accouchement"
+															className="resize-none"
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="developmentMilestones"
+											render={({ field }) => (
+												<FormItem className="mt-4">
+													<FormLabel>Étapes du développement moteur</FormLabel>
+													<FormControl>
+														<Textarea
+															placeholder="Étapes du développement moteur"
+															className="resize-none"
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+											<FormField
+												control={form.control}
+												name="sleepingPattern"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Sommeil</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Habitudes de sommeil"
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={form.control}
+												name="feeding"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Alimentation</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Habitudes alimentaires"
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+											<FormField
+												control={form.control}
+												name="behavior"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Comportement général</FormLabel>
+														<FormControl>
+															<Textarea

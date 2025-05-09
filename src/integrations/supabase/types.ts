@@ -358,20 +358,27 @@ export type Database = {
         Row: {
           address: string | null
           avatarUrl: string | null
+          behavior: string | null
           birthDate: string | null
+          birthDetails: string | null
           cabinetId: number | null
+          childCareContext: string | null
           childrenAges: number[] | null
+          complementaryExams: string | null
           contraception: Database["public"]["Enums"]["Contraception"] | null
           createdAt: string
           currentTreatment: string | null
+          developmentMilestones: string | null
           digestiveDoctorName: string | null
           digestiveProblems: string | null
           email: string | null
           entDoctorName: string | null
           entProblems: string | null
+          feeding: string | null
           firstName: string
           gender: Database["public"]["Enums"]["Gender"] | null
           generalPractitioner: string | null
+          generalSymptoms: string | null
           handedness: Database["public"]["Enums"]["Handedness"] | null
           hasChildren: string | null
           hasVisionCorrection: boolean
@@ -387,8 +394,10 @@ export type Database = {
           osteopathId: number
           phone: string | null
           physicalActivity: string | null
+          pregnancyHistory: string | null
           quitSmokingDate: string | null
           rheumatologicalHistory: string | null
+          sleepingPattern: string | null
           smokingAmount: string | null
           smokingSince: string | null
           surgicalHistory: string | null
@@ -399,20 +408,27 @@ export type Database = {
         Insert: {
           address?: string | null
           avatarUrl?: string | null
+          behavior?: string | null
           birthDate?: string | null
+          birthDetails?: string | null
           cabinetId?: number | null
+          childCareContext?: string | null
           childrenAges?: number[] | null
+          complementaryExams?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           createdAt?: string
           currentTreatment?: string | null
+          developmentMilestones?: string | null
           digestiveDoctorName?: string | null
           digestiveProblems?: string | null
           email?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
+          feeding?: string | null
           firstName: string
           gender?: Database["public"]["Enums"]["Gender"] | null
           generalPractitioner?: string | null
+          generalSymptoms?: string | null
           handedness?: Database["public"]["Enums"]["Handedness"] | null
           hasChildren?: string | null
           hasVisionCorrection?: boolean
@@ -428,8 +444,10 @@ export type Database = {
           osteopathId: number
           phone?: string | null
           physicalActivity?: string | null
+          pregnancyHistory?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
+          sleepingPattern?: string | null
           smokingAmount?: string | null
           smokingSince?: string | null
           surgicalHistory?: string | null
@@ -440,20 +458,27 @@ export type Database = {
         Update: {
           address?: string | null
           avatarUrl?: string | null
+          behavior?: string | null
           birthDate?: string | null
+          birthDetails?: string | null
           cabinetId?: number | null
+          childCareContext?: string | null
           childrenAges?: number[] | null
+          complementaryExams?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           createdAt?: string
           currentTreatment?: string | null
+          developmentMilestones?: string | null
           digestiveDoctorName?: string | null
           digestiveProblems?: string | null
           email?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
+          feeding?: string | null
           firstName?: string
           gender?: Database["public"]["Enums"]["Gender"] | null
           generalPractitioner?: string | null
+          generalSymptoms?: string | null
           handedness?: Database["public"]["Enums"]["Handedness"] | null
           hasChildren?: string | null
           hasVisionCorrection?: boolean
@@ -469,8 +494,10 @@ export type Database = {
           osteopathId?: number
           phone?: string | null
           physicalActivity?: string | null
+          pregnancyHistory?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
+          sleepingPattern?: string | null
           smokingAmount?: string | null
           smokingSince?: string | null
           surgicalHistory?: string | null

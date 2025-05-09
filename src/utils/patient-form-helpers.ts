@@ -1,4 +1,3 @@
-
 // Ce fichier contient des utilitaires pour le traitement des données des patients
 import { Patient, User, AppointmentStatus } from "@/types";
 
@@ -35,6 +34,16 @@ export function preparePatientForApi(patient: Partial<Patient>): any {
     ...patient,
     // Transforme les booléens en chaînes si nécessaire pour la compatibilité
     hasChildren: patient.hasChildren?.toString() || "false",
+    // Assurer que les nouveaux champs sont correctement formatés
+    complementaryExams: patient.complementaryExams || null,
+    generalSymptoms: patient.generalSymptoms || null,
+    pregnancyHistory: patient.pregnancyHistory || null,
+    birthDetails: patient.birthDetails || null,
+    developmentMilestones: patient.developmentMilestones || null,
+    sleepingPattern: patient.sleepingPattern || null,
+    feeding: patient.feeding || null,
+    behavior: patient.behavior || null,
+    childCareContext: patient.childCareContext || null,
   };
 }
 
@@ -106,4 +115,25 @@ export function adaptAppointmentStatusFromSupabase(status: string): AppointmentS
  */
 export function adaptAppointmentStatusForSupabase(status: AppointmentStatus): string {
   return status.toString();
+}
+
+/**
+ * Vérifie si un patient est un enfant (moins de 17 ans)
+ */
+export function isChildPatient(patient: Patient | null): boolean {
+  if (!patient || !patient.birthDate) return false;
+  
+  const birthDate = new Date(patient.birthDate);
+  const today = new Date();
+  const age = today.getFullYear() - birthDate.getFullYear();
+  
+  // Vérifie si l'anniversaire est déjà passé cette année
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    return age - 1 < 17;
+  }
+  
+  return age < 17;
 }

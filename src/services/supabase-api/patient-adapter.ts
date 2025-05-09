@@ -41,4 +41,15 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
   cabinetId: data.cabinetId,
   userId: data.userId || null,
   osteopathId: data.osteopathId || 1,
+  // Nouveaux champs pour tous les patients
+  complementaryExams: data.complementaryExams || null,
+  generalSymptoms: data.generalSymptoms || null,
+  // Nouveaux champs pour les enfants
+  pregnancyHistory: data.pregnancyHistory || null,
+  birthDetails: data.birthDetails || null,
+  developmentMilestones: data.developmentMilestones || null,
+  sleepingPattern: data.sleepingPattern || null,
+  feeding: data.feeding || null,
+  behavior: data.behavior || null,
+  childCareContext: data.childCareContext || null,
 });

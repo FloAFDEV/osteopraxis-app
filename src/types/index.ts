@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -60,6 +59,17 @@ export interface Patient {
   rheumatologicalHistory: string | null;
   hdlm: string | null;
   userId: string | null;
+  // Nouveaux champs pour tous les patients
+  complementaryExams: string | null;
+  generalSymptoms: string | null;
+  // Nouveaux champs pour les enfants
+  pregnancyHistory: string | null;
+  birthDetails: string | null;
+  developmentMilestones: string | null;
+  sleepingPattern: string | null;
+  feeding: string | null;
+  behavior: string | null;
+  childCareContext: string | null;
 }
 
 // Mise à jour des interfaces pour les autres entités pour assurer la cohérence des types

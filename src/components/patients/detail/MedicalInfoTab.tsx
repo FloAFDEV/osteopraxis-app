@@ -1,6 +1,14 @@
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
-import { RecentAppointmentsCard } from "./RecentAppointmentsCard";
+import { differenceInYears, format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Calendar, History, X, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
+import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 
 interface MedicalInfoTabProps {
 	patient: Patient;
@@ -18,91 +26,193 @@ export function MedicalInfoTab({
 	onUpdateAppointmentStatus,
 	onNavigateToHistory,
 }: MedicalInfoTabProps) {
-	// Créer un affichage formaté pour le tabagisme
-	const getSmokerInfo = () => {
-		if (patient.isSmoker) {
-			return `Fumeur${
-				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
-			}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ""}`;
-		} else if (patient.isExSmoker) {
-			return `Ex-fumeur${
-				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
-			}${
-				patient.quitSmokingDate
-					? `, arrêt depuis ${patient.quitSmokingDate}`
-					: ""
-			}`;
-		} else {
-			return "Non-fumeur";
+	const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus>(
+		"COMPLETED"
+	);
+	const [isChild, setIsChild] = useState<boolean>(false);
+
+	const lastAppointment =
+		pastAppointments && pastAppointments.length > 0
+			? pastAppointments[0]
+			: null;
+
+	// Déterminer si c'est un enfant (moins de 17 ans)
+	useEffect(() => {
+		if (patient.birthDate) {
+			const age = differenceInYears(
+				new Date(),
+				new Date(patient.birthDate)
+			);
+			setIsChild(age < 17);
 		}
-	};
+	}, [patient.birthDate]);
 
 	return (
 		<div className="space-y-6 mt-6">
-			<MedicalInfoCard
-				title="Médecins et spécialistes"
-				items={[
-					{
-						label: "Médecin traitant",
-						value: patient.generalPractitioner,
-					},
-					{
-						label: "Ophtalmologiste",
-						value: patient.ophtalmologistName,
-					},
-					{
-						label: "ORL",
-						value: patient.entDoctorName,
-					},
-					{
-						label: "Gastro-entérologue",
-						value: patient.digestiveDoctorName,
-					},
-				]}
-			/>
+			{lastAppointment && (
+				<Card className="border-blue-100 dark:border-blue-900/50">
+					<CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-t-lg">
+						<CardTitle className="text-lg flex flex-wrap items-center gap-2">
+							<Calendar className="h-5 w-5 text-blue-500" />
+							Dernière séance (
+							{format(new Date(lastAppointment.date), "dd MMMM yyyy", {
+								locale: fr,
+							})}
+							) :
+							<AppointmentStatusBadge
+								status={lastAppointment.status}
+							/>
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="pt-4">
+						<div>
+							<p className="mb-2">
+								<span className="font-medium">Motif :</span>{" "}
+								{lastAppointment.reason}
+							</p>
+							<div className="pl-4 border-l-2 border-gray-200 dark:border-gray-700 italic text-muted-foreground my-2">
+								{lastAppointment.notes
+									? lastAppointment.notes
+									: "Pas de notes pour cette séance"}
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 
 			<MedicalInfoCard
-				title="Antécédents médicaux"
+				title="Informations médicales générales"
 				items={[
+					{
+						label: "Médecin généraliste",
+						value: patient.generalPractitioner || "Non renseigné",
+					},
 					{
 						label: "Traitement actuel",
-						value: patient.currentTreatment,
-						showSeparatorAfter: true,
+						value: patient.currentTreatment || "Aucun",
 					},
 					{
-						label: "Antécédents chirurgicaux",
-						value: patient.surgicalHistory,
+						label: "Chirurgie",
+						value: patient.surgicalHistory || "Aucun antécédent",
 					},
 					{
-						label: "Antécédents traumatiques",
-						value: patient.traumaHistory,
+						label: "Traumatismes",
+						value: patient.traumaHistory || "Aucun antécédent",
 					},
 					{
-						label: "Antécédents rhumatologiques",
-						value: patient.rheumatologicalHistory,
-						showSeparatorAfter: true,
-					},
-					{
-						label: "Problèmes digestifs",
-						value: patient.digestiveProblems,
-					},
-					{
-						label: "Problèmes ORL",
-						value: patient.entProblems,
-					},
-					{
-						label: "Correction visuelle",
-						value: patient.hasVisionCorrection ? "Oui" : "Non",
+						label: "Rhumatologie",
+						value:
+							patient.rheumatologicalHistory || "Aucun antécédent",
 					},
 				]}
 			/>
 
-			{/* Aperçu des dernières séances */}
-			<RecentAppointmentsCard
-				appointments={pastAppointments}
-				onStatusChange={onUpdateAppointmentStatus}
-				onNavigateToHistory={onNavigateToHistory}
+			<MedicalInfoCard
+				title="Ophtalmologie"
+				items={[
+					{
+						label: "Correction de la vue",
+						value: patient.hasVisionCorrection ? "Oui" : "Non",
+					},
+					{
+						label: "Ophtalmologue",
+						value: patient.ophtalmologistName || "Non renseigné",
+					},
+				]}
 			/>
+
+			<MedicalInfoCard
+				title="ORL"
+				items={[
+					{
+						label: "Problèmes ORL",
+						value: patient.entProblems || "Aucun",
+					},
+					{
+						label: "Médecin ORL",
+						value: patient.entDoctorName || "Non renseigné",
+					},
+				]}
+			/>
+
+			<MedicalInfoCard
+				title="Digestif"
+				items={[
+					{
+						label: "Problèmes digestifs",
+						value: patient.digestiveProblems || "Aucun",
+					},
+					{
+						label: "Médecin digestif",
+						value: patient.digestiveDoctorName || "Non renseigné",
+					},
+				]}
+			/>
+
+			{/* Nouvelle section pour tous les patients */}
+			<MedicalInfoCard
+				title="Anamnèse complémentaire"
+				items={[
+					{
+						label: "Examens complémentaires",
+						value: patient.complementaryExams || "Aucun",
+					},
+					{
+						label: "Symptômes généraux",
+						value: patient.generalSymptoms || "Non renseignés",
+					},
+				]}
+			/>
+
+			{/* Nouvelle section pour les patients pédiatriques */}
+			{isChild && (
+				<MedicalInfoCard
+					title="Informations pédiatriques"
+					items={[
+						{
+							label: "Grossesse",
+							value: patient.pregnancyHistory || "Non renseigné",
+						},
+						{
+							label: "Naissance",
+							value: patient.birthDetails || "Non renseigné",
+						},
+						{
+							label: "Développement moteur",
+							value: patient.developmentMilestones || "Non renseigné",
+						},
+						{
+							label: "Sommeil",
+							value: patient.sleepingPattern || "Non renseigné",
+						},
+						{
+							label: "Alimentation",
+							value: patient.feeding || "Non renseigné",
+						},
+						{
+							label: "Comportement",
+							value: patient.behavior || "Non renseigné",
+						},
+						{
+							label: "Mode de garde / Contexte",
+							value: patient.childCareContext || "Non renseigné",
+						},
+					]}
+				/>
+			)}
+
+			{pastAppointments.length > 1 && (
+				<div className="flex justify-end mt-6">
+					<Button
+						variant="outline"
+						onClick={onNavigateToHistory}
+						className="flex items-center"
+					>
+						<History className="w-4 h-4 mr-2" />
+						Voir historique complet ({pastAppointments.length} séances)
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }
