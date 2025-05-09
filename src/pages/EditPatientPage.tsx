@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from "@/components/ui/layout";
@@ -55,13 +56,31 @@ const EditPatientPage = () => {
       if (typeof updatedData.hasChildren === 'boolean') {
         updatedData.hasChildren = updatedData.hasChildren ? "true" : "false";
       }
-
-      // Use the patientService updatePatient method
-      await patientService.updatePatient({
+      
+      // Ensure enum fields are properly formatted
+      const patientUpdate = {
         ...patient,
         ...updatedData,
-        updatedAt: new Date().toISOString()
-      });
+        updatedAt: new Date().toISOString(),
+        // Make sure these fields are properly set for the update
+        gender: updatedData.gender || patient.gender,
+        maritalStatus: updatedData.maritalStatus || patient.maritalStatus,
+        handedness: updatedData.handedness || patient.handedness,
+        contraception: updatedData.contraception || patient.contraception,
+        // Ensure all required fields are present
+        complementaryExams: updatedData.complementaryExams || patient.complementaryExams || null,
+        generalSymptoms: updatedData.generalSymptoms || patient.generalSymptoms || null,
+        pregnancyHistory: updatedData.pregnancyHistory || patient.pregnancyHistory || null,
+        birthDetails: updatedData.birthDetails || patient.birthDetails || null,
+        developmentMilestones: updatedData.developmentMilestones || patient.developmentMilestones || null,
+        sleepingPattern: updatedData.sleepingPattern || patient.sleepingPattern || null,
+        feeding: updatedData.feeding || patient.feeding || null,
+        behavior: updatedData.behavior || patient.behavior || null,
+        childCareContext: updatedData.childCareContext || patient.childCareContext || null
+      };
+
+      // Use the patientService updatePatient method
+      await patientService.updatePatient(patientUpdate);
 
       // Afficher le toast de succès ici
       toast.success("Patient mis à jour avec succès");

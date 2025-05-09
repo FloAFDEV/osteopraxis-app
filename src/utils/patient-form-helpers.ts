@@ -1,5 +1,6 @@
+
 // Ce fichier contient des utilitaires pour le traitement des données des patients
-import { Patient, User, AppointmentStatus } from "@/types";
+import { Patient, User, AppointmentStatus, MaritalStatus, Contraception, Handedness, Gender } from "@/types";
 
 /**
  * Adapte les données d'un patient depuis le format Supabase vers le format interne
@@ -23,6 +24,11 @@ export function adaptPatientFromSupabase(supabasePatient: any): Patient {
     updatedAt: supabasePatient.updatedAt || new Date().toISOString(),
     // Assure-toi que les tableaux sont correctement initialisés
     childrenAges: Array.isArray(supabasePatient.childrenAges) ? supabasePatient.childrenAges : [],
+    // S'assurer que les énumérations sont correctement définies
+    gender: supabasePatient.gender as Gender || null,
+    maritalStatus: supabasePatient.maritalStatus as MaritalStatus || null,
+    contraception: supabasePatient.contraception as Contraception || null,
+    handedness: supabasePatient.handedness as Handedness || null,
   };
 }
 
@@ -44,6 +50,11 @@ export function preparePatientForApi(patient: Partial<Patient>): any {
     feeding: patient.feeding || null,
     behavior: patient.behavior || null,
     childCareContext: patient.childCareContext || null,
+    // S'assurer que les valeurs d'énumération sont définies
+    gender: patient.gender || null,
+    maritalStatus: patient.maritalStatus || null,
+    handedness: patient.handedness || null,
+    contraception: patient.contraception || null,
   };
 }
 
@@ -100,7 +111,7 @@ export function isUserAdmin(user: User | null): boolean {
  * Adapte le statut d'un rendez-vous depuis Supabase
  */
 export function adaptAppointmentStatusFromSupabase(status: string): AppointmentStatus {
-  const validStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELED", "RESCHEDULED"];
+  const validStatuses: AppointmentStatus[] = ["SCHEDULED", "COMPLETED", "CANCELED", "RESCHEDULED", "NO_SHOW"];
   
   if (validStatuses.includes(status as AppointmentStatus)) {
     return status as AppointmentStatus;
@@ -137,3 +148,60 @@ export function isChildPatient(patient: Patient | null): boolean {
   
   return age < 17;
 }
+
+/**
+ * Obtient les options pour les menus déroulants en fonction du type d'énumération
+ */
+export function getEnumOptions(enumType: string): { value: string; label: string }[] {
+  switch (enumType) {
+    case 'MaritalStatus':
+      return [
+        { value: 'SINGLE', label: 'Célibataire' },
+        { value: 'MARRIED', label: 'Marié(e)' },
+        { value: 'DIVORCED', label: 'Divorcé(e)' },
+        { value: 'WIDOWED', label: 'Veuf/Veuve' },
+        { value: 'SEPARATED', label: 'Séparé(e)' },
+        { value: 'ENGAGED', label: 'Fiancé(e)' },
+        { value: 'PARTNERED', label: 'Pacsé(e)' },
+      ];
+    case 'Handedness':
+      return [
+        { value: 'LEFT', label: 'Gaucher' },
+        { value: 'RIGHT', label: 'Droitier' },
+        { value: 'AMBIDEXTROUS', label: 'Ambidextre' },
+      ];
+    case 'Contraception':
+      return [
+        { value: 'NONE', label: 'Aucune' },
+        { value: 'PILLS', label: 'Pilule' },
+        { value: 'CONDOM', label: 'Préservatif' },
+        { value: 'IMPLANTS', label: 'Implant' },
+        { value: 'DIAPHRAGM', label: 'Diaphragme' },
+        { value: 'IUD', label: 'DIU (Dispositif Intra-Utérin)' },
+        { value: 'INJECTION', label: 'Injection' },
+        { value: 'PATCH', label: 'Patch' },
+        { value: 'RING', label: 'Anneau vaginal' },
+        { value: 'NATURAL_METHODS', label: 'Méthodes naturelles' },
+        { value: 'STERILIZATION', label: 'Stérilisation' },
+      ];
+    case 'Gender':
+      return [
+        { value: 'Homme', label: 'Homme' },
+        { value: 'Femme', label: 'Femme' },
+      ];
+    default:
+      return [];
+  }
+}
+
+/**
+ * Transforme un libellé en valeur d'énumération
+ */
+export function getLabelFromEnumValue(enumType: string, value: string | null): string {
+  if (!value) return '';
+  
+  const options = getEnumOptions(enumType);
+  const option = options.find(opt => opt.value === value);
+  return option ? option.label : '';
+}
+

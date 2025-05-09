@@ -43,7 +43,21 @@ const NewPatientPage = () => {
         ...patientData,
         osteopathId: user.osteopathId || user.id, // Utilise osteopathId ou id selon ce qui est disponible
         cabinetId: 1, // Pour la démo, nous utilisons toujours le cabinet ID 1
-        userId: null // Requis par le type mais peut être null
+        userId: null, // Requis par le type mais peut être null
+        // Ajout des nouveaux champs requis pour la compatibilité des types
+        complementaryExams: patientData.complementaryExams || null,
+        generalSymptoms: patientData.generalSymptoms || null,
+        pregnancyHistory: patientData.pregnancyHistory || null,
+        birthDetails: patientData.birthDetails || null,
+        developmentMilestones: patientData.developmentMilestones || null,
+        sleepingPattern: patientData.sleepingPattern || null,
+        feeding: patientData.feeding || null,
+        behavior: patientData.behavior || null,
+        childCareContext: patientData.childCareContext || null,
+        isExSmoker: patientData.isExSmoker || false,
+        smokingSince: patientData.smokingSince || null,
+        smokingAmount: patientData.smokingAmount || null,
+        quitSmokingDate: patientData.quitSmokingDate || null
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
 
       console.log("Envoi du patient à l'API avec osteopathId:", patientToCreate.osteopathId);
