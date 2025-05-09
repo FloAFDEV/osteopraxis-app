@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -19,6 +18,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { TranslatedSelect } from "@/components/ui/translated-select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -320,29 +320,14 @@ export function PatientForm({
 										render={({ field }) => (
 											<FormItem className="flex flex-col space-y-1.5">
 												<FormLabel>Genre</FormLabel>
-												<Select
-													onValueChange={
-														field.onChange
-													}
-													defaultValue={field.value}
-												>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue placeholder="Sélectionner un genre" />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														<SelectItem value="Homme">
-															Homme
-														</SelectItem>
-														<SelectItem value="Femme">
-															Femme
-														</SelectItem>
-														<SelectItem value="Autre">
-															Autre
-														</SelectItem>
-													</SelectContent>
-												</Select>
+												<FormControl>
+													<TranslatedSelect
+														value={field.value}
+														onValueChange={field.onChange}
+														enumType="Gender"
+														placeholder="Sélectionner un genre"
+													/>
+												</FormControl>
 												<FormMessage />
 											</FormItem>
 										)}
@@ -374,9 +359,11 @@ export function PatientForm({
 											<FormItem>
 												<FormLabel>Situation maritale</FormLabel>
 												<FormControl>
-													<Input
-														placeholder="Situation maritale"
-														{...field}
+													<TranslatedSelect
+														value={field.value}
+														onValueChange={field.onChange}
+														enumType="MaritalStatus"
+														placeholder="Sélectionner une situation maritale"
 													/>
 												</FormControl>
 												<FormMessage />
@@ -411,12 +398,14 @@ export function PatientForm({
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>
-													Latéralité (droitier, gaucher...)
+													Latéralité
 												</FormLabel>
 												<FormControl>
-													<Input
-														placeholder="Latéralité"
-														{...field}
+													<TranslatedSelect
+														value={field.value}
+														onValueChange={field.onChange}
+														enumType="Handedness"
+														placeholder="Sélectionner une latéralité"
 													/>
 												</FormControl>
 												<FormMessage />
@@ -487,9 +476,11 @@ export function PatientForm({
 													Contraception
 												</FormLabel>
 												<FormControl>
-													<Input
-														placeholder="Contraception"
-														{...field}
+													<TranslatedSelect
+														value={field.value}
+														onValueChange={field.onChange}
+														enumType="Contraception"
+														placeholder="Sélectionner un type de contraception"
 													/>
 												</FormControl>
 												<FormMessage />
@@ -1136,56 +1127,3 @@ export function PatientForm({
 													<FormItem>
 														<FormLabel>Comportement général</FormLabel>
 														<FormControl>
-															<Textarea
-																placeholder="Comportement général"
-																className="resize-none"
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="childCareContext"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Mode de garde / Contexte familial</FormLabel>
-														<FormControl>
-															<Textarea
-																placeholder="Mode de garde, contexte familial"
-																className="resize-none"
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</TabsContent>
-					)}
-				</Tabs>
-
-				<div className="flex justify-end space-x-2">
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => navigate("/patients")}
-						disabled={isLoading}
-					>
-						Annuler
-					</Button>
-					<Button type="submit" disabled={isLoading}>
-						{isLoading ? "Enregistrement..." : "Enregistrer"}
-					</Button>
-				</div>
-			</form>
-		</Form>
-	);
-}

@@ -36,6 +36,7 @@ const NewPatientPage = () => {
       if (patientData.birthDate instanceof Date) {
         patientData.birthDate = patientData.birthDate.toISOString();
       }
+      
       console.log("Données patient avant création:", patientData);
 
       // Utiliser l'ID de l'ostéopathe connecté au lieu de la valeur en dur

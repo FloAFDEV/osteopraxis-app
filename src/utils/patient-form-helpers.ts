@@ -188,6 +188,7 @@ export function getEnumOptions(enumType: string): { value: string; label: string
       return [
         { value: 'Homme', label: 'Homme' },
         { value: 'Femme', label: 'Femme' },
+        { value: 'Autre', label: 'Autre' },
       ];
     default:
       return [];
@@ -205,3 +206,52 @@ export function getLabelFromEnumValue(enumType: string, value: string | null): s
   return option ? option.label : '';
 }
 
+/**
+ * Traduit le statut d'un rendez-vous en français
+ */
+export function translateAppointmentStatus(status: AppointmentStatus): string {
+  switch (status) {
+    case 'SCHEDULED':
+      return 'Planifié';
+    case 'COMPLETED':
+      return 'Terminé';
+    case 'CANCELED':
+      return 'Annulé';
+    case 'RESCHEDULED':
+      return 'Reporté';
+    case 'NO_SHOW':
+      return 'Absence';
+    default:
+      return status;
+  }
+}
+
+/**
+ * Traduit l'état marital en français
+ */
+export function translateMaritalStatus(status: MaritalStatus | null | undefined): string {
+  if (!status) return 'Non spécifié';
+  
+  const option = getEnumOptions('MaritalStatus').find(opt => opt.value === status);
+  return option ? option.label : 'Non spécifié';
+}
+
+/**
+ * Traduit le type de contraception en français
+ */
+export function translateContraception(contraception: Contraception | null | undefined): string {
+  if (!contraception) return 'Non spécifiée';
+  
+  const option = getEnumOptions('Contraception').find(opt => opt.value === contraception);
+  return option ? option.label : 'Non spécifiée';
+}
+
+/**
+ * Traduit la latéralité en français
+ */
+export function translateHandedness(handedness: Handedness | null | undefined): string {
+  if (!handedness) return 'Non spécifiée';
+  
+  const option = getEnumOptions('Handedness').find(opt => opt.value === handedness);
+  return option ? option.label : 'Non spécifiée';
+}

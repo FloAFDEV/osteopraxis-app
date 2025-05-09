@@ -24,6 +24,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { translateContraception, translateHandedness, translateMaritalStatus } from "@/utils/patient-form-helpers";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -243,25 +244,7 @@ const PatientDetailPage = () => {
 							items={[
 								{
 									label: "Statut marital",
-									value:
-										patient.maritalStatus === "SINGLE"
-											? "Célibataire"
-											: patient.maritalStatus ===
-											  "MARRIED"
-											? "Marié(e)"
-											: patient.maritalStatus ===
-											  "DIVORCED"
-											? "Divorcé(e)"
-											: patient.maritalStatus ===
-											  "WIDOWED"
-											? "Veuf/Veuve"
-											: patient.maritalStatus ===
-											  "PARTNERED"
-											? "En couple"
-											: patient.maritalStatus ===
-											  "ENGAGED"
-											? "Fiancé(e)"
-											: "Non spécifié",
+									value: translateMaritalStatus(patient.maritalStatus),
 								},
 								{
 									label: "Enfants",
@@ -277,15 +260,7 @@ const PatientDetailPage = () => {
 								},
 								{
 									label: "Latéralité",
-									value:
-										patient.handedness === "RIGHT"
-											? "Droitier(ère)"
-											: patient.handedness === "LEFT"
-											? "Gaucher(ère)"
-											: patient.handedness ===
-											  "AMBIDEXTROUS"
-											? "Ambidextre"
-											: "Non spécifié",
+									value: translateHandedness(patient.handedness),
 								},
 								{
 									label: "Tabagisme",
@@ -293,26 +268,7 @@ const PatientDetailPage = () => {
 								},
 								{
 									label: "Contraception",
-									value:
-										patient.contraception === "NONE"
-											? "Aucune"
-											: patient.contraception === "PILLS"
-											? "Pilule"
-											: patient.contraception === "PATCH"
-											? "Patch"
-											: patient.contraception === "RING"
-											? "Anneau vaginal"
-											: patient.contraception === "IUD"
-											? "Stérilet"
-											: patient.contraception ===
-											  "IMPLANTS"
-											? "Implant"
-											: patient.contraception === "CONDOM"
-											? "Préservatif"
-											: patient.contraception ===
-											  "DIAPHRAGM"
-											? "Diaphragme"
-											: "Non spécifié",
+									value: translateContraception(patient.contraception),
 								},
 							]}
 						/>
