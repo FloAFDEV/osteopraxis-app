@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -452,7 +453,7 @@ export function PatientForm({
 
 								{form.getValues("hasChildren") && (
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-																				<div>
+										<div>
 											<FormLabel>
 												Âges des enfants (séparés par
 												des virgules)
@@ -1136,3 +1137,55 @@ export function PatientForm({
 														<FormLabel>Comportement général</FormLabel>
 														<FormControl>
 															<Textarea
+																placeholder="Comportement général"
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={form.control}
+												name="childCareContext"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Mode de garde / Contexte familial</FormLabel>
+														<FormControl>
+															<Textarea
+																placeholder="Mode de garde, contexte familial"
+																className="resize-none"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						</TabsContent>
+					)}
+				</Tabs>
+
+				<div className="flex justify-end space-x-2">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => navigate("/patients")}
+						disabled={isLoading}
+					>
+						Annuler
+					</Button>
+					<Button type="submit" disabled={isLoading}>
+						{isLoading ? "Enregistrement..." : "Enregistrer"}
+					</Button>
+				</div>
+			</form>
+		</Form>
+	);
+}
