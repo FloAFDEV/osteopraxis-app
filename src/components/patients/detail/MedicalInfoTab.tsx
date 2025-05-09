@@ -1,13 +1,14 @@
-
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
-import { Patient } from "@/types";
+import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { RecentAppointmentsCard } from "./RecentAppointmentsCard";
-import { Appointment, AppointmentStatus } from "@/types";
 
 interface MedicalInfoTabProps {
 	patient: Patient;
 	pastAppointments: Appointment[];
-	onUpdateAppointmentStatus: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
+	onUpdateAppointmentStatus: (
+		appointmentId: number,
+		status: AppointmentStatus
+	) => Promise<void>;
 	onNavigateToHistory: () => void;
 }
 
@@ -15,7 +16,7 @@ export function MedicalInfoTab({
 	patient,
 	pastAppointments,
 	onUpdateAppointmentStatus,
-	onNavigateToHistory
+	onNavigateToHistory,
 }: MedicalInfoTabProps) {
 	return (
 		<div className="space-y-6 mt-6">
@@ -72,18 +73,15 @@ export function MedicalInfoTab({
 					},
 					{
 						label: "Correction visuelle",
-						value: patient.hasVisionCorrection
-							? "Oui"
-							: "Non",
+						value: patient.hasVisionCorrection ? "Oui" : "Non",
 					},
 				]}
 			/>
 
 			{/* Aperçu des dernières séances */}
-			<RecentAppointmentsCard 
-				appointments={pastAppointments} 
+			<RecentAppointmentsCard
+				appointments={pastAppointments}
 				onStatusChange={onUpdateAppointmentStatus}
-				onNavigateToHistory={onNavigateToHistory}
 			/>
 		</div>
 	);
