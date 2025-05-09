@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { formatAppointmentTime } from "@/utils/date-utils";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale"; // Importation correcte de la locale française
 import { Calendar, Edit, Link, Plus, X } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
 import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
@@ -48,7 +49,7 @@ export function UpcomingAppointmentsTab({
 										{format(
 											new Date(appointment.date),
 											"EEEE dd MMMM yyyy",
-											{ locale: require("date-fns/locale/fr") }
+											{ locale: fr } // Utilisation correcte de la locale importée
 										)}
 									</h3>
 									<p className="text-sm text-muted-foreground">
