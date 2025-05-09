@@ -1,3 +1,4 @@
+
 import React, {
 	createContext,
 	useContext,
@@ -8,7 +9,7 @@ import React, {
 } from "react";
 import { User } from "@/types";
 import { api } from "@/services/api";
-import { supabase } from "@/services/supabase-api/utils";
+import { supabase } from "@/integrations/supabase/client";
 import { useAutoLogout } from "@/hooks/use-auto-logout";
 
 interface AuthState {
@@ -162,6 +163,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	// Then use useEffect with loadStoredToken
 	useEffect(() => {
+		// Set up auth state listener FIRST
+		const { data: { subscription } } = supabase.auth.onAuthStateChange(
+			(event, session) => {
+				console.log("Auth state changed:", event, session?.user?.email);
+				if (session) {
+					// Update local state from session
+					setAuthState({
+						user: session.user ? {
+							id: session.user.id,
+							email: session.user.email || "",
+							first_name: session.user.user_metadata.first_name,
+							last_name: session.user.user_metadata.last_name,
+							role: (session.user.user_metadata.role || "OSTEOPATH") as any,
+							created_at: session.user.created_at,
+							updated_at: new Date().toISOString(),
+							osteopathId: session.user.user_metadata.osteopathId
+						} : null,
+						isAuthenticated: true,
+						token: session.access_token || null,
+					});
+				} else {
+					setAuthState({
+						user: null,
+						isAuthenticated: false,
+						token: null,
+					});
+				}
+			}
+		);
+
 		const initialAuth = async () => {
 			try {
 				console.log(
@@ -194,6 +225,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		};
 
 		initialAuth();
+
+		// Cleanup the subscription when component unmounts
+		return () => {
+			subscription.unsubscribe();
+		};
 	}, [loadAttempts, loadStoredToken]);
 
 	const login = useCallback(async (email: string, password: string) => {

@@ -1,62 +1,51 @@
 
-import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "../../integrations/supabase/client";
-import { AppointmentStatus } from "@/types";
+import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from '@/integrations/supabase/client';
+import { AppointmentStatus } from '@/types';
 
-// Fonction de typage des données
-const typedData = <T>(data: any): T => data as T;
+export { supabase, SUPABASE_API_URL, SUPABASE_API_KEY };
 
-// Valeurs valides pour le statut des rendez-vous
-export const AppointmentStatusValues = [
-  "SCHEDULED", 
-  "COMPLETED", 
-  "CANCELED",
-  "RESCHEDULED", 
-  "NO_SHOW"
-] as const;
+// Fonction pour le typage des données Supabase
+export function typedData<T>(data: any): T {
+  return data as T;
+}
 
-/**
- * Vérifie et normalise le statut d'un rendez-vous
- * @param status Statut à vérifier
- * @returns Statut normalisé et validé
- */
-export const ensureAppointmentStatus = (status?: string): AppointmentStatus => {
-  // Normaliser le statut en majuscules
-  const normalizedStatus = status?.toUpperCase();
-  
-  // Corriger le cas particulier "CANCELLED" (orthographe UK) vers "CANCELED" (orthographe US)
-  if (normalizedStatus === "CANCELLED") {
-    return "CANCELED";
+// Fonction pour s'assurer que le statut du rendez-vous est valide
+export function ensureAppointmentStatus(status?: AppointmentStatus | null): AppointmentStatus {
+  if (!status) {
+    return 'SCHEDULED';
   }
   
-  // Vérifier si le statut est valide
-  if (normalizedStatus && AppointmentStatusValues.includes(normalizedStatus as AppointmentStatus)) {
-    return normalizedStatus as AppointmentStatus;
+  const validStatuses: AppointmentStatus[] = [
+    'SCHEDULED', 
+    'COMPLETED', 
+    'CANCELED', 
+    'NO_SHOW'
+  ];
+  
+  if (validStatuses.includes(status as AppointmentStatus)) {
+    return status as AppointmentStatus;
   }
   
-  // Par défaut, retourner SCHEDULED
-  return "SCHEDULED";
-};
+  return 'SCHEDULED'; // Valeur par défaut
+}
 
-/**
- * Filtre les propriétés nulles d'un objet
- * @param obj Objet à nettoyer
- * @returns Un nouvel objet sans les propriétés nulles ou undefined
- */
-export const removeNullProperties = <T extends Record<string, any>>(obj: T): Partial<T> => {
-  const result: Partial<T> = {};
+// Fonction pour supprimer les propriétés nulles d'un objet
+export function removeNullProperties(obj: any): any {
+  if (!obj) return {};
   
-  Object.entries(obj).forEach(([key, value]) => {
-    if (value !== null && value !== undefined) {
-      result[key as keyof T] = value;
+  const result: any = {};
+  
+  for (const key in obj) {
+    if (obj[key] !== null && obj[key] !== undefined) {
+      result[key] = obj[key];
     }
-  });
+  }
   
   return result;
-};
+}
 
-export { 
-  supabase, 
-  typedData,
-  SUPABASE_API_URL,
-  SUPABASE_API_KEY
+// Exporter les cors headers pour les appels API
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 };
