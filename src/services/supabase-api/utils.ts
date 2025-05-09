@@ -4,6 +4,15 @@ import { AppointmentStatus } from '@/types';
 
 export { supabase, SUPABASE_API_URL, SUPABASE_API_KEY };
 
+// Définition des valeurs valides pour le statut de rendez-vous
+export const AppointmentStatusValues: AppointmentStatus[] = [
+  'SCHEDULED', 
+  'COMPLETED', 
+  'CANCELED', 
+  'NO_SHOW',
+  'RESCHEDULED'
+];
+
 // Fonction pour le typage des données Supabase
 export function typedData<T>(data: any): T {
   return data as T;
@@ -15,14 +24,7 @@ export function ensureAppointmentStatus(status?: AppointmentStatus | null): Appo
     return 'SCHEDULED';
   }
   
-  const validStatuses: AppointmentStatus[] = [
-    'SCHEDULED', 
-    'COMPLETED', 
-    'CANCELED', 
-    'NO_SHOW'
-  ];
-  
-  if (validStatuses.includes(status as AppointmentStatus)) {
+  if (AppointmentStatusValues.includes(status as AppointmentStatus)) {
     return status as AppointmentStatus;
   }
   
