@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { supabaseOsteopathService } from "../../supabase-api/osteopath-service";
 import { supabasePatientService } from "../../supabase-api/patient-service";
@@ -97,7 +96,23 @@ describe("Tests d'intégration CRUD sur Supabase (Osteopath, Patient, Cabinet, I
       avatarUrl: null,
       cabinetId: null,
       userId: null,
-      osteopathId: osteoId
+      osteopathId: osteoId,
+      // Ajout des nouveaux champs pour tous les patients
+      complementaryExams: null,
+      generalSymptoms: null,
+      // Ajout des nouveaux champs pour les enfants
+      pregnancyHistory: null,
+      birthDetails: null,
+      developmentMilestones: null,
+      sleepingPattern: null,
+      feeding: null,
+      behavior: null,
+      childCareContext: null,
+      // Propriétés supplémentaires
+      isExSmoker: false,
+      smokingSince: null,
+      smokingAmount: null,
+      quitSmokingDate: null
     });
     patientId = patient.id;
     expect(patientId).toBeDefined();

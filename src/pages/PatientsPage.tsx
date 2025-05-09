@@ -184,7 +184,23 @@ const PatientsPage = () => {
         traumaHistory: null,
         hdlm: null,
         userId: null,
-        avatarUrl: null
+        avatarUrl: null,
+        // Ajout des nouveaux champs pour tous les patients
+        complementaryExams: null,
+        generalSymptoms: null,
+        // Ajout des nouveaux champs pour les enfants
+        pregnancyHistory: null,
+        birthDetails: null,
+        developmentMilestones: null,
+        sleepingPattern: null,
+        feeding: null,
+        behavior: null,
+        childCareContext: null,
+        // Autres propriétés concernant le tabagisme
+        isExSmoker: false,
+        smokingSince: null,
+        smokingAmount: null,
+        quitSmokingDate: null
       };
       
       try {
