@@ -1,16 +1,13 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DashboardData } from "@/types";
-import { Calendar, Clock, User } from "lucide-react";
-import { useState, useEffect } from "react";
-import { api } from "@/services/api";
-import { format, isToday, isTomorrow, parseISO, addDays } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Appointment } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/services/api";
+import { Appointment, DashboardData } from "@/types";
+import { format, isToday, isTomorrow, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Calendar, Clock, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { formatAppointmentDate } from "@/utils/date-utils";
 
 interface AppointmentsOverviewProps {
 	data: DashboardData;
@@ -24,7 +21,9 @@ export function AppointmentsOverview({
 	const [upcomingAppointments, setUpcomingAppointments] = useState<
 		Appointment[]
 	>([]);
-	const [nextAppointment, setNextAppointment] = useState<Appointment | null>(null);
+	const [nextAppointment, setNextAppointment] = useState<Appointment | null>(
+		null
+	);
 	const [patients, setPatients] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
@@ -46,8 +45,8 @@ export function AppointmentsOverview({
 						// Inclure maintenant aussi les rendez-vous avec le statut SCHEDULED ou COMPLETED
 						return (
 							appointmentDate >= now &&
-							(appointment.status === "SCHEDULED" || 
-							 appointment.status === "COMPLETED")
+							(appointment.status === "SCHEDULED" ||
+								appointment.status === "COMPLETED")
 						);
 					})
 					.sort(
@@ -55,11 +54,11 @@ export function AppointmentsOverview({
 							parseISO(a.date).getTime() -
 							parseISO(b.date).getTime()
 					);
-				
+
 				// Séparer le prochain rendez-vous des autres rendez-vous à venir
 				let nextApp = null;
 				let otherAppointments = [...filteredAppointments];
-				
+
 				if (filteredAppointments.length > 0) {
 					nextApp = filteredAppointments[0];
 					// Garder les 4 rendez-vous suivants (sans le premier qui est affiché séparément)
@@ -67,9 +66,13 @@ export function AppointmentsOverview({
 				}
 
 				console.log(
-					`Appointments for dashboard: Total=${filteredAppointments.length}, Next=${nextApp ? 'Yes' : 'No'}, Others=${otherAppointments.length}`
+					`Appointments for dashboard: Total=${
+						filteredAppointments.length
+					}, Next=${nextApp ? "Yes" : "No"}, Others=${
+						otherAppointments.length
+					}`
 				);
-				
+
 				setNextAppointment(nextApp);
 				setUpcomingAppointments(otherAppointments);
 				setPatients(patientsData);
@@ -98,16 +101,16 @@ export function AppointmentsOverview({
 				return;
 			}
 
-			console.log(`Navigation vers le Séance #${appointmentId}`);
+			console.log(`Navigation vers la séance #${appointmentId}`);
 
 			// Naviguer vers la page d'édition du Séance avec l'ID
 			navigate(`/appointments/${appointmentId}/edit`);
 
 			// Afficher un toast pour confirmer l'action
-			toast.info(`Chargement des détails du Séance #${appointmentId}`);
+			toast.info(`Chargement des détails de la séance #${appointmentId}`);
 		} catch (error) {
 			console.error("Erreur lors de la navigation:", error);
-			toast.error("Impossible d'afficher les détails de ce Séance");
+			toast.error("Impossible d'afficher les détails de cette séance");
 		}
 	};
 
@@ -127,15 +130,19 @@ export function AppointmentsOverview({
 	const appointmentsToday = data?.appointmentsToday || 0;
 
 	// Render the appointment card
-	const renderAppointmentItem = (appointment: Appointment, isHighlighted = false, isLastItem = false) => {
+	const renderAppointmentItem = (
+		appointment: Appointment,
+		isHighlighted = false,
+		isLastItem = false
+	) => {
 		const patient = getPatientById(appointment.patientId);
 		const appointmentDate = parseISO(appointment.date);
-		
+
 		return (
 			<div
 				key={appointment.id}
 				className={`flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-900/20 transition-colors relative ${
-					isHighlighted ? 'bg-blue-50 dark:bg-blue-900/10' : ''
+					isHighlighted ? "bg-blue-50 dark:bg-blue-900/10" : ""
 				} ${!isLastItem ? "border-b" : ""}`}
 			>
 				<div className="flex-shrink-0 mr-4">
@@ -172,21 +179,14 @@ export function AppointmentsOverview({
 					<div className="mt-2 flex flex-wrap gap-3">
 						<div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
 							<Clock className="h-3 w-3 text-blue-500 mr-1" />
-							<span>
-								{format(
-									appointmentDate,
-									"HH:mm"
-								)}
-							</span>
+							<span>{format(appointmentDate, "HH:mm")}</span>
 						</div>
 						<div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
 							<Calendar className="h-3 w-3 text-purple-500 mr-1" />
 							<span>
-								{format(
-									appointmentDate,
-									"dd MMM yyyy",
-									{ locale: fr }
-								)}
+								{format(appointmentDate, "dd MMM yyyy", {
+									locale: fr,
+								})}
 							</span>
 						</div>
 						{isToday(appointmentDate) && (
@@ -207,11 +207,7 @@ export function AppointmentsOverview({
 					</div>
 				</div>
 				<button
-					onClick={() =>
-						handleAppointmentClick(
-							appointment.id
-						)
-					}
+					onClick={() => handleAppointmentClick(appointment.id)}
 					className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-sky-700 dark:hover:bg-sky-800 dark:text-white text-blue-600 rounded text-xs font-medium transition-colors"
 				>
 					Détails
@@ -234,12 +230,13 @@ export function AppointmentsOverview({
 						variant="outline"
 						className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
 					>
-						{
-							(nextAppointment && isToday(parseISO(nextAppointment.date)) ? 1 : 0) + 
+						{(nextAppointment &&
+						isToday(parseISO(nextAppointment.date))
+							? 1
+							: 0) +
 							upcomingAppointments.filter((app) =>
 								isToday(parseISO(app.date))
-							).length
-						}{" "}
+							).length}{" "}
 						aujourd'hui
 					</Badge>
 				</CardTitle>
@@ -249,20 +246,31 @@ export function AppointmentsOverview({
 					<div className="flex justify-center py-8">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
 					</div>
-				) : nextAppointment === null && upcomingAppointments.length === 0 ? (
+				) : nextAppointment === null &&
+				  upcomingAppointments.length === 0 ? (
 					<div className="text-center py-8 text-muted-foreground">
 						<Calendar className="h-12 w-12 mx-auto mb-3 text-slate-300" />
 						<p>Aucune séance à venir</p>
 					</div>
 				) : (
 					<div>
-						{nextAppointment && renderAppointmentItem(nextAppointment, true, upcomingAppointments.length === 0)}
-						
+						{nextAppointment &&
+							renderAppointmentItem(
+								nextAppointment,
+								true,
+								upcomingAppointments.length === 0
+							)}
+
 						{upcomingAppointments.map((appointment, index) => {
-							const isLastItem = index === upcomingAppointments.length - 1;
-							return renderAppointmentItem(appointment, false, isLastItem);
+							const isLastItem =
+								index === upcomingAppointments.length - 1;
+							return renderAppointmentItem(
+								appointment,
+								false,
+								isLastItem
+							);
 						})}
-						
+
 						<div className="p-4 bg-slate-50 dark:bg-slate-900/20 text-center">
 							<Link
 								to="/appointments"
