@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Appointment, AppointmentStatus } from "@/types";
@@ -31,7 +32,7 @@ export function RecentAppointmentsCard({
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={onNavigateToHistory}
+						onClick={() => onNavigateToHistory()}
 						aria-label="Voir tout l'historique des rendez-vous"
 					>
 						Voir tout l'historique
@@ -42,7 +43,6 @@ export function RecentAppointmentsCard({
 				{appointments.length === 0 ? (
 					<p className="text-center text-muted-foreground py-4">
 						Aucune séance passée
-						<span className="italic">Chargement...</span>
 					</p>
 				) : (
 					<div className="space-y-4 max-h-80 overflow-y-auto pr-2">
