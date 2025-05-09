@@ -1,10 +1,10 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Patient } from "@/types";
+import { differenceInYears, parseISO } from "date-fns";
+import { Mail, User, UserRound, Users } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { Mail, User, UserRound, Users } from "lucide-react";
-import { Patient } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { differenceInYears, parseISO } from "date-fns";
 
 interface PatientListItemProps {
 	patient: Patient;
@@ -16,28 +16,17 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
 
-	// Get patient initials for avatar
-	const getInitials = () => {
-		const firstInitial = patient.firstName
-			? patient.firstName.charAt(0).toUpperCase()
-			: "";
-		const lastInitial = patient.lastName
-			? patient.lastName.charAt(0).toUpperCase()
-			: "";
-		return `${firstInitial}${lastInitial}`;
-	};
-
 	// Determine background color and icon based on gender
 	const getAvatarColor = () => {
 		switch (patient.gender) {
 			case "Homme":
 				return {
-					background: "bg-blue-100 text-blue-600",
+					background: "bg-blue-200 text-blue-600",
 					icon: <User className="h-5 w-5 text-blue-600" />,
 				};
 			case "Femme":
 				return {
-					background: "bg-pink-100 text-pink-600",
+					background: "bg-pink-200 text-pink-600",
 					icon: <UserRound className="h-5 w-5 text-pink-600" />,
 				};
 			default:
