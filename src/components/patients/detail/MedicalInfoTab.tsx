@@ -20,8 +20,6 @@ interface MedicalInfoTabProps {
 export function MedicalInfoTab({
 	patient,
 	pastAppointments,
-	onUpdateAppointmentStatus,
-	onNavigateToHistory,
 }: MedicalInfoTabProps) {
 	const [selectedStatus, setSelectedStatus] =
 		useState<AppointmentStatus>("COMPLETED");
