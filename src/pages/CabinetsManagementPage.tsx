@@ -80,7 +80,7 @@ const CabinetsManagementPage = () => {
   }
 
   return <Layout>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 mt-20">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
