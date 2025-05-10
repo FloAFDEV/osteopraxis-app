@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
@@ -75,7 +74,7 @@ const getPatientSchema = (emailRequired: boolean) =>
 		feeding: z.string().optional().nullable(),
 		behavior: z.string().optional().nullable(),
 		childCareContext: z.string().optional().nullable(),
-		
+
 		// Nouveaux champs généraux
 		ent_followup: z.string().optional().nullable(),
 		intestinal_transit: z.string().optional().nullable(),
@@ -85,7 +84,7 @@ const getPatientSchema = (emailRequired: boolean) =>
 		sport_frequency: z.string().optional().nullable(),
 		gynecological_history: z.string().optional().nullable(),
 		other_comments_adult: z.string().optional().nullable(),
-		
+
 		// Nouveaux champs spécifiques aux enfants
 		fine_motor_skills: z.string().optional().nullable(),
 		gross_motor_skills: z.string().optional().nullable(),
@@ -178,7 +177,7 @@ export function PatientForm({
 					smokingSince: patient.smokingSince || "",
 					smokingAmount: patient.smokingAmount || "",
 					quitSmokingDate: patient.quitSmokingDate || "",
-					
+
 					// Nouveaux champs généraux
 					ent_followup: patient.ent_followup || null,
 					intestinal_transit: patient.intestinal_transit || null,
@@ -186,9 +185,10 @@ export function PatientForm({
 					fracture_history: patient.fracture_history || null,
 					dental_health: patient.dental_health || null,
 					sport_frequency: patient.sport_frequency || null,
-					gynecological_history: patient.gynecological_history || null,
+					gynecological_history:
+						patient.gynecological_history || null,
 					other_comments_adult: patient.other_comments_adult || null,
-					
+
 					// Nouveaux champs spécifiques aux enfants
 					fine_motor_skills: patient.fine_motor_skills || null,
 					gross_motor_skills: patient.gross_motor_skills || null,
@@ -200,7 +200,7 @@ export function PatientForm({
 					school_grade: patient.school_grade || null,
 					pediatrician_name: patient.pediatrician_name || null,
 					paramedical_followup: patient.paramedical_followup || null,
-					other_comments_child: patient.other_comments_child || null
+					other_comments_child: patient.other_comments_child || null,
 			  }
 			: {
 					firstName: "",
@@ -241,7 +241,7 @@ export function PatientForm({
 					school_grade: null,
 					pediatrician_name: null,
 					paramedical_followup: null,
-					other_comments_child: null
+					other_comments_child: null,
 			  },
 	});
 
@@ -318,10 +318,12 @@ export function PatientForm({
 				>
 					<TabsList className="grid grid-cols-6 sm:grid-cols-6">
 						<TabsTrigger value="general">Général</TabsTrigger>
-						<TabsTrigger value="medical">Médical</TabsTrigger>
 						<TabsTrigger value="contact">Contact</TabsTrigger>
-						<TabsTrigger value="anamnese">Anamnèse</TabsTrigger>
-						<TabsTrigger value="additional">Complémentaire</TabsTrigger>
+						<TabsTrigger value="medical">Médical</TabsTrigger>
+						<TabsTrigger value="anamnese">Examens</TabsTrigger>
+						<TabsTrigger value="additional">
+							Santé/Habitudes
+						</TabsTrigger>
 						{isChild && (
 							<TabsTrigger value="pediatric">
 								Pédiatrie
@@ -329,11 +331,10 @@ export function PatientForm({
 						)}
 					</TabsList>
 
-					
 					<TabsContent value="general" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
 									<FormField
 										control={form.control}
 										name="firstName"
@@ -590,10 +591,94 @@ export function PatientForm({
 						</Card>
 					</TabsContent>
 
-					
+					<TabsContent value="contact" className="space-y-4">
+						<Card>
+							<CardContent className="space-y-4 mt-6">
+								<FormField
+									control={form.control}
+									name="email"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Email
+												{emailRequired && (
+													<span className="text-red-500">
+														*
+													</span>
+												)}
+											</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="Email"
+													{...field}
+													value={field.value || ""}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="phone"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Téléphone</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="Téléphone"
+													{...field}
+													pattern="^[0-9+]*$"
+													title="Entrez uniquement des chiffres et le signe '+'"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="address"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Adresse</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="Adresse"
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="notes"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Notes</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder="Notes générales sur le patient"
+													className="resize-none"
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</CardContent>
+						</Card>
+					</TabsContent>
+
 					<TabsContent value="medical" className="space-y-4">
 						<Card>
-							<CardContent className="space-y-4">
+							<CardContent className="space-y-4 mt-6">
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
 										control={form.control}
@@ -1041,99 +1126,17 @@ export function PatientForm({
 						</Card>
 					</TabsContent>
 
-					
-					<TabsContent value="contact" className="space-y-4">
-						<Card>
-							<CardContent className="space-y-4">
-								<FormField
-									control={form.control}
-									name="email"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>
-												Email
-												{emailRequired && (
-													<span className="text-red-500">
-														*
-													</span>
-												)}
-											</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Email"
-													{...field}
-													value={field.value || ""}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="phone"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Téléphone</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Téléphone"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="address"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Adresse</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Adresse"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="notes"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Notes</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Notes générales sur le patient"
-													className="resize-none"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</CardContent>
-						</Card>
-					</TabsContent>
-
 					<TabsContent value="anamnese" className="space-y-4">
 						<Card>
-							<CardContent className="space-y-4">
+							<CardContent className="space-y-4 mt-6">
 								<FormField
 									control={form.control}
 									name="complementaryExams"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Examens complémentaires</FormLabel>
+											<FormLabel>
+												Examens complémentaires
+											</FormLabel>
 											<FormControl>
 												<Textarea
 													placeholder="Détails des examens complémentaires (radiographies, échographies...)"
@@ -1151,7 +1154,9 @@ export function PatientForm({
 									name="generalSymptoms"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Symptômes généraux</FormLabel>
+											<FormLabel>
+												Symptômes généraux
+											</FormLabel>
 											<FormControl>
 												<Textarea
 													placeholder="Description des symptômes généraux"
@@ -1169,8 +1174,11 @@ export function PatientForm({
 
 					<TabsContent value="additional" className="space-y-4">
 						<Card>
-							<CardContent className="space-y-4">
-								<AdditionalFieldsTab form={form} isChild={isChild} />
+							<CardContent className="space-y-4 mt-6">
+								<AdditionalFieldsTab
+									form={form}
+									isChild={isChild}
+								/>
 							</CardContent>
 						</Card>
 					</TabsContent>
@@ -1178,37 +1186,47 @@ export function PatientForm({
 					{isChild && (
 						<TabsContent value="pediatric" className="space-y-4">
 							<Card>
-								<CardContent className="space-y-4">
+								<CardContent className="space-y-4 mt-6">
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
 											name="pediatrician_name"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Pédiatre</FormLabel>
+													<FormLabel>
+														Pédiatre
+													</FormLabel>
 													<FormControl>
 														<Input
 															placeholder="Nom du pédiatre"
 															{...field}
-															value={field.value || ''}
+															value={
+																field.value ||
+																""
+															}
 														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
 											)}
 										/>
-										
+
 										<FormField
 											control={form.control}
 											name="school_grade"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Niveau scolaire</FormLabel>
+													<FormLabel>
+														Niveau scolaire
+													</FormLabel>
 													<FormControl>
 														<Input
 															placeholder="Classe actuelle"
 															{...field}
-															value={field.value || ''}
+															value={
+																field.value ||
+																""
+															}
 														/>
 													</FormControl>
 													<FormMessage />
@@ -1223,54 +1241,106 @@ export function PatientForm({
 											name="weight_at_birth"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Poids à la naissance (g)</FormLabel>
+													<FormLabel>
+														Poids à la naissance (g)
+													</FormLabel>
 													<FormControl>
 														<Input
 															type="number"
 															placeholder="Ex: 3500"
 															{...field}
-															value={field.value ?? ''}
-															onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+															value={
+																field.value ??
+																""
+															}
+															onChange={(e) =>
+																field.onChange(
+																	e.target
+																		.value ===
+																		""
+																		? null
+																		: Number(
+																				e
+																					.target
+																					.value
+																		  )
+																)
+															}
 														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
 											)}
 										/>
-										
+
 										<FormField
 											control={form.control}
 											name="height_at_birth"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Taille à la naissance (cm)</FormLabel>
+													<FormLabel>
+														Taille à la naissance
+														(cm)
+													</FormLabel>
 													<FormControl>
 														<Input
 															type="number"
 															placeholder="Ex: 50"
 															{...field}
-															value={field.value ?? ''}
-															onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+															value={
+																field.value ??
+																""
+															}
+															onChange={(e) =>
+																field.onChange(
+																	e.target
+																		.value ===
+																		""
+																		? null
+																		: Number(
+																				e
+																					.target
+																					.value
+																		  )
+																)
+															}
 														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
 											)}
 										/>
-										
+
 										<FormField
 											control={form.control}
 											name="head_circumference"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Périmètre crânien (cm)</FormLabel>
+													<FormLabel>
+														Périmètre crânien (cm)
+													</FormLabel>
 													<FormControl>
 														<Input
 															type="number"
 															placeholder="Ex: 35"
 															{...field}
-															value={field.value ?? ''}
-															onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+															value={
+																field.value ??
+																""
+															}
+															onChange={(e) =>
+																field.onChange(
+																	e.target
+																		.value ===
+																		""
+																		? null
+																		: Number(
+																				e
+																					.target
+																					.value
+																		  )
+																)
+															}
 														/>
 													</FormControl>
 													<FormMessage />
@@ -1278,18 +1348,22 @@ export function PatientForm({
 											)}
 										/>
 									</div>
-									
+
 									<FormField
 										control={form.control}
 										name="apgar_score"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Score APGAR</FormLabel>
+												<FormLabel>
+													Score APGAR
+												</FormLabel>
 												<FormControl>
 													<Input
 														placeholder="Ex: 9/10 à 1 min, 10/10 à 5 min"
 														{...field}
-														value={field.value || ''}
+														value={
+															field.value || ""
+														}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -1302,7 +1376,9 @@ export function PatientForm({
 										name="pregnancyHistory"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Histoire de la grossesse</FormLabel>
+												<FormLabel>
+													Histoire de la grossesse
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Déroulement de la grossesse"
@@ -1320,7 +1396,9 @@ export function PatientForm({
 										name="birthDetails"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Détails de la naissance</FormLabel>
+												<FormLabel>
+													Détails de la naissance
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Mode d'accouchement, durée, complications..."
@@ -1338,7 +1416,9 @@ export function PatientForm({
 										name="developmentMilestones"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Étapes de développement</FormLabel>
+												<FormLabel>
+													Étapes de développement
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Âge pour s'asseoir, marcher, parler..."
@@ -1357,32 +1437,42 @@ export function PatientForm({
 											name="fine_motor_skills"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Motricité fine</FormLabel>
+													<FormLabel>
+														Motricité fine
+													</FormLabel>
 													<FormControl>
 														<Textarea
 															placeholder="Capacités de motricité fine"
 															className="resize-none"
 															{...field}
-															value={field.value || ''}
+															value={
+																field.value ||
+																""
+															}
 														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
 											)}
 										/>
-										
+
 										<FormField
 											control={form.control}
 											name="gross_motor_skills"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Motricité globale</FormLabel>
+													<FormLabel>
+														Motricité globale
+													</FormLabel>
 													<FormControl>
 														<Textarea
 															placeholder="Capacités de motricité globale"
 															className="resize-none"
 															{...field}
-															value={field.value || ''}
+															value={
+																field.value ||
+																""
+															}
 														/>
 													</FormControl>
 													<FormMessage />
@@ -1396,7 +1486,9 @@ export function PatientForm({
 										name="sleepingPattern"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Habitudes de sommeil</FormLabel>
+												<FormLabel>
+													Habitudes de sommeil
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Qualité du sommeil, réveils nocturnes..."
@@ -1414,7 +1506,9 @@ export function PatientForm({
 										name="feeding"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Alimentation</FormLabel>
+												<FormLabel>
+													Alimentation
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Habitudes alimentaires, allergies..."
@@ -1432,7 +1526,9 @@ export function PatientForm({
 										name="behavior"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Comportement</FormLabel>
+												<FormLabel>
+													Comportement
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Description du comportement en général"
@@ -1450,12 +1546,16 @@ export function PatientForm({
 										name="childcare_type"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Type de garde</FormLabel>
+												<FormLabel>
+													Type de garde
+												</FormLabel>
 												<FormControl>
 													<Input
 														placeholder="Ex: crèche, nounou, grands-parents..."
 														{...field}
-														value={field.value || ''}
+														value={
+															field.value || ""
+														}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -1468,13 +1568,17 @@ export function PatientForm({
 										name="paramedical_followup"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Suivi paramédical</FormLabel>
+												<FormLabel>
+													Suivi paramédical
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Orthophonie, psychomotricité, ergothérapie..."
 														className="resize-none"
 														{...field}
-														value={field.value || ''}
+														value={
+															field.value || ""
+														}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -1487,13 +1591,17 @@ export function PatientForm({
 										name="other_comments_child"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Autres remarques (enfant)</FormLabel>
+												<FormLabel>
+													Autres remarques (enfant)
+												</FormLabel>
 												<FormControl>
 													<Textarea
 														placeholder="Autres informations importantes pour cet enfant"
 														className="resize-none"
 														{...field}
-														value={field.value || ''}
+														value={
+															field.value || ""
+														}
 													/>
 												</FormControl>
 												<FormMessage />
