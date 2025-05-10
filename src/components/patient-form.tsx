@@ -1246,6 +1246,7 @@ export function PatientForm({
 													<FormControl>
 														<Input
 															type="number"
+															min={0} // 👈 interdit les valeurs négatives
 															placeholder="Ex: 3500"
 															{...field}
 															value={
@@ -1284,6 +1285,7 @@ export function PatientForm({
 													<FormControl>
 														<Input
 															type="number"
+															min={0} // 👈 interdit les valeurs négatives
 															placeholder="Ex: 50"
 															{...field}
 															value={
@@ -1321,6 +1323,7 @@ export function PatientForm({
 													<FormControl>
 														<Input
 															type="number"
+															min={0} // 👈 interdit les valeurs négatives
 															placeholder="Ex: 35"
 															{...field}
 															value={
