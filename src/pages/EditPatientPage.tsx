@@ -87,7 +87,7 @@ const EditPatientPage = () => {
 				handedness: updatedData.handedness || patient.handedness,
 				contraception:
 					updatedData.contraception || patient.contraception,
-				// Ensure all required fields are present
+				// Champs existants
 				complementaryExams:
 					updatedData.complementaryExams ||
 					patient.complementaryExams ||
@@ -116,6 +116,29 @@ const EditPatientPage = () => {
 					updatedData.childCareContext ||
 					patient.childCareContext ||
 					null,
+					
+				// Nouveaux champs généraux
+				ent_followup: updatedData.ent_followup || patient.ent_followup || null,
+				intestinal_transit: updatedData.intestinal_transit || patient.intestinal_transit || null,
+				sleep_quality: updatedData.sleep_quality || patient.sleep_quality || null,
+				fracture_history: updatedData.fracture_history || patient.fracture_history || null,
+				dental_health: updatedData.dental_health || patient.dental_health || null,
+				sport_frequency: updatedData.sport_frequency || patient.sport_frequency || null,
+				gynecological_history: updatedData.gynecological_history || patient.gynecological_history || null,
+				other_comments_adult: updatedData.other_comments_adult || patient.other_comments_adult || null,
+				
+				// Nouveaux champs spécifiques aux enfants
+				fine_motor_skills: updatedData.fine_motor_skills || patient.fine_motor_skills || null,
+				gross_motor_skills: updatedData.gross_motor_skills || patient.gross_motor_skills || null,
+				weight_at_birth: updatedData.weight_at_birth || patient.weight_at_birth || null,
+				height_at_birth: updatedData.height_at_birth || patient.height_at_birth || null,
+				head_circumference: updatedData.head_circumference || patient.head_circumference || null,
+				apgar_score: updatedData.apgar_score || patient.apgar_score || null,
+				childcare_type: updatedData.childcare_type || patient.childcare_type || null,
+				school_grade: updatedData.school_grade || patient.school_grade || null,
+				pediatrician_name: updatedData.pediatrician_name || patient.pediatrician_name || null,
+				paramedical_followup: updatedData.paramedical_followup || patient.paramedical_followup || null,
+				other_comments_child: updatedData.other_comments_child || patient.other_comments_child || null
 			};
 
 			console.log(

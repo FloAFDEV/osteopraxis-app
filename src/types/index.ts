@@ -70,6 +70,29 @@ export interface Patient {
   feeding: string | null;
   behavior: string | null;
   childCareContext: string | null;
+  
+  // Nouveaux champs généraux
+  ent_followup: string | null;
+  intestinal_transit: string | null;
+  sleep_quality: string | null;
+  fracture_history: string | null;
+  dental_health: string | null;
+  sport_frequency: string | null;
+  gynecological_history: string | null;
+  other_comments_adult: string | null;
+  
+  // Nouveaux champs spécifiques aux enfants
+  fine_motor_skills: string | null;
+  gross_motor_skills: string | null;
+  weight_at_birth: number | null;
+  height_at_birth: number | null;
+  head_circumference: number | null;
+  apgar_score: string | null;
+  childcare_type: string | null;
+  school_grade: string | null;
+  pediatrician_name: string | null;
+  paramedical_followup: string | null;
+  other_comments_child: string | null;
 }
 
 // Mise à jour des interfaces pour les autres entités pour assurer la cohérence des types
@@ -196,4 +219,5 @@ export interface DashboardData {
     prevPatients: number;
     growthText: string;
   }[];
+
 }

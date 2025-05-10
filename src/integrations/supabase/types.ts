@@ -357,33 +357,44 @@ export type Database = {
       Patient: {
         Row: {
           address: string | null
+          apgar_score: string | null
           avatarUrl: string | null
           behavior: string | null
           birthDate: string | null
           birthDetails: string | null
           cabinetId: number | null
+          childcare_type: string | null
           childCareContext: string | null
           childrenAges: number[] | null
           complementaryExams: string | null
           contraception: Database["public"]["Enums"]["Contraception"] | null
           createdAt: string
           currentTreatment: string | null
+          dental_health: string | null
           developmentMilestones: string | null
           digestiveDoctorName: string | null
           digestiveProblems: string | null
           email: string | null
+          ent_followup: string | null
           entDoctorName: string | null
           entProblems: string | null
           feeding: string | null
+          fine_motor_skills: string | null
           firstName: string
+          fracture_history: string | null
           gender: Database["public"]["Enums"]["Gender"] | null
           generalPractitioner: string | null
           generalSymptoms: string | null
+          gross_motor_skills: string | null
+          gynecological_history: string | null
           handedness: Database["public"]["Enums"]["Handedness"] | null
           hasChildren: string | null
           hasVisionCorrection: boolean
           hdlm: string | null
+          head_circumference: number | null
+          height_at_birth: number | null
           id: number
+          intestinal_transit: string | null
           isDeceased: boolean
           isExSmoker: boolean | null
           isSmoker: boolean
@@ -392,48 +403,67 @@ export type Database = {
           occupation: string | null
           ophtalmologistName: string | null
           osteopathId: number
+          other_comments_adult: string | null
+          other_comments_child: string | null
+          paramedical_followup: string | null
+          pediatrician_name: string | null
           phone: string | null
           physicalActivity: string | null
           pregnancyHistory: string | null
           quitSmokingDate: string | null
           rheumatologicalHistory: string | null
+          school_grade: string | null
+          sleep_quality: string | null
           sleepingPattern: string | null
           smokingAmount: string | null
           smokingSince: string | null
+          sport_frequency: string | null
           surgicalHistory: string | null
           traumaHistory: string | null
           updatedAt: string
           userId: string | null
+          weight_at_birth: number | null
         }
         Insert: {
           address?: string | null
+          apgar_score?: string | null
           avatarUrl?: string | null
           behavior?: string | null
           birthDate?: string | null
           birthDetails?: string | null
           cabinetId?: number | null
+          childcare_type?: string | null
           childCareContext?: string | null
           childrenAges?: number[] | null
           complementaryExams?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           createdAt?: string
           currentTreatment?: string | null
+          dental_health?: string | null
           developmentMilestones?: string | null
           digestiveDoctorName?: string | null
           digestiveProblems?: string | null
           email?: string | null
+          ent_followup?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
           feeding?: string | null
+          fine_motor_skills?: string | null
           firstName: string
+          fracture_history?: string | null
           gender?: Database["public"]["Enums"]["Gender"] | null
           generalPractitioner?: string | null
           generalSymptoms?: string | null
+          gross_motor_skills?: string | null
+          gynecological_history?: string | null
           handedness?: Database["public"]["Enums"]["Handedness"] | null
           hasChildren?: string | null
           hasVisionCorrection?: boolean
           hdlm?: string | null
+          head_circumference?: number | null
+          height_at_birth?: number | null
           id?: number
+          intestinal_transit?: string | null
           isDeceased?: boolean
           isExSmoker?: boolean | null
           isSmoker?: boolean
@@ -442,48 +472,67 @@ export type Database = {
           occupation?: string | null
           ophtalmologistName?: string | null
           osteopathId: number
+          other_comments_adult?: string | null
+          other_comments_child?: string | null
+          paramedical_followup?: string | null
+          pediatrician_name?: string | null
           phone?: string | null
           physicalActivity?: string | null
           pregnancyHistory?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
+          school_grade?: string | null
+          sleep_quality?: string | null
           sleepingPattern?: string | null
           smokingAmount?: string | null
           smokingSince?: string | null
+          sport_frequency?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
           updatedAt?: string
           userId?: string | null
+          weight_at_birth?: number | null
         }
         Update: {
           address?: string | null
+          apgar_score?: string | null
           avatarUrl?: string | null
           behavior?: string | null
           birthDate?: string | null
           birthDetails?: string | null
           cabinetId?: number | null
+          childcare_type?: string | null
           childCareContext?: string | null
           childrenAges?: number[] | null
           complementaryExams?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           createdAt?: string
           currentTreatment?: string | null
+          dental_health?: string | null
           developmentMilestones?: string | null
           digestiveDoctorName?: string | null
           digestiveProblems?: string | null
           email?: string | null
+          ent_followup?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
           feeding?: string | null
+          fine_motor_skills?: string | null
           firstName?: string
+          fracture_history?: string | null
           gender?: Database["public"]["Enums"]["Gender"] | null
           generalPractitioner?: string | null
           generalSymptoms?: string | null
+          gross_motor_skills?: string | null
+          gynecological_history?: string | null
           handedness?: Database["public"]["Enums"]["Handedness"] | null
           hasChildren?: string | null
           hasVisionCorrection?: boolean
           hdlm?: string | null
+          head_circumference?: number | null
+          height_at_birth?: number | null
           id?: number
+          intestinal_transit?: string | null
           isDeceased?: boolean
           isExSmoker?: boolean | null
           isSmoker?: boolean
@@ -492,18 +541,26 @@ export type Database = {
           occupation?: string | null
           ophtalmologistName?: string | null
           osteopathId?: number
+          other_comments_adult?: string | null
+          other_comments_child?: string | null
+          paramedical_followup?: string | null
+          pediatrician_name?: string | null
           phone?: string | null
           physicalActivity?: string | null
           pregnancyHistory?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
+          school_grade?: string | null
+          sleep_quality?: string | null
           sleepingPattern?: string | null
           smokingAmount?: string | null
           smokingSince?: string | null
+          sport_frequency?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
           updatedAt?: string
           userId?: string | null
+          weight_at_birth?: number | null
         }
         Relationships: [
           {

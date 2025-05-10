@@ -41,10 +41,10 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
   cabinetId: data.cabinetId,
   userId: data.userId || null,
   osteopathId: data.osteopathId || 1,
-  // Nouveaux champs pour tous les patients
+  // Champs existants pour tous les patients
   complementaryExams: data.complementaryExams || null,
   generalSymptoms: data.generalSymptoms || null,
-  // Nouveaux champs pour les enfants
+  // Champs existants pour les enfants
   pregnancyHistory: data.pregnancyHistory || null,
   birthDetails: data.birthDetails || null,
   developmentMilestones: data.developmentMilestones || null,
@@ -52,4 +52,27 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
   feeding: data.feeding || null,
   behavior: data.behavior || null,
   childCareContext: data.childCareContext || null,
+  
+  // Nouveaux champs généraux
+  ent_followup: data.ent_followup || null,
+  intestinal_transit: data.intestinal_transit || null,
+  sleep_quality: data.sleep_quality || null,
+  fracture_history: data.fracture_history || null,
+  dental_health: data.dental_health || null,
+  sport_frequency: data.sport_frequency || null,
+  gynecological_history: data.gynecological_history || null,
+  other_comments_adult: data.other_comments_adult || null,
+  
+  // Nouveaux champs spécifiques aux enfants
+  fine_motor_skills: data.fine_motor_skills || null,
+  gross_motor_skills: data.gross_motor_skills || null,
+  weight_at_birth: data.weight_at_birth || null,
+  height_at_birth: data.height_at_birth || null,
+  head_circumference: data.head_circumference || null,
+  apgar_score: data.apgar_score || null,
+  childcare_type: data.childcare_type || null,
+  school_grade: data.school_grade || null,
+  pediatrician_name: data.pediatrician_name || null,
+  paramedical_followup: data.paramedical_followup || null,
+  other_comments_child: data.other_comments_child || null,
 });

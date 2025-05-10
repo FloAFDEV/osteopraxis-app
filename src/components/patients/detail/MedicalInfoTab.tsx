@@ -1,3 +1,4 @@
+
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
@@ -97,6 +98,10 @@ export function MedicalInfoTab({
 						value: patient.surgicalHistory || "Aucun antécédent",
 					},
 					{
+						label: "Fractures",
+						value: patient.fracture_history || "Aucun antécédent",
+					},
+					{
 						label: "Traumatismes",
 						value: patient.traumaHistory || "Aucun antécédent",
 					},
@@ -110,7 +115,25 @@ export function MedicalInfoTab({
 			/>
 
 			<MedicalInfoCard
-				title="Ophtalmologie"
+				title="Activité physique / Sommeil"
+				items={[
+					{
+						label: "Activité physique",
+						value: patient.physicalActivity || "Non renseigné",
+					},
+					{
+						label: "Fréquence sportive",
+						value: patient.sport_frequency || "Non renseigné",
+					},
+					{
+						label: "Qualité du sommeil",
+						value: patient.sleep_quality || "Non renseigné",
+					},
+				]}
+			/>
+
+			<MedicalInfoCard
+				title="Ophtalmologie / Dentaire"
 				items={[
 					{
 						label: "Correction de la vue",
@@ -119,6 +142,10 @@ export function MedicalInfoTab({
 					{
 						label: "Ophtalmologue",
 						value: patient.ophtalmologistName || "Non renseigné",
+					},
+					{
+						label: "Santé dentaire",
+						value: patient.dental_health || "Non renseigné", 
 					},
 				]}
 			/>
@@ -134,6 +161,10 @@ export function MedicalInfoTab({
 						label: "Médecin ORL",
 						value: patient.entDoctorName || "Non renseigné",
 					},
+					{
+						label: "Suivi ORL",
+						value: patient.ent_followup || "Non renseigné",
+					},
 				]}
 			/>
 
@@ -145,11 +176,31 @@ export function MedicalInfoTab({
 						value: patient.digestiveProblems || "Aucun",
 					},
 					{
+						label: "Transit intestinal",
+						value: patient.intestinal_transit || "Non renseigné",
+					},
+					{
 						label: "Médecin digestif",
 						value: patient.digestiveDoctorName || "Non renseigné",
 					},
 				]}
 			/>
+
+			{!isChild && (
+				<MedicalInfoCard
+					title="Gynécologique"
+					items={[
+						{
+							label: "Contraception",
+							value: patient.contraception ? String(patient.contraception) : "Non renseigné",
+						},
+						{
+							label: "Antécédents gynécologiques",
+							value: patient.gynecological_history || "Non renseigné",
+						},
+					]}
+				/>
+			)}
 
 			{/* Nouvelle section pour tous les patients */}
 			<MedicalInfoCard
@@ -166,43 +217,121 @@ export function MedicalInfoTab({
 				]}
 			/>
 
-			{/* Nouvelle section pour les patients pédiatriques */}
-			{isChild && (
+			{/* Commentaires additionnels adultes */}
+			{!isChild && patient.other_comments_adult && (
 				<MedicalInfoCard
-					title="Informations pédiatriques"
+					title="Autres commentaires"
 					items={[
 						{
-							label: "Grossesse",
-							value: patient.pregnancyHistory || "Non renseigné",
-						},
-						{
-							label: "Naissance",
-							value: patient.birthDetails || "Non renseigné",
-						},
-						{
-							label: "Développement moteur",
-							value:
-								patient.developmentMilestones ||
-								"Non renseigné",
-						},
-						{
-							label: "Sommeil",
-							value: patient.sleepingPattern || "Non renseigné",
-						},
-						{
-							label: "Alimentation",
-							value: patient.feeding || "Non renseigné",
-						},
-						{
-							label: "Comportement",
-							value: patient.behavior || "Non renseigné",
-						},
-						{
-							label: "Mode de garde / Contexte",
-							value: patient.childCareContext || "Non renseigné",
+							label: "Notes supplémentaires",
+							value: patient.other_comments_adult,
 						},
 					]}
 				/>
+			)}
+
+			{/* Sections spécifiques aux enfants */}
+			{isChild && (
+				<>
+					<MedicalInfoCard
+						title="Informations pédiatriques générales"
+						items={[
+							{
+								label: "Grossesse",
+								value: patient.pregnancyHistory || "Non renseigné",
+							},
+							{
+								label: "Naissance",
+								value: patient.birthDetails || "Non renseigné",
+							},
+							{
+								label: "Score APGAR",
+								value: patient.apgar_score || "Non renseigné",
+							},
+							{
+								label: "Poids à la naissance",
+								value: patient.weight_at_birth ? `${patient.weight_at_birth} g` : "Non renseigné",
+							},
+							{
+								label: "Taille à la naissance",
+								value: patient.height_at_birth ? `${patient.height_at_birth} cm` : "Non renseigné",
+							},
+							{
+								label: "Périmètre crânien",
+								value: patient.head_circumference ? `${patient.head_circumference} cm` : "Non renseigné",
+							},
+						]}
+					/>
+
+					<MedicalInfoCard
+						title="Développement et suivi"
+						items={[
+							{
+								label: "Développement moteur",
+								value: patient.developmentMilestones || "Non renseigné",
+							},
+							{
+								label: "Motricité fine",
+								value: patient.fine_motor_skills || "Non renseigné",
+							},
+							{
+								label: "Motricité globale",
+								value: patient.gross_motor_skills || "Non renseigné",
+							},
+							{
+								label: "Sommeil",
+								value: patient.sleepingPattern || "Non renseigné",
+							},
+							{
+								label: "Alimentation",
+								value: patient.feeding || "Non renseigné",
+							},
+							{
+								label: "Comportement",
+								value: patient.behavior || "Non renseigné",
+							},
+						]}
+					/>
+
+					<MedicalInfoCard
+						title="Environnement et suivi"
+						items={[
+							{
+								label: "Mode de garde",
+								value: patient.childcare_type || "Non renseigné",
+							},
+							{
+								label: "Niveau scolaire",
+								value: patient.school_grade || "Non renseigné",
+							},
+							{
+								label: "Pédiatre",
+								value: patient.pediatrician_name || "Non renseigné",
+							},
+							{
+								label: "Suivis paramédicaux",
+								value: patient.paramedical_followup || "Non renseigné",
+							},
+							{
+								label: "Contexte de garde",
+								value: patient.childCareContext || "Non renseigné",
+							},
+						]}
+					/>
+
+					{/* Commentaires additionnels enfants */}
+					{patient.other_comments_child && (
+						<MedicalInfoCard
+							title="Autres commentaires"
+							items={[
+								{
+									label: "Notes supplémentaires",
+									value: patient.other_comments_child,
+								},
+							]}
+						/>
+					)}
+				</>
 			)}
 		</div>
 	);

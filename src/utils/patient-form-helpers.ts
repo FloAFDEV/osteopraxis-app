@@ -49,10 +49,10 @@ const getPatientSchema = (emailRequired: boolean) => z.object({
 	handedness: z.string().optional().nullable(),
 	familyStatus: z.string().optional().nullable(),
 	cabinetId: z.number().optional(), // Ajout du champ cabinetId
-	// Nouveaux champs pour tous les patients
+	// Champs existants pour tous les patients
 	complementaryExams: z.string().optional().nullable(),
 	generalSymptoms: z.string().optional().nullable(),
-	// Nouveaux champs pour les enfants
+	// Champs existants pour les enfants
 	pregnancyHistory: z.string().optional().nullable(),
 	birthDetails: z.string().optional().nullable(),
 	developmentMilestones: z.string().optional().nullable(),
@@ -60,6 +60,29 @@ const getPatientSchema = (emailRequired: boolean) => z.object({
 	feeding: z.string().optional().nullable(),
 	behavior: z.string().optional().nullable(),
 	childCareContext: z.string().optional().nullable(),
+	
+	// Nouveaux champs généraux
+	ent_followup: z.string().optional().nullable(),
+	intestinal_transit: z.string().optional().nullable(),
+	sleep_quality: z.string().optional().nullable(),
+	fracture_history: z.string().optional().nullable(),
+	dental_health: z.string().optional().nullable(),
+	sport_frequency: z.string().optional().nullable(),
+	gynecological_history: z.string().optional().nullable(),
+	other_comments_adult: z.string().optional().nullable(),
+	
+	// Nouveaux champs spécifiques aux enfants
+	fine_motor_skills: z.string().optional().nullable(),
+	gross_motor_skills: z.string().optional().nullable(),
+	weight_at_birth: z.number().optional().nullable(),
+	height_at_birth: z.number().optional().nullable(),
+	head_circumference: z.number().optional().nullable(),
+	apgar_score: z.string().optional().nullable(),
+	childcare_type: z.string().optional().nullable(),
+	school_grade: z.string().optional().nullable(),
+	pediatrician_name: z.string().optional().nullable(),
+	paramedical_followup: z.string().optional().nullable(),
+	other_comments_child: z.string().optional().nullable(),
 });
 
 export default getPatientSchema;

@@ -54,7 +54,7 @@ const NewPatientPage = () => {
         osteopathId: user.osteopathId || user.id, // Utilise osteopathId ou id selon ce qui est disponible
         cabinetId: patientData.cabinetId || selectedCabinetId || 1, // Utiliser le cabinetId du formulaire ou celui sélectionné dans la navbar
         userId: null, // Requis par le type mais peut être null
-        // Ajout des nouveaux champs requis pour la compatibilité des types
+        // Champs existants requis
         complementaryExams: patientData.complementaryExams || null,
         generalSymptoms: patientData.generalSymptoms || null,
         pregnancyHistory: patientData.pregnancyHistory || null,
@@ -67,7 +67,30 @@ const NewPatientPage = () => {
         isExSmoker: patientData.isExSmoker || false,
         smokingSince: patientData.smokingSince || null,
         smokingAmount: patientData.smokingAmount || null,
-        quitSmokingDate: patientData.quitSmokingDate || null
+        quitSmokingDate: patientData.quitSmokingDate || null,
+        
+        // Nouveaux champs généraux
+        ent_followup: patientData.ent_followup || null,
+        intestinal_transit: patientData.intestinal_transit || null,
+        sleep_quality: patientData.sleep_quality || null,
+        fracture_history: patientData.fracture_history || null,
+        dental_health: patientData.dental_health || null,
+        sport_frequency: patientData.sport_frequency || null,
+        gynecological_history: patientData.gynecological_history || null,
+        other_comments_adult: patientData.other_comments_adult || null,
+        
+        // Nouveaux champs spécifiques aux enfants
+        fine_motor_skills: patientData.fine_motor_skills || null,
+        gross_motor_skills: patientData.gross_motor_skills || null,
+        weight_at_birth: patientData.weight_at_birth || null,
+        height_at_birth: patientData.height_at_birth || null,
+        head_circumference: patientData.head_circumference || null,
+        apgar_score: patientData.apgar_score || null,
+        childcare_type: patientData.childcare_type || null,
+        school_grade: patientData.school_grade || null,
+        pediatrician_name: patientData.pediatrician_name || null,
+        paramedical_followup: patientData.paramedical_followup || null,
+        other_comments_child: patientData.other_comments_child || null
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
 
       console.log("Envoi du patient à l'API avec cabinetId:", patientToCreate.cabinetId);
