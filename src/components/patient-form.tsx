@@ -1,28 +1,20 @@
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
-	FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { TranslatedSelect } from "@/components/ui/translated-select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { TranslatedSelect } from "@/components/ui/translated-select";
 import { Patient } from "@/types";
 import { convertHasChildrenToBoolean } from "@/utils/patient-form-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,54 +25,55 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 // Schéma de validation pour le formulaire patient
-const getPatientSchema = (emailRequired: boolean) => z.object({
-	address: z.string().optional().nullable(),
-	email: emailRequired 
-		? z.string().email("Email invalide").min(1, "Email requis")
-		: z.string().email("Email invalide").optional().nullable(),
-	phone: z.string().optional().nullable(),
-	notes: z.string().optional().nullable(),
-	birthDate: z.date().optional().nullable(),
-	childrenAges: z.array(z.number()).optional().nullable(),
-	firstName: z.string().min(1, "Prénom requis"),
-	lastName: z.string().min(1, "Nom requis"),
-	gender: z.string().optional().nullable(),
-	hasChildren: z.boolean().optional().nullable(),
-	occupation: z.string().optional().nullable(),
-	maritalStatus: z.string().optional().nullable(),
-	contraception: z.string().optional().nullable(),
-	physicalActivity: z.string().optional().nullable(),
-	isSmoker: z.boolean().optional().nullable(),
-	isExSmoker: z.boolean().optional().nullable(),
-	smokingSince: z.string().optional().nullable(),
-	smokingAmount: z.string().optional().nullable(),
-	quitSmokingDate: z.string().optional().nullable(),
-	generalPractitioner: z.string().optional().nullable(),
-	ophtalmologistName: z.string().optional().nullable(),
-	hasVisionCorrection: z.boolean().optional().nullable(),
-	entDoctorName: z.string().optional().nullable(),
-	entProblems: z.string().optional().nullable(),
-	digestiveDoctorName: z.string().optional().nullable(),
-	digestiveProblems: z.string().optional().nullable(),
-	surgicalHistory: z.string().optional().nullable(),
-	traumaHistory: z.string().optional().nullable(),
-	rheumatologicalHistory: z.string().optional().nullable(),
-	currentTreatment: z.string().optional().nullable(),
-	handedness: z.string().optional().nullable(),
-	familyStatus: z.string().optional().nullable(),
-	cabinetId: z.number().optional(), // Ajout du champ cabinetId
-	// Nouveaux champs pour tous les patients
-	complementaryExams: z.string().optional().nullable(),
-	generalSymptoms: z.string().optional().nullable(),
-	// Nouveaux champs pour les enfants
-	pregnancyHistory: z.string().optional().nullable(),
-	birthDetails: z.string().optional().nullable(),
-	developmentMilestones: z.string().optional().nullable(),
-	sleepingPattern: z.string().optional().nullable(),
-	feeding: z.string().optional().nullable(),
-	behavior: z.string().optional().nullable(),
-	childCareContext: z.string().optional().nullable(),
-});
+const getPatientSchema = (emailRequired: boolean) =>
+	z.object({
+		address: z.string().optional().nullable(),
+		email: emailRequired
+			? z.string().email("Email invalide").min(1, "Email requis")
+			: z.string().email("Email invalide").optional().nullable(),
+		phone: z.string().optional().nullable(),
+		notes: z.string().optional().nullable(),
+		birthDate: z.date().optional().nullable(),
+		childrenAges: z.array(z.number()).optional().nullable(),
+		firstName: z.string().min(1, "Prénom requis"),
+		lastName: z.string().min(1, "Nom requis"),
+		gender: z.string().optional().nullable(),
+		hasChildren: z.boolean().optional().nullable(),
+		occupation: z.string().optional().nullable(),
+		maritalStatus: z.string().optional().nullable(),
+		contraception: z.string().optional().nullable(),
+		physicalActivity: z.string().optional().nullable(),
+		isSmoker: z.boolean().optional().nullable(),
+		isExSmoker: z.boolean().optional().nullable(),
+		smokingSince: z.string().optional().nullable(),
+		smokingAmount: z.string().optional().nullable(),
+		quitSmokingDate: z.string().optional().nullable(),
+		generalPractitioner: z.string().optional().nullable(),
+		ophtalmologistName: z.string().optional().nullable(),
+		hasVisionCorrection: z.boolean().optional().nullable(),
+		entDoctorName: z.string().optional().nullable(),
+		entProblems: z.string().optional().nullable(),
+		digestiveDoctorName: z.string().optional().nullable(),
+		digestiveProblems: z.string().optional().nullable(),
+		surgicalHistory: z.string().optional().nullable(),
+		traumaHistory: z.string().optional().nullable(),
+		rheumatologicalHistory: z.string().optional().nullable(),
+		currentTreatment: z.string().optional().nullable(),
+		handedness: z.string().optional().nullable(),
+		familyStatus: z.string().optional().nullable(),
+		cabinetId: z.number().optional(), // Ajout du champ cabinetId
+		// Nouveaux champs pour tous les patients
+		complementaryExams: z.string().optional().nullable(),
+		generalSymptoms: z.string().optional().nullable(),
+		// Nouveaux champs pour les enfants
+		pregnancyHistory: z.string().optional().nullable(),
+		birthDetails: z.string().optional().nullable(),
+		developmentMilestones: z.string().optional().nullable(),
+		sleepingPattern: z.string().optional().nullable(),
+		feeding: z.string().optional().nullable(),
+		behavior: z.string().optional().nullable(),
+		childCareContext: z.string().optional().nullable(),
+	});
 
 // Utiliser le schéma avec emailRequired à false pour type PatientFormValues
 export type PatientFormValues = z.infer<ReturnType<typeof getPatientSchema>>;
@@ -104,7 +97,11 @@ export function PatientForm({
 	const [childrenAgesInput, setChildrenAgesInput] = useState<string>("");
 	const [isChild, setIsChild] = useState<boolean>(false);
 	const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
-		patient?.cabinetId ? String(patient.cabinetId) : selectedCabinetId ? String(selectedCabinetId) : null
+		patient?.cabinetId
+			? String(patient.cabinetId)
+			: selectedCabinetId
+			? String(selectedCabinetId)
+			: null
 	);
 
 	// Initialiser le form avec les valeurs existantes ou valeurs par défaut
@@ -185,8 +182,9 @@ export function PatientForm({
 	useEffect(() => {
 		const birthDate = form.watch("birthDate");
 		if (birthDate) {
-			const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
-			setIsChild(age < 17);
+			const age =
+				new Date().getFullYear() - new Date(birthDate).getFullYear();
+			setIsChild(age < 12);
 		} else {
 			setIsChild(false);
 		}
@@ -218,7 +216,9 @@ export function PatientForm({
 				...values,
 				childrenAges: childrenAgesArray,
 				hasChildren: values.hasChildren,
-				cabinetId: currentCabinetId ? parseInt(currentCabinetId) : undefined,
+				cabinetId: currentCabinetId
+					? parseInt(currentCabinetId)
+					: undefined,
 			};
 
 			// Appeler la fonction de sauvegarde
@@ -228,7 +228,10 @@ export function PatientForm({
 			navigate("/patients");
 			toast.success("✅  Patient enregistré avec succès !");
 		} catch (error) {
-			console.error("⛔ rreur lors de l'enregistrement du patient:", error);
+			console.error(
+				"⛔ rreur lors de l'enregistrement du patient:",
+				error
+			);
 			toast.error(
 				"⛔ Erreur lors de l'enregistrement du patient. Veuillez réessayer."
 			);
@@ -252,10 +255,12 @@ export function PatientForm({
 						<TabsTrigger value="contact">Contact</TabsTrigger>
 						<TabsTrigger value="anamnese">Anamnèse</TabsTrigger>
 						{isChild && (
-							<TabsTrigger value="pediatric">Pédiatrie</TabsTrigger>
+							<TabsTrigger value="pediatric">
+								Pédiatrie
+							</TabsTrigger>
 						)}
 					</TabsList>
-					
+
 					<TabsContent value="general" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4">
@@ -312,14 +317,19 @@ export function PatientForm({
 										<FormItem>
 											<FormLabel>Cabinet</FormLabel>
 											<FormDescription>
-												Sélectionnez le cabinet auquel ce patient est rattaché
+												Sélectionnez le cabinet auquel
+												ce patient est rattaché
 											</FormDescription>
 											<FormControl>
 												<TranslatedSelect
 													value={currentCabinetId}
 													onValueChange={(value) => {
-														setCurrentCabinetId(value);
-														field.onChange(parseInt(value));
+														setCurrentCabinetId(
+															value
+														);
+														field.onChange(
+															parseInt(value)
+														);
 													}}
 													enumType="Cabinet"
 													placeholder="Sélectionner un cabinet"
@@ -336,11 +346,15 @@ export function PatientForm({
 										name="birthDate"
 										render={({ field }) => (
 											<FormItem className="flex flex-col space-y-1.5">
-												<FormLabel>Date de naissance</FormLabel>
+												<FormLabel>
+													Date de naissance
+												</FormLabel>
 												<FormControl>
 													<DateInput
 														value={field.value}
-														onChange={field.onChange}
+														onChange={
+															field.onChange
+														}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -357,7 +371,9 @@ export function PatientForm({
 												<FormControl>
 													<TranslatedSelect
 														value={field.value}
-														onValueChange={field.onChange}
+														onValueChange={
+															field.onChange
+														}
 														enumType="Gender"
 														placeholder="Sélectionner un genre"
 													/>
@@ -374,7 +390,9 @@ export function PatientForm({
 										name="occupation"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Profession</FormLabel>
+												<FormLabel>
+													Profession
+												</FormLabel>
 												<FormControl>
 													<Input
 														placeholder="Profession"
@@ -391,11 +409,15 @@ export function PatientForm({
 										name="maritalStatus"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Situation maritale</FormLabel>
+												<FormLabel>
+													Situation maritale
+												</FormLabel>
 												<FormControl>
 													<TranslatedSelect
 														value={field.value}
-														onValueChange={field.onChange}
+														onValueChange={
+															field.onChange
+														}
 														enumType="MaritalStatus"
 														placeholder="Sélectionner une situation maritale"
 													/>
@@ -437,7 +459,9 @@ export function PatientForm({
 												<FormControl>
 													<TranslatedSelect
 														value={field.value}
-														onValueChange={field.onChange}
+														onValueChange={
+															field.onChange
+														}
 														enumType="Handedness"
 														placeholder="Sélectionner une latéralité"
 													/>
@@ -512,7 +536,9 @@ export function PatientForm({
 												<FormControl>
 													<TranslatedSelect
 														value={field.value}
-														onValueChange={field.onChange}
+														onValueChange={
+															field.onChange
+														}
 														enumType="Contraception"
 														placeholder="Sélectionner un type de contraception"
 													/>
@@ -544,7 +570,9 @@ export function PatientForm({
 
 								{/* Section Tabagisme */}
 								<div className="border p-4 rounded-lg space-y-4">
-									<h3 className="font-medium text-lg">Habitudes tabagiques</h3>
+									<h3 className="font-medium text-lg">
+										Habitudes tabagiques
+									</h3>
 									<div className="grid grid-cols-1 gap-4">
 										<FormField
 											control={form.control}
@@ -556,17 +584,27 @@ export function PatientForm({
 															Fumeur ?
 														</FormLabel>
 														<FormDescription>
-															Indiquez si le patient
-															fume actuellement.
+															Indiquez si le
+															patient fume
+															actuellement.
 														</FormDescription>
 													</div>
 													<FormControl>
 														<Switch
-															checked={field.value}
-															onCheckedChange={(checked) => {
-																field.onChange(checked);
+															checked={
+																field.value
+															}
+															onCheckedChange={(
+																checked
+															) => {
+																field.onChange(
+																	checked
+																);
 																if (checked) {
-																	form.setValue("isExSmoker", false);
+																	form.setValue(
+																		"isExSmoker",
+																		false
+																	);
 																}
 															}}
 														/>
@@ -582,7 +620,9 @@ export function PatientForm({
 													name="smokingSince"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Depuis quand ?</FormLabel>
+															<FormLabel>
+																Depuis quand ?
+															</FormLabel>
 															<FormControl>
 																<Input
 																	placeholder="Ex: 2010, depuis 5 ans..."
@@ -598,7 +638,9 @@ export function PatientForm({
 													name="smokingAmount"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Quantité</FormLabel>
+															<FormLabel>
+																Quantité
+															</FormLabel>
 															<FormControl>
 																<Input
 																	placeholder="Ex: 10 cigarettes/jour"
@@ -622,17 +664,27 @@ export function PatientForm({
 															Ex-fumeur ?
 														</FormLabel>
 														<FormDescription>
-															Indiquez si le patient
-															a arrêté de fumer.
+															Indiquez si le
+															patient a arrêté de
+															fumer.
 														</FormDescription>
 													</div>
 													<FormControl>
 														<Switch
-															checked={field.value}
-															onCheckedChange={(checked) => {
-																field.onChange(checked);
+															checked={
+																field.value
+															}
+															onCheckedChange={(
+																checked
+															) => {
+																field.onChange(
+																	checked
+																);
 																if (checked) {
-																	form.setValue("isSmoker", false);
+																	form.setValue(
+																		"isSmoker",
+																		false
+																	);
 																}
 															}}
 														/>
@@ -648,7 +700,9 @@ export function PatientForm({
 													name="quitSmokingDate"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Arrêt depuis</FormLabel>
+															<FormLabel>
+																Arrêt depuis
+															</FormLabel>
 															<FormControl>
 																<Input
 																	placeholder="Ex: 2018, depuis 3 ans..."
@@ -664,7 +718,10 @@ export function PatientForm({
 													name="smokingAmount"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Quantité avant arrêt</FormLabel>
+															<FormLabel>
+																Quantité avant
+																arrêt
+															</FormLabel>
 															<FormControl>
 																<Input
 																	placeholder="Ex: 15 cigarettes/jour"
@@ -1002,14 +1059,18 @@ export function PatientForm({
 						<Card>
 							<CardContent className="space-y-4">
 								<div className="py-4">
-									<h3 className="font-medium text-lg mb-4">Informations complémentaires</h3>
+									<h3 className="font-medium text-lg mb-4">
+										Informations complémentaires
+									</h3>
 
 									<FormField
 										control={form.control}
 										name="complementaryExams"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Examens complémentaires</FormLabel>
+												<FormLabel>
+													Examens complémentaires
+												</FormLabel>
 												<FormDescription>
 													Radios, IRM, bilans, etc.
 												</FormDescription>
@@ -1030,9 +1091,12 @@ export function PatientForm({
 										name="generalSymptoms"
 										render={({ field }) => (
 											<FormItem className="mt-4">
-												<FormLabel>Symptômes généraux</FormLabel>
+												<FormLabel>
+													Symptômes généraux
+												</FormLabel>
 												<FormDescription>
-													Digestion, sommeil, stress, etc.
+													Digestion, sommeil, stress,
+													etc.
 												</FormDescription>
 												<FormControl>
 													<Textarea
@@ -1056,14 +1120,19 @@ export function PatientForm({
 							<Card>
 								<CardContent className="space-y-6">
 									<div className="py-4">
-										<h3 className="font-medium text-lg mb-4">Informations pédiatriques</h3>
+										<h3 className="font-medium text-lg mb-4">
+											Informations pédiatriques
+										</h3>
 
 										<FormField
 											control={form.control}
 											name="pregnancyHistory"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Déroulement de la grossesse</FormLabel>
+													<FormLabel>
+														Déroulement de la
+														grossesse
+													</FormLabel>
 													<FormControl>
 														<Textarea
 															placeholder="Déroulement de la grossesse"
@@ -1081,9 +1150,13 @@ export function PatientForm({
 											name="birthDetails"
 											render={({ field }) => (
 												<FormItem className="mt-4">
-													<FormLabel>Détails de l'accouchement</FormLabel>
+													<FormLabel>
+														Détails de
+														l'accouchement
+													</FormLabel>
 													<FormDescription>
-														Voie, durée, poids, complications...
+														Voie, durée, poids,
+														complications...
 													</FormDescription>
 													<FormControl>
 														<Textarea
@@ -1102,7 +1175,10 @@ export function PatientForm({
 											name="developmentMilestones"
 											render={({ field }) => (
 												<FormItem className="mt-4">
-													<FormLabel>Étapes du développement moteur</FormLabel>
+													<FormLabel>
+														Étapes du développement
+														moteur
+													</FormLabel>
 													<FormControl>
 														<Textarea
 															placeholder="Étapes du développement moteur"
@@ -1121,7 +1197,9 @@ export function PatientForm({
 												name="sleepingPattern"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Habitudes de sommeil</FormLabel>
+														<FormLabel>
+															Habitudes de sommeil
+														</FormLabel>
 														<FormControl>
 															<Textarea
 																placeholder="Habitudes de sommeil"
@@ -1133,13 +1211,15 @@ export function PatientForm({
 													</FormItem>
 												)}
 											/>
-											
+
 											<FormField
 												control={form.control}
 												name="feeding"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Alimentation</FormLabel>
+														<FormLabel>
+															Alimentation
+														</FormLabel>
 														<FormControl>
 															<Textarea
 																placeholder="Habitudes alimentaires"
@@ -1159,7 +1239,9 @@ export function PatientForm({
 												name="behavior"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Comportement général</FormLabel>
+														<FormLabel>
+															Comportement général
+														</FormLabel>
 														<FormControl>
 															<Textarea
 																placeholder="Comportement général de l'enfant"
@@ -1171,13 +1253,15 @@ export function PatientForm({
 													</FormItem>
 												)}
 											/>
-											
+
 											<FormField
 												control={form.control}
 												name="childCareContext"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Contexte de garde</FormLabel>
+														<FormLabel>
+															Contexte de garde
+														</FormLabel>
 														<FormControl>
 															<Textarea
 																placeholder="Mode de garde, scolarité, etc."
@@ -1214,4 +1298,3 @@ export function PatientForm({
 		</Form>
 	);
 }
-
