@@ -83,6 +83,7 @@ const NewAppointmentPage = () => {
 								date: defaultDate,
 								time: defaultTime,
 								status: "SCHEDULED",
+								website: "" // Initialiser le honeypot
 							}}
 						/>
 					</section>

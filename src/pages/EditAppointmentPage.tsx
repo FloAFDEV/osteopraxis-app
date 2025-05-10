@@ -1,123 +1,122 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
-import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
+import { Patient } from "@/types";
+import { Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
 
 const EditAppointmentPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
-	const [appointment, setAppointment] = useState<Appointment | null>(null);
+	const [appointment, setAppointment] = useState<any>(null);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const fetchAppointmentAndPatients = async () => {
-			setLoading(true);
+		const fetchData = async () => {
 			try {
-				if (!id) {
-					toast.error("L'ID de la séance est manquant.");
-					return;
-				}
-
-				const appointmentId = parseInt(id, 10);
+				// Fetch appointment and patients in parallel
 				const [appointmentData, patientsData] = await Promise.all([
-					api.getAppointmentById(appointmentId),
+					api.getAppointmentById(Number(id)),
 					api.getPatients(),
 				]);
 
 				if (!appointmentData) {
-					toast.error("Séance non trouvée.");
-					navigate("/appointments");
+					setError("Séance introuvable");
 					return;
 				}
 
 				setAppointment(appointmentData);
-				setPatients(
-					patientsData.sort((a: Patient, b: Patient) =>
-						a.lastName.localeCompare(b.lastName)
-					)
-				);
-			} catch (error) {
-				console.error("Erreur lors du chargement des données :", error);
-				toast.error(
-					"Impossible de charger les données. Veuillez réessayer."
-				);
+				setPatients(patientsData);
+			} catch (err) {
+				console.error("Erreur lors du chargement des données:", err);
+				setError("Erreur lors du chargement des données");
+				toast.error("Erreur lors du chargement des données");
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		fetchAppointmentAndPatients();
-	}, [id, navigate]);
+		if (id) {
+			fetchData();
+		}
+	}, [id]);
 
 	if (loading) {
 		return (
 			<Layout>
-				<div className="flex justify-center items-center h-full">
+				<div className="flex justify-center items-center py-20">
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent mx-auto mb-4" />
-						<p className="text-gray-500 dark:text-gray-400">
-							Chargement des données...
-						</p>
+						<p className="text-gray-500">Chargement des données...</p>
 					</div>
 				</div>
 			</Layout>
 		);
 	}
 
-	if (!appointment) {
+	if (error || !appointment) {
 		return (
 			<Layout>
-				<div className="flex justify-center items-center h-full">
-					<div className="text-center">
-						<p className="text-red-500 dark:text-red-400">
-							Séance non trouvée. Veuillez vérifier l'ID.
-						</p>
-					</div>
+				<div className="flex flex-col items-center justify-center py-20">
+					<h2 className="text-2xl font-bold text-red-600 mb-4">
+						{error || "Une erreur est survenue"}
+					</h2>
+					<p className="text-gray-600 mb-6">
+						La séance demandée n'a pas pu être chargée.
+					</p>
+					<button
+						onClick={() => navigate("/appointments")}
+						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+					>
+						Retourner à la liste des séances
+					</button>
 				</div>
 			</Layout>
 		);
 	}
+
+	// Format date for form
+	const formattedDate = new Date(appointment.date);
+	const formattedTime = formattedDate.toLocaleTimeString("fr-FR", {
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: false,
+	});
 
 	return (
 		<Layout>
 			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<header className="mb-6">
-					<h1 className="text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-						<Calendar className="h-8 w-8 text-purple-500 dark:text-purple-400" />
+					<h1 className="text-3xl font-bold flex items-center gap-2">
+						<Calendar className="h-8 w-8 text-purple-600" />
 						Modifier la séance
 					</h1>
-					<p className="text-gray-500 dark:text-gray-400 mt-2">
-						Modifiez les informations de la séance en remplissant le
+					<p className="text-gray-500 mt-2">
+						Modifiez les informations de la séance en utilisant le
 						formulaire ci-dessous.
 					</p>
 				</header>
 
-				<section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-					{appointment && (
-						<AppointmentForm
-							patients={patients}
-							appointmentId={appointment.id}
-							defaultValues={{
-								patientId: appointment.patientId,
-								date: new Date(appointment.date),
-								time: format(
-									new Date(appointment.date),
-									"HH:mm"
-								),
-								reason: appointment.reason,
-								status: appointment.status,
-								notes: appointment.notes,
-							}}
-							isEditing={true}
-						/>
-					)}
+				<section className="rounded-lg border border-gray-200 shadow-sm p-6">
+					<AppointmentForm
+						patients={patients}
+						defaultValues={{
+							patientId: appointment.patientId,
+							date: formattedDate,
+							time: formattedTime,
+							reason: appointment.reason || "",
+							notes: appointment.notes || "",
+							status: appointment.status,
+							website: "" // Initialiser le honeypot
+						}}
+						appointmentId={Number(id)}
+						isEditing={true}
+					/>
 				</section>
 			</div>
 		</Layout>

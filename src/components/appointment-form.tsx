@@ -46,11 +46,13 @@ const appointmentFormSchema = z.object({
   // Updated to account for both status spellings
   status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "CANCELED", "RESCHEDULED", "NO_SHOW"], {
     required_error: "Veuillez sélectionner un statut"
-  })
+  }),
+  // Honeypot field
+  website: z.string().optional()
 });
 
 // Create a custom refinement function that properly handles the context
-const refinePastAppointments = (isEditing: boolean) => {
+const refineFormValidations = (isEditing: boolean) => {
   return appointmentFormSchema.superRefine((data, ctx) => {
     // Pour les nouvelles séances seulement, vérifier que le temps n'est pas dans le passé
     if (!isEditing && isSameDay(data.date, new Date())) {
@@ -61,6 +63,15 @@ const refinePastAppointments = (isEditing: boolean) => {
           path: ["time"]
         });
       }
+    }
+    
+    // Vérification du honeypot - si rempli, c'est probablement un bot
+    if (data.website && data.website.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Validation error",
+        path: ["website"]
+      });
     }
   });
 };
@@ -103,7 +114,7 @@ export function AppointmentForm({
   }, [patients, defaultValues?.patientId]);
 
   // Use the custom schema with refinement
-  const schema = refinePastAppointments(isEditing);
+  const schema = refineFormValidations(isEditing);
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(schema),
@@ -113,7 +124,8 @@ export function AppointmentForm({
       time: defaultValues?.time || "09:00",
       reason: defaultValues?.reason || "",
       notes: defaultValues?.notes || "",
-      status: defaultValues?.status || "SCHEDULED"
+      status: defaultValues?.status || "SCHEDULED",
+      website: "" // Initialize honeypot field with empty string
     }
   });
 
@@ -170,7 +182,6 @@ export function AppointmentForm({
       return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
     }).filter(Boolean) as string[];
   };
-  const availableTimes = generateAvailableTimes();
   
   const onSubmit = async (data: AppointmentFormValues) => {
     try {
@@ -277,6 +288,34 @@ export function AppointmentForm({
   
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Honeypot field - hidden from users but might be filled by bots */}
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem 
+              style={{ 
+                position: "absolute", 
+                left: "-5000px",
+                opacity: 0,
+                width: "1px",
+                height: "1px",
+                overflow: "hidden"
+              }}
+              aria-hidden="true"
+            >
+              <FormLabel>Site web</FormLabel>
+              <FormControl>
+                <Input 
+                  autoComplete="off"
+                  tabIndex={-1} 
+                  {...field} 
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         {/* Champ de recherche + Select */}
         <FormField control={form.control} name="patientId" render={({
         field
@@ -330,8 +369,8 @@ export function AppointmentForm({
                 field.onChange(date);
                 // Ne pas réinitialiser l'heure en mode édition
                 if (!isEditing && date && isSameDay(date, new Date())) {
-                  const now = new Date();
-                  const currentTimeSlot = availableTimes[0];
+                  const availableTimeSlots = generateAvailableTimes();
+                  const currentTimeSlot = availableTimeSlots[0];
                   if (currentTimeSlot) {
                     form.setValue("time", currentTimeSlot);
                   }
@@ -360,7 +399,7 @@ export function AppointmentForm({
                       </div>
                     </FormControl>
                     <SelectContent>
-                      {availableTimes.length > 0 ? availableTimes.map(time => <SelectItem key={time} value={time}>
+                      {generateAvailableTimes().length > 0 ? generateAvailableTimes().map(time => <SelectItem key={time} value={time}>
                             {time}
                           </SelectItem>) : <SelectItem value="00:00" disabled>
                           Aucun horaire disponible
