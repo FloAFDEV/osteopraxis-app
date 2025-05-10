@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, Activity, User, UserPlus, Info } from "lucide-react";
@@ -17,10 +16,20 @@ const registerSchema = z.object({
   lastName: z.string().min(1, "Le nom est requis"),
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  confirmPassword: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères")
+  confirmPassword: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  website: z.string().optional() // Champ honeypot pour détecter les bots
 }).refine((data) => data.password === data.confirmPassword, {
   path: ["confirmPassword"],
   message: "Les mots de passe ne correspondent pas",
+}).superRefine((data, ctx) => {
+  // Vérification du honeypot - si rempli, c'est probablement un bot
+  if (data.website && data.website.length > 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Validation error",
+      path: ["website"]
+    });
+  }
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -39,6 +48,7 @@ const RegisterPage = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      website: "", // Initialiser le honeypot
     },
   });
 
@@ -134,6 +144,34 @@ const RegisterPage = () => {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Honeypot field - hidden from users but might be filled by bots */}
+                <FormField
+                  control={form.control}
+                  name="website"
+                  render={({ field }) => (
+                    <FormItem 
+                      style={{ 
+                        position: "absolute", 
+                        left: "-5000px",
+                        opacity: 0,
+                        width: "1px",
+                        height: "1px",
+                        overflow: "hidden"
+                      }}
+                      aria-hidden="true"
+                    >
+                      <FormLabel>Site web</FormLabel>
+                      <FormControl>
+                        <Input 
+                          autoComplete="off"
+                          tabIndex={-1} 
+                          {...field} 
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
                 <div className="flex flex-col md:flex-row gap-4">
                   <FormField
                     control={form.control}
