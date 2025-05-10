@@ -924,8 +924,7 @@ export function PatientForm({
 												</FormLabel>
 												<FormControl>
 													<Input
-														placeholder="Nom de
-														l'ophtalmologue"
+														placeholder="Nom de l'ophtalmologue"
 														{...field}
 													/>
 												</FormControl>
