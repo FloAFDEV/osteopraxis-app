@@ -213,6 +213,16 @@ export interface DashboardData {
 	newPatientsLast30Days: number;
 	thirtyDayGrowthPercentage: number;
 	annualGrowthPercentage: number;
+	monthlyGrowth: {
+		month: string;
+		patients: number;
+		prevPatients: number;
+		growthText: string;
+		hommes: number;
+		femmes: number;
+		enfants: number;
+	}[];
+	childrenCount?: number;
 }
 
 export interface MonthlyGrowth {
