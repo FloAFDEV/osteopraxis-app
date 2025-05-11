@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
 import { Patient, DashboardData } from "@/types";
@@ -6,6 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { GenderPieChart } from './demographics/gender-pie-chart';
 import { ChildrenStats } from './demographics/children-stats';
 import { calculateGenderData, isChild } from './demographics/gender-chart-utils';
+import { ChartPie } from 'lucide-react';
 
 interface DemographicsCardProps {
   patients?: Patient[];
@@ -41,9 +41,10 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   // Add DEBUG: Log chart data just before rendering
   useEffect(() => {
     console.log("Chart data before rendering:", chartData);
-  }, [chartData]);
+    console.log("Patients data available:", !!patients, "Dashboard data available:", !!data);
+  }, [chartData, patients, data]);
 
-  const isLoading = patientsList.length === 0 && !data || !data?.maleCount && !data?.femaleCount && totalPatients === 0;
+  const isLoading = (!patientsList || patientsList.length === 0) && !data;
   
   if (isLoading) {
     return (
@@ -77,7 +78,14 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
           <span className="font-medium">Total:</span> {totalPatients} patients
         </div>
         
-        <GenderPieChart chartData={chartData} totalPatients={totalPatients} />
+        {chartData && chartData.length > 0 ? (
+          <GenderPieChart chartData={chartData} totalPatients={totalPatients} />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
+            <ChartPie className="h-12 w-12 mb-2" />
+            <p>Aucune donnée démographique disponible</p>
+          </div>
+        )}
         
         {/* Children statistics summary - always displayed with real values */}
         <ChildrenStats childrenCount={childrenCount} totalPatients={totalPatients} />

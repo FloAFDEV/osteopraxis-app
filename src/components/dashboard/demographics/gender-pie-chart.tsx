@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { User, UserRound, Baby, UserCircle, ChartPie } from 'lucide-react';
 import { TooltipProvider, Tooltip as UITooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -28,12 +28,17 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
   const { isMobile } = useIsMobile();
   
   // Log data for debugging
-  console.log("GenderPieChart received data:", chartData, "totalPatients:", totalPatients);
+  useEffect(() => {
+    console.log("GenderPieChart rendering with data:", chartData, "totalPatients:", totalPatients);
+  }, [chartData, totalPatients]);
 
   // Create safe data for the chart - ensure we always have valid data
-  const validChartData = chartData?.filter(item => item.value > 0) || [];
+  const validChartData = chartData?.filter(item => item && item.value > 0) || [];
   
-  console.log("Valid chart data after filtering:", validChartData);
+  // Log valid data
+  useEffect(() => {
+    console.log("Valid chart data after filtering:", validChartData);
+  }, [validChartData]);
   
   // If we have no data, show a placeholder
   if (!validChartData.length) {
@@ -146,6 +151,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
             isAnimationActive={true}
             animationDuration={800}
             animationBegin={300}
+            nameKey="name"
           >
             {validChartData.map((entry, index) => (
               <Cell 
