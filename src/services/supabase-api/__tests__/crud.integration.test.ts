@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { supabaseOsteopathService } from "../../supabase-api/osteopath-service";
 import { supabasePatientService } from "../../supabase-api/patient-service";
@@ -97,10 +98,10 @@ describe("Tests d'intégration CRUD sur Supabase (Osteopath, Patient, Cabinet, I
       cabinetId: null,
       userId: null,
       osteopathId: osteoId,
-      // Ajout des nouveaux champs pour tous les patients
+      // Champs existants pour tous les patients
       complementaryExams: null,
       generalSymptoms: null,
-      // Ajout des nouveaux champs pour les enfants
+      // Champs existants pour les enfants
       pregnancyHistory: null,
       birthDetails: null,
       developmentMilestones: null,
@@ -108,11 +109,32 @@ describe("Tests d'intégration CRUD sur Supabase (Osteopath, Patient, Cabinet, I
       feeding: null,
       behavior: null,
       childCareContext: null,
-      // Propriétés supplémentaires
+      // Propriétés pour le tabagisme
       isExSmoker: false,
       smokingSince: null,
       smokingAmount: null,
-      quitSmokingDate: null
+      quitSmokingDate: null,
+      // Nouveaux champs généraux
+      ent_followup: null,
+      intestinal_transit: null,
+      sleep_quality: null,
+      fracture_history: null,
+      dental_health: null,
+      sport_frequency: null,
+      gynecological_history: null,
+      other_comments_adult: null,
+      // Nouveaux champs spécifiques aux enfants
+      fine_motor_skills: null,
+      gross_motor_skills: null,
+      weight_at_birth: null,
+      height_at_birth: null,
+      head_circumference: null,
+      apgar_score: null,
+      childcare_type: null,
+      school_grade: null,
+      pediatrician_name: null,
+      paramedical_followup: null,
+      other_comments_child: null
     });
     patientId = patient.id;
     expect(patientId).toBeDefined();

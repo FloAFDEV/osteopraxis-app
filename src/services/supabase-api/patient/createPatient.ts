@@ -4,7 +4,7 @@ import { supabase } from "../utils";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 
 // Type pour la création de patient, sans les champs générés
-type CreatePatientPayload = Omit<Patient, "id" | "createdAt" | "updatedAt">;
+export type CreatePatientPayload = Omit<Patient, "id" | "createdAt" | "updatedAt">;
 
 export async function createPatient(patient: CreatePatientPayload): Promise<Patient> {
   // Correction pour certaines valeurs d'énumération
@@ -43,7 +43,27 @@ export async function createPatient(patient: CreatePatientPayload): Promise<Pati
     smokingSince: patient.smokingSince || null,
     smokingAmount: patient.smokingAmount || null,
     isExSmoker: patient.isExSmoker || false,
-    quitSmokingDate: patient.quitSmokingDate || null
+    quitSmokingDate: patient.quitSmokingDate || null,
+    // Ajout des nouveaux champs avec valeurs par défaut
+    apgar_score: patient.apgar_score || null,
+    childcare_type: patient.childcare_type || null,
+    dental_health: patient.dental_health || null,
+    ent_followup: patient.ent_followup || null,
+    fine_motor_skills: patient.fine_motor_skills || null,
+    fracture_history: patient.fracture_history || null,
+    gross_motor_skills: patient.gross_motor_skills || null,
+    gynecological_history: patient.gynecological_history || null,
+    head_circumference: patient.head_circumference || null,
+    height_at_birth: patient.height_at_birth || null,
+    intestinal_transit: patient.intestinal_transit || null,
+    other_comments_adult: patient.other_comments_adult || null,
+    other_comments_child: patient.other_comments_child || null,
+    paramedical_followup: patient.paramedical_followup || null,
+    pediatrician_name: patient.pediatrician_name || null,
+    school_grade: patient.school_grade || null,
+    sleep_quality: patient.sleep_quality || null,
+    sport_frequency: patient.sport_frequency || null,
+    weight_at_birth: patient.weight_at_birth || null
   };
 
   console.log("Création d'un patient avec les données:", insertable);
