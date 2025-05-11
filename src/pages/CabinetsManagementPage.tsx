@@ -28,10 +28,11 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const CabinetsManagementPage = () => {
+	const navigate = useNavigate();
 	const [cabinets, setCabinets] = useState<Cabinet[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -117,11 +118,13 @@ const CabinetsManagementPage = () => {
 		<Layout>
 			{" "}
 			<div className="flex items-center gap-2">
-				<Button variant="outline" size="sm" asChild>
-					<Link to="/patients">
-						<ArrowLeft className="mr-2 h-4 w-4" />
-						Retour
-					</Link>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => navigate(-1)}
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Retour
 				</Button>
 			</div>
 			<div className="container mx-auto px-4 mt-20">
