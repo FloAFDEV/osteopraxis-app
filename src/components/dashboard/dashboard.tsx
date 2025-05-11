@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -11,6 +10,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 import { formatAppointmentDate } from "@/utils/date-utils";
+import { isChild } from './demographics/gender-chart-utils';
 
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -29,6 +29,7 @@ export function Dashboard() {
     newPatientsLast30Days: 0,
     thirtyDayGrowthPercentage: 0,
     annualGrowthPercentage: 0,
+    childrenCount: 0, // Initialize childrenCount
     monthlyGrowth: Array(12).fill(0).map((_, index) => {
       const frenchMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
       return {
@@ -56,6 +57,10 @@ export function Dashboard() {
         const totalPatients = patients.length;
         const maleCount = patients.filter(p => p.gender === "Homme").length;
         const femaleCount = patients.filter(p => p.gender === "Femme").length;
+        
+        // Calculate the children count
+        const childrenCount = patients.filter(isChild).length;
+        console.log(`Dashboard data loading - Found ${childrenCount} children among ${totalPatients} patients`);
 
         // Calcul des âges et métriques de croissance
         const today = new Date();
@@ -192,6 +197,7 @@ export function Dashboard() {
           newPatientsLast30Days,
           thirtyDayGrowthPercentage,
           annualGrowthPercentage,
+          childrenCount, // Add the childrenCount to the dashboard data
           monthlyGrowth
         });
       } catch (error) {

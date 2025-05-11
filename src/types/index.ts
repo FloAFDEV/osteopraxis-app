@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -219,5 +220,5 @@ export interface DashboardData {
     prevPatients: number;
     growthText: string;
   }[];
-
+  childrenCount?: number; // Add the childrenCount property (optional)
 }
