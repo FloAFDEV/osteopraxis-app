@@ -4,7 +4,7 @@ import { DemographicsCard } from "@/components/dashboard/demographics-card";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
 import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/services/api";
-import { Appointment, DashboardData, MonthlyGrowth, Patient } from "@/types";
+import { Appointment, DashboardData, Patient, MonthlyGrowth } from "@/types";
 import { formatAppointmentDate } from "@/utils/date-utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -51,6 +51,8 @@ const initialDashboardData: DashboardData = {
 	newPatientsLast30Days: 0,
 	thirtyDayGrowthPercentage: 0,
 	annualGrowthPercentage: 0,
+	childrenCount: 0,
+	monthlyGrowth: initialMonthlyGrowth,
 };
 
 // --- Fonctions Utilitaires pour les calculs ---
@@ -288,6 +290,7 @@ export function Dashboard() {
 					...demographics,
 					...growthMetrics,
 					...appointmentStats,
+					monthlyGrowth: monthlyGrowthData,
 				});
 			} catch (err) {
 				console.error(
