@@ -27,9 +27,9 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				: "bg-gray-100",
 		darkBg:
 			patient?.gender === "Homme"
-				? "dark:bg-blue-900"
+				? "dark:bg-blue-950"
 				: patient?.gender === "Femme"
-				? "dark:bg-fuchsia-900"
+				? "dark:bg-fuchsia-950"
 				: "dark:bg-gray-800",
 		textColor:
 			patient?.gender === "Homme"
