@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Patient, DashboardData } from "@/types";
@@ -30,6 +29,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   const femaleCount = data?.femaleCount || 0;
 
   // Function to determine if a patient is a child (age < 12)
+  // Use precise age calculation to account for months and days
   const isChild = (patient: Patient): boolean => {
     if (!patient.birthDate) return false;
     
@@ -48,14 +48,17 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     return age < 12;
   };
 
-  // Calculate children count from patients list with console logging for debugging
-  const getChildrenCount = (): number => {
-    if (patientsList.length > 0) {
-      const childrenPatients = patientsList.filter(isChild);
-      console.log(`Children count: ${childrenPatients.length} out of ${patientsList.length} patients`);
-      
-      // Debug information about each patient
-      patientsList.forEach(patient => {
+  // Calculate children count directly from patients list
+  const childrenCount = React.useMemo(() => {
+    if (!patientsList.length) return 0;
+    
+    const children = patientsList.filter(isChild);
+    console.log(`Children calculation in demographics-card: found ${children.length} children`);
+    
+    // Log detailed information about each patient for debugging
+    if (children.length === 0) {
+      console.log('No children found in patient list. Analyzing all patients:');
+      patientsList.slice(0, 5).forEach(patient => {
         if (patient.birthDate) {
           const birthDate = new Date(patient.birthDate);
           const today = new Date();
@@ -64,20 +67,20 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
           if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
             age--;
           }
-          console.log(`Patient ${patient.firstName} ${patient.lastName}: Birth date ${patient.birthDate}, Age: ${age}, Is child: ${age < 12}`);
+          console.log(`Patient: ${patient.firstName} ${patient.lastName}, Birth date: ${patient.birthDate}, Age: ${age}, Is child: ${age < 12}`);
         } else {
-          console.log(`Patient ${patient.firstName} ${patient.lastName}: No birth date provided`);
+          console.log(`Patient: ${patient.firstName} ${patient.lastName}, No birth date provided`);
         }
       });
-      
-      return childrenPatients.length;
     }
-    // Default value if no patient data available
-    return 0;
-  };
+    
+    return children.length;
+  }, [patientsList]);
 
-  const childrenCount = getChildrenCount();
-  console.log(`Final children count: ${childrenCount}`);
+  // Log the final children count for debugging
+  useEffect(() => {
+    console.log(`Final children count in demographics-card: ${childrenCount}`);
+  }, [childrenCount]);
 
   const GENDER_COLORS = {
     "Homme": "#3b82f6",  
@@ -87,36 +90,22 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   };
 
   const calculateGenderData = (): GenderChartData[] => {
-    if (data && data.maleCount !== undefined && data.femaleCount !== undefined) {
-      // If using dashboard data, we'll have to add children data separately
-      // For now, return adult data only as we can't determine children from this dataset
-      return [{
-        name: "Homme",
-        value: data.maleCount,
-        percentage: totalPatients > 0 ? Math.round((data.maleCount / totalPatients) * 100) : 0,
-        icon: <User className="h-5 w-5 text-blue-600" />
-      }, {
-        name: "Femme",
-        value: data.femaleCount,
-        percentage: totalPatients > 0 ? Math.round((data.femaleCount / totalPatients) * 100) : 0,
-        icon: <UserRound className="h-5 w-5 text-pink-600" />
-      }];
-    }
-
+    // Pour garantir que les enfants sont toujours affichés même s'il n'y a pas de données
+    const result: GenderChartData[] = [];
+    
     if (patientsList.length > 0) {
+      // Séparer les enfants et les adultes
       const childPatients = patientsList.filter(isChild);
       const adultPatients = patientsList.filter(patient => !isChild(patient));
       
       console.log(`Chart data calculation: ${childPatients.length} children and ${adultPatients.length} adults`);
       
-      // Count adult males and females
+      // Compter les adultes hommes et femmes
       const adultMales = adultPatients.filter(p => p.gender === "Homme").length;
       const adultFemales = adultPatients.filter(p => p.gender === "Femme").length;
       const otherOrUndefined = adultPatients.filter(p => p.gender !== "Homme" && p.gender !== "Femme").length;
       
-      const result: GenderChartData[] = [];
-      
-      // Add adult males if any
+      // Ajouter les adultes hommes si présents
       if (adultMales > 0) {
         result.push({
           name: "Homme",
@@ -126,7 +115,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         });
       }
       
-      // Add adult females if any
+      // Ajouter les adultes femmes si présents
       if (adultFemales > 0) {
         result.push({
           name: "Femme",
@@ -136,17 +125,15 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         });
       }
       
-      // Add children as a separate category if any
-      if (childPatients.length > 0) {
-        result.push({
-          name: "Enfant",
-          value: childPatients.length,
-          percentage: Math.round((childPatients.length / totalPatients) * 100),
-          icon: <Baby className="h-5 w-5 text-emerald-600" />
-        });
-      }
+      // Toujours ajouter les enfants, même si le compte est 0
+      result.push({
+        name: "Enfant",
+        value: childPatients.length,
+        percentage: totalPatients > 0 ? Math.round((childPatients.length / totalPatients) * 100) : 0,
+        icon: <Baby className="h-5 w-5 text-emerald-600" />
+      });
       
-      // Add other/undefined if any
+      // Ajouter les autres/non définis si présents
       if (otherOrUndefined > 0) {
         result.push({
           name: "Non spécifié",
@@ -159,44 +146,29 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       return result;
     }
     
-    // Ensure default data includes children for demonstration
+    // Données par défaut pour la démonstration (toujours inclure les enfants)
     return [{
       name: "Homme",
       value: 1,
-      percentage: 40,
+      percentage: 33,
       icon: <User className="h-5 w-5 text-blue-600" />
     }, {
       name: "Femme",
       value: 1,
-      percentage: 40,
+      percentage: 33,
       icon: <UserRound className="h-5 w-5 text-pink-600" />
     }, {
       name: "Enfant",
       value: 1,
-      percentage: 20,
+      percentage: 34,
       icon: <Baby className="h-5 w-5 text-emerald-600" />
     }];
   };
 
   const chartData = calculateGenderData();
 
-  // Ensure children are always represented in the chart data display
-  const hasChildrenData = chartData.some(item => item.name === "Enfant");
-  const childrenPercentage = childrenCount > 0 && totalPatients > 0
-    ? Math.round((childrenCount / totalPatients) * 100)
-    : hasChildrenData 
-      ? chartData.find(item => item.name === "Enfant")?.percentage || 0
-      : 0;
-
-  // Force add children category to chart if we have actual children but they're not showing
-  if (childrenCount > 0 && !hasChildrenData) {
-    chartData.push({
-      name: "Enfant",
-      value: childrenCount,
-      percentage: childrenPercentage,
-      icon: <Baby className="h-5 w-5 text-emerald-600" />
-    });
-  }
+  // Calculer le pourcentage d'enfants
+  const childrenPercentage = totalPatients > 0 ? Math.round((childrenCount / totalPatients) * 100) : 0;
 
   const renderCustomizedLabel = ({
     cx,
@@ -213,7 +185,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
     
-    const genderIcon = chartData[index].icon;
+    const genderIcon = chartData[index]?.icon;
     
     return (
       <g>
@@ -334,7 +306,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
           </ResponsiveContainer>
         </div>
         
-        {/* Children statistics summary - always displayed for clarity */}
+        {/* Children statistics summary - always displayed */}
         <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <div className="flex items-center gap-2 text-sm">
             <Baby className="h-4 w-4 text-emerald-600" />
@@ -348,4 +320,3 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     </Card>
   );
 };
-
