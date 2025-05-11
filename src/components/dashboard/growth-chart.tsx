@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardData } from "@/types";
@@ -11,6 +12,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { useEffect } from "react";
 
 interface GrowthChartProps {
 	data: DashboardData;
@@ -71,6 +73,22 @@ export function GrowthChart({ data }: GrowthChartProps) {
 		};
 	});
 
+	// DEBUG: Affichons les données formatées pour vérifier
+	useEffect(() => {
+		console.log("Formatted Data:", formattedData);
+		
+		// Vérifions chaque élément des données
+		formattedData.forEach((item, index) => {
+			console.log(`Mois ${index + 1}:`, item);
+		});
+		
+		// Vérifions aussi si les valeurs sont des nombres valides
+		const hasValidData = formattedData.some(item => 
+			(item.total > 0 || item.hommes > 0 || item.femmes > 0 || item.enfants > 0)
+		);
+		console.log("A des données valides:", hasValidData);
+	}, [formattedData]);
+
 	return (
 		<div className="w-full h-[400px]">
 			<ResponsiveContainer width="100%" height="100%">
@@ -127,6 +145,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
 							return nameMap[value] || value;
 						}}
 					/>
+					{/* Assurons-nous que les lignes sont explicitent déclarées avec tous les attributs nécessaires */}
 					<Line
 						type="monotone"
 						dataKey="total"
@@ -135,33 +154,41 @@ export function GrowthChart({ data }: GrowthChartProps) {
 						dot={{ stroke: "#9b87f5", strokeWidth: 2, r: 4 }}
 						activeDot={{ r: 6 }}
 						name="total"
+						isAnimationActive={true}
+						connectNulls={true}
 					/>
 					<Line
 						type="monotone"
 						dataKey="hommes"
 						stroke="#60a5fa"
 						strokeWidth={2}
-						dot={{ stroke: "#D3E4FD", strokeWidth: 2, r: 3 }}
+						dot={{ stroke: "#60a5fa", strokeWidth: 2, r: 3 }}
 						activeDot={{ r: 5 }}
 						name="hommes"
+						isAnimationActive={true}
+						connectNulls={true}
 					/>
 					<Line
 						type="monotone"
 						dataKey="femmes"
 						stroke="#b93dcc"
 						strokeWidth={2}
-						dot={{ stroke: "#FFDEE2", strokeWidth: 2, r: 3 }}
+						dot={{ stroke: "#b93dcc", strokeWidth: 2, r: 3 }}
 						activeDot={{ r: 5 }}
 						name="femmes"
+						isAnimationActive={true}
+						connectNulls={true}
 					/>
 					<Line
 						type="monotone"
 						dataKey="enfants"
 						stroke="#34d399"
 						strokeWidth={2}
-						dot={{ stroke: "#E5DEFF", strokeWidth: 2, r: 3 }}
+						dot={{ stroke: "#34d399", strokeWidth: 2, r: 3 }}
 						activeDot={{ r: 5 }}
 						name="enfants"
+						isAnimationActive={true}
+						connectNulls={true}
 					/>
 				</LineChart>
 			</ResponsiveContainer>
