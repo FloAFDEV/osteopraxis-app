@@ -27,13 +27,23 @@ export const GENDER_COLORS = {
 export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, totalPatients }) => {
   const { isMobile } = useIsMobile();
   
-  // Ajout d'un log pour vérifier les données entrantes
+  // Log data for debugging
   console.log("GenderPieChart received data:", chartData, "totalPatients:", totalPatients);
 
-  // S'assurer que chartData est valide pour éviter les erreurs d'affichage
-  const validChartData = chartData?.length > 0 ? chartData : [
-    { name: "Aucune donnée", value: 1, percentage: 100, icon: <UserCircle className="h-5 w-5 text-gray-400" /> }
-  ];
+  // Create safe data for the chart - ensure we always have valid data
+  const validChartData = chartData?.filter(item => item.value > 0) || [];
+  
+  console.log("Valid chart data after filtering:", validChartData);
+  
+  // If we have no data, show a placeholder
+  if (!validChartData.length) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
+        <UserCircle className="h-12 w-12 mb-2" />
+        <p>Aucune donnée démographique disponible</p>
+      </div>
+    );
+  }
 
   const renderCustomizedLabel = ({
     cx,
@@ -50,8 +60,6 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
     
-    const genderIcon = validChartData[index]?.icon;
-    
     return (
       <g>
         <text 
@@ -65,11 +73,6 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
         >
           {`${(percent * 100).toFixed(0)}%`}
         </text>
-        {genderIcon && (
-          <g transform={`translate(${x - 12}, ${y + 15}) scale(0.8)`}>
-            {genderIcon}
-          </g>
-        )}
       </g>
     );
   };
@@ -137,7 +140,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
             cy="50%" 
             labelLine={false} 
             label={renderCustomizedLabel} 
-            outerRadius={isMobile ? 100 : 120}
+            outerRadius={isMobile ? 80 : 100}
             fill="#8884d8" 
             dataKey="value"
             isAnimationActive={true}
