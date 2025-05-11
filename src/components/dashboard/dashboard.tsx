@@ -1,3 +1,4 @@
+
 import { AppointmentsOverview } from "@/components/dashboard/appointments-overview";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { DemographicsCard } from "@/components/dashboard/demographics-card";
@@ -50,6 +51,9 @@ export function Dashboard() {
 					patients: 0,
 					prevPatients: 0,
 					growthText: "0%",
+					hommes: 0,    // Add default values for hommes
+					femmes: 0,    // Add default values for femmes
+					enfants: 0,   // Add default values for enfants
 				};
 			}),
 	});
@@ -244,11 +248,19 @@ export function Dashboard() {
 							? 100
 							: 0;
 
+					// Calculate gender and age distribution for this month
+					const thisMonthMaleCount = patientsByMonth[index].filter(p => p.gender === "Homme").length;
+					const thisMonthFemaleCount = patientsByMonth[index].filter(p => p.gender === "Femme").length;
+					const thisMonthChildrenCount = patientsByMonth[index].filter(isChild).length;
+
 					return {
 						month,
 						patients: thisMonthPatients,
 						prevPatients: lastYearPatients,
 						growthText: `${growthRate}%`,
+						hommes: thisMonthMaleCount,    // Add male count
+						femmes: thisMonthFemaleCount,  // Add female count
+						enfants: thisMonthChildrenCount  // Add children count
 					};
 				});
 
