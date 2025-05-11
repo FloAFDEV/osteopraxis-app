@@ -86,10 +86,10 @@ export function GrowthChart({ data }: GrowthChartProps) {
 					<CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
 					<XAxis
 						dataKey="month"
-						tick={{ fill: "#64748b", fontSize: 12 }}
+						tick={{ fill: "#64748b", fontSize: 16 }}
 					/>
 					<YAxis
-						tick={{ fill: "#64748b", fontSize: 12 }}
+						tick={{ fill: "#64748b", fontSize: 16 }}
 						domain={[0, "auto"]}
 					/>
 					<Tooltip
