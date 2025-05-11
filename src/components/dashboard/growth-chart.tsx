@@ -148,7 +148,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
 					<Line
 						type="monotone"
 						dataKey="femmes"
-						stroke="#a78bfa"
+						stroke="#b93dcc"
 						strokeWidth={2}
 						dot={{ stroke: "#FFDEE2", strokeWidth: 2, r: 3 }}
 						activeDot={{ r: 5 }}
