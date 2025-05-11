@@ -185,10 +185,10 @@ const PatientsPage = () => {
         hdlm: null,
         userId: null,
         avatarUrl: null,
-        // Ajout des nouveaux champs pour tous les patients
+        // Champs généraux
         complementaryExams: null,
         generalSymptoms: null,
-        // Ajout des nouveaux champs pour les enfants
+        // Champs pour les enfants
         pregnancyHistory: null,
         birthDetails: null,
         developmentMilestones: null,
@@ -200,7 +200,28 @@ const PatientsPage = () => {
         isExSmoker: false,
         smokingSince: null,
         smokingAmount: null,
-        quitSmokingDate: null
+        quitSmokingDate: null,
+        // Nouveaux champs généraux
+        ent_followup: null,
+        intestinal_transit: null,
+        sleep_quality: null,
+        fracture_history: null,
+        dental_health: null,
+        sport_frequency: null,
+        gynecological_history: null,
+        other_comments_adult: null,
+        // Nouveaux champs spécifiques aux enfants
+        fine_motor_skills: null,
+        gross_motor_skills: null,
+        weight_at_birth: null,
+        height_at_birth: null,
+        head_circumference: null,
+        apgar_score: null,
+        childcare_type: null,
+        school_grade: null,
+        pediatrician_name: null,
+        paramedical_followup: null,
+        other_comments_child: null
       };
       
       try {

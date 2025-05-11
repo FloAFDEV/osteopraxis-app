@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
@@ -29,7 +28,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   const maleCount = data?.maleCount || 0;
   const femaleCount = data?.femaleCount || 0;
 
-  // Function to determine if a patient is a child (age < 18)
+  // Function to determine if a patient is a child (age < 12)
   const isChild = (patient: Patient): boolean => {
     if (!patient.birthDate) return false;
     
@@ -40,10 +39,10 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     
     // If birth month hasn't occurred this year yet or if birth month is the same but birth day hasn't occurred yet
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      return age - 1 < 18; // Subtract 1 from age
+      return age - 1 < 12; // Subtract 1 from age and check if less than 12
     }
     
-    return age < 18;
+    return age < 12; // Check if less than 12
   };
 
   // Calculate children count from patients list
@@ -294,7 +293,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <div className="flex items-center gap-2 text-sm">
               <Baby className="h-4 w-4 text-emerald-600" />
-              <span className="font-medium">Enfants: </span>
+              <span className="font-medium">Enfants (-12 ans): </span>
               <span>
                 {childrenCount} patient{childrenCount > 1 ? 's' : ''} ({Math.round((childrenCount / totalPatients) * 100)}% du total)
               </span>
