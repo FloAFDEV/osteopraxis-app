@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
-import { Mail, MapPin, Phone, User } from "lucide-react";
+import { Baby, Mail, MapPin, Phone, User } from "lucide-react";
 
 interface PatientInfoProps {
 	patient: Patient;
@@ -45,6 +45,11 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				: "bg-gray-200",
 	};
 
+	// Calculer l'âge du patient
+	const age = patient.birthDate
+		? differenceInYears(new Date(), parseISO(patient.birthDate))
+		: null;
+
 	return (
 		<Card>
 			<CardContent
@@ -71,17 +76,19 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 								: patient.gender === "Femme"
 								? "Femme"
 								: "Non spécifié"}
-							,{" "}
-							{differenceInYears(
-								new Date(),
-								parseISO(patient.birthDate)
-							)}{" "}
-							ans
-						</CardDescription>
+							, {age !== null ? `${age} ans` : "âge non spécifié"}
+						</CardDescription>{" "}
+						{/* Affichage de l'icône enfant si moins de 12 ans */}
+						{age !== null && age < 12 && (
+							<span className="flex items-center text-amber-500 text-sm">
+								<Baby className="h-6 w-6 mr-1" />
+								Enfant -12 ans
+							</span>
+						)}
 					</div>
 				</div>
 
-				{/* Contact Information */}
+				{/* Informations de contact */}
 				<div className="mt-6 space-y-4">
 					<div className="flex items-center space-x-2">
 						<MapPin className="h-4 w-4 text-muted-foreground" />
