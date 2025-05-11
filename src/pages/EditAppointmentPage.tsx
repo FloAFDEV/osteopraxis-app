@@ -1,11 +1,10 @@
-
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { api } from "@/services/api";
-import { Layout } from "@/components/ui/layout";
 import { AppointmentForm } from "@/components/appointment-form";
+import { Layout } from "@/components/ui/layout";
+import { api } from "@/services/api";
 import { Patient } from "@/types";
 import { Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const EditAppointmentPage = () => {
@@ -30,8 +29,29 @@ const EditAppointmentPage = () => {
 					return;
 				}
 
+				// Trie les patients par nom de famille et prénom
+				const sortedPatients = patientsData.sort(
+					(a: Patient, b: Patient) => {
+						const lastNameComparison = a.lastName.localeCompare(
+							b.lastName,
+							"fr",
+							{
+								sensitivity: "base",
+							}
+						);
+
+						if (lastNameComparison !== 0) {
+							return lastNameComparison;
+						}
+
+						return a.firstName.localeCompare(b.firstName, "fr", {
+							sensitivity: "base",
+						});
+					}
+				);
+
 				setAppointment(appointmentData);
-				setPatients(patientsData);
+				setPatients(sortedPatients);
 			} catch (err) {
 				console.error("Erreur lors du chargement des données:", err);
 				setError("Erreur lors du chargement des données");
@@ -52,7 +72,9 @@ const EditAppointmentPage = () => {
 				<div className="flex justify-center items-center py-20">
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent mx-auto mb-4" />
-						<p className="text-gray-500">Chargement des données...</p>
+						<p className="text-gray-500">
+							Chargement des données...
+						</p>
 					</div>
 				</div>
 			</Layout>
@@ -112,7 +134,7 @@ const EditAppointmentPage = () => {
 							reason: appointment.reason || "",
 							notes: appointment.notes || "",
 							status: appointment.status,
-							website: "" // Initialiser le honeypot
+							website: "", // Initialiser le honeypot
 						}}
 						appointmentId={Number(id)}
 						isEditing={true}
