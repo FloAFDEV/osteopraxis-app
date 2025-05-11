@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Patient, DashboardData } from "@/types";
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import { User, UserRound, UserCircle } from 'lucide-react';
+import { User, UserRound, UserCircle, Baby } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DemographicsCardProps {
@@ -28,14 +29,45 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   const maleCount = data?.maleCount || 0;
   const femaleCount = data?.femaleCount || 0;
 
+  // Function to determine if a patient is a child (age < 18)
+  const isChild = (patient: Patient): boolean => {
+    if (!patient.birthDate) return false;
+    
+    const birthDate = new Date(patient.birthDate);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    // If birth month hasn't occurred this year yet or if birth month is the same but birth day hasn't occurred yet
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      return age - 1 < 18; // Subtract 1 from age
+    }
+    
+    return age < 18;
+  };
+
+  // Calculate children count from patients list
+  const getChildrenCount = (): number => {
+    if (patientsList.length > 0) {
+      return patientsList.filter(isChild).length;
+    }
+    // Default value if no patient data available
+    return 0;
+  };
+
+  const childrenCount = getChildrenCount();
+
   const GENDER_COLORS = {
     "Homme": "#3b82f6",  
-    "Femme": "#d946ef",  
+    "Femme": "#d946ef",
+    "Enfant": "#10b981", // Emerald color for children
     "Non spécifié": "#94a3b8"
   };
 
   const calculateGenderData = (): GenderChartData[] => {
     if (data && data.maleCount !== undefined && data.femaleCount !== undefined) {
+      // If using dashboard data, we'll have to add children data separately
+      // For now, return adult data only as we can't determine children from this dataset
       return [{
         name: "Homme",
         value: data.maleCount,
@@ -48,23 +80,62 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         icon: <UserRound className="h-5 w-5 text-pink-600" />
       }];
     }
+
     if (patientsList.length > 0) {
-      const genderCounts = patientsList.reduce((acc, patient) => {
-        const gender = patient.gender || "Non spécifié";
-        acc[gender] = (acc[gender] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      return Object.entries(genderCounts).map(([name, value]) => ({
-        name,
-        value,
-        percentage: Math.round((value / totalPatients) * 100),
-        icon: name === "Homme" ? 
-          <User className="h-5 w-5 text-blue-600" /> : 
-          name === "Femme" ? 
-            <UserRound className="h-5 w-5 text-pink-600" /> : 
-            <UserCircle className="h-5 w-5 text-gray-600" />
-      }));
+      const childPatients = patientsList.filter(isChild);
+      const adultPatients = patientsList.filter(patient => !isChild(patient));
+      
+      // Count adult males and females
+      const adultMales = adultPatients.filter(p => p.gender === "Homme").length;
+      const adultFemales = adultPatients.filter(p => p.gender === "Femme").length;
+      const otherOrUndefined = adultPatients.filter(p => p.gender !== "Homme" && p.gender !== "Femme").length;
+      
+      const result: GenderChartData[] = [];
+      
+      // Add adult males if any
+      if (adultMales > 0) {
+        result.push({
+          name: "Homme",
+          value: adultMales,
+          percentage: Math.round((adultMales / totalPatients) * 100),
+          icon: <User className="h-5 w-5 text-blue-600" />
+        });
+      }
+      
+      // Add adult females if any
+      if (adultFemales > 0) {
+        result.push({
+          name: "Femme",
+          value: adultFemales,
+          percentage: Math.round((adultFemales / totalPatients) * 100),
+          icon: <UserRound className="h-5 w-5 text-pink-600" />
+        });
+      }
+      
+      // Add children as a separate category if any
+      if (childPatients.length > 0) {
+        result.push({
+          name: "Enfant",
+          value: childPatients.length,
+          percentage: Math.round((childPatients.length / totalPatients) * 100),
+          icon: <Baby className="h-5 w-5 text-emerald-600" />
+        });
+      }
+      
+      // Add other/undefined if any
+      if (otherOrUndefined > 0) {
+        result.push({
+          name: "Non spécifié",
+          value: otherOrUndefined,
+          percentage: Math.round((otherOrUndefined / totalPatients) * 100),
+          icon: <UserCircle className="h-5 w-5 text-gray-600" />
+        });
+      }
+      
+      return result;
     }
+    
+    // Default data if no patients
     return [{
       name: "Homme",
       value: 1,
@@ -179,6 +250,8 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       </Card>;
   }
   
+  const hasChildrenData = chartData.some(item => item.name === "Enfant");
+  
   return (
     <Card className="overflow-hidden rounded-lg bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
       <CardHeader>
@@ -215,6 +288,19 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
             </PieChart>
           </ResponsiveContainer>
         </div>
+        
+        {/* Children statistics summary */}
+        {hasChildrenData && (
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="flex items-center gap-2 text-sm">
+              <Baby className="h-4 w-4 text-emerald-600" />
+              <span className="font-medium">Enfants: </span>
+              <span>
+                {childrenCount} patient{childrenCount > 1 ? 's' : ''} ({Math.round((childrenCount / totalPatients) * 100)}% du total)
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
