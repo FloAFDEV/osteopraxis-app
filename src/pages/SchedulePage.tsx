@@ -1,4 +1,3 @@
-
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -43,6 +42,7 @@ import {
 	Trash2,
 	User,
 	X,
+	ArrowLeft,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -103,8 +103,8 @@ const SchedulePage = () => {
 				const appointmentDate = parseISO(appointment.date);
 				return (
 					isSameDay(appointmentDate, date) &&
-					(appointment.status === "SCHEDULED" || 
-					 appointment.status === "COMPLETED")
+					(appointment.status === "SCHEDULED" ||
+						appointment.status === "COMPLETED")
 				);
 			})
 			.sort((a, b) => {
@@ -172,6 +172,17 @@ const SchedulePage = () => {
 	// --- JSX Structure ---
 	return (
 		<Layout>
+			<div className="flex items-center gap-2">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => navigate(-1)}
+					className="flex items-center gap-1"
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Retour
+				</Button>
+			</div>
 			<div className="flex flex-col p-4 sm:p-6 lg:p-8 mt-20">
 				{/* Header remains the same */}
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -416,11 +427,12 @@ const SchedulePage = () => {
 																				appointmentTime
 																			}
 																		</Badge>
-																		{appointment.status === "COMPLETED" && (
-                                                                            <Badge className="bg-amber-500">
-                                                                                Terminé
-                                                                            </Badge>
-                                                                        )}
+																		{appointment.status ===
+																			"COMPLETED" && (
+																			<Badge className="bg-amber-500">
+																				Terminé
+																			</Badge>
+																		)}
 																		{/* Buttons removed from here */}
 																	</div>
 																	{/* Middle section: Link to patient/reason */}
@@ -453,7 +465,9 @@ const SchedulePage = () => {
 																			)
 																		}
 																		disabled={
-																			isProcessingAction || appointment.status === "COMPLETED"
+																			isProcessingAction ||
+																			appointment.status ===
+																				"COMPLETED"
 																		}
 																		title="Annuler cette séance"
 																	>
@@ -594,7 +608,7 @@ const DaySchedule = ({
 					isSameDay(date, new Date());
 				const isProcessingAction =
 					appointment && actionInProgress?.id === appointment.id;
-                const isCompleted = appointment?.status === "COMPLETED";
+				const isCompleted = appointment?.status === "COMPLETED";
 
 				return (
 					<div
@@ -646,11 +660,11 @@ const DaySchedule = ({
 												)?.lastName ||
 													`Patient #${appointment.patientId}`}
 											</Link>
-                                            {isCompleted && (
-                                                <Badge className="bg-amber-500 text-white">
-                                                    Terminé
-                                                </Badge>
-                                            )}
+											{isCompleted && (
+												<Badge className="bg-amber-500 text-white">
+													Terminé
+												</Badge>
+											)}
 										</div>
 										<p className="text-sm text-muted-foreground ml-6 truncate">
 											{" "}
@@ -700,7 +714,10 @@ const DaySchedule = ({
 													appointment.id
 												)
 											}
-											disabled={isProcessingAction || isCompleted}
+											disabled={
+												isProcessingAction ||
+												isCompleted
+											}
 											aria-label="Annuler cette séance"
 										>
 											{isProcessingAction &&
