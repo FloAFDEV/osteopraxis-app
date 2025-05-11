@@ -29,6 +29,31 @@ export const calculateGenderData = (patientsList: Patient[], totalPatients: numb
   // Pour garantir que les données sont calculées correctement
   const result: GenderChartData[] = [];
   
+  // Si nous n'avons pas de patients mais un nombre total, c'est que nous utilisons les données pré-calculées
+  if (patientsList.length === 0 && totalPatients > 0) {
+    console.log("Using pre-calculated data from dashboard data");
+    return [
+      {
+        name: "Homme",
+        value: 0,
+        percentage: 0,
+        icon: <User className="h-5 w-5 text-blue-600" />
+      },
+      {
+        name: "Femme",
+        value: 0, 
+        percentage: 0,
+        icon: <UserRound className="h-5 w-5 text-pink-600" />
+      },
+      {
+        name: "Enfant",
+        value: 0,
+        percentage: 0,
+        icon: <Baby className="h-5 w-5 text-emerald-600" />
+      }
+    ];
+  }
+  
   // Séparer les enfants et les adultes
   const childPatients = patientsList.filter(isChild);
   const adultPatients = patientsList.filter(patient => !isChild(patient));
@@ -48,59 +73,39 @@ export const calculateGenderData = (patientsList: Patient[], totalPatients: numb
   
   console.log(`Percentages - Male: ${malePercentage}%, Female: ${femalePercentage}%, Children: ${childrenPercentage}%, Other: ${otherPercentage}%`);
   
-  // Ajouter les adultes hommes
-  if (totalPatients > 0) {
+  // Ajouter les adultes hommes (toujours ajouter, même avec valeur 0, pour maintenir la structure)
+  result.push({
+    name: "Homme",
+    value: adultMales,
+    percentage: malePercentage,
+    icon: <User className="h-5 w-5 text-blue-600" />
+  });
+  
+  // Ajouter les adultes femmes
+  result.push({
+    name: "Femme",
+    value: adultFemales,
+    percentage: femalePercentage,
+    icon: <UserRound className="h-5 w-5 text-pink-600" />
+  });
+  
+  // Toujours ajouter les enfants avec les vraies données
+  result.push({
+    name: "Enfant",
+    value: childPatients.length,
+    percentage: childrenPercentage,
+    icon: <Baby className="h-5 w-5 text-emerald-600" />
+  });
+  
+  // Ajouter les autres/non définis si présents
+  if (otherOrUndefined > 0) {
     result.push({
-      name: "Homme",
-      value: adultMales,
-      percentage: malePercentage,
-      icon: <User className="h-5 w-5 text-blue-600" />
+      name: "Non spécifié",
+      value: otherOrUndefined,
+      percentage: otherPercentage,
+      icon: <UserCircle className="h-5 w-5 text-gray-600" />
     });
-    
-    // Ajouter les adultes femmes
-    result.push({
-      name: "Femme",
-      value: adultFemales,
-      percentage: femalePercentage,
-      icon: <UserRound className="h-5 w-5 text-pink-600" />
-    });
-    
-    // Toujours ajouter les enfants avec les vraies données
-    result.push({
-      name: "Enfant",
-      value: childPatients.length,
-      percentage: childrenPercentage,
-      icon: <Baby className="h-5 w-5 text-emerald-600" />
-    });
-    
-    // Ajouter les autres/non définis si présents
-    if (otherOrUndefined > 0) {
-      result.push({
-        name: "Non spécifié",
-        value: otherOrUndefined,
-        percentage: otherPercentage,
-        icon: <UserCircle className="h-5 w-5 text-gray-600" />
-      });
-    }
-    
-    return result;
   }
   
-  // Si aucun patient, retourner des données vides mais structurées
-  return [{
-    name: "Homme",
-    value: 0,
-    percentage: 0,
-    icon: <User className="h-5 w-5 text-blue-600" />
-  }, {
-    name: "Femme",
-    value: 0,
-    percentage: 0,
-    icon: <UserRound className="h-5 w-5 text-pink-600" />
-  }, {
-    name: "Enfant",
-    value: 0,
-    percentage: 0,
-    icon: <Baby className="h-5 w-5 text-emerald-600" />
-  }];
+  return result;
 };

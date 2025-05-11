@@ -25,26 +25,6 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     if (patientsList.length > 0) {
       const children = patientsList.filter(isChild);
       console.log(`Children calculation in demographics-card: found ${children.length} children out of ${patientsList.length} patients`);
-      
-      // Log detailed information about the first few patients to verify calculations
-      if (patientsList.length > 0) {
-        console.log('Examinons les premiers patients :');
-        patientsList.slice(0, Math.min(5, patientsList.length)).forEach(patient => {
-          if (patient.birthDate) {
-            const birthDate = new Date(patient.birthDate);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-              age--;
-            }
-            console.log(`Patient: ${patient.firstName} ${patient.lastName}, Birth date: ${patient.birthDate}, Age: ${age}, Is child: ${age < 12}`);
-          } else {
-            console.log(`Patient: ${patient.firstName} ${patient.lastName}, No birth date provided`);
-          }
-        });
-      }
-      
       return children.length;
     }
     
@@ -57,6 +37,11 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   }, [childrenCount, totalPatients]);
 
   const chartData = calculateGenderData(patientsList, totalPatients);
+  
+  // Add DEBUG: Log chart data just before rendering
+  useEffect(() => {
+    console.log("Chart data before rendering:", chartData);
+  }, [chartData]);
 
   const isLoading = patientsList.length === 0 && !data || !data?.maleCount && !data?.femaleCount && totalPatients === 0;
   
@@ -87,6 +72,11 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Add gender data to render */}
+        <div className="mb-2 text-sm">
+          <span className="font-medium">Total:</span> {totalPatients} patients
+        </div>
+        
         <GenderPieChart chartData={chartData} totalPatients={totalPatients} />
         
         {/* Children statistics summary - always displayed with real values */}

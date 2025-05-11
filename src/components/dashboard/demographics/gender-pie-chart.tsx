@@ -26,6 +26,14 @@ export const GENDER_COLORS = {
 
 export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, totalPatients }) => {
   const { isMobile } = useIsMobile();
+  
+  // Ajout d'un log pour vérifier les données entrantes
+  console.log("GenderPieChart received data:", chartData, "totalPatients:", totalPatients);
+
+  // S'assurer que chartData est valide pour éviter les erreurs d'affichage
+  const validChartData = chartData?.length > 0 ? chartData : [
+    { name: "Aucune donnée", value: 1, percentage: 100, icon: <UserCircle className="h-5 w-5 text-gray-400" /> }
+  ];
 
   const renderCustomizedLabel = ({
     cx,
@@ -42,7 +50,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
     
-    const genderIcon = chartData[index]?.icon;
+    const genderIcon = validChartData[index]?.icon;
     
     return (
       <g>
@@ -57,9 +65,11 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
         >
           {`${(percent * 100).toFixed(0)}%`}
         </text>
-        <g transform={`translate(${x - 12}, ${y + 15}) scale(0.8)`}>
-          {genderIcon}
-        </g>
+        {genderIcon && (
+          <g transform={`translate(${x - 12}, ${y + 15}) scale(0.8)`}>
+            {genderIcon}
+          </g>
+        )}
       </g>
     );
   };
@@ -118,11 +128,11 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
   };
 
   return (
-    <div className={`h-[300px] mt-4`}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-[300px] mt-4">
+      <ResponsiveContainer width="100%" height="100%" debounce={1}>
         <PieChart>
           <Pie 
-            data={chartData} 
+            data={validChartData} 
             cx="50%" 
             cy="50%" 
             labelLine={false} 
@@ -130,8 +140,11 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
             outerRadius={isMobile ? 100 : 120}
             fill="#8884d8" 
             dataKey="value"
+            isAnimationActive={true}
+            animationDuration={800}
+            animationBegin={300}
           >
-            {chartData.map((entry, index) => (
+            {validChartData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
                 fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || "#94a3b8"} 

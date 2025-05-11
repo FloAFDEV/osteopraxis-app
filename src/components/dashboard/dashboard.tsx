@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -42,24 +43,28 @@ export function Dashboard() {
   });
   
   const [loading, setLoading] = useState(true);
+  const [patients, setPatients] = useState<any[]>([]); // Ajout d'un state pour les patients
 
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
         // Récupération des données réelles uniquement
-        const [patients, appointments] = await Promise.all([
+        const [patientsData, appointments] = await Promise.all([
           api.getPatients(), 
           api.getAppointments()
         ]);
+        
+        // Stocker les patients pour les utiliser dans les sous-composants
+        setPatients(patientsData);
 
         // Calcul des statistiques avec uniquement les données réelles
-        const totalPatients = patients.length;
-        const maleCount = patients.filter(p => p.gender === "Homme").length;
-        const femaleCount = patients.filter(p => p.gender === "Femme").length;
+        const totalPatients = patientsData.length;
+        const maleCount = patientsData.filter(p => p.gender === "Homme").length;
+        const femaleCount = patientsData.filter(p => p.gender === "Femme").length;
         
         // Calculate the children count
-        const childrenCount = patients.filter(isChild).length;
+        const childrenCount = patientsData.filter(isChild).length;
         console.log(`Dashboard data loading - Found ${childrenCount} children among ${totalPatients} patients`);
 
         // Calcul des âges et métriques de croissance
@@ -68,7 +73,7 @@ export function Dashboard() {
         const currentMonth = today.getMonth();
 
         // Nouveaux patients ce mois-ci et cette année
-        const newPatientsThisMonth = patients.filter(p => {
+        const newPatientsThisMonth = patientsData.filter(p => {
           const createdAt = new Date(p.createdAt);
           return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
         }).length;
@@ -128,7 +133,7 @@ export function Dashboard() {
           ? Math.round((newPatientsLast30Days - patientsPrevious30Days) / patientsPrevious30Days * 100) 
           : newPatientsLast30Days > 0 ? 100 : 0;
         
-        const patientsLastYearEnd = patients.filter(p => {
+        const patientsLastYearEnd = patientsData.filter(p => {
           const createdAt = new Date(p.createdAt);
           return createdAt.getFullYear() < currentYear;
         }).length;
@@ -176,9 +181,9 @@ export function Dashboard() {
           return Math.round(totalAge / patientsWithBirthDate.length);
         };
         
-        const averageAge = calculateAverageAge(patients);
-        const averageAgeMale = calculateAverageAge(patients.filter(p => p.gender === "Homme"));
-        const averageAgeFemale = calculateAverageAge(patients.filter(p => p.gender === "Femme"));
+        const averageAge = calculateAverageAge(patientsData);
+        const averageAgeMale = calculateAverageAge(patientsData.filter(p => p.gender === "Homme"));
+        const averageAgeFemale = calculateAverageAge(patientsData.filter(p => p.gender === "Femme"));
 
         // Mettre à jour les données du tableau de bord
         setDashboardData({
@@ -251,7 +256,7 @@ export function Dashboard() {
               <AppointmentsOverview data={dashboardData} />
             </div>
             <div className="animate-fade-in animate-delay-200">
-              <DemographicsCard data={dashboardData} />
+              <DemographicsCard patients={patients} data={dashboardData} />
             </div>
           </div>
 
