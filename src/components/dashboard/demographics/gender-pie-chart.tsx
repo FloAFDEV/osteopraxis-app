@@ -28,11 +28,12 @@ interface GenderPieChartProps {
 	totalPatients: number;
 }
 
+// Couleurs plus douces (500) pour cohérence design
 export const GENDER_COLORS = {
-	Homme: "#60a5fa",
-	Femme: "#d946ef",
-	Enfant: "#34d399",
-	"Non spécifié": "#94a3b8",
+	Homme: "#3b82f6", // blue-500
+	Femme: "#8b5cf6", // purple-500
+	Enfant: "#10b981", // emerald-500
+	"Non spécifié": "#6b7280", // gray-500
 };
 
 export const GenderPieChart: React.FC<GenderPieChartProps> = ({
@@ -41,26 +42,9 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 }) => {
 	const { isMobile } = useIsMobile();
 
-	// Log data for debugging
-	useEffect(() => {
-		console.log(
-			"GenderPieChart rendering with data:",
-			chartData,
-			"totalPatients:",
-			totalPatients
-		);
-	}, [chartData, totalPatients]);
-
-	// Create safe data for the chart - ensure we always have valid data
 	const validChartData =
 		chartData?.filter((item) => item && item.value > 0) || [];
 
-	// Log valid data
-	useEffect(() => {
-		console.log("Valid chart data after filtering:", validChartData);
-	}, [validChartData]);
-
-	// If we have no data, show a placeholder
 	if (!validChartData.length) {
 		return (
 			<div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
@@ -77,7 +61,6 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 		innerRadius,
 		outerRadius,
 		percent,
-		index,
 	}: any) => {
 		if (percent < 0.05) return null;
 		const RADIAN = Math.PI / 180;
@@ -86,19 +69,17 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 		const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
 		return (
-			<g>
-				<text
-					x={x}
-					y={y}
-					fill="white"
-					fontWeight="bold"
-					fontSize="14"
-					dominantBaseline="central"
-					textAnchor="middle"
-				>
-					{`${(percent * 100).toFixed(0)}%`}
-				</text>
-			</g>
+			<text
+				x={x}
+				y={y}
+				fill="white"
+				fontWeight="bold"
+				fontSize="14"
+				dominantBaseline="central"
+				textAnchor="middle"
+			>
+				{`${(percent * 100).toFixed(0)}%`}
+			</text>
 		);
 	};
 
@@ -171,9 +152,6 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 						outerRadius={isMobile ? 80 : 100}
 						fill="#8884d8"
 						dataKey="value"
-						isAnimationActive={true}
-						animationDuration={800}
-						animationBegin={300}
 						nameKey="name"
 					>
 						{validChartData.map((entry, index) => (
@@ -182,7 +160,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 								fill={
 									GENDER_COLORS[
 										entry.name as keyof typeof GENDER_COLORS
-									] || "#94a3b8"
+									] || "#6b7280"
 								}
 							/>
 						))}
