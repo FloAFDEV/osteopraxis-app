@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { User, UserRound, Baby, UserCircle } from 'lucide-react';
+import { User, UserRound, Baby, UserCircle, ChartPie } from 'lucide-react';
 import { TooltipProvider, Tooltip as UITooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -39,7 +39,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({ chartData, total
   if (!validChartData.length) {
     return (
       <div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
-        <UserCircle className="h-12 w-12 mb-2" />
+        <ChartPie className="h-12 w-12 mb-2" />
         <p>Aucune donnée démographique disponible</p>
       </div>
     );
