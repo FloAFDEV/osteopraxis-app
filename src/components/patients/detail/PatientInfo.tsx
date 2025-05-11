@@ -82,7 +82,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 						{age !== null && age < 12 && (
 							<span className="flex items-center text-amber-500 text-sm">
 								<Baby className="h-6 w-6 mr-1" />
-								Enfant -12 ans
+								Enfant
 							</span>
 						)}
 					</div>
