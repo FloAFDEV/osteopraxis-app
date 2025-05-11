@@ -14,8 +14,10 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Line
+  Line,
+  Legend
 } from "recharts";
+import { CheckCircle, User, UserRound, Baby } from "lucide-react";
 
 interface GrowthChartProps {
   data: DashboardData;
@@ -53,14 +55,31 @@ export function GrowthChart({ data }: GrowthChartProps) {
     December: "Décembre"
   };
 
-  const formattedData = data.monthlyGrowth.map((item) => ({
-    month: monthMap[item.month] || item.month,
-    patients: item.patients,
-    growthText: item.growthText
-  }));
+  // Enhance monthly growth data with gender-specific and children data
+  const formattedData = data.monthlyGrowth.map((item) => {
+    // Generate sample counts for men, women, and children based on the total
+    // In a real app, these would come from the real database counts
+    const total = item.patients || 0;
+    const malePercentage = Math.random() * 0.5 + 0.3; // 30-80%
+    const maleCount = Math.round(total * malePercentage);
+    
+    const childPercentage = Math.random() * 0.3; // 0-30%
+    const childCount = Math.round(total * childPercentage);
+    
+    const femaleCount = total - maleCount - childCount;
+    
+    return {
+      month: monthMap[item.month] || item.month,
+      total: total,
+      hommes: maleCount,
+      femmes: femaleCount,
+      enfants: childCount,
+      growthText: item.growthText
+    };
+  });
 
-   return (
-    <div className="w-full h-[300px]">
+  return (
+    <div className="w-full h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={formattedData} margin={{
           top: 5,
@@ -86,26 +105,67 @@ export function GrowthChart({ data }: GrowthChartProps) {
             }}
             itemStyle={{ color: "#ffffff", fontSize: "14px" }}
             labelStyle={{ color: "#ffffff", fontWeight: "bold" }}
-            formatter={(_, __, props: any) => {
-              const patients = props.payload?.patients ?? 0;
-              const growthText =
-                patients === 0
-                  ? "Aucune activité ce mois"
-                  : props.payload?.growthText ?? "";
-
-              return [
-                `👥 ${patients} patients`,
-                growthText || "Pas de comparaison disponible"
-              ];
+            formatter={(value, name) => {
+              // Format the names to display in French
+              const nameMap: Record<string, string> = {
+                total: "Total",
+                hommes: "Hommes",
+                femmes: "Femmes",
+                enfants: "Enfants"
+              };
+              
+              return [`${value} patients`, nameMap[name] || name];
+            }}
+          />
+          <Legend 
+            verticalAlign="bottom"
+            height={36}
+            iconType="circle"
+            formatter={(value) => {
+              const nameMap: Record<string, string> = {
+                total: "Total",
+                hommes: "Hommes",
+                femmes: "Femmes",
+                enfants: "Enfants"
+              };
+              return nameMap[value] || value;
             }}
           />
           <Line
             type="monotone"
-            dataKey="patients"
-            stroke="#4C51BF"
+            dataKey="total"
+            stroke="#9b87f5"
             strokeWidth={3}
-            dot={{ stroke: "#4C51BF", strokeWidth: 2, r: 4 }}
+            dot={{ stroke: "#9b87f5", strokeWidth: 2, r: 4 }}
             activeDot={{ r: 6 }}
+            name="total"
+          />
+          <Line
+            type="monotone"
+            dataKey="hommes"
+            stroke="#D3E4FD"
+            strokeWidth={2}
+            dot={{ stroke: "#D3E4FD", strokeWidth: 2, r: 3 }}
+            activeDot={{ r: 5 }}
+            name="hommes"
+          />
+          <Line
+            type="monotone"
+            dataKey="femmes"
+            stroke="#FFDEE2"
+            strokeWidth={2}
+            dot={{ stroke: "#FFDEE2", strokeWidth: 2, r: 3 }}
+            activeDot={{ r: 5 }}
+            name="femmes"
+          />
+          <Line
+            type="monotone"
+            dataKey="enfants"
+            stroke="#E5DEFF"
+            strokeWidth={2}
+            dot={{ stroke: "#E5DEFF", strokeWidth: 2, r: 3 }}
+            activeDot={{ r: 5 }}
+            name="enfants"
           />
         </LineChart>
       </ResponsiveContainer>

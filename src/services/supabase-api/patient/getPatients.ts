@@ -47,6 +47,13 @@ export async function getPatients(): Promise<Patient[]> {
         console.log(`Child: ${child.firstName} ${child.lastName}, Birth date: ${child.birthDate}`);
       }
     });
+
+    // Additional logging for gender distribution
+    const maleCount = patients.filter(p => p.gender === "Homme").length;
+    const femaleCount = patients.filter(p => p.gender === "Femme").length;
+    const unknownGenderCount = patients.length - maleCount - femaleCount;
+    
+    console.log(`Gender distribution - Males: ${maleCount}, Females: ${femaleCount}, Unknown: ${unknownGenderCount}`);
     
     return patients;
   } catch (error) {
