@@ -1,3 +1,4 @@
+
 import { Patient } from "@/types";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 import { supabase } from "../utils";
@@ -13,9 +14,10 @@ export async function getPatients(): Promise<Patient[]> {
 
 		const patients = data.map(adaptPatientFromSupabase);
 
-		// Log patients with birth dates to debug
-		const patientsWithBirthDates = patients.filter((p) => p.birthDate);
-
+		// Calculer les comptages par genre et âge pour le graphique
+		const maleCount = patients.filter(p => p.gender === "Homme").length;
+		const femaleCount = patients.filter(p => p.gender === "Femme").length;
+		
 		// Calculate children count using precise age calculation
 		const childrenPatients = patients.filter((p) => {
 			if (!p.birthDate) return false;
@@ -38,18 +40,8 @@ export async function getPatients(): Promise<Patient[]> {
 			return age < 12;
 		});
 
-		// Log detailed information about children for debugging
-
-		childrenPatients.forEach((child) => {
-			if (child.birthDate) {
-				const birthDate = new Date(child.birthDate);
-			}
-		});
-
-		// Additional logging for gender distribution
-		const maleCount = patients.filter((p) => p.gender === "Homme").length;
-		const femaleCount = patients.filter((p) => p.gender === "Femme").length;
-		const unknownGenderCount = patients.length - maleCount - femaleCount;
+		console.log(`GetPatients: Found ${childrenPatients.length} children among ${patients.length} total patients`);
+		console.log(`GetPatients: Gender distribution - ${maleCount} men, ${femaleCount} women`);
 
 		return patients;
 	} catch (error) {

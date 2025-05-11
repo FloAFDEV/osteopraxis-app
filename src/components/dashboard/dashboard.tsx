@@ -4,10 +4,10 @@ import { DemographicsCard } from "@/components/dashboard/demographics-card";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
 import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/services/api";
-import { DashboardData } from "@/types";
+import { DashboardData, Patient } from "@/types";
 import { formatAppointmentDate } from "@/utils/date-utils";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isChild } from "./demographics/gender-chart-utils";
 
 export function Dashboard() {
@@ -190,7 +190,7 @@ export function Dashboard() {
 						? 100
 						: 0;
 
-				// Données de croissance mensuelle
+				// Données de croissance mensuelle avec distribution par genre et âge
 				const frenchMonths = [
 					"Jan",
 					"Fév",
@@ -205,16 +205,26 @@ export function Dashboard() {
 					"Nov",
 					"Déc",
 				];
+				
+				// Création d'un tableau pour stocker les patients par mois (cette année)
+				const patientsByMonth = Array(12).fill(0).map(() => []);
+				
+				// Grouper les patients par mois de création
+				patientsData.forEach(patient => {
+					const createdAt = new Date(patient.createdAt);
+					// Ne considérer que les patients créés cette année
+					if (createdAt.getFullYear() === currentYear) {
+						const month = createdAt.getMonth();
+						patientsByMonth[month].push(patient);
+					}
+				});
+				
 				const monthlyGrowth = frenchMonths.map((month, index) => {
-					const thisYearPatients = patients.filter((p) => {
-						const createdAt = new Date(p.createdAt);
-						return (
-							createdAt.getMonth() === index &&
-							createdAt.getFullYear() === currentYear
-						);
-					}).length;
-
-					const lastYearPatients = patients.filter((p) => {
+					// Patients créés ce mois-ci cette année
+					const thisMonthPatients = patientsByMonth[index].length;
+					
+					// Patients de l'année dernière (pour comparaison)
+					const lastYearPatients = patientsData.filter((p) => {
 						const createdAt = new Date(p.createdAt);
 						return (
 							createdAt.getMonth() === index &&
@@ -222,24 +232,27 @@ export function Dashboard() {
 						);
 					}).length;
 
+					// Calcul du taux de croissance
 					const growthRate =
 						lastYearPatients > 0
 							? Math.round(
-									((thisYearPatients - lastYearPatients) /
+									((thisMonthPatients - lastYearPatients) /
 										lastYearPatients) *
 										100
 							  )
-							: thisYearPatients > 0
+							: thisMonthPatients > 0
 							? 100
 							: 0;
 
 					return {
 						month,
-						patients: thisYearPatients,
+						patients: thisMonthPatients,
 						prevPatients: lastYearPatients,
 						growthText: `${growthRate}%`,
 					};
 				});
+
+				console.log("Données mensuelles générées:", monthlyGrowth);
 
 				// Calcul des âges moyens
 				const calculateAverageAge = (patientList: any[]) => {
@@ -285,7 +298,7 @@ export function Dashboard() {
 					newPatientsLast30Days,
 					thirtyDayGrowthPercentage,
 					annualGrowthPercentage,
-					childrenCount, // Add the childrenCount to the dashboard data
+					childrenCount,
 					monthlyGrowth,
 				});
 			} catch (error) {
