@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
-import { Mail, User, UserRound, Users } from "lucide-react";
+import { Baby, Mail, User, UserRound, Users } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -38,6 +38,9 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 	};
 
 	const avatarStyle = getAvatarColor();
+
+	// Vérification si c'est un enfant de moins de 12 ans
+	const isChild = age !== null && age < 12;
 
 	return (
 		<div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
@@ -77,30 +80,37 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 								)}
 							</div>
 
+							{/* Si c'est un enfant, ajouter l'icône */}
+							{isChild && (
+								<div className="text-xs text-gray-500 flex items-center gap-1">
+									<Baby className="h-4 w-4 text-emerald-600" />
+									<span>Enfant</span>
+								</div>
+							)}
+
 							<div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
 								{patient.email && (
-	<span className="flex items-center text-gray-700 dark:text-gray-200">
-		<Mail className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
-		<a
-			href={`mailto:${patient.email}`}
-			className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-		>
-			{patient.email}
-		</a>
-	</span>
-)}
+									<span className="flex items-center text-gray-700 dark:text-gray-200">
+										<Mail className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
+										<a
+											href={`mailto:${patient.email}`}
+											className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+										>
+											{patient.email}
+										</a>
+									</span>
+								)}
 
-{patient.phone && (
-	<span className="text-gray-700 dark:text-gray-200">
-		<a
-			href={`tel:${patient.phone}`}
-			className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-		>
-			{patient.phone}
-		</a>
-	</span>
-)}
-
+								{patient.phone && (
+									<span className="text-gray-700 dark:text-gray-200">
+										<a
+											href={`tel:${patient.phone}`}
+											className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+										>
+											{patient.phone}
+										</a>
+									</span>
+								)}
 
 								{patient.occupation && (
 									<span className="text-gray-400 italic">
