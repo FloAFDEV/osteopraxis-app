@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
@@ -134,21 +135,32 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       return result;
     }
     
-    // Default data if no patients
+    // Ensure default data includes children for demonstration
     return [{
       name: "Homme",
       value: 1,
-      percentage: 50,
+      percentage: 40,
       icon: <User className="h-5 w-5 text-blue-600" />
     }, {
       name: "Femme",
       value: 1,
-      percentage: 50,
+      percentage: 40,
       icon: <UserRound className="h-5 w-5 text-pink-600" />
+    }, {
+      name: "Enfant",
+      value: 1,
+      percentage: 20,
+      icon: <Baby className="h-5 w-5 text-emerald-600" />
     }];
   };
 
   const chartData = calculateGenderData();
+
+  // Ensure children are always represented in the chart data display
+  const hasChildrenData = chartData.some(item => item.name === "Enfant");
+  const childrenPercentage = hasChildrenData 
+    ? chartData.find(item => item.name === "Enfant")?.percentage || 0
+    : 0;
 
   const renderCustomizedLabel = ({
     cx,
@@ -249,8 +261,6 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       </Card>;
   }
   
-  const hasChildrenData = chartData.some(item => item.name === "Enfant");
-  
   return (
     <Card className="overflow-hidden rounded-lg bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
       <CardHeader>
@@ -288,18 +298,16 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
           </ResponsiveContainer>
         </div>
         
-        {/* Children statistics summary */}
-        {hasChildrenData && (
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <div className="flex items-center gap-2 text-sm">
-              <Baby className="h-4 w-4 text-emerald-600" />
-              <span className="font-medium">Enfants (-12 ans): </span>
-              <span>
-                {childrenCount} patient{childrenCount > 1 ? 's' : ''} ({Math.round((childrenCount / totalPatients) * 100)}% du total)
-              </span>
-            </div>
+        {/* Children statistics summary - always displayed for clarity */}
+        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="flex items-center gap-2 text-sm">
+            <Baby className="h-4 w-4 text-emerald-600" />
+            <span className="font-medium">Enfants (-12 ans): </span>
+            <span>
+              {childrenCount} patient{childrenCount > 1 ? 's' : ''} ({childrenPercentage}% du total)
+            </span>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
