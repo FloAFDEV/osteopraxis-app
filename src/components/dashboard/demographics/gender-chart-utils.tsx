@@ -24,46 +24,52 @@ export const isChild = (patient: Patient): boolean => {
 };
 
 export const calculateGenderData = (patientsList: Patient[], totalPatients: number): GenderChartData[] => {
-  // Pour garantir que les enfants sont toujours affichés même s'il n'y a pas de données
+  console.log(`calculateGenderData - Total patients: ${totalPatients}, List length: ${patientsList.length}`);
+  
+  // Pour garantir que les données sont calculées correctement
   const result: GenderChartData[] = [];
   
-  if (patientsList.length > 0) {
-    // Séparer les enfants et les adultes
-    const childPatients = patientsList.filter(isChild);
-    const adultPatients = patientsList.filter(patient => !isChild(patient));
+  // Séparer les enfants et les adultes
+  const childPatients = patientsList.filter(isChild);
+  const adultPatients = patientsList.filter(patient => !isChild(patient));
+  
+  console.log(`Chart data calculation: ${childPatients.length} children and ${adultPatients.length} adults`);
+  
+  // Compter les adultes hommes et femmes
+  const adultMales = adultPatients.filter(p => p.gender === "Homme").length;
+  const adultFemales = adultPatients.filter(p => p.gender === "Femme").length;
+  const otherOrUndefined = adultPatients.filter(p => p.gender !== "Homme" && p.gender !== "Femme").length;
+  
+  // Calculer les pourcentages réels
+  const malePercentage = totalPatients > 0 ? Math.round((adultMales / totalPatients) * 100) : 0;
+  const femalePercentage = totalPatients > 0 ? Math.round((adultFemales / totalPatients) * 100) : 0;
+  const childrenPercentage = totalPatients > 0 ? Math.round((childPatients.length / totalPatients) * 100) : 0;
+  const otherPercentage = totalPatients > 0 ? Math.round((otherOrUndefined / totalPatients) * 100) : 0;
+  
+  console.log(`Percentages - Male: ${malePercentage}%, Female: ${femalePercentage}%, Children: ${childrenPercentage}%, Other: ${otherPercentage}%`);
+  
+  // Ajouter les adultes hommes
+  if (totalPatients > 0) {
+    result.push({
+      name: "Homme",
+      value: adultMales,
+      percentage: malePercentage,
+      icon: <User className="h-5 w-5 text-blue-600" />
+    });
     
-    console.log(`Chart data calculation: ${childPatients.length} children and ${adultPatients.length} adults`);
+    // Ajouter les adultes femmes
+    result.push({
+      name: "Femme",
+      value: adultFemales,
+      percentage: femalePercentage,
+      icon: <UserRound className="h-5 w-5 text-pink-600" />
+    });
     
-    // Compter les adultes hommes et femmes
-    const adultMales = adultPatients.filter(p => p.gender === "Homme").length;
-    const adultFemales = adultPatients.filter(p => p.gender === "Femme").length;
-    const otherOrUndefined = adultPatients.filter(p => p.gender !== "Homme" && p.gender !== "Femme").length;
-    
-    // Ajouter les adultes hommes si présents
-    if (adultMales > 0) {
-      result.push({
-        name: "Homme",
-        value: adultMales,
-        percentage: Math.round((adultMales / totalPatients) * 100),
-        icon: <User className="h-5 w-5 text-blue-600" />
-      });
-    }
-    
-    // Ajouter les adultes femmes si présents
-    if (adultFemales > 0) {
-      result.push({
-        name: "Femme",
-        value: adultFemales,
-        percentage: Math.round((adultFemales / totalPatients) * 100),
-        icon: <UserRound className="h-5 w-5 text-pink-600" />
-      });
-    }
-    
-    // Toujours ajouter les enfants, même si le compte est 0
+    // Toujours ajouter les enfants avec les vraies données
     result.push({
       name: "Enfant",
       value: childPatients.length,
-      percentage: totalPatients > 0 ? Math.round((childPatients.length / totalPatients) * 100) : 0,
+      percentage: childrenPercentage,
       icon: <Baby className="h-5 w-5 text-emerald-600" />
     });
     
@@ -72,7 +78,7 @@ export const calculateGenderData = (patientsList: Patient[], totalPatients: numb
       result.push({
         name: "Non spécifié",
         value: otherOrUndefined,
-        percentage: Math.round((otherOrUndefined / totalPatients) * 100),
+        percentage: otherPercentage,
         icon: <UserCircle className="h-5 w-5 text-gray-600" />
       });
     }
@@ -80,21 +86,21 @@ export const calculateGenderData = (patientsList: Patient[], totalPatients: numb
     return result;
   }
   
-  // Données par défaut pour la démonstration (toujours inclure les enfants)
+  // Si aucun patient, retourner des données vides mais structurées
   return [{
     name: "Homme",
-    value: 1,
-    percentage: 33,
+    value: 0,
+    percentage: 0,
     icon: <User className="h-5 w-5 text-blue-600" />
   }, {
     name: "Femme",
-    value: 1,
-    percentage: 33,
+    value: 0,
+    percentage: 0,
     icon: <UserRound className="h-5 w-5 text-pink-600" />
   }, {
     name: "Enfant",
-    value: 1,
-    percentage: 34,
+    value: 0,
+    percentage: 0,
     icon: <Baby className="h-5 w-5 text-emerald-600" />
   }];
 };

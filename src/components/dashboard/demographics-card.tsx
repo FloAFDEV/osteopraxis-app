@@ -22,15 +22,15 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 
   // Calculate children count directly from patients list
   const childrenCount = React.useMemo(() => {
-    if (!patientsList.length) return 0;
+    if (!patientsList.length) return data?.childrenCount || 0;
     
     const children = patientsList.filter(isChild);
-    console.log(`Children calculation in demographics-card: found ${children.length} children`);
+    console.log(`Children calculation in demographics-card: found ${children.length} children out of ${patientsList.length} patients`);
     
-    // Log detailed information about each patient for debugging
-    if (children.length === 0) {
-      console.log('No children found in patient list. Analyzing all patients:');
-      patientsList.slice(0, 5).forEach(patient => {
+    // Log détaillé des premiers patients pour vérifier les calculs
+    if (patientsList.length > 0) {
+      console.log('Examinons les premiers patients :');
+      patientsList.slice(0, Math.min(5, patientsList.length)).forEach(patient => {
         if (patient.birthDate) {
           const birthDate = new Date(patient.birthDate);
           const today = new Date();
@@ -47,12 +47,12 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     }
     
     return children.length;
-  }, [patientsList]);
+  }, [patientsList, data?.childrenCount]);
 
   // Log the final children count for debugging
   useEffect(() => {
-    console.log(`Final children count in demographics-card: ${childrenCount}`);
-  }, [childrenCount]);
+    console.log(`Final children count in demographics-card: ${childrenCount}, total patients: ${totalPatients}`);
+  }, [childrenCount, totalPatients]);
 
   const chartData = calculateGenderData(patientsList, totalPatients);
 
@@ -87,7 +87,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
       <CardContent>
         <GenderPieChart chartData={chartData} totalPatients={totalPatients} />
         
-        {/* Children statistics summary - always displayed */}
+        {/* Children statistics summary - always displayed with real values */}
         <ChildrenStats childrenCount={childrenCount} totalPatients={totalPatients} />
       </CardContent>
     </Card>
