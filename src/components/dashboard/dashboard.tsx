@@ -4,322 +4,298 @@ import { DemographicsCard } from "@/components/dashboard/demographics-card";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
 import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/services/api";
-import { DashboardData } from "@/types";
+import { Appointment, DashboardData, MonthlyGrowth, Patient } from "@/types";
 import { formatAppointmentDate } from "@/utils/date-utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { isChild } from "./demographics/gender-chart-utils";
 
-export function Dashboard() {
-	const [dashboardData, setDashboardData] = useState<DashboardData>({
-		totalPatients: 0,
-		maleCount: 0,
-		femaleCount: 0,
-		averageAge: 0,
-		averageAgeMale: 0,
-		averageAgeFemale: 0,
-		newPatientsThisMonth: 0,
-		newPatientsThisYear: 0,
-		newPatientsLastYear: 0,
-		appointmentsToday: 0,
-		nextAppointment: "Aucune séance prévue",
-		patientsLastYearEnd: 0,
-		newPatientsLast30Days: 0,
-		thirtyDayGrowthPercentage: 0,
-		annualGrowthPercentage: 0,
-		childrenCount: 0,
-		monthlyGrowth: Array(12)
-			.fill(0)
-			.map((_, index) => {
-				const frenchMonths = [
-					"Jan",
-					"Fév",
-					"Mar",
-					"Avr",
-					"Mai",
-					"Juin",
-					"Juil",
-					"Août",
-					"Sep",
-					"Oct",
-					"Nov",
-					"Déc",
-				];
-				return {
-					month: frenchMonths[index],
-					patients: 0,
-					prevPatients: 0,
-					growthText: "0%",
-					hommes: 0, // Add default values for hommes
-					femmes: 0, // Add default values for femmes
-					enfants: 0, // Add default values for enfants
-				};
-			}),
+const FRENCH_MONTHS = [
+	"Jan",
+	"Fév",
+	"Mar",
+	"Avr",
+	"Mai",
+	"Juin",
+	"Juil",
+	"Août",
+	"Sep",
+	"Oct",
+	"Nov",
+	"Déc",
+];
+
+const initialMonthlyGrowth: MonthlyGrowth[] = FRENCH_MONTHS.map((month) => ({
+	month,
+	patients: 0,
+	prevPatients: 0,
+	growthText: "0%",
+	hommes: 0,
+	femmes: 0,
+	enfants: 0,
+}));
+
+const initialDashboardData: DashboardData = {
+	totalPatients: 0,
+	maleCount: 0,
+	femaleCount: 0,
+	averageAge: 0,
+	averageAgeMale: 0,
+	averageAgeFemale: 0,
+	newPatientsThisMonth: 0,
+	newPatientsThisYear: 0,
+	newPatientsLastYear: 0,
+	appointmentsToday: 0,
+	nextAppointment: null,
+	patientsLastYearEnd: 0,
+	newPatientsLast30Days: 0,
+	thirtyDayGrowthPercentage: 0,
+	annualGrowthPercentage: 0,
+};
+
+// --- Fonctions Utilitaires pour les calculs ---
+
+function calculateDemographics(patients: Patient[], currentYear: number) {
+	const maleCount = patients.filter((p) => p.gender === "Homme").length;
+	const femaleCount = patients.filter((p) => p.gender === "Femme").length;
+	const childrenCount = patients.filter(isChild).length;
+
+	const calculateAverageAge = (patientList: Patient[]): number => {
+		const patientsWithBirthDate = patientList.filter((p) => p.birthDate);
+		if (patientsWithBirthDate.length === 0) return 0;
+
+		const totalAge = patientsWithBirthDate.reduce((sum, patient) => {
+			const birthDate = new Date(patient.birthDate);
+			let age = currentYear - birthDate.getFullYear();
+			const monthDiff = new Date().getMonth() - birthDate.getMonth();
+			if (
+				monthDiff < 0 ||
+				(monthDiff === 0 && new Date().getDate() < birthDate.getDate())
+			) {
+				age--;
+			}
+			return sum + Math.max(0, age); // S'assurer que l'âge n'est pas négatif
+		}, 0);
+		return Math.round(totalAge / patientsWithBirthDate.length);
+	};
+
+	return {
+		maleCount,
+		femaleCount,
+		childrenCount,
+		averageAge: calculateAverageAge(patients),
+		averageAgeMale: calculateAverageAge(
+			patients.filter((p) => p.gender === "Homme")
+		),
+		averageAgeFemale: calculateAverageAge(
+			patients.filter((p) => p.gender === "Femme")
+		),
+	};
+}
+
+function calculateGrowthMetrics(
+	patientsData: Patient[],
+	currentYear: number,
+	currentMonth: number
+) {
+	const newPatientsThisMonth = patientsData.filter((p) => {
+		const createdAt = new Date(p.createdAt);
+		return (
+			createdAt.getMonth() === currentMonth &&
+			createdAt.getFullYear() === currentYear
+		);
+	}).length;
+
+	const newPatientsThisYear = patientsData.filter(
+		(p) => new Date(p.createdAt).getFullYear() === currentYear
+	).length;
+	const newPatientsLastYear = patientsData.filter(
+		(p) => new Date(p.createdAt).getFullYear() === currentYear - 1
+	).length;
+
+	const thirtyDaysAgo = new Date();
+	thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+	const newPatientsLast30Days = patientsData.filter(
+		(p) => new Date(p.createdAt) >= thirtyDaysAgo
+	).length;
+
+	const patientsAtStartOf30DayPeriod = patientsData.filter(
+		(p) => new Date(p.createdAt) < thirtyDaysAgo
+	).length;
+	const thirtyDayGrowthPercentage =
+		patientsAtStartOf30DayPeriod > 0
+			? Math.round(
+					(newPatientsLast30Days / patientsAtStartOf30DayPeriod) * 100
+			  )
+			: newPatientsLast30Days > 0
+			? 100
+			: 0; // Si pas de patients avant, mais des nouveaux, croissance de 100%
+
+	const patientsLastYearEnd = patientsData.filter(
+		(p) => new Date(p.createdAt).getFullYear() < currentYear
+	).length;
+	const annualGrowthPercentage =
+		patientsLastYearEnd > 0
+			? Math.round((newPatientsThisYear / patientsLastYearEnd) * 100) // Croissance par rapport à la base de l'année dernière
+			: newPatientsThisYear > 0
+			? 100
+			: 0;
+
+	return {
+		newPatientsThisMonth,
+		newPatientsThisYear,
+		newPatientsLastYear,
+		newPatientsLast30Days,
+		thirtyDayGrowthPercentage,
+		annualGrowthPercentage,
+		patientsLastYearEnd,
+	};
+}
+
+function calculateAppointmentStats(appointments: Appointment[], today: Date) {
+	const appointmentsToday = appointments.filter(
+		(a) => new Date(a.date).toDateString() === today.toDateString()
+	).length;
+
+	const futureAppointments = appointments
+		.filter((a) => {
+			const appDate = new Date(a.date);
+			return (
+				appDate >= today &&
+				a.status !== "CANCELED" &&
+				a.status !== "COMPLETED" &&
+				a.status !== "NO_SHOW"
+			);
+		})
+		.sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+		);
+
+	const nextAppointment =
+		futureAppointments.length > 0
+			? formatAppointmentDate(
+					futureAppointments[0].date,
+					"EEEE d MMMM yyyy 'à' HH:mm"
+			  )
+			: null;
+
+	return { appointmentsToday, nextAppointment };
+}
+
+function calculateMonthlyBreakdown(
+	patients: Patient[],
+	currentYear: number
+): MonthlyGrowth[] {
+	const patientsByMonthThisYear: Patient[][] = Array(12)
+		.fill(null)
+		.map(() => []);
+	const patientsByMonthLastYear: Patient[][] = Array(12)
+		.fill(null)
+		.map(() => []);
+
+	patients.forEach((patient) => {
+		const createdAt = new Date(patient.createdAt);
+		const year = createdAt.getFullYear();
+		const month = createdAt.getMonth();
+		if (year === currentYear) {
+			patientsByMonthThisYear[month].push(patient);
+		} else if (year === currentYear - 1) {
+			patientsByMonthLastYear[month].push(patient);
+		}
 	});
 
+	return FRENCH_MONTHS.map((monthName, index) => {
+		const thisMonthPatientsList = patientsByMonthThisYear[index];
+		const lastYearPatientsCount = patientsByMonthLastYear[index].length;
+
+		const hommes = thisMonthPatientsList.filter(
+			(p) => p.gender === "Homme"
+		).length;
+		const femmes = thisMonthPatientsList.filter(
+			(p) => p.gender === "Femme"
+		).length;
+		const enfants = thisMonthPatientsList.filter(isChild).length;
+
+		const growthRate =
+			lastYearPatientsCount > 0
+				? Math.round(
+						((thisMonthPatientsList.length -
+							lastYearPatientsCount) /
+							lastYearPatientsCount) *
+							100
+				  )
+				: thisMonthPatientsList.length > 0
+				? 100
+				: 0;
+
+		return {
+			month: monthName,
+			patients: thisMonthPatientsList.length,
+			prevPatients: lastYearPatientsCount,
+			growthText: `${growthRate}%`,
+			hommes,
+			femmes,
+			enfants,
+		};
+	});
+}
+// --- Fin des Fonctions Utilitaires ---
+
+export function Dashboard() {
+	const [dashboardData, setDashboardData] =
+		useState<DashboardData>(initialDashboardData);
 	const [loading, setLoading] = useState(true);
-	const [patients, setPatients] = useState<any[]>([]); // Ajout d'un state pour les patients
+	const [allPatients, setAllPatients] = useState<Patient[]>([]);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		const loadDashboardData = async () => {
 			setLoading(true);
+			setError(null);
 			try {
-				// Récupération des données réelles uniquement
-				const [patientsData, appointments] = await Promise.all([
+				// Récupération des données réelles
+				const [patientsData, appointmentsData] = await Promise.all([
 					api.getPatients(),
 					api.getAppointments(),
 				]);
 
-				// Stocker les patients pour les utiliser dans les sous-composants
-				setPatients(patientsData);
+				setAllPatients(patientsData); // Stocker tous les patients pour DemographicsCard
 
-				// Calcul des statistiques avec uniquement les données réelles
-				const totalPatients = patientsData.length;
-				const maleCount = patientsData.filter(
-					(p) => p.gender === "Homme"
-				).length;
-				const femaleCount = patientsData.filter(
-					(p) => p.gender === "Femme"
-				).length;
-
-				// Calculate the children count
-				const childrenCount = patientsData.filter(isChild).length;
-				console.log(
-					`Dashboard data loading - Found ${childrenCount} children among ${totalPatients} patients`
-				);
-
-				// Calcul des âges et métriques de croissance
 				const today = new Date();
 				const currentYear = today.getFullYear();
 				const currentMonth = today.getMonth();
 
-				// Nouveaux patients ce mois-ci et cette année
-				const newPatientsThisMonth = patientsData.filter((p) => {
-					const createdAt = new Date(p.createdAt);
-					return (
-						createdAt.getMonth() === currentMonth &&
-						createdAt.getFullYear() === currentYear
-					);
-				}).length;
-
-				const newPatientsThisYear = patients.filter((p) => {
-					const createdAt = new Date(p.createdAt);
-					return createdAt.getFullYear() === currentYear;
-				}).length;
-
-				const newPatientsLastYear = patients.filter((p) => {
-					const createdAt = new Date(p.createdAt);
-					return createdAt.getFullYear() === currentYear - 1;
-				}).length;
-
-				// Rendez-vous aujourd'hui
-				const appointmentsToday = appointments.filter((a) => {
-					const appDate = new Date(a.date);
-					return appDate.toDateString() === today.toDateString();
-				}).length;
-
-				// Prochain rendez-vous - vérifier les rendez-vous à venir et prendre le plus proche
-				const futureAppointments = appointments
-					.filter((a) => {
-						// Filtrer les rendez-vous à venir et non annulés
-						const appDate = new Date(a.date);
-						return (
-							appDate > today &&
-							a.status !== "CANCELED" &&
-							a.status !== "NO_SHOW"
-						);
-					})
-					.sort(
-						(a, b) =>
-							new Date(a.date).getTime() -
-							new Date(b.date).getTime()
-					);
-
-				// Obtenir les informations détaillées du prochain rendez-vous
-				let nextAppointment = "Aucune séance prévue";
-				if (futureAppointments.length > 0) {
-					const nextApp = futureAppointments[0];
-					// Formater la date complète pour afficher le jour, la date et l'heure
-					nextAppointment = formatAppointmentDate(
-						nextApp.date,
-						"EEEE d MMMM yyyy 'à' HH:mm"
-					);
-				}
-
-				// Calcul de la croissance sur 30 jours
-				const thirtyDaysAgo = new Date();
-				thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-				const newPatientsLast30Days = patients.filter((p) => {
-					const createdAt = new Date(p.createdAt);
-					return createdAt >= thirtyDaysAgo;
-				}).length;
-
-				const sixtyDaysAgo = new Date();
-				sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-
-				const patientsPrevious30Days = patients.filter((p) => {
-					const createdAt = new Date(p.createdAt);
-					return (
-						createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo
-					);
-				}).length;
-
-				// Taux de croissance
-				const thirtyDayGrowthPercentage =
-					patientsPrevious30Days > 0
-						? Math.round(
-								((newPatientsLast30Days -
-									patientsPrevious30Days) /
-									patientsPrevious30Days) *
-									100
-						  )
-						: newPatientsLast30Days > 0
-						? 100
-						: 0;
-
-				const patientsLastYearEnd = patientsData.filter((p) => {
-					const createdAt = new Date(p.createdAt);
-					return createdAt.getFullYear() < currentYear;
-				}).length;
-
-				const annualGrowthPercentage =
-					patientsLastYearEnd > 0
-						? Math.round(
-								(newPatientsThisYear / patientsLastYearEnd) *
-									100
-						  )
-						: newPatientsThisYear > 0
-						? 100
-						: 0;
-
-				// Données de croissance mensuelle avec distribution par genre et âge
-				const frenchMonths = [
-					"Jan",
-					"Fév",
-					"Mar",
-					"Avr",
-					"Mai",
-					"Juin",
-					"Juil",
-					"Août",
-					"Sep",
-					"Oct",
-					"Nov",
-					"Déc",
-				];
-
-				// Création d'un tableau pour stocker les patients par mois (cette année)
-				const patientsByMonth = Array(12)
-					.fill(0)
-					.map(() => []);
-
-				// Grouper les patients par mois de création
-				patientsData.forEach((patient) => {
-					const createdAt = new Date(patient.createdAt);
-					// Ne considérer que les patients créés cette année
-					if (createdAt.getFullYear() === currentYear) {
-						const month = createdAt.getMonth();
-						patientsByMonth[month].push(patient);
-					}
-				});
-
-				const monthlyGrowth = frenchMonths.map((month, index) => {
-					// Patients créés ce mois-ci cette année
-					const thisMonthPatients = patientsByMonth[index].length;
-
-					// Patients de l'année dernière (pour comparaison)
-					const lastYearPatients = patientsData.filter((p) => {
-						const createdAt = new Date(p.createdAt);
-						return (
-							createdAt.getMonth() === index &&
-							createdAt.getFullYear() === currentYear - 1
-						);
-					}).length;
-
-					// Calcul du taux de croissance
-					const growthRate =
-						lastYearPatients > 0
-							? Math.round(
-									((thisMonthPatients - lastYearPatients) /
-										lastYearPatients) *
-										100
-							  )
-							: thisMonthPatients > 0
-							? 100
-							: 0;
-
-					// Calculate gender and age distribution for this month
-					const thisMonthMaleCount = patientsByMonth[index].filter(
-						(p) => p.gender === "Homme"
-					).length;
-					const thisMonthFemaleCount = patientsByMonth[index].filter(
-						(p) => p.gender === "Femme"
-					).length;
-					const thisMonthChildrenCount =
-						patientsByMonth[index].filter(isChild).length;
-
-					return {
-						month,
-						patients: thisMonthPatients,
-						prevPatients: lastYearPatients,
-						growthText: `${growthRate}%`,
-						hommes: thisMonthMaleCount, // Add male count
-						femmes: thisMonthFemaleCount, // Add female count
-						enfants: thisMonthChildrenCount, // Add children count
-					};
-				});
-				// Calcul des âges moyens
-				const calculateAverageAge = (patientList: any[]) => {
-					const patientsWithBirthDate = patientList.filter(
-						(p) => p.birthDate
-					);
-					if (patientsWithBirthDate.length === 0) return 0;
-
-					const totalAge = patientsWithBirthDate.reduce(
-						(sum, patient) => {
-							const birthDate = new Date(patient.birthDate);
-							const age = currentYear - birthDate.getFullYear();
-							return sum + age;
-						},
-						0
-					);
-
-					return Math.round(totalAge / patientsWithBirthDate.length);
-				};
-
-				const averageAge = calculateAverageAge(patientsData);
-				const averageAgeMale = calculateAverageAge(
-					patientsData.filter((p) => p.gender === "Homme")
+				const demographics = calculateDemographics(
+					patientsData,
+					currentYear
 				);
-				const averageAgeFemale = calculateAverageAge(
-					patientsData.filter((p) => p.gender === "Femme")
+				const growthMetrics = calculateGrowthMetrics(
+					patientsData,
+					currentYear,
+					currentMonth
+				);
+				const appointmentStats = calculateAppointmentStats(
+					appointmentsData,
+					today
+				);
+				const monthlyGrowthData = calculateMonthlyBreakdown(
+					patientsData,
+					currentYear
 				);
 
-				// Mettre à jour les données du tableau de bord
 				setDashboardData({
-					totalPatients,
-					maleCount,
-					femaleCount,
-					averageAge: 0,
-					averageAgeMale: 0,
-					averageAgeFemale: 0,
-					newPatientsThisMonth,
-					newPatientsThisYear,
-					newPatientsLastYear,
-					appointmentsToday,
-					nextAppointment,
-					patientsLastYearEnd,
-					newPatientsLast30Days,
-					thirtyDayGrowthPercentage,
-					annualGrowthPercentage,
-					childrenCount,
-					monthlyGrowth,
+					totalPatients: patientsData.length,
+					...demographics,
+					...growthMetrics,
+					...appointmentStats,
 				});
-			} catch (error) {
+			} catch (err) {
 				console.error(
 					"Erreur lors du chargement des données du tableau de bord:",
-					error
+					err
+				);
+				setError(
+					"Impossible de charger les données du tableau de bord. Veuillez réessayer plus tard."
 				);
 			} finally {
 				setLoading(false);
@@ -327,16 +303,55 @@ export function Dashboard() {
 		};
 
 		loadDashboardData();
-	}, []);
+	}, []); // Dépendance vide car on charge une seule fois
+
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				{" "}
+				{/* Adjusted for full screen loading */}
+				<div className="flex flex-col items-center gap-4">
+					<Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+					<p className="text-lg text-gray-600 dark:text-gray-300 animate-pulse">
+						Chargement des données...
+					</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex items-center justify-center min-h-screen p-4">
+				<Card className="w-full max-w-md text-center">
+					<CardContent className="p-6">
+						<h2 className="text-xl font-semibold text-destructive mb-2">
+							Erreur
+						</h2>
+						<p className="text-muted-foreground">{error}</p>
+						<button
+							onClick={() => window.location.reload()} // Simple way to retry
+							className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+						>
+							Réessayer
+						</button>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-8 p-4 sm:p-6 lg:p-8">
+			{" "}
+			{/* Added padding to the main container */}
 			{/* Header Image Banner */}
-			<div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg mb-8 animate-fade-in shadow-lg transform hover:scale-[1.01] transition-all duration-500">
+			<div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg shadow-lg animate-fade-in transition-all duration-500 hover:scale-[1.01]">
 				<img
-					src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400"
+					src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400" // Consider optimizing image for web
 					alt="Cabinet d'ostéopathie"
 					className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
+					loading="lazy" // Lazy load image
 				/>
 				<div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex items-center">
 					<div className="px-6 md:px-10 max-w-2xl animate-fade-in animate-delay-100">
@@ -351,48 +366,45 @@ export function Dashboard() {
 					</div>
 				</div>
 			</div>
+			{/* Main content is already rendered if not loading and no error */}
+			<>
+				<div className="animate-fade-in">
+					<DashboardStats data={dashboardData} />
+				</div>
 
-			{loading ? (
-				<div className="flex items-center justify-center py-12">
-					<div className="flex flex-col items-center gap-4">
-						<Loader2 className="h-12 w-12 animate-spin text-blue-500" />
-						<p className="text-lg text-gray-600 dark:text-gray-300 animate-pulse">
-							Chargement des données...
-						</p>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					{" "}
+					{/* Removed extra padding from here */}
+					<div className="animate-fade-in animate-delay-100">
+						<AppointmentsOverview data={dashboardData} />
+					</div>
+					<div className="animate-fade-in animate-delay-200">
+						<DemographicsCard
+							patients={allPatients} // Pass allPatients
+							data={dashboardData} // data.childrenCount, data.maleCount, data.femaleCount, etc. can be derived from allPatients too
+						/>
 					</div>
 				</div>
-			) : (
-				<>
-					<div className="animate-fade-in">
-						<DashboardStats data={dashboardData} />
-					</div>
 
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-2 sm:px-0">
-						<div className="animate-fade-in animate-delay-100">
-							<AppointmentsOverview data={dashboardData} />
-						</div>
-						<div className="animate-fade-in animate-delay-200">
-							<DemographicsCard
-								patients={patients}
-								data={dashboardData}
-							/>
-						</div>
-					</div>
-
-					<div className="animate-fade-in animate-delay-300 px-2 sm:px-0">
-						<Card className="hover-scale">
-							<CardContent className="p-6 bg-inherit">
-								<h2 className="text-xl font-bold mb-4">
-									Évolution de l'activité
-								</h2>
-								<div className="h-full">
-									<GrowthChart data={dashboardData} />
-								</div>
-							</CardContent>
-						</Card>
-					</div>
-				</>
-			)}
+				<div className="animate-fade-in animate-delay-300">
+					{" "}
+					{/* Removed extra padding */}
+					<Card className="hover-scale">
+						<CardContent className="p-6 bg-inherit">
+							{" "}
+							{/* Ensure bg-inherit has desired effect or remove */}
+							<h2 className="text-xl font-bold mb-4">
+								Évolution de l'activité
+							</h2>
+							<div className="h-full">
+								{" "}
+								{/* Ensure GrowthChart handles its own height or provide specific height */}
+								<GrowthChart data={dashboardData} />
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</>
 		</div>
 	);
 }
