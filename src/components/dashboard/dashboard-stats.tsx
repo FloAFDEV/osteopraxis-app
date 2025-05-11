@@ -87,7 +87,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 			<StatCard
 				title="Croissance annuelle"
 				value={`${data.annualGrowthPercentage}%`}
-				description={`${data.newPatientsThisYear} nouveaux cette année`}
+				description={`${data.newPatientsThisYear} nouveaux patients cette année`}
 				color="text-amber-500"
 				icon={<TrendingUp />}
 			/>
