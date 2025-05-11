@@ -1,25 +1,24 @@
-
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { FileText, Plus } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { ArrowLeft, FileText, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
+import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
+import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
-import { Accordion } from "@/components/ui/accordion";
-import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 
 // Import our new components
-import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
 import { InvoiceEmptyState } from "@/components/invoices/InvoiceEmptyState";
-import { InvoiceYearGroup } from "@/components/invoices/InvoiceYearGroup";
+import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
 import { InvoicePrintWrapper } from "@/components/invoices/InvoicePrintWrapper";
+import { InvoiceYearGroup } from "@/components/invoices/InvoiceYearGroup";
 import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 
 const InvoicesPage = () => {
@@ -67,8 +66,13 @@ const InvoicesPage = () => {
 		filteredInvoices,
 		groupInvoicesByYearAndMonth: groupedInvoices,
 		generateYearOptions,
-		generateMonthOptions
-	} = useInvoiceFiltering(invoices, searchQuery, statusFilter, patientDataMap);
+		generateMonthOptions,
+	} = useInvoiceFiltering(
+		invoices,
+		searchQuery,
+		statusFilter,
+		patientDataMap
+	);
 
 	// Available month options for the selected year
 	const monthOptions = generateMonthOptions(selectedYear, filteredInvoices);
@@ -139,10 +143,7 @@ const InvoicesPage = () => {
 				cabinet: cabinetData,
 			};
 		} catch (error) {
-			console.error(
-				"Error loading related data:",
-				error
-			);
+			console.error("Error loading related data:", error);
 			return { patient: null, osteopath: null, cabinet: null };
 		}
 	};
@@ -188,7 +189,7 @@ const InvoicesPage = () => {
 	};
 
 	const handleDownloadAllInvoices = async () => {
-		const yearInvoices = filteredInvoices.filter(invoice => {
+		const yearInvoices = filteredInvoices.filter((invoice) => {
 			const date = new Date(invoice.date);
 			return date.getFullYear().toString() === selectedYear;
 		});
@@ -213,17 +214,22 @@ const InvoicesPage = () => {
 		);
 	};
 
-	const handleDownloadMonthInvoices = async (year: string, monthKey: string) => {
+	const handleDownloadMonthInvoices = async (
+		year: string,
+		monthKey: string
+	) => {
 		if (!invoices) return;
 
-		const monthInvoices = filteredInvoices.filter(invoice => {
+		const monthInvoices = filteredInvoices.filter((invoice) => {
 			const date = new Date(invoice.date);
-			const invoiceMonthKey = format(date, 'yyyy-MM');
+			const invoiceMonthKey = format(date, "yyyy-MM");
 			return invoiceMonthKey === monthKey;
 		});
 
 		if (monthInvoices.length === 0) {
-			const monthLabel = format(parseISO(`${monthKey}-01`), 'MMMM yyyy', { locale: fr });
+			const monthLabel = format(parseISO(`${monthKey}-01`), "MMMM yyyy", {
+				locale: fr,
+			});
 			toast.error(`Aucune facture trouvée pour ${monthLabel}`);
 			return;
 		}
@@ -238,8 +244,10 @@ const InvoicesPage = () => {
 
 		setPrintAllInvoices(monthInvoices);
 		setPrintInvoice(null);
-		
-		const monthLabel = format(parseISO(`${monthKey}-01`), 'MMMM yyyy', { locale: fr });
+
+		const monthLabel = format(parseISO(`${monthKey}-01`), "MMMM yyyy", {
+			locale: fr,
+		});
 		toast.info(
 			`Préparation du téléchargement des ${monthInvoices.length} factures de ${monthLabel}...`
 		);
@@ -271,6 +279,14 @@ const InvoicesPage = () => {
 				</div>
 			)}
 			<Layout>
+				<div className="flex items-center gap-2">
+					<Button variant="outline" size="sm" asChild>
+						<Link to="/patients">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Retour
+						</Link>
+					</Button>
+				</div>
 				<div className="mb-6 mt-20">
 					{/* Header */}
 					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -290,7 +306,7 @@ const InvoicesPage = () => {
 					</div>
 
 					{/* Filters */}
-					<InvoiceFilters 
+					<InvoiceFilters
 						searchQuery={searchQuery}
 						setSearchQuery={setSearchQuery}
 						statusFilter={statusFilter}
@@ -317,30 +333,46 @@ const InvoicesPage = () => {
 								.map(([year, months]) => {
 									// Filter by selected year
 									if (year !== selectedYear) return null;
-									
+
 									return (
-										<Accordion type="multiple" className="space-y-4" key={year}>
+										<Accordion
+											type="multiple"
+											className="space-y-4"
+											key={year}
+										>
 											<InvoiceYearGroup
 												year={year}
 												months={months}
 												selectedMonth={selectedMonth}
 												patientDataMap={patientDataMap}
-												onEditInvoice={(id) => navigate(`/invoices/${id}`)}
+												onEditInvoice={(id) =>
+													navigate(`/invoices/${id}`)
+												}
 												onDeleteInvoice={(id) => {
 													setSelectedInvoiceId(id);
 													setIsDeleteModalOpen(true);
 												}}
-												onPrintInvoice={handlePrintInvoice}
-												onDownloadInvoice={handleDownloadInvoice}
-												onDownloadMonthInvoices={handleDownloadMonthInvoices}
+												onPrintInvoice={
+													handlePrintInvoice
+												}
+												onDownloadInvoice={
+													handleDownloadInvoice
+												}
+												onDownloadMonthInvoices={
+													handleDownloadMonthInvoices
+												}
 											/>
 										</Accordion>
 									);
 								})}
 						</div>
 					) : (
-						<InvoiceEmptyState 
-							hasFilters={searchQuery !== "" || statusFilter !== "ALL" || selectedMonth !== null}
+						<InvoiceEmptyState
+							hasFilters={
+								searchQuery !== "" ||
+								statusFilter !== "ALL" ||
+								selectedMonth !== null
+							}
 						/>
 					)}
 				</div>
@@ -365,7 +397,9 @@ const InvoicesPage = () => {
 				{isDeleteModalOpen && selectedInvoiceId && (
 					<ConfirmDeleteInvoiceModal
 						isOpen={isDeleteModalOpen}
-						invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")}
+						invoiceNumber={selectedInvoiceId
+							.toString()
+							.padStart(4, "0")}
 						onCancel={() => setIsDeleteModalOpen(false)}
 						onDelete={handleDeleteInvoice}
 					/>
