@@ -3,7 +3,7 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowLeft, FileText, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import ConfirmDeleteInvoiceModal from "@/components/modals/ConfirmDeleteInvoiceModal";
@@ -280,11 +280,13 @@ const InvoicesPage = () => {
 			)}
 			<Layout>
 				<div className="flex items-center gap-2">
-					<Button variant="outline" size="sm" asChild>
-						<Link to="/patients">
-							<ArrowLeft className="mr-2 h-4 w-4" />
-							Retour
-						</Link>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => navigate(-1)}
+					>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Retour
 					</Button>
 				</div>
 				<div className="mb-6 mt-20">
