@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
 	Plus,
 	Calendar,
@@ -9,7 +9,8 @@ import {
 	Clock,
 	Home,
 	ArrowRight,
-	ChevronDown, 
+	ArrowLeft,
+	ChevronDown,
 	CalendarX,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -17,7 +18,7 @@ import { fr } from "date-fns/locale";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
-import { AppointmentCard } from "@/components/appointment-card"; 
+import { AppointmentCard } from "@/components/appointment-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -48,6 +49,7 @@ const AppointmentsPage = () => {
 	const [appointmentToCancel, setAppointmentToCancel] =
 		useState<Appointment | null>(null);
 	const location = useLocation();
+	const navigate = useNavigate();
 
 	const [refreshKey, setRefreshKey] = useState(0);
 
@@ -128,9 +130,13 @@ const AppointmentsPage = () => {
 		filteredApps.forEach((appointment) => {
 			const appointmentDate = new Date(appointment.date);
 			const appointmentDateStr = format(appointmentDate, "yyyy-MM-dd");
-			
+
 			// Mettre les rendez-vous COMPLETED dans "past" même si leur date est future
-			if (appointmentDateStr < todayStr || (appointment.status === "COMPLETED" && appointmentDateStr < todayStr)) {
+			if (
+				appointmentDateStr < todayStr ||
+				(appointment.status === "COMPLETED" &&
+					appointmentDateStr < todayStr)
+			) {
 				past.push(appointment);
 			} else if (appointmentDateStr === todayStr) {
 				// Pour aujourd'hui, montrer même les COMPLETED
@@ -240,6 +246,18 @@ const AppointmentsPage = () => {
 	// ... keep existing code (rendering the component)
 	return (
 		<Layout>
+			{" "}
+			<div className="flex items-center gap-2">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => navigate(-1)}
+					className="flex items-center gap-1"
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Retour
+				</Button>
+			</div>
 			<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8 mt-20">
 				{/* Section Titre et Actions */}
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -708,8 +726,7 @@ const AppointmentsPage = () => {
 											// Message if no past appointments match the year filter
 											<div className="text-center py-8 text-gray-500">
 												<p>
-													Aucune séance passée
-													trouvé{" "}
+													Aucune séance passée trouvé{" "}
 													{selectedPastYear
 														? `pour l'année ${selectedPastYear}`
 														: ""}
@@ -722,30 +739,28 @@ const AppointmentsPage = () => {
 							</div>
 						)}
 						{/* --- Overall Empty State --- */}
-						{!loading &&
-							filteredAppointments.length === 0 && (
-								<div className="text-center py-16 bg-gray-50 rounded-lg mt-8 border border-dashed">
-									<CalendarX className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-									<h3 className="text-xl font-semibold text-gray-700">
-										Aucune séance trouvée
-									</h3>
-									<p className="text-muted-foreground mt-2 mb-6 max-w-md mx-auto">
-										{searchQuery || statusFilter !== "all"
-											? "Aucune séance ne correspond à vos critères de recherche ou de filtrage."
-											: "Vous n'avez pas encore de séance."}
-									</p>
-									<Button asChild>
-										<Link to="/appointments/new">
-											<Plus className="mr-2 h-4 w-4" />{" "}
-											Créer une séance
-										</Link>
-									</Button>
-								</div>
-							)}
+						{!loading && filteredAppointments.length === 0 && (
+							<div className="text-center py-16 bg-gray-50 rounded-lg mt-8 border border-dashed">
+								<CalendarX className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+								<h3 className="text-xl font-semibold text-gray-700">
+									Aucune séance trouvée
+								</h3>
+								<p className="text-muted-foreground mt-2 mb-6 max-w-md mx-auto">
+									{searchQuery || statusFilter !== "all"
+										? "Aucune séance ne correspond à vos critères de recherche ou de filtrage."
+										: "Vous n'avez pas encore de séance."}
+								</p>
+								<Button asChild>
+									<Link to="/appointments/new">
+										<Plus className="mr-2 h-4 w-4" /> Créer
+										une séance
+									</Link>
+								</Button>
+							</div>
+						)}
 					</>
 				)}
 			</div>
-
 			{/* --- Cancel Confirmation Dialog --- */}
 			<Dialog
 				open={!!appointmentToCancel}
@@ -808,7 +823,9 @@ const AppointmentsPage = () => {
 						<Button
 							variant="destructive"
 							onClick={handleCancelAppointment}
-							disabled={appointmentToCancel?.status === "COMPLETED"}
+							disabled={
+								appointmentToCancel?.status === "COMPLETED"
+							}
 						>
 							Confirmer l'annulation
 						</Button>
