@@ -35,27 +35,49 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     
     const birthDate = new Date(patient.birthDate);
     const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
+    
+    // Calculate age more precisely
+    let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     
-    // If birth month hasn't occurred this year yet or if birth month is the same but birth day hasn't occurred yet
+    // Adjust age if birthday hasn't occurred this year yet
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      return age - 1 < 12; // Subtract 1 from age and check if less than 12
+      age--;
     }
     
-    return age < 12; // Check if less than 12
+    return age < 12;
   };
 
-  // Calculate children count from patients list
+  // Calculate children count from patients list with console logging for debugging
   const getChildrenCount = (): number => {
     if (patientsList.length > 0) {
-      return patientsList.filter(isChild).length;
+      const childrenPatients = patientsList.filter(isChild);
+      console.log(`Children count: ${childrenPatients.length} out of ${patientsList.length} patients`);
+      
+      // Debug information about each patient
+      patientsList.forEach(patient => {
+        if (patient.birthDate) {
+          const birthDate = new Date(patient.birthDate);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          console.log(`Patient ${patient.firstName} ${patient.lastName}: Birth date ${patient.birthDate}, Age: ${age}, Is child: ${age < 12}`);
+        } else {
+          console.log(`Patient ${patient.firstName} ${patient.lastName}: No birth date provided`);
+        }
+      });
+      
+      return childrenPatients.length;
     }
     // Default value if no patient data available
     return 0;
   };
 
   const childrenCount = getChildrenCount();
+  console.log(`Final children count: ${childrenCount}`);
 
   const GENDER_COLORS = {
     "Homme": "#3b82f6",  
@@ -84,6 +106,8 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     if (patientsList.length > 0) {
       const childPatients = patientsList.filter(isChild);
       const adultPatients = patientsList.filter(patient => !isChild(patient));
+      
+      console.log(`Chart data calculation: ${childPatients.length} children and ${adultPatients.length} adults`);
       
       // Count adult males and females
       const adultMales = adultPatients.filter(p => p.gender === "Homme").length;
@@ -158,9 +182,21 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 
   // Ensure children are always represented in the chart data display
   const hasChildrenData = chartData.some(item => item.name === "Enfant");
-  const childrenPercentage = hasChildrenData 
-    ? chartData.find(item => item.name === "Enfant")?.percentage || 0
-    : 0;
+  const childrenPercentage = childrenCount > 0 && totalPatients > 0
+    ? Math.round((childrenCount / totalPatients) * 100)
+    : hasChildrenData 
+      ? chartData.find(item => item.name === "Enfant")?.percentage || 0
+      : 0;
+
+  // Force add children category to chart if we have actual children but they're not showing
+  if (childrenCount > 0 && !hasChildrenData) {
+    chartData.push({
+      name: "Enfant",
+      value: childrenCount,
+      percentage: childrenPercentage,
+      icon: <Baby className="h-5 w-5 text-emerald-600" />
+    });
+  }
 
   const renderCustomizedLabel = ({
     cx,
@@ -312,3 +348,4 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     </Card>
   );
 };
+
