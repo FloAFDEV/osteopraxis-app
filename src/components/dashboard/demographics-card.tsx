@@ -1,21 +1,15 @@
+
 import React, { useEffect } from 'react';
 import { CardTitle, CardDescription, CardContent, Card, CardHeader } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Patient, DashboardData } from "@/types";
-import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import { User, UserRound, UserCircle, Baby } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { GenderPieChart } from './demographics/gender-pie-chart';
+import { ChildrenStats } from './demographics/children-stats';
+import { calculateGenderData, isChild } from './demographics/gender-chart-utils';
 
 interface DemographicsCardProps {
   patients?: Patient[];
   data?: DashboardData;
-}
-
-interface GenderChartData {
-  name: string;
-  value: number;
-  percentage: number;
-  icon: React.ReactNode;
 }
 
 export const DemographicsCard: React.FC<DemographicsCardProps> = ({
@@ -25,28 +19,6 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
   const { isMobile } = useIsMobile();
   const patientsList = patients || [];
   const totalPatients = patientsList.length || data?.totalPatients || 0;
-  const maleCount = data?.maleCount || 0;
-  const femaleCount = data?.femaleCount || 0;
-
-  // Function to determine if a patient is a child (age < 12)
-  // Use precise age calculation to account for months and days
-  const isChild = (patient: Patient): boolean => {
-    if (!patient.birthDate) return false;
-    
-    const birthDate = new Date(patient.birthDate);
-    const today = new Date();
-    
-    // Calculate age more precisely
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    // Adjust age if birthday hasn't occurred this year yet
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return age < 12;
-  };
 
   // Calculate children count directly from patients list
   const childrenCount = React.useMemo(() => {
@@ -82,181 +54,13 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
     console.log(`Final children count in demographics-card: ${childrenCount}`);
   }, [childrenCount]);
 
-  const GENDER_COLORS = {
-    "Homme": "#3b82f6",  
-    "Femme": "#d946ef",
-    "Enfant": "#10b981", // Emerald color for children
-    "Non spécifié": "#94a3b8"
-  };
+  const chartData = calculateGenderData(patientsList, totalPatients);
 
-  const calculateGenderData = (): GenderChartData[] => {
-    // Pour garantir que les enfants sont toujours affichés même s'il n'y a pas de données
-    const result: GenderChartData[] = [];
-    
-    if (patientsList.length > 0) {
-      // Séparer les enfants et les adultes
-      const childPatients = patientsList.filter(isChild);
-      const adultPatients = patientsList.filter(patient => !isChild(patient));
-      
-      console.log(`Chart data calculation: ${childPatients.length} children and ${adultPatients.length} adults`);
-      
-      // Compter les adultes hommes et femmes
-      const adultMales = adultPatients.filter(p => p.gender === "Homme").length;
-      const adultFemales = adultPatients.filter(p => p.gender === "Femme").length;
-      const otherOrUndefined = adultPatients.filter(p => p.gender !== "Homme" && p.gender !== "Femme").length;
-      
-      // Ajouter les adultes hommes si présents
-      if (adultMales > 0) {
-        result.push({
-          name: "Homme",
-          value: adultMales,
-          percentage: Math.round((adultMales / totalPatients) * 100),
-          icon: <User className="h-5 w-5 text-blue-600" />
-        });
-      }
-      
-      // Ajouter les adultes femmes si présents
-      if (adultFemales > 0) {
-        result.push({
-          name: "Femme",
-          value: adultFemales,
-          percentage: Math.round((adultFemales / totalPatients) * 100),
-          icon: <UserRound className="h-5 w-5 text-pink-600" />
-        });
-      }
-      
-      // Toujours ajouter les enfants, même si le compte est 0
-      result.push({
-        name: "Enfant",
-        value: childPatients.length,
-        percentage: totalPatients > 0 ? Math.round((childPatients.length / totalPatients) * 100) : 0,
-        icon: <Baby className="h-5 w-5 text-emerald-600" />
-      });
-      
-      // Ajouter les autres/non définis si présents
-      if (otherOrUndefined > 0) {
-        result.push({
-          name: "Non spécifié",
-          value: otherOrUndefined,
-          percentage: Math.round((otherOrUndefined / totalPatients) * 100),
-          icon: <UserCircle className="h-5 w-5 text-gray-600" />
-        });
-      }
-      
-      return result;
-    }
-    
-    // Données par défaut pour la démonstration (toujours inclure les enfants)
-    return [{
-      name: "Homme",
-      value: 1,
-      percentage: 33,
-      icon: <User className="h-5 w-5 text-blue-600" />
-    }, {
-      name: "Femme",
-      value: 1,
-      percentage: 33,
-      icon: <UserRound className="h-5 w-5 text-pink-600" />
-    }, {
-      name: "Enfant",
-      value: 1,
-      percentage: 34,
-      icon: <Baby className="h-5 w-5 text-emerald-600" />
-    }];
-  };
-
-  const chartData = calculateGenderData();
-
-  // Calculer le pourcentage d'enfants
-  const childrenPercentage = totalPatients > 0 ? Math.round((childrenCount / totalPatients) * 100) : 0;
-
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-    index
-  }: any) => {
-    if (percent < 0.05) return null;
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    
-    const genderIcon = chartData[index]?.icon;
-    
-    return (
-      <g>
-        <text 
-          x={x} 
-          y={y} 
-          fill="white" 
-          fontWeight="bold" 
-          fontSize="14" 
-          dominantBaseline="central" 
-          textAnchor="middle"
-        >
-          {`${(percent * 100).toFixed(0)}%`}
-        </text>
-        <g transform={`translate(${x - 12}, ${y + 15}) scale(0.8)`}>
-          {genderIcon}
-        </g>
-      </g>
-    );
-  };
-
-  const CustomTooltip = ({
-    active,
-    payload
-  }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return <div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow">
-          <p className="font-medium">{data.name}</p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">{data.value}</span> patients
-          </p>
-          <p className="text-sm text-primary font-semibold">
-            {data.percentage}% du total
-          </p>
-        </div>;
-    }
-    return null;
-  };
-
-  const CustomLegend = ({
-    payload
-  }: any) => {
-    if (!payload) return null;
-    return <ul className="flex flex-wrap justify-center gap-4 pt-4">
-        {payload.map((entry: any, index: number) => <li key={`legend-${index}`} className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full" style={{
-          backgroundColor: entry.color
-        }} />
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger asChild>
-                  <span className="text-sm cursor-help">
-                    {entry.value} ({entry.payload.percentage}%)
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    {entry.payload.value} patients ({entry.payload.percentage}% du total)
-                  </p>
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-          </li>)}
-      </ul>;
-  };
-
-  const isLoading = patientsList.length === 0 && !data || !maleCount && !femaleCount && totalPatients === 0;
+  const isLoading = patientsList.length === 0 && !data || !data?.maleCount && !data?.femaleCount && totalPatients === 0;
   
   if (isLoading) {
-    return <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg">
+    return (
+      <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg">
         <CardHeader>
           <CardTitle>Démographie des patients</CardTitle>
           <CardDescription>
@@ -266,7 +70,8 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         <CardContent className="flex items-center justify-center h-[250px]">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
   
   return (
@@ -280,42 +85,10 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className={`h-[${isMobile ? '300' : '300'}px] mt-4`}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie 
-                data={chartData} 
-                cx="50%" 
-                cy="50%" 
-                labelLine={false} 
-                label={renderCustomizedLabel} 
-                outerRadius={isMobile ? 100 : 120}
-                fill="#8884d8" 
-                dataKey="value"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || "#94a3b8"} 
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend content={<CustomLegend />} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        <GenderPieChart chartData={chartData} totalPatients={totalPatients} />
         
         {/* Children statistics summary - always displayed */}
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <div className="flex items-center gap-2 text-sm">
-            <Baby className="h-4 w-4 text-emerald-600" />
-            <span className="font-medium">Enfants (-12 ans): </span>
-            <span>
-              {childrenCount} patient{childrenCount > 1 ? 's' : ''} ({childrenPercentage}% du total)
-            </span>
-          </div>
-        </div>
+        <ChildrenStats childrenCount={childrenCount} totalPatients={totalPatients} />
       </CardContent>
     </Card>
   );
