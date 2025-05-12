@@ -1,7 +1,8 @@
 
-import { useMemo } from "react";
 import { Invoice, Patient } from "@/types";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { useMemo } from "react";
 
 export const useInvoiceFiltering = (
   invoices: Invoice[] | undefined,
@@ -9,112 +10,119 @@ export const useInvoiceFiltering = (
   statusFilter: string,
   patientDataMap: Map<number, Patient>
 ) => {
-  // Helper function to get patient name
-  const getPatientName = (invoice: Invoice, patientDataMap: Map<number, Patient>) => {
-    // First check if we have the patient in our map
-    const patient = patientDataMap.get(invoice.patientId);
-    if (patient) {
-      return `${patient.firstName} ${patient.lastName}`;
-    }
-
-    // Then check if Patient is attached by API
-    // @ts-ignore (Patient peut être attaché par API)
-    if (invoice.Patient) {
-      //@ts-ignore
-      return `${invoice.Patient.firstName} ${invoice.Patient.lastName}`;
-    }
-
-    return `Patient #${invoice.patientId}`;
-  };
-
+  // Filter invoices based on search query and status
   const filteredInvoices = useMemo(() => {
     if (!invoices) return [];
-
+    
     return invoices.filter((invoice) => {
-      // Get the patient name
-      const patientName = getPatientName(invoice, patientDataMap);
-
-      const matchesQuery =
-        patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        invoice.id.toString().includes(searchQuery);
-
-      const matchesStatus =
-        statusFilter === "ALL" || invoice.paymentStatus === statusFilter;
+      // Filter by payment status
+      if (statusFilter !== "ALL" && invoice.paymentStatus !== statusFilter) {
+        return false;
+      }
+      
+      // Filter by search query (patient name)
+      if (searchQuery.trim() !== "") {
+        const patient = patientDataMap.get(invoice.patientId);
+        if (!patient) return false;
         
-      return matchesQuery && matchesStatus;
+        const patientFullName = `${patient.lastName} ${patient.firstName}`.toLowerCase();
+        if (!patientFullName.includes(searchQuery.toLowerCase())) {
+          return false;
+        }
+      }
+      
+      return true;
     });
   }, [invoices, searchQuery, statusFilter, patientDataMap]);
 
   // Group invoices by year and month
   const groupInvoicesByYearAndMonth = useMemo(() => {
-    if (!filteredInvoices) return {};
-
-    const groupedInvoices: Record<string, Record<string, Invoice[]>> = {};
-
-    filteredInvoices.forEach(invoice => {
+    const groupedData: Record<string, Record<string, Invoice[]>> = {};
+    
+    if (!filteredInvoices.length) return groupedData;
+    
+    filteredInvoices.forEach((invoice) => {
       const date = new Date(invoice.date);
       const year = date.getFullYear().toString();
-      const monthKey = format(date, 'yyyy-MM');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const monthKey = `${year}-${month}`;
       
-      if (!groupedInvoices[year]) {
-        groupedInvoices[year] = {};
+      if (!groupedData[year]) {
+        groupedData[year] = {};
       }
       
-      if (!groupedInvoices[year][monthKey]) {
-        groupedInvoices[year][monthKey] = [];
+      if (!groupedData[year][monthKey]) {
+        groupedData[year][monthKey] = [];
       }
       
-      groupedInvoices[year][monthKey].push(invoice);
+      groupedData[year][monthKey].push(invoice);
     });
-
-    // Sort invoices in each month
-    Object.keys(groupedInvoices).forEach(year => {
-      Object.keys(groupedInvoices[year]).forEach(monthKey => {
-        groupedInvoices[year][monthKey].sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-      });
-    });
-
-    return groupedInvoices;
+    
+    return groupedData;
   }, [filteredInvoices]);
 
-  // Generate years for filter options
-  const generateYearOptions = () => {
+  // Generate year options for filtering
+  const generateYearOptions = (): string[] => {
     const currentYear = new Date().getFullYear();
-    const years: number[] = [];
-
-    // Generate the 5 latest years
+    const years: string[] = [];
+    
+    // Add last 5 years + current year as options
     for (let i = 0; i < 5; i++) {
-      years.push(currentYear - i);
+      years.push((currentYear - i).toString());
     }
-
-    return years;
+    
+    // Add years from invoices
+    filteredInvoices.forEach(invoice => {
+      const year = new Date(invoice.date).getFullYear().toString();
+      if (!years.includes(year)) {
+        years.push(year);
+      }
+    });
+    
+    return years.sort((a, b) => parseInt(b) - parseInt(a));
   };
 
-  // Generate months for filter options
-  const generateMonthOptions = (selectedYear: string, filteredInvoices: Invoice[]) => {
-    if (!filteredInvoices || filteredInvoices.length === 0) return [];
+  // Generate month options for filtering based on selected year
+  const generateMonthOptions = (
+    selectedYear: string,
+    invoices: Invoice[]
+  ): { value: string; label: string }[] => {
+    const months: { value: string; label: string }[] = [];
+    const trackedMonths = new Set<string>();
     
-    const monthsInYear = new Set<string>();
-    
-    filteredInvoices.forEach(invoice => {
+    invoices.forEach(invoice => {
       const date = new Date(invoice.date);
       const invoiceYear = date.getFullYear().toString();
       
       if (invoiceYear === selectedYear) {
-        const monthKey = format(date, 'yyyy-MM');
-        monthsInYear.add(monthKey);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const monthKey = `${selectedYear}-${month}`;
+        
+        if (!trackedMonths.has(monthKey)) {
+          trackedMonths.add(monthKey);
+          
+          // Format month name
+          const monthLabel = format(date, 'MMMM', { locale: fr });
+          months.push({
+            value: monthKey,
+            label: monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)
+          });
+        }
       }
     });
     
-    return Array.from(monthsInYear).sort((a, b) => b.localeCompare(a)); // Sort in descending order
+    // Sort by month number (descending)
+    return months.sort((a, b) => {
+      const monthA = parseInt(a.value.split('-')[1]);
+      const monthB = parseInt(b.value.split('-')[1]);
+      return monthB - monthA;
+    });
   };
 
-  return {
-    filteredInvoices,
-    groupInvoicesByYearAndMonth,
-    generateYearOptions,
-    generateMonthOptions
+  return { 
+    filteredInvoices, 
+    groupInvoicesByYearAndMonth, 
+    generateYearOptions, 
+    generateMonthOptions 
   };
 };
