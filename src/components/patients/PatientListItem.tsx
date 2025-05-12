@@ -124,7 +124,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 						<Button
 							variant="default"
 							size="sm"
-							className="h-8 px-3 bg-blue-500 hover:bg-blue-700"
+							className="h-8 px-3 bg-blue-500 hover:bg-blue-700 hover:text-white"
 							asChild
 						>
 							<Link to={`/patients/${patient.id}`}>Voir</Link>
