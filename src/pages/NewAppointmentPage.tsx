@@ -1,11 +1,11 @@
-
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { AppointmentForm } from "@/components/appointment-form";
+import { Button } from "@/components/ui/button";
+import { Layout } from "@/components/ui/layout";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
-import { Layout } from "@/components/ui/layout";
-import { AppointmentForm } from "@/components/appointment-form";
+import { ArrowLeft, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const NewAppointmentPage = () => {
@@ -13,6 +13,7 @@ const NewAppointmentPage = () => {
 	const [loading, setLoading] = useState(true);
 
 	const location = useLocation();
+	const navigate = useNavigate();
 	const queryParams = new URLSearchParams(location.search);
 
 	const patientId = queryParams.get("patientId")
@@ -53,7 +54,17 @@ const NewAppointmentPage = () => {
 
 	return (
 		<Layout>
-			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+			<div className="flex items-center gap-2">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => navigate(-1)}
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Retour
+				</Button>
+			</div>
+			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
 				<header className="mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<Calendar className="h-8 w-8 text-purple-500" />
@@ -61,7 +72,8 @@ const NewAppointmentPage = () => {
 					</h1>
 					<p className="text-gray-500 mt-2">
 						Créez une séance en remplissant le formulaire
-						ci-dessous. Ajoutez un motif et un compte rendu pour suivre l'historique du patient.
+						ci-dessous. Ajoutez un motif et un compte rendu pour
+						suivre l'historique du patient.
 					</p>
 				</header>
 
@@ -83,7 +95,7 @@ const NewAppointmentPage = () => {
 								date: defaultDate,
 								time: defaultTime,
 								status: "SCHEDULED",
-								website: "" // Initialiser le honeypot
+								website: "", // Initialiser le honeypot
 							}}
 						/>
 					</section>
