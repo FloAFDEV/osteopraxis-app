@@ -1,63 +1,79 @@
-import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { FileText, Save } from "lucide-react";
-import { api } from "@/services/api";
-import { Patient } from "@/types";
-import { Layout } from "@/components/ui/layout";
-import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { AppointmentStatusDropdown } from "@/components/patients/detail/AppointmentStatusDropdown";
-import { AppointmentStatus } from "@/types";
-import { useAutoSave } from "@/hooks/use-auto-save";
-import { AutoSaveIndicator } from "@/components/ui/auto-save-indicator";
-import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AutoSaveIndicator } from "@/components/ui/auto-save-indicator";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Layout } from "@/components/ui/layout";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { api } from "@/services/api";
+import { AppointmentStatus, Patient } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, ArrowLeft, FileText, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useLocation, useNavigate } from "react-router-dom";
+import { z } from "zod";
 
 const ImmediateAppointmentPage = () => {
 	const [patient, setPatient] = useState<Patient | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [appointmentId, setAppointmentId] = useState<number | null>(null);
-	const [appointmentStatus, setAppointmentStatus] = useState<AppointmentStatus>("SCHEDULED");
-	
+	const [appointmentStatus, setAppointmentStatus] =
+		useState<AppointmentStatus>("SCHEDULED");
+
 	const location = useLocation();
 	const navigate = useNavigate();
 	const queryParams = new URLSearchParams(location.search);
-	const patientId = queryParams.get("patientId") ? parseInt(queryParams.get("patientId")!) : undefined;
+	const patientId = queryParams.get("patientId")
+		? parseInt(queryParams.get("patientId")!)
+		: undefined;
 
 	const formSchema = z.object({
-		reason: z.string().min(3, { message: "Le motif doit contenir au moins 3 caractères" }),
-		notes: z.string().optional()
+		reason: z.string().min(3, {
+			message: "Le motif doit contenir au moins 3 caractères",
+		}),
+		notes: z.string().optional(),
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			reason: "",
-			notes: ""
-		}
+			notes: "",
+		},
 	});
 
 	// Set up auto-save functionality
 	const autoSave = useAutoSave({
 		onSave: async () => {
 			if (!appointmentId) return;
-			
+
 			const formData = form.getValues();
 			await api.updateAppointment(appointmentId, {
 				reason: formData.reason,
-				notes: formData.notes
+				notes: formData.notes,
 			});
 		},
 		interval: 30000, // Auto-save every 30 seconds
 		debounce: 2000, // Wait 2 seconds after changes before saving
-		enabled: !!appointmentId && form.formState.isDirty
+		enabled: !!appointmentId && form.formState.isDirty,
 	});
 
 	// Watch for form changes to trigger auto-save
@@ -67,22 +83,24 @@ const ImmediateAppointmentPage = () => {
 				autoSave.setDirty();
 			}
 		});
-		
+
 		return () => subscription.unsubscribe();
 	}, [form, appointmentId]);
-	
+
 	// Ajout d'une confirmation avant de quitter la page si modifications non enregistrées
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 			if (form.formState.isDirty) {
-				const message = "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter cette page ?";
+				const message =
+					"Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter cette page ?";
 				e.returnValue = message;
 				return message;
 			}
 		};
-		
-		window.addEventListener('beforeunload', handleBeforeUnload);
-		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () =>
+			window.removeEventListener("beforeunload", handleBeforeUnload);
 	}, [form.formState.isDirty]);
 
 	// Load patient data and check for existing appointment today
@@ -102,19 +120,24 @@ const ImmediateAppointmentPage = () => {
 					navigate("/patients");
 					return;
 				}
-				
+
 				setPatient(patientData);
-				
+
 				// Check if there's already an appointment today for this patient
-				const existingAppointment = await api.getTodayAppointmentForPatient(patientId);
-				
+				const existingAppointment =
+					await api.getTodayAppointmentForPatient(patientId);
+
 				if (existingAppointment) {
-					console.log("Rendez-vous existant aujourd'hui trouvé:", existingAppointment);
+					console.log(
+						"Rendez-vous existant aujourd'hui trouvé:",
+						existingAppointment
+					);
 					setAppointmentId(existingAppointment.id);
 					setAppointmentStatus(existingAppointment.status);
-					form.reset({ 
-						reason: existingAppointment.reason || "Séance immédiate", 
-						notes: existingAppointment.notes || "" 
+					form.reset({
+						reason:
+							existingAppointment.reason || "Séance immédiate",
+						notes: existingAppointment.notes || "",
 					});
 					toast.info("Une séance existe déjà pour aujourd'hui");
 				} else {
@@ -122,7 +145,10 @@ const ImmediateAppointmentPage = () => {
 					createInitialAppointment(patientId);
 				}
 			} catch (error) {
-				console.error("Erreur lors du chargement des données du patient:", error);
+				console.error(
+					"Erreur lors du chargement des données du patient:",
+					error
+				);
 				toast.error("Impossible de charger les données du patient");
 				navigate("/patients");
 			} finally {
@@ -142,15 +168,20 @@ const ImmediateAppointmentPage = () => {
 				date: now.toISOString(),
 				reason: "Séance immédiate",
 				status: "SCHEDULED" as AppointmentStatus,
-				notificationSent: false
+				notificationSent: false,
 			};
 
-			const createdAppointment = await api.createAppointment(appointmentData);
+			const createdAppointment = await api.createAppointment(
+				appointmentData
+			);
 			setAppointmentId(createdAppointment.id);
 			form.reset({ reason: "Séance immédiate", notes: "" });
 			toast.success("Séance immédiate créée");
 		} catch (error) {
-			console.error("Erreur lors de la création de la séance immédiate:", error);
+			console.error(
+				"Erreur lors de la création de la séance immédiate:",
+				error
+			);
 			toast.error("Impossible de créer la séance immédiate");
 		}
 	};
@@ -158,40 +189,43 @@ const ImmediateAppointmentPage = () => {
 	// Handle form submission
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		if (!appointmentId || !patient) return;
-		
+
 		// Validation supplémentaire pour les séances complétées
 		if (appointmentStatus === "COMPLETED" && !data.notes?.trim()) {
 			toast.error("Veuillez ajouter des notes pour terminer la séance");
 			return;
 		}
-		
+
 		setSaving(true);
 		try {
 			await api.updateAppointment(appointmentId, {
 				reason: data.reason,
 				notes: data.notes,
-				status: appointmentStatus
+				status: appointmentStatus,
 			});
-			
+
 			// Update patient's HDLM with the session notes if completed
 			if (appointmentStatus === "COMPLETED" && data.notes) {
-				const currentDate = new Date().toLocaleDateString('fr-FR');
+				const currentDate = new Date().toLocaleDateString("fr-FR");
 				const formattedNotes = `${currentDate} - ${data.reason}: ${data.notes}`;
-				
-				const updatedHdlm = patient.hdlm 
+
+				const updatedHdlm = patient.hdlm
 					? `${patient.hdlm}\n\n${formattedNotes}`
 					: formattedNotes;
-					
+
 				await api.updatePatient({
 					...patient,
-					hdlm: updatedHdlm
+					hdlm: updatedHdlm,
 				});
 			}
-			
+
 			toast.success("Séance enregistrée avec succès");
 			navigate(`/patients/${patientId}`);
 		} catch (error) {
-			console.error("Erreur lors de l'enregistrement de la séance:", error);
+			console.error(
+				"Erreur lors de l'enregistrement de la séance:",
+				error
+			);
 			toast.error("Impossible d'enregistrer la séance");
 		} finally {
 			setSaving(false);
@@ -208,7 +242,7 @@ const ImmediateAppointmentPage = () => {
 	// Handle status change
 	const handleStatusChange = async (status: AppointmentStatus) => {
 		if (!appointmentId) return;
-		
+
 		setAppointmentStatus(status);
 		try {
 			await api.updateAppointmentStatus(appointmentId, status);
@@ -221,12 +255,18 @@ const ImmediateAppointmentPage = () => {
 
 	const getStatusLabel = (status: AppointmentStatus): string => {
 		switch (status) {
-			case "SCHEDULED": return "Planifiée";
-			case "COMPLETED": return "Terminée";
-			case "CANCELED": return "Annulée";
-			case "RESCHEDULED": return "Reportée";
-			case "NO_SHOW": return "Absence";
-			default: return status;
+			case "SCHEDULED":
+				return "Planifiée";
+			case "COMPLETED":
+				return "Terminée";
+			case "CANCELED":
+				return "Annulée";
+			case "RESCHEDULED":
+				return "Reportée";
+			case "NO_SHOW":
+				return "Absence";
+			default:
+				return status;
 		}
 	};
 
@@ -242,7 +282,17 @@ const ImmediateAppointmentPage = () => {
 
 	return (
 		<Layout>
-			<div className="max-w-4xl mx-auto px-4 py-8">
+			<div className="flex items-center gap-2">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => navigate(-1)}
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Retour
+				</Button>
+			</div>
+			<div className="max-w-4xl mx-auto px-4 py-8 mt-20">
 				<header className="mb-6">
 					<div className="flex justify-between items-center">
 						<h1 className="text-3xl font-bold flex items-center gap-2">
@@ -251,7 +301,9 @@ const ImmediateAppointmentPage = () => {
 						</h1>
 						<div className="flex items-center gap-3">
 							<div className="flex items-center gap-2">
-								<span className="text-sm text-muted-foreground">Statut:</span>
+								<span className="text-sm text-muted-foreground">
+									Statut:
+								</span>
 								<AppointmentStatusDropdown
 									status={appointmentStatus}
 									onStatusChange={handleStatusChange}
@@ -262,13 +314,19 @@ const ImmediateAppointmentPage = () => {
 					</div>
 					{patient && (
 						<p className="text-muted-foreground mt-2">
-							Patient: <span className="font-medium text-foreground">{patient.firstName} {patient.lastName}</span>
+							Patient:{" "}
+							<span className="font-medium text-foreground">
+								{patient.firstName} {patient.lastName}
+							</span>
 						</p>
 					)}
 				</header>
 
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className="space-y-6"
+					>
 						<Card>
 							<CardHeader>
 								<CardTitle>Motif de la séance</CardTitle>
@@ -279,7 +337,9 @@ const ImmediateAppointmentPage = () => {
 									name="reason"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Motif de consultation</FormLabel>
+											<FormLabel>
+												Motif de consultation
+											</FormLabel>
 											<FormControl>
 												<Textarea
 													placeholder="Saisir le motif de la consultation..."
@@ -304,7 +364,9 @@ const ImmediateAppointmentPage = () => {
 									name="notes"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Observations et soins effectués</FormLabel>
+											<FormLabel>
+												Observations et soins effectués
+											</FormLabel>
 											<FormControl>
 												<Textarea
 													placeholder="Saisir le compte-rendu de la séance..."
@@ -316,10 +378,12 @@ const ImmediateAppointmentPage = () => {
 										</FormItem>
 									)}
 								/>
-								
+
 								{patient?.hdlm && (
 									<div className="mt-4 p-3 rounded-md bg-muted/30 border">
-										<p className="text-sm font-medium mb-1">Historique du patient:</p>
+										<p className="text-sm font-medium mb-1">
+											Historique du patient:
+										</p>
 										<div className="max-h-40 overflow-y-auto text-sm whitespace-pre-line">
 											{patient.hdlm}
 										</div>
@@ -330,33 +394,44 @@ const ImmediateAppointmentPage = () => {
 									<Alert className="mt-4">
 										<AlertCircle className="h-4 w-4" />
 										<AlertDescription>
-											Pour terminer la séance, veuillez remplir le compte-rendu ci-dessus.
+											Pour terminer la séance, veuillez
+											remplir le compte-rendu ci-dessus.
 										</AlertDescription>
 									</Alert>
 								)}
 							</CardContent>
-							
+
 							<CardFooter className="flex justify-between pt-6">
-								<Button 
-									type="button" 
+								<Button
+									type="button"
 									variant="outline"
-									onClick={() => navigate(`/patients/${patientId}`)}
+									onClick={() =>
+										navigate(`/patients/${patientId}`)
+									}
 								>
 									Annuler
 								</Button>
 								<div className="flex gap-3">
-									<Button 
-										type="button" 
-										variant="outline" 
+									<Button
+										type="button"
+										variant="outline"
 										onClick={handleManualSave}
-										disabled={saving || !form.formState.isDirty}
+										disabled={
+											saving || !form.formState.isDirty
+										}
 									>
 										<Save className="mr-2 h-4 w-4" />
 										Enregistrer
 									</Button>
-									<Button 
-										type="submit" 
-										disabled={saving || !form.formState.isValid || (appointmentStatus === "COMPLETED" && !form.getValues().notes?.trim())}
+									<Button
+										type="submit"
+										disabled={
+											saving ||
+											!form.formState.isValid ||
+											(appointmentStatus ===
+												"COMPLETED" &&
+												!form.getValues().notes?.trim())
+										}
 									>
 										Terminer la séance
 									</Button>
