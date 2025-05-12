@@ -78,15 +78,14 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 										({age} ans)
 									</span>
 								)}
+								{/* Si c'est un enfant, ajouter l'icône */}
+								{isChild && (
+									<div className="ml-1 text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+										<Baby className="h-5 w-5 text-emerald-600" />
+										<span>Enfant</span>
+									</div>
+								)}
 							</div>
-
-							{/* Si c'est un enfant, ajouter l'icône */}
-							{isChild && (
-								<div className="text-xs text-gray-500 flex items-center gap-1">
-									<Baby className="h-4 w-4 text-emerald-600" />
-									<span>Enfant</span>
-								</div>
-							)}
 
 							<div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
 								{patient.email && (
