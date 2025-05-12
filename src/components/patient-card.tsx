@@ -199,7 +199,7 @@ export function PatientCard({
 							asChild
 							variant="default"
 							size="sm"
-							className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+							className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 hover:text-white"
 						>
 							<Link to={`/patients/${patient.id}`}>
 								Voir le dossier
