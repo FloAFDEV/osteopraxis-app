@@ -95,14 +95,14 @@ export function InvoiceFilters({
           </Select>
 
           <Select
-            value={selectedMonth || ""}
-            onValueChange={(value) => setSelectedMonth(value || null)}
+            value={selectedMonth || "all"}
+            onValueChange={(value) => setSelectedMonth(value === "all" ? null : value)}
           >
             <SelectTrigger className="w-full xs:w-[150px] bg-white dark:bg-gray-900">
               <SelectValue placeholder="Mois" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les mois</SelectItem>
+              <SelectItem value="all">Tous les mois</SelectItem>
               {monthOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
