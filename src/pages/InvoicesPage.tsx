@@ -300,7 +300,7 @@ const InvoicesPage = () => {
 						</h1>
 						<Button
 							onClick={() => navigate("/invoices/new")}
-							className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:text-white"
+							className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 hover:text-white text-slate-950"
 						>
 							<Plus className="h-5 w-5" />
 							Nouvelle note d'honoraire
