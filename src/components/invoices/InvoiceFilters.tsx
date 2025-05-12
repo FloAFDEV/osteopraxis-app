@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Calendar, FileSpreadsheet } from "lucide-react";
 import { InvoiceExportButtons } from "./InvoiceExportButtons";
 import { Invoice, Patient } from "@/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface InvoiceFiltersProps {
   searchQuery: string;
@@ -45,6 +46,8 @@ export function InvoiceFilters({
   invoices,
   patientDataMap
 }: InvoiceFiltersProps) {
+  const { isMobile } = useIsMobile();
+
   return (
     <div className="space-y-4 mb-6">
       {/* Première ligne de filtres */}
@@ -112,7 +115,8 @@ export function InvoiceFilters({
           </Select>
         </div>
 
-        <div className="flex gap-2 w-full sm:w-auto">
+        {/* Modifié : Disposition des boutons adaptée pour mobile */}
+        <div className="flex flex-row gap-2 w-full sm:w-auto">
           {/* Bouton de téléchargement des factures */}
           <Button
             variant="outline"
