@@ -111,5 +111,29 @@ export const invoiceService = {
     
     // Mock implementation
     return true;
+  },
+  
+  // Nouvelle méthode pour exporter les factures d'une période donnée (mois ou année)
+  async exportInvoicesByPeriod(year: string, month: string | null = null): Promise<Invoice[]> {
+    // Récupérer toutes les factures
+    const allInvoices = await this.getInvoices();
+    
+    // Filtrer par année et mois si spécifié
+    return allInvoices.filter(invoice => {
+      const invoiceDate = new Date(invoice.date);
+      const invoiceYear = invoiceDate.getFullYear().toString();
+      
+      // Si l'année ne correspond pas, exclure
+      if (invoiceYear !== year) return false;
+      
+      // Si un mois est spécifié, vérifier la correspondance
+      if (month !== null) {
+        const invoiceMonth = (invoiceDate.getMonth() + 1).toString().padStart(2, '0');
+        return invoiceMonth === month;
+      }
+      
+      // Sinon, inclure toutes les factures de l'année
+      return true;
+    });
   }
 };

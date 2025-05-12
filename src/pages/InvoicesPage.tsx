@@ -307,7 +307,7 @@ const InvoicesPage = () => {
 						</Button>
 					</div>
 
-					{/* Filters */}
+					{/* Filters with updated props */}
 					<InvoiceFilters
 						searchQuery={searchQuery}
 						setSearchQuery={setSearchQuery}
@@ -320,6 +320,8 @@ const InvoicesPage = () => {
 						onDownloadAll={handleDownloadAllInvoices}
 						invoiceYears={yearOptions}
 						monthOptions={monthOptions}
+						invoices={invoices || []}
+						patientDataMap={patientDataMap}
 					/>
 
 					{/* Content */}
