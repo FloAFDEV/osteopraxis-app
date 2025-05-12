@@ -1,8 +1,9 @@
 import { AppointmentForm } from "@/components/appointment-form";
+import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
-import { Calendar } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -112,7 +113,17 @@ const EditAppointmentPage = () => {
 
 	return (
 		<Layout>
-			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+			<div className="flex items-center gap-2">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => navigate(-1)}
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Retour
+				</Button>
+			</div>
+			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
 				<header className="mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<Calendar className="h-8 w-8 text-purple-600" />
