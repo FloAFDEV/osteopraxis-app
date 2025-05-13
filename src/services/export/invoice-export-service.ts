@@ -235,6 +235,7 @@ export const invoiceExportService = {
           
           // Alignment spécifique par colonne
           const columnIndex = cell.col;
+          // Correction des erreurs TypeScript: convertir columnIndex en nombre pour les comparaisons
           if (columnIndex === 1) { // Date
             cell.alignment = { horizontal: 'center' };
           } else if (columnIndex === 2) { // Numéro
