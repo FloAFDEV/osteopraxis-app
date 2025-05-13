@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -6,7 +7,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { invoiceExportService } from "@/services/export/invoice-export-service";
-import { Invoice, Patient } from "@/types";
+import { Invoice, Osteopath, Patient } from "@/types";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, Download, FileSpreadsheet } from "lucide-react";
@@ -17,6 +18,7 @@ interface InvoiceExportButtonsProps {
 	selectedMonth: string | null;
 	invoices: Invoice[];
 	patientDataMap: Map<number, Patient>;
+	osteopath?: Osteopath;
 }
 
 export function InvoiceExportButtons({
@@ -24,6 +26,7 @@ export function InvoiceExportButtons({
 	selectedMonth,
 	invoices,
 	patientDataMap,
+	osteopath,
 }: InvoiceExportButtonsProps) {
 	// Fonction pour filtrer les factures par période
 	const filterInvoicesByPeriod = (
@@ -84,7 +87,8 @@ export function InvoiceExportButtons({
 			const blob = await invoiceExportService.generateAccountingExport(
 				filteredInvoices,
 				patientDataMap,
-				periodLabel
+				periodLabel,
+				osteopath
 			);
 
 			// Créer un URL pour le téléchargement
