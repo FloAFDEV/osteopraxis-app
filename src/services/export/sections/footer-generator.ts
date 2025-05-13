@@ -1,5 +1,6 @@
 
 import ExcelJS from 'exceljs';
+import { Invoice } from '@/types';
 import { applyFooterStyles } from '../styles/excel-styles';
 
 /**
@@ -8,7 +9,9 @@ import { applyFooterStyles } from '../styles/excel-styles';
 export const generateFooterSection = (
   worksheet: ExcelJS.Worksheet, 
   lastRow: number,
-  headerRow: number
+  headerRow: number,
+  invoices: Invoice[],
+  currentYear: string
 ): void => {
   // Ligne bleue de séparation
   const blueLineRow = lastRow + 1;
@@ -19,7 +22,9 @@ export const generateFooterSection = (
     pattern: 'solid',
     fgColor: { argb: 'FF2E5984' }
   };
-  blueLineCell.height = 5;
+  
+  // Définir la hauteur de ligne plutôt que de la cellule
+  worksheet.getRow(blueLineRow).height = 5;
   
   // Nombre de consultations sur l'année
   const summaryRow = blueLineRow + 2;

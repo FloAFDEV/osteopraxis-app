@@ -51,15 +51,8 @@ export const invoiceExportService = {
     
     // Génération du pied de page et totaux
     if (sortedInvoices.length > 0) {
-      // On passe les invoices en variable globale temporaire pour le footer
-      global.invoices = sortedInvoices;
-      global.currentYear = currentYear;
-      
-      generateFooterSection(worksheet, lastRowIndex, headerRowIndex);
-      
-      // Nettoyage des variables globales temporaires
-      delete global.invoices;
-      delete global.currentYear;
+      // Au lieu d'utiliser global, passons directement les données au générateur de pied de page
+      generateFooterSection(worksheet, lastRowIndex, headerRowIndex, sortedInvoices, currentYear);
     }
     
     // Génération du fichier XLSX
@@ -73,8 +66,8 @@ export const invoiceExportService = {
   translatePaymentStatus
 };
 
-// Déclaration pour TypeScript pour les variables globales temporaires
-declare global {
-  var invoices: Invoice[];
-  var currentYear: string;
-}
+// Nous n'avons plus besoin de la déclaration globale car nous n'utilisons plus global
+// declare global {
+//   var invoices: Invoice[];
+//   var currentYear: string;
+// }
