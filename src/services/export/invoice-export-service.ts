@@ -29,6 +29,10 @@ export const invoiceExportService = {
     worksheet.pageSetup.orientation = 'landscape';
     worksheet.pageSetup.fitToPage = true;
     
+    // Configuration des en-têtes/pieds de page pour l'impression
+    worksheet.headerFooter.oddFooter = '&CPage &P sur &N';
+    worksheet.headerFooter.evenFooter = '&CPage &P sur &N';
+    
     // Ajout de l'en-tête avec infos de l'ostéopathe
     if (osteopath) {
       // Logo et titre
@@ -152,127 +156,171 @@ export const invoiceExportService = {
       };
     });
     
+    // Ligne de séparation visuelle sous l'en-tête
+    const separatorRow = worksheet.addRow([]);
+    separatorRow.height = 6;
+    separatorRow.eachCell({ includeEmpty: true }, function(cell) {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE6E6E6' }
+      };
+      cell.border = {
+        top: {style:'thin', color: {argb:'FFD0D0D0'}},
+        left: {style:'thin', color: {argb:'FFD0D0D0'}},
+        bottom: {style:'thin', color: {argb:'FFD0D0D0'}},
+        right: {style:'thin', color: {argb:'FFD0D0D0'}}
+      };
+    });
+    
     // Tri des factures par date
     const sortedInvoices = [...invoices].sort((a, b) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
     
-    // Ajout des données
-    let rowCounter = headerRow;
-    sortedInvoices.forEach(invoice => {
-      const patient = patientDataMap.get(invoice.patientId);
-      const patientName = patient 
-        ? `${patient.lastName} ${patient.firstName}`
-        : `Patient #${invoice.patientId}`;
+    // Gérer le cas où il n'y a pas de factures
+    if (sortedInvoices.length === 0) {
+      const noInvoiceRow = worksheet.addRow(['Aucune facture sur cette période']);
+      worksheet.mergeCells(`A${headerRow+2}:G${headerRow+2}`);
+      noInvoiceRow.font = { 
+        name: 'Arial', 
+        size: 12, 
+        italic: true,
+        color: { argb: 'FF888888' }
+      };
+      noInvoiceRow.alignment = { 
+        horizontal: 'center', 
+        vertical: 'middle' 
+      };
+      noInvoiceRow.height = 30;
       
-      rowCounter++;
-      const row = worksheet.addRow({
-        date: format(new Date(invoice.date), 'dd/MM/yyyy'),
-        number: invoice.id.toString().padStart(4, '0'),
-        patient: patientName,
-        amount: invoice.amount,
-        paymentMethod: invoice.paymentMethod || 'Non spécifié',
-        status: this.translatePaymentStatus(invoice.paymentStatus),
-        notes: invoice.notes || ''
-      });
-      
-      // Style pour les lignes de données
-      row.eachCell({ includeEmpty: true }, function(cell) {
+      // Ajouter des bordures pour la ligne
+      noInvoiceRow.eachCell({ includeEmpty: true }, function(cell) {
         cell.border = {
           top: {style:'thin', color: {argb:'FFD0D0D0'}},
           left: {style:'thin', color: {argb:'FFD0D0D0'}},
           bottom: {style:'thin', color: {argb:'FFD0D0D0'}},
           right: {style:'thin', color: {argb:'FFD0D0D0'}}
         };
-        cell.font = { name: 'Arial', size: 10 };
+      });
+    } else {
+      // Ajout des données
+      let rowCounter = headerRow + 1; // +1 pour la ligne de séparation
+      sortedInvoices.forEach(invoice => {
+        const patient = patientDataMap.get(invoice.patientId);
+        const patientName = patient 
+          ? `${patient.lastName} ${patient.firstName}`
+          : `Patient #${invoice.patientId}`;
         
-        // Alignment spécifique par colonne
-        const columnIndex = cell.col;
-        if (columnIndex === 1) { // Date
-          cell.alignment = { horizontal: 'center' };
-        } else if (columnIndex === 2) { // Numéro
-          cell.alignment = { horizontal: 'center' };
-        } else if (columnIndex === 4) { // Montant
-          cell.alignment = { horizontal: 'right' };
+        rowCounter++;
+        const row = worksheet.addRow({
+          date: format(new Date(invoice.date), 'dd/MM/yyyy'),
+          number: invoice.id.toString().padStart(4, '0'),
+          patient: patientName,
+          amount: invoice.amount,
+          paymentMethod: invoice.paymentMethod || 'Non spécifié',
+          status: this.translatePaymentStatus(invoice.paymentStatus),
+          notes: invoice.notes || ''
+        });
+        
+        // Style pour les lignes de données
+        row.eachCell({ includeEmpty: true }, function(cell) {
+          cell.border = {
+            top: {style:'thin', color: {argb:'FFD0D0D0'}},
+            left: {style:'thin', color: {argb:'FFD0D0D0'}},
+            bottom: {style:'thin', color: {argb:'FFD0D0D0'}},
+            right: {style:'thin', color: {argb:'FFD0D0D0'}}
+          };
+          cell.font = { name: 'Arial', size: 10 };
+          
+          // Alignment spécifique par colonne
+          const columnIndex = cell.col;
+          if (columnIndex === 1) { // Date
+            cell.alignment = { horizontal: 'center' };
+          } else if (columnIndex === 2) { // Numéro
+            cell.alignment = { horizontal: 'center' };
+          } else if (columnIndex === 4) { // Montant
+            cell.alignment = { horizontal: 'right' };
+          }
+        });
+        
+        // Alternance de couleur pour les lignes
+        if (rowCounter % 2 === 0) {
+          row.eachCell({ includeEmpty: true }, function(cell) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF5F8FA' }
+            };
+          });
         }
       });
       
-      // Alternance de couleur pour les lignes
-      if (rowCounter % 2 === 0) {
-        row.eachCell({ includeEmpty: true }, function(cell) {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFF5F8FA' }
-          };
-        });
-      }
-    });
-    
-    // Formatage des cellules de montant
-    worksheet.getColumn('amount').numFmt = '# ##0.00 €';
-    
-    // Ajout du total avec un style amélioré
-    const totalRow = worksheet.rowCount + 2;
-    
-    // Ligne de séparation
-    worksheet.mergeCells(`A${totalRow-1}:G${totalRow-1}`);
-    
-    // Total avec fond coloré
-    worksheet.mergeCells(`A${totalRow}:C${totalRow}`);
-    const totalLabelCell = worksheet.getCell(`A${totalRow}`);
-    totalLabelCell.value = 'TOTAL';
-    totalLabelCell.font = { 
-      name: 'Arial',
-      bold: true, 
-      size: 12,
-      color: { argb: 'FFFFFFFF' } 
-    };
-    totalLabelCell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FF2E5984' }
-    };
-    totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    totalLabelCell.border = {
-      top: {style:'thin'},
-      left: {style:'thin'},
-      bottom: {style:'thin'},
-      right: {style:'thin'}
-    };
-    
-    const totalValueCell = worksheet.getCell(`D${totalRow}`);
-    totalValueCell.value = {
-      formula: `SUM(D${headerRow+1}:D${worksheet.rowCount})`,
-      date1904: false
-    };
-    totalValueCell.font = { 
-      name: 'Arial',
-      bold: true, 
-      size: 12,
-      color: { argb: 'FF2E5984' }
-    };
-    totalValueCell.numFmt = '# ##0.00 €';
-    totalValueCell.alignment = { horizontal: 'right' };
-    totalValueCell.border = {
-      top: {style:'thin'},
-      left: {style:'thin'},
-      bottom: {style:'thin'},
-      right: {style:'thin'}
-    };
-    
-    // Fusion des cellules restantes
-    worksheet.mergeCells(`E${totalRow}:G${totalRow}`);
-    const emptyCell = worksheet.getCell(`E${totalRow}`);
-    emptyCell.border = {
-      top: {style:'thin'},
-      left: {style:'thin'},
-      bottom: {style:'thin'},
-      right: {style:'thin'}
-    };
+      // Formatage des cellules de montant
+      worksheet.getColumn('amount').numFmt = '# ##0.00 €';
+      
+      // Ajout du total avec un style amélioré
+      const totalRow = worksheet.rowCount + 2;
+      
+      // Ligne de séparation
+      worksheet.mergeCells(`A${totalRow-1}:G${totalRow-1}`);
+      
+      // Total avec fond coloré
+      worksheet.mergeCells(`A${totalRow}:C${totalRow}`);
+      const totalLabelCell = worksheet.getCell(`A${totalRow}`);
+      totalLabelCell.value = 'TOTAL';
+      totalLabelCell.font = { 
+        name: 'Arial',
+        bold: true, 
+        size: 12,
+        color: { argb: 'FFFFFFFF' } 
+      };
+      totalLabelCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF2E5984' }
+      };
+      totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      totalLabelCell.border = {
+        top: {style:'thin'},
+        left: {style:'thin'},
+        bottom: {style:'thin'},
+        right: {style:'thin'}
+      };
+      
+      const totalValueCell = worksheet.getCell(`D${totalRow}`);
+      totalValueCell.value = {
+        formula: `SUM(D${headerRow+2}:D${worksheet.rowCount})`,
+        date1904: false
+      };
+      totalValueCell.font = { 
+        name: 'Arial',
+        bold: true, 
+        size: 12,
+        color: { argb: 'FF2E5984' }
+      };
+      totalValueCell.numFmt = '# ##0.00 €';
+      totalValueCell.alignment = { horizontal: 'right' };
+      totalValueCell.border = {
+        top: {style:'thin'},
+        left: {style:'thin'},
+        bottom: {style:'thin'},
+        right: {style:'thin'}
+      };
+      
+      // Fusion des cellules restantes
+      worksheet.mergeCells(`E${totalRow}:G${totalRow}`);
+      const emptyCell = worksheet.getCell(`E${totalRow}`);
+      emptyCell.border = {
+        top: {style:'thin'},
+        left: {style:'thin'},
+        bottom: {style:'thin'},
+        right: {style:'thin'}
+      };
+    }
     
     // Pied de page
-    const footerRow = totalRow + 3;
+    const footerRow = worksheet.rowCount + 3;
     worksheet.mergeCells(`A${footerRow}:G${footerRow}`);
     const footerCell = worksheet.getCell(`A${footerRow}`);
     footerCell.value = 'Document généré automatiquement - OstéoManager';
