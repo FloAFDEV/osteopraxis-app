@@ -1,4 +1,3 @@
-
 import ExcelJS from 'exceljs';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -235,12 +234,14 @@ export const invoiceExportService = {
           
           // Alignment spécifique par colonne
           const columnIndex = cell.col;
-          // Correction des erreurs TypeScript: convertir columnIndex en nombre pour les comparaisons
-          if (columnIndex === 1) { // Date
+          // Convertir columnIndex en nombre pour les comparaisons
+          const colNumber = Number(columnIndex);
+          
+          if (colNumber === 1) { // Date
             cell.alignment = { horizontal: 'center' };
-          } else if (columnIndex === 2) { // Numéro
+          } else if (colNumber === 2) { // Numéro
             cell.alignment = { horizontal: 'center' };
-          } else if (columnIndex === 4) { // Montant
+          } else if (colNumber === 4) { // Montant
             cell.alignment = { horizontal: 'right' };
           }
         });
