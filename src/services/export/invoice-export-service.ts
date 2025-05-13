@@ -187,11 +187,12 @@ export const invoiceExportService = {
         cell.font = { name: 'Arial', size: 10 };
         
         // Alignment spécifique par colonne
-        if (cell.column === 1) { // Date
+        const columnIndex = cell.col;
+        if (columnIndex === 1) { // Date
           cell.alignment = { horizontal: 'center' };
-        } else if (cell.column === 2) { // Numéro
+        } else if (columnIndex === 2) { // Numéro
           cell.alignment = { horizontal: 'center' };
-        } else if (cell.column === 4) { // Montant
+        } else if (columnIndex === 4) { // Montant
           cell.alignment = { horizontal: 'right' };
         }
       });
