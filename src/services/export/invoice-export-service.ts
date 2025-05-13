@@ -40,6 +40,9 @@ export const invoiceExportService = {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
     
+    // Extraction de l'année pour le récapitulatif
+    const currentYear = period.includes(' ') ? period.split(' ')[1] : period;
+    
     // Génération de l'en-tête
     const headerRowIndex = generateHeaderSection(worksheet, period, osteopath);
     
@@ -48,7 +51,15 @@ export const invoiceExportService = {
     
     // Génération du pied de page et totaux
     if (sortedInvoices.length > 0) {
+      // On passe les invoices en variable globale temporaire pour le footer
+      global.invoices = sortedInvoices;
+      global.currentYear = currentYear;
+      
       generateFooterSection(worksheet, lastRowIndex, headerRowIndex);
+      
+      // Nettoyage des variables globales temporaires
+      delete global.invoices;
+      delete global.currentYear;
     }
     
     // Génération du fichier XLSX
@@ -61,3 +72,9 @@ export const invoiceExportService = {
   // Export de la fonction de traduction des statuts pour compatibilité
   translatePaymentStatus
 };
+
+// Déclaration pour TypeScript pour les variables globales temporaires
+declare global {
+  var invoices: Invoice[];
+  var currentYear: string;
+}

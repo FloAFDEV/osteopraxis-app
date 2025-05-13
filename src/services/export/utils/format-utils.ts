@@ -7,10 +7,11 @@ import { PaymentStatus } from '@/types';
 export const translatePaymentStatus = (status: string): string => {
   const statusMap: Record<string, string> = {
     'PENDING': 'En attente',
-    'PAID': 'Payé',
-    'CANCELLED': 'Annulé',
-    'REFUNDED': 'Remboursé',
-    'PARTIALLY_PAID': 'Partiellement payé'
+    'PAID': 'Payée',
+    'CANCELLED': 'Annulée',
+    'CANCELED': 'Annulée',
+    'REFUNDED': 'Remboursée',
+    'PARTIALLY_PAID': 'Partiellement payée'
   };
   
   return statusMap[status] || status;

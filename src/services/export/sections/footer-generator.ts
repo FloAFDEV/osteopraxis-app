@@ -10,69 +10,62 @@ export const generateFooterSection = (
   lastRow: number,
   headerRow: number
 ): void => {
-  // Total row with formula
-  const totalRow = lastRow + 2;
-      
-  // Ligne de séparation
-  worksheet.mergeCells(`A${totalRow-1}:G${totalRow-1}`);
-  
-  // Total avec fond coloré
-  worksheet.mergeCells(`A${totalRow}:C${totalRow}`);
-  const totalLabelCell = worksheet.getCell(`A${totalRow}`);
-  totalLabelCell.value = 'TOTAL';
-  totalLabelCell.font = { 
-    name: 'Arial',
-    bold: true, 
-    size: 12,
-    color: { argb: 'FFFFFFFF' } 
-  };
-  totalLabelCell.fill = {
+  // Ligne bleue de séparation
+  const blueLineRow = lastRow + 1;
+  worksheet.mergeCells(`A${blueLineRow}:G${blueLineRow}`);
+  const blueLineCell = worksheet.getCell(`A${blueLineRow}`);
+  blueLineCell.fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FF2E5984' }
   };
-  totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' };
-  totalLabelCell.border = {
-    top: {style:'thin'},
-    left: {style:'thin'},
-    bottom: {style:'thin'},
-    right: {style:'thin'}
-  };
+  blueLineCell.height = 5;
   
-  const totalValueCell = worksheet.getCell(`D${totalRow}`);
+  // Nombre de consultations sur l'année
+  const summaryRow = blueLineRow + 2;
+  worksheet.mergeCells(`A${summaryRow}:C${summaryRow}`);
+  const summaryCell = worksheet.getCell(`A${summaryRow}`);
+  summaryCell.value = `${invoices.length} consultations sur l'année ${currentYear}`;
+  summaryCell.font = { 
+    name: 'Arial',
+    bold: true, 
+    size: 12,
+    color: { argb: 'FF334E81' }
+  };
+  summaryCell.alignment = { horizontal: 'left', vertical: 'middle' };
+  
+  // Cellule TOTAL
+  worksheet.mergeCells(`D${summaryRow}:E${summaryRow}`);
+  const totalLabelCell = worksheet.getCell(`D${summaryRow}`);
+  totalLabelCell.value = 'TOTAL';
+  totalLabelCell.font = { 
+    name: 'Arial',
+    bold: true, 
+    size: 14,
+    color: { argb: 'FF334E81' }
+  };
+  totalLabelCell.alignment = { horizontal: 'right', vertical: 'middle' };
+  
+  // Valeur du total
+  worksheet.mergeCells(`F${summaryRow}:G${summaryRow}`);
+  const totalValueCell = worksheet.getCell(`F${summaryRow}`);
   totalValueCell.value = {
-    formula: `SUM(D${headerRow+2}:D${lastRow})`,
+    formula: `SUM(E${headerRow+1}:E${lastRow})`,
     date1904: false
   };
   totalValueCell.font = { 
     name: 'Arial',
     bold: true, 
-    size: 12,
-    color: { argb: 'FF2E5984' }
+    size: 14,
+    color: { argb: 'FF334E81' }
   };
   totalValueCell.numFmt = '# ##0.00 €';
   totalValueCell.alignment = { horizontal: 'right' };
-  totalValueCell.border = {
-    top: {style:'thin'},
-    left: {style:'thin'},
-    bottom: {style:'thin'},
-    right: {style:'thin'}
-  };
-  
-  // Fusion des cellules restantes
-  worksheet.mergeCells(`E${totalRow}:G${totalRow}`);
-  const emptyCell = worksheet.getCell(`E${totalRow}`);
-  emptyCell.border = {
-    top: {style:'thin'},
-    left: {style:'thin'},
-    bottom: {style:'thin'},
-    right: {style:'thin'}
-  };
   
   // Pied de page
-  const footerRow = totalRow + 3;
+  const footerRow = summaryRow + 2;
   worksheet.mergeCells(`A${footerRow}:G${footerRow}`);
   const footerCell = worksheet.getCell(`A${footerRow}`);
-  footerCell.value = 'Document généré automatiquement - OstéoManager';
+  footerCell.value = 'Document généré automatiquement – PatientHub';
   applyFooterStyles(footerCell);
 };

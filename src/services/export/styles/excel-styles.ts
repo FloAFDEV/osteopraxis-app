@@ -93,7 +93,7 @@ export const applyDataRowStyles = (row: ExcelJS.Row) => {
       cell.alignment = { horizontal: 'center' };
     } else if (colNumber === 2) { // Numéro
       cell.alignment = { horizontal: 'center' };
-    } else if (colNumber === 4) { // Montant
+    } else if (colNumber === 5) { // Montant
       cell.alignment = { horizontal: 'right' };
     }
   });

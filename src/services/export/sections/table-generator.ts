@@ -17,12 +17,12 @@ export const generateTableSection = (
   // En-têtes du tableau
   worksheet.columns = [
     { header: 'Date', key: 'date', width: 15 },
-    { header: 'Numéro', key: 'number', width: 12 },
-    { header: 'Patient', key: 'patient', width: 25 },
-    { header: 'Montant', key: 'amount', width: 12 },
-    { header: 'Paiement', key: 'paymentMethod', width: 15 },
-    { header: 'Statut', key: 'status', width: 15 },
-    { header: 'Notes', key: 'notes', width: 30 }
+    { header: 'Numéro de facture', key: 'number', width: 15 },
+    { header: 'Nom', key: 'lastName', width: 18 },
+    { header: 'Prénom', key: 'firstName', width: 18 },
+    { header: 'Montant', key: 'amount', width: 15 },
+    { header: 'Mode de paiement', key: 'paymentMethod', width: 20 },
+    { header: 'Statut', key: 'status', width: 15 }
   ];
   
   // Styles pour les en-têtes
@@ -34,24 +34,13 @@ export const generateTableSection = (
     applyCellBorders(cell);
   });
   
-  // Ligne de séparation visuelle sous l'en-tête
-  const separatorRow = worksheet.addRow([]);
-  separatorRow.height = 6;
-  separatorRow.eachCell({ includeEmpty: true }, function(cell) {
-    cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFE6E6E6' }
-    };
-    applyCellBorders(cell);
-  });
-  
-  let rowCounter = startRow + 1; // +1 pour la ligne de séparation
+  let rowCounter = startRow;
   
   // Gérer le cas où il n'y a pas de factures
   if (invoices.length === 0) {
+    rowCounter++;
     const noInvoiceRow = worksheet.addRow(['Aucune facture sur cette période']);
-    worksheet.mergeCells(`A${startRow+2}:G${startRow+2}`);
+    worksheet.mergeCells(`A${rowCounter}:G${rowCounter}`);
     noInvoiceRow.font = { 
       name: 'Arial', 
       size: 12, 
@@ -69,31 +58,29 @@ export const generateTableSection = (
       applyCellBorders(cell);
     });
     
-    rowCounter++;
   } else {
     // Ajout des données
     invoices.forEach(invoice => {
       const patient = patientDataMap.get(invoice.patientId);
-      const patientName = patient 
-        ? `${patient.lastName} ${patient.firstName}`
-        : `Patient #${invoice.patientId}`;
+      const lastName = patient ? patient.lastName : 'Inconnu';
+      const firstName = patient ? patient.firstName : '';
       
       rowCounter++;
       const row = worksheet.addRow({
         date: format(new Date(invoice.date), 'dd/MM/yyyy'),
-        number: invoice.id.toString().padStart(4, '0'),
-        patient: patientName,
+        number: `#${invoice.id.toString().padStart(4, '0')}`,
+        lastName: lastName,
+        firstName: firstName,
         amount: invoice.amount,
         paymentMethod: invoice.paymentMethod || 'Non spécifié',
         status: translatePaymentStatus(invoice.paymentStatus),
-        notes: invoice.notes || ''
       });
       
       // Style pour les lignes de données
       applyDataRowStyles(row);
       
       // Alternance de couleur pour les lignes
-      if (rowCounter % 2 === 0) {
+      if (rowCounter % 2 === 1) {
         applyAlternatingRowColor(row);
       }
     });
