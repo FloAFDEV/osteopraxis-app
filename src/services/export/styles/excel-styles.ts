@@ -86,19 +86,17 @@ export const applyDataRowStyles = (row: ExcelJS.Row) => {
     
     // Alignment spécifique par colonne
     const columnIndex = cell.col;
-    // Convertir columnIndex en nombre pour les comparaisons
-    const colNumber = Number(columnIndex);
     
-    if (colNumber === 1) { // Date
+    if (columnIndex === 1) { // Date
       cell.alignment = { horizontal: 'center' };
-    } else if (colNumber === 2) { // Numéro
+    } else if (columnIndex === 2) { // Numéro
       cell.alignment = { horizontal: 'center' };
-    } else if (colNumber === 5) { // Montant
+    } else if (columnIndex === 5) { // Montant
       cell.alignment = { horizontal: 'right' };
       cell.numFmt = '# ##0,00 €';
-    } else if (colNumber === 6) { // Mode de paiement
+    } else if (columnIndex === 6) { // Mode de paiement
       cell.alignment = { horizontal: 'center' };
-    } else if (colNumber === 7) { // Statut
+    } else if (columnIndex === 7) { // Statut
       cell.alignment = { horizontal: 'center' };
     }
   });

@@ -13,8 +13,12 @@ export const generateFooterSection = (
   invoices: Invoice[],
   currentYear: string
 ): void => {
+  // Ligne vide après la dernière ligne de données
+  const emptyRow = lastRow + 1;
+  worksheet.getRow(emptyRow).height = 10;
+  
   // Ligne bleue de séparation
-  const blueLineRow = lastRow + 1;
+  const blueLineRow = emptyRow + 1;
   worksheet.mergeCells(`A${blueLineRow}:G${blueLineRow}`);
   const blueLineCell = worksheet.getCell(`A${blueLineRow}`);
   blueLineCell.fill = {
@@ -22,15 +26,14 @@ export const generateFooterSection = (
     pattern: 'solid',
     fgColor: { argb: 'FF2E5984' }
   };
-  
-  // Définir la hauteur de ligne plutôt que de la cellule
   worksheet.getRow(blueLineRow).height = 5;
   
   // Ligne vide après la ligne bleue
-  const emptyRow = blueLineRow + 1;
+  const emptyRowAfterLine = blueLineRow + 1;
+  worksheet.getRow(emptyRowAfterLine).height = 10;
   
   // Nombre de consultations sur l'année - 3 premières colonnes fusionnées
-  const summaryRow = emptyRow + 1;
+  const summaryRow = emptyRowAfterLine + 1;
   worksheet.mergeCells(`A${summaryRow}:C${summaryRow}`);
   const summaryCell = worksheet.getCell(`A${summaryRow}`);
   summaryCell.value = `${invoices.length} consultations sur l'année ${currentYear}`;
@@ -52,7 +55,7 @@ export const generateFooterSection = (
     size: 14,
     color: { argb: 'FF334E81' }
   };
-  totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  totalLabelCell.alignment = { horizontal: 'right', vertical: 'middle' };
   
   // Valeur du total - Colonnes F-G fusionnées
   worksheet.mergeCells(`F${summaryRow}:G${summaryRow}`);
@@ -80,8 +83,8 @@ export const generateFooterSection = (
     };
   });
   
-  // Pied de page
-  const footerRow = summaryRow + 2;
+  // Pied de page avec espacement
+  const footerRow = summaryRow + 3;
   worksheet.mergeCells(`A${footerRow}:G${footerRow}`);
   const footerCell = worksheet.getCell(`A${footerRow}`);
   footerCell.value = 'Document généré automatiquement – PatientHub';
