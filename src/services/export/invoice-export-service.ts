@@ -41,7 +41,7 @@ export const invoiceExportService = {
     });
     
     // Extraction de l'année pour le récapitulatif
-    const currentYear = period.includes(' ') ? period.split(' ').pop() : period;
+    const currentYear = period.includes(' ') ? period.split(' ')[1] : period;
     
     // Génération de l'en-tête
     const headerRowIndex = generateHeaderSection(worksheet, period, osteopath);
@@ -50,7 +50,10 @@ export const invoiceExportService = {
     const lastRowIndex = generateTableSection(worksheet, sortedInvoices, patientDataMap, headerRowIndex);
     
     // Génération du pied de page et totaux
-    generateFooterSection(worksheet, lastRowIndex, headerRowIndex, sortedInvoices, currentYear || '');
+    if (sortedInvoices.length > 0) {
+      // Au lieu d'utiliser global, passons directement les données au générateur de pied de page
+      generateFooterSection(worksheet, lastRowIndex, headerRowIndex, sortedInvoices, currentYear);
+    }
     
     // Génération du fichier XLSX
     const buffer = await workbook.xlsx.writeBuffer();
@@ -62,3 +65,9 @@ export const invoiceExportService = {
   // Export de la fonction de traduction des statuts pour compatibilité
   translatePaymentStatus
 };
+
+// Nous n'avons plus besoin de la déclaration globale car nous n'utilisons plus global
+// declare global {
+//   var invoices: Invoice[];
+//   var currentYear: string;
+// }

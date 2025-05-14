@@ -6,7 +6,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { invoiceExportService } from "@/services/export";
+import { invoiceExportService } from "@/services/export/invoice-export-service";
 import { Invoice, Osteopath, Patient } from "@/types";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -79,7 +79,7 @@ export function InvoiceExportButtons({
 				? format(parseISO(`${year}-${month}-01`), "MMMM yyyy", {
 						locale: fr,
 				  })
-				: `l'année ${year}`;
+				: `Année ${year}`;
 
 			toast.info(`Préparation de l'export comptable pour ${periodLabel}`);
 
@@ -97,7 +97,7 @@ export function InvoiceExportButtons({
 			link.href = url;
 			link.setAttribute(
 				"download",
-				`Comptabilité_${periodLabel.replace(" ", "_").replace("'", "")}.xlsx`
+				`Comptabilité_${periodLabel.replace(" ", "_")}.xlsx`
 			);
 			document.body.appendChild(link);
 			link.click();

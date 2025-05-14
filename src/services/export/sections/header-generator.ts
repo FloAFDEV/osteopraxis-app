@@ -16,9 +16,7 @@ export const generateHeaderSection = (
   // Titre principal
   worksheet.mergeCells(`A${currentRow}:G${currentRow}`);
   const titleCell = worksheet.getCell(`A${currentRow}`);
-  
-  titleCell.value = `Exercice sur ${period}`;
-  
+  titleCell.value = `Extraction comptable sur ${period}`;
   titleCell.font = { 
     name: 'Arial',
     size: 16, 
@@ -30,10 +28,6 @@ export const generateHeaderSection = (
     vertical: 'middle' 
   };
   worksheet.getRow(currentRow).height = 30;
-  
-  // Ajouter une ligne vide après le titre
-  currentRow++;
-  worksheet.getRow(currentRow).height = 15;
   currentRow++;
   
   return currentRow;

@@ -13,12 +13,8 @@ export const generateFooterSection = (
   invoices: Invoice[],
   currentYear: string
 ): void => {
-  // Ligne vide après la dernière ligne de données
-  const emptyRow = lastRow + 1;
-  worksheet.getRow(emptyRow).height = 10;
-  
   // Ligne bleue de séparation
-  const blueLineRow = emptyRow + 1;
+  const blueLineRow = lastRow + 1;
   worksheet.mergeCells(`A${blueLineRow}:G${blueLineRow}`);
   const blueLineCell = worksheet.getCell(`A${blueLineRow}`);
   blueLineCell.fill = {
@@ -26,14 +22,12 @@ export const generateFooterSection = (
     pattern: 'solid',
     fgColor: { argb: 'FF2E5984' }
   };
+  
+  // Définir la hauteur de ligne plutôt que de la cellule
   worksheet.getRow(blueLineRow).height = 5;
   
-  // Ligne vide après la ligne bleue
-  const emptyRowAfterLine = blueLineRow + 1;
-  worksheet.getRow(emptyRowAfterLine).height = 10;
-  
-  // Nombre de consultations sur l'année - 3 premières colonnes fusionnées
-  const summaryRow = emptyRowAfterLine + 1;
+  // Nombre de consultations sur l'année
+  const summaryRow = blueLineRow + 2;
   worksheet.mergeCells(`A${summaryRow}:C${summaryRow}`);
   const summaryCell = worksheet.getCell(`A${summaryRow}`);
   summaryCell.value = `${invoices.length} consultations sur l'année ${currentYear}`;
@@ -45,7 +39,7 @@ export const generateFooterSection = (
   };
   summaryCell.alignment = { horizontal: 'left', vertical: 'middle' };
   
-  // Cellule TOTAL - Colonnes D-E fusionnées
+  // Cellule TOTAL
   worksheet.mergeCells(`D${summaryRow}:E${summaryRow}`);
   const totalLabelCell = worksheet.getCell(`D${summaryRow}`);
   totalLabelCell.value = 'TOTAL';
@@ -57,7 +51,7 @@ export const generateFooterSection = (
   };
   totalLabelCell.alignment = { horizontal: 'right', vertical: 'middle' };
   
-  // Valeur du total - Colonnes F-G fusionnées
+  // Valeur du total
   worksheet.mergeCells(`F${summaryRow}:G${summaryRow}`);
   const totalValueCell = worksheet.getCell(`F${summaryRow}`);
   totalValueCell.value = {
@@ -70,21 +64,11 @@ export const generateFooterSection = (
     size: 14,
     color: { argb: 'FF334E81' }
   };
-  totalValueCell.numFmt = '# ##0,00 €';
-  totalValueCell.alignment = { horizontal: 'center' };
+  totalValueCell.numFmt = '# ##0.00 €';
+  totalValueCell.alignment = { horizontal: 'right' };
   
-  // Appliquer des bordures au bas du tableau de total
-  [totalLabelCell, totalValueCell, summaryCell].forEach(cell => {
-    cell.border = {
-      top: {style:'thin', color: {argb:'FF000000'}},
-      left: {style:'thin', color: {argb:'FF000000'}},
-      bottom: {style:'thin', color: {argb:'FF000000'}},
-      right: {style:'thin', color: {argb:'FF000000'}}
-    };
-  });
-  
-  // Pied de page avec espacement
-  const footerRow = summaryRow + 3;
+  // Pied de page
+  const footerRow = summaryRow + 2;
   worksheet.mergeCells(`A${footerRow}:G${footerRow}`);
   const footerCell = worksheet.getCell(`A${footerRow}`);
   footerCell.value = 'Document généré automatiquement – PatientHub';
