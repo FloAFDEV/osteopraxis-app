@@ -26,8 +26,11 @@ export const generateFooterSection = (
   // Définir la hauteur de ligne plutôt que de la cellule
   worksheet.getRow(blueLineRow).height = 5;
   
-  // Nombre de consultations sur l'année
-  const summaryRow = blueLineRow + 2;
+  // Ligne vide après la ligne bleue
+  const emptyRow = blueLineRow + 1;
+  
+  // Nombre de consultations sur l'année - 3 premières colonnes fusionnées
+  const summaryRow = emptyRow + 1;
   worksheet.mergeCells(`A${summaryRow}:C${summaryRow}`);
   const summaryCell = worksheet.getCell(`A${summaryRow}`);
   summaryCell.value = `${invoices.length} consultations sur l'année ${currentYear}`;
@@ -39,7 +42,7 @@ export const generateFooterSection = (
   };
   summaryCell.alignment = { horizontal: 'left', vertical: 'middle' };
   
-  // Cellule TOTAL
+  // Cellule TOTAL - Colonnes D-E fusionnées
   worksheet.mergeCells(`D${summaryRow}:E${summaryRow}`);
   const totalLabelCell = worksheet.getCell(`D${summaryRow}`);
   totalLabelCell.value = 'TOTAL';
@@ -49,9 +52,9 @@ export const generateFooterSection = (
     size: 14,
     color: { argb: 'FF334E81' }
   };
-  totalLabelCell.alignment = { horizontal: 'right', vertical: 'middle' };
+  totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' };
   
-  // Valeur du total
+  // Valeur du total - Colonnes F-G fusionnées
   worksheet.mergeCells(`F${summaryRow}:G${summaryRow}`);
   const totalValueCell = worksheet.getCell(`F${summaryRow}`);
   totalValueCell.value = {
@@ -64,8 +67,18 @@ export const generateFooterSection = (
     size: 14,
     color: { argb: 'FF334E81' }
   };
-  totalValueCell.numFmt = '# ##0.00 €';
-  totalValueCell.alignment = { horizontal: 'right' };
+  totalValueCell.numFmt = '# ##0,00 €';
+  totalValueCell.alignment = { horizontal: 'center' };
+  
+  // Appliquer des bordures au bas du tableau de total
+  [totalLabelCell, totalValueCell, summaryCell].forEach(cell => {
+    cell.border = {
+      top: {style:'thin', color: {argb:'FF000000'}},
+      left: {style:'thin', color: {argb:'FF000000'}},
+      bottom: {style:'thin', color: {argb:'FF000000'}},
+      right: {style:'thin', color: {argb:'FF000000'}}
+    };
+  });
   
   // Pied de page
   const footerRow = summaryRow + 2;

@@ -14,10 +14,10 @@ export const generateTableSection = (
   patientDataMap: Map<number, Patient>,
   startRow: number
 ): number => {
-  // En-têtes du tableau
+  // En-têtes du tableau avec les titres exacts selon l'image de référence
   worksheet.columns = [
-    { header: 'Date', key: 'date', width: 15 },
-    { header: 'Numéro de facture', key: 'number', width: 15 },
+    { header: 'Date de séance', key: 'date', width: 15 },
+    { header: 'N° de Note d\'Honoraire', key: 'number', width: 22 },
     { header: 'Nom', key: 'lastName', width: 18 },
     { header: 'Prénom', key: 'firstName', width: 18 },
     { header: 'Montant', key: 'amount', width: 15 },
@@ -86,7 +86,7 @@ export const generateTableSection = (
     });
     
     // Formatage des cellules de montant
-    worksheet.getColumn('amount').numFmt = '# ##0.00 €';
+    worksheet.getColumn('amount').numFmt = '# ##0,00 €';
   }
   
   return rowCounter;

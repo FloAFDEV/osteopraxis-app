@@ -16,7 +16,10 @@ export const generateHeaderSection = (
   // Titre principal
   worksheet.mergeCells(`A${currentRow}:G${currentRow}`);
   const titleCell = worksheet.getCell(`A${currentRow}`);
-  titleCell.value = `Extraction comptable sur ${period}`;
+  
+  // Ajuster le titre pour qu'il corresponde à "Exercice sur l'année 2025" ou "Exercice sur avril 2025"
+  titleCell.value = `Exercice sur ${period}`;
+  
   titleCell.font = { 
     name: 'Arial',
     size: 16, 

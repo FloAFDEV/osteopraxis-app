@@ -95,6 +95,11 @@ export const applyDataRowStyles = (row: ExcelJS.Row) => {
       cell.alignment = { horizontal: 'center' };
     } else if (colNumber === 5) { // Montant
       cell.alignment = { horizontal: 'right' };
+      cell.numFmt = '# ##0,00 €';
+    } else if (colNumber === 6) { // Mode de paiement
+      cell.alignment = { horizontal: 'center' };
+    } else if (colNumber === 7) { // Statut
+      cell.alignment = { horizontal: 'center' };
     }
   });
 };

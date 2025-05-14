@@ -65,9 +65,3 @@ export const invoiceExportService = {
   // Export de la fonction de traduction des statuts pour compatibilité
   translatePaymentStatus
 };
-
-// Nous n'avons plus besoin de la déclaration globale car nous n'utilisons plus global
-// declare global {
-//   var invoices: Invoice[];
-//   var currentYear: string;
-// }
