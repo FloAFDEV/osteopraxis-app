@@ -1,7 +1,8 @@
 import { AppointmentsOverview } from "@/components/dashboard/appointments-overview";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { DemographicsCard } from "@/components/dashboard/demographics-card";
-import { GrowthChart } from "@/components/dashboard/growth-chart";
+import { GrowthChart as DashboardGrowthChart } from "@/components/dashboard/growth-chart";
+import { GrowthChart as SimpleGrowthChart } from "@/components/growth-chart";
 import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/services/api";
 import { Appointment, DashboardData, Patient, MonthlyGrowth } from "@/types";
@@ -11,18 +12,18 @@ import { useEffect, useState } from "react";
 import { isChild } from "./demographics/gender-chart-utils";
 
 const FRENCH_MONTHS = [
-	"Jan",
-	"Fév",
-	"Mar",
-	"Avr",
-	"Mai",
-	"Juin",
-	"Juil",
-	"Août",
-	"Sep",
-	"Oct",
-	"Nov",
-	"Déc",
+	"janvier",
+	"février",
+	"mars",
+	"avril",
+	"mai",
+	"juin",
+	"juillet",
+	"août",
+	"septembre",
+	"octobre",
+	"novembre",
+	"décembre",
 ];
 
 const initialMonthlyGrowth: MonthlyGrowth[] = FRENCH_MONTHS.map((month) => ({
@@ -249,6 +250,9 @@ export function Dashboard() {
 	const [loading, setLoading] = useState(true);
 	const [allPatients, setAllPatients] = useState<Patient[]>([]);
 	const [error, setError] = useState<string | null>(null);
+	const [chartType, setChartType] = useState<"detailed" | "simple">(
+		"detailed"
+	);
 
 	useEffect(() => {
 		const loadDashboardData = async () => {
@@ -396,13 +400,55 @@ export function Dashboard() {
 						<CardContent className="p-6 bg-inherit">
 							{" "}
 							{/* Ensure bg-inherit has desired effect or remove */}
-							<h2 className="text-xl font-bold mb-4">
+							<h2 className="text-2xl font-bold mb-4">
 								Évolution de l'activité
 							</h2>
 							<div className="h-full">
 								{" "}
 								{/* Ensure GrowthChart handles its own height or provide specific height */}
-								<GrowthChart data={dashboardData} />
+								{chartType === "detailed" ? (
+									<DashboardGrowthChart
+										data={dashboardData}
+									/>
+								) : (
+									<SimpleGrowthChart data={dashboardData} />
+								)}{" "}
+							</div>
+							<div className="m-0 mt-4 flex items-center gap-2">
+								<label
+									htmlFor="chartType"
+									className="text-sm font-medium"
+								>
+									Type de graphique :
+								</label>
+
+								<button
+									type="button"
+									aria-label="Changer le type de graphique"
+									onClick={() =>
+										setChartType(
+											chartType === "detailed"
+												? "simple"
+												: "detailed"
+										)
+									}
+									className="relative w-20 h-9 text-xs rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 [perspective:600px] focus:outline-none rounded-md"
+								>
+									<div
+										className={`transition duration-500 [transform-style:preserve-3d] ${
+											chartType === "simple"
+												? "[transform:rotateY(180deg)]"
+												: ""
+										}`}
+									>
+										<span className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden]">
+											Graphique
+										</span>
+										<span className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
+											Comparé
+										</span>
+									</div>
+								</button>
 							</div>
 						</CardContent>
 					</Card>
