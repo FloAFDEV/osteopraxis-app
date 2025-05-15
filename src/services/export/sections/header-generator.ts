@@ -1,34 +1,41 @@
+import ExcelJS from "exceljs";
 
-import ExcelJS from 'exceljs';
-import { Osteopath } from '@/types';
-import { applyTitleStyles } from '../styles/excel-styles';
-
-/**
- * Generate header section for the accounting report
- */
 export const generateHeaderSection = (
-  worksheet: ExcelJS.Worksheet,
-  period: string,
-  osteopath?: Osteopath
+	worksheet: ExcelJS.Worksheet,
+	period: string
 ): number => {
-  let currentRow = 1;
-  
-  // Titre principal
-  worksheet.mergeCells(`A${currentRow}:G${currentRow}`);
-  const titleCell = worksheet.getCell(`A${currentRow}`);
-  titleCell.value = `Extraction comptable sur ${period}`;
-  titleCell.font = { 
-    name: 'Arial',
-    size: 16, 
-    bold: true, 
-    color: { argb: 'FF2E5984' }
-  };
-  titleCell.alignment = { 
-    horizontal: 'center', 
-    vertical: 'middle' 
-  };
-  worksheet.getRow(currentRow).height = 30;
-  currentRow++;
-  
-  return currentRow;
+	// Génération de l'en-tête avec le titre et la période
+	const headerRow = worksheet.getRow(1);
+	headerRow.values = ["Récapitulatif Comptable", `Période: ${period}`];
+
+	// Personnalisation de la première ligne (Titre)
+	headerRow.font = {
+		name: "Arial",
+		bold: true,
+		size: 16,
+		color: { argb: "FF2E5984" },
+	};
+	headerRow.alignment = { horizontal: "center", vertical: "middle" };
+	headerRow.height = 30;
+	worksheet.mergeCells("A1:G1"); // Fusion des cellules pour centrer le titre
+
+	// Personnalisation de la deuxième ligne pour la période
+	const periodRow = worksheet.getRow(2);
+	periodRow.values = [`Période: ${period}`]; // Affichage dynamique de la période
+	periodRow.font = {
+		name: "Arial",
+		italic: true,
+		size: 12,
+		color: { argb: "FF888888" },
+	};
+	periodRow.alignment = { horizontal: "center", vertical: "middle" };
+	periodRow.height = 20;
+	worksheet.mergeCells("A2:G2"); // Fusion des cellules pour centrer la période
+
+	// Ligne de séparation (A3:G3)
+	const lineRow = worksheet.getRow(3);
+	lineRow.height = 5; // Petite hauteur pour la séparation
+	worksheet.mergeCells("A3:G3");
+
+	return 4; // La prochaine ligne où les données commenceront
 };
