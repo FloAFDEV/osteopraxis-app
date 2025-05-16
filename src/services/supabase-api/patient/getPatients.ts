@@ -2,65 +2,53 @@ import { Patient } from "@/types";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 import { supabase } from "../utils";
 
-export async function getPatients(userUUID: string): Promise<Patient[]> {
+export async function getPatients(): Promise<Patient[]> {
 	try {
-		// 1. Récupérer l'osteopathId (integer) lié à ce user UUID
-		const { data: userData, error: userError } = await supabase
-			.from("User")
-			.select("osteopathId")
-			.eq("id", userUUID)
-			.single();
+		const { data, error } = await supabase.from("Patient").select("*");
 
-		if (userError) {
-			console.error("Erreur fetching osteopathId du user :", userError);
-			throw userError;
+		if (error) {
+			console.error("Error fetching patients:", error);
+			throw error;
 		}
 
-		if (!userData || !userData.osteopathId) {
-			console.log("No osteopathId found for user", userUUID);
-			return [];
-		}
+		const patients = data.map(adaptPatientFromSupabase);
 
-		const osteopathId: number = userData.osteopathId;
-
-		// 2. Récupérer les patients associés à cet osteopathId
-		const { data: patientsData, error: patientsError } = await supabase
-			.from("Patient")
-			.select("*")
-			.eq("osteopathId", osteopathId);
-
-		if (patientsError) {
-			console.error("Erreur fetching patients:", patientsError);
-			throw patientsError;
-		}
-
-		const patients = patientsData.map(adaptPatientFromSupabase);
-
-		// 3. Calculs des stats (facultatif, pour debug)
+		// Calculer les comptages par genre et âge pour le graphique
 		const maleCount = patients.filter((p) => p.gender === "Homme").length;
 		const femaleCount = patients.filter((p) => p.gender === "Femme").length;
-		const childrenCount = patients.filter((p) => {
+
+		// Calculate children count using precise age calculation
+		const childrenPatients = patients.filter((p) => {
 			if (!p.birthDate) return false;
+
 			const birthDate = new Date(p.birthDate);
 			const today = new Date();
+
+			// Calculate age more precisely
 			let age = today.getFullYear() - birthDate.getFullYear();
 			const monthDiff = today.getMonth() - birthDate.getMonth();
+
+			// Adjust age if birthday hasn't occurred this year yet
 			if (
 				monthDiff < 0 ||
 				(monthDiff === 0 && today.getDate() < birthDate.getDate())
 			) {
 				age--;
 			}
+
 			return age < 12;
-		}).length;
+		});
 
 		console.log(
-			`Patients for osteopathId ${osteopathId}: total=${patients.length}, men=${maleCount}, women=${femaleCount}, children=${childrenCount}`
+			`GetPatients: Found ${childrenPatients.length} children among ${patients.length} total patients`
+		);
+		console.log(
+			`GetPatients: Gender distribution - ${maleCount} men, ${femaleCount} women`
 		);
 
 		return patients;
 	} catch (error) {
-		console.error("Error in getPatientsForUser:", error);
+		console.error("Error in getPatients:", error);
 		throw error;
 	}
 }
