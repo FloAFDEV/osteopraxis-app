@@ -33,7 +33,6 @@ const getPatientSchema = (emailRequired: boolean) =>
 			? z.string().email("Email invalide").min(1, "Email requis")
 			: z.string().email("Email invalide").optional().nullable(),
 		phone: z.string().optional().nullable(),
-		notes: z.string().optional().nullable(),
 		birthDate: z.date().optional().nullable(),
 		childrenAges: z.array(z.number()).optional().nullable(),
 		firstName: z.string().min(1, "Prénom requis"),
@@ -505,11 +504,12 @@ export function PatientForm({
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>
-													Situation familiale
+													Antécédents médicaux
+													familiaux
 												</FormLabel>
 												<FormControl>
 													<Input
-														placeholder="Situation familiale"
+														placeholder="Maladies héréditaires"
 														{...field}
 													/>
 												</FormControl>
@@ -647,24 +647,6 @@ export function PatientForm({
 											<FormControl>
 												<Input
 													placeholder="Adresse"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="notes"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Notes</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Notes générales sur le patient"
-													className="resize-none"
 													{...field}
 												/>
 											</FormControl>
