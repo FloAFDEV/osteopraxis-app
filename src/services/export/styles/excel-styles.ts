@@ -1,8 +1,7 @@
-
 import ExcelJS from "exceljs";
 
 /**
- * Apply header styles to a row
+ * Applique le style d'en-tête à une ligne
  */
 export const applyHeaderStyles = (row: ExcelJS.Row) => {
 	row.font = {
@@ -23,19 +22,20 @@ export const applyHeaderStyles = (row: ExcelJS.Row) => {
 };
 
 /**
- * Apply standard cell borders
+ * Applique une bordure standard à une cellule
  */
 export const applyCellBorders = (cell: ExcelJS.Cell) => {
-	cell.border = {
+	const borderStyle: Partial<ExcelJS.Borders> = {
 		top: { style: "thin", color: { argb: "FFD0D0D0" } },
 		left: { style: "thin", color: { argb: "FFD0D0D0" } },
 		bottom: { style: "thin", color: { argb: "FFD0D0D0" } },
 		right: { style: "thin", color: { argb: "FFD0D0D0" } },
 	};
+	cell.border = borderStyle;
 };
 
 /**
- * Apply title styles to a cell
+ * Applique le style du titre à une cellule
  */
 export const applyTitleStyles = (cell: ExcelJS.Cell) => {
 	cell.font = {
@@ -51,7 +51,7 @@ export const applyTitleStyles = (cell: ExcelJS.Cell) => {
 };
 
 /**
- * Apply footer styles to a cell
+ * Applique le style du pied de page à une cellule
  */
 export const applyFooterStyles = (cell: ExcelJS.Cell) => {
 	cell.font = {
@@ -64,10 +64,10 @@ export const applyFooterStyles = (cell: ExcelJS.Cell) => {
 };
 
 /**
- * Apply alternating row color
+ * Applique une couleur d'arrière-plan alternée à une ligne (utile pour les tableaux)
  */
 export const applyAlternatingRowColor = (row: ExcelJS.Row) => {
-	row.eachCell({ includeEmpty: true }, function (cell) {
+	row.eachCell({ includeEmpty: true }, (cell) => {
 		cell.fill = {
 			type: "pattern",
 			pattern: "solid",
@@ -77,26 +77,18 @@ export const applyAlternatingRowColor = (row: ExcelJS.Row) => {
 };
 
 /**
- * Apply data row styles
+ * Applique les styles standards d'une ligne de données
  */
 export const applyDataRowStyles = (row: ExcelJS.Row) => {
-	row.eachCell({ includeEmpty: true }, function (cell) {
+	row.eachCell({ includeEmpty: true }, (cell) => {
 		applyCellBorders(cell);
 		cell.font = { name: "Arial", size: 10 };
 
-		// Alignment spécifique par colonne
-		const columnIndex = cell.col;
-		// Convertir columnIndex en nombre pour les comparaisons
-		const colNumber = Number(columnIndex);
+		// Récupère l'index de la colonne de manière sûre
+		const colNumber = Number(cell.col);
 
-		if (colNumber === 1) {
-			// Date
-			cell.alignment = { horizontal: "center" };
-		} else if (colNumber === 2) {
-			// Numéro
-			cell.alignment = { horizontal: "center" };
-		} else if (colNumber === 5) {
-			// Montant
+		// Aligne certaines colonnes au centre si index correspondant
+		if ([1, 2, 5].includes(colNumber)) {
 			cell.alignment = { horizontal: "center" };
 		}
 	});
