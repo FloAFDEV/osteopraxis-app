@@ -47,7 +47,7 @@ const getPatientSchema = (emailRequired: boolean) => z.object({
 	rheumatologicalHistory: z.string().optional().nullable(),
 	currentTreatment: z.string().optional().nullable(),
 	handedness: z.string().optional().nullable(),
-	familyStatus: z.string().optional().nullable(),
+	familyStatus: z.string().optional().nullable(), // Ajout du champ familyStatus
 	cabinetId: z.number().optional(), // Ajout du champ cabinetId
 	// Champs existants pour tous les patients
 	complementaryExams: z.string().optional().nullable(),

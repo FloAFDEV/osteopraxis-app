@@ -41,6 +41,8 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
   cabinetId: data.cabinetId,
   userId: data.userId || null,
   osteopathId: data.osteopathId || 1,
+  // Ajout du champ familyStatus
+  familyStatus: data.familyStatus || null,
   // Champs existants pour tous les patients
   complementaryExams: data.complementaryExams || null,
   generalSymptoms: data.generalSymptoms || null,
