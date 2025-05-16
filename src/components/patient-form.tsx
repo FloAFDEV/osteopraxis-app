@@ -329,7 +329,6 @@ export function PatientForm({
 							</TabsTrigger>
 						)}
 					</TabsList>
-
 					<TabsContent value="general" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4">
@@ -497,51 +496,6 @@ export function PatientForm({
 									/>
 								</div>
 
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<FormField
-										control={form.control}
-										name="familyStatus"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>
-													Antécédents médicaux
-													familiaux
-												</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Maladies héréditaires"
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-
-									<FormField
-										control={form.control}
-										name="handedness"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>
-													Latéralité
-												</FormLabel>
-												<FormControl>
-													<TranslatedSelect
-														value={field.value}
-														onValueChange={
-															field.onChange
-														}
-														enumType="Handedness"
-														placeholder="Sélectionner une latéralité"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-
 								<FormField
 									control={form.control}
 									name="hasChildren"
@@ -590,7 +544,7 @@ export function PatientForm({
 							</CardContent>
 						</Card>
 					</TabsContent>
-
+					{/* Tab Contact */}
 					<TabsContent value="contact" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4 mt-6">
@@ -658,10 +612,76 @@ export function PatientForm({
 						</Card>
 					</TabsContent>
 
+					{/* Tab Médical */}
+
 					<TabsContent value="medical" className="space-y-4">
 						<Card>
-							<CardContent className="space-y-4 mt-6">
+							<CardContent className="space-y-4 pt-6">
+								{" "}
+								{/* mt-6 -> pt-6 pour cohérence */}
+								{/* Section: Informations Médicales Générales */}
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<FormField
+										control={form.control}
+										name="familyStatus"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													Antécédents médicaux
+													familiaux
+												</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="Maladies héréditaires"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="handedness"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													Latéralité
+												</FormLabel>
+												<FormControl>
+													<TranslatedSelect
+														value={field.value}
+														onValueChange={
+															field.onChange
+														}
+														enumType="Handedness"
+														placeholder="Sélectionner une latéralité"
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<FormField
+										control={form.control}
+										name="physicalActivity" // Placé avant contraception pour un flux peut-être plus général
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													Activité physique
+												</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="Activité physique"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 									<FormField
 										control={form.control}
 										name="contraception"
@@ -684,217 +704,27 @@ export function PatientForm({
 											</FormItem>
 										)}
 									/>
-
-									<FormField
-										control={form.control}
-										name="physicalActivity"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>
-													Activité physique
-												</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Activité physique"
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
 								</div>
-
-								{/* Section Tabagisme */}
-								<div className="border p-4 rounded-lg space-y-4">
-									<h3 className="font-medium text-lg">
-										Habitudes tabagiques
-									</h3>
-									<div className="grid grid-cols-1 gap-4">
-										<FormField
-											control={form.control}
-											name="isSmoker"
-											render={({ field }) => (
-												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-													<div className="space-y-0.5">
-														<FormLabel className="text-base">
-															Fumeur ?
-														</FormLabel>
-														<FormDescription>
-															Indiquez si le
-															patient fume
-															actuellement.
-														</FormDescription>
-													</div>
-													<FormControl>
-														<Switch
-															checked={
-																field.value
-															}
-															onCheckedChange={(
-																checked
-															) => {
-																field.onChange(
-																	checked
-																);
-																if (checked) {
-																	form.setValue(
-																		"isExSmoker",
-																		false
-																	);
-																}
-															}}
-														/>
-													</FormControl>
-												</FormItem>
-											)}
-										/>
-
-										{form.watch("isSmoker") && (
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
-												<FormField
-													control={form.control}
-													name="smokingSince"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>
-																Depuis quand ?
-															</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Ex: 2010, depuis 5 ans..."
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
+								{/* Section: Médecins et Suivis Spécifiques */}
+								{/* Médecin généraliste en pleine largeur */}
+								<FormField
+									control={form.control}
+									name="generalPractitioner"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Médecin généraliste
+											</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="Médecin généraliste"
+													{...field}
 												/>
-												<FormField
-													control={form.control}
-													name="smokingAmount"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>
-																Quantité
-															</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Ex: 10 cigarettes/jour"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-											</div>
-										)}
-
-										<FormField
-											control={form.control}
-											name="isExSmoker"
-											render={({ field }) => (
-												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-													<div className="space-y-0.5">
-														<FormLabel className="text-base">
-															Ex-fumeur ?
-														</FormLabel>
-														<FormDescription>
-															Indiquez si le
-															patient a arrêté de
-															fumer.
-														</FormDescription>
-													</div>
-													<FormControl>
-														<Switch
-															checked={
-																field.value
-															}
-															onCheckedChange={(
-																checked
-															) => {
-																field.onChange(
-																	checked
-																);
-																if (checked) {
-																	form.setValue(
-																		"isSmoker",
-																		false
-																	);
-																}
-															}}
-														/>
-													</FormControl>
-												</FormItem>
-											)}
-										/>
-
-										{form.watch("isExSmoker") && (
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
-												<FormField
-													control={form.control}
-													name="quitSmokingDate"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>
-																Arrêt depuis
-															</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Ex: 2018, depuis 3 ans..."
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name="smokingAmount"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>
-																Quantité avant
-																arrêt
-															</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Ex: 15 cigarettes/jour"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-											</div>
-										)}
-									</div>
-								</div>
-
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<FormField
-										control={form.control}
-										name="generalPractitioner"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>
-													Médecin généraliste
-												</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Médecin généraliste"
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
 										control={form.control}
@@ -914,12 +744,11 @@ export function PatientForm({
 											</FormItem>
 										)}
 									/>
-
 									<FormField
 										control={form.control}
 										name="hasVisionCorrection"
 										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 md:mt-[28px]">
 												<div className="space-y-0.5">
 													<FormLabel className="text-base">
 														Correction de la vision
@@ -943,7 +772,6 @@ export function PatientForm({
 										)}
 									/>
 								</div>
-
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
 										control={form.control}
@@ -963,7 +791,6 @@ export function PatientForm({
 											</FormItem>
 										)}
 									/>
-
 									<FormField
 										control={form.control}
 										name="entProblems"
@@ -983,7 +810,6 @@ export function PatientForm({
 										)}
 									/>
 								</div>
-
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
 										control={form.control}
@@ -1003,7 +829,6 @@ export function PatientForm({
 											</FormItem>
 										)}
 									/>
-
 									<FormField
 										control={form.control}
 										name="digestiveProblems"
@@ -1023,7 +848,7 @@ export function PatientForm({
 										)}
 									/>
 								</div>
-
+								{/* Section: Antécédents Médicaux Détaillés (TextAreas en pleine largeur) */}
 								<FormField
 									control={form.control}
 									name="surgicalHistory"
@@ -1043,7 +868,6 @@ export function PatientForm({
 										</FormItem>
 									)}
 								/>
-
 								<FormField
 									control={form.control}
 									name="traumaHistory"
@@ -1063,7 +887,6 @@ export function PatientForm({
 										</FormItem>
 									)}
 								/>
-
 								<FormField
 									control={form.control}
 									name="rheumatologicalHistory"
@@ -1083,7 +906,50 @@ export function PatientForm({
 										</FormItem>
 									)}
 								/>
-
+								<FormField
+									control={form.control}
+									name="fracture_history"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Historique des fractures
+											</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder="Historique détaillé des fractures"
+													className="resize-none"
+													{...field}
+													value={field.value || ""}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								{!isChild && (
+									<FormField
+										control={form.control}
+										name="gynecological_history"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													Antécédents gynéco-urinaires
+												</FormLabel>
+												<FormControl>
+													<Textarea
+														placeholder="Antécédents gynécologiques ou urinaires"
+														className="resize-none"
+														{...field}
+														value={
+															field.value || ""
+														}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								)}
 								<FormField
 									control={form.control}
 									name="currentTreatment"
@@ -1106,7 +972,6 @@ export function PatientForm({
 							</CardContent>
 						</Card>
 					</TabsContent>
-
 					<TabsContent value="anamnese" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4 mt-6">
@@ -1152,7 +1017,7 @@ export function PatientForm({
 							</CardContent>
 						</Card>
 					</TabsContent>
-
+					{/*Suivi pédiatrique */}
 					<TabsContent value="additional" className="space-y-4">
 						<Card>
 							<CardContent className="space-y-4 mt-6">
@@ -1163,7 +1028,6 @@ export function PatientForm({
 							</CardContent>
 						</Card>
 					</TabsContent>
-
 					{isChild && (
 						<TabsContent value="pediatric" className="space-y-4">
 							<Card>
