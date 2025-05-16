@@ -1,33 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-	Plus,
-	Calendar,
-	Filter,
-	Search,
-	RefreshCw,
-	Clock,
-	Home,
-	ArrowRight,
-	ArrowLeft,
-	ChevronDown,
-	CalendarX,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { api } from "@/services/api";
-import { Appointment, Patient } from "@/types";
-import { Layout } from "@/components/ui/layout";
 import { AppointmentCard } from "@/components/appointment-card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import {
 	Dialog,
 	DialogContent,
@@ -36,8 +8,36 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Layout } from "@/components/ui/layout";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { api } from "@/services/api";
+import { Appointment, Patient } from "@/types";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import {
+	ArrowLeft,
+	ArrowRight,
+	Calendar,
+	CalendarX,
+	ChevronDown,
+	Clock,
+	Filter,
+	Home,
+	Plus,
+	RefreshCw,
+	Search,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const AppointmentsPage = () => {
 	// ... keep existing code (états, variables, etc.)
@@ -578,7 +578,7 @@ const AppointmentsPage = () => {
 									<div className="border-l-4 border-gray-400 pl-4 ml-[1px] py-4 bg-white dark:bg-gray-800 rounded-b-md shadow-sm space-y-6">
 										{/* Filter by Year - Placed Inside */}
 										<div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 px-2 pt-2">
-											<p className="text-sm font-medium text-gray-600 whitespace-nowrap">
+											<p className="text-sm font-medium text-gray-600 dark:text-gray-400  whitespace-nowrap">
 												Filtrer par année :
 											</p>
 											<Select
