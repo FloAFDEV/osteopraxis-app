@@ -1,4 +1,3 @@
-
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
@@ -94,6 +93,10 @@ export function MedicalInfoTab({
 						value: patient.currentTreatment || "Aucun",
 					},
 					{
+						label: "Antécédents médicaux familiaux",
+						value: patient.familyStatus || "Non renseigné",
+					},
+					{
 						label: "Chirurgie",
 						value: patient.surgicalHistory || "Aucun antécédent",
 					},
@@ -145,7 +148,7 @@ export function MedicalInfoTab({
 					},
 					{
 						label: "Santé dentaire",
-						value: patient.dental_health || "Non renseigné", 
+						value: patient.dental_health || "Non renseigné",
 					},
 				]}
 			/>
@@ -192,11 +195,15 @@ export function MedicalInfoTab({
 					items={[
 						{
 							label: "Contraception",
-							value: patient.contraception ? String(patient.contraception) : "Non renseigné",
+							value: patient.contraception
+								? String(patient.contraception)
+								: "Non renseigné",
 						},
 						{
 							label: "Antécédents gynécologiques",
-							value: patient.gynecological_history || "Non renseigné",
+							value:
+								patient.gynecological_history ||
+								"Non renseigné",
 						},
 					]}
 				/>
@@ -238,7 +245,8 @@ export function MedicalInfoTab({
 						items={[
 							{
 								label: "Grossesse",
-								value: patient.pregnancyHistory || "Non renseigné",
+								value:
+									patient.pregnancyHistory || "Non renseigné",
 							},
 							{
 								label: "Naissance",
@@ -250,15 +258,21 @@ export function MedicalInfoTab({
 							},
 							{
 								label: "Poids à la naissance",
-								value: patient.weight_at_birth ? `${patient.weight_at_birth} g` : "Non renseigné",
+								value: patient.weight_at_birth
+									? `${patient.weight_at_birth} g`
+									: "Non renseigné",
 							},
 							{
 								label: "Taille à la naissance",
-								value: patient.height_at_birth ? `${patient.height_at_birth} cm` : "Non renseigné",
+								value: patient.height_at_birth
+									? `${patient.height_at_birth} cm`
+									: "Non renseigné",
 							},
 							{
 								label: "Périmètre crânien",
-								value: patient.head_circumference ? `${patient.head_circumference} cm` : "Non renseigné",
+								value: patient.head_circumference
+									? `${patient.head_circumference} cm`
+									: "Non renseigné",
 							},
 						]}
 					/>
@@ -268,19 +282,26 @@ export function MedicalInfoTab({
 						items={[
 							{
 								label: "Développement moteur",
-								value: patient.developmentMilestones || "Non renseigné",
+								value:
+									patient.developmentMilestones ||
+									"Non renseigné",
 							},
 							{
 								label: "Motricité fine",
-								value: patient.fine_motor_skills || "Non renseigné",
+								value:
+									patient.fine_motor_skills ||
+									"Non renseigné",
 							},
 							{
 								label: "Motricité globale",
-								value: patient.gross_motor_skills || "Non renseigné",
+								value:
+									patient.gross_motor_skills ||
+									"Non renseigné",
 							},
 							{
 								label: "Sommeil",
-								value: patient.sleepingPattern || "Non renseigné",
+								value:
+									patient.sleepingPattern || "Non renseigné",
 							},
 							{
 								label: "Alimentation",
@@ -298,7 +319,8 @@ export function MedicalInfoTab({
 						items={[
 							{
 								label: "Mode de garde",
-								value: patient.childcare_type || "Non renseigné",
+								value:
+									patient.childcare_type || "Non renseigné",
 							},
 							{
 								label: "Niveau scolaire",
@@ -306,15 +328,20 @@ export function MedicalInfoTab({
 							},
 							{
 								label: "Pédiatre",
-								value: patient.pediatrician_name || "Non renseigné",
+								value:
+									patient.pediatrician_name ||
+									"Non renseigné",
 							},
 							{
 								label: "Suivis paramédicaux",
-								value: patient.paramedical_followup || "Non renseigné",
+								value:
+									patient.paramedical_followup ||
+									"Non renseigné",
 							},
 							{
 								label: "Contexte de garde",
-								value: patient.childCareContext || "Non renseigné",
+								value:
+									patient.childCareContext || "Non renseigné",
 							},
 						]}
 					/>
