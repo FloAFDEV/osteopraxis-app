@@ -59,6 +59,7 @@ export interface Patient {
 	rheumatologicalHistory: string | null;
 	hdlm: string | null;
 	userId: string | null;
+	familyStatus: string | null;
 	// Nouveaux champs pour tous les patients
 	complementaryExams: string | null;
 	generalSymptoms: string | null;
