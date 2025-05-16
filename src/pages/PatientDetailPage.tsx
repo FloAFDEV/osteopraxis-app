@@ -11,6 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
 import { invoiceService } from "@/services/api/invoice-service";
 import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
+import {
+	translateContraception,
+	translateHandedness,
+	translateMaritalStatus,
+} from "@/utils/patient-form-helpers";
 import { format } from "date-fns";
 import {
 	Activity,
@@ -24,7 +29,6 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { translateContraception, translateHandedness, translateMaritalStatus } from "@/utils/patient-form-helpers";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -34,7 +38,7 @@ const PatientDetailPage = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
-	const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 	const historyTabRef = useRef<HTMLElement | null>(null);
 	const getSmokerInfo = () => {
 		if (patient.isSmoker) {
@@ -244,7 +248,9 @@ const PatientDetailPage = () => {
 							items={[
 								{
 									label: "Statut marital",
-									value: translateMaritalStatus(patient.maritalStatus),
+									value: translateMaritalStatus(
+										patient.maritalStatus
+									),
 								},
 								{
 									label: "Enfants",
@@ -260,7 +266,9 @@ const PatientDetailPage = () => {
 								},
 								{
 									label: "Latéralité",
-									value: translateHandedness(patient.handedness),
+									value: translateHandedness(
+										patient.handedness
+									),
 								},
 								{
 									label: "Tabagisme",
@@ -268,7 +276,9 @@ const PatientDetailPage = () => {
 								},
 								{
 									label: "Contraception",
-									value: translateContraception(patient.contraception),
+									value: translateContraception(
+										patient.contraception
+									),
 								},
 							]}
 						/>
