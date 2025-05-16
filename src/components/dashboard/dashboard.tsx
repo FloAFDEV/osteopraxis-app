@@ -423,8 +423,13 @@ export function Dashboard() {
 								</label>
 
 								<button
+									id="chartType"
 									type="button"
-									aria-label="Changer le type de graphique"
+									aria-label={`Changer le type de graphique (actuellement : ${
+										chartType === "detailed"
+											? "Évolution annuelle"
+											: "Comparaison avec N-1"
+									})`}
 									onClick={() =>
 										setChartType(
 											chartType === "detailed"
@@ -432,21 +437,21 @@ export function Dashboard() {
 												: "detailed"
 										)
 									}
-									className="relative w-20 h-9 text-xs rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 [perspective:600px] focus:outline-none rounded-md"
+									className="relative w-44 h-9 text-xs rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px] focus:outline-none"
 								>
 									<div
-										className={`transition duration-500 [transform-style:preserve-3d] ${
+										className={`relative w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.4,0.0,0.2,1)] [transform-style:preserve-3d] will-change-transform ${
 											chartType === "simple"
 												? "[transform:rotateY(180deg)]"
 												: ""
 										}`}
 									>
-										<span className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden]">
-											Graphique
-										</span>
-										<span className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
-											Comparé
-										</span>
+										<div className="absolute inset-0 flex items-center justify-center px-2 font-bold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden]">
+											Évolution annuelle
+										</div>
+										<div className="absolute inset-0 flex items-center justify-center px-2 font-bold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+											Comparaison avec N-1
+										</div>
 									</div>
 								</button>
 							</div>
