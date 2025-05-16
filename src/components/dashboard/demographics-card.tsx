@@ -80,8 +80,8 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 			<CardContent>
 				{/* Add gender data to render */}
 				<div className="mb-2 text-sm">
-					<span className="font-medium">Total:</span> {totalPatients}{" "}
-					patients
+					<span className="font-medium">Total de:</span>{" "}
+					{totalPatients} patients
 				</div>
 
 				{chartData && chartData.length > 0 ? (
