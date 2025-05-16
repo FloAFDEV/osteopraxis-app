@@ -378,6 +378,7 @@ export type Database = {
           ent_followup: string | null
           entDoctorName: string | null
           entProblems: string | null
+          familyStatus: string | null
           feeding: string | null
           fine_motor_skills: string | null
           firstName: string
@@ -447,6 +448,7 @@ export type Database = {
           ent_followup?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
+          familyStatus?: string | null
           feeding?: string | null
           fine_motor_skills?: string | null
           firstName: string
@@ -516,6 +518,7 @@ export type Database = {
           ent_followup?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
+          familyStatus?: string | null
           feeding?: string | null
           fine_motor_skills?: string | null
           firstName?: string
