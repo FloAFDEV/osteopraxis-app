@@ -5,7 +5,33 @@ import { supabase } from "../utils";
 
 export async function getPatients(): Promise<Patient[]> {
 	try {
-		const { data, error } = await supabase.from("Patient").select("*");
+		// Récupérer l'utilisateur actuel
+		const { data: { user } } = await supabase.auth.getUser();
+		
+		if (!user) {
+			console.warn("GetPatients: No authenticated user found");
+			return [];
+		}
+		
+		// Obtenir l'osteopathId associé à cet utilisateur
+		const { data: osteopathData } = await supabase
+			.from("Osteopath")
+			.select("id")
+			.eq("userId", user.id)
+			.single();
+			
+		if (!osteopathData) {
+			console.warn("GetPatients: No osteopath profile found for user", user.id);
+			return [];
+		}
+		
+		console.log(`GetPatients: Filtering by osteopathId ${osteopathData.id} for user ${user.id}`);
+		
+		// Filtrer les patients par l'osteopathId
+		const { data, error } = await supabase
+			.from("Patient")
+			.select("*")
+			.eq("osteopathId", osteopathData.id);
 
 		if (error) {
 			console.error("Error fetching patients:", error);
@@ -40,7 +66,7 @@ export async function getPatients(): Promise<Patient[]> {
 			return age < 12;
 		});
 
-		console.log(`GetPatients: Found ${childrenPatients.length} children among ${patients.length} total patients`);
+		console.log(`GetPatients: Found ${childrenPatients.length} children among ${patients.length} total patients for osteopath ${osteopathData.id}`);
 		console.log(`GetPatients: Gender distribution - ${maleCount} men, ${femaleCount} women`);
 
 		return patients;
