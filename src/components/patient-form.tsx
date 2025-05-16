@@ -116,6 +116,7 @@ export function PatientForm({
 }: PatientFormProps) {
 	const navigate = useNavigate();
 	const [activeTab, setActiveTab] = useState("general");
+
 	const [childrenCount, setChildrenCount] = useState<number>(0);
 	const [childrenAgesInput, setChildrenAgesInput] = useState<string>("");
 	const [isChild, setIsChild] = useState<boolean>(false);
