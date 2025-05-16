@@ -2,7 +2,7 @@ import { Patient } from "@/types";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 import { supabase } from "../utils";
 
-export async function getPatientsForUser(userUUID: string): Promise<Patient[]> {
+export async function getPatients(userUUID: string): Promise<Patient[]> {
 	try {
 		// 1. Récupérer l'osteopathId (integer) lié à ce user UUID
 		const { data: userData, error: userError } = await supabase
