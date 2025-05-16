@@ -99,6 +99,45 @@ const CabinetsManagementPage = () => {
 		}
 	};
 
+	// Composant pour afficher l'image avec loader + message d'erreur
+	const ImageWithLoader = ({
+		src,
+		alt,
+		className,
+	}: {
+		src: string;
+		alt: string;
+		className?: string;
+	}) => {
+		const [loading, setLoading] = useState(true);
+		const [error, setError] = useState(false);
+
+		return (
+			<div
+				className={`w-full h-48 overflow-hidden flex justify-center items-center bg-gray-100 dark:bg-gray-700 ${className}`}
+			>
+				{loading && !error && (
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+				)}
+				{error && !loading && (
+					<p className="text-sm text-red-500">Image non disponible</p>
+				)}
+				<img
+					src={src}
+					alt={alt}
+					className={`w-full h-full object-cover ${
+						loading || error ? "hidden" : "block"
+					}`}
+					onLoad={() => setLoading(false)}
+					onError={() => {
+						setLoading(false);
+						setError(true);
+					}}
+				/>
+			</div>
+		);
+	};
+
 	if (loading) {
 		return (
 			<Layout>
@@ -116,7 +155,6 @@ const CabinetsManagementPage = () => {
 
 	return (
 		<Layout>
-			{" "}
 			<div className="flex items-center gap-2">
 				<Button
 					variant="outline"
@@ -171,13 +209,10 @@ const CabinetsManagementPage = () => {
 								className="overflow-hidden hover:shadow-md transition-shadow"
 							>
 								{cabinet.imageUrl && (
-									<div className="w-full h-48 overflow-hidden">
-										<img
-											src={cabinet.imageUrl}
-											alt={cabinet.name}
-											className="w-full h-full object-cover"
-										/>
-									</div>
+									<ImageWithLoader
+										src={cabinet.imageUrl}
+										alt={cabinet.name}
+									/>
 								)}
 
 								<CardHeader className="pb-2">
