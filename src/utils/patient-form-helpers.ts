@@ -112,19 +112,32 @@ export function getEnumOptions(
 			];
 		case "Contraception":
 			return [
-				{ value: "NONE", label: "Aucune" },
-				{ value: "PILLS", label: "Pilule" },
-				{ value: "CONDOM", label: "Préservatif" },
-				{ value: "IMPLANTS", label: "Implant" },
-				{ value: "DIAPHRAGM", label: "Diaphragme" },
-				{ value: "IUD", label: "Stérilet (cuivre)" },
-				{ value: "IUD_HORMONAL", label: "Stérilet hormoné" },
-				{ value: "INJECTION", label: "Injection" },
-				{ value: "PATCH", label: "Patch" },
-				{ value: "RING", label: "Anneau vaginal" },
-				{ value: "NATURAL_METHODS", label: "Méthodes naturelles" },
-				{ value: "STERILIZATION", label: "Stérilisation" },
+				{ value: "NONE", label: "Aucune méthode" },
+				{ value: "PILLS", label: "Pilule (orale)" },
+				{ value: "CONDOM", label: "Préservatif (interne/externe)" },
+				{
+					value: "IMPLANTS",
+					label: "Implant contraceptif (sous-cutané)",
+				},
+				{ value: "DIAPHRAGM", label: "Diaphragme (barrière)" },
+				{ value: "IUD", label: "Stérilet (cuivre, non hormonal)" },
+				{ value: "IUD_HORMONAL", label: "Stérilet (hormonal, DIU)" },
+				{
+					value: "INJECTION",
+					label: "Injection contraceptive (progestatif, tous les 3 mois)",
+				},
+				{
+					value: "PATCH",
+					label: "Patch contraceptif (hormonal, cutané)",
+				},
+				{ value: "RING", label: "Anneau vaginal (hormonal)" },
+				{
+					value: "NATURAL_METHODS",
+					label: "Méthodes naturelles (calendrier, température...)",
+				},
+				{ value: "STERILIZATION", label: "Stérilisation définitive" },
 			];
+
 		case "Gender":
 			return [
 				{ value: "Homme", label: "Homme" },
