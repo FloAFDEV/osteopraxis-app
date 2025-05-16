@@ -269,51 +269,6 @@ export const AdditionalFieldsTab = ({
 				/>
 			</section>
 
-			{/* --- Section : Antécédents médicaux --- */}
-			<section className="space-y-4">
-				<FormField
-					control={form.control}
-					name="fracture_history"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Historique des fractures</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Historique détaillé des fractures"
-									className="resize-none"
-									{...field}
-									value={field.value || ""}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				{!isChild && (
-					<FormField
-						control={form.control}
-						name="gynecological_history"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									Antécédents gynéco-urinaires
-								</FormLabel>
-								<FormControl>
-									<Textarea
-										placeholder="Antécédents gynécologiques ou urinaires"
-										className="resize-none"
-										{...field}
-										value={field.value || ""}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				)}
-			</section>
-
 			{/* --- Section : Autres commentaires --- */}
 			{!isChild && (
 				<section>
