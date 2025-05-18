@@ -1,4 +1,5 @@
 
+
 import { supabase } from "../utils";
 import { ensureOsteopathProfile } from "./ensureOsteopathProfile";
 
