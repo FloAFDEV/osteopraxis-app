@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -26,6 +27,10 @@ export interface Cabinet {
   osteopathId: number;
   createdAt: string;
   updatedAt: string;
+  imageUrl?: string | null;
+  logoUrl?: string | null;
+  professionalProfileId?: number | null;
+  tenant_id?: string | null;
 }
 
 export interface Patient {
@@ -39,7 +44,7 @@ export interface Patient {
   city: string | null;
   postalCode: string | null;
   country: string | null;
-  gender: "MALE" | "FEMALE" | "OTHER" | null;
+  gender: "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
   height: number | null;
   weight: number | null;
   bmi: number | null;
@@ -51,7 +56,7 @@ export interface Patient {
   cabinetId: number | null;
   createdAt: string;
   updatedAt: string;
-	userId: string | null;
+  userId: string | null;
   complementaryExams: string | null;
   generalSymptoms: string | null;
   pregnancyHistory: string | null;
@@ -65,6 +70,29 @@ export interface Patient {
   smokingSince: string | null;
   smokingAmount: string | null;
   quitSmokingDate: string | null;
+  
+  // Champs ajoutés existants en base de données
+  currentTreatment?: string | null;
+  hdlm?: string | null;
+  hasVisionCorrection?: boolean;
+  isSmoker?: boolean;
+  isDeceased?: boolean;
+  maritalStatus?: string | null;
+  occupation?: string | null;
+  physicalActivity?: string | null;
+  hasChildren?: string | null;
+  generalPractitioner?: string | null;
+  entProblems?: string | null;
+  entDoctorName?: string | null;
+  digestiveProblems?: string | null;
+  digestiveDoctorName?: string | null;
+  ophtalmologistName?: string | null;
+  surgicalHistory?: string | null;
+  traumaHistory?: string | null;
+  rheumatologicalHistory?: string | null;
+  handedness?: string | null;
+  contraception?: string | null;
+  familyStatus?: string | null;
 
   // Nouveaux champs généraux
   ent_followup: string | null;
@@ -101,9 +129,15 @@ export interface Appointment {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+  
+  // Propriétés manquantes utilisées dans le code
+  date?: string; // Pour compatibilité avec le code existant
+  reason?: string;
+  notificationSent?: boolean;
+  user_id?: string | null;
 }
 
-export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "DONE";
+export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "DONE" | "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
 
 export interface Invoice {
   id: number;
@@ -142,4 +176,35 @@ export interface AuthState {
   token: string | null;
   message?: string;
   needsProfileSetup?: boolean;
+}
+
+// Ajout des types manquants pour le dashboard
+export interface MonthlyGrowth {
+  month: string;
+  patients: number;
+  prevPatients: number;
+  growthText: string;
+  hommes: number;
+  femmes: number;
+  enfants: number;
+}
+
+export interface DashboardData {
+  totalPatients: number;
+  maleCount: number;
+  femaleCount: number;
+  averageAge: number;
+  averageAgeMale: number;
+  averageAgeFemale: number;
+  newPatientsThisMonth: number;
+  newPatientsThisYear: number;
+  newPatientsLastYear: number;
+  appointmentsToday: number;
+  nextAppointment: string | null;
+  patientsLastYearEnd: number;
+  newPatientsLast30Days: number;
+  thirtyDayGrowthPercentage: number;
+  annualGrowthPercentage: number;
+  childrenCount: number;
+  monthlyGrowth: MonthlyGrowth[];
 }

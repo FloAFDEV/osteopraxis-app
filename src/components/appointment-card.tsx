@@ -2,7 +2,7 @@
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Clock, Calendar, FileText, Edit, X, MessageSquare } from "lucide-react";
-import { Appointment, Patient } from "@/types";
+import { Appointment, Patient, AppointmentStatus } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,20 +25,25 @@ export function AppointmentCard({
 	onEdit,
 	onCancel,
 }: AppointmentCardProps) {
+	// Utiliser start si disponible, sinon utiliser date pour la compatibilité
+	const dateField = appointment.start || appointment.date;
 	const formattedDate = formatAppointmentDate(
-		appointment.date,
+		dateField,
 		"EEEE d MMMM yyyy"
 	);
-	const formattedTime = formatAppointmentTime(appointment.date);
+	const formattedTime = formatAppointmentTime(dateField);
 	const navigate = useNavigate();
 
-	const getStatusBadge = (status: Appointment["status"]) => {
+	const getStatusBadge = (status: AppointmentStatus) => {
 		switch (status) {
 			case "SCHEDULED":
+			case "PLANNED":
 				return <Badge className="bg-blue-500">Planifié</Badge>;
 			case "COMPLETED":
+			case "DONE":
 				return <Badge className="bg-green-500">Terminé</Badge>;
 			case "CANCELED":
+			case "CANCELLED":
 				return <Badge className="bg-red-500">Annulé</Badge>;
 			case "RESCHEDULED":
 				return <Badge className="bg-amber-500">Reporté</Badge>;
@@ -69,14 +74,12 @@ export function AppointmentCard({
 				</div>
 				<div className="space-y-2">
 					{/* Affichage du traitement en cours */}
-					{patient && (
+					{patient && patient.currentTreatment && (
 						<div className="flex items-center gap-2 text-sm">
 							<FileText className="h-4 w-4 text-primary" />
 							<span>
 								Traitement en cours :{" "}
-								{patient.currentTreatment
-									? patient.currentTreatment
-									: "Aucun traitement en cours"}
+								{patient.currentTreatment}
 							</span>
 						</div>
 					)}
@@ -94,9 +97,11 @@ export function AppointmentCard({
 					</div>
 
 					{/* Affichage du Motif de la séance */}
-					<p className="text-muted-foreground">
-						Motif : {appointment.reason}
-					</p>
+					{appointment.reason && (
+						<p className="text-muted-foreground">
+							Motif : {appointment.reason}
+						</p>
+					)}
 
                     {/* Affichage des notes de séance s'il y en a */}
                     {appointment.notes && (
@@ -114,7 +119,7 @@ export function AppointmentCard({
 			</CardContent>
 			<CardFooter className="px-6 py-4 bg-muted/20 flex flex-wrap justify-end gap-2">
 				{/* Si la séance est terminée, on montre le bouton pour accéder/créer la Note d'honoraire */}
-				{appointment.status === "COMPLETED" && (
+				{(appointment.status === "COMPLETED" || appointment.status === "DONE") && (
 					<>
 						<Button variant="outline" size="sm" asChild>
 							<Link
@@ -128,7 +133,7 @@ export function AppointmentCard({
 				)}
 
 				{/* Pour les séances à venir, on montre les boutons modifier et annuler */}
-				{appointment.status === "SCHEDULED" && (
+				{(appointment.status === "SCHEDULED" || appointment.status === "PLANNED") && (
 					<>
 						<Button variant="outline" size="sm" asChild>
 							<Link to={`/appointments/${appointment.id}/edit`}>
