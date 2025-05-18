@@ -1,14 +1,39 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
+import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 
 export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     try {
+      // Récupérer l'ID de l'ostéopathe connecté
+      const osteopathId = await getCurrentOsteopathId();
+      
+      // Récupérer d'abord les patients liés à cet ostéopathe
+      const { data: patients, error: patientError } = await supabase
+        .from("Patient")
+        .select("id")
+        .eq("osteopathId", osteopathId);
+        
+      if (patientError) {
+        console.error("Erreur de chargement des patients:", patientError);
+        throw patientError;
+      }
+      
+      // Si aucun patient trouvé, retourner un tableau vide
+      if (!patients || patients.length === 0) {
+        console.log("Aucun patient trouvé pour l'ostéopathe", osteopathId);
+        return [];
+      }
+      
+      // Extraire les IDs de patients pour le filtre
+      const patientIds = patients.map(p => p.id);
+      console.log(`Filtrage des factures pour ${patientIds.length} patients de l'ostéopathe ${osteopathId}`);
+
       const { data, error } = await supabase
         .from("Invoice")
         .select("*")
+        .in("patientId", patientIds)
         .order('date', { ascending: false });
       
       if (error) throw new Error(error.message);
@@ -129,6 +154,25 @@ export const supabaseInvoiceService = {
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
     try {
       const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...dataToInsert } = invoiceData as any;
+      
+      // Vérifier que le patient appartient bien à l'ostéopathe connecté
+      const osteopathId = await getCurrentOsteopathId();
+      
+      const { data: patientCheck, error: patientError } = await supabase
+        .from("Patient")
+        .select("osteopathId")
+        .eq("id", dataToInsert.patientId)
+        .maybeSingle();
+        
+      if (patientError || !patientCheck) {
+        console.error("Patient introuvable ou erreur:", patientError);
+        throw new Error("Patient introuvable");
+      }
+      
+      if (patientCheck.osteopathId !== osteopathId) {
+        console.error("Tentative d'accès non autorisé: le patient n'appartient pas à cet ostéopathe");
+        throw new Error("Vous n'êtes pas autorisé à créer une facture pour ce patient");
+      }
       
       // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
       if (!dataToInsert.appointmentId || dataToInsert.appointmentId === 0) {

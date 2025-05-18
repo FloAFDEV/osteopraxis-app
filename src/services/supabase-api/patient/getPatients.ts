@@ -1,10 +1,20 @@
+
 import { Patient } from "@/types";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 import { supabase } from "../utils";
+import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
 
 export async function getPatients(): Promise<Patient[]> {
 	try {
-		const { data, error } = await supabase.from("Patient").select("*");
+		// Récupérer l'ID de l'ostéopathe connecté
+		const osteopathId = await getCurrentOsteopathId();
+		console.log("Filtrage des patients par osteopathId:", osteopathId);
+
+		// Requête filtrée par osteopathId
+		const { data, error } = await supabase
+			.from("Patient")
+			.select("*")
+			.eq("osteopathId", osteopathId);
 
 		if (error) {
 			console.error("Error fetching patients:", error);
@@ -40,7 +50,7 @@ export async function getPatients(): Promise<Patient[]> {
 		});
 
 		console.log(
-			`GetPatients: Found ${childrenPatients.length} children among ${patients.length} total patients`
+			`GetPatients: Found ${childrenPatients.length} children among ${patients.length} total patients for osteopath ${osteopathId}`
 		);
 		console.log(
 			`GetPatients: Gender distribution - ${maleCount} men, ${femaleCount} women`
