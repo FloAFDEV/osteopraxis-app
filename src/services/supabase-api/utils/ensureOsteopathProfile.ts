@@ -19,6 +19,18 @@ export const ensureOsteopathProfile = async (userId: string): Promise<number | n
     // Si un profil existe, retourner son ID
     if (existingProfile) {
       console.log("Profil ostéopathe existant trouvé:", existingProfile.id);
+      
+      // Mettre à jour la référence dans User au cas où elle ne serait pas définie
+      const { error: updateError } = await supabase
+        .from("User")
+        .update({ osteopathId: existingProfile.id })
+        .eq("id", userId)
+        .is("osteopathId", null);
+        
+      if (updateError) {
+        console.error("Erreur lors de la mise à jour de la référence osteopathId dans User:", updateError);
+      }
+      
       return existingProfile.id;
     }
     
@@ -62,17 +74,10 @@ export const ensureOsteopathProfile = async (userId: string): Promise<number | n
       throw new Error(`Erreur lors de la création du profil ostéopathe: ${insertError.message}`);
     }
     
-    // Mettre à jour la référence dans la table User
-    const { error: updateUserError } = await supabase
-      .from("User")
-      .update({ osteopathId: newProfile.id })
-      .eq("id", userId);
-      
-    if (updateUserError) {
-      console.error("Erreur lors de la mise à jour de l'ID ostéopathe dans User:", updateUserError);
-    }
-    
     console.log("Nouveau profil ostéopathe créé avec ID:", newProfile.id);
+    
+    // Notre trigger SQL devrait automatiquement mettre à jour la référence dans la table User
+    
     return newProfile.id;
     
   } catch (error) {

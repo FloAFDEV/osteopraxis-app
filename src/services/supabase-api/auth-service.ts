@@ -1,5 +1,4 @@
-
-import { AuthState, User, Role } from "@/types";
+import { User, AuthState, Role } from "@/types";
 import { supabase } from "./utils";
 import { toast } from "sonner";
 import { ensureOsteopathProfile } from "./utils/ensureOsteopathProfile";
@@ -33,35 +32,15 @@ export const supabaseAuthService = {
       throw new Error("Échec lors de la création du compte");
     }
     
-    try {
-      // Créer l'entrée User associée
-      const { error: userError } = await supabase
-        .from("User")
-        .insert({
-          id: data.user.id,
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          role: "OSTEOPATH",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
-      
-      if (userError) {
-        console.error("Erreur lors de la création du profil utilisateur:", userError);
+    // Les triggers SQL s'occuperont de créer l'entrée User et de maintenir les relations
+    // On vérifie/créé simplement le profil Ostéopathe si nécessaire
+    if (data.session) {
+      try {
+        const osteopathId = await ensureOsteopathProfile(data.user.id);
+        console.log("Profil ostéopathe vérifié/créé lors de l'inscription:", osteopathId);
+      } catch (osteoError) {
+        console.error("Erreur lors de la création du profil ostéopathe:", osteoError);
       }
-      
-      // Vérifier/Créer un profil Ostéopathe si l'inscription est réussie
-      if (data.session) {
-        try {
-          const osteopathId = await ensureOsteopathProfile(data.user.id);
-          console.log("Profil ostéopathe vérifié/créé lors de l'inscription:", osteopathId);
-        } catch (osteoError) {
-          console.error("Erreur lors de la création du profil ostéopathe:", osteoError);
-        }
-      }
-    } catch (insertError) {
-      console.error("Erreur lors de la création du profil utilisateur:", insertError);
     }
     
     // Si email confirmation est requise, retourner un état spécial avec un message
@@ -212,15 +191,17 @@ export const supabaseAuthService = {
         };
       }
       
-      // Vérifier si l'utilisateur existe dans notre table User
+      // Le trigger SQL devrait avoir créé l'utilisateur, mais vérifions quand même
+      // et récupérons ses informations
       const { data: existingUser, error: userCheckError } = await supabase
         .from("User")
         .select("*")
         .eq("id", data.session.user.id)
         .maybeSingle();
       
-      // Si l'utilisateur n'existe pas dans notre table User, le créer
+      // Si l'utilisateur n'existe pas dans notre table User malgré le trigger (cas rare)
       if (!existingUser && !userCheckError) {
+        console.warn("L'utilisateur n'existe pas dans la table User malgré le trigger, tentative de création manuelle");
         const userData = {
           id: data.session.user.id,
           email: data.session.user.email || "",
@@ -242,7 +223,7 @@ export const supabaseAuthService = {
         }
       }
       
-      // Vérifier/Créer un profil Ostéopathe lors de la vérification d'authentification
+      // Vérifier/Créer un profil Ostéopathe
       try {
         const osteopathId = await ensureOsteopathProfile(data.session.user.id);
         console.log("Profil ostéopathe vérifié/créé lors du checkAuth:", osteopathId);
@@ -250,7 +231,7 @@ export const supabaseAuthService = {
         console.error("Erreur lors de la vérification/création du profil ostéopathe:", osteoError);
       }
       
-      // Récupérer les informations supplémentaires de l'utilisateur depuis la table User
+      // Récupérer les informations mises à jour de l'utilisateur
       const { data: userData, error: userError } = await supabase
         .from("User")
         .select("*")
