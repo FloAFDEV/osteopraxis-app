@@ -1,3 +1,4 @@
+
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -43,11 +44,22 @@ export const supabaseInvoiceService = {
         return {
           id: item.id,
           patientId: item.patientId,
+          cabinetId: item.cabinetId || 1,
+          osteopathId: item.osteopathId || 1,
           appointmentId: item.appointmentId,
           date: item.date,
-          amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus,
+          number: item.number || `INV-${item.id}`,
+          status: item.paymentStatus || "DRAFT",
+          totalAmount: item.amount,
+          amount: item.amount, // Alias pour la compatibilité
+          paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+          paymentDate: item.paymentDate,
           paymentMethod: item.paymentMethod,
+          notes: item.notes,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString(),
+          tvaExoneration: item.tvaExoneration || true,
+          tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         } as Invoice;
       });
     } catch (error) {
@@ -79,11 +91,22 @@ export const supabaseInvoiceService = {
       return {
         id: data.id,
         patientId: data.patientId,
+        cabinetId: data.cabinetId || 1,
+        osteopathId: data.osteopathId || 1,
         appointmentId: data.appointmentId,
         date: data.date,
-        amount: data.amount,
-        paymentStatus: data.paymentStatus as PaymentStatus,
+        number: data.number || `INV-${data.id}`,
+        status: data.paymentStatus || "DRAFT",
+        totalAmount: data.amount,
+        amount: data.amount, // Alias pour la compatibilité
+        paymentStatus: data.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+        paymentDate: data.paymentDate,
         paymentMethod: data.paymentMethod,
+        notes: data.notes,
+        createdAt: data.createdAt || new Date().toISOString(),
+        updatedAt: data.updatedAt || new Date().toISOString(),
+        tvaExoneration: data.tvaExoneration || true,
+        tvaMotif: data.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
       } as Invoice;
     } catch (error) {
       console.error("Erreur getInvoiceById:", error);
@@ -108,11 +131,22 @@ export const supabaseInvoiceService = {
         return {
           id: item.id,
           patientId: item.patientId,
+          cabinetId: item.cabinetId || 1,
+          osteopathId: item.osteopathId || 1,
           appointmentId: item.appointmentId,
           date: item.date,
-          amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          paymentMethod: item.paymentMethod
+          number: item.number || `INV-${item.id}`,
+          status: item.paymentStatus || "DRAFT",
+          totalAmount: item.amount,
+          amount: item.amount, // Alias pour la compatibilité
+          paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+          paymentDate: item.paymentDate,
+          paymentMethod: item.paymentMethod,
+          notes: item.notes,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString(),
+          tvaExoneration: item.tvaExoneration || true,
+          tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         } as Invoice;
       });
     } catch (error) {
@@ -138,11 +172,22 @@ export const supabaseInvoiceService = {
         return {
           id: item.id,
           patientId: item.patientId,
+          cabinetId: item.cabinetId || 1,
+          osteopathId: item.osteopathId || 1,
           appointmentId: item.appointmentId,
           date: item.date,
-          amount: item.amount,
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          paymentMethod: item.paymentMethod
+          number: item.number || `INV-${item.id}`,
+          status: item.paymentStatus || "DRAFT",
+          totalAmount: item.amount,
+          amount: item.amount, // Alias pour la compatibilité
+          paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+          paymentDate: item.paymentDate,
+          paymentMethod: item.paymentMethod,
+          notes: item.notes,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString(),
+          tvaExoneration: item.tvaExoneration || true,
+          tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         } as Invoice;
       });
     } catch (error) {

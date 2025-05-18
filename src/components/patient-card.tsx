@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ import {
 	UserCheck,
 	UserCircle,
 	Users,
+	Weight,
+	Height,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -126,6 +129,15 @@ export function PatientCard({
 									{age} ans
 								</Badge>
 							)}
+
+							{patient.bloodType && (
+								<Badge
+									variant="outline"
+									className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 font-medium"
+								>
+									{patient.bloodType.replace("_", "+")}
+								</Badge>
+							)}
 						</div>
 
 						{patient.occupation && (
@@ -187,6 +199,29 @@ export function PatientCard({
 									</div>
 								)}
 							</span>
+						</div>
+					)}
+
+					{/* Affichage du poids et de la taille si disponibles */}
+					{(patient.weight || patient.height) && (
+						<div className="flex flex-wrap items-center gap-4 mt-2 text-sm">
+							{patient.weight && (
+								<div className="flex items-center gap-1">
+									<Weight className="h-4 w-4 text-amber-600" />
+									<span>{patient.weight} kg</span>
+								</div>
+							)}
+							{patient.height && (
+								<div className="flex items-center gap-1">
+									<Height className="h-4 w-4 text-green-600" />
+									<span>{patient.height} cm</span>
+								</div>
+							)}
+							{patient.bmi && (
+								<div className="text-xs font-medium px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
+									IMC: {patient.bmi.toFixed(1)}
+								</div>
+							)}
 						</div>
 					)}
 				</div>

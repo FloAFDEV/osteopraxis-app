@@ -45,6 +45,14 @@ const NewPatientPage = () => {
       if (patientData.birthDate instanceof Date) {
         patientData.birthDate = patientData.birthDate.toISOString();
       }
+
+      // Assurer le bon type pour les valeurs numériques
+      if (patientData.height) patientData.height = Number(patientData.height);
+      if (patientData.weight) patientData.weight = Number(patientData.weight);
+      if (patientData.bmi) patientData.bmi = Number(patientData.bmi);
+      if (patientData.weight_at_birth) patientData.weight_at_birth = Number(patientData.weight_at_birth);
+      if (patientData.height_at_birth) patientData.height_at_birth = Number(patientData.height_at_birth);
+      if (patientData.head_circumference) patientData.head_circumference = Number(patientData.head_circumference);
       
       console.log("Données patient avant création:", patientData);
 
@@ -90,7 +98,13 @@ const NewPatientPage = () => {
         school_grade: patientData.school_grade || null,
         pediatrician_name: patientData.pediatrician_name || null,
         paramedical_followup: patientData.paramedical_followup || null,
-        other_comments_child: patientData.other_comments_child || null
+        other_comments_child: patientData.other_comments_child || null,
+        
+        // Nouveaux champs demandés
+        height: patientData.height || null,
+        weight: patientData.weight || null,
+        bmi: patientData.bmi || null,
+        bloodType: patientData.bloodType || null,
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
 
       console.log("Envoi du patient à l'API avec cabinetId:", patientToCreate.cabinetId);

@@ -57,6 +57,8 @@ export interface Patient {
   createdAt: string;
   updatedAt: string;
   userId: string | null;
+  avatarUrl: string | null;
+  childrenAges: number[] | null;
   complementaryExams: string | null;
   generalSymptoms: string | null;
   pregnancyHistory: string | null;
@@ -107,9 +109,9 @@ export interface Patient {
   // Nouveaux champs spécifiques aux enfants
   fine_motor_skills: string | null;
   gross_motor_skills: string | null;
-  weight_at_birth: string | null;
-  height_at_birth: string | null;
-  head_circumference: string | null;
+  weight_at_birth: number | null;
+  height_at_birth: number | null;
+  head_circumference: number | null;
   apgar_score: string | null;
   childcare_type: string | null;
   school_grade: string | null;
@@ -154,9 +156,18 @@ export interface Invoice {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+  
+  // Propriétés utilisées dans le code mais manquantes dans l'interface
+  amount: number; // Alias pour totalAmount
+  paymentStatus: PaymentStatus; // Alias pour status
+  tvaExoneration?: boolean | null;
+  tvaMotif?: string | null;
+  // Relations
+  Patient?: Patient; // Relation avec le patient
 }
 
 export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELLED";
+export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 
 export interface Osteopath {
   id: number;
@@ -207,4 +218,18 @@ export interface DashboardData {
   annualGrowthPercentage: number;
   childrenCount: number;
   monthlyGrowth: MonthlyGrowth[];
+}
+
+// Type d'entrée pour créer un rendez-vous (pour résoudre les erreurs)
+export interface CreateAppointmentPayload {
+  patientId: number;
+  date: string;
+  reason: string;
+  cabinetId: number;
+  osteopathId: number;
+  start: string;
+  end: string;
+  notes?: string | null;
+  status: AppointmentStatus;
+  notificationSent: boolean;
 }

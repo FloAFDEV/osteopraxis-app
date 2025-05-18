@@ -1,3 +1,4 @@
+
 import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
 import { PatientForm } from "@/components/patient-form";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,14 @@ const EditPatientPage = () => {
 					: "false";
 			}
 
+			// Convertir les champs numériques correctement
+			if (updatedData.height) updatedData.height = Number(updatedData.height);
+			if (updatedData.weight) updatedData.weight = Number(updatedData.weight);
+			if (updatedData.bmi) updatedData.bmi = Number(updatedData.bmi);
+			if (updatedData.weight_at_birth) updatedData.weight_at_birth = Number(updatedData.weight_at_birth);
+			if (updatedData.height_at_birth) updatedData.height_at_birth = Number(updatedData.height_at_birth);
+			if (updatedData.head_circumference) updatedData.head_circumference = Number(updatedData.head_circumference);
+
 			// Ensure enum fields are properly formatted
 			const patientUpdate = {
 				...patient,
@@ -87,6 +96,7 @@ const EditPatientPage = () => {
 				handedness: updatedData.handedness || patient.handedness,
 				contraception:
 					updatedData.contraception || patient.contraception,
+				childrenAges: updatedData.childrenAges || patient.childrenAges || null,
 				// Champs existants
 				complementaryExams:
 					updatedData.complementaryExams ||
@@ -138,7 +148,13 @@ const EditPatientPage = () => {
 				school_grade: updatedData.school_grade || patient.school_grade || null,
 				pediatrician_name: updatedData.pediatrician_name || patient.pediatrician_name || null,
 				paramedical_followup: updatedData.paramedical_followup || patient.paramedical_followup || null,
-				other_comments_child: updatedData.other_comments_child || patient.other_comments_child || null
+				other_comments_child: updatedData.other_comments_child || patient.other_comments_child || null,
+				
+				// Nouveaux champs demandés
+				height: updatedData.height !== undefined ? updatedData.height : patient.height || null,
+				weight: updatedData.weight !== undefined ? updatedData.weight : patient.weight || null,
+				bmi: updatedData.bmi !== undefined ? updatedData.bmi : patient.bmi || null,
+				bloodType: updatedData.bloodType || patient.bloodType || null,
 			};
 
 			console.log(
@@ -148,6 +164,7 @@ const EditPatientPage = () => {
 
 			// Use the patientService updatePatient method
 			await patientService.updatePatient(patientUpdate);
+			toast.success("Patient mis à jour avec succès!");
 
 			// Attendre un peu avant de naviguer pour laisser le toast s'afficher
 			setTimeout(() => {
