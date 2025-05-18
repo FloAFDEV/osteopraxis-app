@@ -1,3 +1,4 @@
+
 import { User, AuthState } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAuthService } from "../supabase-api/auth-service";
@@ -107,7 +108,8 @@ export const authService = {
     authState = {
       user,
       isAuthenticated: true,
-      token
+      token,
+      needsProfileSetup: false // Par défaut, supposons que le profil est complet dans le mode simulé
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));

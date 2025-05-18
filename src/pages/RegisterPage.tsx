@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Mail, Lock, Activity, User, UserPlus, Info } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -37,8 +38,11 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 const RegisterPage = () => {
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo") || "/profile/setup";
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(4);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -65,11 +69,17 @@ const RegisterPage = () => {
       setRegistrationSuccess(true);
       toast.success("Votre compte a été créé avec succès !");
       
-      // Redirection vers la configuration du profil après 2 secondes
-      setTimeout(() => {
-        navigate("/profile/setup");
-      }, 4500);
-      
+      // Compte à rebours pour la redirection
+      let counter = 4;
+      const countdownInterval = setInterval(() => {
+        counter -= 1;
+        setRedirectCountdown(counter);
+        
+        if (counter <= 0) {
+          clearInterval(countdownInterval);
+          navigate(returnTo);
+        }
+      }, 1000);
     } catch (error: any) {
       console.error("Register error:", error);
       setRegisterError(error.message || "Erreur lors de la création du compte");
@@ -92,11 +102,22 @@ const RegisterPage = () => {
             <p className="text-gray-300 mb-6">
               Votre compte a été créé avec succès. Vous allez être redirigé vers la configuration de votre profil professionnel.
             </p>
+            <div className="flex justify-center mb-4">
+              <div className="bg-blue-500/20 rounded-full px-4 py-2">
+                <span className="text-blue-300 font-semibold">Redirection dans {redirectCountdown}s...</span>
+              </div>
+            </div>
             <div className="animate-pulse mb-6 flex justify-center">
               <div className="bg-blue-500/30 rounded-full h-2 w-24"></div>
             </div>
             <p className="text-gray-400 text-sm">
-              Redirection automatique vers la configuration de votre profil...
+              Si vous n'êtes pas redirigé automatiquement, 
+              <button 
+                onClick={() => navigate(returnTo)}
+                className="text-blue-400 hover:underline ml-1"
+              >
+                cliquez ici
+              </button>
             </p>
           </div>
         </div>
@@ -337,3 +358,4 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
+

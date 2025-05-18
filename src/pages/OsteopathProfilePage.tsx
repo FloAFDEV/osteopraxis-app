@@ -1,11 +1,11 @@
 
 import { useState, useEffect, useCallback } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/ui/layout";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
-import { UserCog, Building } from "lucide-react";
+import { UserCog, Building, CheckCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Osteopath, Cabinet } from "@/types";
@@ -23,7 +23,10 @@ const OsteopathProfilePage = () => {
   const [showAuthSheet, setShowAuthSheet] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+  const [setupFlow, setSetupFlow] = useState<'profile' | 'cabinet'>('profile');
+  const [setupProgress, setSetupProgress] = useState(0);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
   // Générer un nom par défaut si first_name et last_name sont manquants
   const getDefaultName = useCallback(() => {
@@ -62,6 +65,7 @@ const OsteopathProfilePage = () => {
       if (existingOsteopath && existingOsteopath.id) {
         console.log("Ostéopathe trouvé avec ID:", existingOsteopath.id);
         setOsteopath(existingOsteopath);
+        setSetupProgress(50);
         
         // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
         if (!user.osteopathId) {
@@ -78,12 +82,17 @@ const OsteopathProfilePage = () => {
         // Si des cabinets existent, rediriger vers le tableau de bord
         if (existingCabinets && existingCabinets.length > 0) {
           console.log("Cabinets existants trouvés, redirection vers le tableau de bord dans 1 seconde");
+          setSetupProgress(100);
+          
+          const returnTo = searchParams.get("returnTo") || "/dashboard";
+          // Si l'utilisateur a déjà terminé la configuration, rediriger après un court délai
           setTimeout(() => {
-            navigate("/dashboard");
+            navigate(returnTo);
           }, 1000);
           return;
         } else {
           // Sinon, afficher le formulaire de cabinet
+          setSetupFlow('cabinet');
           setShowCabinetForm(true);
         }
       } else {
@@ -91,6 +100,8 @@ const OsteopathProfilePage = () => {
         console.log("Aucun ostéopathe trouvé, formulaire de création nécessaire");
         setOsteopath(null);
         setShowCabinetForm(false);
+        setSetupFlow('profile');
+        setSetupProgress(0);
       }
       
     } catch (error) {
@@ -100,7 +111,7 @@ const OsteopathProfilePage = () => {
       setLoading(false);
       setHasAttemptedLoad(true);
     }
-  }, [user, navigate, updateUser]);
+  }, [user, navigate, updateUser, searchParams]);
 
   // Rechargement du token d'authentification au montage du composant
   useEffect(() => {
@@ -154,7 +165,7 @@ const OsteopathProfilePage = () => {
       }
     } else {
       // Pour un nouveau profil
-      toast.success("Profil créé avec succès");
+      toast.success("Profil créé avec succès! Continuons avec votre cabinet.");
       
       // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
       if (updatedOsteopath && updatedOsteopath.id && user) {
@@ -165,6 +176,7 @@ const OsteopathProfilePage = () => {
     
     // Mettre à jour l'état local avec l'ostéopathe mis à jour
     setOsteopath(updatedOsteopath);
+    setSetupProgress(50);
     
     // Vérifier si des cabinets existent déjà pour cet ostéopathe
     try {
@@ -174,13 +186,18 @@ const OsteopathProfilePage = () => {
         
         // Si des cabinets existent, rediriger vers le tableau de bord
         if (existingCabinets && existingCabinets.length > 0) {
+          setSetupProgress(100);
+          const returnTo = searchParams.get("returnTo") || "/dashboard";
           toast.success("Configuration terminée, redirection vers le tableau de bord");
-          navigate("/dashboard");
+          setTimeout(() => {
+            navigate(returnTo);
+          }, 1500);
           return;
         }
       }
       
       // Sinon, afficher le formulaire de cabinet
+      setSetupFlow('cabinet');
       setShowCabinetForm(true);
     } catch (error) {
       console.error("Erreur lors de la vérification des cabinets après création de l'ostéopathe:", error);
@@ -188,8 +205,14 @@ const OsteopathProfilePage = () => {
   };
   
   const handleCabinetSuccess = () => {
-    toast.success("Cabinet créé avec succès");
-    navigate("/dashboard");
+    setSetupProgress(100);
+    toast.success("Cabinet créé avec succès! Configuration terminée.");
+    const returnTo = searchParams.get("returnTo") || "/dashboard";
+    
+    // Redirection vers le tableau de bord après un court délai
+    setTimeout(() => {
+      navigate(returnTo);
+    }, 1500);
   };
 
   const handleRelogin = () => {
@@ -206,7 +229,27 @@ const OsteopathProfilePage = () => {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
+        {/* Indicateur de progression */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className={`rounded-full flex items-center justify-center w-10 h-10 ${setupFlow === 'profile' || setupProgress >= 50 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                {setupProgress >= 50 ? <CheckCircle className="h-5 w-5" /> : "1"}
+              </div>
+              <div className={`h-1 w-20 mx-2 ${setupProgress >= 50 ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+              <div className={`rounded-full flex items-center justify-center w-10 h-10 ${setupProgress === 100 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : setupFlow === 'cabinet' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                {setupProgress === 100 ? <CheckCircle className="h-5 w-5" /> : "2"}
+              </div>
+            </div>
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              {setupProgress === 0 && "Configuration du profil professionnel"}
+              {setupProgress === 50 && "Configuration du cabinet"}
+              {setupProgress === 100 && "Configuration terminée!"}
+            </div>
+          </div>
+        </div>
+
         {!showCabinetForm ? (
           <>
             <div className="mb-6">
@@ -276,6 +319,46 @@ const OsteopathProfilePage = () => {
             </div>
           </>
         )}
+
+        {/* Étapes du processus d'onboarding */}
+        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/30">
+          <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Processus de configuration de votre compte
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`p-3 rounded-md flex items-start ${setupFlow === 'profile' || setupProgress >= 50 ? 'bg-green-100/50 dark:bg-green-900/20' : 'bg-gray-100 dark:bg-gray-800/30'}`}>
+              <div className={`rounded-full p-1.5 mr-3 flex-shrink-0 ${setupProgress >= 50 ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-300' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
+                {setupProgress >= 50 ? <CheckCircle className="h-4 w-4" /> : <UserCog className="h-4 w-4" />}
+              </div>
+              <div>
+                <p className="font-medium text-sm">1. Profil professionnel</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Nom professionnel, titre, numéro ADELI et SIRET</p>
+              </div>
+            </div>
+            <div className={`p-3 rounded-md flex items-start ${setupProgress === 100 ? 'bg-green-100/50 dark:bg-green-900/20' : setupFlow === 'cabinet' ? 'bg-blue-100/50 dark:bg-blue-900/20' : 'bg-gray-100 dark:bg-gray-800/30'}`}>
+              <div className={`rounded-full p-1.5 mr-3 flex-shrink-0 ${setupProgress === 100 ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-300' : setupFlow === 'cabinet' ? 'bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-300' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
+                {setupProgress === 100 ? <CheckCircle className="h-4 w-4" /> : <Building className="h-4 w-4" />}
+              </div>
+              <div>
+                <p className="font-medium text-sm">2. Configuration du cabinet</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Nom du cabinet, adresse, coordonnées</p>
+              </div>
+            </div>
+          </div>
+          {setupProgress === 100 && (
+            <div className="mt-4 flex justify-end">
+              <Button 
+                onClick={() => navigate('/dashboard')} 
+                className="bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+              >
+                Accéder à mon tableau de bord
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Authentication Sheet */}

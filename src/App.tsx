@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useAuth } from "./contexts/AuthContext";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
@@ -30,8 +30,9 @@ import SettingsPage from "./pages/SettingsPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 
 function App() {
-	const { isAuthenticated, loadStoredToken, user } = useAuth();
+	const { isAuthenticated, loadStoredToken, user, redirectToSetupIfNeeded } = useAuth();
 	const [loading, setLoading] = useState(true);
+	const location = useLocation();
 
 	// Chargement initial du token stocké au démarrage de l'application
 	useEffect(() => {
@@ -50,6 +51,17 @@ function App() {
 		};
 		initAuth();
 	}, [loadStoredToken]);
+
+	// Vérifie si l'utilisateur doit compléter son profil après chaque changement d'authentification
+	useEffect(() => {
+		if (!loading && isAuthenticated && user) {
+			// Exclure les pages/routes qui sont explicitement exclues de la redirection automatique
+			const excludedPaths = ['/profile/setup', '/login', '/register'];
+			if (!excludedPaths.some(path => location.pathname.startsWith(path))) {
+				redirectToSetupIfNeeded(location.pathname);
+			}
+		}
+	}, [isAuthenticated, loading, user, location.pathname, redirectToSetupIfNeeded]);
 
 	// Configuration des chemins publics (accessibles sans connexion)
 	const publicPaths = ["/privacy-policy", "/terms-of-service"];

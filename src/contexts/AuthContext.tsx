@@ -1,4 +1,3 @@
-
 import React, {
 	createContext,
 	useContext,
@@ -11,12 +10,14 @@ import { User } from "@/types";
 import { api } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useAutoLogout } from "@/hooks/use-auto-logout";
+import { useNavigate } from "react-router-dom";
 
 interface AuthState {
 	user: User | null;
 	isAuthenticated: boolean;
 	token: string | null;
 	message?: string; // Optional message field for auth feedback
+	needsProfileSetup?: boolean; // Indique si l'utilisateur doit configurer son profil
 }
 
 interface AuthContextType extends AuthState {
@@ -34,6 +35,7 @@ interface AuthContextType extends AuthState {
 	isLoading: boolean;
 	loginWithMagicLink: (email: string) => Promise<void>;
 	promoteToAdmin: (userId: string) => Promise<boolean>;
+	redirectToSetupIfNeeded: (fallbackUrl: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -49,6 +51,7 @@ const AuthContext = createContext<AuthContextType>({
 	updateUser: () => true,
 	loginWithMagicLink: async () => {},
 	promoteToAdmin: async () => false,
+	redirectToSetupIfNeeded: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -94,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 								user: authCheck.user,
 								isAuthenticated: true,
 								token: authCheck.token || parsedState.token,
+								needsProfileSetup: authCheck.needsProfileSetup
 							});
 
 							// Vérifier l'état de la session Supabase
@@ -142,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 							user: parsedState.user,
 							isAuthenticated: true,
 							token: parsedState.token,
+							needsProfileSetup: parsedState.needsProfileSetup
 						});
 
 						return true;
@@ -245,6 +250,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					user: response.user,
 					isAuthenticated: true,
 					token: response.token,
+					needsProfileSetup: response.needsProfileSetup
 				};
 
 				localStorage.setItem("authState", JSON.stringify(authData));
@@ -365,6 +371,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
+	// Nouvelle fonction pour rediriger vers la page de configuration si nécessaire
+	const redirectToSetupIfNeeded = useCallback((fallbackUrl: string = "/dashboard") => {
+		if (authState.needsProfileSetup && authState.isAuthenticated) {
+			window.location.href = `/profile/setup?returnTo=${encodeURIComponent(fallbackUrl)}`;
+			return true;
+		}
+		return false;
+	}, [authState.needsProfileSetup, authState.isAuthenticated]);
+
   // Add auto logout functionality when user is authenticated
   const isAuthenticated = authState.isAuthenticated;
   useAutoLogout();
@@ -382,6 +397,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				isLoading,
 				loginWithMagicLink,
 				promoteToAdmin,
+				redirectToSetupIfNeeded,
 			}}
 		>
 			{children}

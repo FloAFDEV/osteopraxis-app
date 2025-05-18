@@ -98,8 +98,9 @@ export const supabaseAuthService = {
     }
     
     // Vérifier/Créer un profil Ostéopathe lors de la connexion
+    let osteopathId = null;
     try {
-      const osteopathId = await ensureOsteopathProfile(data.user.id);
+      osteopathId = await ensureOsteopathProfile(data.user.id);
       console.log("Profil ostéopathe vérifié/créé lors de la connexion:", osteopathId);
     } catch (osteoError) {
       console.error("Erreur lors de la vérification/création du profil ostéopathe:", osteoError);
@@ -126,22 +127,27 @@ export const supabaseAuthService = {
       role: typedUserData.role,
       created_at: typedUserData.created_at,
       updated_at: typedUserData.updated_at,
-      osteopathId: typedUserData.osteopathId
+      osteopathId: typedUserData.osteopathId || osteopathId
     } : {
       id: data.user.id,
       email: data.user.email || "",
-      first_name: null,
-      last_name: null,
-      role: "OSTEOPATH" as Role, // Valeur par défaut
+      first_name: data.user.user_metadata?.first_name || null,
+      last_name: data.user.user_metadata?.last_name || null,
+      role: "OSTEOPATH" as Role,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      osteopathId: null
+      osteopathId: osteopathId
     };
+    
+    // Déterminer si l'utilisateur doit être redirigé vers la configuration
+    // Si l'osteopathId n'est pas défini ou si l'utilisateur n'a pas de cabinet
+    const needsSetup = !user.osteopathId;
     
     const authState: AuthState = {
       user,
       isAuthenticated: true,
-      token: data.session?.access_token || null
+      token: data.session?.access_token || null,
+      needsProfileSetup: needsSetup
     };
     
     localStorage.setItem("authState", JSON.stringify(authState));
@@ -224,8 +230,9 @@ export const supabaseAuthService = {
       }
       
       // Vérifier/Créer un profil Ostéopathe
+      let osteopathId = null;
       try {
-        const osteopathId = await ensureOsteopathProfile(data.session.user.id);
+        osteopathId = await ensureOsteopathProfile(data.session.user.id);
         console.log("Profil ostéopathe vérifié/créé lors du checkAuth:", osteopathId);
       } catch (osteoError) {
         console.error("Erreur lors de la vérification/création du profil ostéopathe:", osteoError);
@@ -252,22 +259,43 @@ export const supabaseAuthService = {
         role: typedUserData.role,
         created_at: typedUserData.created_at,
         updated_at: typedUserData.updated_at,
-        osteopathId: typedUserData.osteopathId
+        osteopathId: typedUserData.osteopathId || osteopathId
       } : {
         id: data.session.user.id,
         email: data.session.user.email || "",
-        first_name: null,
-        last_name: null,
+        first_name: data.session.user.user_metadata?.first_name || null,
+        last_name: data.session.user.user_metadata?.last_name || null,
         role: "OSTEOPATH" as Role,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        osteopathId: null
+        osteopathId: osteopathId
       };
+      
+      // Vérifier les cabinets de l'ostéopathe si un ID d'ostéopathe existe
+      let hasCabinet = false;
+      if (user.osteopathId) {
+        try {
+          const { data: cabinets } = await supabase
+            .from("Cabinet")
+            .select("id")
+            .eq("osteopathId", user.osteopathId)
+            .limit(1);
+          
+          hasCabinet = cabinets && cabinets.length > 0;
+        } catch (error) {
+          console.error("Erreur lors de la vérification des cabinets:", error);
+        }
+      }
+      
+      // L'utilisateur a besoin de configuration s'il n'a pas d'ID d'ostéopathe
+      // ou s'il a un ID d'ostéopathe mais pas de cabinet
+      const needsSetup = !user.osteopathId || (user.osteopathId && !hasCabinet);
       
       return {
         user,
         isAuthenticated: true,
-        token: data.session.access_token
+        token: data.session.access_token,
+        needsProfileSetup: needsSetup
       };
     } catch (error) {
       console.error("Erreur lors de la vérification de l'authentification:", error);
