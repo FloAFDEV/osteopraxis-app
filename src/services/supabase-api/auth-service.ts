@@ -1,3 +1,4 @@
+
 import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 import { toast } from "sonner";
@@ -209,6 +210,36 @@ export const supabaseAuthService = {
           isAuthenticated: false,
           token: null
         };
+      }
+      
+      // Vérifier si l'utilisateur existe dans notre table User
+      const { data: existingUser, error: userCheckError } = await supabase
+        .from("User")
+        .select("*")
+        .eq("id", data.session.user.id)
+        .maybeSingle();
+      
+      // Si l'utilisateur n'existe pas dans notre table User, le créer
+      if (!existingUser && !userCheckError) {
+        const userData = {
+          id: data.session.user.id,
+          email: data.session.user.email || "",
+          first_name: data.session.user.user_metadata?.first_name || null,
+          last_name: data.session.user.user_metadata?.last_name || null,
+          role: "OSTEOPATH" as Role,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        const { error: insertError } = await supabase
+          .from("User")
+          .insert([userData]);
+        
+        if (insertError) {
+          console.error("Erreur lors de la création de l'utilisateur manquant:", insertError);
+        } else {
+          console.log("Utilisateur manquant créé avec succès dans la table User");
+        }
       }
       
       // Vérifier/Créer un profil Ostéopathe lors de la vérification d'authentification

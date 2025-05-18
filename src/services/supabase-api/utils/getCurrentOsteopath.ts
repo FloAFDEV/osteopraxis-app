@@ -1,41 +1,39 @@
+
 import { supabase } from "../utils";
 import { ensureOsteopathProfile } from "./ensureOsteopathProfile";
 
 /**
- * Récupère l'ID de l'ostéopathe connecté à partir de son auth_id
- * @returns L'ID de l'ostéopathe ou une erreur si non trouvé
+ * Récupère l'ID de l'ostéopathe actuellement connecté
+ * Si aucun profil Ostéopathe n'est trouvé, en crée un
  */
-export async function getCurrentOsteopathId(): Promise<number> {
-	const {
-		data: { user },
-		error: authError,
-	} = await supabase.auth.getUser();
-
-	if (authError || !user) {
-		throw new Error("Utilisateur non connecté");
-	}
-
-	// Typage manuel pour éviter le TS2589
-	type MinimalUser = { id: string };
-
-	const { data: userData, error: userError } = await supabase
-		.from("User")
-		.select("id")
-		.eq("auth_id", user.id)
-		.single();
-
-	if (userError || !userData) {
-		throw new Error("Utilisateur non trouvé");
-	}
-
-	const { id } = userData as MinimalUser;
-
-	return ensureOsteopathProfile(id);
-}
+export const getCurrentOsteopathId = async (): Promise<number | null> => {
+  try {
+    // Récupérer l'utilisateur connecté
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      console.error("Erreur: Utilisateur non connecté", userError);
+      return null;
+    }
+    
+    // Utiliser ensureOsteopathProfile pour garantir l'existence du profil
+    return await ensureOsteopathProfile(user.id);
+    
+  } catch (error) {
+    console.error("Erreur inattendue dans getCurrentOsteopathId:", error);
+    return null;
+  }
+};
 
 /**
- * Vérifie si deux ostéopathes sont identiques (utilisé pour autorisations)
+ * Vérifie si l'ostéopathe donné correspond à l'utilisateur connecté
  */
-export function isSameOsteopath(osteoId1: number, osteoId2: number): boolean {
-	return osteoId1 === osteoId2;
-}
+export const isSameOsteopath = async (osteopathId: number): Promise<boolean> => {
+  try {
+    const currentOsteopathId = await getCurrentOsteopathId();
+    return currentOsteopathId === osteopathId;
+  } catch (error) {
+    console.error("Erreur lors de la vérification de l'ostéopathe:", error);
+    return false;
+  }
+};

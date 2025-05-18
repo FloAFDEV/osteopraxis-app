@@ -1,57 +1,82 @@
+
 import { supabase } from "../utils";
 
 /**
- * Vérifie si un profil Ostéopathe existe pour l'utilisateur et en crée un si nécessaire
- * @param userId L'ID de l'utilisateur authentifié (champ id dans table User)
- * @returns L'ID de l'ostéopathe créé ou existant
+ * Vérifie si un profil Ostéopathe existe pour l'utilisateur donné, 
+ * en crée un si nécessaire, et retourne l'ID du profil Ostéopathe
  */
-export async function ensureOsteopathProfile(userId: string): Promise<number> {
-	if (!userId) throw new Error("UserID invalide");
-
-	// Vérifier si profil ostéo existe (userId est UUID ici)
-	const { data: existingProfile, error: checkError } = await supabase
-		.from("Osteopath")
-		.select("id")
-		.eq("userId", userId) // userId en UUID dans Osteopath ?
-		.maybeSingle();
-
-	if (checkError && checkError.code !== "PGRST116") {
-		throw checkError;
-	}
-
-	if (existingProfile) return existingProfile.id;
-
-	// Sinon, créer un profil ostéopathe
-	const now = new Date().toISOString();
-
-	// Récupérer prénom + nom depuis User (id = userId)
-	const { data: userData, error: userError } = await supabase
-		.from("User")
-		.select("first_name, last_name")
-		.eq("id", userId)
-		.maybeSingle();
-
-	const userName =
-		userData && !userError
-			? `${userData.first_name || ""} ${
-					userData.last_name || ""
-			  }`.trim() || "Ostéopathe"
-			: "Ostéopathe";
-
-	const { data: newProfile, error: insertError } = await supabase
-		.from("Osteopath")
-		.insert({
-			userId, // doit être UUID ici, assure-toi que la colonne userId dans Osteopath est aussi UUID
-			name: userName,
-			professional_title: "Ostéopathe D.O.",
-			ape_code: "8690F",
-			createdAt: now,
-			updatedAt: now,
-		})
-		.select("id")
-		.single();
-
-	if (insertError) throw insertError;
-
-	return newProfile.id;
-}
+export const ensureOsteopathProfile = async (userId: string): Promise<number | null> => {
+  try {
+    console.log("Vérification du profil ostéopathe pour userId:", userId);
+    
+    // Vérifier si un profil existe déjà
+    const { data: existingProfile, error: checkError } = await supabase
+      .from("Osteopath")
+      .select("id")
+      .eq("userId", userId)
+      .maybeSingle();
+      
+    // Si un profil existe, retourner son ID
+    if (existingProfile) {
+      console.log("Profil ostéopathe existant trouvé:", existingProfile.id);
+      return existingProfile.id;
+    }
+    
+    // Si une erreur autre qu'une absence de résultat survient
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error("Erreur lors de la vérification du profil ostéopathe:", checkError);
+      throw new Error(`Erreur lors de la vérification du profil ostéopathe: ${checkError.message}`);
+    }
+    
+    // Récupérer les informations de l'utilisateur pour le nom
+    const { data: userData, error: userError } = await supabase
+      .from("User")
+      .select("first_name, last_name")
+      .eq("id", userId)
+      .maybeSingle();
+      
+    let name = "Nouvel Ostéopathe";
+    if (userData && !userError) {
+      name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+      if (!name) name = "Nouvel Ostéopathe";
+    }
+    
+    // Créer un nouveau profil Ostéopathe
+    const { data: newProfile, error: insertError } = await supabase
+      .from("Osteopath")
+      .insert({
+        userId,
+        name,
+        professional_title: "Ostéopathe D.O.",
+        adeli_number: null,
+        siret: null,
+        ape_code: "8690F",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
+      .select('id')
+      .single();
+    
+    if (insertError) {
+      console.error("Erreur lors de la création du profil ostéopathe:", insertError);
+      throw new Error(`Erreur lors de la création du profil ostéopathe: ${insertError.message}`);
+    }
+    
+    // Mettre à jour la référence dans la table User
+    const { error: updateUserError } = await supabase
+      .from("User")
+      .update({ osteopathId: newProfile.id })
+      .eq("id", userId);
+      
+    if (updateUserError) {
+      console.error("Erreur lors de la mise à jour de l'ID ostéopathe dans User:", updateUserError);
+    }
+    
+    console.log("Nouveau profil ostéopathe créé avec ID:", newProfile.id);
+    return newProfile.id;
+    
+  } catch (error) {
+    console.error("Erreur inattendue dans ensureOsteopathProfile:", error);
+    throw error;
+  }
+};
