@@ -1,6 +1,7 @@
 import { AuthState, User, Role } from "@/types";
 import { supabase } from "./utils";
 import { toast } from "sonner";
+import { ensureOsteopathProfile } from "./utils/ensureOsteopathProfile";
 
 export const supabaseAuthService = {
   async register(email: string, password: string, firstName: string, lastName: string): Promise<AuthState> {
@@ -47,6 +48,16 @@ export const supabaseAuthService = {
       
       if (userError) {
         console.error("Erreur lors de la création du profil utilisateur:", userError);
+      }
+      
+      // Vérifier/Créer un profil Ostéopathe si l'inscription est réussie
+      if (data.session) {
+        try {
+          const osteopathId = await ensureOsteopathProfile(data.user.id);
+          console.log("Profil ostéopathe vérifié/créé lors de l'inscription:", osteopathId);
+        } catch (osteoError) {
+          console.error("Erreur lors de la création du profil ostéopathe:", osteoError);
+        }
       }
     } catch (insertError) {
       console.error("Erreur lors de la création du profil utilisateur:", insertError);
@@ -104,6 +115,14 @@ export const supabaseAuthService = {
     
     if (!data.user) {
       throw new Error("Identifiants incorrects");
+    }
+    
+    // Vérifier/Créer un profil Ostéopathe lors de la connexion
+    try {
+      const osteopathId = await ensureOsteopathProfile(data.user.id);
+      console.log("Profil ostéopathe vérifié/créé lors de la connexion:", osteopathId);
+    } catch (osteoError) {
+      console.error("Erreur lors de la vérification/création du profil ostéopathe:", osteoError);
     }
     
     // Récupérer les informations supplémentaires de l'utilisateur depuis la table User
@@ -190,6 +209,14 @@ export const supabaseAuthService = {
           isAuthenticated: false,
           token: null
         };
+      }
+      
+      // Vérifier/Créer un profil Ostéopathe lors de la vérification d'authentification
+      try {
+        const osteopathId = await ensureOsteopathProfile(data.session.user.id);
+        console.log("Profil ostéopathe vérifié/créé lors du checkAuth:", osteopathId);
+      } catch (osteoError) {
+        console.error("Erreur lors de la vérification/création du profil ostéopathe:", osteoError);
       }
       
       // Récupérer les informations supplémentaires de l'utilisateur depuis la table User

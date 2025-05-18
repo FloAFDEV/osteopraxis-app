@@ -1,5 +1,6 @@
 
 import { supabase } from "../utils";
+import { ensureOsteopathProfile } from "./ensureOsteopathProfile";
 
 /**
  * Récupère l'ID de l'ostéopathe connecté à partir de son userId
@@ -14,24 +15,14 @@ export async function getCurrentOsteopathId(): Promise<number> {
     throw new Error("Utilisateur non connecté");
   }
   
-  // 2. Récupérer l'ostéopathe lié à cet utilisateur
-  const { data, error } = await supabase
-    .from("Osteopath")
-    .select("id")
-    .eq("userId", user.id)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Erreur lors de la récupération de l'ostéopathe:", error);
-    throw error;
-  }
-  
-  if (!data) {
-    console.error("Aucun ostéopathe trouvé pour l'utilisateur:", user.id);
+  try {
+    // 2. Récupérer ou créer l'ostéopathe lié à cet utilisateur
+    const osteopathId = await ensureOsteopathProfile(user.id);
+    return osteopathId;
+  } catch (error) {
+    console.error("Erreur lors de la récupération/création de l'ostéopathe:", error);
     throw new Error("Profil ostéopathe introuvable pour cet utilisateur");
   }
-  
-  return data.id as number;
 }
 
 /**
