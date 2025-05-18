@@ -667,13 +667,6 @@ export type Database = {
 				};
 				Relationships: [
 					{
-						foreignKeyName: "fk_treatmenthistory_consultation";
-						columns: ["consultationId"];
-						isOneToOne: false;
-						referencedRelation: "Consultation";
-						referencedColumns: ["id"];
-					},
-					{
 						foreignKeyName: "TreatmentHistory_consultationId_fkey";
 						columns: ["consultationId"];
 						isOneToOne: false;
