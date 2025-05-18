@@ -1,106 +1,89 @@
-import { InvoiceForm } from "@/components/invoice-form";
-import { Card } from "@/components/ui/card";
-import { FancyLoader } from "@/components/ui/fancy-loader";
-import { Layout } from "@/components/ui/layout";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
-import { Activity } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Layout } from "@/components/ui/layout";
+import { InvoiceForm } from "@/components/invoice-form";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const NewInvoicePage = () => {
-	const { patientId } = useParams<{ patientId: string }>();
-	const [searchParams] = useSearchParams();
-	const appointmentId = searchParams.get("appointmentId");
-	const [patient, setPatient] = useState<Patient | null>(null);
-	const [appointment, setAppointment] = useState<Appointment | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [patientData, setPatientData] = useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				if (appointmentId) {
-					const appointmentData = await api.getAppointmentById(
-						parseInt(appointmentId, 10)
-					);
+  useEffect(() => {
+    const appointmentId = searchParams.get("appointmentId");
+    
+    if (appointmentId) {
+      const fetchAppointmentAndPatient = async () => {
+        setIsLoading(true);
+        try {
+          const appointment = await api.getAppointmentById(parseInt(appointmentId));
+          
+          if (appointment) {
+            setAppointment(appointment);
+            
+            // Vérifier si ce rendez-vous a déjà une facture associée
+            // Pour l'instant, on ne fait qu'un log
+            console.log("Vérification si le rendez-vous a déjà une facture");
+            
+            // Récupérer les informations du patient
+            if (appointment.patientId) {
+              const patient = await api.getPatientById(appointment.patientId);
+              if (patient) {
+                setPatientData(patient);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Erreur lors du chargement des données du rendez-vous:", error);
+          toast.error("Impossible de charger les données du rendez-vous");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchAppointmentAndPatient();
+    }
+  }, [searchParams]);
 
-					if (appointmentData) {
-						if (appointmentData.invoiceId) {
-							// ✅ Facture existe : on bloque, toast + redirection sans afficher le formulaire
-							toast.error(
-								"⛔ Une facture existe déjà pour ce rendez-vous."
-							);
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Chargement...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
-							setTimeout(() => {
-								navigate("/invoices");
-							}, 1500);
-
-							return; // ⛔ STOP ici, on ne fait rien d'autre
-						}
-
-						setAppointment(appointmentData);
-
-						// Chargement du patient lié au rendez-vous
-						const patientData = await api.getPatientById(
-							appointmentData.patientId
-						);
-						if (patientData) setPatient(patientData);
-					}
-				} else if (patientId) {
-					// Pas de appointmentId => on charge seulement le patient
-					const patientData = await api.getPatientById(
-						parseInt(patientId, 10)
-					);
-					if (patientData) setPatient(patientData);
-				}
-
-				setIsLoading(false); // ✅ on termine le chargement uniquement si on n'a pas redirigé
-			} catch (error) {
-				console.error("Erreur lors du chargement des données:", error);
-				toast.error("Erreur lors du chargement des données");
-				setIsLoading(false);
-			}
-		};
-
-		loadData();
-	}, [patientId, appointmentId, navigate]);
-
-	const handleInvoiceCreated = () => {
-		toast.success("✅ Facture créée avec succès !");
-		setTimeout(() => {
-			navigate("/invoices");
-		}, 1500);
-	};
-
-	return (
-		
-		<Layout>
-			<div className="mb-6">
-				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-					<h1 className="text-3xl font-bold flex items-center gap-3">
-						<Activity className="h-8 w-8 text-amber-500 dark:text-amber-400" />
-						<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-red-500">
-							Nouvelle Facture
-						</span>
-					</h1>
-				</div>
-
-				{isLoading ? (
-					<FancyLoader message="Chargement des données..." />
-				) : (
-					<Card className="p-6">
-						<InvoiceForm
-							initialPatient={patient}
-							initialAppointment={appointment}
-							onCreate={handleInvoiceCreated}
-						/>
-					</Card>
-				)}
-			</div>
-		</Layout>
-	);
+  return (
+    <Layout>
+      <div className="container mx-auto py-10">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Retour
+        </Button>
+        <h1 className="text-2xl font-bold mb-4">Nouvelle Facture</h1>
+        {appointment && patientData ? (
+          <InvoiceForm appointment={appointment} patient={patientData} />
+        ) : (
+          <div className="text-center">
+            <p className="text-muted-foreground">
+              Aucun rendez-vous sélectionné ou informations du patient manquantes.
+            </p>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
 };
 
 export default NewInvoicePage;

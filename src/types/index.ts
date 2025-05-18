@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -134,12 +133,28 @@ export interface Appointment {
   
   // Propriétés manquantes utilisées dans le code
   date?: string; // Pour compatibilité avec le code existant
-  reason?: string;
-  notificationSent?: boolean;
+  reason: string;
+  notificationSent: boolean;
   user_id?: string | null;
 }
 
 export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "DONE" | "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
+
+// Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
+export interface CreateAppointmentPayload {
+  patientId: number;
+  cabinetId: number;
+  osteopathId: number;
+  start: string;
+  end: string;
+  date?: string;
+  reason: string;
+  status: AppointmentStatus;
+  notes?: string | null;
+  notificationSent: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface Invoice {
   id: number;
@@ -218,18 +233,4 @@ export interface DashboardData {
   annualGrowthPercentage: number;
   childrenCount: number;
   monthlyGrowth: MonthlyGrowth[];
-}
-
-// Type d'entrée pour créer un rendez-vous (pour résoudre les erreurs)
-export interface CreateAppointmentPayload {
-  patientId: number;
-  date: string;
-  reason: string;
-  cabinetId: number;
-  osteopathId: number;
-  start: string;
-  end: string;
-  notes?: string | null;
-  status: AppointmentStatus;
-  notificationSent: boolean;
 }

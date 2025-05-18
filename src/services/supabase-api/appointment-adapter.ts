@@ -1,5 +1,5 @@
 
-import { Appointment, AppointmentStatus } from "@/types";
+import { Appointment, AppointmentStatus, CreateAppointmentPayload } from "@/types";
 
 export const adaptAppointmentFromSupabase = (data: any): Appointment => {
   // S'assurer que tous les champs requis sont présents
@@ -33,7 +33,7 @@ export const adaptAppointmentToSupabase = (appointment: Partial<Appointment>): a
   return payload;
 };
 
-export const createAppointmentPayload = (data: any): any => {
+export const createAppointmentPayload = (data: any): CreateAppointmentPayload => {
   // Créer un payload correct pour la création d'un rendez-vous
   return {
     patientId: data.patientId,

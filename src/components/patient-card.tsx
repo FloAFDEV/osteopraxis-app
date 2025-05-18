@@ -1,258 +1,94 @@
-
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Patient } from "@/types";
-import { differenceInYears, format, parseISO } from "date-fns";
+import React from "react";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 import {
-	Baby,
+	Calendar,
 	Mail,
 	MapPin,
 	Phone,
 	User,
-	UserCheck,
-	UserCircle,
-	Users,
 	Weight,
-	Height,
+	Activity,
+	Droplets,
+	Ruler, // Remplacé Height par Ruler
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Patient } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 interface PatientCardProps {
-	patient: Patient;
-	showDetailsButton?: boolean;
+  patient: Patient;
 }
 
-export function PatientCard({
-	patient,
-	showDetailsButton = true,
-}: PatientCardProps) {
-	// Calculer l'âge uniquement si birthDate est défini
-	const age = patient.birthDate
-		? differenceInYears(new Date(), parseISO(patient.birthDate))
-		: null;
+export function PatientCard({ patient }: PatientCardProps) {
+  const navigate = useNavigate();
 
-	// Déterminer si le patient est un enfant (moins de 18 ans)
-	const isChild = age !== null && age < 12;
+  const age = patient.birthDate
+    ? formatDistanceToNow(new Date(patient.birthDate), {
+        locale: fr,
+        addSuffix: true,
+      })
+    : "Non renseigné";
 
-	const getInitials = (firstName?: string, lastName?: string) => {
-		const firstInitial = firstName
-			? firstName.charAt(0).toUpperCase()
-			: "?";
-		const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : "?";
-		return `${firstInitial}${lastInitial}`;
-	};
-
-	// Définir les couleurs en fonction du genre avec des variantes plus subtiles
-	const getGenderColors = (gender?: string) => {
-		switch (gender) {
-			case "Homme":
-				return {
-					badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-					avatar: "bg-blue-500 text-white",
-					border: "border-blue-500",
-					icon: <UserCheck className="ml-1 h-4 w-4 text-blue-600" />,
-				};
-			case "Femme":
-				return {
-					badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-					avatar: "bg-pink-500 text-white",
-					border: "border-pink-500",
-					icon: <UserCircle className="ml-1 h-4 w-4 text-pink-600" />,
-				};
-			default:
-				return {
-					badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-					avatar: "bg-purple-500 text-white",
-					border: "border-purple-500",
-					icon: <Users className="ml-1 h-4 w-4 text-purple-600" />,
-				};
-		}
-	};
-
-	const genderColors = getGenderColors(patient.gender);
-
-	return (
-		<Card
-			className="overflow-hidden transition-all duration-200 border-t-4 h-full hover:shadow-lg hover:scale-[1.02] flex flex-col"
-			style={{
-				borderTopColor:
-					patient.gender === "Homme"
-						? "#2563eb"
-						: patient.gender === "Femme"
-						? "#ec4899"
-						: "#6b7280",
-			}}
-		>
-			<CardContent className="p-6 flex-grow">
-				<div className="flex gap-4">
-					<Avatar className="h-16 w-16 shadow-sm">
-						{patient.avatarUrl ? (
-							<img
-								src={patient.avatarUrl}
-								alt={`${patient.firstName} ${patient.lastName}`}
-							/>
-						) : (
-							<AvatarFallback
-								className={`text-lg ${genderColors.avatar}`}
-							>
-								{getInitials(
-									patient.firstName,
-									patient.lastName
-								)}
-							</AvatarFallback>
-						)}
-					</Avatar>
-
-					<div className="space-y-1 flex-1 min-w-0">
-						<h3 className="text-xl font-semibold truncate flex items-center">
-							{patient.lastName} {patient.firstName}
-							{genderColors.icon}
-						</h3>
-
-						<div className="flex items-center gap-2 flex-wrap">
-							{patient.gender && (
-								<Badge
-									variant="outline"
-									className={`${genderColors.badge} font-medium`}
-								>
-									{patient.gender}
-								</Badge>
-							)}
-
-							{age !== null && (
-								<Badge
-									variant="outline"
-									className="bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 font-medium"
-								>
-									{age} ans
-								</Badge>
-							)}
-
-							{patient.bloodType && (
-								<Badge
-									variant="outline"
-									className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 font-medium"
-								>
-									{patient.bloodType.replace("_", "+")}
-								</Badge>
-							)}
-						</div>
-
-						{patient.occupation && (
-							<p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
-								{patient.occupation}
-							</p>
-						)}
-					</div>
-				</div>
-
-				<div className="mt-4 space-y-2 text-gray-600 dark:text-gray-400 border-t pt-4 border-gray-100 dark:border-gray-800">
-					{patient.address && (
-						<div className="flex items-center gap-2 text-sm">
-							<MapPin className="h-4 w-4 icon-amber flex-shrink-0" />
-							<span className="truncate">{patient.address}</span>
-						</div>
-					)}
-
-					{patient.phone && (
-						<div className="flex items-center gap-2 text-sm">
-							<Phone className="h-4 w-4 icon-green flex-shrink-0" />
-							<a
-								href={`tel:${patient.phone}`}
-								className="truncate hover:text-blue-600 hover:underline transition-colors"
-							>
-								{patient.phone}
-							</a>
-						</div>
-					)}
-
-					{patient.email && (
-						<div className="flex items-center gap-2 text-sm">
-							<Mail className="h-4 w-4 icon-blue flex-shrink-0" />
-							<a
-								href={`mailto:${patient.email}`}
-								className="truncate hover:text-blue-600 hover:underline transition-colors"
-							>
-								{patient.email}
-							</a>
-						</div>
-					)}
-
-					{patient.birthDate && (
-						<div className="flex items-center gap-2 text-sm">
-							<User className="h-4 w-4 icon-purple flex-shrink-0" />
-							<span className="truncate">
-								Né(e) le{" "}
-								{format(
-									parseISO(patient.birthDate),
-									"dd/MM/yyyy"
-								)}
-							</span>
-							<span>
-								{/* Si c'est un enfant, ajouter l'icône */}
-								{isChild && (
-									<div className="ml-1 text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
-										<Baby className="h-5 w-5 text-emerald-600" />
-										<span>Enfant</span>
-									</div>
-								)}
-							</span>
-						</div>
-					)}
-
-					{/* Affichage du poids et de la taille si disponibles */}
-					{(patient.weight || patient.height) && (
-						<div className="flex flex-wrap items-center gap-4 mt-2 text-sm">
-							{patient.weight && (
-								<div className="flex items-center gap-1">
-									<Weight className="h-4 w-4 text-amber-600" />
-									<span>{patient.weight} kg</span>
-								</div>
-							)}
-							{patient.height && (
-								<div className="flex items-center gap-1">
-									<Height className="h-4 w-4 text-green-600" />
-									<span>{patient.height} cm</span>
-								</div>
-							)}
-							{patient.bmi && (
-								<div className="text-xs font-medium px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-									IMC: {patient.bmi.toFixed(1)}
-								</div>
-							)}
-						</div>
-					)}
-				</div>
-			</CardContent>
-
-			{showDetailsButton && (
-				<CardFooter className="px-6 py-4 bg-gray-50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-800">
-					<div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
-						<Button
-							asChild
-							variant="default"
-							size="sm"
-							className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 hover:text-white"
-						>
-							<Link to={`/patients/${patient.id}`}>
-								Voir le dossier
-							</Link>
-						</Button>
-						<Button
-							asChild
-							variant="outline"
-							size="sm"
-							className="w-full dark:border-gray-600 dark:hover:bg-gray-800"
-						>
-							<Link to={`/patients/${patient.id}/edit`}>
-								Modifier
-							</Link>
-						</Button>
-					</div>
-				</CardFooter>
-			)}
-		</Card>
-	);
+  return (
+    <Card
+      className="hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      onClick={() => navigate(`/patients/${patient.id}`)}
+    >
+      <CardHeader>
+        <CardTitle className="flex justify-between items-start space-y-0 pb-2">
+          <span>
+            {patient.firstName} {patient.lastName}
+          </span>
+          <Badge variant="secondary">
+            {age}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-sm text-muted-foreground grid gap-1">
+          <div className="flex items-center">
+            <User className="w-4 h-4 mr-2" />
+            {patient.gender || "Non renseigné"}
+          </div>
+          <div className="flex items-center">
+            <Calendar className="w-4 h-4 mr-2" />
+            {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString("fr-FR") : "Non renseignée"}
+          </div>
+          <div className="flex items-center">
+            <Mail className="w-4 h-4 mr-2" />
+            {patient.email || "Non renseigné"}
+          </div>
+          <div className="flex items-center">
+            <Phone className="w-4 h-4 mr-2" />
+            {patient.phone || "Non renseigné"}
+          </div>
+          <div className="flex items-center">
+            <MapPin className="w-4 h-4 mr-2" />
+            {patient.address || "Non renseignée"}
+            {patient.postalCode ? `, ${patient.postalCode}` : null}
+            {patient.city ? ` ${patient.city}` : null}
+          </div>
+          <div className="flex items-center">
+            <Weight className="w-4 h-4 mr-2" />
+            {patient.weight ? `${patient.weight} kg` : "Non renseigné"}
+          </div>
+          <div className="flex items-center">
+            <Ruler className="w-4 h-4 mr-2" />
+            {patient.height ? `${patient.height} cm` : "Non renseignée"}
+          </div>
+          <div className="flex items-center">
+            <Activity className="w-4 h-4 mr-2" />
+            {patient.bmi ? `${patient.bmi} BMI` : "Non renseigné"}
+          </div>
+          <div className="flex items-center">
+            <Droplets className="w-4 h-4 mr-2" />
+            {patient.bloodType || "Non renseigné"}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

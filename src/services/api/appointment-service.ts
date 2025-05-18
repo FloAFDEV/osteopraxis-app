@@ -1,3 +1,4 @@
+
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -16,17 +17,31 @@ const appointments: Appointment[] = [
   {
     id: 1,
     patientId: 1,
+    cabinetId: 1,
+    osteopathId: 1,
+    start: new Date().toISOString(),
+    end: new Date(new Date().getTime() + 30 * 60000).toISOString(),
     date: new Date().toISOString(),
     reason: "Consultation de routine",
     status: "SCHEDULED",
+    notes: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     notificationSent: false,
   },
   {
     id: 2,
     patientId: 2,
+    cabinetId: 1,
+    osteopathId: 1,
+    start: new Date().toISOString(),
+    end: new Date(new Date().getTime() + 30 * 60000).toISOString(),
     date: new Date().toISOString(),
     reason: "Suivi post-opératoire",
     status: "COMPLETED",
+    notes: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     notificationSent: false,
   },
 ];
