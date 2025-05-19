@@ -39,13 +39,13 @@ export const supabaseInvoiceService = {
       
       if (error) throw new Error(error.message);
       
-      // Transform data with explicit typing
+      // Transform data with explicit typing and add missing fields
       return (data || []).map(item => {
-        return {
+        const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: item.cabinetId || 1,
-          osteopathId: item.osteopathId || 1,
+          cabinetId: 1, // Valeur par défaut
+          osteopathId: osteopathId, // Utiliser l'ID de l'ostéopathe connecté
           appointmentId: item.appointmentId,
           date: item.date,
           number: item.number || `INV-${item.id}`,
@@ -60,7 +60,8 @@ export const supabaseInvoiceService = {
           updatedAt: new Date().toISOString(),
           tvaExoneration: item.tvaExoneration || true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-        } as Invoice;
+        };
+        return invoice;
       });
     } catch (error) {
       console.error("Erreur getInvoices:", error);
@@ -87,12 +88,15 @@ export const supabaseInvoiceService = {
       
       if (!data) return undefined;
       
-      // Return the properly typed invoice
-      return {
+      // Obtenir l'ID de l'ostéopathe connecté
+      const osteopathId = await getCurrentOsteopathId();
+      
+      // Return the properly typed invoice with all required fields
+      const invoice: Invoice = {
         id: data.id,
         patientId: data.patientId,
         cabinetId: data.cabinetId || 1,
-        osteopathId: data.osteopathId || 1,
+        osteopathId: data.osteopathId || osteopathId,
         appointmentId: data.appointmentId,
         date: data.date,
         number: data.number || `INV-${data.id}`,
@@ -107,7 +111,9 @@ export const supabaseInvoiceService = {
         updatedAt: new Date().toISOString(),
         tvaExoneration: data.tvaExoneration || true,
         tvaMotif: data.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-      } as Invoice;
+      };
+      
+      return invoice;
     } catch (error) {
       console.error("Erreur getInvoiceById:", error);
       throw error;
@@ -126,13 +132,16 @@ export const supabaseInvoiceService = {
       
       if (error) throw new Error(error.message);
       
-      // Transform data with explicit typing
+      // Obtenir l'ID de l'ostéopathe connecté
+      const osteopathId = await getCurrentOsteopathId();
+      
+      // Transform data with explicit typing and add missing fields
       return (data || []).map(item => {
-        return {
+        const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
           cabinetId: item.cabinetId || 1,
-          osteopathId: item.osteopathId || 1,
+          osteopathId: item.osteopathId || osteopathId,
           appointmentId: item.appointmentId,
           date: item.date,
           number: item.number || `INV-${item.id}`,
@@ -140,14 +149,15 @@ export const supabaseInvoiceService = {
           totalAmount: item.amount,
           amount: item.amount, // Alias pour la compatibilité
           paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
-          paymentDate: item.paymentDate,
-          paymentMethod: item.paymentMethod,
-          notes: item.notes,
+          paymentDate: item.paymentDate || null,
+          paymentMethod: item.paymentMethod || null,
+          notes: item.notes || null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           tvaExoneration: item.tvaExoneration || true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-        } as Invoice;
+        };
+        return invoice;
       });
     } catch (error) {
       console.error("Erreur getInvoicesByPatientId:", error);
@@ -167,13 +177,16 @@ export const supabaseInvoiceService = {
       
       if (error) throw new Error(error.message);
       
+      // Obtenir l'ID de l'ostéopathe connecté
+      const osteopathId = await getCurrentOsteopathId();
+      
       // Transform data with explicit typing
       return (data || []).map(item => {
-        return {
+        const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
           cabinetId: item.cabinetId || 1,
-          osteopathId: item.osteopathId || 1,
+          osteopathId: item.osteopathId || osteopathId,
           appointmentId: item.appointmentId,
           date: item.date,
           number: item.number || `INV-${item.id}`,
@@ -181,14 +194,15 @@ export const supabaseInvoiceService = {
           totalAmount: item.amount,
           amount: item.amount, // Alias pour la compatibilité
           paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
-          paymentDate: item.paymentDate,
-          paymentMethod: item.paymentMethod,
-          notes: item.notes,
+          paymentDate: item.paymentDate || null,
+          paymentMethod: item.paymentMethod || null,
+          notes: item.notes || null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           tvaExoneration: item.tvaExoneration || true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-        } as Invoice;
+        };
+        return invoice;
       });
     } catch (error) {
       console.error("Erreur getInvoicesByAppointmentId:", error);

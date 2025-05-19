@@ -1,11 +1,5 @@
 
-import {
-	Patient,
-	Gender,
-	MaritalStatus,
-	Handedness,
-	Contraception,
-} from "@/types";
+import { Patient } from "@/types";
 
 export const adaptPatientFromSupabase = (data: any): Patient => ({
 	id: data.id,
@@ -19,13 +13,13 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
 	city: data.city || null,
 	postalCode: data.postalCode || null,
 	country: data.country || null,
-	gender: data.gender as Gender,
+	gender: data.gender,
 	height: data.height || null,
 	weight: data.weight || null,
 	bmi: data.bmi || null,
 	bloodType: data.bloodType || null,
 	birthDate: data.birthDate,
-	maritalStatus: data.maritalStatus as MaritalStatus,
+	maritalStatus: data.maritalStatus,
 	occupation: data.occupation,
 	hasChildren: data.hasChildren,
 	childrenAges: data.childrenAges || null,
@@ -34,7 +28,7 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
 	traumaHistory: data.traumaHistory,
 	rheumatologicalHistory: data.rheumatologicalHistory,
 	currentTreatment: data.currentTreatment,
-	handedness: data.handedness as Handedness,
+	handedness: data.handedness,
 	hasVisionCorrection: data.hasVisionCorrection,
 	ophtalmologistName: data.ophtalmologistName,
 	entProblems: data.entProblems,
@@ -48,13 +42,17 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
 	smokingAmount: data.smokingAmount || null,
 	quitSmokingDate: data.quitSmokingDate || null,
 	isDeceased: data.isDeceased,
-	contraception: data.contraception as Contraception,
+	contraception: data.contraception,
 	hdlm: data.hdlm,
 	avatarUrl: data.avatarUrl,
 	cabinetId: data.cabinetId,
 	userId: data.userId || null,
 	osteopathId: data.osteopathId || 1,
 	familyStatus: data.familyStatus || null,
+	// Ajout des champs requis manquants
+	medicalHistory: data.medicalHistory || null,
+	allergies: data.allergies || null,
+	medications: data.medications || null,
 	// Champs existants pour tous les patients
 	complementaryExams: data.complementaryExams || null,
 	generalSymptoms: data.generalSymptoms || null,

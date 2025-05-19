@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
 const PatientsPage = () => {
