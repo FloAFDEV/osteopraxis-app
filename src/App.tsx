@@ -28,6 +28,7 @@ import RegisterPage from "./pages/RegisterPage";
 import SchedulePage from "./pages/SchedulePage";
 import SettingsPage from "./pages/SettingsPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
+import { corsHeaders } from "./services/corsHeaders";
 
 function App() {
 	const { isAuthenticated, loadStoredToken, user, redirectToSetupIfNeeded } = useAuth();
@@ -75,11 +76,7 @@ function App() {
 			if (typeof input === "string" && input.includes("supabase.co")) {
 				modifiedInit.headers = {
 					...modifiedInit.headers,
-					"Access-Control-Allow-Origin": "*",
-					"Access-Control-Allow-Headers":
-						"authorization, apikey, content-type, x-client-info, X-Cancellation-Override, X-HTTP-Method-Override, prefer",
-					"Access-Control-Allow-Methods":
-						"GET, POST, PUT, PATCH, DELETE, OPTIONS",
+					...corsHeaders
 				};
 			}
 			return originalFetch(input, modifiedInit);

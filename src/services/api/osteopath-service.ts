@@ -3,6 +3,7 @@ import { Osteopath } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
 import { supabase } from '@/integrations/supabase/client';
+import { corsHeaders } from "../corsHeaders";
 
 export const osteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
