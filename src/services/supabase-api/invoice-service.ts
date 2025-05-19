@@ -1,4 +1,3 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -44,15 +43,19 @@ export const supabaseInvoiceService = {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: 1, // Valeur par défaut
-          osteopathId: osteopathId, // Utiliser l'ID de l'ostéopathe connecté
+          cabinetId: 1, // Default value
+          osteopathId: osteopathId, // Use connected osteopath ID
           appointmentId: item.appointmentId,
           date: item.date,
+          // Fix for the invoice number property
           number: item.number || `INV-${item.id}`,
-          status: item.paymentStatus || "DRAFT",
+          // Fix for the status property - use 'CANCELLED' instead of 'CANCELED'
+          status: item.paymentStatus === 'CANCELED' ? 'CANCELLED' : item.paymentStatus || "DRAFT",
           totalAmount: item.amount,
-          amount: item.amount, // Alias pour la compatibilité
-          paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+          amount: item.amount, // Alias for compatibility
+          // Fix for paymentStatus property
+          paymentStatus: item.paymentStatus as PaymentStatus,
+          // Fix for paymentDate property
           paymentDate: item.paymentDate || null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
@@ -88,7 +91,7 @@ export const supabaseInvoiceService = {
       
       if (!data) return undefined;
       
-      // Obtenir l'ID de l'ostéopathe connecté
+      // Get connected osteopath ID
       const osteopathId = await getCurrentOsteopathId();
       
       // Return the properly typed invoice with all required fields
@@ -100,10 +103,11 @@ export const supabaseInvoiceService = {
         appointmentId: data.appointmentId,
         date: data.date,
         number: data.number || `INV-${data.id}`,
-        status: data.paymentStatus || "DRAFT",
+        // Fix for status property value
+        status: data.paymentStatus === 'CANCELED' ? 'CANCELLED' : data.paymentStatus || "DRAFT",
         totalAmount: data.amount,
-        amount: data.amount, // Alias pour la compatibilité
-        paymentStatus: data.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+        amount: data.amount, // Alias for compatibility
+        paymentStatus: data.paymentStatus as PaymentStatus,
         paymentDate: data.paymentDate || null,
         paymentMethod: data.paymentMethod || null,
         notes: data.notes || null,
@@ -132,7 +136,7 @@ export const supabaseInvoiceService = {
       
       if (error) throw new Error(error.message);
       
-      // Obtenir l'ID de l'ostéopathe connecté
+      // Get connected osteopath ID
       const osteopathId = await getCurrentOsteopathId();
       
       // Transform data with explicit typing and add missing fields
@@ -145,10 +149,11 @@ export const supabaseInvoiceService = {
           appointmentId: item.appointmentId,
           date: item.date,
           number: item.number || `INV-${item.id}`,
-          status: item.paymentStatus || "DRAFT",
+          // Fix for status property value
+          status: item.paymentStatus === 'CANCELED' ? 'CANCELLED' : item.paymentStatus || "DRAFT",
           totalAmount: item.amount,
-          amount: item.amount, // Alias pour la compatibilité
-          paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+          amount: item.amount, // Alias for compatibility
+          paymentStatus: item.paymentStatus as PaymentStatus,
           paymentDate: item.paymentDate || null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
@@ -177,7 +182,7 @@ export const supabaseInvoiceService = {
       
       if (error) throw new Error(error.message);
       
-      // Obtenir l'ID de l'ostéopathe connecté
+      // Get connected osteopath ID
       const osteopathId = await getCurrentOsteopathId();
       
       // Transform data with explicit typing
@@ -190,10 +195,11 @@ export const supabaseInvoiceService = {
           appointmentId: item.appointmentId,
           date: item.date,
           number: item.number || `INV-${item.id}`,
-          status: item.paymentStatus || "DRAFT",
+          // Fix for status property value
+          status: item.paymentStatus === 'CANCELED' ? 'CANCELLED' : item.paymentStatus || "DRAFT",
           totalAmount: item.amount,
-          amount: item.amount, // Alias pour la compatibilité
-          paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
+          amount: item.amount, // Alias for compatibility
+          paymentStatus: item.paymentStatus as PaymentStatus,
           paymentDate: item.paymentDate || null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
@@ -356,5 +362,29 @@ export const supabaseInvoiceService = {
       console.error("Erreur deleteInvoice:", error);
       throw error;
     }
+  },
+  
+  // Nouvelle méthode pour exporter les factures d'une période donnée (mois ou année)
+  async exportInvoicesByPeriod(year: string, month: string | null = null): Promise<Invoice[]> {
+    // Récupérer toutes les factures
+    const allInvoices = await this.getInvoices();
+    
+    // Filtrer par année et mois si spécifié
+    return allInvoices.filter(invoice => {
+      const invoiceDate = new Date(invoice.date);
+      const invoiceYear = invoiceDate.getFullYear().toString();
+      
+      // Si l'année ne correspond pas, exclure
+      if (invoiceYear !== year) return false;
+      
+      // Si un mois est spécifié, vérifier la correspondance
+      if (month !== null) {
+        const invoiceMonth = (invoiceDate.getMonth() + 1).toString().padStart(2, '0');
+        return invoiceMonth === month;
+      }
+      
+      // Sinon, inclure toutes les factures de l'année
+      return true;
+    });
   }
 };
