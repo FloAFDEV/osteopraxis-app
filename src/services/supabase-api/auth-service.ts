@@ -32,16 +32,8 @@ export const supabaseAuthService = {
       throw new Error("Échec lors de la création du compte");
     }
     
-    // Les triggers SQL s'occuperont de créer l'entrée User et de maintenir les relations
-    // On vérifie/créé simplement le profil Ostéopathe si nécessaire
-    if (data.session) {
-      try {
-        const osteopathId = await ensureOsteopathProfile(data.user.id);
-        console.log("Profil ostéopathe vérifié/créé lors de l'inscription:", osteopathId);
-      } catch (osteoError) {
-        console.error("Erreur lors de la création du profil ostéopathe:", osteoError);
-      }
-    }
+    // Ne pas créer de profil Ostéopathe automatiquement lors de l'inscription
+    // L'utilisateur sera redirigé vers la page de configuration
     
     // Si email confirmation est requise, retourner un état spécial avec un message
     if (data.session === null) {
@@ -63,7 +55,7 @@ export const supabaseAuthService = {
       };
     }
     
-    // Si inscription réussie et pas de confirmation d'email requise, connecter l'utilisateur
+    // Si inscription réussie et pas de confirmation d'email requise
     return {
       user: {
         id: data.user.id,
@@ -76,7 +68,8 @@ export const supabaseAuthService = {
         osteopathId: null
       },
       isAuthenticated: true,
-      token: data.session?.access_token || null
+      token: data.session?.access_token || null,
+      needsProfileSetup: true // Indiquer que l'utilisateur doit configurer son profil
     };
   },
   
@@ -97,13 +90,25 @@ export const supabaseAuthService = {
       throw new Error("Identifiants incorrects");
     }
     
-    // Vérifier/Créer un profil Ostéopathe lors de la connexion
+    // Ne pas essayer de créer un profil Ostéopathe automatiquement
+    // Vérifier simplement si l'utilisateur en a déjà un
     let osteopathId = null;
     try {
-      osteopathId = await ensureOsteopathProfile(data.user.id);
-      console.log("Profil ostéopathe vérifié/créé lors de la connexion:", osteopathId);
+      // Recherche d'un profil Ostéopathe déjà existant
+      const { data: osteopathData } = await supabase
+        .from("Osteopath")
+        .select("id")
+        .eq("userId", data.user.id)
+        .maybeSingle();
+        
+      if (osteopathData) {
+        osteopathId = osteopathData.id;
+        console.log("Profil ostéopathe trouvé:", osteopathId);
+      } else {
+        console.log("Pas de profil ostéopathe trouvé pour userId:", data.user.id);
+      }
     } catch (osteoError) {
-      console.error("Erreur lors de la vérification/création du profil ostéopathe:", osteoError);
+      console.error("Erreur lors de la recherche du profil ostéopathe:", osteoError);
     }
     
     // Récupérer les informations supplémentaires de l'utilisateur depuis la table User
@@ -140,7 +145,7 @@ export const supabaseAuthService = {
     };
     
     // Déterminer si l'utilisateur doit être redirigé vers la configuration
-    // Si l'osteopathId n'est pas défini ou si l'utilisateur n'a pas de cabinet
+    // Si l'osteopathId n'est pas défini, l'utilisateur doit configurer son profil
     const needsSetup = !user.osteopathId;
     
     const authState: AuthState = {
@@ -229,13 +234,23 @@ export const supabaseAuthService = {
         }
       }
       
-      // Vérifier/Créer un profil Ostéopathe
+      // Vérifier si l'utilisateur a déjà un profil d'ostéopathe
       let osteopathId = null;
       try {
-        osteopathId = await ensureOsteopathProfile(data.session.user.id);
-        console.log("Profil ostéopathe vérifié/créé lors du checkAuth:", osteopathId);
+        const { data: osteopathData } = await supabase
+          .from("Osteopath")
+          .select("id")
+          .eq("userId", data.session.user.id)
+          .maybeSingle();
+          
+        if (osteopathData) {
+          osteopathId = osteopathData.id;
+          console.log("Profil ostéopathe trouvé lors du checkAuth:", osteopathId);
+        } else {
+          console.log("Pas de profil ostéopathe trouvé pour userId:", data.session.user.id);
+        }
       } catch (osteoError) {
-        console.error("Erreur lors de la vérification/création du profil ostéopathe:", osteoError);
+        console.error("Erreur lors de la recherche du profil ostéopathe:", osteoError);
       }
       
       // Récupérer les informations mises à jour de l'utilisateur
@@ -271,25 +286,8 @@ export const supabaseAuthService = {
         osteopathId: osteopathId
       };
       
-      // Vérifier les cabinets de l'ostéopathe si un ID d'ostéopathe existe
-      let hasCabinet = false;
-      if (user.osteopathId) {
-        try {
-          const { data: cabinets } = await supabase
-            .from("Cabinet")
-            .select("id")
-            .eq("osteopathId", user.osteopathId)
-            .limit(1);
-          
-          hasCabinet = cabinets && cabinets.length > 0;
-        } catch (error) {
-          console.error("Erreur lors de la vérification des cabinets:", error);
-        }
-      }
-      
       // L'utilisateur a besoin de configuration s'il n'a pas d'ID d'ostéopathe
-      // ou s'il a un ID d'ostéopathe mais pas de cabinet
-      const needsSetup = !user.osteopathId || (user.osteopathId && !hasCabinet);
+      const needsSetup = !user.osteopathId;
       
       return {
         user,

@@ -371,10 +371,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
-	// Nouvelle fonction pour rediriger vers la page de configuration si nécessaire
+	// Mise à jour de la fonction redirectToSetupIfNeeded pour mieux gérer la redirection
 	const redirectToSetupIfNeeded = useCallback((fallbackUrl: string = "/dashboard") => {
 		if (authState.needsProfileSetup && authState.isAuthenticated) {
-			window.location.href = `/profile/setup?returnTo=${encodeURIComponent(fallbackUrl)}`;
+			// Utiliser navigate plutôt que window.location pour une meilleure expérience utilisateur
+			const returnParam = fallbackUrl !== "/dashboard" ? `?returnTo=${encodeURIComponent(fallbackUrl)}` : "";
+			const setupUrl = `/profile/setup${returnParam}`;
+			
+			console.log(`Redirection vers la configuration du profil: ${setupUrl}`);
+			
+			// Stocker l'URL de retour pour après la configuration
+			if (fallbackUrl !== "/dashboard") {
+				sessionStorage.setItem("profileSetupReturnUrl", fallbackUrl);
+			}
+			
+			window.location.href = setupUrl;
 			return true;
 		}
 		return false;

@@ -63,6 +63,22 @@ export function OsteopathProfileForm({
   const navigate = useNavigate();
   const MAX_AUTH_RETRIES = 2;
   
+  // Récupérer le paramètre returnTo de l'URL si présent
+  const [returnUrl, setReturnUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Récupérer l'URL de retour soit des paramètres de l'URL, soit du sessionStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlReturnTo = urlParams.get('returnTo');
+    const storedReturnUrl = sessionStorage.getItem("profileSetupReturnUrl");
+    
+    if (urlReturnTo) {
+      setReturnUrl(urlReturnTo);
+    } else if (storedReturnUrl) {
+      setReturnUrl(storedReturnUrl);
+    }
+  }, []);
+  
   // Vérifier l'authentification au chargement du composant et réessayer si nécessaire
   useEffect(() => {
     const verifyAuth = async () => {
@@ -179,6 +195,32 @@ export function OsteopathProfileForm({
         try {
           osteopathResult = await api.createOsteopath(osteopathData);
           console.log("Création réussie:", osteopathResult);
+          
+          // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
+          if (osteopathResult && osteopathResult.id) {
+            console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathResult.id);
+            
+            // Mettre à jour la table User avec l'osteopathId
+            try {
+              const { error: updateError } = await supabase
+                .from("User")
+                .update({ osteopathId: osteopathResult.id })
+                .eq("id", user.id);
+                
+              if (updateError) {
+                console.error("Erreur lors de la mise à jour de l'utilisateur avec osteopathId:", updateError);
+              } else {
+                console.log("Utilisateur mis à jour avec succès avec osteopathId:", osteopathResult.id);
+              }
+            } catch (updateError) {
+              console.error("Exception lors de la mise à jour de l'utilisateur:", updateError);
+            }
+            
+            // Mettre à jour le state local
+            const updatedUser = { ...user, osteopathId: osteopathResult.id };
+            updateUser(updatedUser);
+          }
+          
           toast.success("Profil créé avec succès");
         } catch (createError: any) {
           console.error("Erreur lors de la création de l'ostéopathe:", createError);
@@ -217,6 +259,30 @@ export function OsteopathProfileForm({
             }
             
             osteopathResult = result.osteopath;
+            
+            // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
+            if (osteopathResult && osteopathResult.id) {
+              // Mettre à jour la table User avec l'osteopathId
+              try {
+                const { error: updateError } = await supabase
+                  .from("User")
+                  .update({ osteopathId: osteopathResult.id })
+                  .eq("id", user.id);
+                  
+                if (updateError) {
+                  console.error("Erreur lors de la mise à jour de l'utilisateur avec osteopathId:", updateError);
+                } else {
+                  console.log("Utilisateur mis à jour avec succès avec osteopathId (via edge):", osteopathResult.id);
+                }
+              } catch (updateError) {
+                console.error("Exception lors de la mise à jour de l'utilisateur (via edge):", updateError);
+              }
+              
+              // Mettre à jour le state local
+              const updatedUser = { ...user, osteopathId: osteopathResult.id };
+              updateUser(updatedUser);
+            }
+            
             toast.success("Profil créé avec succès (via fonction alternative)");
           } else {
             throw createError;
@@ -224,18 +290,18 @@ export function OsteopathProfileForm({
         }
       }
       
-      // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
-      if (!user.osteopathId && osteopathResult && osteopathResult.id) {
-        console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathResult.id);
-        const updatedUser = { ...user, osteopathId: osteopathResult.id };
-        updateUser(updatedUser);
-      }
-      
       if (onSuccess) {
         onSuccess(osteopathResult);
       } else {
-        // Rediriger vers le dashboard si aucune fonction de succès spécifiée
-        navigate("/dashboard");
+        // Si un URL de retour est disponible, y rediriger
+        if (returnUrl) {
+          console.log("Redirection vers l'URL de retour:", returnUrl);
+          sessionStorage.removeItem("profileSetupReturnUrl"); // Nettoyer après usage
+          navigate(returnUrl);
+        } else {
+          // Sinon, rediriger vers le dashboard
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       console.error("Error submitting osteopath form:", error);
@@ -266,6 +332,12 @@ export function OsteopathProfileForm({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const redirectToLogin = () => {
+    toast.info("Veuillez vous connecter pour continuer");
+    // Force un rechargement de la page vers login pour s'assurer que l'état d'authentification est bien réinitialisé
+    window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname + window.location.search);
   };
 
   if (isSubmitting) {

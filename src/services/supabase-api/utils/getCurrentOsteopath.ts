@@ -1,9 +1,9 @@
+
 import { supabase } from "../utils";
-import { ensureOsteopathProfile } from "./ensureOsteopathProfile";
 
 /**
  * Récupère l'ID de l'ostéopathe actuellement connecté
- * Si aucun profil Ostéopathe n'est trouvé, en crée un
+ * Ne crée plus automatiquement un profil Ostéopathe s'il n'existe pas
  */
 export const getCurrentOsteopathId = async (): Promise<number | null> => {
 	try {
@@ -32,6 +32,12 @@ export const getCurrentOsteopathId = async (): Promise<number | null> => {
 		// Vérifie le rôle (en supposant que role est une string ou un enum)
 		if (userProfile.role !== "OSTEOPATH") {
 			console.warn("L'utilisateur n'est pas un ostéopathe");
+			return null;
+		}
+
+		// Si l'osteopathId est null, l'utilisateur doit d'abord configurer son profil
+		if (!userProfile.osteopathId) {
+			console.warn("L'utilisateur n'a pas encore configuré son profil d'ostéopathe");
 			return null;
 		}
 

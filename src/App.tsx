@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
@@ -56,7 +57,7 @@ function App() {
 	useEffect(() => {
 		if (!loading && isAuthenticated && user) {
 			// Exclure les pages/routes qui sont explicitement exclues de la redirection automatique
-			const excludedPaths = ['/profile/setup', '/login', '/register'];
+			const excludedPaths = ['/profile/setup', '/login', '/register', '/privacy-policy', '/terms-of-service'];
 			if (!excludedPaths.some(path => location.pathname.startsWith(path))) {
 				redirectToSetupIfNeeded(location.pathname);
 			}
@@ -99,7 +100,6 @@ function App() {
 
 	const isAdmin = user?.role === "ADMIN";
 
-	
 	return (
 		<>
 			<Routes>
