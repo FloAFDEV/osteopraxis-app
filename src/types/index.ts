@@ -137,7 +137,16 @@ export interface Appointment {
   user_id?: string | null;
 }
 
-export type AppointmentStatus = "PLANNED" | "CONFIRMED" | "CANCELLED" | "DONE" | "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
+export type AppointmentStatus = 
+  | "PLANNED" 
+  | "CONFIRMED" 
+  | "CANCELLED" 
+  | "DONE" 
+  | "SCHEDULED" 
+  | "COMPLETED" 
+  | "CANCELED" 
+  | "RESCHEDULED" 
+  | "NO_SHOW";
 
 // Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
 export interface CreateAppointmentPayload {

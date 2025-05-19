@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -7,15 +8,20 @@ import {
 } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
+import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase, createAppointmentPayload } from "./appointment-adapter";
 
 // Type plus spécifique pour la création d'appointment
 type CreateAppointmentPayload = {
 	date: string;
 	patientId: number;
 	reason: string;
+	start: string;
+	end: string;
 	status?: AppointmentStatus;
 	cabinetId?: number;
+	osteopathId?: number;
 	notificationSent?: boolean;
+	notes?: string | null;
 };
 
 // Type pour l'objet réellement envoyé à Supabase
@@ -25,7 +31,9 @@ type InsertableAppointment = {
 	reason: string;
 	status: AppointmentStatus;
 	cabinetId?: number;
+	osteopathId?: number;
 	notificationSent: boolean;
+	notes?: string | null;
 };
 
 // Type pour les mises à jour d'appointment
@@ -73,7 +81,7 @@ export const supabaseAppointmentService = {
 			}
 
 			console.log(`${data?.length || 0} rendez-vous chargés pour l'ostéopathe ${osteopathId}`);
-			return data || [];
+			return (data || []).map(adaptAppointmentFromSupabase);
 		} catch (error) {
 			console.error("Error fetching appointments:", error);
 			throw error;
@@ -92,7 +100,7 @@ export const supabaseAppointmentService = {
 			if (error) throw error;
 			if (!data) throw new Error(`Appointment with id ${id} not found`);
 
-			return data;
+			return adaptAppointmentFromSupabase(data);
 		} catch (error) {
 			console.error("Error fetching appointment:", error);
 			throw error;
@@ -111,7 +119,7 @@ export const supabaseAppointmentService = {
 
 			if (error) throw error;
 
-			return data || [];
+			return (data || []).map(adaptAppointmentFromSupabase);
 		} catch (error) {
 			console.error("Error fetching patient appointments:", error);
 			throw error;
@@ -150,7 +158,7 @@ export const supabaseAppointmentService = {
 				throw error;
 			}
 
-			return data;
+			return data ? adaptAppointmentFromSupabase(data) : null;
 		} catch (error) {
 			console.error("Error fetching today's appointments:", error);
 			throw error;
@@ -182,19 +190,20 @@ export const supabaseAppointmentService = {
 				throw new Error("Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient");
 			}
 
-			// Création de l'objet à insérer - sans les champs timestamp qui sont auto-générés par la DB
-			const insertable: InsertableAppointment = {
-				date: payload.date,
-				patientId: payload.patientId,
-				reason: payload.reason,
-				cabinetId: payload.cabinetId,
-				status: ensureAppointmentStatus(payload.status),
-				notificationSent: payload.notificationSent ?? false,
-			};
+			// Création de l'objet à insérer - adapter correctement pour Supabase
+			const adaptedData = adaptAppointmentToSupabase({
+				...payload,
+				osteopathId: payload.osteopathId || osteopathId,
+			});
+
+			// Convertir le statut si nécessaire (CANCELLED -> CANCELED)
+			if (adaptedData.status === "CANCELLED") {
+				adaptedData.status = "CANCELED";
+			}
 
 			const { data, error } = await supabase
 				.from("Appointment")
-				.insert(insertable)
+				.insert(adaptedData)
 				.select()
 				.single();
 
@@ -204,7 +213,7 @@ export const supabaseAppointmentService = {
 			}
 
 			console.log("Rendez-vous créé avec succès:", data);
-			return data;
+			return adaptAppointmentFromSupabase(data);
 		} catch (error: any) {
 			console.error("Error creating appointment:", error);
 			throw error;

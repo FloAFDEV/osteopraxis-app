@@ -7,7 +7,7 @@ import { z } from "zod";
 import { api } from "@/services/api";
 import { Appointment, Patient, AppointmentStatus } from "@/types";
 import { toast } from "sonner";
-import { Calendar } from "lucide-react";
+import { Calendar, CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -50,12 +49,14 @@ interface AppointmentFormProps {
   defaultValues?: Partial<AppointmentFormValues>;
   appointmentId?: number;
   patients?: Patient[]; // Ajouté pour NewAppointmentPage
+  isEditing?: boolean;
 }
 
 export function AppointmentForm({
   defaultValues,
   appointmentId,
   patients: propPatients,
+  isEditing,
 }: AppointmentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [patients, setPatients] = useState<Patient[]>(propPatients || []);
@@ -256,13 +257,34 @@ export function AppointmentForm({
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={isSubmitting}
-                      initialFocus
-                    />
+                    {/* Ici nous corrigeons l'erreur en utilisant le composant ui/calendar */}
+                    <div className="calendar-container p-3">
+                      {field.value && (
+                        <div className="text-sm mb-2">
+                          Sélection: {formatDate(field.value)}
+                        </div>
+                      )}
+                      <div className="grid grid-cols-7 gap-2">
+                        {Array.from({ length: 31 }, (_, i) => {
+                          const day = new Date();
+                          day.setDate(day.getDate() + i - 5);
+                          return (
+                            <Button 
+                              key={i}
+                              type="button"
+                              variant={field.value && day.toDateString() === field.value.toDateString() ? "default" : "outline"}
+                              className={cn(
+                                "h-9 w-9",
+                                day.getMonth() !== new Date().getMonth() && "opacity-50"
+                              )}
+                              onClick={() => field.onChange(day)}
+                            >
+                              {day.getDate()}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </PopoverContent>
                 </Popover>
                 <FormMessage />

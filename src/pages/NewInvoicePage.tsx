@@ -75,8 +75,8 @@ const NewInvoicePage = () => {
         <h1 className="text-2xl font-bold mb-4">Nouvelle Facture</h1>
         {appointment && patientData ? (
           <InvoiceForm 
-            patient={patientData} 
-            appointment={appointment} 
+            patient={patientData}
+            appointment={appointment}
             onCreate={() => navigate("/invoices")}
           />
         ) : (

@@ -25,9 +25,15 @@ export const adaptAppointmentFromSupabase = (data: any): Appointment => {
 };
 
 export const adaptAppointmentToSupabase = (appointment: Partial<Appointment>): any => {
+  // Pour les champs date, start et end, assurons qu'ils sont définis pour Supabase
+  const date = appointment.date || appointment.start;
+  
   // Convertir l'appointment pour l'envoi à Supabase
   const payload: any = {
     ...appointment,
+    date: date,
+    // Si le statut est "CANCELLED", le convertir en "CANCELED" (orthographe en DB)
+    status: appointment.status === "CANCELLED" ? "CANCELED" : appointment.status,
   };
 
   // Nettoyer les propriétés non nécessaires pour Supabase
