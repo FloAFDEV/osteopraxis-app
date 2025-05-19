@@ -28,7 +28,6 @@ import RegisterPage from "./pages/RegisterPage";
 import SchedulePage from "./pages/SchedulePage";
 import SettingsPage from "./pages/SettingsPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
-import { corsHeaders } from "./services/corsHeaders";
 
 function App() {
 	const { isAuthenticated, loadStoredToken, user, redirectToSetupIfNeeded } = useAuth();
@@ -72,13 +71,16 @@ function App() {
 		const originalFetch = window.fetch;
 		window.fetch = function (input, init) {
 			const modifiedInit = init || {};
-			// Si l'URL contient supabase.co, nous ajoutons les en-têtes CORS
-			if (typeof input === "string" && input.includes("supabase.co")) {
-				modifiedInit.headers = {
-					...modifiedInit.headers,
-					...corsHeaders
-				};
+			
+			// Pour les requêtes vers les fonctions edge de Supabase
+			if (typeof input === "string" && input.includes("supabase.co/functions")) {
+				// Ne pas ajouter de headers CORS côté client
+				// Access-Control-Allow-* sont des headers de réponse, pas de requête
+				// S'assurer que les headers d'authentification sont présents
+				const headers = modifiedInit.headers || {};
+				modifiedInit.headers = headers;
 			}
+			
 			return originalFetch(input, modifiedInit);
 		};
 
@@ -97,6 +99,7 @@ function App() {
 
 	const isAdmin = user?.role === "ADMIN";
 
+	
 	return (
 		<>
 			<Routes>

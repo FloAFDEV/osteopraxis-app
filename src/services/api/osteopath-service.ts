@@ -3,7 +3,6 @@ import { Osteopath } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
 import { supabase } from '@/integrations/supabase/client';
-import { corsHeaders } from "../corsHeaders";
 
 export const osteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
@@ -58,8 +57,8 @@ export const osteopathService = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${sessionData.session.access_token}`,
-            ...corsHeaders // Ajout des en-têtes CORS pour la requête
+            "Authorization": `Bearer ${sessionData.session.access_token}`
+            // Ne pas inclure les corsHeaders ici - ces headers sont réservés aux réponses du serveur
           },
           body: JSON.stringify({
             osteopathData: {
@@ -139,6 +138,7 @@ export const osteopathService = {
               headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${sessionData.session.access_token}`
+                // Ne pas inclure les corsHeaders ici
               },
               body: JSON.stringify({
                 osteopathData: data

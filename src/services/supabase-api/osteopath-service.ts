@@ -1,7 +1,6 @@
 
 import { Osteopath } from "@/types";
 import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY, removeNullProperties } from "./utils";
-import { corsHeaders } from "@/services/corsHeaders";
 
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
@@ -145,8 +144,8 @@ export const supabaseOsteopathService = {
           apikey: SUPABASE_API_KEY,
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Prefer: "return=representation",
-          ...corsHeaders
+          Prefer: "return=representation"
+          // Ne pas inclure corsHeaders ici
         },
         body: JSON.stringify(updatePayload),
       });

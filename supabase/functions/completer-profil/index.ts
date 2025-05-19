@@ -54,6 +54,7 @@ serve(async (req: Request) => {
     // Support both PATCH and POST with X-HTTP-Method-Override
     const method = req.headers.get('X-HTTP-Method-Override') || req.method;
     console.log("Méthode effective:", method);
+    console.log("User ID trouvé:", user.id);
     
     let osteopathData;
     try {
@@ -92,11 +93,24 @@ serve(async (req: Request) => {
 
     // Vérifier si un ostéopathe existe déjà pour cet utilisateur
     console.log("Recherche d'un ostéopathe existant...");
-    const { data: existingOsteopath, error: findError } = await adminClient
+    let { data: existingOsteopath, error: findError } = await adminClient
       .from('Osteopath')
       .select('*')
       .eq('userId', user.id)
       .maybeSingle();
+      
+    // Si pas trouvé, lister tous les ostéopathes pour debug
+    if (!existingOsteopath) {
+      console.log("Aucun ostéopathe trouvé avec l'ID utilisateur actuel. Affichage des 10 premiers ostéopathes:");
+      const { data: allOsteos, error: listError } = await adminClient
+        .from('Osteopath')
+        .select('id, userId, name')
+        .limit(10);
+        
+      if (!listError) {
+        console.log("Ostéopathes disponibles:", allOsteos);
+      }
+    }
       
     if (findError) {
       console.error("Erreur lors de la recherche d'un ostéopathe existant:", findError);
