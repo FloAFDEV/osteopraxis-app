@@ -58,7 +58,8 @@ export const osteopathService = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${sessionData.session.access_token}`
+            "Authorization": `Bearer ${sessionData.session.access_token}`,
+            ...corsHeaders // Ajout des en-têtes CORS pour la requête
           },
           body: JSON.stringify({
             osteopathData: {
