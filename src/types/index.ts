@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -130,9 +131,7 @@ export interface Appointment {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
-  
-  // Propriétés manquantes utilisées dans le code
-  date?: string; // Pour compatibilité avec le code existant
+  date: string; // Rendu obligatoire pour compatibilité
   reason: string;
   notificationSent: boolean;
   user_id?: string | null;
@@ -147,13 +146,14 @@ export interface CreateAppointmentPayload {
   osteopathId: number;
   start: string;
   end: string;
-  date?: string;
+  date: string;  // Rendu obligatoire pour compatibilité
   reason: string;
   status: AppointmentStatus;
   notes?: string | null;
   notificationSent: boolean;
   createdAt?: string;
   updatedAt?: string;
+  website?: string; // Ajouté pour le honeypot dans le formulaire
 }
 
 export interface Invoice {

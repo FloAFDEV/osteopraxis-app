@@ -2,7 +2,8 @@
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { AppointmentStatus } from "@/types"; 
+import { AppointmentStatus, CreateAppointmentPayload } from "@/types"; 
+import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
 
 // Create a custom error class for appointment conflicts
 export class AppointmentConflictError extends Error {
@@ -113,10 +114,12 @@ export const appointmentService = {
     ) || null;
   },
 
-  async createAppointment(appointment: Omit<Appointment, "id">): Promise<Appointment> {
+  async createAppointment(appointmentData: any): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.createAppointment(appointment);
+        // Utiliser la fonction adaptateur pour créer le payload
+        const payload = createAppointmentPayload(appointmentData);
+        return await supabaseAppointmentService.createAppointment(payload);
       } catch (error) {
         console.error("Erreur lors de la création de la séance:", error);
         throw error;
@@ -124,12 +127,17 @@ export const appointmentService = {
     }
     
     await delay(500);
-    const newAppointment = {
-      ...appointment,
+    // Assurer que tous les champs nécessaires sont présents
+    const appointmentWithAllFields = {
+      ...appointmentData,
       id: appointments.length + 1,
+      start: appointmentData.start || appointmentData.date,
+      end: appointmentData.end || new Date(new Date(appointmentData.date).getTime() + 30 * 60000).toISOString(),
+      date: appointmentData.date || appointmentData.start,
+      osteopathId: appointmentData.osteopathId || 1,
     };
-    appointments.push(newAppointment);
-    return newAppointment;
+    appointments.push(appointmentWithAllFields);
+    return appointmentWithAllFields;
   },
 
   async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {

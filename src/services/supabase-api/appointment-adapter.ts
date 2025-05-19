@@ -2,15 +2,18 @@
 import { Appointment, AppointmentStatus, CreateAppointmentPayload } from "@/types";
 
 export const adaptAppointmentFromSupabase = (data: any): Appointment => {
-  // S'assurer que tous les champs requis sont présents
+  // Assurer que tous les champs requis sont présents
+  const start = data.start || data.date;
+  const end = data.end || (start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString() : null);
+  
   return {
     id: data.id,
     patientId: data.patientId,
     cabinetId: data.cabinetId || 1,
     osteopathId: data.osteopathId || 1,
-    date: data.date || data.start, // Compatibilité
-    start: data.start || data.date, // S'assurer que start est défini
-    end: data.end || new Date(new Date(data.start || data.date).getTime() + 30 * 60000).toISOString(), // Par défaut 30 minutes
+    date: data.date || start, // Compatibilité
+    start: start,
+    end: end,
     status: data.status as AppointmentStatus,
     notes: data.notes || null,
     createdAt: data.createdAt || new Date().toISOString(),
@@ -35,13 +38,16 @@ export const adaptAppointmentToSupabase = (appointment: Partial<Appointment>): a
 
 export const createAppointmentPayload = (data: any): CreateAppointmentPayload => {
   // Créer un payload correct pour la création d'un rendez-vous
+  const start = data.start || data.date;
+  
   return {
     patientId: data.patientId,
     cabinetId: data.cabinetId || 1,
     osteopathId: data.osteopathId || 1,
-    start: data.start || data.date,
-    end: data.end || new Date(new Date(data.start || data.date).getTime() + 30 * 60000).toISOString(),
-    status: data.status,
+    start: start,
+    end: data.end || new Date(new Date(start).getTime() + 30 * 60000).toISOString(),
+    date: start, // S'assurer que le champ date est défini
+    status: data.status || "PLANNED",
     notes: data.notes || null,
     reason: data.reason || "",
     notificationSent: data.notificationSent || false,

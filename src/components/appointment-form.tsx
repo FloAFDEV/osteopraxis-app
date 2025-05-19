@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -7,8 +8,6 @@ import { api } from "@/services/api";
 import { Appointment, Patient, AppointmentStatus } from "@/types";
 import { toast } from "sonner";
 import { Calendar } from "lucide-react";
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,10 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
-import { DatePicker } from "@/components/ui/date-picker";
-import { InputTime } from "./ui/input-time";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const appointmentFormSchema = z.object({
   patientId: z.number().min(1, {
@@ -42,6 +41,7 @@ const appointmentFormSchema = z.object({
   }),
   notes: z.string().optional(),
   status: z.enum(["PLANNED", "CONFIRMED", "CANCELLED", "DONE", "SCHEDULED", "COMPLETED", "CANCELED", "RESCHEDULED", "NO_SHOW"]).default("PLANNED"),
+  website: z.string().optional(), // Ajouté pour le honeypot
 });
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
@@ -49,20 +49,27 @@ type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 interface AppointmentFormProps {
   defaultValues?: Partial<AppointmentFormValues>;
   appointmentId?: number;
+  patients?: Patient[]; // Ajouté pour NewAppointmentPage
 }
 
 export function AppointmentForm({
   defaultValues,
   appointmentId,
+  patients: propPatients,
 }: AppointmentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<Patient[]>(propPatients || []);
   const [customTime, setCustomTime] = useState<string | null>(null);
   const [useCustomTime, setUseCustomTime] = useState(false);
   const navigate = useNavigate();
   const { patientId: patientIdParam } = useParams<{ patientId: string }>();
 
   useEffect(() => {
+    if (propPatients) {
+      setPatients(propPatients);
+      return;
+    }
+
     const fetchPatients = async () => {
       try {
         const patientsData = await api.getPatients();
@@ -74,7 +81,7 @@ export function AppointmentForm({
     };
 
     fetchPatients();
-  }, []);
+  }, [propPatients]);
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -85,6 +92,7 @@ export function AppointmentForm({
       reason: defaultValues?.reason || "",
       notes: defaultValues?.notes || "",
       status: defaultValues?.status || "PLANNED",
+      website: defaultValues?.website || "", // Honeypot field
     },
   });
 
@@ -158,9 +166,41 @@ export function AppointmentForm({
     }
   };
 
+  // Fonction simple pour formater la date en français
+  const formatDate = (date: Date) => {
+    return format(date, "PPP", { locale: fr });
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Honeypot field - hidden from users */}
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem
+              style={{
+                position: "absolute",
+                left: "-5000px",
+                opacity: 0,
+                height: "1px",
+                width: "1px",
+                overflow: "hidden"
+              }}
+              aria-hidden="true"
+            >
+              <FormControl>
+                <Input
+                  {...field}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="patientId"
@@ -202,12 +242,12 @@ export function AppointmentForm({
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
+                          "w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP", { locale: fr })
+                          formatDate(field.value)
                         ) : (
                           <span>Choisir une date</span>
                         )}
@@ -216,9 +256,8 @@ export function AppointmentForm({
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <DatePicker
+                    <Calendar
                       mode="single"
-                      locale={fr}
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={isSubmitting}
@@ -238,11 +277,13 @@ export function AppointmentForm({
               <FormItem>
                 <FormLabel>Heure de la séance</FormLabel>
                 <FormControl>
-                  <InputTime
+                  <Input
+                    type="time"
+                    placeholder="HH:MM"
                     value={useCustomTime ? customTime : field.value}
-                    onChange={(time) => {
-                      field.onChange(time);
-                      setCustomTime(time);
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      setCustomTime(e.target.value);
                       setUseCustomTime(true);
                     }}
                     disabled={isSubmitting}

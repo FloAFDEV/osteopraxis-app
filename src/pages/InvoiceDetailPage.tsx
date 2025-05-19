@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "@/services/api";
@@ -22,8 +23,13 @@ const InvoiceDetailPage: React.FC = () => {
       try {
         if (!id) return;
         
-        // Convertir l'ID en nombre si nécessaire
-        const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+        // Convertir l'ID en nombre
+        const numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+          toast.error("ID de facture invalide");
+          return navigate("/invoices");
+        }
+        
         const invoiceData = await api.getInvoiceById(numericId);
         
         if (invoiceData) {

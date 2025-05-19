@@ -60,6 +60,7 @@ interface InvoiceFormProps {
 	initialAppointment?: Appointment;
 	initialInvoice?: Invoice;
 	patient?: Patient | null;
+	appointment?: Appointment | null;
 	onCreate?: () => void;
 	onSubmit?: (data: Invoice) => Promise<void>;
 }
@@ -69,14 +70,15 @@ export const InvoiceForm = ({
 	initialAppointment,
 	initialInvoice,
 	patient,
+	appointment,
 	onCreate,
 	onSubmit,
 }: InvoiceFormProps) => {
 	const [selectedPatient, setSelectedPatient] = useState<Patient | null>(
 		initialPatient || patient || null
 	);
-	const [appointment, setAppointment] = useState<Appointment | null>(
-		initialAppointment || null
+	const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(
+		initialAppointment || appointment || null
 	);
 	const [searchParams] = useSearchParams();
 
@@ -84,14 +86,14 @@ export const InvoiceForm = ({
 
 	// Fetch appointment by ID from URL if needed
 	useEffect(() => {
-		if (!initialAppointment && appointmentIdParam) {
+		if (!initialAppointment && !appointment && appointmentIdParam) {
 			const fetchAppointment = async () => {
 				try {
 					const fetched = await api.getAppointmentById(
 						Number(appointmentIdParam)
 					);
 					if (fetched) {
-						setAppointment(fetched);
+						setSelectedAppointment(fetched);
 						form.setValue("appointmentId", fetched.id);
 						form.setValue("date", fetched.date.split("T")[0]); // ISO → yyyy-MM-dd
 						if (!selectedPatient) {
@@ -108,7 +110,7 @@ export const InvoiceForm = ({
 			};
 			fetchAppointment();
 		}
-	}, [appointmentIdParam, initialAppointment]);
+	}, [appointmentIdParam, initialAppointment, appointment]);
 
 	// Patient list si non fourni
 	const { data: patients } = useQuery({
@@ -121,17 +123,18 @@ export const InvoiceForm = ({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			patientId: initialPatient?.id || patient?.id || initialInvoice?.patientId || 0,
-			appointmentId: initialAppointment?.id || initialInvoice?.appointmentId,
+			appointmentId: initialAppointment?.id || appointment?.id || initialInvoice?.appointmentId,
 			amount: initialInvoice?.amount || 60,
 			date: initialInvoice?.date?.split("T")[0] || 
 			      initialAppointment?.date?.split("T")[0] ||
+				  appointment?.date?.split("T")[0] ||
 			      format(new Date(), "yyyy-MM-dd"),
 			paymentStatus: initialInvoice?.paymentStatus || "PAID",
 			paymentMethod: initialInvoice?.paymentMethod || "CB",
 			tvaExoneration: initialInvoice?.tvaExoneration ?? true,
 			tvaMotif: initialInvoice?.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
 			notes: initialInvoice?.notes || "",
-			noConsultation: !initialInvoice?.appointmentId,
+			noConsultation: !initialInvoice?.appointmentId && !appointment?.id,
 			// Initialize honeypot field with empty string
 			website: ""
 		},
@@ -152,17 +155,17 @@ export const InvoiceForm = ({
 				notes: data.notes,
 			};
 
-			if (!data.noConsultation && appointment?.id) {
+			if (!data.noConsultation && (selectedAppointment?.id || appointment?.id)) {
 				console.log(
 					"[DEBUG] Vérification appointmentId =",
-					appointment.id
+					selectedAppointment?.id || appointment?.id
 				);
 
 				// Si ce n'est pas une mise à jour
 				if (!initialInvoice) {
 					// ✅ Vérifier s'il existe déjà une facture pour ce rendez-vous
 					const existingInvoices = await api.getInvoicesByAppointmentId(
-						appointment.id
+						selectedAppointment?.id || appointment?.id
 					);
 
 					if (existingInvoices && existingInvoices.length > 0) {
@@ -176,8 +179,8 @@ export const InvoiceForm = ({
 					}
 				}
 
-				invoiceData.appointmentId = appointment.id;
-				console.log("[DEBUG] appointmentId trouvé:", appointment.id);
+				invoiceData.appointmentId = selectedAppointment?.id || appointment?.id;
+				console.log("[DEBUG] appointmentId trouvé:", selectedAppointment?.id || appointment?.id);
 			}
 
 			console.log(

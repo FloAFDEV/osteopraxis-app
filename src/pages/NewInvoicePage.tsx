@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -73,7 +74,11 @@ const NewInvoicePage = () => {
         </Button>
         <h1 className="text-2xl font-bold mb-4">Nouvelle Facture</h1>
         {appointment && patientData ? (
-          <InvoiceForm appointment={appointment} patient={patientData} />
+          <InvoiceForm 
+            patient={patientData} 
+            appointment={appointment} 
+            onCreate={() => navigate("/invoices")}
+          />
         ) : (
           <div className="text-center">
             <p className="text-muted-foreground">

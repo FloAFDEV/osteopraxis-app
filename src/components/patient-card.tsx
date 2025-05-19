@@ -1,3 +1,4 @@
+
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -10,11 +11,10 @@ import {
 	Weight,
 	Activity,
 	Droplets,
-	Ruler, // Remplacé Height par Ruler
+	Ruler,
 } from "lucide-react";
 import { Patient } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
