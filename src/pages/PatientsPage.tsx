@@ -1,3 +1,9 @@
+import React, { useState } from "react";
+import { api } from "@/services/api";
+import { Layout } from "@/components/ui/layout";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 // Modifions uniquement la section de création d'un patient test pour qu'elle respecte l'interface requise:
 
@@ -101,3 +107,37 @@ const createTestPatient = async () => {
     toast.error("Impossible de créer le patient test");
   }
 };
+
+const PatientsPage = () => {
+  // Simulation du hook useQuery pour obtenir refetch
+  const { data: patients, refetch } = useQuery({
+    queryKey: ['patients'],
+    queryFn: api.getPatients
+  });
+
+  return (
+    <Layout>
+      <div className="container mx-auto py-6">
+        <h1 className="text-2xl font-bold mb-4">Patients</h1>
+        <Button 
+          variant="outline" 
+          onClick={createTestPatient}
+          className="mb-4"
+        >
+          Créer un patient test
+        </Button>
+        
+        {/* Rest of the component code */}
+        <div className="grid gap-4">
+          {patients?.map(patient => (
+            <div key={patient.id} className="border p-4 rounded">
+              {patient.firstName} {patient.lastName}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default PatientsPage;

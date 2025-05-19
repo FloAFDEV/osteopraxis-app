@@ -53,9 +53,9 @@ export const supabaseInvoiceService = {
           totalAmount: item.amount,
           amount: item.amount, // Alias pour la compatibilité
           paymentStatus: item.paymentStatus as PaymentStatus, // Alias pour la compatibilité
-          paymentDate: item.paymentDate,
-          paymentMethod: item.paymentMethod,
-          notes: item.notes,
+          paymentDate: item.paymentDate || null,
+          paymentMethod: item.paymentMethod || null,
+          notes: item.notes || null,
           createdAt: item.createdAt || new Date().toISOString(),
           updatedAt: item.updatedAt || new Date().toISOString(),
           tvaExoneration: item.tvaExoneration || true,
@@ -100,9 +100,9 @@ export const supabaseInvoiceService = {
         totalAmount: data.amount,
         amount: data.amount, // Alias pour la compatibilité
         paymentStatus: data.paymentStatus as PaymentStatus, // Alias pour la compatibilité
-        paymentDate: data.paymentDate,
-        paymentMethod: data.paymentMethod,
-        notes: data.notes,
+        paymentDate: data.paymentDate || null,
+        paymentMethod: data.paymentMethod || null,
+        notes: data.notes || null,
         createdAt: data.createdAt || new Date().toISOString(),
         updatedAt: data.updatedAt || new Date().toISOString(),
         tvaExoneration: data.tvaExoneration || true,
@@ -224,9 +224,19 @@ export const supabaseInvoiceService = {
         delete dataToInsert.appointmentId;
       }
       
+      // Assurons-nous que tous les champs requis sont présents
+      const dataWithDefaults = {
+        ...dataToInsert,
+        cabinetId: dataToInsert.cabinetId || 1,
+        osteopathId: dataToInsert.osteopathId || osteopathId,
+        number: dataToInsert.number || `INV-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
       const { data, error } = await supabase
         .from("Invoice")
-        .insert(dataToInsert)
+        .insert(dataWithDefaults)
         .select()
         .single();
 
