@@ -47,15 +47,11 @@ export const supabaseInvoiceService = {
           osteopathId: osteopathId, // Use connected osteopath ID
           appointmentId: item.appointmentId,
           date: item.date,
-          // Fix for the invoice number property
           number: item.number || `INV-${item.id}`,
-          // Use CANCELED instead of CANCELLED
           status: item.paymentStatus || "DRAFT",
           totalAmount: item.amount,
           amount: item.amount, // Alias for compatibility
-          // Fix for paymentStatus property
           paymentStatus: item.paymentStatus as PaymentStatus,
-          // Fix for paymentDate property
           paymentDate: item.paymentDate || null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
