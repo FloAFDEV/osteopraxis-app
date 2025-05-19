@@ -1,6 +1,6 @@
 
 import { Invoice, PaymentStatus } from "@/types";
-import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
+import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 
@@ -56,8 +56,8 @@ export const supabaseInvoiceService = {
           paymentDate: item.paymentDate || null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
-          createdAt: item.createdAt || new Date().toISOString(),
-          updatedAt: item.updatedAt || new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           tvaExoneration: item.tvaExoneration || true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         } as Invoice;
@@ -103,8 +103,8 @@ export const supabaseInvoiceService = {
         paymentDate: data.paymentDate || null,
         paymentMethod: data.paymentMethod || null,
         notes: data.notes || null,
-        createdAt: data.createdAt || new Date().toISOString(),
-        updatedAt: data.updatedAt || new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         tvaExoneration: data.tvaExoneration || true,
         tvaMotif: data.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
       } as Invoice;
@@ -143,8 +143,8 @@ export const supabaseInvoiceService = {
           paymentDate: item.paymentDate,
           paymentMethod: item.paymentMethod,
           notes: item.notes,
-          createdAt: item.createdAt || new Date().toISOString(),
-          updatedAt: item.updatedAt || new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           tvaExoneration: item.tvaExoneration || true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         } as Invoice;
@@ -184,8 +184,8 @@ export const supabaseInvoiceService = {
           paymentDate: item.paymentDate,
           paymentMethod: item.paymentMethod,
           notes: item.notes,
-          createdAt: item.createdAt || new Date().toISOString(),
-          updatedAt: item.updatedAt || new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           tvaExoneration: item.tvaExoneration || true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         } as Invoice;
