@@ -11,11 +11,14 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		// Convertir les types enum en chaînes si nécessaire
 		const formattedData = {
 			...updateData,
-			// Convertir tout type spécifique en chaîne si nécessaire
+			// Convertir tout type spécifique en chaîne pour être compatibles avec Supabase
 			contraception: String(updateData.contraception || ""),
 			gender: String(updateData.gender || ""),
 			handedness: String(updateData.handedness || ""),
 			maritalStatus: String(updateData.maritalStatus || ""),
+			childrenAges: Array.isArray(updateData.childrenAges) 
+				? updateData.childrenAges 
+				: null
 		};
 
 		const { data, error } = await supabase

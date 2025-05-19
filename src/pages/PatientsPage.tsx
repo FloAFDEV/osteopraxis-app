@@ -5,8 +5,8 @@ import { Layout } from "@/components/ui/layout";
 import { useQuery } from "@tanstack/react-query";
 
 const PatientsPage = () => {
-  // Use useQuery to get refetch function
-  const { data: patients, refetch } = useQuery({
+  // Use useQuery to fetch patients
+  const { data: patients } = useQuery({
     queryKey: ['patients'],
     queryFn: api.getPatients
   });

@@ -18,14 +18,17 @@ export async function createPatient(
 			osteopathId,
 		};
 
-		// Enlever les champs non supportés ou les convertir en types corrects
+		// Convertir les données pour respecter les types précis attendus par Supabase
 		const formattedData = {
 			...patientWithOsteopath,
-			// Convertir tout type spécifique en chaîne si nécessaire
+			// Enlever les champs qui ne sont pas supportés par la table
 			contraception: String(patientWithOsteopath.contraception || ""),
 			gender: String(patientWithOsteopath.gender || ""),
 			handedness: String(patientWithOsteopath.handedness || ""),
 			maritalStatus: String(patientWithOsteopath.maritalStatus || ""),
+			childrenAges: Array.isArray(patientWithOsteopath.childrenAges) 
+				? patientWithOsteopath.childrenAges 
+				: null
 		};
 
 		const { data, error } = await supabase

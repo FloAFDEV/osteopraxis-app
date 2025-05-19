@@ -43,14 +43,14 @@ export const supabaseInvoiceService = {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: 1, // Default value
+          cabinetId: item.cabinetId || 1, // Default value
           osteopathId: osteopathId, // Use connected osteopath ID
           appointmentId: item.appointmentId,
           date: item.date,
           // Fix for the invoice number property
           number: item.number || `INV-${item.id}`,
-          // Fix for the status property - use 'CANCELLED' instead of 'CANCELED'
-          status: item.paymentStatus === 'CANCELED' ? 'CANCELLED' : item.paymentStatus || "DRAFT",
+          // Use CANCELED instead of CANCELLED
+          status: item.paymentStatus || "DRAFT",
           totalAmount: item.amount,
           amount: item.amount, // Alias for compatibility
           // Fix for paymentStatus property
@@ -103,8 +103,7 @@ export const supabaseInvoiceService = {
         appointmentId: data.appointmentId,
         date: data.date,
         number: data.number || `INV-${data.id}`,
-        // Fix for status property value
-        status: data.paymentStatus === 'CANCELED' ? 'CANCELLED' : data.paymentStatus || "DRAFT",
+        status: data.paymentStatus || "DRAFT",
         totalAmount: data.amount,
         amount: data.amount, // Alias for compatibility
         paymentStatus: data.paymentStatus as PaymentStatus,
@@ -149,8 +148,7 @@ export const supabaseInvoiceService = {
           appointmentId: item.appointmentId,
           date: item.date,
           number: item.number || `INV-${item.id}`,
-          // Fix for status property value
-          status: item.paymentStatus === 'CANCELED' ? 'CANCELLED' : item.paymentStatus || "DRAFT",
+          status: item.paymentStatus || "DRAFT",
           totalAmount: item.amount,
           amount: item.amount, // Alias for compatibility
           paymentStatus: item.paymentStatus as PaymentStatus,
@@ -195,8 +193,7 @@ export const supabaseInvoiceService = {
           appointmentId: item.appointmentId,
           date: item.date,
           number: item.number || `INV-${item.id}`,
-          // Fix for status property value
-          status: item.paymentStatus === 'CANCELED' ? 'CANCELLED' : item.paymentStatus || "DRAFT",
+          status: item.paymentStatus || "DRAFT",
           totalAmount: item.amount,
           amount: item.amount, // Alias for compatibility
           paymentStatus: item.paymentStatus as PaymentStatus,

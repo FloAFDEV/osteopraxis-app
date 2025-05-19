@@ -190,7 +190,7 @@ export interface Invoice {
   Patient?: Patient; // Relation avec le patient
 }
 
-export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELLED";
+export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELED";
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 
 export interface Osteopath {
