@@ -34,160 +34,160 @@ export interface Cabinet {
 }
 
 export interface Patient {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-  birthDate: string | null;
-  address: string | null;
-  city: string | null;
-  postalCode: string | null;
-  country: string | null;
-  gender: "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
-  height: number | null;
-  weight: number | null;
-  bmi: number | null;
-  bloodType: "A_POS" | "A_NEG" | "B_POS" | "B_NEG" | "AB_POS" | "AB_NEG" | "O_POS" | "O_NEG" | null;
-  medicalHistory: string | null;
-  allergies: string | null;
-  medications: string | null;
-  osteopathId: string | number | null;
-  cabinetId: number | null;
-  createdAt: string;
-  updatedAt: string;
-  userId: string | null;
-  avatarUrl: string | null;
-  childrenAges: number[] | null;
-  complementaryExams: string | null;
-  generalSymptoms: string | null;
-  pregnancyHistory: string | null;
-  birthDetails: string | null;
-  developmentMilestones: string | null;
-  sleepingPattern: string | null;
-  feeding: string | null;
-  behavior: string | null;
-  childCareContext: string | null;
-  isExSmoker: boolean | null;
-  smokingSince: string | null;
-  smokingAmount: string | null;
-  quitSmokingDate: string | null;
-  
-  // Champs ajoutés existants en base de données
-  currentTreatment?: string | null;
-  hdlm?: string | null;
-  hasVisionCorrection?: boolean;
-  isSmoker?: boolean;
-  isDeceased?: boolean;
-  maritalStatus?: string | null;
-  occupation?: string | null;
-  physicalActivity?: string | null;
-  hasChildren?: string | null;
-  generalPractitioner?: string | null;
-  entProblems?: string | null;
-  entDoctorName?: string | null;
-  digestiveProblems?: string | null;
-  digestiveDoctorName?: string | null;
-  ophtalmologistName?: string | null;
-  surgicalHistory?: string | null;
-  traumaHistory?: string | null;
-  rheumatologicalHistory?: string | null;
-  handedness?: string | null;
-  contraception?: string | null;
-  familyStatus?: string | null;
+	id: number;
+	firstName: string;
+	lastName: string;
+	email: string | null;
+	phone: string | null;
+	birthDate: string | null;
+	address: string | null;
+	city: string | null;
+	postalCode: string | null;
+	country: string | null;
+	gender: "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
+	height: number | null;
+	weight: number | null;
+	bmi: number | null;
+	bloodType: "A_POS" | "A_NEG" | "B_POS" | "B_NEG" | "AB_POS" | "AB_NEG" | "O_POS" | "O_NEG" | null;
+	medicalHistory: string | null;
+	allergies: string | null;
+	medications: string | null;
+	osteopathId: string | number | null;
+	cabinetId: number | null;
+	createdAt: string;
+	updatedAt: string;
+	userId: string | null;
+	avatarUrl: string | null;
+	childrenAges: number[] | null;
+	complementaryExams: string | null;
+	generalSymptoms: string | null;
+	pregnancyHistory: string | null;
+	birthDetails: string | null;
+	developmentMilestones: string | null;
+	sleepingPattern: string | null;
+	feeding: string | null;
+	behavior: string | null;
+	childCareContext: string | null;
+	isExSmoker: boolean | null;
+	smokingSince: string | null;
+	smokingAmount: string | null;
+	quitSmokingDate: string | null;
+	
+	// Champs ajoutés existants en base de données
+	currentTreatment?: string | null;
+	hdlm?: string | null;
+	hasVisionCorrection?: boolean;
+	isSmoker?: boolean;
+	isDeceased?: boolean;
+	maritalStatus?: string | null;
+	occupation?: string | null;
+	physicalActivity?: string | null;
+	hasChildren?: string | null;
+	generalPractitioner?: string | null;
+	entProblems?: string | null;
+	entDoctorName?: string | null;
+	digestiveProblems?: string | null;
+	digestiveDoctorName?: string | null;
+	ophtalmologistName?: string | null;
+	surgicalHistory?: string | null;
+	traumaHistory?: string | null;
+	rheumatologicalHistory?: string | null;
+	handedness?: string | null;
+	contraception?: string | null;
+	familyStatus?: string | null;
 
-  // Nouveaux champs généraux
-  ent_followup: string | null;
-  intestinal_transit: string | null;
-  sleep_quality: string | null;
-  fracture_history: string | null;
-  dental_health: string | null;
-  sport_frequency: string | null;
-  gynecological_history: string | null;
-  other_comments_adult: string | null;
+	// Nouveaux champs généraux
+	ent_followup: string | null;
+	intestinal_transit: string | null;
+	sleep_quality: string | null;
+	fracture_history: string | null;
+	dental_health: string | null;
+	sport_frequency: string | null;
+	gynecological_history: string | null;
+	other_comments_adult: string | null;
 
-  // Nouveaux champs spécifiques aux enfants
-  fine_motor_skills: string | null;
-  gross_motor_skills: string | null;
-  weight_at_birth: number | null;
-  height_at_birth: number | null;
-  head_circumference: number | null;
-  apgar_score: string | null;
-  childcare_type: string | null;
-  school_grade: string | null;
-  pediatrician_name: string | null;
-  paramedical_followup: string | null;
-  other_comments_child: string | null;
+	// Nouveaux champs spécifiques aux enfants
+	fine_motor_skills: string | null;
+	gross_motor_skills: string | null;
+	weight_at_birth: number | null;
+	height_at_birth: number | null;
+	head_circumference: number | null;
+	apgar_score: string | null;
+	childcare_type: string | null;
+	school_grade: string | null;
+	pediatrician_name: string | null;
+	paramedical_followup: string | null;
+	other_comments_child: string | null;
 }
 
 export interface Appointment {
-  id: number;
-  patientId: number;
-  cabinetId: number;
-  osteopathId: number;
-  start: string;
-  end: string;
-  status: AppointmentStatus;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-  date: string; // Rendu obligatoire pour compatibilité
-  reason: string;
-  notificationSent: boolean;
-  user_id?: string | null;
+	id: number;
+	patientId: number;
+	cabinetId: number;
+	osteopathId: number;
+	start: string;
+	end: string;
+	status: AppointmentStatus;
+	notes: string | null;
+	createdAt: string;
+	updatedAt: string;
+	date: string; // Rendu obligatoire pour compatibilité
+	reason: string;
+	notificationSent: boolean;
+	user_id?: string | null;
 }
 
 export type AppointmentStatus = 
-  | "PLANNED" 
-  | "CONFIRMED" 
-  | "CANCELLED" 
-  | "DONE" 
-  | "SCHEDULED" 
-  | "COMPLETED" 
-  | "CANCELED" 
-  | "RESCHEDULED" 
-  | "NO_SHOW";
+	| "PLANNED" 
+	| "CONFIRMED" 
+	| "CANCELLED" 
+	| "DONE" 
+	| "SCHEDULED" 
+	| "COMPLETED" 
+	| "CANCELED" 
+	| "RESCHEDULED" 
+	| "NO_SHOW";
 
 // Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
 export interface CreateAppointmentPayload {
-  patientId: number;
-  cabinetId: number;
-  osteopathId: number;
-  start: string;
-  end: string;
-  date: string;  // Rendu obligatoire pour compatibilité
-  reason: string;
-  status: AppointmentStatus;
-  notes?: string | null;
-  notificationSent: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  website?: string; // Ajouté pour le honeypot dans le formulaire
+	patientId: number;
+	cabinetId: number;
+	osteopathId: number;
+	start: string;
+	end: string;
+	date: string;  // Rendu obligatoire pour compatibilité
+	reason: string;
+	status: AppointmentStatus;
+	notes?: string | null;
+	notificationSent: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+	website?: string; // Ajouté pour le honeypot dans le formulaire
 }
 
 export interface Invoice {
-  id: number;
-  patientId: number;
-  cabinetId: number;
-  osteopathId: number;
-  appointmentId: number | null;
-  date: string;
-  number: string;
-  status: InvoiceStatus;
-  totalAmount: number;
-  paymentDate: string | null;
-  paymentMethod: string | null;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-  
-  // Propriétés utilisées dans le code mais manquantes dans l'interface
-  amount: number; // Alias pour totalAmount
-  paymentStatus: PaymentStatus; // Alias pour status
-  tvaExoneration?: boolean | null;
-  tvaMotif?: string | null;
-  // Relations
-  Patient?: Patient; // Relation avec le patient
+	id: number;
+	patientId: number;
+	cabinetId: number;
+	osteopathId: number;
+	appointmentId: number | null;
+	date: string;
+	number: string;
+	status: InvoiceStatus;
+	totalAmount: number;
+	paymentDate: string | null;
+	paymentMethod: string | null;
+	notes: string | null;
+	createdAt: string;
+	updatedAt: string;
+	
+	// Propriétés utilisées dans le code mais manquantes dans l'interface
+	amount: number; // Alias pour totalAmount
+	paymentStatus: PaymentStatus; // Alias pour status
+	tvaExoneration?: boolean | null;
+	tvaMotif?: string | null;
+	// Relations
+	Patient?: Patient; // Relation avec le patient
 }
 
 export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELED";
