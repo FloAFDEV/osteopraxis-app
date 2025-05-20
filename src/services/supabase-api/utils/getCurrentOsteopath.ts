@@ -105,21 +105,21 @@ export const isSameOsteopath = async (osteopathId: number): Promise<boolean> => 
 };
 
 // Types simplifiés pour éviter la récursion
-type PatientBasicInfo = {
+interface SimplePatient {
   id: number;
   firstName: string;
   lastName: string;
-};
+}
 
-type AppointmentBasicInfo = {
+interface SimpleAppointment {
   id: number;
   patientId: number;
-};
+}
 
-type InvoiceBasicInfo = {
+interface SimpleInvoice {
   id: number;
   patientId: number;
-};
+}
 
 /**
  * Vérifie si un patient appartient à l'ostéopathe connecté
@@ -236,8 +236,7 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       return false;
     }
     
-    // Vérifier que le patient appartient à l'ostéopathe connecté sans utiliser isPatientOwnedByCurrentOsteopath
-    // pour éviter la récursion potentielle
+    // Vérifier que le patient appartient à l'ostéopathe connecté
     const { data: patientData, error: patientError } = await supabase
       .from("Patient")
       .select("id")
@@ -302,8 +301,7 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       return false;
     }
     
-    // Vérifier que le patient appartient à l'ostéopathe connecté sans utiliser isPatientOwnedByCurrentOsteopath 
-    // pour éviter une récursion potentielle
+    // Vérifier que le patient appartient à l'ostéopathe connecté
     const { data: patientData, error: patientError } = await supabase
       .from("Patient")
       .select("id")

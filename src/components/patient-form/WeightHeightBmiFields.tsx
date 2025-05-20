@@ -43,6 +43,18 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
     return () => subscription.unsubscribe();
   }, [form]);
 
+  // Fonction pour déterminer la couleur du fond en fonction de la valeur de l'IMC
+  const getBmiBackgroundColor = (bmi: number | null): string => {
+    if (bmi === null || isNaN(bmi)) return "bg-gray-100";
+    
+    if (bmi < 18.5) return "bg-blue-100"; // Sous la normale
+    if (bmi >= 18.5 && bmi <= 24.9) return "bg-green-100"; // Normale
+    if (bmi >= 25 && bmi <= 29.9) return "bg-yellow-100"; // Surpoids
+    if (bmi >= 30) return "bg-red-100"; // Obèse
+    
+    return "bg-gray-100"; // Valeur par défaut
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <FormField
@@ -95,22 +107,27 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
       <FormField
         control={form.control}
         name="bmi"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>IMC (calculé automatiquement)</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="IMC"
-                readOnly
-                {...field}
-                value={field.value || ""}
-                className="bg-gray-100"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        render={({ field }) => {
+          const bmiValue = field.value as number | null;
+          const backgroundColor = getBmiBackgroundColor(bmiValue);
+          
+          return (
+            <FormItem>
+              <FormLabel>IMC (calculé automatiquement)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="IMC"
+                  readOnly
+                  {...field}
+                  value={field.value || ""}
+                  className={`${backgroundColor} border-gray-300`}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          );
+        }}
       />
     </div>
   );
