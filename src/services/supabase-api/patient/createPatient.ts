@@ -37,7 +37,9 @@ export async function createPatient(
 			childrenAges: Array.isArray(patientWithOsteopath.childrenAges) 
 				? patientWithOsteopath.childrenAges 
 				: null,
-            // Assurer que bmi est correctement formaté comme nombre
+            // Assurer que les valeurs numériques sont correctement formatées
+            height: patientWithOsteopath.height ? Number(patientWithOsteopath.height) : null,
+            weight: patientWithOsteopath.weight ? Number(patientWithOsteopath.weight) : null,
             bmi: patientWithOsteopath.bmi ? Number(patientWithOsteopath.bmi) : null
 		} as any;
 

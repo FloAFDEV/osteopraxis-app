@@ -18,4 +18,5 @@ export const patientService = {
 };
 
 export default patientService;
-export { patientService as supabasePatientService, updatePatient };
+export { patientService as supabasePatientService };
+export { updatePatient };

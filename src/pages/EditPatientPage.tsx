@@ -1,4 +1,3 @@
-
 import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
 import { PatientForm } from "@/components/patient-form";
 import { Button } from "@/components/ui/button";
@@ -150,11 +149,10 @@ const EditPatientPage = () => {
 				paramedical_followup: updatedData.paramedical_followup || patient.paramedical_followup || null,
 				other_comments_child: updatedData.other_comments_child || patient.other_comments_child || null,
 				
-				// Nouveaux champs demandés
+				// Champs height, weight et bmi
 				height: updatedData.height !== undefined ? updatedData.height : patient.height || null,
 				weight: updatedData.weight !== undefined ? updatedData.weight : patient.weight || null,
 				bmi: updatedData.bmi !== undefined ? updatedData.bmi : patient.bmi || null,
-				bloodType: updatedData.bloodType || patient.bloodType || null,
 			};
 
 			console.log(

@@ -49,7 +49,9 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 			childrenAges: Array.isArray(updateData.childrenAges) 
 				? updateData.childrenAges 
 				: null,
-            // Assurer que bmi est correctement formaté comme nombre
+            // Assurer que les valeurs numériques sont correctement formatées
+            height: updateData.height ? Number(updateData.height) : null,
+            weight: updateData.weight ? Number(updateData.weight) : null,
             bmi: updateData.bmi ? Number(updateData.bmi) : null
 		} as any;
 

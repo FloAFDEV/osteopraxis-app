@@ -1,7 +1,7 @@
 
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
-import { supabasePatientService } from "../supabase-api/patient-service";
+import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
 
 // Empty array for patients to remove fictitious data
 const patients: Patient[] = [];
@@ -111,3 +111,6 @@ export const patientService = {
     return false;
   }
 };
+
+// Export la fonction isPatientOwnedByCurrentOsteopath pour la sécurité
+export { isPatientOwnedByCurrentOsteopath };

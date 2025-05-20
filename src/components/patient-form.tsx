@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
 import { AdditionalFieldsTab } from "./patient-form/AdditionalFieldsTab";
+import { WeightHeightBmiFields } from "./patient-form/WeightHeightBmiFields";
 
 // Schéma de validation pour le formulaire patient
 const getPatientSchema = (emailRequired: boolean) =>
@@ -96,6 +97,11 @@ const getPatientSchema = (emailRequired: boolean) =>
 		pediatrician_name: z.string().optional().nullable(),
 		paramedical_followup: z.string().optional().nullable(),
 		other_comments_child: z.string().optional().nullable(),
+        
+        // Ajout de height, weight et bmi
+        height: z.number().optional().nullable(),
+        weight: z.number().optional().nullable(),
+        bmi: z.number().optional().nullable(),
 	});
 
 // Utiliser le schéma avec emailRequired à false pour type PatientFormValues
@@ -201,6 +207,11 @@ export function PatientForm({
 					pediatrician_name: patient.pediatrician_name || null,
 					paramedical_followup: patient.paramedical_followup || null,
 					other_comments_child: patient.other_comments_child || null,
+                    
+                    // Ajout des champs height, weight et bmi
+                    height: patient.height || null,
+                    weight: patient.weight || null,
+                    bmi: patient.bmi || null,
 			  }
 			: {
 					firstName: "",
@@ -242,6 +253,9 @@ export function PatientForm({
 					pediatrician_name: null,
 					paramedical_followup: null,
 					other_comments_child: null,
+                    height: null,
+                    weight: null,
+                    bmi: null,
 			  },
 	});
 
@@ -377,6 +391,9 @@ export function PatientForm({
 										)}
 									/>
 								</div>
+
+                                {/* Ajout des champs taille, poids et IMC */}
+                                <WeightHeightBmiFields form={form} />
 
 								{/* Nouveau champ pour le cabinet */}
 								<FormField
@@ -920,7 +937,6 @@ export function PatientForm({
 													placeholder="Historique détaillé des fractures"
 													className="resize-none"
 													{...field}
-													value={field.value || ""}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -1459,8 +1475,8 @@ export function PatientForm({
 									/>
 								</CardContent>
 							</Card>
-						</TabsContent>
-					)}
+						</Tabs>
+					</TabsContent>
 				</Tabs>
 
 				<div className="flex justify-end gap-4">

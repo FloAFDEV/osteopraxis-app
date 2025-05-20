@@ -338,6 +338,7 @@ export type Database = {
           hasVisionCorrection: boolean
           hdlm: string | null
           head_circumference: number | null
+          height: number | null
           height_at_birth: number | null
           id: number
           intestinal_transit: string | null
@@ -368,6 +369,7 @@ export type Database = {
           traumaHistory: string | null
           updatedAt: string
           userId: string | null
+          weight: number | null
           weight_at_birth: number | null
         }
         Insert: {
@@ -409,6 +411,7 @@ export type Database = {
           hasVisionCorrection?: boolean
           hdlm?: string | null
           head_circumference?: number | null
+          height?: number | null
           height_at_birth?: number | null
           id?: number
           intestinal_transit?: string | null
@@ -439,6 +442,7 @@ export type Database = {
           traumaHistory?: string | null
           updatedAt?: string
           userId?: string | null
+          weight?: number | null
           weight_at_birth?: number | null
         }
         Update: {
@@ -480,6 +484,7 @@ export type Database = {
           hasVisionCorrection?: boolean
           hdlm?: string | null
           head_circumference?: number | null
+          height?: number | null
           height_at_birth?: number | null
           id?: number
           intestinal_transit?: string | null
@@ -510,6 +515,7 @@ export type Database = {
           traumaHistory?: string | null
           updatedAt?: string
           userId?: string | null
+          weight?: number | null
           weight_at_birth?: number | null
         }
         Relationships: [

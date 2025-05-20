@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus, Loader2 } from "lucide-react";
@@ -100,11 +99,10 @@ const NewPatientPage = () => {
         paramedical_followup: patientData.paramedical_followup || null,
         other_comments_child: patientData.other_comments_child || null,
         
-        // Nouveaux champs demandés
+        // Gestion des champs taille, poids et IMC
         height: patientData.height || null,
         weight: patientData.weight || null,
         bmi: patientData.bmi || null,
-        bloodType: patientData.bloodType || null,
       } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
 
       console.log("Envoi du patient à l'API avec cabinetId:", patientToCreate.cabinetId);
