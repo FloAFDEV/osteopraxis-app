@@ -10,7 +10,6 @@ import {
 	User,
 	Weight,
 	Activity,
-	Droplets,
 	Ruler,
 } from "lucide-react";
 import { Patient } from "@/types";
@@ -81,11 +80,7 @@ export function PatientCard({ patient }: PatientCardProps) {
           </div>
           <div className="flex items-center">
             <Activity className="w-4 h-4 mr-2" />
-            {patient.bmi ? `${patient.bmi} BMI` : "Non renseigné"}
-          </div>
-          <div className="flex items-center">
-            <Droplets className="w-4 h-4 mr-2" />
-            {patient.bloodType || "Non renseigné"}
+            {patient.bmi ? `${patient.bmi} IMC` : "IMC non calculé"}
           </div>
         </div>
       </CardContent>

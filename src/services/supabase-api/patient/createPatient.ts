@@ -36,7 +36,9 @@ export async function createPatient(
 			// S'assurer que tous les tableaux sont correctement gérés
 			childrenAges: Array.isArray(patientWithOsteopath.childrenAges) 
 				? patientWithOsteopath.childrenAges 
-				: null
+				: null,
+            // Assurer que bmi est correctement formaté comme nombre
+            bmi: patientWithOsteopath.bmi ? Number(patientWithOsteopath.bmi) : null
 		} as any;
 
 		const { data, error } = await supabase

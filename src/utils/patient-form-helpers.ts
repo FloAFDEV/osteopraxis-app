@@ -85,6 +85,11 @@ const getPatientSchema = (emailRequired: boolean) =>
 		pediatrician_name: z.string().optional().nullable(),
 		paramedical_followup: z.string().optional().nullable(),
 		other_comments_child: z.string().optional().nullable(),
+        
+        // Ajout pour poids, taille et IMC
+        weight: z.number().optional().nullable(),
+        height: z.number().optional().nullable(),
+        bmi: z.number().optional().nullable(),
 	});
 
 export default getPatientSchema;
@@ -178,3 +183,4 @@ export function translateContraception(
 	const option = options.find((opt) => opt.value === contraception);
 	return option ? option.label : "Non spécifiée";
 }
+

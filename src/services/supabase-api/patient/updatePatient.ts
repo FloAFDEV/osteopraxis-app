@@ -48,7 +48,9 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 			// S'assurer que tous les tableaux sont correctement gérés
 			childrenAges: Array.isArray(updateData.childrenAges) 
 				? updateData.childrenAges 
-				: null
+				: null,
+            // Assurer que bmi est correctement formaté comme nombre
+            bmi: updateData.bmi ? Number(updateData.bmi) : null
 		} as any;
 
 		const { data, error } = await supabase

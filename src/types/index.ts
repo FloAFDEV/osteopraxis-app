@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -48,10 +47,6 @@ export interface Patient {
 	height: number | null;
 	weight: number | null;
 	bmi: number | null;
-	bloodType: "A_POS" | "A_NEG" | "B_POS" | "B_NEG" | "AB_POS" | "AB_NEG" | "O_POS" | "O_NEG" | null;
-	medicalHistory: string | null;
-	allergies: string | null;
-	medications: string | null;
 	osteopathId: string | number | null;
 	cabinetId: number | null;
 	createdAt: string;
@@ -118,6 +113,11 @@ export interface Patient {
 	pediatrician_name: string | null;
 	paramedical_followup: string | null;
 	other_comments_child: string | null;
+    
+    // Champs requis par le type
+    medicalHistory: string | null;
+    allergies: string | null;
+    medications: string | null;
 }
 
 export interface Appointment {

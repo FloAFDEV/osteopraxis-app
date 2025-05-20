@@ -17,7 +17,6 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
 	height: data.height || null,
 	weight: data.weight || null,
 	bmi: data.bmi || null,
-	bloodType: data.bloodType || null,
 	birthDate: data.birthDate,
 	maritalStatus: data.maritalStatus,
 	occupation: data.occupation,

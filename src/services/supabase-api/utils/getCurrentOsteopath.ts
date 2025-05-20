@@ -180,8 +180,6 @@ export const isCabinetOwnedByCurrentOsteopath = async (cabinetId: number): Promi
 
 /**
  * Vérifie si un rendez-vous appartient à l'ostéopathe connecté
- * @param appointmentId ID du rendez-vous à vérifier
- * @returns true si le rendez-vous appartient à l'ostéopathe connecté, false sinon
  */
 export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number): Promise<boolean> => {
   try {
@@ -248,8 +246,6 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
 
 /**
  * Vérifie si une facture appartient à l'ostéopathe connecté
- * @param invoiceId ID de la facture à vérifier
- * @returns true si la facture appartient à l'ostéopathe connecté, false sinon
  */
 export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promise<boolean> => {
   try {

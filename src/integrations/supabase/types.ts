@@ -306,6 +306,7 @@ export type Database = {
           behavior: string | null
           birthDate: string | null
           birthDetails: string | null
+          bmi: number | null
           cabinetId: number | null
           childcare_type: string | null
           childCareContext: string | null
@@ -376,6 +377,7 @@ export type Database = {
           behavior?: string | null
           birthDate?: string | null
           birthDetails?: string | null
+          bmi?: number | null
           cabinetId?: number | null
           childcare_type?: string | null
           childCareContext?: string | null
@@ -446,6 +448,7 @@ export type Database = {
           behavior?: string | null
           birthDate?: string | null
           birthDetails?: string | null
+          bmi?: number | null
           cabinetId?: number | null
           childcare_type?: string | null
           childCareContext?: string | null
