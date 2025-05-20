@@ -7,6 +7,7 @@ import { Layout } from "@/components/ui/layout";
 import { CabinetForm } from "@/components/cabinet-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { isCabinetOwnedByCurrentOsteopath } from "@/services";
 
 const EditCabinetPage = () => {
   const navigate = useNavigate();
@@ -19,7 +20,18 @@ const EditCabinetPage = () => {
     const fetchData = async () => {
       if (!id) return;
       try {
-        const cabinetData = await api.getCabinetById(parseInt(id));
+        // Vérifier que le cabinet appartient à l'ostéopathe connecté
+        const cabinetId = parseInt(id);
+        const isCabinetOwned = await isCabinetOwnedByCurrentOsteopath(cabinetId);
+        
+        if (!isCabinetOwned) {
+          console.error(`TENTATIVE D'ACCÈS NON AUTORISÉ: Tentative d'édition du cabinet ${id} qui n'appartient pas à l'ostéopathe connecté`);
+          toast.error("Vous n'avez pas accès à ce cabinet");
+          navigate("/cabinets");
+          return;
+        }
+        
+        const cabinetData = await api.getCabinetById(cabinetId);
         if (!cabinetData) {
           throw new Error("Cabinet non trouvé");
         }
@@ -40,7 +52,7 @@ const EditCabinetPage = () => {
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) {
     return <Layout>

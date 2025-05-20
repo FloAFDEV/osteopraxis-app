@@ -7,7 +7,7 @@ export { supabase } from '@/integrations/supabase/client';
 
 // Export utility functions
 export { typedData, ensureAppointmentStatus, AppointmentStatusValues } from './supabase-api/utils';
-export { getCurrentOsteopathId, isSameOsteopath } from './supabase-api/utils/getCurrentOsteopath';
+export { getCurrentOsteopathId, isSameOsteopath, isPatientOwnedByCurrentOsteopath, isCabinetOwnedByCurrentOsteopath } from './supabase-api/utils/getCurrentOsteopath';
 export { ensureOsteopathProfile } from './supabase-api/utils/ensureOsteopathProfile';
 
 // Export date utilities

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { Building, ChevronDown } from "lucide-react";
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCurrentOsteopathId } from "@/services";
 
 interface CabinetSelectorProps {
   selectedCabinetId?: number;
@@ -27,13 +27,38 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
+  const [osteopathId, setOsteopathId] = useState<number | null>(null);
   const navigate = useNavigate();
+
+  // Effet pour récupérer l'ostéopathId courant pour le debug
+  useEffect(() => {
+    const getOsteopathId = async () => {
+      try {
+        const id = await getCurrentOsteopathId();
+        setOsteopathId(id);
+        console.log("CabinetSelector - OsteopathId connecté:", id);
+      } catch (error) {
+        console.error("Erreur lors de la récupération de l'osteopathId:", error);
+      }
+    };
+    
+    getOsteopathId();
+  }, []);
 
   useEffect(() => {
     const loadCabinets = async () => {
       try {
         setLoading(true);
         const userCabinets = await api.getCabinets();
+        console.log(`CabinetSelector - ${userCabinets.length} cabinets chargés pour l'ostéopathe ${osteopathId}`);
+        
+        // Log pour debug
+        if (userCabinets.length > 0) {
+          userCabinets.forEach(cab => {
+            console.log(`Cabinet ${cab.id}: ${cab.name} (osteopathId: ${cab.osteopathId})`);
+          });
+        }
+        
         setCabinets(userCabinets);
         
         // Si aucun cabinet n'est sélectionné mais qu'il y en a disponibles, sélectionner le premier
@@ -58,7 +83,7 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
     };
     
     loadCabinets();
-  }, [selectedCabinetId, onCabinetChange]);
+  }, [selectedCabinetId, onCabinetChange, osteopathId]);
 
   const handleCabinetSelect = (cabinet: Cabinet) => {
     setSelectedCabinet(cabinet);

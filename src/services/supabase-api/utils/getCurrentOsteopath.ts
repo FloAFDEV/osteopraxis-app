@@ -132,3 +132,36 @@ export const isPatientOwnedByCurrentOsteopath = async (patientId: number): Promi
     return false;
   }
 };
+
+/**
+ * Vérifie si un cabinet appartient à l'ostéopathe connecté
+ * @param cabinetId ID du cabinet à vérifier
+ * @returns true si le cabinet appartient à l'ostéopathe connecté, false sinon
+ */
+export const isCabinetOwnedByCurrentOsteopath = async (cabinetId: number): Promise<boolean> => {
+  try {
+    const osteopathId = await getCurrentOsteopathId();
+    
+    if (!osteopathId) {
+      console.warn("Tentative de vérification de propriété d'un cabinet sans osteopathId");
+      return false;
+    }
+    
+    const { data, error } = await supabase
+      .from("Cabinet")
+      .select("id")
+      .eq("id", cabinetId)
+      .eq("osteopathId", osteopathId)
+      .maybeSingle();
+      
+    if (error) {
+      console.error(`Erreur lors de la vérification du cabinet ${cabinetId}:`, error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error(`Erreur lors de la vérification de propriété du cabinet ${cabinetId}:`, error);
+    return false;
+  }
+};
