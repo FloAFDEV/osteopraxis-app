@@ -19,14 +19,39 @@ export const getCurrentOsteopathId = async (): Promise<number | null> => {
 
 		// Recherche dans ta table 'User' le profil lié à l'auth_id
 		const { data: userProfile, error: userProfileError } = await supabase
-			.from("User") // ou "users" selon nom exact
+			.from("User") 
 			.select("osteopathId, role")
-			.eq("auth_id", user.id)
-			.single();
+			.eq("id", user.id)
+			.maybeSingle();
 
 		if (userProfileError || !userProfile) {
 			console.warn("Profil utilisateur non trouvé");
-			return null;
+			
+			// Essayer avec auth_id si la recherche par id ne fonctionne pas
+			const { data: userProfileByAuthId, error: authIdError } = await supabase
+				.from("User")
+				.select("osteopathId, role")
+				.eq("auth_id", user.id)
+				.maybeSingle();
+				
+			if (authIdError || !userProfileByAuthId) {
+				console.warn("Profil utilisateur non trouvé même avec auth_id");
+				return null;
+			}
+			
+			// On a trouvé un profil utilisateur avec auth_id
+			if (userProfileByAuthId.role !== "OSTEOPATH") {
+				console.warn("L'utilisateur n'est pas un ostéopathe");
+				return null;
+			}
+			
+			// Si l'osteopathId est null, l'utilisateur doit d'abord configurer son profil
+			if (!userProfileByAuthId.osteopathId) {
+				console.warn("L'utilisateur n'a pas encore configuré son profil d'ostéopathe (trouvé via auth_id)");
+				return null;
+			}
+			
+			return userProfileByAuthId.osteopathId;
 		}
 
 		// Vérifie le rôle (en supposant que role est une string ou un enum)

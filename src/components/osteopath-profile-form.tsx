@@ -66,6 +66,13 @@ export function OsteopathProfileForm({
   // Récupérer le paramètre returnTo de l'URL si présent
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
   
+  // Define redirectToLogin once, eliminating the duplicate declaration
+  const redirectToLogin = () => {
+    toast.info("Veuillez vous connecter pour continuer");
+    // Force un rechargement de la page vers login pour s'assurer que l'état d'authentification est bien réinitialisé
+    window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname + window.location.search);
+  };
+  
   useEffect(() => {
     // Récupérer l'URL de retour soit des paramètres de l'URL, soit du sessionStorage
     const urlParams = new URLSearchParams(window.location.search);

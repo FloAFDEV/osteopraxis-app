@@ -1,5 +1,4 @@
 
-
 // Export API services
 export { api } from './api/index';
 
@@ -19,4 +18,3 @@ export { AppointmentConflictError } from './api/appointment-service';
 
 // Export CORS headers
 export { corsHeaders } from './corsHeaders';
-

@@ -12,6 +12,7 @@ export async function getPatients(): Promise<Patient[]> {
 
 		// Si aucun osteopathId n'est trouvé, retourner un tableau vide
 		// Cela évite de récupérer des données non associées à l'ostéopathe connecté
+		// et permet de gérer le cas où l'utilisateur n'a pas encore configuré son profil
 		if (!osteopathId) {
 			console.log("Aucun osteopathId trouvé pour l'utilisateur connecté, retour d'une liste vide");
 			return [];
@@ -26,6 +27,12 @@ export async function getPatients(): Promise<Patient[]> {
 		if (error) {
 			console.error("Error fetching patients:", error);
 			throw error;
+		}
+
+		// Vérifier si data est null ou undefined
+		if (!data) {
+			console.log("Aucune donnée de patients retournée");
+			return [];
 		}
 
 		const patients = data.map(adaptPatientFromSupabase);
