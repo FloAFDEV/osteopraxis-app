@@ -1,90 +1,101 @@
 
-import { supabase } from "../utils";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Récupère l'ID de l'ostéopathe actuellement connecté
- * Ne crée plus automatiquement un profil Ostéopathe s'il n'existe pas
+ * Récupère l'ID de l'ostéopathe associé à l'utilisateur connecté
+ * @returns L'ID de l'ostéopathe ou null si non trouvé
  */
 export const getCurrentOsteopathId = async (): Promise<number | null> => {
-	try {
-		const {
-			data: { user },
-			error: userError,
-		} = await supabase.auth.getUser();
-
-		if (userError || !user) {
-			console.error("Utilisateur non connecté", userError);
-			return null;
-		}
-
-		// Recherche dans ta table 'User' le profil lié à l'auth_id
-		const { data: userProfile, error: userProfileError } = await supabase
-			.from("User") 
-			.select("osteopathId, role")
-			.eq("id", user.id)
-			.maybeSingle();
-
-		if (userProfileError || !userProfile) {
-			console.warn("Profil utilisateur non trouvé");
-			
-			// Essayer avec auth_id si la recherche par id ne fonctionne pas
-			const { data: userProfileByAuthId, error: authIdError } = await supabase
-				.from("User")
-				.select("osteopathId, role")
-				.eq("auth_id", user.id)
-				.maybeSingle();
-				
-			if (authIdError || !userProfileByAuthId) {
-				console.warn("Profil utilisateur non trouvé même avec auth_id");
-				return null;
-			}
-			
-			// On a trouvé un profil utilisateur avec auth_id
-			if (userProfileByAuthId.role !== "OSTEOPATH") {
-				console.warn("L'utilisateur n'est pas un ostéopathe");
-				return null;
-			}
-			
-			// Si l'osteopathId est null, l'utilisateur doit d'abord configurer son profil
-			if (!userProfileByAuthId.osteopathId) {
-				console.warn("L'utilisateur n'a pas encore configuré son profil d'ostéopathe (trouvé via auth_id)");
-				return null;
-			}
-			
-			return userProfileByAuthId.osteopathId;
-		}
-
-		// Vérifie le rôle (en supposant que role est une string ou un enum)
-		if (userProfile.role !== "OSTEOPATH") {
-			console.warn("L'utilisateur n'est pas un ostéopathe");
-			return null;
-		}
-
-		// Si l'osteopathId est null, l'utilisateur doit d'abord configurer son profil
-		if (!userProfile.osteopathId) {
-			console.warn("L'utilisateur n'a pas encore configuré son profil d'ostéopathe");
-			return null;
-		}
-
-		// Retourne l'ID de l'ostéopathe
-		return userProfile.osteopathId;
-	} catch (error) {
-		console.error("Erreur inattendue dans getCurrentOsteopathId:", error);
-		return null;
-	}
+  try {
+    // 1. Vérifier que l'utilisateur est authentifié
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !sessionData.session) {
+      console.error("Erreur ou session non trouvée:", sessionError || "Pas de session active");
+      return null;
+    }
+    
+    const userId = sessionData.session.user.id;
+    
+    if (!userId) {
+      console.error("User ID non disponible dans la session");
+      return null;
+    }
+    
+    console.log("Recherche de l'osteopathId pour userId:", userId);
+    
+    // 2. Rechercher d'abord dans la table User pour obtenir l'osteopathId
+    const { data: userData, error: userError } = await supabase
+      .from("User")
+      .select("osteopathId")
+      .eq("id", userId)
+      .maybeSingle();
+      
+    if (userError) {
+      console.error("Erreur lors de la recherche de l'utilisateur:", userError);
+    }
+    
+    // Si l'osteopathId est présent dans User, le retourner directement
+    if (userData?.osteopathId) {
+      console.log("OsteopathId trouvé dans User:", userData.osteopathId);
+      return userData.osteopathId;
+    }
+    
+    // 3. Sinon, rechercher dans la table Osteopath par userId
+    const { data: osteopathData, error: osteopathError } = await supabase
+      .from("Osteopath")
+      .select("id")
+      .eq("userId", userId)
+      .maybeSingle();
+      
+    if (osteopathError) {
+      console.error("Erreur lors de la recherche de l'ostéopathe:", osteopathError);
+      return null;
+    }
+    
+    if (!osteopathData) {
+      console.log("Aucun profil ostéopathe trouvé pour userId:", userId);
+      return null;
+    }
+    
+    console.log("OsteopathId trouvé dans Osteopath:", osteopathData.id);
+    
+    // 4. Mettre à jour la table User avec l'osteopathId pour les futures requêtes
+    if (osteopathData.id) {
+      try {
+        const { error: updateError } = await supabase
+          .from("User")
+          .update({ osteopathId: osteopathData.id })
+          .eq("id", userId);
+          
+        if (updateError) {
+          console.error("Erreur lors de la mise à jour de l'utilisateur avec osteopathId:", updateError);
+        } else {
+          console.log("User mis à jour avec osteopathId:", osteopathData.id);
+        }
+      } catch (updateError) {
+        console.error("Exception lors de la mise à jour de l'utilisateur:", updateError);
+      }
+    }
+    
+    return osteopathData.id;
+  } catch (error) {
+    console.error("Erreur inattendue dans getCurrentOsteopathId:", error);
+    return null;
+  }
 };
 
 /**
- * Vérifie si l'ostéopathe donné correspond à l'utilisateur connecté
+ * Vérifie si l'ostéopathe spécifié est celui connecté
+ * @param osteopathId ID de l'ostéopathe à vérifier
+ * @returns true si c'est l'ostéopathe connecté, false sinon
  */
-export const isSameOsteopath = async (
-	osteopathId: number
-): Promise<boolean> => {
-	try {
-		const currentOsteopathId = await getCurrentOsteopathId();
-		return currentOsteopathId === osteopathId;
-	} catch (error) {
-		console.error("Erreur lors de la vérification de l'ostéopathe:", error);
-		return false;
-	}
+export const isSameOsteopath = async (osteopathId: number): Promise<boolean> => {
+  try {
+    const currentOsteopathId = await getCurrentOsteopathId();
+    return currentOsteopathId === osteopathId;
+  } catch (error) {
+    console.error("Erreur lors de la vérification de l'ostéopathe:", error);
+    return false;
+  }
 };

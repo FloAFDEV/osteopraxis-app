@@ -9,6 +9,13 @@ export async function getPatientById(id: number): Promise<Patient | null> {
     // Récupérer l'ID de l'ostéopathe connecté
     const osteopathId = await getCurrentOsteopathId();
     
+    if (!osteopathId) {
+      console.error("Impossible de récupérer un patient: aucun ostéopathe connecté");
+      throw new Error("Non autorisé: vous devez être connecté en tant qu'ostéopathe");
+    }
+    
+    console.log(`Récupération du patient ${id} pour l'ostéopathe ${osteopathId}`);
+    
     // Utiliser maybeSingle() et filtrer par osteopathId pour sécuriser l'accès
     const { data, error } = await supabase
       .from("Patient")

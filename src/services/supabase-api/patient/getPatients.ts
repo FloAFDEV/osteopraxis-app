@@ -8,15 +8,15 @@ export async function getPatients(): Promise<Patient[]> {
 	try {
 		// Récupérer l'ID de l'ostéopathe connecté
 		const osteopathId = await getCurrentOsteopathId();
-		console.log("Filtrage des patients par osteopathId:", osteopathId);
-
-		// Si aucun osteopathId n'est trouvé, retourner un tableau vide
-		// Cela évite de récupérer des données non associées à l'ostéopathe connecté
-		// et permet de gérer le cas où l'utilisateur n'a pas encore configuré son profil
+		
+		// Si aucun osteopathId n'est trouvé, retourner un tableau vide et journaliser clairement
 		if (!osteopathId) {
 			console.log("Aucun osteopathId trouvé pour l'utilisateur connecté, retour d'une liste vide");
+			console.log("L'utilisateur doit compléter son profil ostéopathe");
 			return [];
 		}
+		
+		console.log("Filtrage des patients par osteopathId:", osteopathId);
 
 		// Appliquer le filtre par osteopathId
 		const { data, error } = await supabase
@@ -37,7 +37,7 @@ export async function getPatients(): Promise<Patient[]> {
 
 		const patients = data.map(adaptPatientFromSupabase);
 
-		// Ton code de comptage, calcul d'âge, etc.
+		// Statistiques et logs
 		const maleCount = patients.filter((p) => p.gender === "Homme").length;
 		const femaleCount = patients.filter((p) => p.gender === "Femme").length;
 

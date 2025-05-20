@@ -2,16 +2,43 @@
 import { Patient } from "@/types";
 import { supabase } from "../utils";
 import { adaptPatientFromSupabase } from "../patient-adapter";
+import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
 
 export async function updatePatient(patient: Patient): Promise<Patient> {
 	try {
+		// Récupérer l'ID de l'ostéopathe connecté
+		const osteopathId = await getCurrentOsteopathId();
+		
+		if (!osteopathId) {
+			console.error("Impossible de mettre à jour un patient: aucun ostéopathe connecté");
+			throw new Error("Non autorisé: vous devez être connecté en tant qu'ostéopathe");
+		}
+		
+		// Vérifier d'abord que le patient appartient bien à l'ostéopathe connecté
+		const { data: existingPatient, error: checkError } = await supabase
+			.from("Patient")
+			.select("id")
+			.eq("id", patient.id)
+			.eq("osteopathId", osteopathId)
+			.maybeSingle();
+			
+		if (checkError) {
+			console.error("Erreur lors de la vérification du patient:", checkError);
+			throw checkError;
+		}
+		
+		if (!existingPatient) {
+			console.error(`Patient avec ID ${patient.id} non trouvé ou n'appartient pas à l'ostéopathe ${osteopathId}`);
+			throw new Error("Patient non trouvé ou accès non autorisé");
+		}
+		
 		// Enlever les champs qui ne doivent pas être mis à jour
 		const { id, createdAt, ...updateData } = patient;
 
-		// Utiliser "as any" pour contourner les vérifications de type strictes
-		// Cela est nécessaire car Supabase accepte ces valeurs comme des chaînes
+		// S'assurer que l'osteopathId est conservé et correspond à l'utilisateur connecté
 		const formattedData = {
 			...updateData,
+			osteopathId, // Garantir que l'osteopathId reste celui de l'utilisateur connecté
 			// S'assurer que tous les tableaux sont correctement gérés
 			childrenAges: Array.isArray(updateData.childrenAges) 
 				? updateData.childrenAges 

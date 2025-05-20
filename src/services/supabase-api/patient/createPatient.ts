@@ -10,17 +10,22 @@ export async function createPatient(
 	try {
 		// Récupérer l'ID de l'ostéopathe connecté
 		const osteopathId = await getCurrentOsteopathId();
+		
+		if (!osteopathId) {
+			console.error("Impossible de créer un patient: aucun ostéopathe connecté");
+			throw new Error("Non autorisé: vous devez être connecté en tant qu'ostéopathe");
+		}
+		
 		console.log("Creating patient for osteopathId:", osteopathId);
 
 		// S'assurer que le patient est associé à l'ostéopathe connecté
+		// Écraser toute tentative de définir un autre osteopathId
 		const patientWithOsteopath = {
 			...patientData,
-			osteopathId,
+			osteopathId, // Garantir que c'est l'osteopathId de l'utilisateur connecté
 		};
 
 		// Convertir les types pour qu'ils correspondent aux attentes de Supabase
-		// Utiliser "as any" pour contourner les vérifications de type strictes
-		// Cela est nécessaire car Supabase accepte ces valeurs comme des chaînes
 		const formattedData = {
 			...patientWithOsteopath,
 			// S'assurer que tous les tableaux sont correctement gérés
