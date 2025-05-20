@@ -221,14 +221,25 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       return false;
     }
     
-    // Vérifier que le patient appartient à l'ostéopathe connecté
-    const isPatientOwned = await isPatientOwnedByCurrentOsteopath(appointment.patientId);
+    // Vérifier que le patient appartient à l'ostéopathe connecté sans utiliser isPatientOwnedByCurrentOsteopath
+    // pour éviter la récursion potentielle
+    const { data: patientData, error: patientError } = await supabase
+      .from("Patient")
+      .select("id")
+      .eq("id", appointment.patientId)
+      .eq("osteopathId", osteopathId)
+      .maybeSingle();
+      
+    if (patientError) {
+      console.error(`[SECURITY] Erreur lors de la vérification du patient ${appointment.patientId}:`, patientError);
+      return false;
+    }
     
-    if (!isPatientOwned) {
+    if (!patientData) {
       console.warn(`[SECURITY VIOLATION] Tentative d'accès au rendez-vous ${appointmentId} qui n'appartient pas à l'ostéopathe ${osteopathId}`);
     }
     
-    return isPatientOwned;
+    return !!patientData;
   } catch (error) {
     console.error(`[SECURITY] Erreur lors de la vérification de propriété du rendez-vous ${appointmentId}:`, error);
     return false;
@@ -278,14 +289,25 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       return false;
     }
     
-    // Vérifier que le patient appartient à l'ostéopathe connecté
-    const isPatientOwned = await isPatientOwnedByCurrentOsteopath(invoice.patientId);
+    // Vérifier que le patient appartient à l'ostéopathe connecté sans utiliser isPatientOwnedByCurrentOsteopath 
+    // pour éviter une récursion potentielle
+    const { data: patientData, error: patientError } = await supabase
+      .from("Patient")
+      .select("id")
+      .eq("id", invoice.patientId)
+      .eq("osteopathId", osteopathId)
+      .maybeSingle();
+      
+    if (patientError) {
+      console.error(`[SECURITY] Erreur lors de la vérification du patient ${invoice.patientId}:`, patientError);
+      return false;
+    }
     
-    if (!isPatientOwned) {
+    if (!patientData) {
       console.warn(`[SECURITY VIOLATION] Tentative d'accès à la facture ${invoiceId} qui n'appartient pas à l'ostéopathe ${osteopathId}`);
     }
     
-    return isPatientOwned;
+    return !!patientData;
   } catch (error) {
     console.error(`[SECURITY] Erreur lors de la vérification de propriété de la facture ${invoiceId}:`, error);
     return false;

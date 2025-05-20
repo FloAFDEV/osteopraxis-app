@@ -1,10 +1,9 @@
-
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
 import { AppointmentStatus, CreateAppointmentPayload } from "@/types"; 
 import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
-import { getCurrentOsteopathId, isAppointmentOwnedByCurrentOsteopath } from "@/services";
+import { getCurrentOsteopathId, isAppointmentOwnedByCurrentOsteopath, isPatientOwnedByCurrentOsteopath } from "@/services";
 
 // Create a custom error class for appointment conflicts
 export class AppointmentConflictError extends Error {
@@ -100,7 +99,6 @@ export const appointmentService = {
     if (USE_SUPABASE) {
       try {
         // S'assurer que le patient appartient à l'ostéopathe connecté avant de récupérer ses rendez-vous
-        const { isPatientOwnedByCurrentOsteopath } = await import("@/services");
         const isOwned = await isPatientOwnedByCurrentOsteopath(patientId);
         
         if (!isOwned) {
