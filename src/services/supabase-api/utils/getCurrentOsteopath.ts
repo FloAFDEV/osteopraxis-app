@@ -104,6 +104,23 @@ export const isSameOsteopath = async (osteopathId: number): Promise<boolean> => 
   }
 };
 
+// Types simplifiés pour éviter la récursion
+type PatientBasicInfo = {
+  id: number;
+  firstName: string;
+  lastName: string;
+};
+
+type AppointmentBasicInfo = {
+  id: number;
+  patientId: number;
+};
+
+type InvoiceBasicInfo = {
+  id: number;
+  patientId: number;
+};
+
 /**
  * Vérifie si un patient appartient à l'ostéopathe connecté
  * @param patientId ID du patient à vérifier

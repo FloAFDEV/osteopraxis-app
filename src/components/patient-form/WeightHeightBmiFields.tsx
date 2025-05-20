@@ -25,8 +25,8 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
     const subscription = form.watch((value, { name }) => {
       // Calculer l'IMC uniquement si le poids ou la taille change
       if (name === "weight" || name === "height") {
-        const weight = parseFloat(value.weight as string);
-        const height = parseFloat(value.height as string);
+        const weight = parseFloat(String(value.weight));
+        const height = parseFloat(String(value.height));
         
         if (!isNaN(weight) && !isNaN(height) && weight > 0 && height > 0) {
           const bmi = calculateBMI(weight, height);
