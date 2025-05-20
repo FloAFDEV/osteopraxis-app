@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -132,12 +133,6 @@ export function OsteopathProfileForm({
       }
     }
   }, [defaultValues, user, form]);
-
-  const redirectToLogin = () => {
-    toast.info("Veuillez vous connecter pour continuer");
-    // Force un rechargement de la page vers login pour s'assurer que l'état d'authentification est bien réinitialisé
-    window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname);
-  };
 
   const onSubmit = async (data: OsteopathProfileFormValues) => {
     if (!user) {
@@ -339,12 +334,6 @@ export function OsteopathProfileForm({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const redirectToLogin = () => {
-    toast.info("Veuillez vous connecter pour continuer");
-    // Force un rechargement de la page vers login pour s'assurer que l'état d'authentification est bien réinitialisé
-    window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname + window.location.search);
   };
 
   if (isSubmitting) {

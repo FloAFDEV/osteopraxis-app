@@ -1,5 +1,5 @@
 
-import { supabase } from "./index";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Vérifie et crée un profil d'ostéopathe pour l'utilisateur si nécessaire
