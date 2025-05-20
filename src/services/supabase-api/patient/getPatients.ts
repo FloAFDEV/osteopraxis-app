@@ -11,14 +11,15 @@ export async function getPatients(): Promise<Patient[]> {
 		
 		// Si aucun osteopathId n'est trouvé, retourner un tableau vide et journaliser clairement
 		if (!osteopathId) {
-			console.log("Aucun osteopathId trouvé pour l'utilisateur connecté, retour d'une liste vide");
-			console.log("L'utilisateur doit compléter son profil ostéopathe");
+			console.warn("ACCÈS REFUSÉ: Tentative d'accès à la liste des patients sans profil ostéopathe");
+			console.log("L'utilisateur doit compléter son profil ostéopathe avant de pouvoir accéder aux patients");
+			// On pourrait ici notifier l'utilisateur qu'il doit configurer son profil
 			return [];
 		}
 		
 		console.log("Filtrage des patients par osteopathId:", osteopathId);
 
-		// Appliquer le filtre par osteopathId
+		// Appliquer le filtre par osteopathId - CRUCIAL pour la sécurité multi-tenant
 		const { data, error } = await supabase
 			.from("Patient")
 			.select("*")

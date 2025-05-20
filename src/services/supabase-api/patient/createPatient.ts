@@ -18,6 +18,11 @@ export async function createPatient(
 		
 		console.log("Creating patient for osteopathId:", osteopathId);
 
+		// SÉCURITÉ RENFORCÉE: Vérifier si le client tente de spécifier un osteopathId différent
+		if (patientData.osteopathId && patientData.osteopathId !== osteopathId) {
+			console.error(`TENTATIVE DE VIOLATION DE SÉCURITÉ: Tentative de création avec osteopathId ${patientData.osteopathId} différent de l'utilisateur connecté ${osteopathId}`);
+		}
+
 		// S'assurer que le patient est associé à l'ostéopathe connecté
 		// Écraser toute tentative de définir un autre osteopathId
 		const patientWithOsteopath = {

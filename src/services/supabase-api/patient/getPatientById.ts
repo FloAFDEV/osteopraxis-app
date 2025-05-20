@@ -30,6 +30,18 @@ export async function getPatientById(id: number): Promise<Patient | null> {
     }
     
     if (!data) {
+      // SÉCURITÉ RENFORCÉE: Vérifier si le patient existe mais appartient à un autre ostéopathe
+      const { data: anyPatient } = await supabase
+        .from("Patient")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
+      
+      if (anyPatient) {
+        console.error(`TENTATIVE D'ACCÈS NON AUTORISÉ: L'ostéopathe ${osteopathId} a tenté d'accéder au patient ${id} qui ne lui appartient pas`);
+        throw new Error("Accès non autorisé: ce patient n'est pas associé à votre compte");
+      }
+      
       console.log(`Aucun patient trouvé avec l'ID ${id} pour l'ostéopathe ${osteopathId}`);
       return null;
     }

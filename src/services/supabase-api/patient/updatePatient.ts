@@ -17,7 +17,7 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		// Vérifier d'abord que le patient appartient bien à l'ostéopathe connecté
 		const { data: existingPatient, error: checkError } = await supabase
 			.from("Patient")
-			.select("id")
+			.select("id, osteopathId")
 			.eq("id", patient.id)
 			.eq("osteopathId", osteopathId)
 			.maybeSingle();
@@ -30,6 +30,12 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		if (!existingPatient) {
 			console.error(`Patient avec ID ${patient.id} non trouvé ou n'appartient pas à l'ostéopathe ${osteopathId}`);
 			throw new Error("Patient non trouvé ou accès non autorisé");
+		}
+		
+		// SÉCURITÉ RENFORCÉE: Vérifier si le client tente de modifier l'osteopathId
+		if (patient.osteopathId && patient.osteopathId !== osteopathId) {
+			console.error(`TENTATIVE DE VIOLATION DE SÉCURITÉ: Tentative de modification d'osteopathId ${osteopathId} vers ${patient.osteopathId}`);
+			throw new Error("Modification non autorisée: vous ne pouvez pas changer l'appartenance du patient");
 		}
 		
 		// Enlever les champs qui ne doivent pas être mis à jour

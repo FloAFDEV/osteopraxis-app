@@ -99,3 +99,36 @@ export const isSameOsteopath = async (osteopathId: number): Promise<boolean> => 
     return false;
   }
 };
+
+/**
+ * Vérifie si un patient appartient à l'ostéopathe connecté
+ * @param patientId ID du patient à vérifier
+ * @returns true si le patient appartient à l'ostéopathe connecté, false sinon
+ */
+export const isPatientOwnedByCurrentOsteopath = async (patientId: number): Promise<boolean> => {
+  try {
+    const osteopathId = await getCurrentOsteopathId();
+    
+    if (!osteopathId) {
+      console.warn("Tentative de vérification de propriété d'un patient sans osteopathId");
+      return false;
+    }
+    
+    const { data, error } = await supabase
+      .from("Patient")
+      .select("id")
+      .eq("id", patientId)
+      .eq("osteopathId", osteopathId)
+      .maybeSingle();
+      
+    if (error) {
+      console.error(`Erreur lors de la vérification du patient ${patientId}:`, error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error(`Erreur lors de la vérification de propriété du patient ${patientId}:`, error);
+    return false;
+  }
+};
