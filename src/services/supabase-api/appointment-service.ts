@@ -1,9 +1,8 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
 	SUPABASE_API_URL,
-	SUPABASE_API_KEY,
+	SUPABASE_PUBLISHABLE_KEY,
 	ensureAppointmentStatus,
 } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -239,7 +238,7 @@ export const supabaseAppointmentService = {
 			const token = session.access_token;
 
 			// 2. Utiliser les constantes importées pour l'URL et la clé API
-			if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+			if (!SUPABASE_API_URL || !SUPABASE_PUBLISHABLE_KEY) {
 				throw new Error(
 					"Configuration Supabase manquante (URL ou clé API)"
 				);
@@ -283,7 +282,7 @@ export const supabaseAppointmentService = {
 			const res = await fetch(URL_ENDPOINT, {
 				method: "PUT", // Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
 				headers: {
-					apikey: SUPABASE_API_KEY,
+					apikey: SUPABASE_PUBLISHABLE_KEY,
 					Authorization: `Bearer ${token}`,
 					"Content-Type": "application/json",
 					Prefer: "return=representation",
@@ -332,7 +331,7 @@ export const supabaseAppointmentService = {
 			const token = session.access_token;
 
 			// Utiliser les constantes importées
-			if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+			if (!SUPABASE_API_URL || !SUPABASE_PUBLISHABLE_KEY) {
 				throw new Error(
 					"Configuration Supabase manquante (URL ou clé API)"
 				);
@@ -379,7 +378,7 @@ export const supabaseAppointmentService = {
 			const res = await fetch(URL_ENDPOINT, {
 				method: "PUT",
 				headers: {
-					apikey: SUPABASE_API_KEY,
+					apikey: SUPABASE_PUBLISHABLE_KEY,
 					Authorization: `Bearer ${token}`,
 					"Content-Type": "application/json",
 					Prefer: "return=representation",

@@ -1,233 +1,150 @@
 
-import { SupabaseClient } from '@supabase/supabase-js';
-import { AppointmentRow, InvoiceRow, PatientRow, CabinetRow } from './securityTypes';
-import { getCurrentOsteopathId } from '../getCurrentOsteopath';
-import { supabase } from '@/integrations/supabase/client';
+import { getCurrentOsteopathId } from "../getCurrentOsteopath";
+import { supabase } from "@/integrations/supabase/client";
+import type { PatientRow, AppointmentRow, InvoiceRow, CabinetRow } from "./securityTypes";
 
 /**
- * Vérifie si un patient appartient à l'ostéopathe connecté
+ * Vérifie si le patient appartient à l'ostéopathe connecté
+ * @param patientId ID du patient à vérifier
+ * @returns true si le patient appartient à l'ostéopathe connecté, false sinon
  */
 export const isPatientOwnedByCurrentOsteopath = async (patientId: number): Promise<boolean> => {
   try {
-    const osteopathId = await getCurrentOsteopathId();
+    const currentOsteopathId = await getCurrentOsteopathId();
     
-    if (!osteopathId) {
-      console.warn("[SECURITY] Tentative de vérification de propriété d'un patient sans osteopathId");
+    if (!currentOsteopathId) {
+      console.warn("[SECURITY] Tentative d'accès à un patient sans profil ostéopathe");
       return false;
     }
     
-    return await checkPatientOwnership(supabase, patientId, osteopathId);
+    const { data, error } = await supabase
+      .from("Patient")
+      .select("osteopathId")
+      .eq("id", patientId)
+      .maybeSingle();
+      
+    if (error || !data) {
+      console.error("[SECURITY] Erreur ou patient non trouvé:", error);
+      return false;
+    }
+    
+    const patientData = data as PatientRow;
+    const result = patientData.osteopathId === currentOsteopathId;
+    
+    if (!result) {
+      console.warn(`[SECURITY VIOLATION] Tentative d'accès au patient ${patientId} (ostéopathe ${patientData.osteopathId}) par l'ostéopathe ${currentOsteopathId}`);
+    }
+    
+    return result;
   } catch (error) {
-    console.error(`[SECURITY] Erreur lors de la vérification de propriété du patient ${patientId}:`, error);
+    console.error("[SECURITY] Erreur lors de la vérification du patient:", error);
     return false;
   }
 };
 
 /**
- * Vérifie si un cabinet appartient à l'ostéopathe connecté
+ * Vérifie si le cabinet appartient à l'ostéopathe connecté
+ * @param cabinetId ID du cabinet à vérifier
+ * @returns true si le cabinet appartient à l'ostéopathe connecté, false sinon
  */
 export const isCabinetOwnedByCurrentOsteopath = async (cabinetId: number): Promise<boolean> => {
   try {
-    const osteopathId = await getCurrentOsteopathId();
+    const currentOsteopathId = await getCurrentOsteopathId();
     
-    if (!osteopathId) {
-      console.warn("[SECURITY] Tentative de vérification de propriété d'un cabinet sans osteopathId");
+    if (!currentOsteopathId) {
+      console.warn("[SECURITY] Tentative d'accès à un cabinet sans profil ostéopathe");
       return false;
     }
     
-    return await checkCabinetOwnership(supabase, cabinetId, osteopathId);
+    const { data, error } = await supabase
+      .from("Cabinet")
+      .select("osteopathId")
+      .eq("id", cabinetId)
+      .maybeSingle();
+      
+    if (error || !data) {
+      console.error("[SECURITY] Erreur ou cabinet non trouvé:", error);
+      return false;
+    }
+    
+    const cabinetData = data as CabinetRow;
+    const result = cabinetData.osteopathId === currentOsteopathId;
+    
+    if (!result) {
+      console.warn(`[SECURITY VIOLATION] Tentative d'accès au cabinet ${cabinetId} (ostéopathe ${cabinetData.osteopathId}) par l'ostéopathe ${currentOsteopathId}`);
+    }
+    
+    return result;
   } catch (error) {
-    console.error(`[SECURITY] Erreur lors de la vérification de propriété du cabinet ${cabinetId}:`, error);
+    console.error("[SECURITY] Erreur lors de la vérification du cabinet:", error);
     return false;
   }
 };
 
 /**
- * Vérifie si un rendez-vous appartient à l'ostéopathe connecté
+ * Vérifie si le rendez-vous appartient à l'ostéopathe connecté
+ * @param appointmentId ID du rendez-vous à vérifier
+ * @returns true si le rendez-vous appartient à l'ostéopathe connecté, false sinon
  */
 export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number): Promise<boolean> => {
   try {
-    const osteopathId = await getCurrentOsteopathId();
+    const currentOsteopathId = await getCurrentOsteopathId();
     
-    if (!osteopathId) {
-      console.warn("[SECURITY] Tentative de vérification de propriété d'un rendez-vous sans osteopathId");
+    if (!currentOsteopathId) {
+      console.warn("[SECURITY] Tentative d'accès à un rendez-vous sans profil ostéopathe");
       return false;
     }
     
-    const isOwned = await checkAppointmentOwnership(supabase, appointmentId, osteopathId);
-    
-    if (!isOwned) {
-      console.warn(`[SECURITY VIOLATION] Tentative d'accès au rendez-vous ${appointmentId} qui n'appartient pas à l'ostéopathe ${osteopathId}`);
+    // Récupérer le patient associé au rendez-vous
+    const { data: appointmentData, error: appointmentError } = await supabase
+      .from("Appointment")
+      .select("patientId")
+      .eq("id", appointmentId)
+      .maybeSingle();
+      
+    if (appointmentError || !appointmentData) {
+      console.error("[SECURITY] Erreur ou rendez-vous non trouvé:", appointmentError);
+      return false;
     }
     
-    return isOwned;
+    // Vérifier que le patient du rendez-vous appartient à l'ostéopathe
+    return isPatientOwnedByCurrentOsteopath(appointmentData.patientId);
   } catch (error) {
-    console.error(`[SECURITY] Erreur lors de la vérification de propriété du rendez-vous ${appointmentId}:`, error);
+    console.error("[SECURITY] Erreur lors de la vérification du rendez-vous:", error);
     return false;
   }
 };
 
 /**
- * Vérifie si une facture appartient à l'ostéopathe connecté
+ * Vérifie si la facture appartient à l'ostéopathe connecté
+ * @param invoiceId ID de la facture à vérifier
+ * @returns true si la facture appartient à l'ostéopathe connecté, false sinon
  */
 export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promise<boolean> => {
   try {
-    const osteopathId = await getCurrentOsteopathId();
+    const currentOsteopathId = await getCurrentOsteopathId();
     
-    if (!osteopathId) {
-      console.warn("[SECURITY] Tentative de vérification de propriété d'une facture sans osteopathId");
+    if (!currentOsteopathId) {
+      console.warn("[SECURITY] Tentative d'accès à une facture sans profil ostéopathe");
       return false;
     }
     
-    const isOwned = await checkInvoiceOwnership(supabase, invoiceId, osteopathId);
-    
-    if (!isOwned) {
-      console.warn(`[SECURITY VIOLATION] Tentative d'accès à la facture ${invoiceId} qui n'appartient pas à l'ostéopathe ${osteopathId}`);
+    // Récupérer le patient associé à la facture
+    const { data: invoiceData, error: invoiceError } = await supabase
+      .from("Invoice")
+      .select("patientId")
+      .eq("id", invoiceId)
+      .maybeSingle();
+      
+    if (invoiceError || !invoiceData) {
+      console.error("[SECURITY] Erreur ou facture non trouvée:", invoiceError);
+      return false;
     }
     
-    return isOwned;
+    // Vérifier que le patient de la facture appartient à l'ostéopathe
+    return isPatientOwnedByCurrentOsteopath(invoiceData.patientId);
   } catch (error) {
-    console.error(`[SECURITY] Erreur lors de la vérification de propriété de la facture ${invoiceId}:`, error);
+    console.error("[SECURITY] Erreur lors de la vérification de la facture:", error);
     return false;
   }
 };
-
-/**
- * Vérifie si l'utilisateur connecté est bien le propriétaire du patient
- */
-export async function checkPatientOwnership(
-  supabase: SupabaseClient,
-  patientId: number,
-  osteopathId: number
-): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("Patient")
-    .select("id, firstName, lastName")
-    .eq("id", patientId)
-    .eq("osteopathId", osteopathId)
-    .maybeSingle();
-
-  if (error) {
-    console.error(`[SECURITY] Erreur lors de la vérification du patient ${patientId}:`, error);
-    return false;
-  }
-
-  return !!data;
-}
-
-/**
- * Vérifie si l'utilisateur connecté est bien le propriétaire du cabinet
- */
-export async function checkCabinetOwnership(
-  supabase: SupabaseClient,
-  cabinetId: number,
-  osteopathId: number
-): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("Cabinet")
-    .select("id, name")
-    .eq("id", cabinetId)
-    .eq("osteopathId", osteopathId)
-    .maybeSingle();
-
-  if (error) {
-    console.error(`[SECURITY] Erreur lors de la vérification du cabinet ${cabinetId}:`, error);
-    return false;
-  }
-
-  return !!data;
-}
-
-/**
- * Vérifie si l'utilisateur connecté est bien le propriétaire du rendez-vous
- */
-export async function checkAppointmentOwnership(
-  supabase: SupabaseClient,
-  appointmentId: number,
-  osteopathId: number
-): Promise<boolean> {
-  // Vérification directe via le champ osteopathId
-  const { data, error } = await supabase
-    .from("Appointment")
-    .select("id, patientId")
-    .eq("id", appointmentId)
-    .eq("osteopathId", osteopathId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Erreur lors de la vérification directe du rendez-vous:", error);
-    return false;
-  }
-
-  if (data) return true;
-
-  // Si aucun résultat direct, on vérifie via le patientId
-  const { data: appointmentData, error: appointmentError } = await supabase
-    .from("Appointment")
-    .select("patientId")
-    .eq("id", appointmentId)
-    .maybeSingle();
-
-  if (appointmentError || !appointmentData) {
-    console.error(`Erreur lors de la récupération du rendez-vous ${appointmentId}:`, appointmentError);
-    return false;
-  }
-
-  // Vérifier que le patient appartient à l'ostéopathe
-  return await checkPatientOwnership(supabase, appointmentData.patientId, osteopathId);
-}
-
-/**
- * Vérifie si l'utilisateur connecté est bien le propriétaire de la facture
- */
-export async function checkInvoiceOwnership(
-  supabase: SupabaseClient,
-  invoiceId: number,
-  osteopathId: number
-): Promise<boolean> {
-  // Vérification directe via le champ osteopathId de la facture
-  const { data, error } = await supabase
-    .from("Invoice")
-    .select("id, patientId")
-    .eq("id", invoiceId)
-    .eq("osteopathId", osteopathId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Erreur lors de la vérification directe de la facture:", error);
-    return false;
-  }
-
-  if (data) return true;
-
-  // Sinon, chercher via le rendez-vous lié à la facture
-  const { data: invoiceWithAppointment, error: joinError } = await supabase
-    .from("Invoice")
-    .select(`
-      id, 
-      patientId,
-      appointmentId
-    `)
-    .eq("id", invoiceId)
-    .maybeSingle();
-
-  if (joinError) {
-    console.error("Erreur lors de la vérification jointe de la facture:", joinError);
-    return false;
-  }
-
-  if (!invoiceWithAppointment) return false;
-
-  // Si la facture a un rendez-vous associé, vérifier la propriété du rendez-vous
-  if (invoiceWithAppointment.appointmentId) {
-    const appointmentOwned = await checkAppointmentOwnership(
-      supabase, 
-      invoiceWithAppointment.appointmentId, 
-      osteopathId
-    );
-    if (appointmentOwned) return true;
-  }
-
-  // Sinon vérifier via le patientId
-  return await checkPatientOwnership(supabase, invoiceWithAppointment.patientId, osteopathId);
-}

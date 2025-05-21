@@ -1,6 +1,6 @@
 
 import { Osteopath } from "@/types";
-import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY, removeNullProperties } from "./utils";
+import { supabase, typedData, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY, removeNullProperties } from "./utils";
 
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
@@ -120,7 +120,7 @@ export const supabaseOsteopathService = {
       const token = session.access_token;
 
       // 3. Utiliser REST pour contourner les problèmes CORS
-      if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+      if (!SUPABASE_API_URL || !SUPABASE_PUBLISHABLE_KEY) {
         throw new Error("Configuration Supabase manquante (URL ou clé API)");
       }
 
@@ -141,7 +141,7 @@ export const supabaseOsteopathService = {
       const res = await fetch(URL_ENDPOINT, {
         method: "PUT",
         headers: {
-          apikey: SUPABASE_API_KEY,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Prefer: "return=representation"

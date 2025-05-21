@@ -1,383 +1,182 @@
-import { Invoice, PaymentStatus } from "@/types";
-import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
-import { corsHeaders } from "@/services/corsHeaders";
+
+import { Invoice } from "@/types";
+import { supabase } from "./utils";
+import { validateInvoiceData, removeNullProperties } from "./invoice-adapter";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 
 export const supabaseInvoiceService = {
   async getInvoices(): Promise<Invoice[]> {
     try {
+      console.log("Chargement des factures depuis Supabase");
+      
       // Récupérer l'ID de l'ostéopathe connecté
       const osteopathId = await getCurrentOsteopathId();
       
-      // Récupérer d'abord les patients liés à cet ostéopathe
-      const { data: patients, error: patientError } = await supabase
-        .from("Patient")
-        .select("id")
-        .eq("osteopathId", osteopathId);
-        
-      if (patientError) {
-        console.error("Erreur de chargement des patients:", patientError);
-        throw patientError;
-      }
-      
-      // Si aucun patient trouvé, retourner un tableau vide
-      if (!patients || patients.length === 0) {
-        console.log("Aucun patient trouvé pour l'ostéopathe", osteopathId);
-        return [];
-      }
-      
-      // Extraire les IDs de patients pour le filtre
-      const patientIds = patients.map(p => p.id);
-      console.log(`Filtrage des factures pour ${patientIds.length} patients de l'ostéopathe ${osteopathId}`);
-
+      // Récupérer les factures pour cet ostéopathe
       const { data, error } = await supabase
         .from("Invoice")
         .select("*")
-        .in("patientId", patientIds)
-        .order('date', { ascending: false });
-      
-      if (error) throw new Error(error.message);
-      
-      // Transform data with explicit typing and add missing fields
-      return (data || []).map(item => {
-        const invoice: Invoice = {
-          id: item.id,
-          patientId: item.patientId,
-          cabinetId: 1, // Default value
-          osteopathId: osteopathId, // Use connected osteopath ID
-          appointmentId: item.appointmentId,
-          date: item.date,
-          number: `INV-${item.id}`,
-          status: "DRAFT",
-          totalAmount: item.amount,
-          amount: item.amount, // Alias for compatibility
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          paymentDate: null,
-          paymentMethod: item.paymentMethod || null,
-          notes: item.notes || null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tvaExoneration: item.tvaExoneration || true,
-          tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-        };
-        return invoice;
-      });
+        .eq("osteopathId", osteopathId)
+        .order("date", { ascending: true });
+
+      if (error) {
+        console.error("Erreur de chargement des factures:", error);
+        throw error;
+      }
+
+      console.log(`${data?.length || 0} factures chargées pour l'ostéopathe ${osteopathId}`);
+      return (data || []) as Invoice[];
     } catch (error) {
-      console.error("Erreur getInvoices:", error);
+      console.error("Error fetching invoices:", error);
       throw error;
     }
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
     try {
-      const query = supabase
+      console.log(`Chargement de la facture ${id}`);
+      const { data, error } = await supabase
         .from("Invoice")
         .select("*")
         .eq("id", id)
         .maybeSingle();
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        if (error.code === "PGRST116") {
-          return undefined;
-        }
-        throw new Error(error.message);
+
+      if (error) throw error;
+      if (!data) {
+        console.log(`Facture avec l'id ${id} non trouvée`);
+        return undefined;
       }
-      
-      if (!data) return undefined;
-      
-      // Get connected osteopath ID
-      const osteopathId = await getCurrentOsteopathId();
-      
-      // Return the properly typed invoice with all required fields
-      const invoice: Invoice = {
-        id: data.id,
-        patientId: data.patientId,
-        cabinetId: 1,
-        osteopathId: osteopathId,
-        appointmentId: data.appointmentId,
-        date: data.date,
-        number: `INV-${data.id}`,
-        status: "DRAFT",
-        totalAmount: data.amount,
-        amount: data.amount, // Alias for compatibility
-        paymentStatus: data.paymentStatus as PaymentStatus,
-        paymentDate: null,
-        paymentMethod: data.paymentMethod || null,
-        notes: data.notes || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tvaExoneration: data.tvaExoneration || true,
-        tvaMotif: data.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-      };
-      
-      return invoice;
+
+      return data as Invoice;
     } catch (error) {
-      console.error("Erreur getInvoiceById:", error);
+      console.error("Error fetching invoice:", error);
       throw error;
     }
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
     try {
-      const query = supabase
+      console.log(`Chargement des factures pour le patient ${patientId}`);
+      const { data, error } = await supabase
         .from("Invoice")
         .select("*")
         .eq("patientId", patientId)
-        .order('date', { ascending: false });
-      
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
-      
-      // Get connected osteopath ID
-      const osteopathId = await getCurrentOsteopathId();
-      
-      // Transform data with explicit typing and add missing fields
-      return (data || []).map(item => {
-        const invoice: Invoice = {
-          id: item.id,
-          patientId: item.patientId,
-          cabinetId: 1,
-          osteopathId: osteopathId,
-          appointmentId: item.appointmentId,
-          date: item.date,
-          number: `INV-${item.id}`,
-          status: "DRAFT",
-          totalAmount: item.amount,
-          amount: item.amount, // Alias for compatibility
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          paymentDate: null,
-          paymentMethod: item.paymentMethod || null,
-          notes: item.notes || null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tvaExoneration: item.tvaExoneration || true,
-          tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-        };
-        return invoice;
-      });
+        .order("date", { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []) as Invoice[];
     } catch (error) {
-      console.error("Erreur getInvoicesByPatientId:", error);
+      console.error("Error fetching patient invoices:", error);
       throw error;
     }
   },
 
   async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {
     try {
-      const query = supabase
+      console.log(`Chargement des factures pour le rendez-vous ${appointmentId}`);
+      const { data, error } = await supabase
         .from("Invoice")
         .select("*")
         .eq("appointmentId", appointmentId)
-        .order('date', { ascending: false });
-      
-      const { data, error } = await query;
-      
-      if (error) throw new Error(error.message);
-      
-      // Get connected osteopath ID
-      const osteopathId = await getCurrentOsteopathId();
-      
-      // Transform data with explicit typing
-      return (data || []).map(item => {
-        const invoice: Invoice = {
-          id: item.id,
-          patientId: item.patientId,
-          cabinetId: 1,
-          osteopathId: osteopathId,
-          appointmentId: item.appointmentId,
-          date: item.date,
-          number: `INV-${item.id}`,
-          status: "DRAFT",
-          totalAmount: item.amount,
-          amount: item.amount, // Alias for compatibility
-          paymentStatus: item.paymentStatus as PaymentStatus,
-          paymentDate: null,
-          paymentMethod: item.paymentMethod || null,
-          notes: item.notes || null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tvaExoneration: item.tvaExoneration || true,
-          tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
-        };
-        return invoice;
-      });
+        .order("date", { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []) as Invoice[];
     } catch (error) {
-      console.error("Erreur getInvoicesByAppointmentId:", error);
+      console.error("Error fetching appointment invoices:", error);
       throw error;
     }
   },
 
-  async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
+  async createInvoice(invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice> {
     try {
-      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...dataToInsert } = invoiceData as any;
+      console.log("Création d'une nouvelle facture:", invoiceData);
       
-      // Vérifier que le patient appartient bien à l'ostéopathe connecté
+      // Validation des données avant l'insertion
+      const validatedData = validateInvoiceData(invoiceData);
+      
+      // Récupérer l'ID de l'ostéopathe connecté
       const osteopathId = await getCurrentOsteopathId();
       
-      const { data: patientCheck, error: patientError } = await supabase
-        .from("Patient")
-        .select("osteopathId")
-        .eq("id", dataToInsert.patientId)
-        .maybeSingle();
-        
-      if (patientError || !patientCheck) {
-        console.error("Patient introuvable ou erreur:", patientError);
-        throw new Error("Patient introuvable");
-      }
-      
-      if (patientCheck.osteopathId !== osteopathId) {
-        console.error("Tentative d'accès non autorisé: le patient n'appartient pas à cet ostéopathe");
-        throw new Error("Vous n'êtes pas autorisé à créer une facture pour ce patient");
-      }
-      
-      // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
-      if (!dataToInsert.appointmentId || dataToInsert.appointmentId === 0) {
-        delete dataToInsert.appointmentId;
-      }
-      
-      // Assurons-nous que tous les champs requis sont présents
-      const dataWithDefaults = {
-        ...dataToInsert,
-        cabinetId: dataToInsert.cabinetId || 1,
-        osteopathId: dataToInsert.osteopathId || osteopathId,
-        number: dataToInsert.number || `INV-${Date.now()}`,
+      // Création de l'objet à insérer
+      const insertData = {
+        ...validatedData,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        // Ne pas inclure osteopathId dans l'insertion si ce n'est pas un champ valide
+        // dans la table Invoice de Supabase
       };
       
       const { data, error } = await supabase
         .from("Invoice")
-        .insert(dataWithDefaults)
+        .insert([insertData])
         .select()
         .single();
 
       if (error) {
-        console.error("[SUPABASE ERROR]", error.code, error.message);
+        console.error("Erreur lors de la création de la facture:", error);
         throw error;
       }
 
+      console.log("Facture créée avec succès:", data);
       return data as Invoice;
-    } catch (error) {
-      console.error("Erreur createInvoice:", error);
+    } catch (error: any) {
+      console.error("Error creating invoice:", error);
       throw error;
     }
   },
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
     try {
-      // 1. Récupérer le token d'authentification utilisateur
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.access_token) {
-        throw new Error("Utilisateur non authentifié");
-      }
-      const token = session.access_token;
-
-      // 2. Utiliser REST pour contourner les problèmes CORS
-      if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
-        throw new Error("Configuration Supabase manquante (URL ou clé API)");
-      }
-
-      const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Invoice?id=eq.${id}`;
+      console.log(`Mise à jour de la facture ${id}:`, invoiceData);
       
-      // Si appointmentId est 0 ou null, le supprimer du payload pour éviter la contrainte de clé étrangère
-      if (invoiceData.appointmentId === 0 || invoiceData.appointmentId === null) {
-        delete invoiceData.appointmentId;
-      }
+      // Retirer les propriétés nulles de l'objet de mise à jour
+      const cleanedData = removeNullProperties(invoiceData);
       
-      // 3. Préparer le payload avec l'ID inclus
-      const updatePayload = {
-        id: id, // Important: inclure l'ID dans le corps
-        ...invoiceData,
-        updatedAt: new Date().toISOString(),
+      const updateData = {
+        ...cleanedData,
+        updatedAt: new Date().toISOString()
       };
 
-      // 4. Nettoyer les valeurs undefined
-      Object.keys(updatePayload).forEach(
-        (k) => updatePayload[k] === undefined && delete updatePayload[k]
-      );
+      const { data, error } = await supabase
+        .from("Invoice")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
 
-      console.log("Payload de mise à jour de la facture:", updatePayload);
-
-      // 5. Utiliser PUT au lieu de PATCH
-      const res = await fetch(URL_ENDPOINT, {
-        method: "PUT",
-        headers: {
-          apikey: SUPABASE_API_KEY,
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Prefer: "return=representation",
-          ...corsHeaders
-        },
-        body: JSON.stringify(updatePayload),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`Erreur HTTP ${res.status}:`, errorText);
-        throw new Error(`Erreur lors de la mise à jour de la facture: ${res.status}`);
+      if (error) {
+        console.error("Erreur lors de la mise à jour de la facture:", error);
+        throw error;
       }
 
-      // Traiter la réponse
-      const data = await res.json();
-      console.log("Réponse de mise à jour de la facture:", data);
-      
-      if (Array.isArray(data) && data.length > 0) return data[0];
-      if (data && typeof data === "object") return data as Invoice;
-      
-      throw new Error("Aucune donnée retournée lors de la mise à jour de la facture");
+      console.log("Facture mise à jour avec succès:", data);
+      return data as Invoice;
     } catch (error) {
-      console.error("Erreur updateInvoice:", error);
+      console.error("Error updating invoice:", error);
       throw error;
     }
   },
-  
-  async updatePaymentStatus(id: number, paymentStatus: PaymentStatus): Promise<Invoice | undefined> {
-    return this.updateInvoice(id, { paymentStatus });
-  },
-  
+
   async deleteInvoice(id: number): Promise<boolean> {
     try {
+      console.log(`Suppression de la facture ${id}`);
       const { error } = await supabase
         .from("Invoice")
         .delete()
         .eq("id", id);
-      
-      if (error) throw new Error(error.message);
-      
+
+      if (error) {
+        console.error("Erreur lors de la suppression de la facture:", error);
+        throw error;
+      }
+      console.log(`Facture ${id} supprimée avec succès`);
       return true;
-    } catch (error) {
-      console.error("Erreur deleteInvoice:", error);
+    } catch (error: any) {
+      console.error("Error deleting invoice:", error);
       throw error;
     }
-  },
-  
-  // Nouvelle méthode pour exporter les factures d'une période donnée (mois ou année)
-  async exportInvoicesByPeriod(year: string, month: string | null = null): Promise<Invoice[]> {
-    // Récupérer toutes les factures
-    const allInvoices = await this.getInvoices();
-    
-    // Filtrer par année et mois si spécifié
-    return allInvoices.filter(invoice => {
-      const invoiceDate = new Date(invoice.date);
-      const invoiceYear = invoiceDate.getFullYear().toString();
-      
-      // Si l'année ne correspond pas, exclure
-      if (invoiceYear !== year) return false;
-      
-      // Si un mois est spécifié, vérifier la correspondance
-      if (month !== null) {
-        const invoiceMonth = (invoiceDate.getMonth() + 1).toString().padStart(2, '0');
-        return invoiceMonth === month;
-      }
-      
-      // Sinon, inclure toutes les factures de l'année
-      return true;
-    });
   }
 };
