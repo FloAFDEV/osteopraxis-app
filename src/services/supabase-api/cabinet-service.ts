@@ -1,3 +1,4 @@
+
 import { Cabinet } from "@/types";
 import { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY, removeNullProperties } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -81,7 +82,7 @@ export const supabaseCabinetService = {
     }
   },
 
-  async createCabinet(cabinetData: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>>: Promise<Cabinet> {
+  async createCabinet(cabinetData: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     try {
       const { data, error } = await supabase
         .from("Cabinet")

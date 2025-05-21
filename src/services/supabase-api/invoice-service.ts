@@ -1,3 +1,4 @@
+
 import { Invoice } from "@/types";
 import { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY } from "./utils";
 import { ensureNotes, ensureDate, formatDate, validateInvoiceData, removeNullProperties } from "./invoice-adapter";
@@ -89,7 +90,7 @@ export const supabaseInvoiceService = {
     }
   },
 
-  async createInvoice(invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Invoice> {
+  async createInvoice(invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice> {
     try {
       console.log("Création d'une nouvelle facture:", invoiceData);
       
