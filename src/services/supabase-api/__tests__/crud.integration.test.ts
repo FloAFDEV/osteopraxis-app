@@ -53,7 +53,14 @@ describe('Cabinet CRUD Operations', () => {
       email: 'test@example.com',
       imageUrl: null,
       logoUrl: null,
-      osteopathId: 1
+      osteopathId: 1,
+      // Ajouter les champs optionnels supplémentaires requis par le type
+      siret: null,
+      city: null,
+      postalCode: null,
+      iban: null,
+      bic: null,
+      country: null
     };
     
     const result = await createCabinet(cabinetData);
