@@ -1,7 +1,8 @@
 
 import { Cabinet } from "@/types";
-import { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY, removeNullProperties } from "./utils";
+import { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
+import { removeNullProperties } from "./invoice-adapter";
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
