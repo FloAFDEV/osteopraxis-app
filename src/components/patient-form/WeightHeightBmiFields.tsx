@@ -20,40 +20,41 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
     return Math.round((weight / (heightInMeters * heightInMeters)) * 10) / 10;
   };
 
-  // Observer les changements de poids et de taille pour calculer l'IMC
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      // Calculer l'IMC uniquement si le poids ou la taille change
-      if (name === "weight" || name === "height") {
-        const weight = parseFloat(String(value.weight));
-        const height = parseFloat(String(value.height));
-        
-        if (!isNaN(weight) && !isNaN(height) && weight > 0 && height > 0) {
-          const bmi = calculateBMI(weight, height);
-          if (bmi) {
-            form.setValue("bmi", bmi);
-          }
-        } else {
-          // Si l'une des valeurs est invalide, réinitialiser l'IMC
-          form.setValue("bmi", null);
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [form]);
-
-  // Fonction pour déterminer la couleur du fond en fonction de la valeur de l'IMC
-  const getBmiBackgroundColor = (bmi: number | null): string => {
-    if (bmi === null || isNaN(bmi)) return "bg-gray-100";
+  // Fonction pour déterminer la classe CSS de couleur en fonction de la valeur de l'IMC
+  const getBmiColorClass = (bmi: number | null): string => {
+    if (bmi === null) return "bg-gray-100"; // Valeur par défaut si pas de BMI
     
     if (bmi < 18.5) return "bg-blue-100"; // Sous la normale
     if (bmi >= 18.5 && bmi <= 24.9) return "bg-green-100"; // Normale
-    if (bmi >= 25 && bmi <= 29.9) return "bg-yellow-100"; // Surpoids
-    if (bmi >= 30) return "bg-red-100"; // Obèse
-    
-    return "bg-gray-100"; // Valeur par défaut
+    if (bmi >= 25.0 && bmi <= 29.9) return "bg-yellow-100"; // Surpoids
+    return "bg-red-100"; // Obèse (≥ 30)
   };
+
+  // Observer les changements de poids et de taille pour calculer l'IMC
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      // Calculer l'IMC uniquement quand le poids ou la taille changent
+      if (name === "weight" || name === "height") {
+        const weight = parseFloat(value.weight as string);
+        const height = parseFloat(value.height as string);
+        
+        const bmi = calculateBMI(weight, height);
+        
+        if (bmi !== null) {
+          // Convertir en string avant de l'assigner au formulaire
+          form.setValue("bmi", bmi.toString(), { shouldValidate: true });
+        } else {
+          form.setValue("bmi", "", { shouldValidate: true });
+        }
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Déterminer la couleur du champ BMI
+  const bmiValue = form.watch("bmi");
+  const bmiColorClass = getBmiColorClass(bmiValue ? parseFloat(bmiValue) : null);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -64,22 +65,23 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
           <FormItem>
             <FormLabel>Taille (cm)</FormLabel>
             <FormControl>
-              <Input
-                type="number"
-                placeholder="Ex: 175"
-                min={0}
-                {...field}
-                value={field.value || ""}
+              <Input 
+                placeholder="Taille en cm" 
+                {...field} 
                 onChange={(e) => {
-                  field.onChange(e.target.value === "" ? null : Number(e.target.value));
-                }}
+                  // Assurez-vous que la valeur est un nombre
+                  const value = e.target.value;
+                  if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                    field.onChange(value);
+                  }
+                }} 
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
         control={form.control}
         name="weight"
@@ -87,47 +89,40 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
           <FormItem>
             <FormLabel>Poids (kg)</FormLabel>
             <FormControl>
-              <Input
-                type="number"
-                placeholder="Ex: 70"
-                min={0}
-                step="0.1"
-                {...field}
-                value={field.value || ""}
+              <Input 
+                placeholder="Poids en kg" 
+                {...field} 
                 onChange={(e) => {
-                  field.onChange(e.target.value === "" ? null : Number(e.target.value));
-                }}
+                  // Assurez-vous que la valeur est un nombre
+                  const value = e.target.value;
+                  if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                    field.onChange(value);
+                  }
+                }} 
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
         control={form.control}
         name="bmi"
-        render={({ field }) => {
-          const bmiValue = field.value as number | null;
-          const backgroundColor = getBmiBackgroundColor(bmiValue);
-          
-          return (
-            <FormItem>
-              <FormLabel>IMC (calculé automatiquement)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="IMC"
-                  readOnly
-                  {...field}
-                  value={field.value || ""}
-                  className={`${backgroundColor} border-gray-300`}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          );
-        }}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>IMC</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="IMC (calculé)" 
+                {...field} 
+                readOnly 
+                className={`${bmiColorClass}`} // Appliquer la classe de couleur conditionnelle
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
     </div>
   );

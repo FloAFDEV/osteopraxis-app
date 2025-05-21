@@ -104,27 +104,27 @@ export const isSameOsteopath = async (osteopathId: number): Promise<boolean> => 
   }
 };
 
-// Types simplifiés pour éviter la récursion
+// Types simplifiés pour les requêtes Supabase
 interface SimplePatient {
   id: number;
   firstName: string;
   lastName: string;
 }
 
-interface SimpleAppointment {
+// Types spécifiques pour les requêtes Supabase avec des interfaces simples
+interface PatientRow {
+  id: number;
+}
+
+interface AppointmentRow {
   id: number;
   patientId: number;
 }
 
-interface SimpleInvoice {
+interface InvoiceRow {
   id: number;
   patientId: number;
 }
-
-// Types spécifiques pour les requêtes Supabase
-type PatientRow = { id: number };
-type AppointmentRow = { id: number; patientId: number };
-type InvoiceRow = { id: number; patientId: number };
 
 /**
  * Vérifie si un patient appartient à l'ostéopathe connecté
@@ -177,12 +177,18 @@ export const isCabinetOwnedByCurrentOsteopath = async (cabinetId: number): Promi
       return false;
     }
     
+    // Utilisation d'un type explicite simple
+    interface CabinetRow {
+      id: number;
+      name: string;
+    }
+    
     const { data, error } = await supabase
       .from("Cabinet")
       .select("id, name")
       .eq("id", cabinetId)
       .eq("osteopathId", osteopathId)
-      .maybeSingle();
+      .maybeSingle<CabinetRow>();
       
     if (error) {
       console.error(`[SECURITY] Erreur lors de la vérification du cabinet ${cabinetId}:`, error);
@@ -234,7 +240,7 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       .from("Appointment")
       .select("patientId")
       .eq("id", appointmentId)
-      .maybeSingle<Pick<AppointmentRow, "patientId">>();
+      .maybeSingle<{ patientId: number }>();
       
     if (appointmentError || !appointment) {
       console.error(`[SECURITY] Erreur lors de la récupération du rendez-vous ${appointmentId}:`, appointmentError);
@@ -299,7 +305,7 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       .from("Invoice")
       .select("patientId")
       .eq("id", invoiceId)
-      .maybeSingle<Pick<InvoiceRow, "patientId">>();
+      .maybeSingle<{ patientId: number }>();
       
     if (invoiceError || !invoice) {
       console.error(`[SECURITY] Erreur lors de la récupération de la facture ${invoiceId}:`, invoiceError);
