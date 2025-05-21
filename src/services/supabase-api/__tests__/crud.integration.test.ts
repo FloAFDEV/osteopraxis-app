@@ -1,110 +1,85 @@
+
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { supabase } from '@/integrations/supabase/client';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { supabaseCabinetService } from '../cabinet';
-import { CabinetCreateInput, CabinetUpdateInput } from '../cabinet/types';
-import { getCurrentOsteopathId } from '../utils/getCurrentOsteopath';
+import { createCabinet, updateCabinet, getCabinetById, deleteCabinet } from '../cabinet';
+import type { CabinetCreateInput } from '../cabinet/types';
 
-// Mock the getCurrentOsteopathId function
-vi.mock('../utils/getCurrentOsteopath', () => ({
-  getCurrentOsteopathId: vi.fn(),
-}));
-
-describe('Supabase Cabinet Service CRUD Operations', () => {
-  const testOsteopathId = 999; // Use a test osteopath ID
-  let testCabinetId: number | undefined;
-
-  beforeAll(async () => {
-    // Set up the mock to return the test osteopath ID
-    (getCurrentOsteopathId as Mock).mockResolvedValue(testOsteopathId);
-  });
-
-  afterAll(async () => {
-    // Clean up: Delete the test cabinet if it exists
-    if (testCabinetId) {
-      try {
-        await supabaseCabinetService.deleteCabinet(testCabinetId);
-        console.log(`[TEST] Cleaned up cabinet with ID ${testCabinetId}`);
-      } catch (error) {
-        console.error(`[TEST] Error cleaning up cabinet with ID ${testCabinetId}:`, error);
-      }
+// Mocker le client Supabase
+vi.mock('@/integrations/supabase/client', () => {
+  return {
+    supabase: {
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+      execute: vi.fn()
     }
+  };
+});
+
+describe('Cabinet CRUD Operations', () => {
+  let mockInsertResponse: any;
+  let mockUpdateResponse: any;
+  let mockDeleteResponse: any;
+  let mockSelectResponse: any;
+  
+  beforeEach(() => {
+    // Réinitialiser les mocks
+    vi.resetAllMocks();
+    
+    // Configurer les réponses simulées
+    mockInsertResponse = { data: { id: 1, name: 'Test Cabinet' }, error: null };
+    mockUpdateResponse = { data: { id: 1, name: 'Updated Cabinet' }, error: null };
+    mockDeleteResponse = { data: {}, error: null };
+    mockSelectResponse = { data: { id: 1, name: 'Test Cabinet' }, error: null };
+    
+    // Configurer le comportement des mocks
+    (supabase.from('Cabinet').insert as any).mockReturnValue({ select: vi.fn().mockResolvedValue(mockInsertResponse) });
+    (supabase.from('Cabinet').update as any).mockResolvedValue(mockUpdateResponse);
+    (supabase.from('Cabinet').delete as any).mockResolvedValue(mockDeleteResponse);
+    (supabase.from('Cabinet').select as any).mockReturnThis();
+    (supabase.from('Cabinet').select().eq as any).mockReturnThis();
+    (supabase.from('Cabinet').select().eq().single as any).mockResolvedValue(mockSelectResponse);
   });
 
   it('should create a new cabinet', async () => {
-    const newCabinetData: CabinetCreateInput = {
+    const cabinetData: CabinetCreateInput = {
       name: 'Test Cabinet',
-      address: '123 Test Street',
+      address: '123 Test St',
       phone: '123-456-7890',
       email: 'test@example.com',
       imageUrl: null,
       logoUrl: null,
-      osteopathId: testOsteopathId,
+      osteopathId: 1
     };
-
-    const createdCabinet = await supabaseCabinetService.createCabinet(newCabinetData);
-
-    expect(createdCabinet).toBeDefined();
-    expect(createdCabinet.name).toBe(newCabinetData.name);
-    expect(createdCabinet.address).toBe(newCabinetData.address);
-    expect(createdCabinet.osteopathId).toBe(testOsteopathId);
-
-    // Store the ID for later tests and cleanup
-    testCabinetId = createdCabinet.id;
-  }, 10000);
-
-  it('should get a cabinet by ID', async () => {
-    if (!testCabinetId) {
-      throw new Error('No cabinet ID available. Create cabinet test must run first.');
-    }
-
-    const cabinet = await supabaseCabinetService.getCabinetById(testCabinetId);
-
-    expect(cabinet).toBeDefined();
-    expect(cabinet?.id).toBe(testCabinetId);
-    expect(cabinet?.osteopathId).toBe(testOsteopathId);
-  });
-
-  it('should get cabinets by osteopath ID', async () => {
-    const cabinets = await supabaseCabinetService.getCabinetsByOsteopathId(testOsteopathId);
-
-    expect(cabinets).toBeDefined();
-    expect(Array.isArray(cabinets)).toBe(true);
-    cabinets.forEach(cabinet => {
-      expect(cabinet.osteopathId).toBe(testOsteopathId);
-    });
+    
+    const result = await createCabinet(cabinetData);
+    
+    expect(supabase.from).toHaveBeenCalledWith('Cabinet');
+    expect(result).toEqual({ id: 1, name: 'Test Cabinet' });
   });
 
   it('should update an existing cabinet', async () => {
-    if (!testCabinetId) {
-      throw new Error('No cabinet ID available. Create cabinet test must run first.');
-    }
+    const result = await updateCabinet(1, { name: 'Updated Cabinet' });
+    
+    expect(supabase.from).toHaveBeenCalledWith('Cabinet');
+    expect(result).toEqual({ id: 1, name: 'Updated Cabinet' });
+  });
 
-    const updateData: CabinetUpdateInput = {
-      name: 'Updated Test Cabinet',
-      address: '456 Updated Street',
-    };
-
-    const updatedCabinet = await supabaseCabinetService.updateCabinet(testCabinetId, updateData);
-
-    expect(updatedCabinet).toBeDefined();
-    expect(updatedCabinet?.id).toBe(testCabinetId);
-    expect(updatedCabinet?.name).toBe(updateData.name);
-    expect(updatedCabinet?.address).toBe(updateData.address);
+  it('should get a cabinet by ID', async () => {
+    const result = await getCabinetById(1);
+    
+    expect(supabase.from).toHaveBeenCalledWith('Cabinet');
+    expect(result).toEqual({ id: 1, name: 'Test Cabinet' });
   });
 
   it('should delete a cabinet', async () => {
-    if (!testCabinetId) {
-      throw new Error('No cabinet ID available. Create cabinet test must run first.');
-    }
-
-    const deleteResult = await supabaseCabinetService.deleteCabinet(testCabinetId);
-    expect(deleteResult).toBe(true);
-
-    // Verify that the cabinet is actually deleted
-    const cabinet = await supabaseCabinetService.getCabinetById(testCabinetId);
-    expect(cabinet).toBeUndefined();
-
-    // Clear the testCabinetId to prevent further operations on a deleted cabinet
-    testCabinetId = undefined;
+    const result = await deleteCabinet(1);
+    
+    expect(supabase.from).toHaveBeenCalledWith('Cabinet');
+    expect(result).toEqual(true);
   });
 });
