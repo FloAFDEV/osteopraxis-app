@@ -1,9 +1,9 @@
 
-import { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY } from '@/integrations/supabase/client';
+import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from '@/integrations/supabase/client';
 import { AppointmentStatus } from '@/types';
 import { getCurrentOsteopathId, isSameOsteopath } from './utils/getCurrentOsteopath';
 
-export { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY, getCurrentOsteopathId, isSameOsteopath };
+export { supabase, SUPABASE_API_URL, SUPABASE_API_KEY, getCurrentOsteopathId, isSameOsteopath };
 
 // Définition des valeurs valides pour le statut de rendez-vous
 export const AppointmentStatusValues: AppointmentStatus[] = [
