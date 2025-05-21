@@ -6,6 +6,24 @@ import { removeNullProperties } from "./invoice-adapter";
 // Type pour les données d'insertion conformes au schéma Supabase
 type CabinetInsertData = Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>;
 
+// Type spécifique pour les mises à jour de cabinet
+type CabinetUpdateData = {
+  name?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  phone?: string | null;
+  email?: string | null;
+  siret?: string | null;
+  iban?: string | null;
+  bic?: string | null;
+  country?: string;
+  imageUrl?: string | null;
+  logoUrl?: string | null;
+  professionalProfileId?: number | null;
+  tenant_id?: string | null;
+};
+
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
     try {
@@ -109,7 +127,7 @@ export const supabaseCabinetService = {
     }
   },
 
-  async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
+  async updateCabinet(id: number, cabinetData: CabinetUpdateData): Promise<Cabinet | undefined> {
     try {
       // Remove null properties to prevent type issues
       const cleanedData = removeNullProperties(cabinetData);
