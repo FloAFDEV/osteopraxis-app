@@ -1,3 +1,4 @@
+
 import { Invoice } from "@/types";
 import { supabase } from "./utils";
 import { validateInvoiceData, removeNullProperties } from "./invoice-adapter";
@@ -100,14 +101,17 @@ export const supabaseInvoiceService = {
       const osteopathId = await getCurrentOsteopathId();
       
       // Création de l'objet à insérer
+      const insertData = {
+        ...validatedData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        // Ne pas inclure osteopathId dans l'insertion si ce n'est pas un champ valide
+        // dans la table Invoice de Supabase
+      };
+      
       const { data, error } = await supabase
         .from("Invoice")
-        .insert({
-          ...validatedData,
-          osteopathId: osteopathId, // Assurez-vous d'ajouter l'ID de l'ostéopathe
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        })
+        .insert([insertData])
         .select()
         .single();
 
@@ -130,13 +134,15 @@ export const supabaseInvoiceService = {
       
       // Retirer les propriétés nulles de l'objet de mise à jour
       const cleanedData = removeNullProperties(invoiceData);
+      
+      const updateData = {
+        ...cleanedData,
+        updatedAt: new Date().toISOString()
+      };
 
       const { data, error } = await supabase
         .from("Invoice")
-        .update({
-          ...cleanedData,
-          updatedAt: new Date().toISOString()
-        })
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();

@@ -64,8 +64,6 @@ export const supabaseCabinetService = {
 
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
     try {
-      // This is a simplified implementation. You might need to adjust the query
-      // based on your actual database schema and relationships.
       const { data, error } = await supabase
         .from("Cabinet")
         .select("*")
@@ -85,15 +83,15 @@ export const supabaseCabinetService = {
 
   async createCabinet(cabinetData: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     try {
+      const insertData = {
+        ...cabinetData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
       const { data, error } = await supabase
         .from("Cabinet")
-        .insert([
-          {
-            ...cabinetData,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ])
+        .insert([insertData])
         .select()
         .single();
 
@@ -114,12 +112,14 @@ export const supabaseCabinetService = {
       // Remove null properties to prevent type issues
       const cleanedData = removeNullProperties(cabinetData);
       
+      const updateData = {
+        ...cleanedData,
+        updatedAt: new Date().toISOString()
+      };
+      
       const { data, error } = await supabase
         .from("Cabinet")
-        .update({
-          ...cleanedData,
-          updatedAt: new Date().toISOString()
-        })
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
