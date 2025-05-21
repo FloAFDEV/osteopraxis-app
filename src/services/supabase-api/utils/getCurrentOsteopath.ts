@@ -240,7 +240,7 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       .from("Appointment")
       .select("patientId")
       .eq("id", appointmentId)
-      .maybeSingle<{ patientId: number }>();
+      .maybeSingle<Pick<AppointmentRow, "patientId">>();
       
     if (appointmentError || !appointment) {
       console.error(`[SECURITY] Erreur lors de la récupération du rendez-vous ${appointmentId}:`, appointmentError);
@@ -305,7 +305,7 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       .from("Invoice")
       .select("patientId")
       .eq("id", invoiceId)
-      .maybeSingle<{ patientId: number }>();
+      .maybeSingle<Pick<InvoiceRow, "patientId">>();
       
     if (invoiceError || !invoice) {
       console.error(`[SECURITY] Erreur lors de la récupération de la facture ${invoiceId}:`, invoiceError);
