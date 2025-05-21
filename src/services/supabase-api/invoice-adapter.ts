@@ -54,6 +54,22 @@ export type InvoiceInsertData = {
 };
 
 /**
+ * Convertit un InvoiceStatus en PaymentStatus compatible
+ */
+export const convertStatusToPaymentStatus = (status: "DRAFT" | "SENT" | "PAID" | "CANCELED" | undefined): "PAID" | "PENDING" | "CANCELED" => {
+  if (!status) return "PENDING";
+  
+  switch (status) {
+    case "PAID": return "PAID";
+    case "CANCELED": return "CANCELED";
+    case "DRAFT":
+    case "SENT":
+    default:
+      return "PENDING";
+  }
+};
+
+/**
  * Validates invoice data before saving
  */
 export const validateInvoiceData = (data: Partial<Invoice>): InvoiceInsertData => {
@@ -62,7 +78,7 @@ export const validateInvoiceData = (data: Partial<Invoice>): InvoiceInsertData =
     throw new Error("Le patient est requis");
   }
   
-  if (data.amount === undefined || data.amount === null) {
+  if (data.amount === undefined && data.totalAmount === undefined) {
     throw new Error("Le montant est requis");
   }
   
@@ -72,15 +88,21 @@ export const validateInvoiceData = (data: Partial<Invoice>): InvoiceInsertData =
   // Ensure notes is a string
   const notes = ensureNotes(data.notes);
   
+  // Convertir le status en paymentStatus compatible
+  const paymentStatus = convertStatusToPaymentStatus(data.status);
+  
+  // Utiliser amount ou totalAmount (ils sont synonymes dans l'application)
+  const amount = data.amount !== undefined ? data.amount : (data.totalAmount || 0);
+  
   // Créer un objet conforme au schéma de la table Invoice dans Supabase
   const insertData: InvoiceInsertData = {
     patientId: data.patientId,
-    amount: data.amount,
+    amount: amount,
     date,
     notes,
     appointmentId: data.appointmentId || null,
     paymentMethod: data.paymentMethod || null,
-    paymentStatus: data.status as "PAID" | "PENDING" | "CANCELED" || "PENDING"
+    paymentStatus
   };
   
   if (data.tvaExoneration !== undefined) {

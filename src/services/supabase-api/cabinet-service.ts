@@ -1,3 +1,4 @@
+
 import { Cabinet } from "@/types";
 import { supabase } from "./utils";
 import { removeNullProperties } from "./invoice-adapter";

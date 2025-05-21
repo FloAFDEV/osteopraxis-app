@@ -1,7 +1,7 @@
 
 import { Invoice } from "@/types";
 import { supabase } from "./utils";
-import { validateInvoiceData, removeNullProperties, InvoiceInsertData } from "./invoice-adapter";
+import { validateInvoiceData, removeNullProperties, InvoiceInsertData, convertStatusToPaymentStatus } from "./invoice-adapter";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 
 export const supabaseInvoiceService = {
@@ -16,7 +16,7 @@ export const supabaseInvoiceService = {
       const { data, error } = await supabase
         .from("Invoice")
         .select("*")
-        .eq("osteopathId", osteopathId)
+        .eq("patientId", osteopathId)
         .order("date", { ascending: true });
 
       if (error) {
@@ -98,15 +98,9 @@ export const supabaseInvoiceService = {
       const validatedData = validateInvoiceData(invoiceData);
       
       // Création de l'objet à insérer avec uniquement les champs conformes au schéma Supabase
-      const insertData = {
-        ...validatedData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
       const { data, error } = await supabase
         .from("Invoice")
-        .insert([insertData])
+        .insert([validatedData])
         .select()
         .single();
 
@@ -129,25 +123,26 @@ export const supabaseInvoiceService = {
       
       // Retirer les propriétés nulles de l'objet de mise à jour
       const cleanedData = removeNullProperties(invoiceData);
+      const updateData: Partial<InvoiceInsertData> = {};
       
-      // Ne conserver que les champs autorisés par le schéma de la table Invoice
-      const updateData = {
-        ...cleanedData,
-        updatedAt: new Date().toISOString()
-      };
-
-      // Supprimer les champs qui ne sont pas dans la table avant la mise à jour
-      if ('osteopathId' in updateData) delete updateData.osteopathId;
-      if ('Patient' in updateData) delete updateData.Patient;
-      if ('totalAmount' in updateData && !('amount' in updateData)) {
-        updateData.amount = updateData.totalAmount;
-        delete updateData.totalAmount;
+      // Copier uniquement les propriétés valides pour la table Invoice
+      if ('amount' in cleanedData) updateData.amount = cleanedData.amount;
+      if ('totalAmount' in cleanedData) updateData.amount = cleanedData.totalAmount;
+      if ('patientId' in cleanedData) updateData.patientId = cleanedData.patientId;
+      if ('appointmentId' in cleanedData) updateData.appointmentId = cleanedData.appointmentId;
+      if ('date' in cleanedData) updateData.date = cleanedData.date as string;
+      if ('notes' in cleanedData) updateData.notes = cleanedData.notes;
+      if ('paymentMethod' in cleanedData) updateData.paymentMethod = cleanedData.paymentMethod;
+      if ('tvaExoneration' in cleanedData) updateData.tvaExoneration = cleanedData.tvaExoneration;
+      if ('tvaMotif' in cleanedData) updateData.tvaMotif = cleanedData.tvaMotif;
+      
+      // Gérer la conversion des statuts
+      if ('status' in cleanedData) {
+        updateData.paymentStatus = convertStatusToPaymentStatus(cleanedData.status);
+      } else if ('paymentStatus' in cleanedData) {
+        updateData.paymentStatus = cleanedData.paymentStatus;
       }
-      if ('status' in updateData && !('paymentStatus' in updateData)) {
-        updateData.paymentStatus = updateData.status;
-        delete updateData.status;
-      }
-
+      
       const { data, error } = await supabase
         .from("Invoice")
         .update(updateData)
