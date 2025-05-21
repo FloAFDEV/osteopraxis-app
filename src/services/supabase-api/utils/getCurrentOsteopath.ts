@@ -104,24 +104,19 @@ export const isSameOsteopath = async (osteopathId: number): Promise<boolean> => 
   }
 };
 
-// Types simplifiés pour les requêtes Supabase
+// Types simplifiés pour éviter la récursion
 interface SimplePatient {
   id: number;
   firstName: string;
   lastName: string;
 }
 
-// Types spécifiques pour les requêtes Supabase avec des interfaces simples
-interface PatientRow {
-  id: number;
-}
-
-interface AppointmentRow {
+interface SimpleAppointment {
   id: number;
   patientId: number;
 }
 
-interface InvoiceRow {
+interface SimpleInvoice {
   id: number;
   patientId: number;
 }
@@ -145,7 +140,7 @@ export const isPatientOwnedByCurrentOsteopath = async (patientId: number): Promi
       .select("id, firstName, lastName")
       .eq("id", patientId)
       .eq("osteopathId", osteopathId)
-      .maybeSingle<SimplePatient>();
+      .maybeSingle();
       
     if (error) {
       console.error(`[SECURITY] Erreur lors de la vérification du patient ${patientId}:`, error);
@@ -177,18 +172,12 @@ export const isCabinetOwnedByCurrentOsteopath = async (cabinetId: number): Promi
       return false;
     }
     
-    // Utilisation d'un type explicite simple
-    interface CabinetRow {
-      id: number;
-      name: string;
-    }
-    
     const { data, error } = await supabase
       .from("Cabinet")
       .select("id, name")
       .eq("id", cabinetId)
       .eq("osteopathId", osteopathId)
-      .maybeSingle<CabinetRow>();
+      .maybeSingle();
       
     if (error) {
       console.error(`[SECURITY] Erreur lors de la vérification du cabinet ${cabinetId}:`, error);
@@ -224,7 +213,7 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       .select("id, patientId")
       .eq("id", appointmentId)
       .eq("osteopathId", osteopathId)  // Vérification directe si le champ existe
-      .maybeSingle<AppointmentRow>();
+      .maybeSingle();
       
     if (directError) {
       console.error(`[SECURITY] Erreur lors de la vérification directe du rendez-vous ${appointmentId}:`, directError);
@@ -240,7 +229,7 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       .from("Appointment")
       .select("patientId")
       .eq("id", appointmentId)
-      .maybeSingle<Pick<AppointmentRow, "patientId">>();
+      .maybeSingle();
       
     if (appointmentError || !appointment) {
       console.error(`[SECURITY] Erreur lors de la récupération du rendez-vous ${appointmentId}:`, appointmentError);
@@ -253,7 +242,7 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       .select("id")
       .eq("id", appointment.patientId)
       .eq("osteopathId", osteopathId)
-      .maybeSingle<PatientRow>();
+      .maybeSingle();
       
     if (patientError) {
       console.error(`[SECURITY] Erreur lors de la vérification du patient ${appointment.patientId}:`, patientError);
@@ -289,7 +278,7 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       .select("id, patientId")
       .eq("id", invoiceId)
       .eq("osteopathId", osteopathId)  // Vérification directe si le champ existe
-      .maybeSingle<InvoiceRow>();
+      .maybeSingle();
       
     if (directError) {
       console.error(`[SECURITY] Erreur lors de la vérification directe de la facture ${invoiceId}:`, directError);
@@ -305,7 +294,7 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       .from("Invoice")
       .select("patientId")
       .eq("id", invoiceId)
-      .maybeSingle<Pick<InvoiceRow, "patientId">>();
+      .maybeSingle();
       
     if (invoiceError || !invoice) {
       console.error(`[SECURITY] Erreur lors de la récupération de la facture ${invoiceId}:`, invoiceError);
@@ -318,7 +307,7 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       .select("id")
       .eq("id", invoice.patientId)
       .eq("osteopathId", osteopathId)
-      .maybeSingle<PatientRow>();
+      .maybeSingle();
       
     if (patientError) {
       console.error(`[SECURITY] Erreur lors de la vérification du patient ${invoice.patientId}:`, patientError);

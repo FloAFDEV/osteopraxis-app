@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "../patient-form";
-import { WeightHeightBmiFields } from "./WeightHeightBmiFields";
 
 interface ExaminationsTabProps {
     form: UseFormReturn<PatientFormValues>;
@@ -14,9 +13,6 @@ export const ExaminationsTab = ({ form }: ExaminationsTabProps) => {
     return (
         <Card>
             <CardContent className="space-y-4 mt-6">
-                {/* Add the Weight, Height and BMI fields at the top of the tab */}
-                <WeightHeightBmiFields form={form} />
-                
                 <FormField
                     control={form.control}
                     name="complementaryExams"
