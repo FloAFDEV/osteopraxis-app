@@ -6,20 +6,16 @@ import { removeNullProperties } from "./invoice-adapter";
 // Type pour les données d'insertion conformes au schéma Supabase
 type CabinetInsertData = Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>;
 
-// Type spécifique pour les mises à jour de cabinet
+// Type spécifique pour les mises à jour de cabinet, correspondant exactement aux colonnes de la table
 type CabinetUpdateData = {
   name?: string;
   address?: string;
-  city?: string;
-  postalCode?: string;
   phone?: string | null;
   email?: string | null;
-  siret?: string | null;
-  iban?: string | null;
-  bic?: string | null;
-  country?: string;
   imageUrl?: string | null;
   logoUrl?: string | null;
+  osteopathId?: number;
+  updatedAt?: string;
   professionalProfileId?: number | null;
   tenant_id?: string | null;
 };
