@@ -30,6 +30,7 @@ export const ExaminationsTab = ({ form }: ExaminationsTabProps) => {
                                     placeholder="Détails des examens complémentaires (radiographies, échographies...)"
                                     className="resize-none"
                                     {...field}
+                                    value={field.value || ""}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -50,6 +51,7 @@ export const ExaminationsTab = ({ form }: ExaminationsTabProps) => {
                                     placeholder="Description des symptômes généraux"
                                     className="resize-none"
                                     {...field}
+                                    value={field.value || ""}
                                 />
                             </FormControl>
                             <FormMessage />
