@@ -115,12 +115,12 @@ serve(async (req: Request) => {
 
     // Vérifier que le client admin a bien été créé avec la service role key
     try {
+      // CORRECTION: Utilisation d'une requête simple sans syntaxe complexe
       // Test simple pour vérifier que le client a les permissions admin
       const { error: testError } = await adminClient
         .from('User')
-        .select('count(*)')
-        .limit(1)
-        .single();
+        .select('id')
+        .limit(1);
       
       if (testError) {
         console.error("Test de permission admin échoué:", testError);
