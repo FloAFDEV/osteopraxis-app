@@ -1,7 +1,6 @@
-
 import { Cabinet } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
-import { supabaseCabinetService } from "../supabase-api/cabinet-service";
+import { supabaseCabinetService } from "../supabase-api/cabinet";
 
 // Données simulées pour les cabinets
 const cabinets: Cabinet[] = [

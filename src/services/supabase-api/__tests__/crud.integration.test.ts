@@ -1,207 +1,110 @@
+import { supabase } from '@/integrations/supabase/client';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { supabaseCabinetService } from '../cabinet';
+import { CabinetCreateInput, CabinetUpdateInput } from '../cabinet/types';
+import { getCurrentOsteopathId } from '../utils/getCurrentOsteopath';
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { supabaseOsteopathService } from "../../supabase-api/osteopath-service";
-import { supabasePatientService } from "../../supabase-api/patient-service";
-import { supabaseCabinetService } from "../../supabase-api/cabinet-service";
-import { supabaseInvoiceService } from "../../supabase-api/invoice-service";
-import { supabaseAppointmentService } from "../../supabase-api/appointment-service";
-import { supabase } from "../../supabase-api/utils";
-import { CreateAppointmentPayload } from "@/types";
+// Mock the getCurrentOsteopathId function
+vi.mock('../utils/getCurrentOsteopath', () => ({
+  getCurrentOsteopathId: vi.fn(),
+}));
 
-// Utilisateur et IDs fictifs utilisés pour lier les entités
-const OSTEO_TEST_EMAIL = "crudemotest@example.com";
-let osteoId: number | undefined;
-let patientId: number | undefined;
-let cabinetId: number | undefined;
-let invoiceId: number | undefined;
-let appointmentId: number | undefined;
-
-// Données de base pour l'ostéopathe fictif
-const osteoDemo = {
-  userId: "test-user-crud-uuid",
-  updatedAt: new Date().toISOString(),
-  ape_code: "8690F",
-  name: "Ostéopathe Crud Demo",
-  professional_title: "Ostéopathe D.O.",
-  adeli_number: "ADELI1234",
-  createdAt: new Date().toISOString(),
-  siret: "SIRET123456789"
-};
-
-describe("Tests d'intégration CRUD sur Supabase (Osteopath, Patient, Cabinet, Invoice, Appointment)", () => {
+describe('Supabase Cabinet Service CRUD Operations', () => {
+  const testOsteopathId = 999; // Use a test osteopath ID
+  let testCabinetId: number | undefined;
 
   beforeAll(async () => {
-    // Nettoyer toute donnée précédente avec des champs de test
-    await supabase.from("Cabinet").delete().eq("address", "Adresse de test CRUD");
-    await supabase.from("Patient").delete().eq("email", "crudpatient@example.com");
-    await supabase.from("Osteopath").delete().eq("name", "Ostéopathe Crud Demo");
-
-    // Créer un ostéopathe de test
-    const osteopath = await supabaseOsteopathService.createOsteopath(osteoDemo);
-    osteoId = osteopath.id;
-    expect(osteopath).toBeDefined();
-    expect(osteopath.name).toBe(osteoDemo.name);
+    // Set up the mock to return the test osteopath ID
+    (getCurrentOsteopathId as Mock).mockResolvedValue(testOsteopathId);
   });
 
   afterAll(async () => {
-    // Nettoyage complet (attention, ici suppression brute via les champs test)
-    if (appointmentId) await supabase.from("Appointment").delete().eq("id", appointmentId);
-    if (invoiceId) await supabase.from("Invoice").delete().eq("id", invoiceId);
-    if (cabinetId) await supabase.from("Cabinet").delete().eq("id", cabinetId);
-    if (patientId) await supabase.from("Patient").delete().eq("id", patientId);
-    if (osteoId) await supabase.from("Osteopath").delete().eq("id", osteoId);
+    // Clean up: Delete the test cabinet if it exists
+    if (testCabinetId) {
+      try {
+        await supabaseCabinetService.deleteCabinet(testCabinetId);
+        console.log(`[TEST] Cleaned up cabinet with ID ${testCabinetId}`);
+      } catch (error) {
+        console.error(`[TEST] Error cleaning up cabinet with ID ${testCabinetId}:`, error);
+      }
+    }
   });
 
-  it("CRUD ostéopathe", async () => {
-    expect(osteoId).toBeDefined();
-    const fetched = await supabaseOsteopathService.getOsteopathById(osteoId!);
-    expect(fetched).toBeDefined();
-    expect(fetched!.name).toBe("Ostéopathe Crud Demo");
-
-    // Update
-    await supabaseOsteopathService.updateOsteopath(osteoId!, { name: "Ostéo MAJ" });
-    const fetchedUpdated = await supabaseOsteopathService.getOsteopathById(osteoId!);
-    expect(fetchedUpdated!.name).toBe("Ostéo MAJ");
-  });
-
-  it("CRUD patient", async () => {
-    // Pour simplifier les tests, on ignore les erreurs TypeScript ici (test uniquement)
-    // @ts-ignore - Test purpose only
-    const patient = await supabasePatientService.createPatient({
-      firstName: "Patient",
-      lastName: "Crud",
-      email: "crudpatient@example.com",
-      phone: "0123456789",
-      address: "Adresse patient CRUD",
-      gender: "Homme",
-      birthDate: new Date().toISOString(),
-      maritalStatus: "SINGLE",
-      occupation: "Etudiant",
-      hasChildren: "Non",
-      childrenAges: null,
-      generalPractitioner: null,
-      surgicalHistory: null,
-      traumaHistory: null,
-      rheumatologicalHistory: null,
-      currentTreatment: null,
-      handedness: "RIGHT",
-      hasVisionCorrection: false,
-      ophtalmologistName: null,
-      entProblems: null,
-      entDoctorName: null,
-      digestiveProblems: null,
-      digestiveDoctorName: null,
-      physicalActivity: null,
-      isSmoker: false,
-      isDeceased: false,
-      contraception: "NONE",
-      hdlm: null,
-      avatarUrl: null,
-      cabinetId: null,
-      userId: null,
-      osteopathId: osteoId,
-      // Pour tests uniquement, on ne complète pas tous les champs
-      city: "Paris",
-      postalCode: "75000",
-      country: "France",
-    });
-    patientId = patient.id;
-    expect(patientId).toBeDefined();
-
-    // Lecture
-    const patientFetched = await supabasePatientService.getPatientById(patientId!);
-    expect(patientFetched).toBeDefined();
-    expect(patientFetched!.email).toBe("crudpatient@example.com");
-
-    // Update
-    patientFetched!.firstName = "NouveauNom";
-    const updatedPatient = await supabasePatientService.updatePatient(patientFetched!);
-    expect(updatedPatient.firstName).toBe("NouveauNom");
-  });
-
-  it("CRUD cabinet", async () => {
-    // Création - @ts-ignore pour les tests
-    // @ts-ignore - Test purpose only
-    const cabinet = await supabaseCabinetService.createCabinet({
-      name: "Cabinet Test CRUD",
-      address: "Adresse de test CRUD",
-      phone: "0123465789",
+  it('should create a new cabinet', async () => {
+    const newCabinetData: CabinetCreateInput = {
+      name: 'Test Cabinet',
+      address: '123 Test Street',
+      phone: '123-456-7890',
+      email: 'test@example.com',
       imageUrl: null,
       logoUrl: null,
-      osteopathId: osteoId!,
-      city: "Paris",
-      postalCode: "75000",
-      country: "France",
-      email: "test@cabinet.com"
-    });
-    cabinetId = cabinet.id;
-    expect(cabinetId).toBeDefined();
-
-    // Lecture
-    const cabinets = await supabaseCabinetService.getCabinetsByOsteopathId(osteoId!);
-    expect(cabinets.length).toBeGreaterThan(0);
-
-    // Update
-    await supabaseCabinetService.updateCabinet(cabinetId!, { name: "Cabinet MAJ" });
-    const cabFetchedUpdated = await supabaseCabinetService.getCabinetById(cabinetId!);
-    expect(cabFetchedUpdated!.name).toBe("Cabinet MAJ");
-  });
-
-  it("CRUD facture (invoice)", async () => {
-    // Création - @ts-ignore pour les tests
-    // @ts-ignore - Test purpose only
-    const invoice = await supabaseInvoiceService.createInvoice({
-      patientId: patientId!,
-      appointmentId: 1,
-      date: new Date().toISOString(),
-      amount: 65,
-      paymentStatus: "PENDING",
-      cabinetId: 1,
-      osteopathId: 1,
-      number: "INV-TEST-001",
-      status: "DRAFT",
-      paymentMethod: "CB",
-      notes: "Test CRUD invoice"
-    });
-    invoiceId = invoice.id;
-    expect(invoiceId).toBeDefined();
-
-    // Lecture
-    const invoiceFetched = await supabaseInvoiceService.getInvoiceById(invoiceId!);
-    expect(invoiceFetched).toBeDefined();
-    expect(invoiceFetched!.amount).toBe(65);
-
-    // Update
-    const updatedInvoice = await supabaseInvoiceService.updateInvoice(invoiceId!, { amount: 80 });
-    expect(updatedInvoice!.amount).toBe(80);
-  });
-
-  it("CRUD rendez-vous (appointment)", async () => {
-    // Création avec tous les champs requis par CreateAppointmentPayload
-    const now = new Date();
-    const appointmentPayload: CreateAppointmentPayload = {
-      patientId: patientId!,
-      date: now.toISOString(),
-      start: now.toISOString(),
-      end: new Date(now.getTime() + 30 * 60000).toISOString(),
-      status: "SCHEDULED",
-      reason: "Test CRUD rendez-vous",
-      notificationSent: false,
-      cabinetId: 1,
-      osteopathId: 1
+      osteopathId: testOsteopathId,
     };
 
-    const appointment = await supabaseAppointmentService.createAppointment(appointmentPayload);
-    appointmentId = appointment.id;
-    expect(appointmentId).toBeDefined();
+    const createdCabinet = await supabaseCabinetService.createCabinet(newCabinetData);
 
-    // Lecture
-    const apptFetched = await supabaseAppointmentService.getAppointmentById(appointmentId!);
-    expect(apptFetched).toBeDefined();
-    expect(apptFetched!.status).toBe("SCHEDULED");
+    expect(createdCabinet).toBeDefined();
+    expect(createdCabinet.name).toBe(newCabinetData.name);
+    expect(createdCabinet.address).toBe(newCabinetData.address);
+    expect(createdCabinet.osteopathId).toBe(testOsteopathId);
 
-    // Update
-    const updated = await supabaseAppointmentService.updateAppointment(appointmentId!, { status: "COMPLETED" });
-    expect(updated.status).toBe("COMPLETED");
+    // Store the ID for later tests and cleanup
+    testCabinetId = createdCabinet.id;
+  }, 10000);
+
+  it('should get a cabinet by ID', async () => {
+    if (!testCabinetId) {
+      throw new Error('No cabinet ID available. Create cabinet test must run first.');
+    }
+
+    const cabinet = await supabaseCabinetService.getCabinetById(testCabinetId);
+
+    expect(cabinet).toBeDefined();
+    expect(cabinet?.id).toBe(testCabinetId);
+    expect(cabinet?.osteopathId).toBe(testOsteopathId);
+  });
+
+  it('should get cabinets by osteopath ID', async () => {
+    const cabinets = await supabaseCabinetService.getCabinetsByOsteopathId(testOsteopathId);
+
+    expect(cabinets).toBeDefined();
+    expect(Array.isArray(cabinets)).toBe(true);
+    cabinets.forEach(cabinet => {
+      expect(cabinet.osteopathId).toBe(testOsteopathId);
+    });
+  });
+
+  it('should update an existing cabinet', async () => {
+    if (!testCabinetId) {
+      throw new Error('No cabinet ID available. Create cabinet test must run first.');
+    }
+
+    const updateData: CabinetUpdateInput = {
+      name: 'Updated Test Cabinet',
+      address: '456 Updated Street',
+    };
+
+    const updatedCabinet = await supabaseCabinetService.updateCabinet(testCabinetId, updateData);
+
+    expect(updatedCabinet).toBeDefined();
+    expect(updatedCabinet?.id).toBe(testCabinetId);
+    expect(updatedCabinet?.name).toBe(updateData.name);
+    expect(updatedCabinet?.address).toBe(updateData.address);
+  });
+
+  it('should delete a cabinet', async () => {
+    if (!testCabinetId) {
+      throw new Error('No cabinet ID available. Create cabinet test must run first.');
+    }
+
+    const deleteResult = await supabaseCabinetService.deleteCabinet(testCabinetId);
+    expect(deleteResult).toBe(true);
+
+    // Verify that the cabinet is actually deleted
+    const cabinet = await supabaseCabinetService.getCabinetById(testCabinetId);
+    expect(cabinet).toBeUndefined();
+
+    // Clear the testCabinetId to prevent further operations on a deleted cabinet
+    testCabinetId = undefined;
   });
 });

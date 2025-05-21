@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Building2, AlertCircle, ArrowLeft } from "lucide-react";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { Layout } from "@/components/ui/layout";
-import { CabinetForm } from "@/components/cabinet-form";
+import { CabinetForm } from "@/components/cabinet";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { isCabinetOwnedByCurrentOsteopath } from "@/services";

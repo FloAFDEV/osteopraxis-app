@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Building2 } from "lucide-react";
 import { Layout } from "@/components/ui/layout";
-import { CabinetForm } from "@/components/cabinet-form";
+import { CabinetForm } from "@/components/cabinet";
 import { api } from "@/services/api";
 import { AuthState } from "@/types";
 import { toast } from "sonner";
