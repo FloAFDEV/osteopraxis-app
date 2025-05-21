@@ -6,7 +6,7 @@ export * from './utils';
 import { patientService, supabasePatientService } from './patient-service';
 import { supabaseAuthService } from './auth-service';
 import { supabaseAppointmentService } from './appointment-service';
-import { supabaseCabinetService } from './cabinet-service';
+import { supabaseCabinetService } from './cabinet';
 import { supabaseInvoiceService } from './invoice-service';
 import { supabaseOsteopathService } from './osteopath-service';
 
