@@ -10,7 +10,7 @@ export const delay = (ms: number = DELAY) => new Promise(resolve => setTimeout(r
 // Active l'utilisation de Supabase au lieu de l'API simulée
 export const USE_SUPABASE = true;
 
-// Configuration des endpoints API
+// Configuration des endpoints API avec la nouvelle nomenclature Supabase
 export const API_CONFIG = {
   // Ces valeurs seront remplacées par des variables d'environnement dans le futur
   SUPABASE_URL: "https://jpjuvzpqfirymtjwnier.supabase.co",
