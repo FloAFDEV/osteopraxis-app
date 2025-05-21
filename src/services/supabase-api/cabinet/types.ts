@@ -13,4 +13,19 @@ export type CabinetUpdateInput = {
   updatedAt?: string;
 };
 
-export type CabinetCreateInput = Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>;
+export type CabinetCreateInput = {
+  name: string;
+  address: string;
+  phone?: string | null;
+  email?: string | null;
+  imageUrl?: string | null;
+  logoUrl?: string | null;
+  osteopathId: number;
+  // Optional fields that can be provided
+  siret?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  iban?: string | null;
+  bic?: string | null;
+  country?: string | null;
+};

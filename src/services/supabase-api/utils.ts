@@ -1,9 +1,9 @@
 
 import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from '@/integrations/supabase/client';
 import { AppointmentStatus } from '@/types';
-import { getCurrentOsteopathId, isSameOsteopath } from './utils/getCurrentOsteopath';
+import { getCurrentOsteopathId } from './utils/getCurrentOsteopath';
 
-export { supabase, SUPABASE_API_URL, SUPABASE_API_KEY, getCurrentOsteopathId, isSameOsteopath };
+export { supabase, SUPABASE_API_URL, SUPABASE_API_KEY, getCurrentOsteopathId };
 
 // Définition des valeurs valides pour le statut de rendez-vous
 export const AppointmentStatusValues: AppointmentStatus[] = [
@@ -50,5 +50,6 @@ export function removeNullProperties(obj: any): any {
 // Exporter les cors headers pour les appels API
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
 };

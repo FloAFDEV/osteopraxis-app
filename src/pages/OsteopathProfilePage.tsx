@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Osteopath, Cabinet } from "@/types";
 import { Button } from "@/components/ui/button";
-import { CabinetForm } from "@/components/cabinet-form";
+import { CabinetForm } from "@/components/cabinet";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 
 const OsteopathProfilePage = () => {

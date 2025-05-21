@@ -9,6 +9,7 @@ export { supabase } from '@/integrations/supabase/client';
 export { typedData, ensureAppointmentStatus, AppointmentStatusValues } from './supabase-api/utils';
 export { 
   getCurrentOsteopathId, 
+  getCurrentOsteopath,
   isSameOsteopath, 
   isPatientOwnedByCurrentOsteopath, 
   isCabinetOwnedByCurrentOsteopath,
@@ -24,4 +25,4 @@ export { convertLocalToUTC, convertUTCToLocal, formatAppointmentDate, formatAppo
 export { AppointmentConflictError, SecurityViolationError } from './api/appointment-service';
 
 // Export CORS headers
-export { corsHeaders } from './corsHeaders';
+export { corsHeaders } from './supabase-api/utils';
