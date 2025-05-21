@@ -1,9 +1,20 @@
-
 // Import types
 import { Cabinet } from "@/types";
 import { supabase, typedData, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
+
+// Define a more focused type for cabinet updates to avoid deep type instantiation
+type CabinetUpdateInput = {
+  name?: string;
+  address?: string;
+  phone?: string | null;
+  email?: string | null;
+  imageUrl?: string | null;
+  logoUrl?: string | null;
+  osteopathId?: number;
+  updatedAt?: string;
+};
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
@@ -205,7 +216,7 @@ export const supabaseCabinetService = {
     }
   },
 
-  async updateCabinet(id: number, cabinet: Partial<Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Cabinet> {
+  async updateCabinet(id: number, cabinet: CabinetUpdateInput): Promise<Cabinet> {
     try {
       // Vérifier que l'utilisateur est autorisé à modifier ce cabinet
       const currentOsteopathId = await getCurrentOsteopathId();
