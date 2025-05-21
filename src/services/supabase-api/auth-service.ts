@@ -1,3 +1,4 @@
+
 import { User, AuthState, Role } from "@/types";
 import { supabase } from "./utils";
 import { toast } from "sonner";
@@ -229,6 +230,20 @@ export const supabaseAuthService = {
         
         if (insertError) {
           console.error("Erreur lors de la création de l'utilisateur manquant:", insertError);
+          // Si l'erreur est une violation de contrainte de clé unique (email),
+          // l'utilisateur existe probablement déjà, réessayons de le récupérer
+          if (insertError.code === '23505') {
+            console.log("L'utilisateur existe probablement déjà, nouvelle tentative de récupération");
+            const { data: retryUser } = await supabase
+              .from("User")
+              .select("*")
+              .eq("id", data.session.user.id)
+              .maybeSingle();
+              
+            if (retryUser) {
+              console.log("Utilisateur récupéré avec succès à la deuxième tentative");
+            }
+          }
         } else {
           console.log("Utilisateur manquant créé avec succès dans la table User");
         }
