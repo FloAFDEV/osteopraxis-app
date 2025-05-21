@@ -28,7 +28,6 @@ export const ContactTab = ({ form, emailRequired }: ContactTabProps) => {
                                 )}
                             </FormLabel>
                             <FormControl>
-                                {/* Assurez-vous qu'il n'y a qu'un seul élément enfant dans FormControl */}
                                 <Input
                                     placeholder="Email"
                                     {...field}

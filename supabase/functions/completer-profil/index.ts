@@ -12,72 +12,50 @@ serve(async (req: Request) => {
     });
   }
 
-  try {
-    // Récupérer le token JWT de l'en-tête Authorization
-    const authHeader = req.headers.get('Authorization')
-    console.log("Authorization header présent:", !!authHeader);
-    
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Aucun token d\'authentification fourni' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      )
-    }
+  // Récupérer le token JWT de l'en-tête Authorization
+  const authHeader = req.headers.get('Authorization')
+  console.log("Authorization header présent:", !!authHeader);
+  
+  if (!authHeader) {
+    return new Response(
+      JSON.stringify({ error: 'Aucun token d\'authentification fourni' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+    )
+  }
 
-    // Récupérer les variables d'environnement pour la connexion Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-    
-    // Vérification des variables d'environnement critiques
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("Variables d'environnement manquantes:", {
-        url: !!supabaseUrl,
-        serviceKey: !!supabaseServiceKey
-      });
-      
-      return new Response(
-        JSON.stringify({ 
-          error: 'Configuration Supabase incomplète', 
-          details: 'URL ou clés manquantes',
-          environment: {
-            hasUrl: !!supabaseUrl,
-            hasServiceKey: !!supabaseServiceKey,
-          }
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-      )
-    }
-
-    // Créer un client Supabase avec le token auth de l'utilisateur
-    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+  // Créer un client Supabase avec le token auth
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') || '',
+    Deno.env.get('SUPABASE_ANON_KEY') || '',
+    {
       global: {
         headers: { Authorization: authHeader },
       },
-    })
-
-    // Récupérer l'utilisateur authentifié
-    console.log("Récupération de l'utilisateur...");
-    const { data: { user }, error: userError } = await userClient.auth.getUser()
-    
-    if (userError || !user) {
-      console.error("Erreur de récupération de l'utilisateur:", userError);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Erreur de récupération de l\'utilisateur', 
-          details: userError,
-          auth: authHeader ? "Token présent" : "Pas de token"
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      )
     }
+  )
 
+  // Récupérer la session utilisateur
+  console.log("Récupération de l'utilisateur...");
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+  
+  if (userError || !user) {
+    console.error("Erreur de récupération de l'utilisateur:", userError);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Erreur de récupération de l\'utilisateur', 
+        details: userError,
+        auth: authHeader ? "Token présent" : "Pas de token"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+    )
+  }
+
+  try {
     // Support both PATCH and POST with X-HTTP-Method-Override
     const method = req.headers.get('X-HTTP-Method-Override') || req.method;
     console.log("Méthode effective:", method);
     console.log("User ID trouvé:", user.id);
     
-    // Récupérer les données du body
     let osteopathData;
     try {
       const requestData = await req.json();
@@ -106,44 +84,12 @@ serve(async (req: Request) => {
     
     console.log("Tentative de création/récupération d'ostéopathe pour l'utilisateur:", user.id);
     
-    // Accéder à la base de données avec des privilèges élevés en utilisant la service role key
+    // Accéder à la base de données avec des privilèges élevés
     const adminClient = createClient(
-      supabaseUrl,
-      supabaseServiceKey,
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
       { auth: { persistSession: false } }
     );
-
-    // Vérifier que le client admin a bien été créé avec la service role key
-    try {
-      // CORRECTION: Utilisation d'une requête simple sans syntaxe complexe
-      // Test simple pour vérifier que le client a les permissions admin
-      const { error: testError } = await adminClient
-        .from('User')
-        .select('id')
-        .limit(1);
-      
-      if (testError) {
-        console.error("Test de permission admin échoué:", testError);
-        return new Response(
-          JSON.stringify({ 
-            error: 'La clé de service n\'a pas les permissions nécessaires', 
-            details: testError,
-            suggestion: 'Vérifiez que SUPABASE_SERVICE_ROLE_KEY est correcte et a toutes les permissions'
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-        )
-      }
-      console.log("Test de permission admin réussi, le client a les permissions nécessaires");
-    } catch (testError) {
-      console.error("Exception lors du test de permission admin:", testError);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Erreur lors du test de permission admin',
-          details: String(testError)
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-      )
-    }
 
     // Vérifier si un ostéopathe existe déjà pour cet utilisateur
     console.log("Recherche d'un ostéopathe existant...");
@@ -169,13 +115,22 @@ serve(async (req: Request) => {
     if (findError) {
       console.error("Erreur lors de la recherche d'un ostéopathe existant:", findError);
       
-      return new Response(
-        JSON.stringify({ 
-          error: 'Erreur lors de la recherche d\'un ostéopathe existant',
-          details: findError
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-      )
+      // Vérifier si l'erreur est liée aux permissions
+      if (findError.code === "42501") {
+        console.error("Erreur de permission. Vérification des paramètres du service_role_key.");
+        
+        return new Response(
+          JSON.stringify({ 
+            error: 'Erreur de permission lors de l\'accès à la base de données',
+            details: findError,
+            suggestion: 'Vérifiez que le SERVICE_ROLE_KEY est correctement configuré'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        )
+      }
+      
+      // Retourner l'erreur au lieu de continuer
+      throw findError;
     }
 
     let result;
@@ -212,13 +167,7 @@ serve(async (req: Request) => {
         
       if (updateError) {
         console.error("Erreur lors de la mise à jour de l'ostéopathe:", updateError);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Erreur lors de la mise à jour de l\'ostéopathe', 
-            details: updateError 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-        )
+        throw updateError;
       }
       
       result = { osteopath: data, operation: 'mise à jour', success: true };
@@ -250,13 +199,7 @@ serve(async (req: Request) => {
         
       if (insertError) {
         console.error("Erreur lors de l'insertion de l'ostéopathe:", insertError);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Erreur lors de la création de l\'ostéopathe', 
-            details: insertError 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-        )
+        throw insertError;
       }
         
       result = { osteopath: data, operation: 'création', success: true };

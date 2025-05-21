@@ -82,7 +82,7 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
                   // Assurez-vous que la valeur est un nombre
                   const value = e.target.value;
                   if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                    field.onChange(value === "" ? null : parseFloat(value));
+                    field.onChange(value);
                   }
                 }} 
               />
@@ -106,7 +106,7 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
                   // Assurez-vous que la valeur est un nombre
                   const value = e.target.value;
                   if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                    field.onChange(value === "" ? null : parseFloat(value));
+                    field.onChange(value);
                   }
                 }} 
               />
@@ -128,7 +128,6 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
                 {...field} 
                 readOnly 
                 className={`${bmiColorClass}`} // Appliquer la classe de couleur conditionnelle
-                value={field.value ?? ""}
               />
             </FormControl>
             <FormMessage />
