@@ -36,16 +36,23 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
       // Calculer l'IMC uniquement quand le poids ou la taille changent
       if (name === "weight" || name === "height") {
         // Convert string values to numbers for calculation
-        const weight = parseFloat(String(value.weight || "0"));
-        const height = parseFloat(String(value.height || "0"));
+        const weightValue = value.weight;
+        const heightValue = value.height;
+        
+        // S'assurer que les valeurs sont des nombres
+        const weight = typeof weightValue === 'number' ? weightValue : 
+                      weightValue ? parseFloat(String(weightValue)) : 0;
+                      
+        const height = typeof heightValue === 'number' ? heightValue : 
+                      heightValue ? parseFloat(String(heightValue)) : 0;
         
         const bmi = calculateBMI(weight, height);
         
         if (bmi !== null) {
-          // Set BMI as a string in the form
-          form.setValue("bmi", String(bmi), { shouldValidate: true });
+          // Set BMI as a number in the form
+          form.setValue("bmi", bmi, { shouldValidate: true });
         } else {
-          form.setValue("bmi", "", { shouldValidate: true });
+          form.setValue("bmi", null, { shouldValidate: true });
         }
       }
     });
@@ -55,7 +62,9 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
 
   // Déterminer la couleur du champ BMI
   const bmiValue = form.watch("bmi");
-  const bmiColorClass = getBmiColorClass(bmiValue ? parseFloat(String(bmiValue)) : null);
+  const numericBmi = typeof bmiValue === 'number' ? bmiValue : 
+                    bmiValue ? parseFloat(String(bmiValue)) : null;
+  const bmiColorClass = getBmiColorClass(numericBmi);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
