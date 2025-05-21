@@ -38,9 +38,25 @@ export const formatDate = (date: string | Date): string => {
 };
 
 /**
+ * Définition d'un type pour les données d'insertion de facture conforme au schéma Supabase
+ * Cela évite les erreurs d'instantiation de type trop profondes
+ */
+export type InvoiceInsertData = {
+  amount: number;
+  patientId: number;
+  appointmentId?: number | null;
+  date?: string;
+  notes?: string | null;
+  paymentMethod?: string | null;
+  paymentStatus?: "PAID" | "PENDING" | "CANCELED";
+  tvaExoneration?: boolean | null;
+  tvaMotif?: string | null;
+};
+
+/**
  * Validates invoice data before saving
  */
-export const validateInvoiceData = (data: Partial<Invoice>): Partial<Invoice> => {
+export const validateInvoiceData = (data: Partial<Invoice>): InvoiceInsertData => {
   // Make sure required fields are present
   if (!data.patientId) {
     throw new Error("Le patient est requis");
@@ -56,11 +72,26 @@ export const validateInvoiceData = (data: Partial<Invoice>): Partial<Invoice> =>
   // Ensure notes is a string
   const notes = ensureNotes(data.notes);
   
-  return {
-    ...data,
+  // Créer un objet conforme au schéma de la table Invoice dans Supabase
+  const insertData: InvoiceInsertData = {
+    patientId: data.patientId,
+    amount: data.amount,
     date,
     notes,
+    appointmentId: data.appointmentId || null,
+    paymentMethod: data.paymentMethod || null,
+    paymentStatus: data.status as "PAID" | "PENDING" | "CANCELED" || "PENDING"
   };
+  
+  if (data.tvaExoneration !== undefined) {
+    insertData.tvaExoneration = data.tvaExoneration;
+  }
+  
+  if (data.tvaMotif !== undefined) {
+    insertData.tvaMotif = data.tvaMotif;
+  }
+  
+  return insertData;
 };
 
 /**

@@ -1,8 +1,9 @@
-
 import { Cabinet } from "@/types";
 import { supabase } from "./utils";
-import { corsHeaders } from "@/services/corsHeaders";
 import { removeNullProperties } from "./invoice-adapter";
+
+// Type pour les données d'insertion conformes au schéma Supabase
+type CabinetInsertData = Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>;
 
 export const supabaseCabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
@@ -81,7 +82,7 @@ export const supabaseCabinetService = {
     }
   },
 
-  async createCabinet(cabinetData: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
+  async createCabinet(cabinetData: CabinetInsertData): Promise<Cabinet> {
     try {
       const insertData = {
         ...cabinetData,
@@ -116,6 +117,9 @@ export const supabaseCabinetService = {
         ...cleanedData,
         updatedAt: new Date().toISOString()
       };
+      
+      // Supprimer les champs qui pourraient ne pas exister dans le schéma de la table
+      if ('id' in updateData) delete updateData.id;
       
       const { data, error } = await supabase
         .from("Cabinet")

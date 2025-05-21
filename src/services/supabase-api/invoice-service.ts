@@ -1,7 +1,7 @@
 
 import { Invoice } from "@/types";
 import { supabase } from "./utils";
-import { validateInvoiceData, removeNullProperties } from "./invoice-adapter";
+import { validateInvoiceData, removeNullProperties, InvoiceInsertData } from "./invoice-adapter";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 
 export const supabaseInvoiceService = {
@@ -97,16 +97,11 @@ export const supabaseInvoiceService = {
       // Validation des données avant l'insertion
       const validatedData = validateInvoiceData(invoiceData);
       
-      // Récupérer l'ID de l'ostéopathe connecté
-      const osteopathId = await getCurrentOsteopathId();
-      
-      // Création de l'objet à insérer
+      // Création de l'objet à insérer avec uniquement les champs conformes au schéma Supabase
       const insertData = {
         ...validatedData,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        // Ne pas inclure osteopathId dans l'insertion si ce n'est pas un champ valide
-        // dans la table Invoice de Supabase
+        updatedAt: new Date().toISOString()
       };
       
       const { data, error } = await supabase
@@ -135,10 +130,23 @@ export const supabaseInvoiceService = {
       // Retirer les propriétés nulles de l'objet de mise à jour
       const cleanedData = removeNullProperties(invoiceData);
       
+      // Ne conserver que les champs autorisés par le schéma de la table Invoice
       const updateData = {
         ...cleanedData,
         updatedAt: new Date().toISOString()
       };
+
+      // Supprimer les champs qui ne sont pas dans la table avant la mise à jour
+      if ('osteopathId' in updateData) delete updateData.osteopathId;
+      if ('Patient' in updateData) delete updateData.Patient;
+      if ('totalAmount' in updateData && !('amount' in updateData)) {
+        updateData.amount = updateData.totalAmount;
+        delete updateData.totalAmount;
+      }
+      if ('status' in updateData && !('paymentStatus' in updateData)) {
+        updateData.paymentStatus = updateData.status;
+        delete updateData.status;
+      }
 
       const { data, error } = await supabase
         .from("Invoice")
