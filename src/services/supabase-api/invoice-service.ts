@@ -1,7 +1,6 @@
-
 import { Invoice } from "@/types";
-import { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY } from "./utils";
-import { ensureNotes, ensureDate, formatDate, validateInvoiceData, removeNullProperties } from "./invoice-adapter";
+import { supabase } from "./utils";
+import { validateInvoiceData, removeNullProperties } from "./invoice-adapter";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 
 export const supabaseInvoiceService = {

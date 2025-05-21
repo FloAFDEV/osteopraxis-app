@@ -1,6 +1,6 @@
 
 import { Cabinet } from "@/types";
-import { supabase, SUPABASE_API_URL, SUPABASE_PUBLISHABLE_KEY } from "./utils";
+import { supabase } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
 import { removeNullProperties } from "./invoice-adapter";
 
@@ -111,10 +111,13 @@ export const supabaseCabinetService = {
 
   async updateCabinet(id: number, cabinetData: Partial<Cabinet>): Promise<Cabinet | undefined> {
     try {
+      // Remove null properties to prevent type issues
+      const cleanedData = removeNullProperties(cabinetData);
+      
       const { data, error } = await supabase
         .from("Cabinet")
         .update({
-          ...cabinetData,
+          ...cleanedData,
           updatedAt: new Date().toISOString()
         })
         .eq("id", id)
