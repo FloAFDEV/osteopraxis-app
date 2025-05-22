@@ -9,12 +9,8 @@ import {
 
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
-    const { data, error } = await supabase
-      .from("Osteopath")
-      .select("*");
-
+    const { data, error } = await supabase.from("Osteopath").select("*");
     if (error) throw new Error(error.message);
-
     return (data || []) as Osteopath[];
   },
 
@@ -24,7 +20,6 @@ export const supabaseOsteopathService = {
       .select("*")
       .eq("id", id)
       .single();
-
     if (error) {
       if (error.code === "PGRST116") {
         console.log("Osteopath not found with ID:", id);
@@ -32,10 +27,12 @@ export const supabaseOsteopathService = {
       }
       throw new Error(error.message);
     }
-
     return data as Osteopath;
   },
 
+  /**
+   * Recherche l'ostéopathe via la table User en filtrant sur auth_id (UUID Supabase Auth).
+   */
   async getOsteopathByUserId(authId: string): Promise<Osteopath | undefined> {
     console.log("Recherche d'un ostéopathe avec authId:", authId);
 
@@ -43,40 +40,37 @@ export const supabaseOsteopathService = {
       throw new Error("authId invalide fourni");
     }
 
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
+    // Récupérer l'utilisateur avec auth_id
+    const { data: users, error: userError } = await supabase
+      .from("User")
+      .select("osteopathId")
+      .eq("auth_id", authId);
 
-      if (!sessionData.session) {
-        throw new Error("Utilisateur non authentifié");
-      }
-
-      const authUserId = sessionData.session.user.id;
-      console.log("authId de session:", authUserId);
-
-      const { data, error } = await supabase
-        .from("Osteopath")
-        .select("*")
-        .eq("authId", authUserId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Erreur lors de la recherche:", error);
-        throw error;
-      }
-
-      if (!data) {
-        console.log("Aucun ostéopathe trouvé pour authId:", authUserId);
-        return undefined;
-      }
-
-      return data as Osteopath;
-    } catch (error) {
-      console.error("Erreur dans getOsteopathByUserId:", error);
-      throw error;
+    if (userError) {
+      console.error("Erreur lors de la récupération de l'utilisateur:", userError);
+      throw new Error(userError.message);
     }
+
+    if (!users || users.length === 0) {
+      console.log("Aucun utilisateur trouvé avec auth_id:", authId);
+      return undefined;
+    }
+
+    const osteopathId = users[0].osteopathId;
+
+    if (!osteopathId) {
+      console.log("L'utilisateur n'a pas d'osteopathId lié.");
+      return undefined;
+    }
+
+    // Récupérer l'ostéopathe lié
+    return this.getOsteopathById(osteopathId);
   },
 
-  async updateOsteopath(id: number, osteoData: Partial<Omit<Osteopath, 'id' | 'createdAt'>>): Promise<Osteopath | undefined> {
+  async updateOsteopath(
+    id: number,
+    osteoData: Partial<Omit<Osteopath, "id" | "createdAt">>
+  ): Promise<Osteopath | undefined> {
     try {
       const currentOsteopath = await this.getOsteopathById(id);
 
@@ -84,61 +78,32 @@ export const supabaseOsteopathService = {
         throw new Error("Ostéopathe non trouvé");
       }
 
-      const authId = currentOsteopath.authId;
-
-      if (!authId) {
-        throw new Error("L'ostéopathe n'a pas d'authId valide");
-      }
-
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.access_token) {
-        throw new Error("Utilisateur non authentifié");
-      }
-      const token = session.access_token;
-
-      const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Osteopath?id=eq.${id}`;
+      const now = new Date().toISOString();
 
       const updatePayload = {
         ...removeNullProperties(osteoData),
-        name: osteoData.name || currentOsteopath.name,
-        authId: authId,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now,
       };
 
-      const res = await fetch(URL_ENDPOINT, {
-        method: "PUT",
-        headers: {
-          apikey: SUPABASE_API_KEY,
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Prefer: "return=representation",
-        },
-        body: JSON.stringify(updatePayload),
-      });
+      const { data, error } = await supabase
+        .from("Osteopath")
+        .update(updatePayload)
+        .eq("id", id)
+        .select()
+        .single();
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Erreur HTTP ${res.status}: ${errorText}`);
-      }
+      if (error) throw error;
 
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) return data[0];
-      if (data && typeof data === "object") return data as Osteopath;
-
-      throw new Error("Aucune donnée retournée lors de la mise à jour");
+      return data as Osteopath;
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'ostéopathe:", error);
       throw error;
     }
   },
 
-  async createOsteopath(data: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
-    const now = new Date().toISOString();
-
+  async createOsteopath(
+    data: Omit<Osteopath, "id" | "createdAt" | "updatedAt">
+  ): Promise<Osteopath> {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
 
@@ -148,18 +113,20 @@ export const supabaseOsteopathService = {
 
       const authId = sessionData.session.user.id;
 
+      // Vérifier si un ostéopathe existe déjà
       const existing = await this.getOsteopathByUserId(authId);
       if (existing) {
         console.warn("Un ostéopathe existe déjà pour cet authId :", authId);
         return existing;
       }
 
+      const now = new Date().toISOString();
+
       const { data: newOsteopath, error } = await supabase
         .from("Osteopath")
         .insert({
           ...data,
-          userId,
-          authId,
+          userId: authId, // attention ici userId dans Osteopath est uuid de User
           createdAt: now,
           updatedAt: now,
         })
