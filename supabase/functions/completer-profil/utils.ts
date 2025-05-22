@@ -19,26 +19,37 @@ export function createStandardClient(authHeader: string) {
 
 /**
  * Creates an admin client that bypasses RLS using the service role key
+ * This client has FULL DATABASE ACCESS and should be used carefully
  */
 export function createAdminClient() {
-  // Vérification que la clé service_role est disponible
-  if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) {
-    throw new Error("ERREUR CRITIQUE: La clé SUPABASE_SERVICE_ROLE_KEY n'est pas définie");
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  
+  // Vérification que les variables requises sont disponibles
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error('Variables d\'environnement manquantes:', { 
+      supabaseUrl: !!supabaseUrl, 
+      serviceRoleKey: !!serviceRoleKey 
+    });
+    throw new Error("ERREUR CRITIQUE: Variables d'environnement requises non définies");
   }
   
-  return createClient(
-    Deno.env.get('SUPABASE_URL') || '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
-    { 
-      auth: { 
-        persistSession: false,
-        autoRefreshToken: false
-      },
-      db: {
-        schema: 'public'
+  // Création du client avec options explicites pour assurer l'accès admin
+  return createClient(supabaseUrl, serviceRoleKey, { 
+    auth: { 
+      persistSession: false,
+      autoRefreshToken: false
+    },
+    global: {
+      headers: {
+        // Ce header est important pour certaines configurations
+        'X-Client-Info': 'edge-function-admin'
       }
+    },
+    db: {
+      schema: 'public'
     }
-  );
+  });
 }
 
 /**
