@@ -10,9 +10,13 @@ const DashboardPage = () => {
   
   // Vérifier si l'utilisateur a besoin de configurer son profil
   useEffect(() => {
+    console.log("DashboardPage - Vérification du profil utilisateur:", user);
+    
     if (user && !user.osteopathId) {
       console.log("Utilisateur sans profil ostéopathe détecté, redirection vers la configuration");
       redirectToSetupIfNeeded("/dashboard");
+    } else {
+      console.log("Utilisateur avec profil ostéopathe ou non connecté:", user?.osteopathId);
     }
   }, [user, redirectToSetupIfNeeded]);
 

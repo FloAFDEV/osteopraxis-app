@@ -1,7 +1,8 @@
+
 import { User, AuthState } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
-import { supabaseAuthService } from "../supabase-api/auth-service";
 import { toast } from "sonner";
+import { supabaseAuthService } from "../supabase-api/auth-service";
 
 // Données simulées pour les utilisateurs
 const users: User[] = [
@@ -76,9 +77,14 @@ export const authService = {
   },
   
   async login(email: string, password: string): Promise<AuthState> {
+    console.log("authService.login appelé pour:", email);
+    
     if (USE_SUPABASE) {
       try {
-        return await supabaseAuthService.login(email, password);
+        console.log("Utilisation de supabaseAuthService.login");
+        const authResult = await supabaseAuthService.login(email, password);
+        console.log("Résultat de Supabase login:", authResult);
+        return authResult;
       } catch (error) {
         console.error("Erreur Supabase login:", error);
         
@@ -156,9 +162,14 @@ export const authService = {
   },
   
   async checkAuth(): Promise<AuthState> {
+    console.log("authService.checkAuth appelé");
+    
     if (USE_SUPABASE) {
       try {
-        return await supabaseAuthService.checkAuth();
+        console.log("Utilisation de supabaseAuthService.checkAuth");
+        const result = await supabaseAuthService.checkAuth();
+        console.log("Résultat de checkAuth Supabase:", result);
+        return result;
       } catch (error) {
         console.error("Erreur Supabase checkAuth:", error);
       }
@@ -171,6 +182,7 @@ export const authService = {
     if (storedAuth) {
       try {
         authState = JSON.parse(storedAuth);
+        console.log("État d'authentification restauré depuis localStorage:", authState);
       } catch (e) {
         console.error("Failed to parse stored auth state", e);
         authState = {

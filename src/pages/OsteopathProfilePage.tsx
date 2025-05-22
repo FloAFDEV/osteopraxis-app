@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "@/services/api";
@@ -67,8 +66,8 @@ const OsteopathProfilePage = () => {
         setOsteopath(existingOsteopath);
         setSetupProgress(50);
         
-        // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
-        if (!user.osteopathId) {
+        // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe si nécessaire
+        if (user && !user.osteopathId) {
           console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", existingOsteopath.id);
           const updatedUser = { ...user, osteopathId: existingOsteopath.id };
           updateUser(updatedUser);
@@ -132,7 +131,11 @@ const OsteopathProfilePage = () => {
   // Chargement des données quand l'authentification est vérifiée
   useEffect(() => {
     if (authChecked && user && !hasAttemptedLoad) {
+      console.log("Démarrage de la vérification des données existantes");
       checkExistingData();
+    } else if (authChecked && !user) {
+      console.log("Utilisateur non connecté, affichage du formulaire de connexion");
+      setLoading(false);
     }
   }, [authChecked, user, checkExistingData, hasAttemptedLoad]);
 
@@ -145,7 +148,7 @@ const OsteopathProfilePage = () => {
     });
   };
 
-  // Si l'utilisateur n'est pas connecté et la feuille d'authentification n'est pas affichée, rediriger vers la connexion
+  // Si l'utilisateur n'est pas connecté et que l'authentification a été vérifiée, rediriger vers la connexion
   if (authChecked && !user && !showAuthSheet) {
     console.log("Redirection vers login: Utilisateur non connecté");
     return <Navigate to="/login" />;
@@ -227,6 +230,11 @@ const OsteopathProfilePage = () => {
     return <FancyLoader message="Chargement de votre profil..." />;
   }
 
+  // Si l'utilisateur est bien connecté mais aucun ostéopathe n'est trouvé, afficher le formulaire de création
+  if (user && !osteopath) {
+    console.log("Utilisateur connecté mais sans profil ostéopathe, affichage du formulaire");
+  }
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
@@ -269,7 +277,7 @@ const OsteopathProfilePage = () => {
                   <p className="text-sm">{loadError}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Button
-                      onClick={handleRelogin}
+                      onClick={() => navigate("/login")}
                       variant="secondary"
                       className="bg-red-100 hover:bg-red-200 dark:bg-red-800/30 dark:hover:bg-red-800/50 text-red-800 dark:text-red-300"
                     >

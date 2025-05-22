@@ -1,34 +1,35 @@
-
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useAuth } from "./contexts/AuthContext";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
-import AppointmentsPage from "./pages/AppointmentsPage";
-import CabinetSettingsPage from "./pages/CabinetSettingsPage";
-import CabinetsManagementPage from "./pages/CabinetsManagementPage";
-import DashboardPage from "./pages/DashboardPage";
-import EditAppointmentPage from "./pages/EditAppointmentPage";
-import EditCabinetPage from "./pages/EditCabinetPage";
-import EditInvoicePage from "./pages/EditInvoicePage";
-import EditPatientPage from "./pages/EditPatientPage";
-import ImmediateAppointmentPage from "./pages/ImmediateAppointmentPage";
-import InvoiceDetailPage from "./pages/InvoiceDetailPage";
-import InvoicesPage from "./pages/InvoicesPage";
+
+// Routes Components imports
 import LoginPage from "./pages/LoginPage";
-import NewAppointmentPage from "./pages/NewAppointmentPage";
-import NewCabinetPage from "./pages/NewCabinetPage";
-import NewInvoicePage from "./pages/NewInvoicePage";
-import NewPatientPage from "./pages/NewPatientPage";
-import OsteopathProfilePage from "./pages/OsteopathProfilePage";
-import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
-import PatientDetailPage from "./pages/PatientDetailPage";
-import PatientsPage from "./pages/PatientsPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import RegisterPage from "./pages/RegisterPage";
+import DashboardPage from "./pages/DashboardPage";
+import PatientsPage from "./pages/PatientsPage";
+import NewPatientPage from "./pages/NewPatientPage";
+import EditPatientPage from "./pages/EditPatientPage";
+import PatientDetailPage from "./pages/PatientDetailPage";
+import AppointmentsPage from "./pages/AppointmentsPage";
+import NewAppointmentPage from "./pages/NewAppointmentPage";
+import ImmediateAppointmentPage from "./pages/ImmediateAppointmentPage";
+import EditAppointmentPage from "./pages/EditAppointmentPage";
 import SchedulePage from "./pages/SchedulePage";
 import SettingsPage from "./pages/SettingsPage";
+import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
+import OsteopathProfilePage from "./pages/OsteopathProfilePage";
+import CabinetSettingsPage from "./pages/CabinetSettingsPage";
+import InvoicesPage from "./pages/InvoicesPage";
+import NewInvoicePage from "./pages/NewInvoicePage";
+import InvoiceDetailPage from "./pages/InvoiceDetailPage";
+import EditInvoicePage from "./pages/EditInvoicePage";
+import CabinetsManagementPage from "./pages/CabinetsManagementPage";
+import NewCabinetPage from "./pages/NewCabinetPage";
+import EditCabinetPage from "./pages/EditCabinetPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
 function App() {
 	const { isAuthenticated, loadStoredToken, user, redirectToSetupIfNeeded } = useAuth();
@@ -56,16 +57,26 @@ function App() {
 	// Vérifie si l'utilisateur doit compléter son profil après chaque changement d'authentification
 	useEffect(() => {
 		if (!loading && isAuthenticated && user) {
+			console.log("Vérification si l'utilisateur doit compléter son profil:", 
+				{hasOsteopathId: !!user.osteopathId, path: location.pathname});
+			
 			// Exclure les pages/routes qui sont explicitement exclues de la redirection automatique
 			const excludedPaths = ['/profile/setup', '/login', '/register', '/privacy-policy', '/terms-of-service'];
+			
+			// Ne pas rediriger si on est déjà sur une des pages exclues
 			if (!excludedPaths.some(path => location.pathname.startsWith(path))) {
-				redirectToSetupIfNeeded(location.pathname);
+				// Si l'utilisateur n'a pas d'osteopathId, rediriger vers la page de configuration du profil
+				if (!user.osteopathId) {
+					console.log("Utilisateur sans osteopathId, redirection vers la configuration du profil");
+					redirectToSetupIfNeeded(location.pathname);
+				} else {
+					console.log("Utilisateur avec osteopathId, pas de redirection nécessaire");
+				}
+			} else {
+				console.log("Chemin courant exclu de la redirection automatique:", location.pathname);
 			}
 		}
 	}, [isAuthenticated, loading, user, location.pathname, redirectToSetupIfNeeded]);
-
-	// Configuration des chemins publics (accessibles sans connexion)
-	const publicPaths = ["/privacy-policy", "/terms-of-service"];
 
 	// Ajout d'un intercepteur global pour toutes les requêtes fetch
 	useEffect(() => {
@@ -245,6 +256,7 @@ function App() {
 						)
 					}
 				/>
+				{/* Routes spécifiques */}
 				<Route
 					path="/profile/setup"
 					element={

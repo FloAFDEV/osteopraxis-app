@@ -71,10 +71,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	// Define loadStoredToken FIRST
 	const loadStoredToken = useCallback(async () => {
+		console.log("Début de loadStoredToken");
 		const storedAuthState = localStorage.getItem("authState");
 		if (storedAuthState) {
 			try {
 				const parsedState = JSON.parse(storedAuthState);
+				console.log("État d'authentification trouvé:", parsedState);
 
 				if (parsedState.token) {
 					try {
@@ -90,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 						); // Augmenté à 500ms
 
 						const authCheck = await api.checkAuth();
+						console.log("Résultat de checkAuth:", authCheck);
 
 						if (authCheck.isAuthenticated && authCheck.user) {
 							console.log("Authentification validée par l'API");
@@ -103,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 							// Vérifier l'état de la session Supabase
 							const { data: session } =
 								await supabase.auth.getSession();
+							console.log("Session Supabase après checkAuth:", session);
 
 							return true;
 						} else {
@@ -129,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 								await supabase.auth.getSession();
 
 							if (supabaseSession?.session) {
+								console.log("Session Supabase récupérée directement:", supabaseSession);
 								// Utilisez la session Supabase et mettez à jour l'état local
 								return true;
 							}
@@ -174,6 +179,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				console.log("Auth state changed:", event, session?.user?.email);
 				if (session) {
 					// Update local state from session
+					const needsProfileSetup = !session.user?.user_metadata?.osteopathId;
+					console.log("needsProfileSetup (onAuthStateChange):", needsProfileSetup);
+
 					setAuthState({
 						user: session.user ? {
 							id: session.user.id,
@@ -187,6 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 						} : null,
 						isAuthenticated: true,
 						token: session.access_token || null,
+						needsProfileSetup: needsProfileSetup
 					});
 				} else {
 					setAuthState({
@@ -343,11 +352,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	const updateUser = useCallback((updatedUser: User) => {
+		console.log("Mise à jour utilisateur avec:", updatedUser);
 		setAuthState((prev) => {
 			const newState = {
 				...prev,
 				user: updatedUser,
+				needsProfileSetup: !updatedUser.osteopathId
 			};
+
+			console.log("Nouvel état après mise à jour:", newState);
 
 			// Update localStorage
 			localStorage.setItem("authState", JSON.stringify(newState));
@@ -371,9 +384,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
-	// Mise à jour de la fonction redirectToSetupIfNeeded pour mieux gérer la redirection
+	// Correction de la fonction redirectToSetupIfNeeded pour mieux gérer la redirection
 	const redirectToSetupIfNeeded = useCallback((fallbackUrl: string = "/dashboard") => {
-		if (authState.needsProfileSetup && authState.isAuthenticated) {
+		console.log("redirectToSetupIfNeeded appelé avec:", { 
+			fallbackUrl, 
+			needsProfileSetup: authState.needsProfileSetup, 
+			isAuthenticated: authState.isAuthenticated,
+			user: authState.user
+		});
+		
+		if (!authState.user || !authState.isAuthenticated) {
+			console.log("Redirection ignorée: utilisateur non connecté");
+			return false;
+		}
+		
+		// Vérification explicite si l'utilisateur a un ID d'ostéopathe
+		const needsSetup = !authState.user.osteopathId;
+		console.log("L'utilisateur a-t-il besoin de configuration?", needsSetup, "osteopathId:", authState.user.osteopathId);
+		
+		if (needsSetup) {
 			// Utiliser navigate plutôt que window.location pour une meilleure expérience utilisateur
 			const returnParam = fallbackUrl !== "/dashboard" ? `?returnTo=${encodeURIComponent(fallbackUrl)}` : "";
 			const setupUrl = `/profile/setup${returnParam}`;
@@ -388,12 +417,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			window.location.href = setupUrl;
 			return true;
 		}
+		console.log("Pas besoin de redirection vers la configuration");
 		return false;
-	}, [authState.needsProfileSetup, authState.isAuthenticated]);
+	}, [authState]);
 
-  // Add auto logout functionality when user is authenticated
-  const isAuthenticated = authState.isAuthenticated;
-  useAutoLogout();
+    // Add auto logout functionality when user is authenticated
+    const isAuthenticated = authState.isAuthenticated;
+    useAutoLogout();
 
 	return (
 		<AuthContext.Provider

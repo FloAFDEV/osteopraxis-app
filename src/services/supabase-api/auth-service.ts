@@ -1,8 +1,7 @@
 
 import { User, AuthState } from "@/types";
-import { delay, USE_SUPABASE } from "../api/config";
-import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
 
 // Définir le service d'authentification Supabase
 export const supabaseAuthService = {
@@ -86,7 +85,20 @@ export const supabaseAuthService = {
       
     // L'utilisateur a besoin de configuration s'il n'a pas d'ID d'ostéopathe
     const needsSetup = !user.osteopathId;
+    console.log("L'utilisateur a besoin d'une configuration:", needsSetup, "osteopathId:", osteopathId);
       
+    // Mettre à jour les métadonnées de l'utilisateur avec l'ID de l'ostéopathe s'il est défini
+    if (osteopathId) {
+      try {
+        await supabase.auth.updateUser({
+          data: { osteopathId }
+        });
+        console.log("Métadonnées utilisateur mises à jour avec osteopathId:", osteopathId);
+      } catch (updateError) {
+        console.error("Erreur lors de la mise à jour des métadonnées:", updateError);
+      }
+    }
+
     return {
       user,
       isAuthenticated: true,
@@ -113,9 +125,11 @@ export const supabaseAuthService = {
   },
   
   async checkAuth(): Promise<AuthState> {
+    console.log("Vérification de l'authentification Supabase");
     const { data } = await supabase.auth.getSession();
       
     if (!data.session) {
+      console.log("Pas de session Supabase active");
       return {
         user: null,
         isAuthenticated: false,
@@ -124,12 +138,15 @@ export const supabaseAuthService = {
     }
         
     if (!data.session.user) {
+      console.log("Session Supabase sans utilisateur");
       return {
         user: null,
         isAuthenticated: false,
         token: null
       };
     }
+    
+    console.log("Session Supabase trouvée pour:", data.session.user.email);
         
     const user: User = {
       id: data.session.user.id,
@@ -154,6 +171,18 @@ export const supabaseAuthService = {
       if (osteopathData) {
         osteopathId = osteopathData.id;
         console.log("Profil ostéopathe trouvé lors du checkAuth:", osteopathId);
+            
+        // Mettre à jour les métadonnées de l'utilisateur si l'ID d'ostéopathe n'y est pas encore
+        if (!data.session.user.user_metadata.osteopathId) {
+          try {
+            await supabase.auth.updateUser({
+              data: { osteopathId }
+            });
+            console.log("Métadonnées utilisateur mises à jour avec osteopathId:", osteopathId);
+          } catch (updateError) {
+            console.error("Erreur lors de la mise à jour des métadonnées:", updateError);
+          }
+        }
       } else {
         console.log("Pas de profil ostéopathe trouvé pour userId:", data.session.user.id);
       }
@@ -167,7 +196,8 @@ export const supabaseAuthService = {
     };
         
     // L'utilisateur a besoin de configuration s'il n'a pas d'ID d'ostéopathe
-    const needsSetup = !user.osteopathId;
+    const needsSetup = !osteopathId;
+    console.log("L'utilisateur a besoin d'une configuration (checkAuth):", needsSetup, "osteopathId:", osteopathId);
         
     return {
       user: updatedUser,
