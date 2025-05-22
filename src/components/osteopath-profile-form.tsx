@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -180,90 +179,44 @@ export function OsteopathProfileForm({
         toast.success("Profil mis à jour avec succès");
         console.log("Mise à jour réussie:", osteopathResult);
       } else {
-        console.log("Création d'un ostéopathe pour l'utilisateur:", user.id);
-        
-        // S'assurer que les champs obligatoires ne sont pas vides
-        const osteopathData = {
-          name: data.name,
-          professional_title: data.professional_title || "Ostéopathe D.O.",
-          adeli_number: data.adeli_number || null,
-          siret: data.siret || null,
-          ape_code: data.ape_code || "8690F",
-          userId: user.id
-        };
-        
-        console.log("Données pour création:", osteopathData);
-        
+        // IMPORTANT: Vérifier d'abord si l'utilisateur a déjà un profil ostéopathe
+        console.log("Vérification si un profil ostéopathe existe déjà pour l'utilisateur:", user.id);
         try {
-          osteopathResult = await api.createOsteopath(osteopathData);
-          console.log("Création réussie:", osteopathResult);
+          const existingOsteopath = await api.getOsteopathByUserId(user.id);
           
-          // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
-          if (osteopathResult && osteopathResult.id) {
-            console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathResult.id);
+          if (existingOsteopath) {
+            console.log("Un profil ostéopathe existe déjà:", existingOsteopath);
+            osteopathResult = existingOsteopath;
             
-            // Mettre à jour la table User avec l'osteopathId
-            try {
-              const { error: updateError } = await supabase
-                .from("User")
-                .update({ osteopathId: osteopathResult.id })
-                .eq("id", user.id);
-                
-              if (updateError) {
-                console.error("Erreur lors de la mise à jour de l'utilisateur avec osteopathId:", updateError);
-              } else {
-                console.log("Utilisateur mis à jour avec succès avec osteopathId:", osteopathResult.id);
-              }
-            } catch (updateError) {
-              console.error("Exception lors de la mise à jour de l'utilisateur:", updateError);
+            // Mettre à jour l'utilisateur avec l'ID de l'ostéopathe si nécessaire
+            if (!user.osteopathId && existingOsteopath.id) {
+              const updatedUser = { ...user, osteopathId: existingOsteopath.id };
+              updateUser(updatedUser);
+              console.log("User mis à jour avec l'osteopathId existant:", existingOsteopath.id);
             }
             
-            // Mettre à jour le state local
-            const updatedUser = { ...user, osteopathId: osteopathResult.id };
-            updateUser(updatedUser);
-          }
-          
-          toast.success("Profil créé avec succès");
-        } catch (createError: any) {
-          console.error("Erreur lors de la création de l'ostéopathe:", createError);
-          
-          // Si l'erreur est liée à l'authentification, réessayer avec la fonction edge
-          if (createError.message?.includes('auth') || createError.message?.includes('permission') || 
-              createError.status === 401 || createError.status === 403) {
+            toast.success("Profil ostéopathe déjà existant");
+          } else {
+            console.log("Aucun profil existant trouvé, création d'un nouveau profil");
             
-            console.log("Tentative alternative via la fonction edge");
+            // S'assurer que les champs obligatoires ne sont pas vides
+            const osteopathData = {
+              name: data.name,
+              professional_title: data.professional_title || "Ostéopathe D.O.",
+              adeli_number: data.adeli_number || null,
+              siret: data.siret || null,
+              ape_code: data.ape_code || "8690F",
+              userId: user.id
+            };
             
-            // Vérifier à nouveau la session
-            const { data: sessionData } = await supabase.auth.getSession();
-            if (!sessionData.session || !sessionData.session.access_token) {
-              throw new Error("Token d'authentification manquant");
-            }
-            
-            const response = await fetch("https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/completer-profil", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${sessionData.session.access_token}`
-              },
-              body: JSON.stringify({ osteopathData })
-            });
-            
-            if (!response.ok) {
-              const errorText = await response.text();
-              throw new Error(`Erreur de la fonction edge: ${errorText}`);
-            }
-            
-            const result = await response.json();
-            console.log("Résultat de la fonction edge:", result);
-            
-            if (!result.success || !result.osteopath) {
-              throw new Error("Échec de la création du profil");
-            }
-            
-            osteopathResult = result.osteopath;
+            console.log("Données pour création:", osteopathData);
+            osteopathResult = await api.createOsteopath(osteopathData);
+            console.log("Création réussie:", osteopathResult);
             
             // Mise à jour de l'utilisateur avec l'ID de l'ostéopathe
             if (osteopathResult && osteopathResult.id) {
+              console.log("Mise à jour de l'utilisateur avec l'ID de l'ostéopathe:", osteopathResult.id);
+              
               // Mettre à jour la table User avec l'osteopathId
               try {
                 const { error: updateError } = await supabase
@@ -274,10 +227,10 @@ export function OsteopathProfileForm({
                 if (updateError) {
                   console.error("Erreur lors de la mise à jour de l'utilisateur avec osteopathId:", updateError);
                 } else {
-                  console.log("Utilisateur mis à jour avec succès avec osteopathId (via edge):", osteopathResult.id);
+                  console.log("Utilisateur mis à jour avec succès avec osteopathId:", osteopathResult.id);
                 }
               } catch (updateError) {
-                console.error("Exception lors de la mise à jour de l'utilisateur (via edge):", updateError);
+                console.error("Exception lors de la mise à jour de l'utilisateur:", updateError);
               }
               
               // Mettre à jour le state local
@@ -285,10 +238,11 @@ export function OsteopathProfileForm({
               updateUser(updatedUser);
             }
             
-            toast.success("Profil créé avec succès (via fonction alternative)");
-          } else {
-            throw createError;
+            toast.success("Profil créé avec succès");
           }
+        } catch (error) {
+          console.error("Erreur lors de la vérification ou création du profil ostéopathe:", error);
+          throw error;
         }
       }
       

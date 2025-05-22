@@ -393,30 +393,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			user: authState.user
 		});
 		
+		// Si l'utilisateur n'est pas connecté, ne rien faire
 		if (!authState.user || !authState.isAuthenticated) {
 			console.log("Redirection ignorée: utilisateur non connecté");
 			return false;
 		}
 		
-		// Vérification explicite si l'utilisateur a un ID d'ostéopathe
+		// Vérification explicite et simple si l'utilisateur a un ID d'ostéopathe
 		const needsSetup = !authState.user.osteopathId;
 		console.log("L'utilisateur a-t-il besoin de configuration?", needsSetup, "osteopathId:", authState.user.osteopathId);
 		
+		// Ne rediriger que si l'utilisateur n'a pas d'osteopathId
 		if (needsSetup) {
-			// Utiliser navigate plutôt que window.location pour une meilleure expérience utilisateur
-			const returnParam = fallbackUrl !== "/dashboard" ? `?returnTo=${encodeURIComponent(fallbackUrl)}` : "";
-			const setupUrl = `/profile/setup${returnParam}`;
-			
-			console.log(`Redirection vers la configuration du profil: ${setupUrl}`);
-			
 			// Stocker l'URL de retour pour après la configuration
 			if (fallbackUrl !== "/dashboard") {
 				sessionStorage.setItem("profileSetupReturnUrl", fallbackUrl);
 			}
 			
+			// Utiliser la navigation directe (plus fiable pour cette redirection spécifique)
+			console.log(`Redirection vers la configuration du profil avec returnTo=${fallbackUrl}`);
+			const setupUrl = `/profile/setup${fallbackUrl !== "/dashboard" ? `?returnTo=${encodeURIComponent(fallbackUrl)}` : ""}`;
 			window.location.href = setupUrl;
 			return true;
 		}
+		
 		console.log("Pas besoin de redirection vers la configuration");
 		return false;
 	}, [authState]);

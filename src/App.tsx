@@ -66,7 +66,7 @@ function App() {
 			// Ne pas rediriger si on est déjà sur une des pages exclues
 			if (!excludedPaths.some(path => location.pathname.startsWith(path))) {
 				// Si l'utilisateur n'a pas d'osteopathId, rediriger vers la page de configuration du profil
-				if (!user.osteopathId) {
+				if (user && !user.osteopathId) {
 					console.log("Utilisateur sans osteopathId, redirection vers la configuration du profil");
 					redirectToSetupIfNeeded(location.pathname);
 				} else {
