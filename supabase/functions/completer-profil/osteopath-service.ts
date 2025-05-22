@@ -2,6 +2,60 @@
 import { createAdminClient } from './utils.ts';
 
 /**
+ * Ensures that the user exists in the custom User table
+ */
+export async function ensureUserExists(authUser: any) {
+  const adminClient = createAdminClient();
+  
+  console.log("Vérification de l'existence de l'utilisateur dans la table User:", authUser.id);
+  
+  try {
+    // Vérifier si l'utilisateur existe déjà dans la table User
+    const { data: existingUser, error: findError } = await adminClient
+      .from('User')
+      .select('*')
+      .eq('id', authUser.id)
+      .maybeSingle();
+      
+    if (findError) {
+      console.error("Erreur lors de la recherche d'un utilisateur:", findError);
+      throw new Error(`Erreur lors de la recherche d'un utilisateur: ${findError.message}`);
+    }
+    
+    // Si l'utilisateur n'existe pas, le créer
+    if (!existingUser) {
+      console.log("L'utilisateur n'existe pas dans la table User, création...");
+      
+      const { error: insertError } = await adminClient
+        .from('User')
+        .insert({
+          id: authUser.id,
+          email: authUser.email,
+          first_name: authUser.user_metadata?.first_name || authUser.user_metadata?.given_name || "",
+          last_name: authUser.user_metadata?.last_name || authUser.user_metadata?.family_name || "",
+          role: "OSTEOPATH",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        console.error("Erreur lors de l'insertion de l'utilisateur:", insertError);
+        throw new Error(`Erreur lors de la création de l'utilisateur: ${insertError.message}`);
+      }
+      
+      console.log("Utilisateur créé avec succès dans la table User");
+    } else {
+      console.log("Utilisateur existant trouvé dans la table User:", existingUser.id);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Exception dans ensureUserExists:", error);
+    throw error;
+  }
+}
+
+/**
  * Finds an osteopath by user ID
  */
 export async function findOsteopathByUserId(userId: string) {

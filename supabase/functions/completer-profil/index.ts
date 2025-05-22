@@ -10,7 +10,8 @@ import {
   findOsteopathByUserId, 
   updateOsteopath, 
   createOsteopath, 
-  updateUserWithOsteopathId 
+  updateUserWithOsteopathId,
+  ensureUserExists
 } from './osteopath-service.ts'
 
 serve(async (req: Request) => {
@@ -77,6 +78,9 @@ serve(async (req: Request) => {
     
     // Process the request
     try {
+      // ÉTAPE CRITIQUE: S'assurer que l'utilisateur existe dans la table User personnalisée
+      await ensureUserExists(user);
+      
       // Vérifier si un ostéopathe existe déjà pour cet utilisateur
       const existingOsteopath = await findOsteopathByUserId(user.id);
       
