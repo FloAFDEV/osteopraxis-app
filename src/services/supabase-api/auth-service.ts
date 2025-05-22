@@ -1,4 +1,3 @@
-
 import { User, AuthState } from "@/types";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
@@ -55,18 +54,30 @@ export const supabaseAuthService = {
     // Vérifier simplement si l'utilisateur en a déjà un
     let osteopathId = null;
     try {
-      // Recherche d'un profil Ostéopathe déjà existant
-      const { data: osteopathData } = await supabase
-        .from("Osteopath")
-        .select("id")
-        .eq("userId", data.user.id)
+      // Recherche d'un profil Ostéopathe déjà existant via User (avec auth_id)
+      const { data: userData } = await supabase
+        .from("User")
+        .select("osteopathId")
+        .eq("auth_id", data.user.id)
         .maybeSingle();
           
-      if (osteopathData) {
-        osteopathId = osteopathData.id;
+      if (userData && userData.osteopathId) {
+        osteopathId = userData.osteopathId;
         console.log("Profil ostéopathe trouvé:", osteopathId);
       } else {
-        console.log("Pas de profil ostéopathe trouvé pour userId:", data.user.id);
+        // Fallback: chercher directement dans Osteopath si User n'a pas l'info
+        const { data: osteopathData } = await supabase
+          .from("Osteopath")
+          .select("id")
+          .eq("userId", data.user.id)
+          .maybeSingle();
+            
+        if (osteopathData) {
+          osteopathId = osteopathData.id;
+          console.log("Profil ostéopathe trouvé directement:", osteopathId);
+        } else {
+          console.log("Pas de profil ostéopathe trouvé pour userId:", data.user.id);
+        }
       }
     } catch (osteoError) {
       console.error("Erreur lors de la recherche du profil ostéopathe:", osteoError);
@@ -159,32 +170,60 @@ export const supabaseAuthService = {
       osteopathId: data.session.user.user_metadata.osteopathId
     };
         
-    // Vérifier si l'utilisateur a déjà un profil d'ostéopathe
+    // Vérifier si l'utilisateur a déjà un profil d'ostéopathe via User (avec auth_id)
     let osteopathId = null;
     try {
-      const { data: osteopathData } = await supabase
-        .from("Osteopath")
-        .select("id")
-        .eq("userId", data.session.user.id)
+      const { data: userData } = await supabase
+        .from("User")
+        .select("osteopathId")
+        .eq("auth_id", data.session.user.id)
         .maybeSingle();
             
-      if (osteopathData) {
-        osteopathId = osteopathData.id;
-        console.log("Profil ostéopathe trouvé lors du checkAuth:", osteopathId);
-            
-        // Mettre à jour les métadonnées de l'utilisateur si l'ID d'ostéopathe n'y est pas encore
-        if (!data.session.user.user_metadata.osteopathId) {
-          try {
-            await supabase.auth.updateUser({
-              data: { osteopathId }
-            });
-            console.log("Métadonnées utilisateur mises à jour avec osteopathId:", osteopathId);
-          } catch (updateError) {
-            console.error("Erreur lors de la mise à jour des métadonnées:", updateError);
-          }
-        }
+      if (userData && userData.osteopathId) {
+        osteopathId = userData.osteopathId;
+        console.log("Profil ostéopathe trouvé via User lors du checkAuth:", osteopathId);
       } else {
-        console.log("Pas de profil ostéopathe trouvé pour userId:", data.session.user.id);
+        // Fallback: chercher directement dans Osteopath
+        const { data: osteopathData } = await supabase
+          .from("Osteopath")
+          .select("id")
+          .eq("userId", data.session.user.id)
+          .maybeSingle();
+              
+        if (osteopathData) {
+          osteopathId = osteopathData.id;
+          console.log("Profil ostéopathe trouvé directement lors du checkAuth:", osteopathId);
+              
+          // Mettre à jour la table User si nous avons trouvé un ostéopathId mais qu'il n'était pas dans User
+          try {
+            const { error: userUpdateError } = await supabase
+              .from("User")
+              .update({ osteopathId })
+              .eq("auth_id", data.session.user.id);
+                  
+            if (userUpdateError) {
+              console.error("Erreur lors de la mise à jour du User avec osteopathId:", userUpdateError);
+            } else {
+              console.log("User mis à jour avec osteopathId trouvé dans Osteopath");
+            }
+          } catch (updateError) {
+            console.error("Exception lors de la mise à jour du User:", updateError);
+          }
+        } else {
+          console.log("Pas de profil ostéopathe trouvé pour userId:", data.session.user.id);
+        }
+      }
+            
+      // Mettre à jour les métadonnées de l'utilisateur si l'ID d'ostéopathe n'y est pas encore
+      if (osteopathId && !data.session.user.user_metadata.osteopathId) {
+        try {
+          await supabase.auth.updateUser({
+            data: { osteopathId }
+          });
+          console.log("Métadonnées utilisateur mises à jour avec osteopathId:", osteopathId);
+        } catch (updateError) {
+          console.error("Erreur lors de la mise à jour des métadonnées:", updateError);
+        }
       }
     } catch (osteoError) {
       console.error("Erreur lors de la recherche du profil ostéopathe:", osteoError);

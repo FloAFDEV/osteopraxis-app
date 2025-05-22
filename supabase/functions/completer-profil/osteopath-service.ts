@@ -14,7 +14,7 @@ export async function ensureUserExists(authUser: any) {
     const { data: existingUser, error: findError } = await adminClient
       .from('User')
       .select('*')
-      .eq('id', authUser.id)
+      .eq('auth_id', authUser.id)
       .maybeSingle();
       
     if (findError) {
@@ -29,7 +29,8 @@ export async function ensureUserExists(authUser: any) {
       const { error: insertError } = await adminClient
         .from('User')
         .insert({
-          id: authUser.id,
+          id: authUser.id, // Use as primary key
+          auth_id: authUser.id, // Link to Supabase Auth
           email: authUser.email,
           first_name: authUser.user_metadata?.first_name || authUser.user_metadata?.given_name || "",
           last_name: authUser.user_metadata?.last_name || authUser.user_metadata?.family_name || "",
@@ -187,10 +188,12 @@ export async function updateUserWithOsteopathId(userId: string, osteopathId: num
   console.log("Mise à jour du profil utilisateur avec l'ID de l'ostéopathe:", osteopathId);
   
   try {
+    // Mise à jour de l'utilisateur dans la table User personnalisée
+    // en utilisant auth_id plutôt que id pour correspondre à l'id de l'Auth Supabase
     const { error: userUpdateError } = await adminClient
       .from('User')
       .update({ osteopathId: osteopathId })
-      .eq('id', userId);
+      .eq('auth_id', userId);
       
     if (userUpdateError) {
       console.error("Erreur lors de la mise à jour du profil utilisateur:", userUpdateError);

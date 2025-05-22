@@ -258,6 +258,7 @@ export type Database = {
         Row: {
           adeli_number: string | null
           ape_code: string | null
+          authId: string | null
           createdAt: string
           id: number
           name: string
@@ -269,6 +270,7 @@ export type Database = {
         Insert: {
           adeli_number?: string | null
           ape_code?: string | null
+          authId?: string | null
           createdAt?: string
           id?: number
           name: string
@@ -280,6 +282,7 @@ export type Database = {
         Update: {
           adeli_number?: string | null
           ape_code?: string | null
+          authId?: string | null
           createdAt?: string
           id?: number
           name?: string

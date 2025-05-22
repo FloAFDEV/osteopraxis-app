@@ -11,11 +11,11 @@ export async function getCurrentOsteopathId(): Promise<number | null> {
       return null;
     }
     
-    // Récupérer l'utilisateur complet à partir de la table User
+    // Récupérer l'utilisateur complet à partir de la table User en utilisant auth_id
     const { data: userData, error: userError } = await supabase
       .from("User")
       .select("osteopathId")
-      .eq("id", user.id)
+      .eq("auth_id", user.id)
       .single();
     
     if (userError || !userData) {

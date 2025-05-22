@@ -8,6 +8,7 @@ RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public."User" (
     id, 
+    auth_id,
     email, 
     first_name, 
     last_name, 
@@ -16,7 +17,8 @@ BEGIN
     updated_at
   ) 
   VALUES (
-    NEW.id, 
+    gen_random_uuid(), -- Generate a UUID for the primary key
+    NEW.id, -- Store Supabase Auth user ID as auth_id
     NEW.email, 
     NEW.raw_user_meta_data->>'first_name', 
     NEW.raw_user_meta_data->>'last_name', 
@@ -24,7 +26,7 @@ BEGIN
     NOW(), 
     NOW()
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (auth_id) DO NOTHING;
   
   RETURN NEW;
 END;
