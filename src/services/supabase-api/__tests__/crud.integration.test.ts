@@ -1,20 +1,33 @@
-
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { supabase } from '@/integrations/supabase/client';
 import { createCabinet, updateCabinet, getCabinetById, deleteCabinet } from '../cabinet';
 import type { CabinetCreateInput } from '../cabinet/types';
 
-// Mocker le client Supabase
+// Mocker le client Supabase de manière plus complète
 vi.mock('@/integrations/supabase/client', () => {
+  const mockSelect = vi.fn().mockReturnThis();
+  const mockInsert = vi.fn().mockReturnThis();
+  const mockUpdate = vi.fn().mockReturnThis();
+  const mockDelete = vi.fn().mockReturnThis();
+  const mockEq = vi.fn().mockReturnThis();
+  const mockSingle = vi.fn();
+  
   return {
     supabase: {
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      single: vi.fn(),
+      from: vi.fn(() => ({
+        select: mockSelect,
+        insert: mockInsert,
+        update: mockUpdate,
+        delete: mockDelete,
+        eq: mockEq,
+        single: mockSingle,
+      })),
+      select: mockSelect,
+      insert: mockInsert,
+      update: mockUpdate,
+      delete: mockDelete,
+      eq: mockEq,
+      single: mockSingle,
       execute: vi.fn()
     }
   };
@@ -31,26 +44,28 @@ describe('Cabinet CRUD Operations', () => {
     vi.resetAllMocks();
     
     // Configurer les réponses simulées
-    mockInsertResponse = { data: { id: 1, name: 'Test Cabinet' }, error: null };
-    mockUpdateResponse = { data: { id: 1, name: 'Updated Cabinet' }, error: null };
-    mockDeleteResponse = { data: {}, error: null };
-    mockSelectResponse = { data: { id: 1, name: 'Test Cabinet' }, error: null };
+    const mockInsertResponse = { data: { id: 1, name: 'Test Cabinet' }, error: null };
+    const mockUpdateResponse = { data: { id: 1, name: 'Updated Cabinet' }, error: null };
+    const mockDeleteResponse = { data: {}, error: null };
+    const mockSelectResponse = { data: { id: 1, name: 'Test Cabinet' }, error: null };
     
     // Configurer le comportement des mocks avec les arguments appropriés
-    (supabase.from as any) = vi.fn().mockImplementation(() => ({
-      insert: vi.fn().mockImplementation(() => ({
+    const mockFrom = vi.fn().mockReturnValue({
+      insert: vi.fn().mockReturnValue({
         select: vi.fn().mockResolvedValue(mockInsertResponse)
-      })),
+      }),
       update: vi.fn().mockResolvedValue(mockUpdateResponse),
       delete: vi.fn().mockResolvedValue(mockDeleteResponse),
-      select: vi.fn().mockImplementation(() => ({
-        eq: vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
           single: vi.fn().mockResolvedValue(mockSelectResponse)
-        }))
-      }))
-    }));
+        })
+      })
+    });
+    
+    (supabase.from as any) = mockFrom;
   });
-
+  
   it('should create a new cabinet', async () => {
     const cabinetData: CabinetCreateInput = {
       name: 'Test Cabinet',
