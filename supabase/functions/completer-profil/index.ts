@@ -23,7 +23,7 @@ serve(async (req: Request) => {
     )
   }
 
-  // Créer un client Supabase avec le token auth
+  // Créer un client Supabase standard pour l'authentification
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') || '',
     Deno.env.get('SUPABASE_ANON_KEY') || '',
@@ -84,53 +84,83 @@ serve(async (req: Request) => {
     
     console.log("Tentative de création/récupération d'ostéopathe pour l'utilisateur:", user.id);
     
-    // Accéder à la base de données avec des privilèges élevés
+    // Accéder à la base de données avec des privilèges élevés (service_role)
+    // Ici nous créons un client avec la SERVICE_ROLE_KEY qui contourne la RLS
     const adminClient = createClient(
       Deno.env.get('SUPABASE_URL') || '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
-      { auth: { persistSession: false } }
+      { 
+        auth: { 
+          persistSession: false,
+          autoRefreshToken: false
+        },
+        // Pas besoin d'en-têtes d'autorisation car service_role ignore l'authentification
+        db: {
+          schema: 'public'
+        }
+      }
     );
 
+    // Vérification que la clé service_role est disponible
+    if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) {
+      console.error("ERREUR CRITIQUE: La clé SUPABASE_SERVICE_ROLE_KEY n'est pas définie");
+      return new Response(
+        JSON.stringify({ 
+          error: 'Configuration du serveur incorrecte - clé service_role manquante',
+          suggestion: 'Contactez l\'administrateur pour configurer la clé SERVICE_ROLE_KEY'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
+    }
+
     // Vérifier si un ostéopathe existe déjà pour cet utilisateur
-    console.log("Recherche d'un ostéopathe existant...");
+    console.log("Recherche d'un ostéopathe existant avec le client admin...");
     let { data: existingOsteopath, error: findError } = await adminClient
       .from('Osteopath')
       .select('*')
       .eq('userId', user.id)
       .maybeSingle();
       
-    // Si pas trouvé, lister tous les ostéopathes pour debug
-    if (!existingOsteopath) {
-      console.log("Aucun ostéopathe trouvé avec l'ID utilisateur actuel. Affichage des 10 premiers ostéopathes:");
-      const { data: allOsteos, error: listError } = await adminClient
-        .from('Osteopath')
-        .select('id, userId, name')
-        .limit(10);
-        
-      if (!listError) {
-        console.log("Ostéopathes disponibles:", allOsteos);
-      }
-    }
-      
+    // Si erreur lors de la recherche, afficher des informations de débogage
     if (findError) {
       console.error("Erreur lors de la recherche d'un ostéopathe existant:", findError);
-      
-      // Vérifier si l'erreur est liée aux permissions
-      if (findError.code === "42501") {
-        console.error("Erreur de permission. Vérification des paramètres du service_role_key.");
+
+      // Test d'accès à la table pour vérifier les permissions
+      console.log("Test d'accès à la base de données avec le client admin...");
+      const { data: testData, error: testError } = await adminClient
+        .from('Osteopath')
+        .select('count(*)')
+        .limit(1);
         
+      if (testError) {
+        console.error("Erreur de test d'accès à la table Osteopath:", testError);
         return new Response(
           JSON.stringify({ 
-            error: 'Erreur de permission lors de l\'accès à la base de données',
-            details: findError,
-            suggestion: 'Vérifiez que le SERVICE_ROLE_KEY est correctement configuré'
+            error: 'Erreur d\'accès à la base de données avec le service_role',
+            details: testError,
+            suggestion: 'Vérifiez la configuration de SUPABASE_SERVICE_ROLE_KEY et les permissions'
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
         )
+      } else {
+        console.log("Test d'accès réussi, mais erreur lors de la recherche spécifique:", findError);
       }
       
-      // Retourner l'erreur au lieu de continuer
-      throw findError;
+      // Retourner l'erreur
+      return new Response(
+        JSON.stringify({ 
+          error: 'Erreur lors de la recherche d\'un ostéopathe existant',
+          details: findError
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
+    }
+
+    // Log des informations pour debugging
+    if (existingOsteopath) {
+      console.log("Ostéopathe existant trouvé:", existingOsteopath.id);
+    } else {
+      console.log("Aucun ostéopathe trouvé, création nécessaire");
     }
 
     let result;
@@ -155,7 +185,7 @@ serve(async (req: Request) => {
         }
       });
       
-      const { data, error: updateError } = await adminClient
+      const { data: updatedOsteopath, error: updateError } = await adminClient
         .from('Osteopath')
         .update({
           ...updatedData,
@@ -167,10 +197,13 @@ serve(async (req: Request) => {
         
       if (updateError) {
         console.error("Erreur lors de la mise à jour de l'ostéopathe:", updateError);
-        throw updateError;
+        return new Response(
+          JSON.stringify({ error: 'Erreur lors de la mise à jour', details: updateError }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        )
       }
       
-      result = { osteopath: data, operation: 'mise à jour', success: true };
+      result = { osteopath: updatedOsteopath, operation: 'mise à jour', success: true };
     } else {
       // Créer un nouvel ostéopathe
       console.log("Création d'un nouvel ostéopathe avec le service_role");
@@ -191,7 +224,7 @@ serve(async (req: Request) => {
       
       console.log("Tentative d'insertion avec:", osteopathToCreate);
       
-      const { data, error: insertError } = await adminClient
+      const { data: newOsteopath, error: insertError } = await adminClient
         .from('Osteopath')
         .insert(osteopathToCreate)
         .select()
@@ -199,10 +232,13 @@ serve(async (req: Request) => {
         
       if (insertError) {
         console.error("Erreur lors de l'insertion de l'ostéopathe:", insertError);
-        throw insertError;
+        return new Response(
+          JSON.stringify({ error: 'Erreur lors de la création', details: insertError }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        )
       }
         
-      result = { osteopath: data, operation: 'création', success: true };
+      result = { osteopath: newOsteopath, operation: 'création', success: true };
     }
 
     // Mettre à jour le profil utilisateur avec l'ID de l'ostéopathe si nécessaire
