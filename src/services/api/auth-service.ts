@@ -1,4 +1,3 @@
-
 import { User, AuthState } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAuthService } from "../supabase-api/auth-service";
