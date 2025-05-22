@@ -37,13 +37,12 @@ describe('Cabinet CRUD Operations', () => {
     mockSelectResponse = { data: { id: 1, name: 'Test Cabinet' }, error: null };
     
     // Configurer le comportement des mocks
-    (supabase.from as any).mockReturnThis();
-    (supabase.from().insert as any).mockReturnValue({ select: vi.fn().mockResolvedValue(mockInsertResponse) });
-    (supabase.from().update as any).mockResolvedValue(mockUpdateResponse);
-    (supabase.from().delete as any).mockResolvedValue(mockDeleteResponse);
-    (supabase.from().select as any).mockReturnThis();
-    (supabase.from().select().eq as any).mockReturnThis();
-    (supabase.from().select().eq().single as any).mockResolvedValue(mockSelectResponse);
+    (supabase.from('Cabinet').insert as any).mockReturnValue({ select: vi.fn().mockResolvedValue(mockInsertResponse) });
+    (supabase.from('Cabinet').update as any).mockResolvedValue(mockUpdateResponse);
+    (supabase.from('Cabinet').delete as any).mockResolvedValue(mockDeleteResponse);
+    (supabase.from('Cabinet').select as any).mockReturnThis();
+    (supabase.from('Cabinet').select().eq as any).mockReturnThis();
+    (supabase.from('Cabinet').select().eq().single as any).mockResolvedValue(mockSelectResponse);
   });
 
   it('should create a new cabinet', async () => {
