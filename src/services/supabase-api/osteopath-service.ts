@@ -171,46 +171,47 @@ export const supabaseOsteopathService = {
   },
   
   async createOsteopath(data: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
-    const now = new Date().toISOString();
-    
-    console.log("Création d'un ostéopathe avec les données:", data);
-    
-    try {
-      // Vérifier l'état de la session avant d'exécuter la requête
-      const { data: sessionData } = await supabase.auth.getSession();
-      console.log("État de la session pour création:", sessionData.session ? "Authentifié" : "Non authentifié");
-      
-      if (!sessionData.session) {
-        throw new Error("Utilisateur non authentifié");
-      }
-      
-      // S'assurer que l'userId est cohérent avec celui de la session
-      const userId = data.userId || sessionData.session.user.id;
-      console.log("Utilisation de l'userId pour création:", userId);
-      
-      const { data: newOsteopath, error } = await supabase
-        .from("Osteopath")
-        .insert({
-          ...data,
-          userId: userId,
-          createdAt: now,
-          updatedAt: now
-        })
-        .select()
-        .single();
+  const now = new Date().toISOString();
 
-      if (error) {
-        console.error("Erreur lors de l'insertion de l'ostéopathe:", error);
-        throw error;
-      }
-      
-      console.log("Ostéopathe créé avec succès via insertion directe:", newOsteopath);
-      return newOsteopath as Osteopath;
-    } catch (error) {
-      console.error("Erreur lors de la création de l'ostéopathe:", error);
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+
+    if (!sessionData.session) {
+      throw new Error("Utilisateur non authentifié");
+    }
+
+    const userId = data.userId || sessionData.session.user.id;
+
+    // 🔍 Vérifier si un ostéopathe existe déjà pour cet utilisateur
+    const existing = await this.getOsteopathByUserId(userId);
+    if (existing) {
+      console.warn("Un ostéopathe existe déjà pour cet userId :", userId);
+      return existing;
+    }
+
+    const { data: newOsteopath, error } = await supabase
+      .from("Osteopath")
+      .insert({
+        ...data,
+        userId,
+        createdAt: now,
+        updatedAt: now
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de l'insertion de l'ostéopathe:", error);
       throw error;
     }
-  },
+
+    return newOsteopath as Osteopath;
+  } catch (error) {
+    console.error("Erreur lors de la création de l'ostéopathe:", error);
+    throw error;
+  }
+}
+,
   
   async hasRequiredFields(osteopathId: number): Promise<boolean> {
     try {
