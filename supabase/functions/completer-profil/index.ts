@@ -127,9 +127,10 @@ serve(async (req: Request) => {
 
       // Test d'accès à la table pour vérifier les permissions
       console.log("Test d'accès à la base de données avec le client admin...");
+      // Correction ici : n'utilisez pas count(*) directement
       const { data: testData, error: testError } = await adminClient
         .from('Osteopath')
-        .select('count(*)')
+        .select('id') // Sélectionner un champ spécifique au lieu de count(*)
         .limit(1);
         
       if (testError) {
@@ -274,3 +275,4 @@ serve(async (req: Request) => {
     )
   }
 });
+
