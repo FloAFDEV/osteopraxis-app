@@ -158,6 +158,7 @@ export const supabaseOsteopathService = {
         .from("Osteopath")
         .insert({
           ...data,
+          userId,
           authId,
           createdAt: now,
           updatedAt: now,
