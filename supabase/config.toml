@@ -8,34 +8,72 @@ schemas = ["public", "storage", "graphql_public"]
 
 [db]
 port = 54322
+shadow_port = 54320
+major_version = 15
 
 [studio]
 enabled = true
 port = 54323
+api_url = "http://localhost"
 
 [inbucket]
 enabled = true
 port = 54324
 
-[auth]
-enabled = true
-port = 54325
-
 [storage]
 enabled = true
-port = 54326
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
 
 [realtime]
 enabled = true
-port = 54327
 
 [analytics]
 enabled = false
-port = 54328
 
-[vector]
-enabled = false
-port = 54329
-
-[functions.completer-profil]
+[[edge_functions]]
+path = "/patient"
 verify_jwt = true
+function_name = "patient"
+
+[[edge_functions]]
+path = "/appointment"
+verify_jwt = true
+function_name = "appointment"
+
+[[edge_functions]]
+path = "/cabinet"
+verify_jwt = true
+function_name = "cabinet"
+
+[[edge_functions]]
+path = "/invoice"
+verify_jwt = true
+function_name = "invoice"
+
+[[edge_functions]]
+path = "/osteopath"
+verify_jwt = true
+function_name = "osteopath"
+
+[[edge_functions]]
+path = "/consultation"
+verify_jwt = true
+function_name = "consultation"
+
+[[edge_functions]]
+path = "/medical-document"
+verify_jwt = true
+function_name = "medical-document"
+
+[[edge_functions]]
+path = "/professional-profile"
+verify_jwt = true
+function_name = "professional-profile"
+
+[[edge_functions]]
+path = "/treatment-history"
+verify_jwt = true
+function_name = "treatment-history"
