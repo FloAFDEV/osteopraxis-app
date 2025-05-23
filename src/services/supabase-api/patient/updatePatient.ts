@@ -2,7 +2,6 @@
 import { Patient } from "@/types";
 import { supabase, SUPABASE_API_URL } from "@/integrations/supabase/client";
 import { adaptPatientFromSupabase } from "../patient-adapter";
-import { corsHeaders } from "@/services/corsHeaders";
 
 export async function updatePatient(patient: Patient): Promise<Patient> {
 	try {
@@ -18,12 +17,12 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		const { id, createdAt, ...updateData } = patient;
 		
 		// Appeler l'Edge Function avec l'en-tête d'autorisation approprié
+		// CORRECTION: Suppression de corsHeaders dans les en-têtes de la requête
 		const response = await fetch(`${SUPABASE_API_URL}/functions/v1/patient?id=${id}`, {
-			method: 'PUT', // Utiliser PUT pour éviter les problèmes CORS
+			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${session.access_token}`,
-				...corsHeaders
+				'Authorization': `Bearer ${session.access_token}`
 			},
 			body: JSON.stringify(updateData)
 		});
