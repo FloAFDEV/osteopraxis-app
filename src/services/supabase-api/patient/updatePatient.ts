@@ -50,13 +50,13 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 				? updateData.childrenAges 
 				: null,
             // Assurer que les valeurs numériques sont correctement formatées
-            height: updateData.height ? Number(updateData.height) : null,
-            weight: updateData.weight ? Number(updateData.weight) : null,
-            bmi: updateData.bmi ? Number(updateData.bmi) : null,
+            height: updateData.height !== undefined ? Number(updateData.height) || null : null,
+            weight: updateData.weight !== undefined ? Number(updateData.weight) || null : null,
+            bmi: updateData.bmi !== undefined ? Number(updateData.bmi) || null : null,
             // Assurer que toutes les autres valeurs numériques sont correctement formatées
-            weight_at_birth: updateData.weight_at_birth ? Number(updateData.weight_at_birth) : null,
-            height_at_birth: updateData.height_at_birth ? Number(updateData.height_at_birth) : null,
-            head_circumference: updateData.head_circumference ? Number(updateData.head_circumference) : null
+            weight_at_birth: updateData.weight_at_birth !== undefined ? Number(updateData.weight_at_birth) || null : null,
+            height_at_birth: updateData.height_at_birth !== undefined ? Number(updateData.height_at_birth) || null : null,
+            head_circumference: updateData.head_circumference !== undefined ? Number(updateData.head_circumference) || null : null
 		} as any;
 
 		console.log("Envoi des données formatées via PUT:", formattedData);

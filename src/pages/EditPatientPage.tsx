@@ -1,3 +1,4 @@
+
 import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
 import { PatientForm } from "@/components/patient-form";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,7 @@ const EditPatientPage = () => {
 					: "false";
 			}
 
-			// Convertir les champs numériques correctement
+			// Convertir les champs numériques correctement - traiter les valeurs undefined
 			if (updatedData.height !== undefined) updatedData.height = updatedData.height ? Number(updatedData.height) : null;
 			if (updatedData.weight !== undefined) updatedData.weight = updatedData.weight ? Number(updatedData.weight) : null;
 			if (updatedData.bmi !== undefined) updatedData.bmi = updatedData.bmi ? Number(updatedData.bmi) : null;
@@ -149,7 +150,7 @@ const EditPatientPage = () => {
 				paramedical_followup: updatedData.paramedical_followup || patient.paramedical_followup || null,
 				other_comments_child: updatedData.other_comments_child || patient.other_comments_child || null,
 				
-				// Champs height, weight et bmi
+				// Champs height, weight et bmi avec traitement spécial pour les valeurs nulles
 				height: updatedData.height !== undefined ? updatedData.height : patient.height || null,
 				weight: updatedData.weight !== undefined ? updatedData.weight : patient.weight || null,
 				bmi: updatedData.bmi !== undefined ? updatedData.bmi : patient.bmi || null,
