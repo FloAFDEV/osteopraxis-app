@@ -64,12 +64,17 @@ export async function getCurrentOsteopath(): Promise<{ id: number } | null> {
   }
 }
 
-// Add missing security functions
+/**
+ * Vérifie si l'ostéopathe cible correspond à l'ostéopathe connecté
+ */
 export async function isSameOsteopath(targetOsteopathId: number): Promise<boolean> {
   const currentOsteopathId = await getCurrentOsteopathId();
   return currentOsteopathId === targetOsteopathId;
 }
 
+/**
+ * Vérifie si un patient appartient à l'ostéopathe connecté
+ */
 export async function isPatientOwnedByCurrentOsteopath(patientId: number): Promise<boolean> {
   try {
     const currentOsteopathId = await getCurrentOsteopathId();
@@ -95,6 +100,9 @@ export async function isPatientOwnedByCurrentOsteopath(patientId: number): Promi
   }
 }
 
+/**
+ * Vérifie si un cabinet appartient à l'ostéopathe connecté
+ */
 export async function isCabinetOwnedByCurrentOsteopath(cabinetId: number): Promise<boolean> {
   try {
     const currentOsteopathId = await getCurrentOsteopathId();
@@ -120,13 +128,16 @@ export async function isCabinetOwnedByCurrentOsteopath(cabinetId: number): Promi
   }
 }
 
+/**
+ * Vérifie si un rendez-vous appartient à l'ostéopathe connecté
+ */
 export async function isAppointmentOwnedByCurrentOsteopath(appointmentId: number): Promise<boolean> {
   try {
     const currentOsteopathId = await getCurrentOsteopathId();
     
     if (!currentOsteopathId) return false;
     
-    // Check if the appointment's patient is owned by current osteopath
+    // Vérifier si le rendez-vous appartient à un patient de l'ostéopathe connecté
     const { data, error } = await supabase
       .from("Appointment")
       .select("patientId")
@@ -145,13 +156,16 @@ export async function isAppointmentOwnedByCurrentOsteopath(appointmentId: number
   }
 }
 
+/**
+ * Vérifie si une facture appartient à l'ostéopathe connecté
+ */
 export async function isInvoiceOwnedByCurrentOsteopath(invoiceId: number): Promise<boolean> {
   try {
     const currentOsteopathId = await getCurrentOsteopathId();
     
     if (!currentOsteopathId) return false;
     
-    // Check if the invoice's patient is owned by current osteopath
+    // Vérifier si la facture appartient à un patient de l'ostéopathe connecté
     const { data, error } = await supabase
       .from("Invoice")
       .select("patientId")

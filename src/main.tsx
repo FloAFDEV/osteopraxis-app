@@ -18,10 +18,15 @@ const queryClient = new QueryClient({
   },
 })
 
-// Ensure we have the React object in scope
-const root = createRoot(document.getElementById("root")!);
+// Ensure we have the element to mount to
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  throw new Error("Root element not found");
+}
 
-// Use React.createElement or JSX with explicit React import
+// Create root and render app
+const root = createRoot(rootElement);
+
 root.render(
   <React.StrictMode>
     <Router>
