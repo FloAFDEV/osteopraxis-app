@@ -90,8 +90,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
             margin={{
               top: 5,
               right: 10,
-              bottom: 5,
-              left: isMobile ? 0 : 1,
+                            left: isMobile ? 0 : 1,
             }}
           >
             {/* Grille de fond */}
