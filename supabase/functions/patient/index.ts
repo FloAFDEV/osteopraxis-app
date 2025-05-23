@@ -116,13 +116,76 @@ serve(async (req: Request) => {
         const patchData = await req.json();
         console.log("Données de mise à jour:", patchData);
         
+        // Vérifier d'abord que le patient appartient bien à l'ostéopathe connecté
+        const { data: authData, error: authError } = await supabaseClient.auth.getUser();
+        if (authError || !authData.user) {
+          return new Response(
+            JSON.stringify({ error: "Utilisateur non authentifié" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 401,
+            }
+          );
+        }
+        
+        // Récupérer l'osteopathId lié à l'utilisateur connecté
+        const { data: osteopathData, error: osteopathError } = await supabaseClient
+          .from("Osteopath")
+          .select("id")
+          .eq("userId", authData.user.id)
+          .single();
+          
+        if (osteopathError) {
+          return new Response(
+            JSON.stringify({ error: "Impossible de vérifier l'ostéopathe" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 403,
+            }
+          );
+        }
+        
+        // Vérifier que le patient appartient à cet ostéopathe
+        const { data: patientCheck, error: patientCheckError } = await supabaseClient
+          .from("Patient")
+          .select("id, osteopathId")
+          .eq("id", patientId)
+          .eq("osteopathId", osteopathData.id)
+          .maybeSingle();
+          
+        if (patientCheckError || !patientCheck) {
+          return new Response(
+            JSON.stringify({ error: "Patient non trouvé ou accès non autorisé" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 403,
+            }
+          );
+        }
+        
+        // SÉCURITÉ: Vérifier si le client tente de modifier l'osteopathId
+        if (patchData.osteopathId && patchData.osteopathId !== osteopathData.id) {
+          return new Response(
+            JSON.stringify({ error: "Modification non autorisée: vous ne pouvez pas changer l'appartenance du patient" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 403,
+            }
+          );
+        }
+        
+        // S'assurer que l'osteopathId est conservé et correspond à l'utilisateur connecté
+        patchData.osteopathId = osteopathData.id;
+        
         // Assurer que les valeurs numériques sont correctement formatées
-        if (patchData.height) patchData.height = Number(patchData.height);
-        if (patchData.weight) patchData.weight = Number(patchData.weight);
-        if (patchData.bmi) patchData.bmi = Number(patchData.bmi);
-        if (patchData.weight_at_birth) patchData.weight_at_birth = Number(patchData.weight_at_birth);
-        if (patchData.height_at_birth) patchData.height_at_birth = Number(patchData.height_at_birth);
-        if (patchData.head_circumference) patchData.head_circumference = Number(patchData.head_circumference);
+        if (patchData.height !== undefined) patchData.height = patchData.height ? Number(patchData.height) || null : null;
+        if (patchData.weight !== undefined) patchData.weight = patchData.weight ? Number(patchData.weight) || null : null;
+        if (patchData.bmi !== undefined) patchData.bmi = patchData.bmi ? Number(patchData.bmi) || null : null;
+        if (patchData.weight_at_birth !== undefined) patchData.weight_at_birth = patchData.weight_at_birth ? Number(patchData.weight_at_birth) || null : null;
+        if (patchData.height_at_birth !== undefined) patchData.height_at_birth = patchData.height_at_birth ? Number(patchData.height_at_birth) || null : null;
+        if (patchData.head_circumference !== undefined) patchData.head_circumference = patchData.head_circumference ? Number(patchData.head_circumference) || null : null;
+        
+        console.log("Données formatées pour mise à jour:", patchData);
         
         const { data: updateData, error: updateError } = await supabaseClient
           .from("Patient")
@@ -130,7 +193,11 @@ serve(async (req: Request) => {
           .eq("id", patientId)
           .select();
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Erreur de mise à jour:", updateError);
+          throw updateError;
+        }
+        
         return new Response(JSON.stringify(updateData), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
