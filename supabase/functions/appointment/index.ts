@@ -1,15 +1,16 @@
 
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.0";
 import { corsHeaders } from "../_shared/cors.ts";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { 
+  verifyUserAndGetIdentity,
+  verifyPatientOwnership,
+  verifyAppointmentOwnership,
+  createErrorResponse,
+  createSuccessResponse
+} from "../_shared/auth-helpers.ts";
 
 serve(async (req: Request) => {
-  // Gestion des requêtes preflight CORS
+  // Cette vérification est importante pour les requêtes preflight CORS
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -17,39 +18,40 @@ serve(async (req: Request) => {
     });
   }
 
-  // Authentification
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    return new Response(
-      JSON.stringify({ error: "Authentification requise" }),
-      {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+  // Vérifier l'identité de l'utilisateur et récupérer le client Supabase authentifié
+  const { identity, supabaseClient, message } = await verifyUserAndGetIdentity(req);
+  
+  if (!identity) {
+    return createErrorResponse(message || "Authentification requise", 401);
   }
-
-  // Client Supabase avec authentification
-  const supabaseClient = createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    }
-  );
-
+  
   try {
     const url = new URL(req.url);
     const appointmentId = url.searchParams.get("id");
     const patientId = url.searchParams.get("patientId");
-    const method = req.method;
+    const method = req.headers.get("X-HTTP-Method-Override") || req.method;
 
     // Support de l'en-tête pour les annulations
     const isCancellation = req.headers.get("X-Cancellation-Override") === "true";
+    
+    // Vérifier la propriété du patient si fourni
+    if (patientId) {
+      const isPatientOwner = await verifyPatientOwnership(supabaseClient, patientId, identity.osteopathId);
+      if (!isPatientOwner) {
+        return createErrorResponse("Accès non autorisé: ce patient n'appartient pas à votre compte", 403);
+      }
+    }
+
+    // Pour les opérations de modification sur un RDV existant, vérifier la propriété
+    if ((method === "PUT" || method === "PATCH" || method === "DELETE") && appointmentId) {
+      // Les annulations sont traitées différemment
+      if (!isCancellation) {
+        const isAppointmentOwner = await verifyAppointmentOwnership(supabaseClient, appointmentId, identity.osteopathId);
+        if (!isAppointmentOwner) {
+          return createErrorResponse("Accès non autorisé: ce rendez-vous n'appartient pas à votre compte", 403);
+        }
+      }
+    }
     
     // Préparer les options de requête pour les annulations
     const options = isCancellation 
@@ -59,7 +61,8 @@ serve(async (req: Request) => {
           }
         } 
       : {};
-
+    
+    // Traiter la demande en fonction de la méthode HTTP
     switch (method) {
       case "GET":
         if (appointmentId) {
@@ -68,38 +71,72 @@ serve(async (req: Request) => {
             .from("Appointment")
             .select("*")
             .eq("id", appointmentId)
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          
+          // Vérifier que le RDV appartient à un patient de cet ostéopathe
+          if (data) {
+            const isPatientOwner = await verifyPatientOwnership(
+              supabaseClient,
+              data.patientId,
+              identity.osteopathId
+            );
+            
+            if (!isPatientOwner) {
+              return createErrorResponse("Accès non autorisé: ce rendez-vous concerne un patient qui n'appartient pas à votre compte", 403);
+            }
+          }
+          
+          return createSuccessResponse(data);
         } else if (patientId) {
-          // Récupérer les RDV d'un patient
+          // Récupérer les RDV d'un patient spécifique
           const { data, error } = await supabaseClient
             .from("Appointment")
             .select("*")
             .eq("patientId", patientId);
 
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          return createSuccessResponse(data);
         } else {
-          // Récupérer tous les RDV
-          const { data, error } = await supabaseClient.from("Appointment").select("*");
+          // Récupérer tous les RDV des patients de l'ostéopathe
+          // D'abord, récupérer tous les patients de l'ostéopathe
+          const { data: patients, error: patientsError } = await supabaseClient
+            .from("Patient")
+            .select("id")
+            .eq("osteopathId", identity.osteopathId);
+          
+          if (patientsError) throw patientsError;
+          
+          if (!patients || patients.length === 0) {
+            return createSuccessResponse([]);
+          }
+          
+          // Ensuite, récupérer tous les RDV pour ces patients
+          const patientIds = patients.map(p => p.id);
+          const { data, error } = await supabaseClient
+            .from("Appointment")
+            .select("*")
+            .in("patientId", patientIds);
+            
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          return createSuccessResponse(data);
         }
 
       case "POST":
         // Créer un nouveau RDV
         const postData = await req.json();
+        
+        // Vérifier que le patient appartient bien à l'ostéopathe
+        const isPostPatientOwner = await verifyPatientOwnership(
+          supabaseClient,
+          postData.patientId,
+          identity.osteopathId
+        );
+        
+        if (!isPostPatientOwner) {
+          return createErrorResponse("Accès non autorisé: ce patient n'appartient pas à votre compte", 403);
+        }
         
         // Supprimer la propriété end si elle existe
         if (postData.end) {
@@ -112,24 +149,29 @@ serve(async (req: Request) => {
           .select();
 
         if (insertError) throw insertError;
-        return new Response(JSON.stringify(insertData), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 201,
-        });
+        return createSuccessResponse(insertData, 201);
 
+      case "PUT":
       case "PATCH":
         // Mettre à jour un RDV existant
         if (!appointmentId) {
-          return new Response(
-            JSON.stringify({ error: "ID du rendez-vous requis pour la mise à jour" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 400,
-            }
-          );
+          return createErrorResponse("ID du rendez-vous requis pour la mise à jour", 400);
         }
         
         const patchData = await req.json();
+        
+        // Vérifier si la mise à jour modifie le patientId
+        if (patchData.patientId && !isCancellation) {
+          const isNewPatientOwner = await verifyPatientOwnership(
+            supabaseClient,
+            patchData.patientId,
+            identity.osteopathId
+          );
+          
+          if (!isNewPatientOwner) {
+            return createErrorResponse("Accès non autorisé: le nouveau patient n'appartient pas à votre compte", 403);
+          }
+        }
         
         // Supprimer la propriété end si elle existe
         if (patchData.end) {
@@ -143,21 +185,12 @@ serve(async (req: Request) => {
           .select(null, options);
 
         if (updateError) throw updateError;
-        return new Response(JSON.stringify(updateData || { success: true, id: appointmentId }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+        return createSuccessResponse(updateData || { success: true, id: appointmentId });
 
       case "DELETE":
         // Supprimer un RDV
         if (!appointmentId) {
-          return new Response(
-            JSON.stringify({ error: "ID du rendez-vous requis pour la suppression" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 400,
-            }
-          );
+          return createErrorResponse("ID du rendez-vous requis pour la suppression", 400);
         }
 
         const { error: deleteError } = await supabaseClient
@@ -166,28 +199,13 @@ serve(async (req: Request) => {
           .eq("id", appointmentId);
 
         if (deleteError) throw deleteError;
-        return new Response(JSON.stringify({ success: true, id: appointmentId }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+        return createSuccessResponse({ id: appointmentId });
 
       default:
-        return new Response(
-          JSON.stringify({ error: `Méthode ${method} non supportée` }),
-          {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 405,
-          }
-        );
+        return createErrorResponse(`Méthode ${method} non supportée`, 405);
     }
   } catch (error) {
     console.error("Erreur:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Une erreur est survenue" }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
-    );
+    return createErrorResponse(error.message || "Une erreur est survenue", 400);
   }
 });

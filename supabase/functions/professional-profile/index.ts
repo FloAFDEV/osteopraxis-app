@@ -1,15 +1,14 @@
 
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.0";
 import { corsHeaders } from "../_shared/cors.ts";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { 
+  verifyUserAndGetIdentity,
+  createErrorResponse,
+  createSuccessResponse
+} from "../_shared/auth-helpers.ts";
 
 serve(async (req: Request) => {
-  // Gestion des requêtes preflight CORS
+  // Cette vérification est importante pour les requêtes preflight CORS
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -17,37 +16,39 @@ serve(async (req: Request) => {
     });
   }
 
-  // Authentification
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    return new Response(
-      JSON.stringify({ error: "Authentification requise" }),
-      {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+  // Vérifier l'identité de l'utilisateur et récupérer le client Supabase authentifié
+  const { identity, supabaseClient, message } = await verifyUserAndGetIdentity(req);
+  
+  if (!identity) {
+    return createErrorResponse(message || "Authentification requise", 401);
   }
-
-  // Client Supabase avec authentification
-  const supabaseClient = createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    }
-  );
-
+  
   try {
     const url = new URL(req.url);
     const profileId = url.searchParams.get("id");
     const userId = url.searchParams.get("userId");
-    const method = req.method;
+    const method = req.headers.get("X-HTTP-Method-Override") || req.method;
     
+    // Si on opère sur un profil spécifique, vérifier qu'il appartient à l'utilisateur actuel ou à l'ostéopathe
+    if (profileId && method !== "GET") {
+      const { data: profile, error: profileError } = await supabaseClient
+        .from("ProfessionalProfile")
+        .select("userId")
+        .eq("id", profileId)
+        .maybeSingle();
+      
+      if (profileError || !profile) {
+        return createErrorResponse("Profil professionnel non trouvé", 404);
+      }
+      
+      // Vérifier que le profil appartient à l'utilisateur connecté
+      const { data: authData } = await supabaseClient.auth.getUser();
+      if (!authData.user || profile.userId !== authData.user.id) {
+        return createErrorResponse("Accès non autorisé: ce profil professionnel ne vous appartient pas", 403);
+      }
+    }
+    
+    // Traiter la demande en fonction de la méthode HTTP
     switch (method) {
       case "GET":
         if (profileId) {
@@ -56,34 +57,36 @@ serve(async (req: Request) => {
             .from("ProfessionalProfile")
             .select("*")
             .eq("id", profileId)
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          return createSuccessResponse(data);
         } else if (userId) {
           // Récupérer un profil par userId
           const { data, error } = await supabaseClient
             .from("ProfessionalProfile")
             .select("*")
             .eq("userId", userId)
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          return createSuccessResponse(data);
         } else {
-          // Récupérer tous les profils professionnels
-          const { data, error } = await supabaseClient.from("ProfessionalProfile").select("*");
+          // Par défaut, récupérer le profil de l'utilisateur connecté
+          const { data: authData } = await supabaseClient.auth.getUser();
+          
+          if (!authData.user) {
+            return createErrorResponse("Utilisateur non authentifié", 401);
+          }
+          
+          const { data, error } = await supabaseClient
+            .from("ProfessionalProfile")
+            .select("*")
+            .eq("userId", authData.user.id)
+            .maybeSingle();
+
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          return createSuccessResponse(data);
         }
 
       case "POST":
@@ -92,57 +95,48 @@ serve(async (req: Request) => {
         
         // Récupérer l'utilisateur actuel
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-        if (userError) throw userError;
-        
-        // Vérifier si un profil existe déjà pour cet utilisateur
-        if (user) {
-          const { data: existingProfile, error: existingError } = await supabaseClient
-            .from("ProfessionalProfile")
-            .select("id")
-            .eq("userId", user.id)
-            .maybeSingle();
-            
-          if (existingProfile) {
-            return new Response(
-              JSON.stringify({ 
-                error: "Un profil professionnel existe déjà pour cet utilisateur",
-                existing: existingProfile
-              }),
-              {
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-                status: 409,
-              }
-            );
-          }
+        if (userError || !user) {
+          return createErrorResponse("Utilisateur non authentifié", 401);
         }
         
-        // Créer le profil
+        // Vérifier si un profil existe déjà pour cet utilisateur
+        const { data: existingProfile, error: existingError } = await supabaseClient
+          .from("ProfessionalProfile")
+          .select("id")
+          .eq("userId", user.id)
+          .maybeSingle();
+          
+        if (existingProfile) {
+          return createErrorResponse("Un profil professionnel existe déjà pour cet utilisateur", 409);
+        }
+        
+        // Créer le profil en s'assurant que userId est celui de l'utilisateur connecté
         const { data: insertData, error: insertError } = await supabaseClient
           .from("ProfessionalProfile")
           .insert({ 
             ...postData,
-            userId: user?.id // Lier le profil à l'utilisateur actuel
+            userId: user.id // S'assurer que le profil est associé à l'utilisateur connecté
           })
           .select();
 
         if (insertError) throw insertError;
-        return new Response(JSON.stringify(insertData), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 201,
-        });
+        return createSuccessResponse(insertData, 201);
 
+      case "PUT":
       case "PATCH":
         // Mettre à jour un profil professionnel existant
         if (!profileId) {
-          return new Response(
-            JSON.stringify({ error: "ID de profil requis pour la mise à jour" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 400,
-            }
-          );
+          return createErrorResponse("ID de profil requis pour la mise à jour", 400);
         }
+        
         const patchData = await req.json();
+        
+        // Empêcher la modification du userId
+        const { data: authData } = await supabaseClient.auth.getUser();
+        if (authData.user) {
+          patchData.userId = authData.user.id; // S'assurer que le userId reste celui de l'utilisateur connecté
+        }
+        
         const { data: updateData, error: updateError } = await supabaseClient
           .from("ProfessionalProfile")
           .update(patchData)
@@ -150,21 +144,12 @@ serve(async (req: Request) => {
           .select();
 
         if (updateError) throw updateError;
-        return new Response(JSON.stringify(updateData), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+        return createSuccessResponse(updateData);
 
       case "DELETE":
         // Supprimer un profil professionnel
         if (!profileId) {
-          return new Response(
-            JSON.stringify({ error: "ID de profil requis pour la suppression" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 400,
-            }
-          );
+          return createErrorResponse("ID de profil requis pour la suppression", 400);
         }
 
         const { error: deleteError } = await supabaseClient
@@ -173,28 +158,13 @@ serve(async (req: Request) => {
           .eq("id", profileId);
 
         if (deleteError) throw deleteError;
-        return new Response(JSON.stringify({ success: true, id: profileId }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+        return createSuccessResponse({ id: profileId });
 
       default:
-        return new Response(
-          JSON.stringify({ error: `Méthode ${method} non supportée` }),
-          {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 405,
-          }
-        );
+        return createErrorResponse(`Méthode ${method} non supportée`, 405);
     }
   } catch (error) {
     console.error("Erreur:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Une erreur est survenue" }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
-    );
+    return createErrorResponse(error.message || "Une erreur est survenue", 400);
   }
 });

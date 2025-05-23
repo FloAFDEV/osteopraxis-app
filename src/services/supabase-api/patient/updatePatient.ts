@@ -17,7 +17,6 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		const { id, createdAt, ...updateData } = patient;
 		
 		// Appeler l'Edge Function avec l'en-tête d'autorisation approprié
-		// CORRECTION: Suppression de corsHeaders dans les en-têtes de la requête
 		const response = await fetch(`${SUPABASE_API_URL}/functions/v1/patient?id=${id}`, {
 			method: 'PUT',
 			headers: {
