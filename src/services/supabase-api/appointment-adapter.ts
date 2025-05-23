@@ -15,8 +15,8 @@ export const adaptAppointmentFromSupabase = (data: any): Appointment => {
     osteopathId: data.osteopathId || 1,
     date: data.date || start, // Compatibilité
     start: start,
-    // Si la colonne end existe dans les données, on l'utilise, sinon on calcule une fin à 30 minutes du début
-    end: data.end || (start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString() : null),
+    // La fin est toujours calculée côté client, jamais stockée en base
+    end: new Date(new Date(start).getTime() + 30 * 60000).toISOString(),
     status: data.status as AppointmentStatus,
     notes: data.notes || null,
     createdAt: data.createdAt || new Date().toISOString(),
@@ -35,19 +35,19 @@ export const adaptAppointmentToSupabase = (appointment: Partial<Appointment>): a
   const date = appointment.date || appointment.start;
   const start = appointment.start || date;
   
-  // Convertir l'appointment pour l'envoi à Supabase, sans inclure la propriété end si elle n'existe pas dans la BDD
+  // Convertir l'appointment pour l'envoi à Supabase, sans inclure la propriété end
   const payload: any = {
     ...appointment,
     date: date,
     start: start,
-    // Ne pas inclure end si nous décidons de ne pas avoir cette colonne en DB
-    // end: appointment.end || (start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString() : null),
+    // Ne pas inclure end car cette colonne n'existe pas en DB
     // Si le statut est "CANCELLED", le convertir en "CANCELED" (orthographe en DB)
     status: appointment.status === "CANCELLED" ? "CANCELED" : appointment.status,
   };
 
   // Nettoyer les propriétés non nécessaires pour Supabase
   delete payload.id; // Ne pas inclure l'ID lors de la création
+  delete payload.end; // Supprimer end car cette colonne n'existe pas en DB
   
   return payload;
 };
@@ -64,8 +64,8 @@ export const createAppointmentPayload = (data: any): CreateAppointmentPayload =>
     cabinetId: data.cabinetId || 1,
     osteopathId: data.osteopathId || 1,
     start: start,
-    // Ne pas inclure end dans le payload si la colonne n'existe pas en DB
-    // end: data.end || (start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString() : null),
+    // end est calculé côté client et n'est pas stocké en DB
+    end: new Date(new Date(start).getTime() + 30 * 60000).toISOString(), // Pour satisfaire le type
     date: start, // S'assurer que le champ date est défini
     status: data.status || "PLANNED",
     notes: data.notes || null,

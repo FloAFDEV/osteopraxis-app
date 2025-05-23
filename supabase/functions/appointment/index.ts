@@ -100,6 +100,12 @@ serve(async (req: Request) => {
       case "POST":
         // Créer un nouveau RDV
         const postData = await req.json();
+        
+        // Supprimer la propriété end si elle existe
+        if (postData.end) {
+          delete postData.end;
+        }
+        
         const { data: insertData, error: insertError } = await supabaseClient
           .from("Appointment")
           .insert(postData)
@@ -124,6 +130,12 @@ serve(async (req: Request) => {
         }
         
         const patchData = await req.json();
+        
+        // Supprimer la propriété end si elle existe
+        if (patchData.end) {
+          delete patchData.end;
+        }
+        
         const { data: updateData, error: updateError } = await supabaseClient
           .from("Appointment")
           .update(patchData)

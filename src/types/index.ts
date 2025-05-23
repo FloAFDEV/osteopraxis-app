@@ -154,7 +154,7 @@ export interface CreateAppointmentPayload {
 	cabinetId: number;
 	osteopathId: number;
 	start: string;
-	end: string;
+	end: string;  // Gardé pour compatibilité avec le code client mais non utilisé en DB
 	date: string;  // Rendu obligatoire pour compatibilité
 	reason: string;
 	status: AppointmentStatus;
