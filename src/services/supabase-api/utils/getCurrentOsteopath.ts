@@ -1,9 +1,13 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// Simplify return type to avoid excessive type instantiation
+/**
+ * Récupère l'ID de l'ostéopathe actuellement connecté
+ * @returns L'ID de l'ostéopathe ou null si non trouvé
+ */
 export async function getCurrentOsteopathId(): Promise<number | null> {
   try {
+    // Vérifier si un utilisateur est connecté
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -11,19 +15,19 @@ export async function getCurrentOsteopathId(): Promise<number | null> {
       return null;
     }
     
-    // Récupérer l'utilisateur complet à partir de la table User en utilisant auth_id
+    // Récupérer l'utilisateur depuis la table User en utilisant auth_id
     const { data: userData, error: userError } = await supabase
       .from("User")
       .select("osteopathId")
       .eq("auth_id", user.id)
       .single();
     
-    if (userError || !userData) {
+    if (userError) {
       console.error("Erreur lors de la récupération des données utilisateur:", userError);
       return null;
     }
     
-    if (!userData.osteopathId) {
+    if (!userData?.osteopathId) {
       console.log("L'utilisateur connecté n'a pas d'osteopathId associé");
       return null;
     }
@@ -36,7 +40,10 @@ export async function getCurrentOsteopathId(): Promise<number | null> {
   }
 }
 
-// Simplify return type to avoid excessive type instantiation
+/**
+ * Récupère les données de l'ostéopathe actuellement connecté
+ * @returns Les données de l'ostéopathe ou null si non trouvé
+ */
 export async function getCurrentOsteopath(): Promise<{ id: number } | null> {
   try {
     const osteopathId = await getCurrentOsteopathId();
@@ -45,7 +52,7 @@ export async function getCurrentOsteopath(): Promise<{ id: number } | null> {
       return null;
     }
     
-    // Récupérer les données complètes de l'ostéopathe
+    // Récupérer les données de l'ostéopathe
     const { data: osteopathData, error: osteopathError } = await supabase
       .from("Osteopath")
       .select("id, name, userId, siret, adeli_number, ape_code")
