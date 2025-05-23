@@ -35,7 +35,14 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		}
 		
 		// Récupérer et adapter les données
-		const [updatedPatient] = await response.json();
+		const responseData = await response.json();
+		
+		// Vérifier si les données sont dans le format attendu
+		if (!responseData.data || !Array.isArray(responseData.data) || responseData.data.length === 0) {
+			throw new Error("Format de réponse inattendu: les données du patient sont manquantes");
+		}
+		
+		const updatedPatient = responseData.data[0];
 		
 		// Si aucune donnée n'a été retournée, lancer une erreur
 		if (!updatedPatient) {

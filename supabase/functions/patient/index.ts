@@ -1,13 +1,12 @@
 
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.0";
 import { corsHeaders } from "../_shared/cors.ts";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
-
-// Créer un client Supabase avec les clés d'environnement
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { 
+  verifyUserAndGetIdentity, 
+  verifyPatientOwnership, 
+  createErrorResponse,
+  createSuccessResponse
+} from "../_shared/auth-helpers.ts";
 
 serve(async (req: Request) => {
   // Cette vérification est importante pour les requêtes preflight CORS
@@ -18,31 +17,13 @@ serve(async (req: Request) => {
     });
   }
 
-  // Récupérer le token d'authentification depuis les en-têtes
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    return new Response(
-      JSON.stringify({ error: "Authentification requise" }),
-      {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+  // Vérifier l'identité de l'utilisateur et récupérer le client Supabase authentifié
+  const { identity, supabaseClient, message } = await verifyUserAndGetIdentity(req);
+  
+  if (!identity) {
+    return createErrorResponse(message || "Authentification requise", 401);
   }
-
-  // Configurer le client Supabase avec le token d'authentification
-  const supabaseClient = createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    }
-  );
-
+  
   try {
     const url = new URL(req.url);
     const patientId = url.searchParams.get("id");
@@ -51,6 +32,15 @@ serve(async (req: Request) => {
     
     console.log("Méthode demandée:", method);
     console.log("Patient ID:", patientId);
+    
+    // Pour les opérations de modification (PUT, PATCH, DELETE), vérifier la propriété du patient
+    if ((method === "PUT" || method === "PATCH" || method === "DELETE") && patientId) {
+      const isOwner = await verifyPatientOwnership(supabaseClient, patientId, identity.osteopathId);
+      
+      if (!isOwner) {
+        return createErrorResponse("Accès non autorisé: ce patient n'appartient pas à votre compte", 403);
+      }
+    }
     
     // Traiter la demande en fonction de la méthode HTTP
     switch (method) {
@@ -61,21 +51,20 @@ serve(async (req: Request) => {
             .from("Patient")
             .select("*")
             .eq("id", patientId)
+            .eq("osteopathId", identity.osteopathId) // Sécurisation: filtrer par osteopathId
             .single();
 
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          return createSuccessResponse(data);
         } else {
-          // Récupérer tous les patients
-          const { data, error } = await supabaseClient.from("Patient").select("*");
+          // Récupérer tous les patients de l'ostéopathe connecté
+          const { data, error } = await supabaseClient
+            .from("Patient")
+            .select("*")
+            .eq("osteopathId", identity.osteopathId); // Sécurisation: filtrer par osteopathId
+            
           if (error) throw error;
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
+          return createSuccessResponse(data);
         }
 
       case "POST":
@@ -90,92 +79,29 @@ serve(async (req: Request) => {
         if (postData.height_at_birth) postData.height_at_birth = Number(postData.height_at_birth);
         if (postData.head_circumference) postData.head_circumference = Number(postData.head_circumference);
         
+        // SÉCURITÉ: S'assurer que le patient est associé à l'ostéopathe connecté
+        postData.osteopathId = identity.osteopathId;
+        
         const { data: insertData, error: insertError } = await supabaseClient
           .from("Patient")
           .insert(postData)
           .select();
 
         if (insertError) throw insertError;
-        return new Response(JSON.stringify(insertData), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 201,
-        });
+        return createSuccessResponse(insertData, 201);
 
       case "PUT":
       case "PATCH":
         // Mettre à jour un patient existant
         if (!patientId) {
-          return new Response(
-            JSON.stringify({ error: "ID patient requis pour la mise à jour" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 400,
-            }
-          );
+          return createErrorResponse("ID patient requis pour la mise à jour", 400);
         }
+        
         const patchData = await req.json();
         console.log("Données de mise à jour:", patchData);
         
-        // Vérifier d'abord que le patient appartient bien à l'ostéopathe connecté
-        const { data: authData, error: authError } = await supabaseClient.auth.getUser();
-        if (authError || !authData.user) {
-          return new Response(
-            JSON.stringify({ error: "Utilisateur non authentifié" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 401,
-            }
-          );
-        }
-        
-        // Récupérer l'osteopathId lié à l'utilisateur connecté
-        const { data: osteopathData, error: osteopathError } = await supabaseClient
-          .from("Osteopath")
-          .select("id")
-          .eq("userId", authData.user.id)
-          .single();
-          
-        if (osteopathError) {
-          return new Response(
-            JSON.stringify({ error: "Impossible de vérifier l'ostéopathe" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 403,
-            }
-          );
-        }
-        
-        // Vérifier que le patient appartient à cet ostéopathe
-        const { data: patientCheck, error: patientCheckError } = await supabaseClient
-          .from("Patient")
-          .select("id, osteopathId")
-          .eq("id", patientId)
-          .eq("osteopathId", osteopathData.id)
-          .maybeSingle();
-          
-        if (patientCheckError || !patientCheck) {
-          return new Response(
-            JSON.stringify({ error: "Patient non trouvé ou accès non autorisé" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 403,
-            }
-          );
-        }
-        
-        // SÉCURITÉ: Vérifier si le client tente de modifier l'osteopathId
-        if (patchData.osteopathId && patchData.osteopathId !== osteopathData.id) {
-          return new Response(
-            JSON.stringify({ error: "Modification non autorisée: vous ne pouvez pas changer l'appartenance du patient" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 403,
-            }
-          );
-        }
-        
-        // S'assurer que l'osteopathId est conservé et correspond à l'utilisateur connecté
-        patchData.osteopathId = osteopathData.id;
+        // SÉCURITÉ: S'assurer que l'osteopathId ne peut pas être modifié
+        patchData.osteopathId = identity.osteopathId;
         
         // Assurer que les valeurs numériques sont correctement formatées
         if (patchData.height !== undefined) patchData.height = patchData.height ? Number(patchData.height) || null : null;
@@ -191,6 +117,7 @@ serve(async (req: Request) => {
           .from("Patient")
           .update(patchData)
           .eq("id", patientId)
+          .eq("osteopathId", identity.osteopathId) // Sécurisation: filtrer par osteopathId
           .select();
 
         if (updateError) {
@@ -198,51 +125,28 @@ serve(async (req: Request) => {
           throw updateError;
         }
         
-        return new Response(JSON.stringify(updateData), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+        return createSuccessResponse(updateData);
 
       case "DELETE":
         // Supprimer un patient
         if (!patientId) {
-          return new Response(
-            JSON.stringify({ error: "ID patient requis pour la suppression" }),
-            {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-              status: 400,
-            }
-          );
+          return createErrorResponse("ID patient requis pour la suppression", 400);
         }
 
         const { error: deleteError } = await supabaseClient
           .from("Patient")
           .delete()
-          .eq("id", patientId);
+          .eq("id", patientId)
+          .eq("osteopathId", identity.osteopathId); // Sécurisation: filtrer par osteopathId
 
         if (deleteError) throw deleteError;
-        return new Response(JSON.stringify({ success: true, id: patientId }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+        return createSuccessResponse({ id: patientId });
 
       default:
-        return new Response(
-          JSON.stringify({ error: `Méthode ${method} non supportée` }),
-          {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 405,
-          }
-        );
+        return createErrorResponse(`Méthode ${method} non supportée`, 405);
     }
   } catch (error) {
     console.error("Erreur:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Une erreur est survenue" }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
-    );
+    return createErrorResponse(error.message || "Une erreur est survenue", 400);
   }
 });
