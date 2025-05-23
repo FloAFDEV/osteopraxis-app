@@ -20,7 +20,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   children,
 }) => {
   return (
-    <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-2 shadow-lg">
+    <Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-1 sm:p-1 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{title}</span>
