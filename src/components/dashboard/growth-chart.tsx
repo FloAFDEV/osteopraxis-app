@@ -5,6 +5,7 @@ import { DashboardData } from "@/types";
 import {
   CartesianGrid,
   Legend,
+  Line,
   LineChart,
   ResponsiveContainer,
   Tooltip,
@@ -13,8 +14,8 @@ import {
 } from "recharts";
 import { ChartWrapper } from "./chart/chart-wrapper";
 import { CustomTooltip } from "./chart/chart-tooltip";
-import { LineConfig } from "./chart/line-config";
 import { formatSeriesName, prepareChartData } from "./chart/chart-utils";
+import { LINE_COLORS, LINE_WIDTH } from "./chart/line-colors";
 
 interface GrowthChartProps {
   data: DashboardData;
@@ -83,10 +84,54 @@ export function GrowthChart({ data }: GrowthChartProps) {
             />
             
             {/* Lignes pour chaque série de données */}
-            <LineConfig dataKey="total" delay={0} />
-            <LineConfig dataKey="hommes" delay={300} />
-            <LineConfig dataKey="femmes" delay={600} />
-            <LineConfig dataKey="enfants" delay={900} />
+            <Line
+              type="monotone"
+              dataKey="total"
+              stroke={LINE_COLORS.total}
+              strokeWidth={LINE_WIDTH.total}
+              dot={{ stroke: LINE_COLORS.total, strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
+              name="total"
+              isAnimationActive={true}
+              animationDuration={1200}
+              connectNulls={true}
+            />
+            <Line
+              type="monotone"
+              dataKey="hommes"
+              stroke={LINE_COLORS.hommes}
+              strokeWidth={LINE_WIDTH.default}
+              dot={{ stroke: LINE_COLORS.hommes, strokeWidth: 2, r: 3 }}
+              activeDot={{ r: 5 }}
+              name="hommes"
+              isAnimationActive={true}
+              animationDuration={1500}
+              connectNulls={true}
+            />
+            <Line
+              type="monotone"
+              dataKey="femmes"
+              stroke={LINE_COLORS.femmes}
+              strokeWidth={LINE_WIDTH.default}
+              dot={{ stroke: LINE_COLORS.femmes, strokeWidth: 2, r: 3 }}
+              activeDot={{ r: 5 }}
+              name="femmes"
+              isAnimationActive={true}
+              animationDuration={1800}
+              connectNulls={true}
+            />
+            <Line
+              type="monotone"
+              dataKey="enfants"
+              stroke={LINE_COLORS.enfants}
+              strokeWidth={LINE_WIDTH.default}
+              dot={{ stroke: LINE_COLORS.enfants, strokeWidth: 2, r: 3 }}
+              activeDot={{ r: 5 }}
+              name="enfants"
+              isAnimationActive={true}
+              animationDuration={2100}
+              connectNulls={true}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
