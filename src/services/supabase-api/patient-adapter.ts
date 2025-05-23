@@ -1,4 +1,3 @@
-
 import { Patient } from "@/types";
 
 export const adaptPatientFromSupabase = (data: any): Patient => ({
@@ -10,9 +9,6 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
 	email: data.email,
 	phone: data.phone,
 	address: data.address,
-	city: data.city || null,
-	postalCode: data.postalCode || null,
-	country: data.country || null,
 	gender: data.gender,
 	height: data.height ? parseFloat(data.height) : null,
 	weight: data.weight ? parseFloat(data.weight) : null,
@@ -49,9 +45,7 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
 	osteopathId: data.osteopathId || 1,
 	familyStatus: data.familyStatus || null,
 	// Ajout des champs requis manquants
-	medicalHistory: data.medicalHistory || null,
 	allergies: data.allergies || null,
-	medications: data.medications || null,
 	// Champs existants pour tous les patients
 	complementaryExams: data.complementaryExams || null,
 	generalSymptoms: data.generalSymptoms || null,
@@ -77,9 +71,15 @@ export const adaptPatientFromSupabase = (data: any): Patient => ({
 	// Nouveaux champs spécifiques aux enfants
 	fine_motor_skills: data.fine_motor_skills || null,
 	gross_motor_skills: data.gross_motor_skills || null,
-	weight_at_birth: data.weight_at_birth ? parseFloat(data.weight_at_birth) : null,
-	height_at_birth: data.height_at_birth ? parseFloat(data.height_at_birth) : null,
-	head_circumference: data.head_circumference ? parseFloat(data.head_circumference) : null,
+	weight_at_birth: data.weight_at_birth
+		? parseFloat(data.weight_at_birth)
+		: null,
+	height_at_birth: data.height_at_birth
+		? parseFloat(data.height_at_birth)
+		: null,
+	head_circumference: data.head_circumference
+		? parseFloat(data.head_circumference)
+		: null,
 	apgar_score: data.apgar_score || null,
 	childcare_type: data.childcare_type || null,
 	school_grade: data.school_grade || null,
