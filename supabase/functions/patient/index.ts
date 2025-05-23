@@ -81,6 +81,15 @@ serve(async (req: Request) => {
       case "POST":
         // Créer un nouveau patient
         const postData = await req.json();
+        
+        // Assurer que les valeurs numériques sont correctement formatées
+        if (postData.height) postData.height = Number(postData.height);
+        if (postData.weight) postData.weight = Number(postData.weight);
+        if (postData.bmi) postData.bmi = Number(postData.bmi);
+        if (postData.weight_at_birth) postData.weight_at_birth = Number(postData.weight_at_birth);
+        if (postData.height_at_birth) postData.height_at_birth = Number(postData.height_at_birth);
+        if (postData.head_circumference) postData.head_circumference = Number(postData.head_circumference);
+        
         const { data: insertData, error: insertError } = await supabaseClient
           .from("Patient")
           .insert(postData)
@@ -92,6 +101,7 @@ serve(async (req: Request) => {
           status: 201,
         });
 
+      case "PUT":
       case "PATCH":
         // Mettre à jour un patient existant
         if (!patientId) {
@@ -105,6 +115,14 @@ serve(async (req: Request) => {
         }
         const patchData = await req.json();
         console.log("Données de mise à jour:", patchData);
+        
+        // Assurer que les valeurs numériques sont correctement formatées
+        if (patchData.height) patchData.height = Number(patchData.height);
+        if (patchData.weight) patchData.weight = Number(patchData.weight);
+        if (patchData.bmi) patchData.bmi = Number(patchData.bmi);
+        if (patchData.weight_at_birth) patchData.weight_at_birth = Number(patchData.weight_at_birth);
+        if (patchData.height_at_birth) patchData.height_at_birth = Number(patchData.height_at_birth);
+        if (patchData.head_circumference) patchData.head_circumference = Number(patchData.head_circumference);
         
         const { data: updateData, error: updateError } = await supabaseClient
           .from("Patient")

@@ -52,7 +52,11 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
             // Assurer que les valeurs numériques sont correctement formatées
             height: updateData.height ? Number(updateData.height) : null,
             weight: updateData.weight ? Number(updateData.weight) : null,
-            bmi: updateData.bmi ? Number(updateData.bmi) : null
+            bmi: updateData.bmi ? Number(updateData.bmi) : null,
+            // Assurer que toutes les autres valeurs numériques sont correctement formatées
+            weight_at_birth: updateData.weight_at_birth ? Number(updateData.weight_at_birth) : null,
+            height_at_birth: updateData.height_at_birth ? Number(updateData.height_at_birth) : null,
+            head_circumference: updateData.head_circumference ? Number(updateData.head_circumference) : null
 		} as any;
 
 		// Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
