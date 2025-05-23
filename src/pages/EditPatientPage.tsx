@@ -70,12 +70,12 @@ const EditPatientPage = () => {
 			}
 
 			// Convertir les champs numériques correctement
-			if (updatedData.height) updatedData.height = Number(updatedData.height);
-			if (updatedData.weight) updatedData.weight = Number(updatedData.weight);
-			if (updatedData.bmi) updatedData.bmi = Number(updatedData.bmi);
-			if (updatedData.weight_at_birth) updatedData.weight_at_birth = Number(updatedData.weight_at_birth);
-			if (updatedData.height_at_birth) updatedData.height_at_birth = Number(updatedData.height_at_birth);
-			if (updatedData.head_circumference) updatedData.head_circumference = Number(updatedData.head_circumference);
+			if (updatedData.height !== undefined) updatedData.height = updatedData.height ? Number(updatedData.height) : null;
+			if (updatedData.weight !== undefined) updatedData.weight = updatedData.weight ? Number(updatedData.weight) : null;
+			if (updatedData.bmi !== undefined) updatedData.bmi = updatedData.bmi ? Number(updatedData.bmi) : null;
+			if (updatedData.weight_at_birth !== undefined) updatedData.weight_at_birth = updatedData.weight_at_birth ? Number(updatedData.weight_at_birth) : null;
+			if (updatedData.height_at_birth !== undefined) updatedData.height_at_birth = updatedData.height_at_birth ? Number(updatedData.height_at_birth) : null;
+			if (updatedData.head_circumference !== undefined) updatedData.head_circumference = updatedData.head_circumference ? Number(updatedData.head_circumference) : null;
 
 			// Ensure enum fields are properly formatted
 			const patientUpdate = {
@@ -139,9 +139,9 @@ const EditPatientPage = () => {
 				// Nouveaux champs spécifiques aux enfants
 				fine_motor_skills: updatedData.fine_motor_skills || patient.fine_motor_skills || null,
 				gross_motor_skills: updatedData.gross_motor_skills || patient.gross_motor_skills || null,
-				weight_at_birth: updatedData.weight_at_birth || patient.weight_at_birth || null,
-				height_at_birth: updatedData.height_at_birth || patient.height_at_birth || null,
-				head_circumference: updatedData.head_circumference || patient.head_circumference || null,
+				weight_at_birth: updatedData.weight_at_birth !== undefined ? updatedData.weight_at_birth : patient.weight_at_birth || null,
+				height_at_birth: updatedData.height_at_birth !== undefined ? updatedData.height_at_birth : patient.height_at_birth || null,
+				head_circumference: updatedData.head_circumference !== undefined ? updatedData.head_circumference : patient.head_circumference || null,
 				apgar_score: updatedData.apgar_score || patient.apgar_score || null,
 				childcare_type: updatedData.childcare_type || patient.childcare_type || null,
 				school_grade: updatedData.school_grade || patient.school_grade || null,

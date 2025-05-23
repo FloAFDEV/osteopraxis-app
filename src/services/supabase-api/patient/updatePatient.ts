@@ -59,7 +59,9 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
             head_circumference: updateData.head_circumference ? Number(updateData.head_circumference) : null
 		} as any;
 
-		// Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
+		console.log("Envoi des données formatées via PUT:", formattedData);
+
+		// Utiliser PUT explicitement au lieu de PATCH pour éviter les problèmes CORS
 		const { data, error } = await supabase
 			.from("Patient")
 			.update(formattedData)
