@@ -122,8 +122,6 @@ export function PatientCard({ patient }: PatientCardProps) {
 					<div className="flex items-center">
 						<MapPin className="w-4 h-4 mr-2" />
 						{patient.address || "Non renseignée"}
-						{patient.postalCode ? `, ${patient.postalCode}` : null}
-						{patient.city ? ` ${patient.city}` : null}
 					</div>
 					<div className="flex items-center">
 						<Weight className="w-4 h-4 mr-2" />
