@@ -5,6 +5,7 @@ import {
 	BarChart,
 	CartesianGrid,
 	Legend,
+	LegendProps,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
@@ -14,6 +15,42 @@ import {
 interface GrowthChartProps {
 	data: DashboardData;
 }
+
+const CustomBarLegend = ({ payload }: LegendProps) => {
+	return (
+		<div
+			style={{
+				display: "flex",
+				justifyContent: "center",
+				gap: "32px",
+				marginTop: "8px",
+			}}
+		>
+			{payload?.map((entry, index) => (
+				<div
+					key={index}
+					style={{
+						display: "flex",
+						alignItems: "center",
+						gap: "6px",
+					}}
+				>
+					<div
+						style={{
+							width: 10,
+							height: 10,
+							borderRadius: "50%",
+							backgroundColor: entry.color,
+						}}
+					/>
+					<span style={{ color: "#334155", fontSize: "14px" }}>
+						{entry.value}
+					</span>
+				</div>
+			))}
+		</div>
+	);
+};
 
 export function GrowthChart({ data }: GrowthChartProps) {
 	return (
@@ -47,7 +84,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
 							borderRadius: "6px",
 						}}
 					/>
-					<Legend />
+					<Legend content={<CustomBarLegend />} />
 					<Bar
 						dataKey="patients"
 						name="Cette année"
