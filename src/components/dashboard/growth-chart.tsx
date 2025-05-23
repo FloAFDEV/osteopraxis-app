@@ -40,7 +40,9 @@ export function GrowthChart({ data }: GrowthChartProps) {
   }, [data]);
 
   if (!data || !data.monthlyGrowth) {
-    return <ChartWrapper title="Croissance mensuelle" isLoading={true} />;
+    return <ChartWrapper title="Croissance mensuelle" isLoading={true}>
+      <div>Aucune donnée disponible</div>
+    </ChartWrapper>;
   }
 
   return (
