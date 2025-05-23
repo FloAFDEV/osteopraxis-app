@@ -100,10 +100,10 @@ export function GrowthChart({ data }: GrowthChartProps) {
             {/* Axes X et Y */}
             <XAxis
               dataKey="month"
-              tick={{ fill: "#64748b", fontSize: 16 }}
+              tick={{ fill: "#64748b", fontSize: 12 }}
             />
             <YAxis
-              tick={{ fill: "#64748b", fontSize: 16 }}
+              tick={{ fill: "#64748b", fontSize: 12 }}
               domain={[0, "auto"]}
             />
             
