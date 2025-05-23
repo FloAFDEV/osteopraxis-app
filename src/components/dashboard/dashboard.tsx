@@ -440,7 +440,7 @@ export function Dashboard() {
 									className="relative w-44 h-9 text-xs rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px] focus:outline-none"
 								>
 									<div
-										className={`relative w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.4,0.0,0.2,1)] [transform-style:preserve-3d] will-change-transform ${
+										className={`relative w-full h-full transition-transform duration-700 ease-&lsqb;cubic-bezier(0.4,0.0,0.2,1)&rsqb; [transform-style:preserve-3d] will-change-transform ${
 											chartType === "simple"
 												? "[transform:rotateY(180deg)]"
 												: ""
