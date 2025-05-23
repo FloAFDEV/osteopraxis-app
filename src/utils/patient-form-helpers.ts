@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 // Fonction pour convertir hasChildren de string à boolean
@@ -183,4 +184,3 @@ export function translateContraception(
 	const option = options.find((opt) => opt.value === contraception);
 	return option ? option.label : "Non spécifiée";
 }
-

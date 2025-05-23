@@ -25,4 +25,4 @@ export { convertLocalToUTC, convertUTCToLocal, formatAppointmentDate, formatAppo
 export { AppointmentConflictError, SecurityViolationError } from './api/appointment-service';
 
 // Export CORS headers
-export { corsHeaders } from './supabase-api/utils';
+export { corsHeaders } from './corsHeaders';

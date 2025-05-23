@@ -55,6 +55,7 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
             bmi: updateData.bmi ? Number(updateData.bmi) : null
 		} as any;
 
+		// Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
 		const { data, error } = await supabase
 			.from("Patient")
 			.update(formattedData)

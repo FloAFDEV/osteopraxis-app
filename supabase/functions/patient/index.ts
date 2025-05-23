@@ -46,7 +46,11 @@ serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
     const patientId = url.searchParams.get("id");
-    const method = req.method;
+    // Utiliser X-HTTP-Method-Override s'il existe, sinon utiliser la méthode HTTP standard
+    const method = req.headers.get("X-HTTP-Method-Override") || req.method;
+    
+    console.log("Méthode demandée:", method);
+    console.log("Patient ID:", patientId);
     
     // Traiter la demande en fonction de la méthode HTTP
     switch (method) {
@@ -100,6 +104,8 @@ serve(async (req: Request) => {
           );
         }
         const patchData = await req.json();
+        console.log("Données de mise à jour:", patchData);
+        
         const { data: updateData, error: updateError } = await supabaseClient
           .from("Patient")
           .update(patchData)
