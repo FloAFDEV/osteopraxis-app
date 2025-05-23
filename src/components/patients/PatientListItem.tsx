@@ -4,13 +4,14 @@ import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
 import { Baby, Mail, User, UserRound, Users } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface PatientListItemProps {
 	patient: Patient;
 }
 
 const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
+	const navigate = useNavigate();
 	// Calculate age only if birthDate is defined
 	const age = patient.birthDate
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
@@ -43,7 +44,10 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 	const isChild = age !== null && age < 12;
 
 	return (
-		<div className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-fade-in">
+		<div
+			className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer animate-fade-in"
+			onClick={() => navigate(`/patients/${patient.id}`)}
+		>
 			<div className="p-4">
 				<div className="flex justify-between items-center">
 					<div className="flex items-center gap-3 flex-grow">
@@ -134,11 +138,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 							size="sm"
 							className="h-8 px-2"
 							asChild
-						>
-							<Link to={`/patients/${patient.id}/edit`}>
-								Modifier
-							</Link>
-						</Button>
+						></Button>
 					</div>
 				</div>
 			</div>
