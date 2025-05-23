@@ -13,9 +13,6 @@ import {
   YAxis,
 } from "recharts";
 import { ChartWrapper } from "./chart/chart-wrapper";
-import { CustomTooltip } from "./chart/chart-tooltip";
-import { formatSeriesName, prepareChartData } from "./chart/chart-utils";
-import { LINE_COLORS, LINE_WIDTH } from "./chart/line-colors";
 
 interface GrowthChartProps {
   data: DashboardData;
@@ -30,13 +27,51 @@ export function GrowthChart({ data }: GrowthChartProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Transforme les données du dashboard pour l'affichage dans le graphique
-    const processedData = prepareChartData(data);
-    
+    if (!data || !data.monthlyGrowth) return;
+
+    // Traduction des mois
+    const monthMap: Record<string, string> = {
+      January: "Janvier",
+      February: "Février",
+      March: "Mars",
+      April: "Avril",
+      May: "Mai",
+      June: "Juin",
+      July: "Juillet",
+      August: "Août",
+      September: "Septembre",
+      October: "Octobre",
+      November: "Novembre",
+      December: "Décembre",
+    };
+
+    // Formater les données
+    const formattedData = data.monthlyGrowth.map((item) => {
+      const total = item.patients || 0;
+      
+      // Obtention des valeurs réelles à partir des données du dashboard
+      const malePercentage = data.totalPatients > 0 ? data.maleCount / data.totalPatients : 0.4;
+      const childPercentage = data.totalPatients > 0 ? data.childrenCount / data.totalPatients : 0.2;
+      
+      // Calcul des proportions basé sur les pourcentages réels
+      const maleCount = Math.round(total * malePercentage);
+      const childCount = Math.round(total * childPercentage);
+      const femaleCount = total - maleCount - childCount;
+
+      return {
+        month: monthMap[item.month] || item.month,
+        total: total,
+        hommes: maleCount,
+        femmes: femaleCount,
+        enfants: childCount,
+        growthText: item.growthText,
+      };
+    });
+
     // Vérifier si les données contiennent des valeurs non nulles
-    console.log("Données du graphique:", processedData);
+    console.log("Données du graphique:", formattedData);
     
-    setChartData(processedData);
+    setChartData(formattedData);
     setIsLoading(false);
   }, [data]);
 
@@ -73,23 +108,51 @@ export function GrowthChart({ data }: GrowthChartProps) {
             />
             
             {/* Tooltip personnalisé */}
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#0891b2",
+                border: "none",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              }}
+              itemStyle={{ color: "#ffffff", fontSize: "14px" }}
+              labelStyle={{ color: "#ffffff", fontWeight: "bold" }}
+              formatter={(value, name) => {
+                // Format the names to display in French
+                const nameMap: Record<string, string> = {
+                  total: "Total",
+                  hommes: "Hommes",
+                  femmes: "Femmes",
+                  enfants: "Enfants",
+                };
+
+                return [`${value} patients`, nameMap[name] || name];
+              }}
+            />
             
             {/* Légende */}
             <Legend
               verticalAlign="bottom"
               height={36}
               iconType="circle"
-              formatter={formatSeriesName}
+              formatter={(value) => {
+                const nameMap: Record<string, string> = {
+                  total: "Total",
+                  hommes: "Hommes",
+                  femmes: "Femmes",
+                  enfants: "Enfants",
+                };
+                return nameMap[value] || value;
+              }}
             />
             
             {/* Lignes pour chaque série de données */}
             <Line
               type="monotone"
               dataKey="total"
-              stroke={LINE_COLORS.total}
-              strokeWidth={LINE_WIDTH.total}
-              dot={{ stroke: LINE_COLORS.total, strokeWidth: 2, r: 4 }}
+              stroke="#9b87f5"
+              strokeWidth={3}
+              dot={{ stroke: "#9b87f5", strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6 }}
               name="total"
               isAnimationActive={true}
@@ -99,9 +162,9 @@ export function GrowthChart({ data }: GrowthChartProps) {
             <Line
               type="monotone"
               dataKey="hommes"
-              stroke={LINE_COLORS.hommes}
-              strokeWidth={LINE_WIDTH.default}
-              dot={{ stroke: LINE_COLORS.hommes, strokeWidth: 2, r: 3 }}
+              stroke="#60a5fa"
+              strokeWidth={2}
+              dot={{ stroke: "#60a5fa", strokeWidth: 2, r: 3 }}
               activeDot={{ r: 5 }}
               name="hommes"
               isAnimationActive={true}
@@ -111,9 +174,9 @@ export function GrowthChart({ data }: GrowthChartProps) {
             <Line
               type="monotone"
               dataKey="femmes"
-              stroke={LINE_COLORS.femmes}
-              strokeWidth={LINE_WIDTH.default}
-              dot={{ stroke: LINE_COLORS.femmes, strokeWidth: 2, r: 3 }}
+              stroke="#b93dcc"
+              strokeWidth={2}
+              dot={{ stroke: "#b93dcc", strokeWidth: 2, r: 3 }}
               activeDot={{ r: 5 }}
               name="femmes"
               isAnimationActive={true}
@@ -123,9 +186,9 @@ export function GrowthChart({ data }: GrowthChartProps) {
             <Line
               type="monotone"
               dataKey="enfants"
-              stroke={LINE_COLORS.enfants}
-              strokeWidth={LINE_WIDTH.default}
-              dot={{ stroke: LINE_COLORS.enfants, strokeWidth: 2, r: 3 }}
+              stroke="#34d399"
+              strokeWidth={2}
+              dot={{ stroke: "#34d399", strokeWidth: 2, r: 3 }}
               activeDot={{ r: 5 }}
               name="enfants"
               isAnimationActive={true}
