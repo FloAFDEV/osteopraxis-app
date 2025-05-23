@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { supabase } from "../utils";
+import { supabase } from "@/integrations/supabase/client";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
 

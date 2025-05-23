@@ -15,7 +15,7 @@ import {
 } from "./osteopath-service.ts";
 
 serve(async (req: Request) => {
-	// CORS preflight
+	// CORS preflight - assurez-vous que cette partie est correcte
 	if (req.method === "OPTIONS") {
 		return new Response("OK", {
 			status: 204,

@@ -77,3 +77,8 @@ function_name = "professional-profile"
 path = "/treatment-history"
 verify_jwt = true
 function_name = "treatment-history"
+
+[[edge_functions]]
+path = "/completer-profil"
+verify_jwt = true
+function_name = "completer-profil"

@@ -1,9 +1,9 @@
 
-// Export API services
-export { api } from './api/index';
+// Export utility functions first to avoid circular dependencies
+export { convertLocalToUTC, convertUTCToLocal, formatAppointmentDate, formatAppointmentTime } from '@/utils/date-utils';
 
-// Export Supabase client 
-export { supabase } from '@/integrations/supabase/client';
+// Export CORS headers
+export { corsHeaders } from './corsHeaders';
 
 // Export utility functions
 export { typedData, ensureAppointmentStatus, AppointmentStatusValues } from './supabase-api/utils';
@@ -18,11 +18,11 @@ export {
 } from './supabase-api/utils/getCurrentOsteopath';
 export { ensureOsteopathProfile } from './supabase-api/utils/ensureOsteopathProfile';
 
-// Export date utilities
-export { convertLocalToUTC, convertUTCToLocal, formatAppointmentDate, formatAppointmentTime } from '@/utils/date-utils';
-
 // Export API errors for better handling
 export { AppointmentConflictError, SecurityViolationError } from './api/appointment-service';
 
-// Export CORS headers
-export { corsHeaders } from './corsHeaders';
+// Export API services - this should come last to avoid circular dependencies
+export { api } from './api/index';
+
+// Export Supabase client - also last to avoid circular dependencies
+export { supabase } from '@/integrations/supabase/client';
