@@ -22,14 +22,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
+import { DateInput } from "@/components/ui/date-input";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import TranslatedSelect from "@/components/ui/translated-select";
-import { GeneralTab } from "./patient-form/GeneralTab";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -40,24 +40,72 @@ const formSchema = z.object({
   }),
   email: z.string().email({
     message: "Veuillez entrer une adresse email valide.",
-  }).optional().or(z.literal('')),
-  phone: z.string().optional().or(z.literal('')),
-  birthDate: z.string().optional().or(z.literal('')),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'Homme', 'Femme']).optional(),
-  address: z.string().optional().or(z.literal('')),
-  maritalStatus: z.string().optional().or(z.literal('')),
-  occupation: z.string().optional().or(z.literal('')),
-  height: z.number().optional(),
-  weight: z.number().optional(),
-  handedness: z.string().optional().or(z.literal('')),
-  hasChildren: z.string().optional().or(z.literal('')),
+  }).optional().or(z.literal('')).nullable(),
+  phone: z.string().optional().nullable(),
+  birthDate: z.string().optional().nullable(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'Homme', 'Femme']).optional().nullable(),
+  address: z.string().optional().nullable(),
+  maritalStatus: z.string().optional().nullable(),
+  occupation: z.string().optional().nullable(),
+  height: z.number().optional().nullable(),
+  weight: z.number().optional().nullable(),
+  bmi: z.number().optional().nullable(),
+  handedness: z.string().optional().nullable(),
+  hasChildren: z.string().optional().nullable(),
   isSmoker: z.boolean().optional(),
-  physicalActivity: z.string().optional().or(z.literal('')),
-  surgicalHistory: z.string().optional().or(z.literal('')),
-  allergies: z.string().optional().or(z.literal('')),
-  contraception: z.string().optional().or(z.literal('')),
-  cabinetId: z.number().optional(),
-  childrenAges: z.array(z.number()).optional(),
+  isExSmoker: z.boolean().optional(),
+  smokingSince: z.string().optional().nullable(),
+  smokingAmount: z.string().optional().nullable(),
+  quitSmokingDate: z.string().optional().nullable(),
+  physicalActivity: z.string().optional().nullable(),
+  surgicalHistory: z.string().optional().nullable(),
+  traumaHistory: z.string().optional().nullable(),
+  rheumatologicalHistory: z.string().optional().nullable(),
+  currentTreatment: z.string().optional().nullable(),
+  allergies: z.string().optional().nullable(),
+  contraception: z.string().optional().nullable(),
+  familyStatus: z.string().optional().nullable(),
+  generalPractitioner: z.string().optional().nullable(),
+  hasVisionCorrection: z.boolean().optional(),
+  ophtalmologistName: z.string().optional().nullable(),
+  entProblems: z.string().optional().nullable(),
+  entDoctorName: z.string().optional().nullable(),
+  digestiveProblems: z.string().optional().nullable(),
+  digestiveDoctorName: z.string().optional().nullable(),
+  cabinetId: z.number().optional().nullable(),
+  childrenAges: z.array(z.number()).optional().nullable(),
+  complementaryExams: z.string().optional().nullable(),
+  generalSymptoms: z.string().optional().nullable(),
+  pregnancyHistory: z.string().optional().nullable(),
+  birthDetails: z.string().optional().nullable(),
+  developmentMilestones: z.string().optional().nullable(),
+  sleepingPattern: z.string().optional().nullable(),
+  feeding: z.string().optional().nullable(),
+  behavior: z.string().optional().nullable(),
+  childCareContext: z.string().optional().nullable(),
+  
+  // Nouveaux champs généraux
+  ent_followup: z.string().optional().nullable(),
+  intestinal_transit: z.string().optional().nullable(),
+  sleep_quality: z.string().optional().nullable(),
+  fracture_history: z.string().optional().nullable(),
+  dental_health: z.string().optional().nullable(),
+  sport_frequency: z.string().optional().nullable(),
+  gynecological_history: z.string().optional().nullable(),
+  other_comments_adult: z.string().optional().nullable(),
+  
+  // Nouveaux champs spécifiques aux enfants
+  fine_motor_skills: z.string().optional().nullable(),
+  gross_motor_skills: z.string().optional().nullable(),
+  weight_at_birth: z.number().optional().nullable(),
+  height_at_birth: z.number().optional().nullable(),
+  head_circumference: z.number().optional().nullable(),
+  apgar_score: z.string().optional().nullable(),
+  childcare_type: z.string().optional().nullable(),
+  school_grade: z.string().optional().nullable(),
+  pediatrician_name: z.string().optional().nullable(),
+  paramedical_followup: z.string().optional().nullable(),
+  other_comments_child: z.string().optional().nullable(),
 });
 
 // Fonction pour convertir les genres legacy
@@ -93,17 +141,67 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
       occupation: patient?.occupation || "",
       height: patient?.height || undefined,
       weight: patient?.weight || undefined,
+      bmi: patient?.bmi || undefined,
       handedness: patient?.handedness || "",
       hasChildren: patient?.hasChildren || "",
       isSmoker: patient?.isSmoker || false,
+      isExSmoker: patient?.isExSmoker || false,
+      smokingSince: patient?.smokingSince || "",
+      smokingAmount: patient?.smokingAmount || "",
+      quitSmokingDate: patient?.quitSmokingDate || "",
       physicalActivity: patient?.physicalActivity || "",
       surgicalHistory: patient?.surgicalHistory || "",
+      traumaHistory: patient?.traumaHistory || "",
+      rheumatologicalHistory: patient?.rheumatologicalHistory || "",
+      currentTreatment: patient?.currentTreatment || "",
       allergies: patient?.allergies || "",
       contraception: patient?.contraception || "",
+      familyStatus: patient?.familyStatus || "",
+      generalPractitioner: patient?.generalPractitioner || "",
+      hasVisionCorrection: patient?.hasVisionCorrection || false,
+      ophtalmologistName: patient?.ophtalmologistName || "",
+      entProblems: patient?.entProblems || "",
+      entDoctorName: patient?.entDoctorName || "",
+      digestiveProblems: patient?.digestiveProblems || "",
+      digestiveDoctorName: patient?.digestiveDoctorName || "",
       cabinetId: patient?.cabinetId || undefined,
       childrenAges: patient?.childrenAges || [],
+      complementaryExams: patient?.complementaryExams || "",
+      generalSymptoms: patient?.generalSymptoms || "",
+      pregnancyHistory: patient?.pregnancyHistory || "",
+      birthDetails: patient?.birthDetails || "",
+      developmentMilestones: patient?.developmentMilestones || "",
+      sleepingPattern: patient?.sleepingPattern || "",
+      feeding: patient?.feeding || "",
+      behavior: patient?.behavior || "",
+      childCareContext: patient?.childCareContext || "",
+      
+      // Nouveaux champs généraux
+      ent_followup: patient?.ent_followup || "",
+      intestinal_transit: patient?.intestinal_transit || "",
+      sleep_quality: patient?.sleep_quality || "",
+      fracture_history: patient?.fracture_history || "",
+      dental_health: patient?.dental_health || "",
+      sport_frequency: patient?.sport_frequency || "",
+      gynecological_history: patient?.gynecological_history || "",
+      other_comments_adult: patient?.other_comments_adult || "",
+      
+      // Nouveaux champs spécifiques aux enfants
+      fine_motor_skills: patient?.fine_motor_skills || "",
+      gross_motor_skills: patient?.gross_motor_skills || "",
+      weight_at_birth: patient?.weight_at_birth || undefined,
+      height_at_birth: patient?.height_at_birth || undefined,
+      head_circumference: patient?.head_circumference || undefined,
+      apgar_score: patient?.apgar_score || "",
+      childcare_type: patient?.childcare_type || "",
+      school_grade: patient?.school_grade || "",
+      pediatrician_name: patient?.pediatrician_name || "",
+      paramedical_followup: patient?.paramedical_followup || "",
+      other_comments_child: patient?.other_comments_child || "",
     },
   });
+
+  const hasChildren = form.watch("hasChildren");
 
   const handleFormSubmit = async (data: any) => {
     try {
@@ -183,13 +281,231 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                 </TabsList>
                 
                 <TabsContent value="general" className="space-y-4">
-                  <GeneralTab 
-                    form={form}
-                    childrenAgesInput={childrenAgesInput}
-                    setChildrenAgesInput={setChildrenAgesInput}
-                    currentCabinetId={currentCabinetId}
-                    setCurrentCabinetId={setCurrentCabinetId}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prénom <span className="text-red-500">*</span></FormLabel>
+                          <FormControl>
+                            <Input placeholder="Prénom" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nom <span className="text-red-500">*</span></FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nom" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Genre</FormLabel>
+                          <FormControl>
+                            <TranslatedSelect
+                              value={field.value || ""}
+                              onValueChange={field.onChange}
+                              enumType="Gender"
+                              placeholder="Sélectionner le genre"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Date de naissance</FormLabel>
+                          <FormControl>
+                            <DateInput
+                              value={field.value ? new Date(field.value) : undefined}
+                              onChange={(date) => {
+                                field.onChange(date ? date.toISOString().split('T')[0] : "");
+                              }}
+                              placeholder="JJ/MM/AAAA"
+                              format="dd/MM/yyyy"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="height"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taille (cm)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Taille"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Poids (kg)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Poids"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="bmi"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>IMC</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="IMC"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="maritalStatus"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Statut marital</FormLabel>
+                          <FormControl>
+                            <TranslatedSelect
+                              value={field.value || ""}
+                              onValueChange={field.onChange}
+                              enumType="MaritalStatus"
+                              placeholder="Sélectionner..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="occupation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Profession</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Profession" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="handedness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Latéralité</FormLabel>
+                        <FormControl>
+                          <TranslatedSelect
+                            value={field.value || ""}
+                            onValueChange={field.onChange}
+                            enumType="Handedness"
+                            placeholder="Sélectionner..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
+
+                  {/* Section A des enfants */}
+                  <div className="space-y-4 p-4 border rounded-lg">
+                    <FormField
+                      control={form.control}
+                      name="hasChildren"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">A des enfants</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value === "true"}
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked ? "true" : "false");
+                                if (!checked) {
+                                  setChildrenAgesInput("");
+                                }
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {hasChildren === "true" && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Âges des enfants (séparés par des virgules)
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="Ex: 5, 8, 12"
+                          value={childrenAgesInput}
+                          onChange={(e) => setChildrenAgesInput(e.target.value)}
+                        />
+                        <p className="text-sm text-gray-500 mt-1">
+                          Entrez les âges séparés par des virgules (ex: 5, 8, 12)
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="contact" className="space-y-4">
@@ -260,7 +576,7 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                         <FormLabel>Contraception</FormLabel>
                         <FormControl>
                           <TranslatedSelect
-                            value={field.value}
+                            value={field.value || ""}
                             onValueChange={field.onChange}
                             enumType="Contraception"
                             placeholder="Sélectionner..."
