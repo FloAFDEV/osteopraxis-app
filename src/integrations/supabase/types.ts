@@ -176,6 +176,7 @@ export type Database = {
           amount: number
           appointmentId: number | null
           cabinetId: number | null
+          createdAt: string | null
           date: string
           id: number
           notes: string | null
@@ -184,11 +185,13 @@ export type Database = {
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"]
           tvaExoneration: boolean | null
           tvaMotif: string | null
+          updatedAt: string | null
         }
         Insert: {
           amount: number
           appointmentId?: number | null
           cabinetId?: number | null
+          createdAt?: string | null
           date?: string
           id?: number
           notes?: string | null
@@ -197,11 +200,13 @@ export type Database = {
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
           tvaExoneration?: boolean | null
           tvaMotif?: string | null
+          updatedAt?: string | null
         }
         Update: {
           amount?: number
           appointmentId?: number | null
           cabinetId?: number | null
+          createdAt?: string | null
           date?: string
           id?: number
           notes?: string | null
@@ -210,6 +215,7 @@ export type Database = {
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
           tvaExoneration?: boolean | null
           tvaMotif?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -314,6 +320,7 @@ export type Database = {
       Patient: {
         Row: {
           address: string | null
+          alcoholConsumption: string | null
           allergies: string | null
           apgar_score: string | null
           avatarUrl: string | null
@@ -325,9 +332,12 @@ export type Database = {
           childcare_type: string | null
           childCareContext: string | null
           childrenAges: number[] | null
+          city: string | null
           complementaryExams: string | null
           contraception: Database["public"]["Enums"]["Contraception"] | null
+          country: string | null
           createdAt: string
+          currentMedication: string | null
           currentTreatment: string | null
           dental_health: string | null
           developmentMilestones: string | null
@@ -359,26 +369,34 @@ export type Database = {
           isDeceased: boolean
           isExSmoker: boolean | null
           isSmoker: boolean
+          job: string | null
           lastName: string
           maritalStatus: Database["public"]["Enums"]["MaritalStatus"] | null
+          medicalHistory: string | null
+          notes: string | null
           occupation: string | null
           ophtalmologistName: string | null
           osteopathId: number
           other_comments_adult: string | null
           other_comments_child: string | null
+          otherContraception: string | null
           paramedical_followup: string | null
           pediatrician_name: string | null
           phone: string | null
           physicalActivity: string | null
+          postalCode: string | null
           pregnancyHistory: string | null
           quitSmokingDate: string | null
           rheumatologicalHistory: string | null
           school_grade: string | null
           sleep_quality: string | null
           sleepingPattern: string | null
+          smoker: boolean | null
+          smokerSince: number | null
           smokingAmount: string | null
           smokingSince: string | null
           sport_frequency: string | null
+          sportActivity: string | null
           surgicalHistory: string | null
           traumaHistory: string | null
           updatedAt: string
@@ -388,6 +406,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          alcoholConsumption?: string | null
           allergies?: string | null
           apgar_score?: string | null
           avatarUrl?: string | null
@@ -399,9 +418,12 @@ export type Database = {
           childcare_type?: string | null
           childCareContext?: string | null
           childrenAges?: number[] | null
+          city?: string | null
           complementaryExams?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
+          country?: string | null
           createdAt?: string
+          currentMedication?: string | null
           currentTreatment?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
@@ -433,26 +455,34 @@ export type Database = {
           isDeceased?: boolean
           isExSmoker?: boolean | null
           isSmoker?: boolean
+          job?: string | null
           lastName: string
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
+          medicalHistory?: string | null
+          notes?: string | null
           occupation?: string | null
           ophtalmologistName?: string | null
           osteopathId: number
           other_comments_adult?: string | null
           other_comments_child?: string | null
+          otherContraception?: string | null
           paramedical_followup?: string | null
           pediatrician_name?: string | null
           phone?: string | null
           physicalActivity?: string | null
+          postalCode?: string | null
           pregnancyHistory?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
           school_grade?: string | null
           sleep_quality?: string | null
           sleepingPattern?: string | null
+          smoker?: boolean | null
+          smokerSince?: number | null
           smokingAmount?: string | null
           smokingSince?: string | null
           sport_frequency?: string | null
+          sportActivity?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
           updatedAt?: string
@@ -462,6 +492,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          alcoholConsumption?: string | null
           allergies?: string | null
           apgar_score?: string | null
           avatarUrl?: string | null
@@ -473,9 +504,12 @@ export type Database = {
           childcare_type?: string | null
           childCareContext?: string | null
           childrenAges?: number[] | null
+          city?: string | null
           complementaryExams?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
+          country?: string | null
           createdAt?: string
+          currentMedication?: string | null
           currentTreatment?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
@@ -507,26 +541,34 @@ export type Database = {
           isDeceased?: boolean
           isExSmoker?: boolean | null
           isSmoker?: boolean
+          job?: string | null
           lastName?: string
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
+          medicalHistory?: string | null
+          notes?: string | null
           occupation?: string | null
           ophtalmologistName?: string | null
           osteopathId?: number
           other_comments_adult?: string | null
           other_comments_child?: string | null
+          otherContraception?: string | null
           paramedical_followup?: string | null
           pediatrician_name?: string | null
           phone?: string | null
           physicalActivity?: string | null
+          postalCode?: string | null
           pregnancyHistory?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
           school_grade?: string | null
           sleep_quality?: string | null
           sleepingPattern?: string | null
+          smoker?: boolean | null
+          smokerSince?: number | null
           smokingAmount?: string | null
           smokingSince?: string | null
           sport_frequency?: string | null
+          sportActivity?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
           updatedAt?: string

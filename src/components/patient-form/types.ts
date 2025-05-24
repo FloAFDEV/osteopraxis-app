@@ -70,11 +70,26 @@ export interface PatientFormValues {
   pediatrician_name: string | null;
   paramedical_followup: string | null;
   other_comments_child: string | null;
+
+  // Nouveaux champs pour le formulaire legacy
+  city: string | null;
+  postalCode: string | null;
+  country: string | null;
+  job: string | null;
+  smoker: boolean | null;
+  smokerSince: number | null;
+  alcoholConsumption: string | null;
+  sportActivity: string | null;
+  medicalHistory: string | null;
+  currentMedication: string | null;
+  otherContraception: string | null;
+  notes: string | null;
 }
 
 export interface PatientFormProps {
   patient?: Patient;
   onSubmit?: (data: PatientFormValues) => Promise<void>;
+  onSave?: (data: PatientFormValues) => Promise<void>;
   emailRequired?: boolean;
   selectedCabinetId?: number | null;
   isLoading?: boolean;

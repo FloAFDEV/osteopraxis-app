@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Patient, Gender, MaritalStatus, Handedness, Contraception } from "@/types";
+import { Patient } from "@/types";
+import { PatientFormProps, PatientFormValues } from "./patient-form/types";
 import { api } from "@/services/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -45,17 +46,17 @@ const formSchema = z.object({
     message: "Veuillez entrer une adresse email valide.",
   }).optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
-  birthDate: z.date().optional(),
+  birthDate: z.string().optional().or(z.literal('')),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   address: z.string().optional().or(z.literal('')),
   city: z.string().optional().or(z.literal('')),
   postalCode: z.string().optional().or(z.literal('')),
   country: z.string().optional().or(z.literal('')),
-  maritalStatus: z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED']).optional(),
+  maritalStatus: z.string().optional().or(z.literal('')),
   job: z.string().optional().or(z.literal('')),
   height: z.number().optional(),
   weight: z.number().optional(),
-  handedness: z.enum(['RIGHT', 'LEFT', 'AMBIDEXTROUS']).optional(),
+  handedness: z.string().optional().or(z.literal('')),
   hasChildren: z.boolean().optional(),
   smoker: z.boolean().optional(),
   smokerSince: z.number().optional(),
@@ -65,22 +66,34 @@ const formSchema = z.object({
   surgicalHistory: z.string().optional().or(z.literal('')),
   allergies: z.string().optional().or(z.literal('')),
   currentMedication: z.string().optional().or(z.literal('')),
-  contraception: z.enum(['NONE', 'PILL', 'IUD', 'IMPLANT', 'OTHER']).optional(),
+  contraception: z.string().optional().or(z.literal('')),
   otherContraception: z.string().optional().or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
 });
 
-interface PatientFormProps {
-  patient?: Patient;
-  onSubmit?: (data: Patient) => Promise<void>;
-}
-
-export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
+export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | undefined>(
     patient?.cabinetId || undefined
   );
+
+  // Convertir gender pour correspondre aux types attendus
+  const convertGender = (gender: string | null): "MALE" | "FEMALE" | "OTHER" | undefined => {
+    if (!gender) return undefined;
+    switch (gender) {
+      case "Homme":
+        return "MALE";
+      case "Femme": 
+        return "FEMALE";
+      case "MALE":
+      case "FEMALE":
+      case "OTHER":
+        return gender;
+      default:
+        return undefined;
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,18 +102,18 @@ export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
       lastName: patient?.lastName || "",
       email: patient?.email || "",
       phone: patient?.phone || "",
-      birthDate: patient?.birthDate ? new Date(patient.birthDate) : undefined,
-      gender: patient?.gender || undefined,
+      birthDate: patient?.birthDate || "",
+      gender: convertGender(patient?.gender as string),
       address: patient?.address || "",
       city: patient?.city || "",
       postalCode: patient?.postalCode || "",
       country: patient?.country || "",
-      maritalStatus: patient?.maritalStatus || undefined,
+      maritalStatus: patient?.maritalStatus || "",
       job: patient?.job || "",
       height: patient?.height || undefined,
       weight: patient?.weight || undefined,
-      handedness: patient?.handedness || undefined,
-      hasChildren: patient?.hasChildren || false,
+      handedness: patient?.handedness || "",
+      hasChildren: patient?.hasChildren === "true" || false,
       smoker: patient?.smoker || false,
       smokerSince: patient?.smokerSince || undefined,
       alcoholConsumption: patient?.alcoholConsumption || "",
@@ -109,7 +122,7 @@ export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
       surgicalHistory: patient?.surgicalHistory || "",
       allergies: patient?.allergies || "",
       currentMedication: patient?.currentMedication || "",
-      contraception: patient?.contraception || undefined,
+      contraception: patient?.contraception || "",
       otherContraception: patient?.otherContraception || "",
       notes: patient?.notes || "",
     },
@@ -127,8 +140,8 @@ export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
 
       if (patient) {
         // Mode édition
-        if (onSubmit) {
-          await onSubmit({ ...patient, ...patientData });
+        if (onSubmit || onSave) {
+          await (onSubmit || onSave)?.(patientData);
         } else {
           await api.updatePatient({ ...patient, ...patientData });
           toast.success("Patient mis à jour avec succès");
@@ -179,6 +192,7 @@ export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
                 <TabsTrigger value="habits">Habitudes de vie</TabsTrigger>
                 <TabsTrigger value="history">Antécédents</TabsTrigger>
               </TabsList>
+              
               <TabsContent value="account" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -256,7 +270,7 @@ export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
                                 )}
                               >
                                 {field.value ? (
-                                  format(field.value, "PPP")
+                                  format(new Date(field.value), "PPP")
                                 ) : (
                                   <span>Choisir une date</span>
                                 )}
@@ -267,8 +281,8 @@ export const PatientForm = ({ patient, onSubmit }: PatientFormProps) => {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
+                              selected={field.value ? new Date(field.value) : undefined}
+                              onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : undefined)}
                               disabled={(date) =>
                                 date > new Date() || date < new Date("1900-01-01")
                               }
