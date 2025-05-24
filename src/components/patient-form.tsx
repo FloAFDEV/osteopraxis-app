@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +29,7 @@ import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import TranslatedSelect from "@/components/ui/translated-select";
 import { GeneralTab } from "./patient-form/GeneralTab";
+import { WeightHeightBmiFields } from "./patient-form/WeightHeightBmiFields";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -93,6 +93,7 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
       occupation: patient?.occupation || "",
       height: patient?.height || undefined,
       weight: patient?.weight || undefined,
+      bmi: patient?.bmi || undefined,
       handedness: patient?.handedness || "",
       hasChildren: patient?.hasChildren || "",
       isSmoker: patient?.isSmoker || false,
@@ -190,6 +191,9 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                     currentCabinetId={currentCabinetId}
                     setCurrentCabinetId={setCurrentCabinetId}
                   />
+                  
+                  {/* Ajout des champs poids, taille et IMC avec calcul automatique */}
+                  <WeightHeightBmiFields form={form} />
                 </TabsContent>
 
                 <TabsContent value="contact" className="space-y-4">
