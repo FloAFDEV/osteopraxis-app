@@ -1,4 +1,3 @@
-
 export interface User {
 	id: string;
 	email: string;
@@ -177,6 +176,7 @@ export interface CreateAppointmentPayload {
 	createdAt?: string;
 	updatedAt?: string;
 	website?: string; // Ajouté pour le honeypot dans le formulaire
+	user_id?: string | null; // Ajouté pour résoudre l'erreur TypeScript
 }
 
 // Interface Invoice mise à jour pour correspondre exactement à la base de données

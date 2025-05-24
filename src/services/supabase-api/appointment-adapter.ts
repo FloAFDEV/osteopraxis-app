@@ -31,7 +31,7 @@ export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Part
 		reason: data.reason,
 		notes: data.notes,
 		notificationSent: data.notificationSent || false,
-		user_id: data.user_id,
+		user_id: data.user_id || null,
 	};
 }
 
@@ -50,5 +50,6 @@ export function createAppointmentPayload(data: any): CreateAppointmentPayload {
 		createdAt: data.createdAt,
 		updatedAt: data.updatedAt,
 		website: data.website, // Pour le honeypot
+		user_id: data.user_id || null,
 	};
 }
