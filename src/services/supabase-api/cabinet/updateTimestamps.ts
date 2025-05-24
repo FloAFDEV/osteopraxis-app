@@ -1,35 +1,30 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
-import { getCabinetById } from "./getCabinetById";
 
 export async function updateTimestamps(cabinetId: number): Promise<void> {
   try {
-    // Vérifier que l'utilisateur est autorisé à modifier ce cabinet
-    const currentOsteopathId = await getCurrentOsteopathId();
-    
-    if (!currentOsteopathId) {
-      throw new Error("Non autorisé: vous devez être connecté en tant qu'ostéopathe");
+    // Récupérer le token d'authentification
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error("Non autorisé: vous devez être connecté");
     }
-    
-    // Vérifier que le cabinet appartient bien à l'ostéopathe connecté
-    const existingCabinet = await getCabinetById(cabinetId);
-    
-    if (!existingCabinet) {
-      throw new Error("Cabinet non trouvé ou accès non autorisé");
-    }
-    
-    const now = new Date().toISOString();
-    
-    const { error } = await supabase
-      .from("Cabinet")
-      .update({ 
-        updatedAt: now 
+
+    // Appeler la fonction Edge sécurisée pour mettre à jour les timestamps
+    const response = await fetch(`https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/cabinet?id=${cabinetId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({
+        updatedAt: new Date().toISOString()
       })
-      .eq("id", cabinetId)
-      .eq("osteopathId", currentOsteopathId); // Filtrer par ostéopathe connecté
-      
-    if (error) throw new Error(error.message);
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
+    }
   } catch (error) {
     console.error("Erreur lors de la mise à jour des timestamps:", error);
     throw error;

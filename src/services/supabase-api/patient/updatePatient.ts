@@ -1,6 +1,6 @@
 
 import { Patient } from "@/types";
-import { supabase, SUPABASE_API_URL } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { adaptPatientFromSupabase } from "../patient-adapter";
 
 export async function updatePatient(patient: Patient): Promise<Patient> {
@@ -17,7 +17,7 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		const { id, createdAt, ...updateData } = patient;
 		
 		// Appeler l'Edge Function avec l'en-tête d'autorisation approprié
-		const response = await fetch(`${SUPABASE_API_URL}/functions/v1/patient?id=${id}`, {
+		const response = await fetch(`https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/patient?id=${id}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -37,11 +37,11 @@ export async function updatePatient(patient: Patient): Promise<Patient> {
 		const responseData = await response.json();
 		
 		// Vérifier si les données sont dans le format attendu
-		if (!responseData.data || !Array.isArray(responseData.data) || responseData.data.length === 0) {
+		if (!responseData.data) {
 			throw new Error("Format de réponse inattendu: les données du patient sont manquantes");
 		}
 		
-		const updatedPatient = responseData.data[0];
+		const updatedPatient = Array.isArray(responseData.data) ? responseData.data[0] : responseData.data;
 		
 		// Si aucune donnée n'a été retournée, lancer une erreur
 		if (!updatedPatient) {

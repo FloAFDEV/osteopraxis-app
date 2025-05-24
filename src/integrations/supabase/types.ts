@@ -304,6 +304,7 @@ export type Database = {
       Patient: {
         Row: {
           address: string | null
+          allergies: string | null
           apgar_score: string | null
           avatarUrl: string | null
           behavior: string | null
@@ -377,6 +378,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          allergies?: string | null
           apgar_score?: string | null
           avatarUrl?: string | null
           behavior?: string | null
@@ -450,6 +452,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          allergies?: string | null
           apgar_score?: string | null
           avatarUrl?: string | null
           behavior?: string | null

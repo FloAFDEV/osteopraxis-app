@@ -1,156 +1,253 @@
-import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
-import {
-	verifyUserAndGetIdentity,
-	verifyCabinetOwnership,
-	createErrorResponse,
-	createSuccessResponse,
-} from "../_shared/auth-helpers.ts";
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+interface AuthenticatedRequest {
+  user: any;
+  supabaseClient: any;
+}
+
+async function verifyUserAndGetIdentity(req: Request): Promise<{ identity: any; supabaseClient: any; message?: string }> {
+  const authHeader = req.headers.get("Authorization");
+  
+  if (!authHeader) {
+    return { identity: null, supabaseClient: null, message: "Token d'authentification manquant" };
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const supabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
+
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+  
+  if (userError || !user) {
+    return { identity: null, supabaseClient: null, message: "Token invalide" };
+  }
+
+  // Récupérer l'osteopathId
+  const { data: userData, error: userDataError } = await supabaseClient
+    .from("User")
+    .select("id, osteopathId")
+    .eq("auth_id", user.id)
+    .maybeSingle();
+
+  if (userDataError || !userData?.osteopathId) {
+    return { identity: null, supabaseClient: null, message: "Profil ostéopathe non trouvé" };
+  }
+
+  return {
+    identity: {
+      authId: user.id,
+      userId: userData.id,
+      osteopathId: userData.osteopathId
+    },
+    supabaseClient
+  };
+}
 
 serve(async (req: Request) => {
-	// Cette vérification est importante pour les requêtes preflight CORS
-	if (req.method === "OPTIONS") {
-		return new Response(null, {
-			status: 204,
-			headers: {
-				...corsHeaders,
-				"Content-Length": "0",
-			},
-		});
-	}
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
 
-	// Vérifier l'identité de l'utilisateur et récupérer le client Supabase authentifié
-	const { identity, supabaseClient, message } =
-		await verifyUserAndGetIdentity(req);
+  try {
+    const { identity, supabaseClient, message } = await verifyUserAndGetIdentity(req);
+    
+    if (!identity) {
+      return new Response(JSON.stringify({ error: message }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
 
-	if (!identity) {
-		return createErrorResponse(message || "Authentification requise", 401);
-	}
+    const url = new URL(req.url);
+    const cabinetId = url.searchParams.get("id");
+    const method = req.method;
 
-	try {
-		const url = new URL(req.url);
-		const cabinetId = url.searchParams.get("id");
-		// Utiliser X-HTTP-Method-Override s'il existe, sinon utiliser la méthode HTTP standard
-		const method = req.headers.get("X-HTTP-Method-Override") || req.method;
+    switch (method) {
+      case "GET":
+        if (cabinetId) {
+          // Récupérer un cabinet spécifique
+          const { data: cabinet, error } = await supabaseClient
+            .from("Cabinet")
+            .select("*")
+            .eq("id", cabinetId)
+            .eq("osteopathId", identity.osteopathId)
+            .maybeSingle();
 
-		console.log("Méthode demandée:", method);
-		console.log("Cabinet ID:", cabinetId);
+          if (error) throw error;
+          
+          if (!cabinet) {
+            return new Response(JSON.stringify({ error: "Cabinet non trouvé" }), {
+              status: 404,
+              headers: { ...corsHeaders, "Content-Type": "application/json" }
+            });
+          }
 
-		// Pour les opérations de modification (PUT, PATCH, DELETE), vérifier la propriété du cabinet
-		if (
-			(method === "PUT" || method === "PATCH" || method === "DELETE") &&
-			cabinetId
-		) {
-			const isOwner = await verifyCabinetOwnership(
-				supabaseClient,
-				cabinetId,
-				identity.osteopathId
-			);
+          return new Response(JSON.stringify({ data: cabinet }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        } else {
+          // Récupérer tous les cabinets de l'ostéopathe
+          const { data: cabinets, error } = await supabaseClient
+            .from("Cabinet")
+            .select("*")
+            .eq("osteopathId", identity.osteopathId);
 
-			if (!isOwner) {
-				return createErrorResponse(
-					"Accès non autorisé: ce cabinet n'appartient pas à votre compte",
-					403
-				);
-			}
-		}
+          if (error) throw error;
 
-		// Traiter la demande en fonction de la méthode HTTP
-		switch (method) {
-			case "GET":
-				if (cabinetId) {
-					// Récupérer un cabinet spécifique
-					const { data, error } = await supabaseClient
-						.from("Cabinet")
-						.select("*")
-						.eq("id", cabinetId)
-						.eq("osteopathId", identity.osteopathId) // Sécurisation: filtrer par osteopathId
-						.single();
+          return new Response(JSON.stringify({ data: cabinets }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
 
-					if (error) throw error;
-					return createSuccessResponse(data);
-				} else {
-					// Récupérer tous les cabinets de l'ostéopathe connecté
-					const { data, error } = await supabaseClient
-						.from("Cabinet")
-						.select("*")
-						.eq("osteopathId", identity.osteopathId); // Sécurisation: filtrer par osteopathId
+      case "POST":
+        const postData = await req.json();
+        
+        // S'assurer que le cabinet est associé à l'ostéopathe connecté
+        const cabinetData = {
+          ...postData,
+          osteopathId: identity.osteopathId
+        };
 
-					if (error) throw error;
-					return createSuccessResponse(data);
-				}
+        // Nettoyer les valeurs undefined
+        Object.keys(cabinetData).forEach(key => {
+          if (cabinetData[key] === undefined) {
+            delete cabinetData[key];
+          }
+        });
 
-			case "POST":
-				// Créer un nouveau cabinet
-				const postData = await req.json();
+        const { data: newCabinet, error: insertError } = await supabaseClient
+          .from("Cabinet")
+          .insert(cabinetData)
+          .select()
+          .single();
 
-				// SÉCURITÉ: S'assurer que le cabinet est associé à l'ostéopathe connecté
-				postData.osteopathId = identity.osteopathId;
+        if (insertError) throw insertError;
 
-				const { data: insertData, error: insertError } =
-					await supabaseClient
-						.from("Cabinet")
-						.insert(postData)
-						.select();
+        return new Response(JSON.stringify({ data: newCabinet }), {
+          status: 201,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
 
-				if (insertError) throw insertError;
-				return createSuccessResponse(insertData, 201);
+      case "PATCH":
+      case "PUT":
+        if (!cabinetId) {
+          return new Response(JSON.stringify({ error: "ID de cabinet requis" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
 
-			case "PUT":
-			case "PATCH":
-				// Mettre à jour un cabinet existant
-				if (!cabinetId) {
-					return createErrorResponse(
-						"ID cabinet requis pour la mise à jour",
-						400
-					);
-				}
+        // Vérifier que le cabinet appartient à l'ostéopathe
+        const { data: existingCabinet, error: checkError } = await supabaseClient
+          .from("Cabinet")
+          .select("id, osteopathId")
+          .eq("id", cabinetId)
+          .eq("osteopathId", identity.osteopathId)
+          .maybeSingle();
 
-				const patchData = await req.json();
+        if (checkError) throw checkError;
+        
+        if (!existingCabinet) {
+          console.error(`Tentative d'accès non autorisé: ostéopathe ${identity.osteopathId} -> cabinet ${cabinetId}`);
+          return new Response(JSON.stringify({ error: "Cabinet non trouvé ou accès non autorisé" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
 
-				// SÉCURITÉ: S'assurer que l'osteopathId ne peut pas être modifié
-				patchData.osteopathId = identity.osteopathId;
+        const patchData = await req.json();
+        
+        // Empêcher la modification de l'osteopathId
+        const updateData = { ...patchData };
+        delete updateData.osteopathId;
+        delete updateData.id;
 
-				const { data: updateData, error: updateError } =
-					await supabaseClient
-						.from("Cabinet")
-						.update(patchData)
-						.eq("id", cabinetId)
-						.eq("osteopathId", identity.osteopathId) // Sécurisation: filtrer par osteopathId
-						.select();
+        // Nettoyer les valeurs undefined
+        Object.keys(updateData).forEach(key => {
+          if (updateData[key] === undefined) {
+            delete updateData[key];
+          }
+        });
 
-				if (updateError) throw updateError;
-				return createSuccessResponse(updateData);
+        updateData.updatedAt = new Date().toISOString();
 
-			case "DELETE":
-				// Supprimer un cabinet
-				if (!cabinetId) {
-					return createErrorResponse(
-						"ID cabinet requis pour la suppression",
-						400
-					);
-				}
+        const { data: updatedCabinet, error: updateError } = await supabaseClient
+          .from("Cabinet")
+          .update(updateData)
+          .eq("id", cabinetId)
+          .eq("osteopathId", identity.osteopathId)
+          .select()
+          .single();
 
-				const { error: deleteError } = await supabaseClient
-					.from("Cabinet")
-					.delete()
-					.eq("id", cabinetId)
-					.eq("osteopathId", identity.osteopathId); // Sécurisation: filtrer par osteopathId
+        if (updateError) throw updateError;
 
-				if (deleteError) throw deleteError;
-				return createSuccessResponse({ id: cabinetId });
+        return new Response(JSON.stringify({ data: updatedCabinet }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
 
-			default:
-				return createErrorResponse(
-					`Méthode ${method} non supportée`,
-					405
-				);
-		}
-	} catch (error) {
-		console.error("Erreur:", error);
-		return createErrorResponse(
-			error.message || "Une erreur est survenue",
-			400
-		);
-	}
+      case "DELETE":
+        if (!cabinetId) {
+          return new Response(JSON.stringify({ error: "ID de cabinet requis" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
+        // Vérifier que le cabinet appartient à l'ostéopathe
+        const { data: cabinetToDelete, error: deleteCheckError } = await supabaseClient
+          .from("Cabinet")
+          .select("id")
+          .eq("id", cabinetId)
+          .eq("osteopathId", identity.osteopathId)
+          .maybeSingle();
+
+        if (deleteCheckError) throw deleteCheckError;
+        
+        if (!cabinetToDelete) {
+          console.error(`Tentative de suppression non autorisée: ostéopathe ${identity.osteopathId} -> cabinet ${cabinetId}`);
+          return new Response(JSON.stringify({ error: "Cabinet non trouvé ou accès non autorisé" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
+        const { error: deleteError } = await supabaseClient
+          .from("Cabinet")
+          .delete()
+          .eq("id", cabinetId)
+          .eq("osteopathId", identity.osteopathId);
+
+        if (deleteError) throw deleteError;
+
+        return new Response(JSON.stringify({ data: { id: cabinetId } }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+
+      default:
+        return new Response(JSON.stringify({ error: `Méthode ${method} non supportée` }), {
+          status: 405,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+    }
+  } catch (error) {
+    console.error("Erreur dans la fonction cabinet:", error);
+    return new Response(JSON.stringify({ 
+      error: "Erreur serveur", 
+      details: error.message 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
 });

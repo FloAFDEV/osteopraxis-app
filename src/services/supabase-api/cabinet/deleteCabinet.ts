@@ -1,40 +1,28 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
-import { getCabinetById } from "./getCabinetById";
 
 export async function deleteCabinet(id: number): Promise<void> {
   try {
-    // Vérifier que l'utilisateur est autorisé à supprimer ce cabinet
-    const currentOsteopathId = await getCurrentOsteopathId();
-    
-    if (!currentOsteopathId) {
-      throw new Error("Non autorisé: vous devez être connecté en tant qu'ostéopathe");
+    // Récupérer le token d'authentification
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error("Non autorisé: vous devez être connecté");
     }
-    
-    // Vérifier que le cabinet appartient bien à l'ostéopathe connecté
-    const existingCabinet = await getCabinetById(id);
-    
-    if (!existingCabinet) {
-      throw new Error("Cabinet non trouvé ou accès non autorisé");
+
+    // Appeler la fonction Edge sécurisée
+    const response = await fetch(`https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/cabinet?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
     }
-    
-    if (existingCabinet.osteopathId !== currentOsteopathId) {
-      console.error(`TENTATIVE DE VIOLATION DE SÉCURITÉ: L'ostéopathe ${currentOsteopathId} tente de supprimer le cabinet ${id} appartenant à l'ostéopathe ${existingCabinet.osteopathId}`);
-      throw new Error("Accès non autorisé: ce cabinet n'est pas associé à votre compte");
-    }
-    
-    console.log(`Suppression du cabinet ${id} pour l'ostéopathe ${currentOsteopathId}`);
-    
-    const { error } = await supabase
-      .from("Cabinet")
-      .delete()
-      .eq("id", id)
-      .eq("osteopathId", currentOsteopathId); // Filtrer par ostéopathe connecté
-      
-    if (error) throw new Error(error.message);
   } catch (error) {
-    console.error("Erreur lors de la suppression du cabinet:", error);
+    console.error("Erreur deleteCabinet:", error);
     throw error;
   }
 }

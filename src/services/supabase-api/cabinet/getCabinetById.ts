@@ -1,50 +1,36 @@
 
 import { Cabinet } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
 
 export async function getCabinetById(id: number): Promise<Cabinet | undefined> {
   try {
-    // Récupérer l'ID de l'ostéopathe connecté
-    const osteopathId = await getCurrentOsteopathId();
-    
-    if (!osteopathId) {
+    // Récupérer le token d'authentification
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       console.warn("Tentative de récupération d'un cabinet sans être connecté");
       return undefined;
     }
-    
-    console.log(`Récupération du cabinet ${id} pour l'ostéopathe ${osteopathId}`);
-    
-    const { data, error } = await supabase
-      .from("Cabinet")
-      .select("*")
-      .eq("id", id)
-      .eq("osteopathId", osteopathId) // Important: filtrer par ostéopathe connecté
-      .single();
-      
-    if (error) {
-      if (error.code === "PGRST116") {
-        // Vérifier si le cabinet existe mais appartient à un autre ostéopathe
-        const { data: anyCabinet } = await supabase
-          .from("Cabinet")
-          .select("id")
-          .eq("id", id)
-          .maybeSingle();
-          
-        if (anyCabinet) {
-          console.error(`TENTATIVE D'ACCÈS NON AUTORISÉ: L'ostéopathe ${osteopathId} a tenté d'accéder au cabinet ${id} qui ne lui appartient pas`);
-        }
-        
-        console.log(`Cabinet ${id} non trouvé pour l'ostéopathe ${osteopathId}`);
+
+    // Appeler la fonction Edge sécurisée
+    const response = await fetch(`https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/cabinet?id=${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
         return undefined;
       }
-      console.error(`Erreur lors de la récupération du cabinet ${id}:`, error);
-      throw new Error(error.message);
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
     }
-    
-    return data as Cabinet;
+
+    const responseData = await response.json();
+    return responseData.data;
   } catch (error) {
-    console.error(`Exception lors de la récupération du cabinet ${id}:`, error);
+    console.error(`Erreur getCabinetById ${id}:`, error);
     throw error;
   }
 }
