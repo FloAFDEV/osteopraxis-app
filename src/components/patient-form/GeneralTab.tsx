@@ -1,4 +1,3 @@
-
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -113,9 +112,8 @@ export const GeneralTab = ({
                                 </FormLabel>
                                 <FormControl>
                                     <DateInput
-                                        value={field.value}
+                                        value={field.value ? new Date(field.value) : undefined}
                                         onChange={(date) => {
-                                            // Convertir correctement la date en string
                                             if (date instanceof Date) {
                                                 field.onChange(date.toISOString().split('T')[0]);
                                             } else if (typeof date === 'string') {
