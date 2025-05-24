@@ -290,9 +290,7 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                     currentCabinetId={currentCabinetId}
                     setCurrentCabinetId={setCurrentCabinetId}
                   />
-                  
-                  {/* Ajout des champs poids, taille et IMC avec calcul automatique */}
-                  <WeightHeightBmiFields form={form} />
+                 
                 </TabsContent>
 
                 <TabsContent value="contact" className="space-y-4">
