@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,13 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -47,29 +41,26 @@ const formSchema = z.object({
   }).optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   birthDate: z.string().optional().or(z.literal('')),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'Homme', 'Femme']).optional(),
   address: z.string().optional().or(z.literal('')),
-  city: z.string().optional().or(z.literal('')),
-  postalCode: z.string().optional().or(z.literal('')),
-  country: z.string().optional().or(z.literal('')),
   maritalStatus: z.string().optional().or(z.literal('')),
-  job: z.string().optional().or(z.literal('')),
+  occupation: z.string().optional().or(z.literal('')),
   height: z.number().optional(),
   weight: z.number().optional(),
   handedness: z.string().optional().or(z.literal('')),
-  hasChildren: z.boolean().optional(),
-  smoker: z.boolean().optional(),
-  smokerSince: z.number().optional(),
-  alcoholConsumption: z.string().optional().or(z.literal('')),
-  sportActivity: z.string().optional().or(z.literal('')),
-  medicalHistory: z.string().optional().or(z.literal('')),
+  hasChildren: z.string().optional().or(z.literal('')),
+  isSmoker: z.boolean().optional(),
+  physicalActivity: z.string().optional().or(z.literal('')),
   surgicalHistory: z.string().optional().or(z.literal('')),
   allergies: z.string().optional().or(z.literal('')),
-  currentMedication: z.string().optional().or(z.literal('')),
   contraception: z.string().optional().or(z.literal('')),
-  otherContraception: z.string().optional().or(z.literal('')),
-  notes: z.string().optional().or(z.literal('')),
 });
+
+// Fonction pour convertir les genres legacy
+const convertGender = (gender: string | null): "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null => {
+  if (!gender) return null;
+  return gender as "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme";
+};
 
 export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => {
   const navigate = useNavigate();
@@ -77,23 +68,6 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | undefined>(
     patient?.cabinetId || undefined
   );
-
-  // Convertir gender pour correspondre aux types attendus
-  const convertGender = (gender: string | null): "MALE" | "FEMALE" | "OTHER" | undefined => {
-    if (!gender) return undefined;
-    switch (gender) {
-      case "Homme":
-        return "MALE";
-      case "Femme": 
-        return "FEMALE";
-      case "MALE":
-      case "FEMALE":
-      case "OTHER":
-        return gender;
-      default:
-        return undefined;
-    }
-  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -105,26 +79,17 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
       birthDate: patient?.birthDate || "",
       gender: convertGender(patient?.gender as string),
       address: patient?.address || "",
-      city: patient?.city || "",
-      postalCode: patient?.postalCode || "",
-      country: patient?.country || "",
       maritalStatus: patient?.maritalStatus || "",
-      job: patient?.job || "",
+      occupation: patient?.occupation || "",
       height: patient?.height || undefined,
       weight: patient?.weight || undefined,
       handedness: patient?.handedness || "",
-      hasChildren: patient?.hasChildren === "true" || false,
-      smoker: patient?.smoker || false,
-      smokerSince: patient?.smokerSince || undefined,
-      alcoholConsumption: patient?.alcoholConsumption || "",
-      sportActivity: patient?.sportActivity || "",
-      medicalHistory: patient?.medicalHistory || "",
+      hasChildren: patient?.hasChildren || "",
+      isSmoker: patient?.isSmoker || false,
+      physicalActivity: patient?.physicalActivity || "",
       surgicalHistory: patient?.surgicalHistory || "",
       allergies: patient?.allergies || "",
-      currentMedication: patient?.currentMedication || "",
       contraception: patient?.contraception || "",
-      otherContraception: patient?.otherContraception || "",
-      notes: patient?.notes || "",
     },
   });
 
@@ -314,63 +279,19 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Adresse</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Adresse" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ville</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ville" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="postalCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Code Postal</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Code Postal" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Pays</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Pays" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Adresse" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -393,7 +314,7 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                   />
                   <FormField
                     control={form.control}
-                    name="job"
+                    name="occupation"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Profession</FormLabel>
@@ -469,54 +390,10 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                     control={form.control}
                     name="hasChildren"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center p-3 rounded-md border">
-                        <FormControl>
-                          <Input
-                            type="checkbox"
-                            className="h-4 w-4"
-                            checked={field.value}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                          />
-                        </FormControl>
-                        <FormLabel className="pl-2">A des enfants</FormLabel>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="smoker"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center p-3 rounded-md border">
-                        <FormControl>
-                          <Input
-                            type="checkbox"
-                            className="h-4 w-4"
-                            checked={field.value}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                          />
-                        </FormControl>
-                        <FormLabel className="pl-2">Fumeur</FormLabel>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="smokerSince"
-                    render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Fumeur depuis (années)</FormLabel>
+                        <FormLabel>A des enfants</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Fumeur depuis (années)"
-                            {...field}
-                          />
+                          <Input placeholder="Oui/Non ou nombre" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -526,29 +403,12 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
 
                 <FormField
                   control={form.control}
-                  name="alcoholConsumption"
+                  name="physicalActivity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Consommation d'alcool</FormLabel>
+                      <FormLabel>Activité physique</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Consommation d'alcool"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="sportActivity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Activité sportive</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Activité sportive" {...field} />
+                        <Input placeholder="Activité physique" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -557,24 +417,6 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
               </TabsContent>
 
               <TabsContent value="history" className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="medicalHistory"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Antécédents médicaux</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Antécédents médicaux"
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="surgicalHistory"
@@ -609,77 +451,23 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
 
                 <FormField
                   control={form.control}
-                  name="currentMedication"
+                  name="contraception"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Médicaments actuels</FormLabel>
+                      <FormLabel>Contraception</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Médicaments actuels"
-                          {...field}
+                        <TranslatedSelect
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          enumType="Contraception"
+                          placeholder="Sélectionner..."
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="contraception"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Contraception</FormLabel>
-                        <FormControl>
-                          <TranslatedSelect
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            enumType="Contraception"
-                            placeholder="Sélectionner..."
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="otherContraception"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Autre contraception</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Autre contraception"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
               </TabsContent>
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Notes"
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </Tabs>
 
             <div className="flex justify-end gap-4 pt-6">

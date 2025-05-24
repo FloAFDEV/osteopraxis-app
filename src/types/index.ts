@@ -72,20 +72,6 @@ export interface Patient {
 	smokingAmount: string | null;
 	quitSmokingDate: string | null;
 
-	// Nouveaux champs ajoutés pour compatibilité avec le formulaire
-	city: string | null;
-	postalCode: string | null;
-	country: string | null;
-	job: string | null;
-	smoker: boolean | null;
-	smokerSince: number | null;
-	alcoholConsumption: string | null;
-	sportActivity: string | null;
-	medicalHistory: string | null;
-	currentMedication: string | null;
-	otherContraception: string | null;
-	notes: string | null;
-
 	// Champs ajoutés existants en base de données
 	currentTreatment?: string | null;
 	hdlm?: string | null;

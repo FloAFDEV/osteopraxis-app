@@ -115,11 +115,13 @@ export const GeneralTab = ({
                                     <DateInput
                                         value={field.value}
                                         onChange={(date) => {
-                                            // Convertir la Date en string ISO si nécessaire
+                                            // Convertir correctement la date en string
                                             if (date instanceof Date) {
-                                                field.onChange(date.toISOString());
-                                            } else {
+                                                field.onChange(date.toISOString().split('T')[0]);
+                                            } else if (typeof date === 'string') {
                                                 field.onChange(date);
+                                            } else {
+                                                field.onChange(null);
                                             }
                                         }}
                                     />
@@ -207,15 +209,15 @@ export const GeneralTab = ({
                             </div>
                             <FormControl>
                                 <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
+                                    checked={field.value === "true"}
+                                    onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
                                 />
                             </FormControl>
                         </FormItem>
                     )}
                 />
 
-                {form.getValues("hasChildren") && (
+                {form.getValues("hasChildren") === "true" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <FormLabel>

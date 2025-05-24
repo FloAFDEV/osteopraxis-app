@@ -8,14 +8,14 @@ export interface PatientFormValues {
   phone: string | null;
   birthDate: string | null;
   address: string | null;
-  gender: "MALE" | "FEMALE" | "OTHER" | null;
+  gender: "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
   height: number | null;
   weight: number | null;
   bmi: number | null;
   cabinetId: number | null;
   maritalStatus: string | null;
   occupation: string | null;
-  hasChildren: boolean;
+  hasChildren: string | null;
   childrenAges: number[] | null;
   generalPractitioner: string | null;
   surgicalHistory: string | null;
@@ -70,20 +70,6 @@ export interface PatientFormValues {
   pediatrician_name: string | null;
   paramedical_followup: string | null;
   other_comments_child: string | null;
-
-  // Nouveaux champs pour le formulaire legacy
-  city: string | null;
-  postalCode: string | null;
-  country: string | null;
-  job: string | null;
-  smoker: boolean | null;
-  smokerSince: number | null;
-  alcoholConsumption: string | null;
-  sportActivity: string | null;
-  medicalHistory: string | null;
-  currentMedication: string | null;
-  otherContraception: string | null;
-  notes: string | null;
 }
 
 export interface PatientFormProps {
