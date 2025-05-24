@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -61,7 +60,7 @@ const formSchema = z.object({
   cabinetId: z.number().optional(),
   childrenAges: z.array(z.number()).optional().nullable(),
   
-  // Additional required fields from PatientFormValues
+  // Additional optional fields from PatientFormValues
   generalPractitioner: z.string().optional().nullable(),
   traumaHistory: z.string().optional().nullable(),
   rheumatologicalHistory: z.string().optional().nullable(),
@@ -130,7 +129,7 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
     patient?.cabinetId?.toString() || null
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<PatientFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: patient?.firstName || "",
