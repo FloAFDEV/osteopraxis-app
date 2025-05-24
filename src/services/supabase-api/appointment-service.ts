@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -47,32 +46,14 @@ export const supabaseAppointmentService = {
 			// Récupérer l'ID de l'ostéopathe connecté
 			const osteopathId = await getCurrentOsteopathId();
 			
-			// Récupérer d'abord les patients liés à cet ostéopathe
-			const { data: patients, error: patientError } = await supabase
-				.from("Patient")
-				.select("id")
-				.eq("osteopathId", osteopathId);
-				
-			if (patientError) {
-				console.error("Erreur de chargement des patients:", patientError);
-				throw patientError;
-			}
-			
-			// Si aucun patient trouvé, retourner un tableau vide
-			if (!patients || patients.length === 0) {
-				console.log("Aucun patient trouvé pour l'ostéopathe", osteopathId);
-				return [];
-			}
-			
-			// Extraire les IDs de patients pour le filtre
-			const patientIds = patients.map(p => p.id);
-			console.log(`Filtrage des rendez-vous pour ${patientIds.length} patients de l'ostéopathe ${osteopathId}`);
-			
-			// Récupérer les rendez-vous pour les patients de cet ostéopathe
+			// Récupérer les rendez-vous avec un join sur Patient pour filtrer par osteopathId
 			const { data, error } = await supabase
 				.from("Appointment")
-				.select("*")
-				.in("patientId", patientIds)
+				.select(`
+					*,
+					Patient!inner(osteopathId)
+				`)
+				.eq("Patient.osteopathId", osteopathId)
 				.order("date", { ascending: true });
 
 			if (error) {
@@ -81,7 +62,11 @@ export const supabaseAppointmentService = {
 			}
 
 			console.log(`${data?.length || 0} rendez-vous chargés pour l'ostéopathe ${osteopathId}`);
-			return (data || []).map(adaptAppointmentFromSupabase);
+			// Adapter les données en retirant la relation Patient du résultat
+			return (data || []).map(item => {
+				const { Patient, ...appointment } = item as any;
+				return adaptAppointmentFromSupabase(appointment);
+			});
 		} catch (error) {
 			console.error("Error fetching appointments:", error);
 			throw error;
@@ -190,20 +175,23 @@ export const supabaseAppointmentService = {
 				throw new Error("Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient");
 			}
 
-			// Création de l'objet à insérer - adapter correctement pour Supabase
+			// Création de l'objet à insérer - ne pas inclure osteopathId car cette colonne n'existe pas
 			const adaptedData = adaptAppointmentToSupabase({
 				...payload,
-				osteopathId: payload.osteopathId || osteopathId,
+				// Retirer osteopathId du payload car cette colonne n'existe pas dans Appointment
 			});
 
+			// Supprimer osteopathId du payload adapté s'il existe
+			const { osteopathId: _, ...finalData } = adaptedData as any;
+
 			// Convertir le statut si nécessaire (CANCELLED -> CANCELED)
-			if (adaptedData.status === "CANCELLED") {
-				adaptedData.status = "CANCELED";
+			if (finalData.status === "CANCELLED") {
+				finalData.status = "CANCELED";
 			}
 
 			const { data, error } = await supabase
 				.from("Appointment")
-				.insert(adaptedData)
+				.insert(finalData)
 				.select()
 				.single();
 
