@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChartPie } from "lucide-react";
-import React, { useEffect } from "react";
+import React from "react";
 import {
 	Cell,
 	Legend,
@@ -38,7 +38,6 @@ export const GENDER_COLORS = {
 
 export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 	chartData,
-	totalPatients,
 }) => {
 	const { isMobile } = useIsMobile();
 
@@ -87,17 +86,13 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 		if (active && payload && payload.length) {
 			const data = payload[0].payload;
 			return (
-				<div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow">
-					<p className="font-medium">{data.name}</p>
-					<p className="text-sm text-muted-foreground">
-						<span className="font-medium text-foreground">
-							{data.value}
-						</span>{" "}
+				<div className="bg-cyan-600 p-3 border rounded-md shadow text-white space-y-2">
+					<p className="font-medium">{data.name}s</p>
+					<p className="text-sm">
+						<span className="text-white">{data.value} </span>
 						patients
 					</p>
-					<p className="text-sm text-primary font-semibold">
-						{data.percentage}% du total
-					</p>
+					<p className="text-sm">{data.percentage}% du total</p>
 				</div>
 			);
 		}
