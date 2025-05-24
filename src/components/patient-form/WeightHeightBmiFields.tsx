@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { PatientFormValues } from "../patient-form";
+import { PatientFormValues } from "./types";
 
 interface WeightHeightBmiFieldsProps {
   form: UseFormReturn<PatientFormValues>;
@@ -40,7 +40,11 @@ export const WeightHeightBmiFields = ({ form }: WeightHeightBmiFieldsProps) => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription && typeof subscription.unsubscribe === 'function') {
+        subscription.unsubscribe();
+      }
+    };
   }, [form]);
 
   // Fonction pour déterminer la couleur du fond en fonction de la valeur de l'IMC

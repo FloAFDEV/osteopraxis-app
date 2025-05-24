@@ -1,4 +1,3 @@
-
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -7,7 +6,7 @@ import { TranslatedSelect } from "@/components/ui/translated-select";
 import { DateInput } from "@/components/ui/date-input";
 import { WeightHeightBmiFields } from "./WeightHeightBmiFields";
 import { UseFormReturn } from "react-hook-form";
-import { PatientFormValues } from "../patient-form";
+import { PatientFormValues } from "./types";
 
 interface GeneralTabProps {
     form: UseFormReturn<PatientFormValues>;

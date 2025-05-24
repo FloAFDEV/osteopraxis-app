@@ -1,4 +1,3 @@
-
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TranslatedSelect } from "@/components/ui/translated-select";
 import { UseFormReturn } from "react-hook-form";
-import { PatientFormValues } from "../patient-form";
+import { PatientFormValues } from "./types";
 
 interface MedicalTabProps {
     form: UseFormReturn<PatientFormValues>;

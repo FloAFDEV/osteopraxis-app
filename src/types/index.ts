@@ -11,6 +11,12 @@ export interface User {
 
 export type Role = "ADMIN" | "OSTEOPATH";
 
+// Ajout des types manquants
+export type Gender = "MALE" | "FEMALE" | "OTHER";
+export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED";
+export type Handedness = "LEFT" | "RIGHT" | "AMBIDEXTROUS";
+export type Contraception = "NONE" | "PILL" | "IUD" | "IMPLANT" | "OTHER";
+
 export interface Cabinet {
 	id: number;
 	name: string;

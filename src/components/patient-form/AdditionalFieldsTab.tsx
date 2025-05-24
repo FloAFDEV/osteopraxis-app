@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
-import { PatientFormValues } from "../patient-form";
+import { PatientFormValues } from "./types";
 
 interface AdditionalFieldsTabProps {
 	form: UseFormReturn<PatientFormValues>;

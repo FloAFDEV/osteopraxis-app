@@ -1,10 +1,9 @@
-
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
-import { PatientFormValues } from "../patient-form";
+import { PatientFormValues } from "./types";
 
 interface PediatricTabProps {
     form: UseFormReturn<PatientFormValues>;
