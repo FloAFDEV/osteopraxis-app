@@ -12,11 +12,28 @@ export interface User {
 export type Role = "ADMIN" | "OSTEOPATH";
 
 // Ajout des types manquants
-export type Gender = "MALE" | "FEMALE" | "OTHER";
-export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED";
+export type Gender = "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
+export type MaritalStatus =
+	| "SINGLE"
+	| "MARRIED"
+	| "DIVORCED"
+	| "WIDOWED"
+	| "SEPARATED"
+	| "ENGAGED"
+	| "PARTNERED";
 export type Handedness = "LEFT" | "RIGHT" | "AMBIDEXTROUS";
-export type Contraception = "NONE" | "PILL" | "IUD" | "IMPLANT" | "OTHER";
-
+export type Contraception =
+	| "NONE"
+	| "PILLS"
+	| "CONDOM"
+	| "IMPLANTS"
+	| "DIAPHRAGM"
+	| "IUD"
+	| "INJECTION"
+	| "PATCH"
+	| "RING"
+	| "NATURAL_METHODS"
+	| "STERILIZATION";
 export interface Cabinet {
 	id: number;
 	name: string;
@@ -166,26 +183,19 @@ export interface CreateAppointmentPayload {
 export interface Invoice {
 	id: number;
 	patientId: number;
-	cabinetId: number;
-	osteopathId: number;
-	appointmentId: number | null;
+	appointmentId?: number; // Changed from consultationId to appointmentId, and made optional
+	amount: number;
 	date: string;
-	number: string;
-	status: InvoiceStatus;
-	totalAmount: number;
-	paymentDate: string | null;
-	paymentMethod: string | null;
-	notes: string | null;
-	createdAt: string;
-	updatedAt: string;
-
-	// Propriétés utilisées dans le code mais manquantes dans l'interface
-	amount: number; // Alias pour totalAmount
-	paymentStatus: PaymentStatus; // Alias pour status
-	tvaExoneration?: boolean | null;
-	tvaMotif?: string | null;
-	// Relations
-	Patient?: Patient; // Relation avec le patient
+	paymentStatus: PaymentStatus;
+	Patient?: {
+		firstName: string;
+		lastName: string;
+	};
+	// Nouveaux champs pour les mentions légales françaises
+	tvaExoneration?: boolean;
+	tvaMotif?: string;
+	paymentMethod?: string;
+	notes?: string;
 }
 
 export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELED";
@@ -233,11 +243,29 @@ export interface DashboardData {
 	newPatientsThisYear: number;
 	newPatientsLastYear: number;
 	appointmentsToday: number;
-	nextAppointment: string | null;
+	nextAppointment: string;
 	patientsLastYearEnd: number;
 	newPatientsLast30Days: number;
 	thirtyDayGrowthPercentage: number;
 	annualGrowthPercentage: number;
-	childrenCount: number;
-	monthlyGrowth: MonthlyGrowth[];
+	monthlyGrowth: {
+		month: string;
+		patients: number;
+		prevPatients: number;
+		growthText: string;
+		hommes: number;
+		femmes: number;
+		enfants: number;
+	}[];
+	childrenCount?: number;
+}
+
+export interface MonthlyGrowth {
+	month: string;
+	patients: number;
+	prevPatients: number;
+	growthText: string;
+	hommes: number;
+	femmes: number;
+	enfants: number;
 }
