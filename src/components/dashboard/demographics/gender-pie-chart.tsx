@@ -86,7 +86,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 		if (active && payload && payload.length) {
 			const data = payload[0].payload;
 			return (
-				<div className="bg-cyan-600 p-3 border rounded-md shadow text-white space-y-2">
+				<div className="bg-cyan-600 p-3 rounded-md shadow text-white space-y-2">
 					<p className="font-medium">{data.name}s</p>
 					<p className="text-sm">
 						<span className="text-white">{data.value} </span>
@@ -144,7 +144,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 						cy="50%"
 						labelLine={false}
 						label={renderCustomizedLabel}
-						outerRadius={isMobile ? 80 : 100}
+						outerRadius={isMobile ? 100 : 130}
 						fill="#8884d8"
 						dataKey="value"
 						nameKey="name"
