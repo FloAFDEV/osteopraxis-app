@@ -25,9 +25,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import TranslatedSelect from "@/components/ui/translated-select";
+import { GeneralTab } from "./patient-form/GeneralTab";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -54,6 +56,8 @@ const formSchema = z.object({
   surgicalHistory: z.string().optional().or(z.literal('')),
   allergies: z.string().optional().or(z.literal('')),
   contraception: z.string().optional().or(z.literal('')),
+  cabinetId: z.number().optional(),
+  childrenAges: z.array(z.number()).optional(),
 });
 
 // Fonction pour convertir les genres legacy
@@ -67,6 +71,12 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | undefined>(
     patient?.cabinetId || undefined
+  );
+  const [childrenAgesInput, setChildrenAgesInput] = useState<string>(
+    patient?.childrenAges?.join(", ") || ""
+  );
+  const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
+    patient?.cabinetId?.toString() || null
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -90,6 +100,8 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
       surgicalHistory: patient?.surgicalHistory || "",
       allergies: patient?.allergies || "",
       contraception: patient?.contraception || "",
+      cabinetId: patient?.cabinetId || undefined,
+      childrenAges: patient?.childrenAges || [],
     },
   });
 
@@ -97,10 +109,20 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
     try {
       setIsSubmitting(true);
       
+      // Traiter les âges des enfants
+      let childrenAgesArray: number[] = [];
+      if (childrenAgesInput.trim()) {
+        childrenAgesArray = childrenAgesInput
+          .split(",")
+          .map((age) => parseInt(age.trim()))
+          .filter((age) => !isNaN(age));
+      }
+
       // Ajouter le cabinetId sélectionné aux données du patient
       const patientData = {
         ...data,
         cabinetId: selectedCabinetId,
+        childrenAges: childrenAgesArray.length > 0 ? childrenAgesArray : null,
       };
 
       if (patient) {
@@ -152,43 +174,25 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                 )}
               </div>
 
-              <Tabs defaultValue="account" className="space-y-4">
+              <Tabs defaultValue="general" className="space-y-4">
                 <TabsList>
-                  <TabsTrigger value="account">Informations générales</TabsTrigger>
+                  <TabsTrigger value="general">Informations générales</TabsTrigger>
+                  <TabsTrigger value="contact">Contact</TabsTrigger>
                   <TabsTrigger value="habits">Habitudes de vie</TabsTrigger>
                   <TabsTrigger value="history">Antécédents</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="account" className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prénom</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Prénom" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nom</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Nom" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <TabsContent value="general" className="space-y-4">
+                  <GeneralTab 
+                    form={form}
+                    childrenAgesInput={childrenAgesInput}
+                    setChildrenAgesInput={setChildrenAgesInput}
+                    currentCabinetId={currentCabinetId}
+                    setCurrentCabinetId={setCurrentCabinetId}
+                  />
+                </TabsContent>
 
+                <TabsContent value="contact" className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -218,68 +222,6 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="birthDate"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Date de naissance</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(new Date(field.value), "PPP")
-                                  ) : (
-                                    <span>Choisir une date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value ? new Date(field.value) : undefined}
-                                onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : undefined)}
-                                disabled={(date) =>
-                                  date > new Date() || date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="gender"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Genre</FormLabel>
-                          <FormControl>
-                            <TranslatedSelect
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              enumType="Gender"
-                              placeholder="Sélectionner un genre"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
                   <FormField
                     control={form.control}
                     name="address"
@@ -293,115 +235,9 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                       </FormItem>
                     )}
                   />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="maritalStatus"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Situation maritale</FormLabel>
-                          <FormControl>
-                            <TranslatedSelect
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              enumType="MaritalStatus"
-                              placeholder="Sélectionner..."
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="occupation"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Profession</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Profession" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                 </TabsContent>
 
                 <TabsContent value="habits" className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="height"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Taille (cm)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Taille (cm)"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="weight"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Poids (kg)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Poids (kg)"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="handedness"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Latéralité</FormLabel>
-                          <FormControl>
-                            <TranslatedSelect
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              enumType="Handedness"
-                              placeholder="Sélectionner..."
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="hasChildren"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>A des enfants</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Oui/Non ou nombre" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
                   <FormField
                     control={form.control}
                     name="physicalActivity"
@@ -410,6 +246,25 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                         <FormLabel>Activité physique</FormLabel>
                         <FormControl>
                           <Input placeholder="Activité physique" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="contraception"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contraception</FormLabel>
+                        <FormControl>
+                          <TranslatedSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            enumType="Contraception"
+                            placeholder="Sélectionner..."
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -444,25 +299,6 @@ export const PatientForm = ({ patient, onSubmit, onSave }: PatientFormProps) => 
                         <FormLabel>Allergies</FormLabel>
                         <FormControl>
                           <Input placeholder="Allergies" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="contraception"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Contraception</FormLabel>
-                        <FormControl>
-                          <TranslatedSelect
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            enumType="Contraception"
-                            placeholder="Sélectionner..."
-                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

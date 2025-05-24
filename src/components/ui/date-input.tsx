@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { format, parse, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -23,19 +24,19 @@ export function DateInput({
 	disabled = false,
 }: DateInputProps) {
 	const [inputValue, setInputValue] = React.useState(
-		value ? format(value, dateFormat) : ""
+		value ? format(value, dateFormat, { locale: fr }) : ""
 	);
 	const [invalid, setInvalid] = React.useState(false);
 
 	React.useEffect(() => {
-		setInputValue(value ? format(value, dateFormat) : "");
+		setInputValue(value ? format(value, dateFormat, { locale: fr }) : "");
 	}, [value, dateFormat]);
 
-	// Helper pour parser et contrôler la validité + bornes d’années (1900 à aujourd’hui)
+	// Helper pour parser et contrôler la validité + bornes d'années (1900 à aujourd'hui)
 	const parseOrNull = (str: string) => {
 		const d = parse(str, dateFormat, new Date(), { locale: fr });
 		if (!isValid(d)) return null;
-		// Limiter l’année
+		// Limiter l'année
 		const year = d.getFullYear();
 		const thisYear = new Date().getFullYear();
 		if (year < 1900 || year > thisYear) return null;
@@ -72,11 +73,11 @@ export function DateInput({
 		const parsed = parseOrNull(inputValue);
 		if (parsed) {
 			onChange(parsed);
-			setInputValue(format(parsed, dateFormat));
+			setInputValue(format(parsed, dateFormat, { locale: fr }));
 			setInvalid(false);
 		} else {
-			// reset à l’ancienne valeur (valeur Date précédente ou chaîne vide)
-			setInputValue(value ? format(value, dateFormat) : "");
+			// reset à l'ancienne valeur (valeur Date précédente ou chaîne vide)
+			setInputValue(value ? format(value, dateFormat, { locale: fr }) : "");
 			setInvalid(true);
 		}
 	};
@@ -93,7 +94,7 @@ export function DateInput({
 				pattern="\d{2}/\d{2}/\d{4}"
 				disabled={disabled}
 				aria-invalid={invalid}
-				title="Format : JJ/MM/AAAA"
+				title="Format : JJ/MM/AAAA"
 				className={cn(invalid && "border-destructive pr-10")}
 			/>
 
