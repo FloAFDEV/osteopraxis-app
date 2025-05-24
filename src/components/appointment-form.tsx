@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -39,7 +38,7 @@ const appointmentFormSchema = z.object({
     message: "La raison doit contenir au moins 2 caractères",
   }),
   notes: z.string().optional(),
-  status: z.enum(["PLANNED", "CONFIRMED", "CANCELLED", "DONE", "SCHEDULED", "COMPLETED", "CANCELED", "RESCHEDULED", "NO_SHOW"]).default("PLANNED"),
+  status: z.enum(["SCHEDULED", "COMPLETED", "CANCELED", "RESCHEDULED", "NO_SHOW"]).default("SCHEDULED"),
   website: z.string().optional(), // Ajouté pour le honeypot
 });
 
@@ -92,7 +91,7 @@ export function AppointmentForm({
       time: defaultValues?.time || "09:00",
       reason: defaultValues?.reason || "",
       notes: defaultValues?.notes || "",
-      status: defaultValues?.status || "PLANNED",
+      status: defaultValues?.status || "SCHEDULED",
       website: defaultValues?.website || "", // Honeypot field
     },
   });
@@ -369,15 +368,11 @@ export function AppointmentForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="PLANNED">PLANNED</SelectItem>
-                  <SelectItem value="CONFIRMED">CONFIRMED</SelectItem>
-                  <SelectItem value="CANCELLED">CANCELLED</SelectItem>
-                  <SelectItem value="DONE">DONE</SelectItem>
-                  <SelectItem value="SCHEDULED">SCHEDULED</SelectItem>
-                  <SelectItem value="COMPLETED">COMPLETED</SelectItem>
-                  <SelectItem value="CANCELED">CANCELED</SelectItem>
-                  <SelectItem value="RESCHEDULED">RESCHEDULED</SelectItem>
-                  <SelectItem value="NO_SHOW">NO_SHOW</SelectItem>
+                  <SelectItem value="SCHEDULED">Planifiée</SelectItem>
+                  <SelectItem value="COMPLETED">Terminée</SelectItem>
+                  <SelectItem value="CANCELED">Annulée</SelectItem>
+                  <SelectItem value="RESCHEDULED">Reportée</SelectItem>
+                  <SelectItem value="NO_SHOW">Absence</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

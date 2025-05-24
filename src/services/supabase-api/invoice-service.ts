@@ -45,7 +45,7 @@ export const supabaseInvoiceService = {
           id: item.id,
           patientId: item.patientId,
           cabinetId: item.cabinetId || 1,
-          osteopathId: item.osteopathId || osteopathId,
+          osteopathId: osteopathId, // Utiliser l'osteopathId récupéré
           appointmentId: item.appointmentId,
           date: item.date,
           number: `INV-${item.id.toString().padStart(4, '0')}`, // Généré côté client
@@ -96,7 +96,7 @@ export const supabaseInvoiceService = {
         id: data.id,
         patientId: data.patientId,
         cabinetId: data.cabinetId || 1,
-        osteopathId: data.osteopathId || osteopathId,
+        osteopathId: osteopathId, // Utiliser l'osteopathId récupéré
         appointmentId: data.appointmentId,
         date: data.date,
         number: `INV-${data.id.toString().padStart(4, '0')}`, // Généré côté client
@@ -141,7 +141,7 @@ export const supabaseInvoiceService = {
           id: item.id,
           patientId: item.patientId,
           cabinetId: item.cabinetId || 1,
-          osteopathId: item.osteopathId || osteopathId,
+          osteopathId: osteopathId, // Utiliser l'osteopathId récupéré
           appointmentId: item.appointmentId,
           date: item.date,
           number: `INV-${item.id.toString().padStart(4, '0')}`, // Généré côté client
@@ -186,7 +186,7 @@ export const supabaseInvoiceService = {
           id: item.id,
           patientId: item.patientId,
           cabinetId: item.cabinetId || 1,
-          osteopathId: item.osteopathId || osteopathId,
+          osteopathId: osteopathId, // Utiliser l'osteopathId récupéré
           appointmentId: item.appointmentId,
           date: item.date,
           number: `INV-${item.id.toString().padStart(4, '0')}`, // Généré côté client

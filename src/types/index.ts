@@ -140,10 +140,6 @@ export interface Appointment {
 }
 
 export type AppointmentStatus =
-	| "PLANNED"
-	| "CONFIRMED"
-	| "CANCELLED"
-	| "DONE"
 	| "SCHEDULED"
 	| "COMPLETED"
 	| "CANCELED"
