@@ -43,7 +43,7 @@ const CustomBarLegend = ({ payload }: LegendProps) => {
 							backgroundColor: entry.color,
 						}}
 					/>
-					<span style={{ color: "#334155", fontSize: "14px" }}>
+					<span className="text-gray-700 dark:text-white text-sm">
 						{entry.value}
 					</span>
 				</div>
