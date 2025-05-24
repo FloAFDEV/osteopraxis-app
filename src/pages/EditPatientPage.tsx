@@ -1,10 +1,10 @@
-
 import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
 import { PatientForm } from "@/components/patient-form";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { patientService } from "@/services/api/patient-service";
 import { Patient } from "@/types";
+import { PatientFormValues } from "@/components/patient-form/types";
 import { Trash, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -56,19 +56,12 @@ const EditPatientPage = () => {
 		loadPatient();
 	}, [id, navigate]);
 
-	const handleSave = async (updatedData: any) => {
+	const handleSave = async (updatedData: PatientFormValues) => {
 		if (!patient) return;
 
 		try {
 			setIsSaving(true);
 			console.info("Submitting values:", updatedData);
-
-			// Make sure hasChildren is kept as a string to match Patient type
-			if (typeof updatedData.hasChildren === "boolean") {
-				updatedData.hasChildren = updatedData.hasChildren
-					? "true"
-					: "false";
-			}
 
 			// Convertir les champs numériques correctement - traiter les valeurs undefined
 			if (updatedData.height !== undefined) updatedData.height = updatedData.height ? Number(updatedData.height) : null;
@@ -226,15 +219,6 @@ const EditPatientPage = () => {
 			</Layout>
 		);
 	}
-
-	// Affichage des informations sur les enfants si le patient en a
-	const hasChildren = patient?.hasChildren === "true";
-	const childrenInfo =
-		hasChildren && patient?.childrenAges && patient.childrenAges.length > 0
-			? `${
-					patient.childrenAges.length
-			  } enfant(s): ${patient.childrenAges.join(", ")} ans`
-			: null;
 
 	return (
 		<Layout>
