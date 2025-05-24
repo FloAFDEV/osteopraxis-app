@@ -78,11 +78,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				{/* Add gender data to render */}
-				<div className="mb-2 text-sm">
-					<span className="font-medium">Total de:</span>{" "}
-					{totalPatients} patients
-				</div>
+				
 
 				{chartData && chartData.length > 0 ? (
 					<GenderPieChart
