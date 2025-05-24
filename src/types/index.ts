@@ -33,7 +33,8 @@ export type Contraception =
 	| "PATCH"
 	| "RING"
 	| "NATURAL_METHODS"
-	| "STERILIZATION";
+	| "STERILIZATION"
+	| "IUD_HORMONAL";
 export interface Cabinet {
 	id: number;
 	name: string;
@@ -156,12 +157,13 @@ export interface Appointment {
 	user_id?: string | null;
 }
 
-export type AppointmentStatus =
-	| "SCHEDULED"
-	| "COMPLETED"
-	| "CANCELED"
-	| "RESCHEDULED"
-	| "NO_SHOW";
+export enum AppointmentStatus {
+	SCHEDULED = "SCHEDULED",
+	COMPLETED = "COMPLETED",
+	CANCELED = "CANCELED",
+	RESCHEDULED = "RESCHEDULED",
+	NO_SHOW = "NO_SHOW",
+}
 
 // Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
 export interface CreateAppointmentPayload {
