@@ -14,6 +14,9 @@ import { CabinetInfoFields } from "./CabinetInfoFields";
 import { BillingInfoFields } from "./BillingInfoFields";
 import { ImageFields } from "./ImageFields";
 
+// Image par défaut pour les cabinets
+const DEFAULT_CABINET_IMAGE = "https://img.freepik.com/photos-premium/maison-moderne-exterieur-genere_1116642-246.jpg?ga=GA1.1.290584622.1739450057&semt=ais_hybrid&w=740";
+
 export function CabinetForm({
   defaultValues,
   cabinetId,
@@ -31,7 +34,11 @@ export function CabinetForm({
     // Initialiser les prévisualisations d'image avec les valeurs par défaut
     if (defaultValues?.imageUrl) {
       setPreviewImageUrl(defaultValues.imageUrl);
+    } else if (!isEditing) {
+      // Si c'est un nouveau cabinet, utiliser l'image par défaut
+      setPreviewImageUrl(DEFAULT_CABINET_IMAGE);
     }
+    
     if (defaultValues?.logoUrl) {
       setPreviewLogoUrl(defaultValues.logoUrl);
     }
@@ -60,7 +67,7 @@ export function CabinetForm({
       address: defaultValues?.address || "",
       phone: defaultValues?.phone || "",
       email: defaultValues?.email || "",
-      imageUrl: defaultValues?.imageUrl || "",
+      imageUrl: defaultValues?.imageUrl || (isEditing ? "" : DEFAULT_CABINET_IMAGE),
       logoUrl: defaultValues?.logoUrl || "",
       osteopathId: defaultValues?.osteopathId || osteopathId,
       siret: defaultValues?.siret || osteopathData?.siret || "",
