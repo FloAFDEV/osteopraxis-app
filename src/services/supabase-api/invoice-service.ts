@@ -1,3 +1,4 @@
+
 import { Invoice, PaymentStatus } from "@/types";
 import { supabase, SUPABASE_API_URL, SUPABASE_API_KEY } from "./utils";
 import { corsHeaders } from "@/services/corsHeaders";
@@ -43,21 +44,21 @@ export const supabaseInvoiceService = {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: 1, // Default value
-          osteopathId: osteopathId, // Use connected osteopath ID
+          cabinetId: item.cabinetId || 1,
+          osteopathId: item.osteopathId || osteopathId,
           appointmentId: item.appointmentId,
           date: item.date,
-          number: `INV-${item.id}`,
+          number: `INV-${item.id.toString().padStart(4, '0')}`, // Généré côté client
           status: "DRAFT",
           totalAmount: item.amount,
-          amount: item.amount, // Alias for compatibility
+          amount: item.amount,
           paymentStatus: item.paymentStatus as PaymentStatus,
           paymentDate: null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tvaExoneration: item.tvaExoneration || true,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString(),
+          tvaExoneration: item.tvaExoneration ?? true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         };
         return invoice;
@@ -94,21 +95,21 @@ export const supabaseInvoiceService = {
       const invoice: Invoice = {
         id: data.id,
         patientId: data.patientId,
-        cabinetId: 1,
-        osteopathId: osteopathId,
+        cabinetId: data.cabinetId || 1,
+        osteopathId: data.osteopathId || osteopathId,
         appointmentId: data.appointmentId,
         date: data.date,
-        number: `INV-${data.id}`,
+        number: `INV-${data.id.toString().padStart(4, '0')}`, // Généré côté client
         status: "DRAFT",
         totalAmount: data.amount,
-        amount: data.amount, // Alias for compatibility
+        amount: data.amount,
         paymentStatus: data.paymentStatus as PaymentStatus,
         paymentDate: null,
         paymentMethod: data.paymentMethod || null,
         notes: data.notes || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tvaExoneration: data.tvaExoneration || true,
+        createdAt: data.createdAt || new Date().toISOString(),
+        updatedAt: data.updatedAt || new Date().toISOString(),
+        tvaExoneration: data.tvaExoneration ?? true,
         tvaMotif: data.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
       };
       
@@ -139,21 +140,21 @@ export const supabaseInvoiceService = {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: 1,
-          osteopathId: osteopathId,
+          cabinetId: item.cabinetId || 1,
+          osteopathId: item.osteopathId || osteopathId,
           appointmentId: item.appointmentId,
           date: item.date,
-          number: `INV-${item.id}`,
+          number: `INV-${item.id.toString().padStart(4, '0')}`, // Généré côté client
           status: "DRAFT",
           totalAmount: item.amount,
-          amount: item.amount, // Alias for compatibility
+          amount: item.amount,
           paymentStatus: item.paymentStatus as PaymentStatus,
           paymentDate: null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tvaExoneration: item.tvaExoneration || true,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString(),
+          tvaExoneration: item.tvaExoneration ?? true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         };
         return invoice;
@@ -184,21 +185,21 @@ export const supabaseInvoiceService = {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: 1,
-          osteopathId: osteopathId,
+          cabinetId: item.cabinetId || 1,
+          osteopathId: item.osteopathId || osteopathId,
           appointmentId: item.appointmentId,
           date: item.date,
-          number: `INV-${item.id}`,
+          number: `INV-${item.id.toString().padStart(4, '0')}`, // Généré côté client
           status: "DRAFT",
           totalAmount: item.amount,
-          amount: item.amount, // Alias for compatibility
+          amount: item.amount,
           paymentStatus: item.paymentStatus as PaymentStatus,
           paymentDate: null,
           paymentMethod: item.paymentMethod || null,
           notes: item.notes || null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tvaExoneration: item.tvaExoneration || true,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString(),
+          tvaExoneration: item.tvaExoneration ?? true,
           tvaMotif: item.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         };
         return invoice;
@@ -211,7 +212,16 @@ export const supabaseInvoiceService = {
 
   async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
     try {
-      const { id: _omit, createdAt: _createdAt, updatedAt: _updatedAt, ...dataToInsert } = invoiceData as any;
+      // Nettoyer les données pour enlever les champs qui n'existent pas en base
+      const { 
+        id: _omit, 
+        number: _omitNumber, // Ne pas envoyer le number en base
+        status: _omitStatus, // Ne pas envoyer le status en base
+        totalAmount: _omitTotalAmount, // Utiliser amount à la place
+        createdAt: _createdAt, 
+        updatedAt: _updatedAt, 
+        ...dataToInsert 
+      } = invoiceData as any;
       
       // Vérifier que le patient appartient bien à l'ostéopathe connecté
       const osteopathId = await getCurrentOsteopathId();
@@ -237,19 +247,27 @@ export const supabaseInvoiceService = {
         delete dataToInsert.appointmentId;
       }
       
-      // Assurons-nous que tous les champs requis sont présents
-      const dataWithDefaults = {
-        ...dataToInsert,
+      // Préparer les données pour l'insertion en base (seulement les champs qui existent)
+      const dataForDb = {
+        patientId: dataToInsert.patientId,
         cabinetId: dataToInsert.cabinetId || 1,
-        osteopathId: dataToInsert.osteopathId || osteopathId,
-        number: dataToInsert.number || `INV-${Date.now()}`,
+        appointmentId: dataToInsert.appointmentId || null,
+        amount: dataToInsert.amount, // Utiliser amount au lieu de totalAmount
+        date: dataToInsert.date,
+        paymentStatus: dataToInsert.paymentStatus,
+        paymentMethod: dataToInsert.paymentMethod || null,
+        notes: dataToInsert.notes || null,
+        tvaExoneration: dataToInsert.tvaExoneration ?? true,
+        tvaMotif: dataToInsert.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
+
+      console.log("Données à insérer en base:", dataForDb);
       
       const { data, error } = await supabase
         .from("Invoice")
-        .insert(dataWithDefaults)
+        .insert(dataForDb)
         .select()
         .single();
 
@@ -258,7 +276,29 @@ export const supabaseInvoiceService = {
         throw error;
       }
 
-      return data as Invoice;
+      // Retourner la facture avec tous les champs attendus par le frontend
+      const invoice: Invoice = {
+        id: data.id,
+        patientId: data.patientId,
+        cabinetId: data.cabinetId,
+        osteopathId: osteopathId,
+        appointmentId: data.appointmentId,
+        date: data.date,
+        number: `INV-${data.id.toString().padStart(4, '0')}`, // Généré côté client
+        status: "DRAFT",
+        totalAmount: data.amount,
+        amount: data.amount,
+        paymentStatus: data.paymentStatus as PaymentStatus,
+        paymentDate: null,
+        paymentMethod: data.paymentMethod,
+        notes: data.notes,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        tvaExoneration: data.tvaExoneration,
+        tvaMotif: data.tvaMotif,
+      };
+
+      return invoice;
     } catch (error) {
       console.error("Erreur createInvoice:", error);
       throw error;
@@ -290,10 +330,23 @@ export const supabaseInvoiceService = {
         delete invoiceData.appointmentId;
       }
       
+      // Nettoyer les données pour enlever les champs qui n'existent pas en base
+      const { 
+        number: _omitNumber, 
+        status: _omitStatus, 
+        totalAmount: _omitTotalAmount,
+        ...cleanedData 
+      } = invoiceData as any;
+
+      // Si totalAmount est fourni, l'utiliser pour amount
+      if (invoiceData.totalAmount !== undefined) {
+        cleanedData.amount = invoiceData.totalAmount;
+      }
+      
       // 3. Préparer le payload avec l'ID inclus
       const updatePayload = {
-        id: id, // Important: inclure l'ID dans le corps
-        ...invoiceData,
+        id: id,
+        ...cleanedData,
         updatedAt: new Date().toISOString(),
       };
 
@@ -327,8 +380,23 @@ export const supabaseInvoiceService = {
       const data = await res.json();
       console.log("Réponse de mise à jour de la facture:", data);
       
-      if (Array.isArray(data) && data.length > 0) return data[0];
-      if (data && typeof data === "object") return data as Invoice;
+      if (Array.isArray(data) && data.length > 0) {
+        const dbInvoice = data[0];
+        return {
+          ...dbInvoice,
+          number: `INV-${dbInvoice.id.toString().padStart(4, '0')}`,
+          status: "DRAFT",
+          totalAmount: dbInvoice.amount,
+        } as Invoice;
+      }
+      if (data && typeof data === "object") {
+        return {
+          ...data,
+          number: `INV-${data.id.toString().padStart(4, '0')}`,
+          status: "DRAFT",
+          totalAmount: data.amount,
+        } as Invoice;
+      }
       
       throw new Error("Aucune donnée retournée lors de la mise à jour de la facture");
     } catch (error) {
