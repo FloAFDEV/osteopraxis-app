@@ -1,3 +1,4 @@
+
 export interface User {
 	id: string;
 	email: string;
@@ -157,13 +158,8 @@ export interface Appointment {
 	user_id?: string | null;
 }
 
-export enum AppointmentStatus {
-	SCHEDULED = "SCHEDULED",
-	COMPLETED = "COMPLETED",
-	CANCELED = "CANCELED",
-	RESCHEDULED = "RESCHEDULED",
-	NO_SHOW = "NO_SHOW",
-}
+// Changed from enum to type union for better compatibility
+export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
 
 // Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
 export interface CreateAppointmentPayload {
@@ -189,6 +185,7 @@ export interface Invoice {
 	amount: number;
 	date: string;
 	paymentStatus: PaymentStatus;
+	cabinetId: number; // Added cabinetId field to match database schema
 	Patient?: {
 		firstName: string;
 		lastName: string;
@@ -260,14 +257,4 @@ export interface DashboardData {
 		enfants: number;
 	}[];
 	childrenCount?: number;
-}
-
-export interface MonthlyGrowth {
-	month: string;
-	patients: number;
-	prevPatients: number;
-	growthText: string;
-	hommes: number;
-	femmes: number;
-	enfants: number;
 }
