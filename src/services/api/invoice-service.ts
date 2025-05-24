@@ -1,4 +1,3 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
@@ -115,7 +114,9 @@ export const invoiceService = {
         // Écraser l'osteopathId dans le payload avec celui de l'utilisateur connecté
         const securedInvoiceData = { 
           ...invoiceData, 
-          osteopathId 
+          osteopathId,
+          // S'assurer que cabinetId est inclus
+          cabinetId: invoiceData.cabinetId || null
         };
         
         return await supabaseInvoiceService.createInvoice(securedInvoiceData);

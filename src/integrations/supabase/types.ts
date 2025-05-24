@@ -175,6 +175,7 @@ export type Database = {
         Row: {
           amount: number
           appointmentId: number | null
+          cabinetId: number | null
           date: string
           id: number
           notes: string | null
@@ -187,6 +188,7 @@ export type Database = {
         Insert: {
           amount: number
           appointmentId?: number | null
+          cabinetId?: number | null
           date?: string
           id?: number
           notes?: string | null
@@ -199,6 +201,7 @@ export type Database = {
         Update: {
           amount?: number
           appointmentId?: number | null
+          cabinetId?: number | null
           date?: string
           id?: number
           notes?: string | null
@@ -214,6 +217,13 @@ export type Database = {
             columns: ["appointmentId"]
             isOneToOne: false
             referencedRelation: "Appointment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Invoice_cabinetId_fkey"
+            columns: ["cabinetId"]
+            isOneToOne: false
+            referencedRelation: "Cabinet"
             referencedColumns: ["id"]
           },
           {
@@ -525,6 +535,13 @@ export type Database = {
           weight_at_birth?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_patient_cabinet"
+            columns: ["cabinetId"]
+            isOneToOne: false
+            referencedRelation: "Cabinet"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "Patient_cabinetId_fkey"
             columns: ["cabinetId"]

@@ -2,6 +2,7 @@
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
+import { getCurrentOsteopathId } from "@/services";
 
 // Empty array for patients to remove fictitious data
 const patients: Patient[] = [];
@@ -38,7 +39,20 @@ export const patientService = {
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
     if (USE_SUPABASE) {
       try {
-        const createdPatient = await supabasePatientService.createPatient(patient);
+        // Récupérer l'osteopathId de l'utilisateur connecté
+        const osteopathId = await getCurrentOsteopathId();
+        if (!osteopathId) {
+          throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
+        }
+        
+        // S'assurer que l'osteopathId est correct et que cabinetId est inclus
+        const securedPatientData = {
+          ...patient,
+          osteopathId,
+          cabinetId: patient.cabinetId || null
+        };
+        
+        const createdPatient = await supabasePatientService.createPatient(securedPatientData);
         return createdPatient;
       } catch (error) {
         console.error("Erreur Supabase createPatient:", error);

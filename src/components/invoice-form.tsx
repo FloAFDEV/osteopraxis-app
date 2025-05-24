@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -7,6 +6,7 @@ import { z } from "zod";
 import { Patient, PaymentStatus, Appointment, Invoice } from "@/types";
 import { api } from "@/services/api";
 import { toast } from "sonner";
+import { CabinetSelector } from "@/components/cabinet/cabinet-selector";
 import {
 	Form,
 	FormControl,
@@ -79,6 +79,9 @@ export const InvoiceForm = ({
 	);
 	const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(
 		initialAppointment || appointment || null
+	);
+	const [selectedCabinetId, setSelectedCabinetId] = useState<number | undefined>(
+		initialInvoice?.cabinetId || appointment?.cabinetId || patient?.cabinetId || undefined
 	);
 	const [searchParams] = useSearchParams();
 
@@ -153,6 +156,7 @@ export const InvoiceForm = ({
 				tvaExoneration: data.tvaExoneration,
 				tvaMotif: data.tvaMotif,
 				notes: data.notes,
+				cabinetId: selectedCabinetId, // Ajouter le cabinet sélectionné
 			};
 
 			if (!data.noConsultation && (selectedAppointment?.id || appointment?.id)) {
@@ -226,7 +230,7 @@ export const InvoiceForm = ({
 						<FormItem 
 							style={{ 
 								position: "absolute", 
-								left: "-5000px",
+								left: "-5000px", 
 								opacity: 0,
 								width: "1px",
 								height: "1px",
@@ -245,6 +249,21 @@ export const InvoiceForm = ({
 						</FormItem>
 					)}
 				/>
+
+				{/* Sélecteur de cabinet */}
+				<div className="mb-6">
+					<FormLabel>Cabinet <span className="text-red-500">*</span></FormLabel>
+					<CabinetSelector
+						selectedCabinetId={selectedCabinetId}
+						onCabinetChange={setSelectedCabinetId}
+						className="w-full mt-2"
+					/>
+					{!selectedCabinetId && (
+						<p className="text-sm text-red-500 mt-1">
+							Veuillez sélectionner un cabinet
+						</p>
+					)}
+				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div className="space-y-4">
@@ -460,7 +479,7 @@ export const InvoiceForm = ({
 					<Button variant="outline" type="button" onClick={onCreate}>
 						{initialInvoice ? "Annuler" : "Retour"}
 					</Button>
-					<Button type="submit">
+					<Button type="submit" disabled={!selectedCabinetId}>
 						{initialInvoice ? "Mettre à jour" : "Créer la facture"}
 					</Button>
 				</div>
