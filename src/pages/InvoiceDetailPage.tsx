@@ -92,7 +92,7 @@ const InvoiceDetailPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <strong>Numéro de Facture:</strong> {invoice.number}
+              <strong>Numéro de Facture:</strong> INV-{invoice.id.toString().padStart(4, '0')}
             </div>
             <div>
               <strong>Date:</strong> {format(new Date(invoice.date), 'dd MMMM yyyy', { locale: fr })}
@@ -101,10 +101,10 @@ const InvoiceDetailPage: React.FC = () => {
               <strong>Patient:</strong> {patient ? `${patient.firstName} ${patient.lastName}` : "N/A"}
             </div>
             <div>
-              <strong>Montant Total:</strong> {invoice.totalAmount} €
+              <strong>Montant Total:</strong> {invoice.amount} €
             </div>
             <div>
-              <strong>Statut:</strong> {invoice.status}
+              <strong>Statut de Paiement:</strong> {invoice.paymentStatus}
             </div>
             <div>
               <strong>Méthode de Paiement:</strong> {invoice.paymentMethod || "N/A"}

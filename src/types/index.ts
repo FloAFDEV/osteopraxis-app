@@ -36,6 +36,7 @@ export type Contraception =
 	| "NATURAL_METHODS"
 	| "STERILIZATION"
 	| "IUD_HORMONAL";
+
 export interface Cabinet {
 	id: number;
 	name: string;
@@ -178,23 +179,26 @@ export interface CreateAppointmentPayload {
 	website?: string; // Ajouté pour le honeypot dans le formulaire
 }
 
+// Interface Invoice mise à jour pour correspondre exactement à la base de données
 export interface Invoice {
 	id: number;
-	patientId: number;
-	appointmentId?: number; // Changed from consultationId to appointmentId, and made optional
-	amount: number;
 	date: string;
+	amount: number;
 	paymentStatus: PaymentStatus;
-	cabinetId: number; // Added cabinetId field to match database schema
+	appointmentId?: number | null;
+	patientId: number;
+	tvaExoneration?: boolean | null;
+	tvaMotif?: string | null;
+	notes?: string | null;
+	paymentMethod?: string | null;
+	cabinetId?: number | null;
+	createdAt?: string;
+	updatedAt?: string;
+	// Champs calculés côté client pour la compatibilité avec l'UI
 	Patient?: {
 		firstName: string;
 		lastName: string;
 	};
-	// Nouveaux champs pour les mentions légales françaises
-	tvaExoneration?: boolean;
-	tvaMotif?: string;
-	paymentMethod?: string;
-	notes?: string;
 }
 
 export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELED";

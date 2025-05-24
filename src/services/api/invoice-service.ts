@@ -105,21 +105,7 @@ export const invoiceService = {
           }
         }
         
-        // Récupérer l'osteopathId de l'utilisateur connecté pour le forcer dans le payload
-        const osteopathId = await getCurrentOsteopathId();
-        if (!osteopathId) {
-          throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
-        }
-        
-        // Écraser l'osteopathId dans le payload avec celui de l'utilisateur connecté
-        const securedInvoiceData = { 
-          ...invoiceData, 
-          osteopathId,
-          // S'assurer que cabinetId est inclus
-          cabinetId: invoiceData.cabinetId || null
-        };
-        
-        return await supabaseInvoiceService.createInvoice(securedInvoiceData);
+        return await supabaseInvoiceService.createInvoice(invoiceData);
       } catch (error) {
         console.error("Erreur Supabase createInvoice:", error);
         throw error;
@@ -143,12 +129,6 @@ export const invoiceService = {
         if (!isOwned) {
           console.error(`[SECURITY VIOLATION] Tentative de mise à jour de la facture ${id} qui n'appartient pas à l'ostéopathe connecté`);
           throw new SecurityViolationError(`Vous n'avez pas accès à cette facture`);
-        }
-        
-        // Empêcher la modification de l'osteopathId et du patientId
-        if (invoiceData.osteopathId !== undefined) {
-          console.warn(`[SECURITY] Tentative de modification de l'osteopathId dans updateInvoice. Cette modification sera ignorée.`);
-          delete invoiceData.osteopathId;
         }
         
         if (invoiceData.patientId !== undefined) {
