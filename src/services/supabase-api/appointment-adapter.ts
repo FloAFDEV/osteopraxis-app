@@ -41,8 +41,6 @@ export const adaptAppointmentToSupabase = (appointment: Partial<Appointment>): a
     date: date,
     start: start,
     // Ne pas inclure end car cette colonne n'existe pas en DB
-    // Si le statut est "CANCELLED", le convertir en "CANCELED" (orthographe en DB)
-    status: appointment.status === "CANCELLED" ? "CANCELED" : appointment.status,
   };
 
   // Nettoyer les propriétés non nécessaires pour Supabase
@@ -67,7 +65,7 @@ export const createAppointmentPayload = (data: any): CreateAppointmentPayload =>
     // end est calculé côté client et n'est pas stocké en DB
     end: new Date(new Date(start).getTime() + 30 * 60000).toISOString(), // Pour satisfaire le type
     date: start, // S'assurer que le champ date est défini
-    status: data.status || "PLANNED",
+    status: data.status || "SCHEDULED",
     notes: data.notes || null,
     reason: data.reason || "",
     notificationSent: data.notificationSent || false,
