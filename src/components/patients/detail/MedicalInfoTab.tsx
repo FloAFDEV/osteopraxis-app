@@ -3,7 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { differenceInYears, format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar } from "lucide-react";
+import {
+	Calendar,
+	Stethoscope,
+	Dumbbell,
+	Eye,
+	Ear,
+	Soup,
+	Heart,
+	FilePlus2,
+	StickyNote,
+	Baby,
+	Activity,
+	Home,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 
@@ -30,7 +43,6 @@ export function MedicalInfoTab({
 			? pastAppointments[0]
 			: null;
 
-	// Déterminer si c'est un enfant (moins de 17 ans)
 	useEffect(() => {
 		if (patient.birthDate) {
 			const age = differenceInYears(
@@ -83,6 +95,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Informations médicales générales"
+				icon={<Stethoscope className="h-5 w-5 text-primary" />}
 				items={[
 					{
 						label: "Médecin généraliste",
@@ -119,6 +132,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Activité physique / Sommeil"
+				icon={<Dumbbell className="h-5 w-5 text-primary" />}
 				items={[
 					{
 						label: "Activité physique",
@@ -137,6 +151,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Ophtalmologie / Dentaire"
+				icon={<Eye className="h-5 w-5 text-primary" />}
 				items={[
 					{
 						label: "Correction de la vue",
@@ -155,6 +170,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="ORL"
+				icon={<Ear className="h-5 w-5 text-primary" />}
 				items={[
 					{
 						label: "Problèmes ORL",
@@ -173,6 +189,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Digestif"
+				icon={<Soup className="h-5 w-5 text-primary" />}
 				items={[
 					{
 						label: "Problèmes digestifs",
@@ -192,6 +209,7 @@ export function MedicalInfoTab({
 			{!isChild && (
 				<MedicalInfoCard
 					title="Gynécologique"
+					icon={<Heart className="h-5 w-5 text-primary" />}
 					items={[
 						{
 							label: "Contraception",
@@ -209,9 +227,9 @@ export function MedicalInfoTab({
 				/>
 			)}
 
-			{/* Nouvelle section pour tous les patients */}
 			<MedicalInfoCard
 				title="Anamnèse complémentaire"
+				icon={<FilePlus2 className="h-5 w-5 text-primary" />}
 				items={[
 					{
 						label: "Examens complémentaires",
@@ -224,10 +242,10 @@ export function MedicalInfoTab({
 				]}
 			/>
 
-			{/* Commentaires additionnels adultes */}
 			{!isChild && patient.other_comments_adult && (
 				<MedicalInfoCard
 					title="Autres commentaires"
+					icon={<StickyNote className="h-5 w-5 text-primary" />}
 					items={[
 						{
 							label: "Notes supplémentaires",
@@ -237,11 +255,11 @@ export function MedicalInfoTab({
 				/>
 			)}
 
-			{/* Sections spécifiques aux enfants */}
 			{isChild && (
 				<>
 					<MedicalInfoCard
 						title="Informations pédiatriques générales"
+						icon={<Baby className="h-5 w-5 text-primary" />}
 						items={[
 							{
 								label: "Grossesse",
@@ -279,6 +297,7 @@ export function MedicalInfoTab({
 
 					<MedicalInfoCard
 						title="Développement et suivi"
+						icon={<Activity className="h-5 w-5 text-primary" />}
 						items={[
 							{
 								label: "Développement moteur",
@@ -316,6 +335,7 @@ export function MedicalInfoTab({
 
 					<MedicalInfoCard
 						title="Environnement et suivi"
+						icon={<Home className="h-5 w-5 text-primary" />}
 						items={[
 							{
 								label: "Mode de garde",
@@ -346,10 +366,12 @@ export function MedicalInfoTab({
 						]}
 					/>
 
-					{/* Commentaires additionnels enfants */}
 					{patient.other_comments_child && (
 						<MedicalInfoCard
 							title="Autres commentaires"
+							icon={
+								<StickyNote className="h-5 w-5 text-primary" />
+							}
 							items={[
 								{
 									label: "Notes supplémentaires",
