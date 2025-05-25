@@ -1,21 +1,13 @@
-
-import { useState } from "react";
-import { Invoice, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-	FileText,
-	Search,
-	Trash2,
-	Printer,
-	Download,
-	StickyNote,
-} from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Invoice, Patient } from "@/types";
+import clsx from "clsx";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Download, FileText, Printer, StickyNote, Trash2 } from "lucide-react";
+import { useState } from "react";
 import ConfirmDeleteInvoiceModal from "./modals/ConfirmDeleteInvoiceModal";
-import clsx from "clsx";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface InvoiceDetailsProps {
 	invoice: Invoice;
@@ -152,7 +144,7 @@ export const InvoiceDetails = ({
 				<CardContent className="p-0 flex flex-col h-full">
 					{/* 🔷 Icônes Print / Download - top right */}
 					<div className="absolute top-4 right-4 flex gap-2 z-10">
-						{onPrint && (
+						{onDownload && (
 							<Button
 								size="icon"
 								variant="outline"
@@ -250,18 +242,6 @@ export const InvoiceDetails = ({
 				<div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
 					{/* Actions à droite (Modifier/Supprimer) */}
 					<div className="flex gap-2 ml-auto">
-						{onEdit && (
-							<Button
-								size="icon"
-								variant="outline"
-								onClick={onEdit}
-								title="Détails"
-								aria-label="Modifier la facture"
-								className="h-10 w-10 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
-							>
-								<Search className="h-5 w-5" />
-							</Button>
-						)}
 						{onDelete && (
 							<Button
 								size="icon"
@@ -278,13 +258,13 @@ export const InvoiceDetails = ({
 
 					{/* Actions à gauche (Imprimer/Télécharger) en mobile uniquement */}
 					{isMobile && (
-						<div className="flex gap-2 hidden">
+						<div className="flex gap-2">
 							{onPrint && (
 								<Button
 									size="sm"
 									variant="outline"
 									onClick={onPrint}
-									className="h-8 px-2 rounded-md border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300 flex items-center hidden"
+									className="h-8 px-2 rounded-md border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300 items-center hidden"
 								>
 									<Printer className="h-4 w-4 mr-1" />
 									<span className="sr-only sm:not-sr-only sm:inline">
