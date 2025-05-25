@@ -1,9 +1,9 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { TranslatedSelect } from "@/components/ui/translated-select";
-import { DateInput } from "@/components/ui/date-input";
 import { WeightHeightBmiFields } from "./WeightHeightBmiFields";
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
@@ -111,17 +111,11 @@ export const GeneralTab = ({
                                     Date de naissance
                                 </FormLabel>
                                 <FormControl>
-                                    <DateInput
-                                        value={field.value ? new Date(field.value) : undefined}
-                                        onChange={(date) => {
-                                            if (date instanceof Date) {
-                                                field.onChange(date.toISOString().split('T')[0]);
-                                            } else if (typeof date === 'string') {
-                                                field.onChange(date);
-                                            } else {
-                                                field.onChange(null);
-                                            }
-                                        }}
+                                    <Input
+                                        type="date"
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
+                                        placeholder="JJ/MM/AAAA"
                                     />
                                 </FormControl>
                                 <FormMessage />

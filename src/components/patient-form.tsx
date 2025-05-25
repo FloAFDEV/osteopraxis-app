@@ -25,7 +25,9 @@ export function PatientForm({
   isLoading = false,
 }: PatientFormProps) {
   const [activeTab, setActiveTab] = useState("general");
-  const [childrenAgesInput, setChildrenAgesInput] = useState("");
+  const [childrenAgesInput, setChildrenAgesInput] = useState(
+    patient?.childrenAges ? patient.childrenAges.join(", ") : ""
+  );
   const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
     selectedCabinetId ? selectedCabinetId.toString() : null
   );
@@ -53,7 +55,8 @@ export function PatientForm({
       lastName: patient?.lastName || "",
       email: patient?.email || "",
       phone: patient?.phone || "",
-      birthDate: patient?.birthDate || null,
+      // Convertir la date en string pour le formulaire
+      birthDate: patient?.birthDate ? new Date(patient.birthDate).toISOString().split('T')[0] : null,
       address: patient?.address || "",
       
       // Informations personnelles
@@ -135,6 +138,17 @@ export function PatientForm({
   const handleSubmit = async (data: PatientFormValues) => {
     try {
       console.log("Form data being submitted:", data);
+      
+      // Traiter les âges des enfants depuis l'input
+      if (data.hasChildren === "true" && childrenAgesInput.trim()) {
+        const ages = childrenAgesInput
+          .split(",")
+          .map(age => parseInt(age.trim()))
+          .filter(age => !isNaN(age));
+        data.childrenAges = ages.length > 0 ? ages : null;
+      } else {
+        data.childrenAges = null;
+      }
       
       if (onSubmit) {
         await onSubmit(data);

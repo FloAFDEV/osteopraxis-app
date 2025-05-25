@@ -22,13 +22,13 @@ const getPatientSchema = (emailRequired: boolean) =>
 			? z.string().email("Email invalide").min(1, "Email requis")
 			: z.string().email("Email invalide").optional().nullable(),
 		phone: z.string().optional().nullable(),
-		notes: z.string().optional().nullable(),
-		birthDate: z.date().optional().nullable(),
+		// Corriger le type pour birthDate - accepter string pour le formulaire
+		birthDate: z.string().optional().nullable(),
 		childrenAges: z.array(z.number()).optional().nullable(),
 		firstName: z.string().min(1, "Prénom requis"),
 		lastName: z.string().min(1, "Nom requis"),
 		gender: z.string().optional().nullable(),
-		hasChildren: z.boolean().optional().nullable(),
+		hasChildren: z.string().optional().nullable(), // Garder en string pour le switch
 		occupation: z.string().optional().nullable(),
 		maritalStatus: z.string().optional().nullable(),
 		contraception: z.string().optional().nullable(),
