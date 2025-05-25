@@ -13,7 +13,6 @@ interface InvoiceDetailsProps {
 	invoice: Invoice;
 	patient?: Patient;
 	patientName?: string;
-	onEdit?: () => void;
 	onDelete?: () => void;
 	onDownload?: () => void;
 	onPrint?: () => void;
@@ -23,7 +22,6 @@ export const InvoiceDetails = ({
 	invoice,
 	patient,
 	patientName,
-	onEdit,
 	onDelete,
 	onDownload,
 	onPrint,
