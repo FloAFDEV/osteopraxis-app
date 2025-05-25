@@ -25,6 +25,10 @@ export function PatientForm({
   isLoading = false,
 }: PatientFormProps) {
   const [activeTab, setActiveTab] = useState("general");
+  const [childrenAgesInput, setChildrenAgesInput] = useState("");
+  const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
+    selectedCabinetId ? selectedCabinetId.toString() : null
+  );
 
   // Calcul de l'âge pour déterminer si c'est un enfant
   const calculateAge = (birthDate: string | null) => {
@@ -49,7 +53,7 @@ export function PatientForm({
       lastName: patient?.lastName || "",
       email: patient?.email || "",
       phone: patient?.phone || "",
-      birthDate: patient?.birthDate ? new Date(patient.birthDate) : undefined,
+      birthDate: patient?.birthDate || null,
       address: patient?.address || "",
       
       // Informations personnelles
@@ -179,15 +183,21 @@ export function PatientForm({
               </TabsList>
 
               <TabsContent value="general">
-                <GeneralTab form={form} />
+                <GeneralTab 
+                  form={form} 
+                  childrenAgesInput={childrenAgesInput}
+                  setChildrenAgesInput={setChildrenAgesInput}
+                  currentCabinetId={currentCabinetId}
+                  setCurrentCabinetId={setCurrentCabinetId}
+                />
               </TabsContent>
 
               <TabsContent value="contact">
-                <ContactTab form={form} />
+                <ContactTab form={form} emailRequired={emailRequired} />
               </TabsContent>
 
               <TabsContent value="medical">
-                <MedicalTab form={form} />
+                <MedicalTab form={form} isChild={isChild} />
               </TabsContent>
 
               <TabsContent value="examinations">
@@ -201,7 +211,7 @@ export function PatientForm({
               )}
 
               <TabsContent value="additional">
-                <AdditionalFieldsTab form={form} />
+                <AdditionalFieldsTab form={form} isChild={isChild} />
               </TabsContent>
             </Tabs>
 
