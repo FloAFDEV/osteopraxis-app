@@ -51,7 +51,8 @@ const getPatientSchema = (emailRequired: boolean) =>
 		currentTreatment: z.string().optional().nullable(),
 		handedness: z.string().optional().nullable(),
 		familyStatus: z.string().optional().nullable(),
-		cabinetId: z.number().optional(), // Ajout du champ cabinetId
+		cabinetId: z.number().optional(),
+		
 		// Champs existants pour tous les patients
 		complementaryExams: z.string().optional().nullable(),
 		generalSymptoms: z.string().optional().nullable(),
@@ -91,6 +92,25 @@ const getPatientSchema = (emailRequired: boolean) =>
         weight: z.number().optional().nullable(),
         height: z.number().optional().nullable(),
         bmi: z.number().optional().nullable(),
+        
+        // Champs manquants ajoutés
+        allergies: z.string().optional().nullable(),
+        avatarUrl: z.string().optional().nullable(),
+        userId: z.string().optional().nullable(),
+        osteopathId: z.number().optional().nullable(),
+        city: z.string().optional().nullable(),
+        postalCode: z.string().optional().nullable(),
+        country: z.string().optional().nullable(),
+        job: z.string().optional().nullable(),
+        alcoholConsumption: z.string().optional().nullable(),
+        hdlm: z.string().optional().nullable(),
+        isDeceased: z.boolean().optional().nullable(),
+        smoker: z.boolean().optional().nullable(),
+        smokerSince: z.number().optional().nullable(),
+        sportActivity: z.string().optional().nullable(),
+        medicalHistory: z.string().optional().nullable(),
+        currentMedication: z.string().optional().nullable(),
+        otherContraception: z.string().optional().nullable(),
 	});
 
 export default getPatientSchema;

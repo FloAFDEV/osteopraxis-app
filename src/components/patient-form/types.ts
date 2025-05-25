@@ -70,6 +70,25 @@ export interface PatientFormValues {
   pediatrician_name?: string | null;
   paramedical_followup?: string | null;
   other_comments_child?: string | null;
+  
+  // Champs manquants identifiés dans Patient mais pas dans le formulaire
+  avatarUrl?: string | null;
+  userId?: string | null;
+  osteopathId?: number | null;
+  city?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+  job?: string | null;
+  alcoholConsumption?: string | null;
+  hdlm?: string | null;
+  isDeceased?: boolean;
+  smoker?: boolean;
+  smokerSince?: number | null;
+  sportActivity?: string | null;
+  medicalHistory?: string | null;
+  currentMedication?: string | null;
+  otherContraception?: string | null;
+  notes?: string | null;
 }
 
 export interface PatientFormProps {
