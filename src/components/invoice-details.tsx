@@ -148,7 +148,7 @@ export const InvoiceDetails = ({
 							<Button
 								size="icon"
 								variant="outline"
-								onClick={onPrint}
+								onClick={onDownload}
 								title="Imprimer"
 								aria-label="Imprimer la note d'honoraire"
 								className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
