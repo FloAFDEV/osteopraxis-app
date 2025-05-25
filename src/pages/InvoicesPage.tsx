@@ -349,9 +349,6 @@ const InvoicesPage = () => {
 												months={months}
 												selectedMonth={selectedMonth}
 												patientDataMap={patientDataMap}
-												onEditInvoice={(id) =>
-													navigate(`/invoices/${id}`)
-												}
 												onDeleteInvoice={(id) => {
 													setSelectedInvoiceId(id);
 													setIsDeleteModalOpen(true);

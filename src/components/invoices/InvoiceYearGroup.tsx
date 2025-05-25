@@ -8,7 +8,6 @@ interface InvoiceYearGroupProps {
   months: Record<string, Invoice[]>;
   selectedMonth: string | null;
   patientDataMap: Map<number, Patient>;
-  onEditInvoice: (id: number) => void;
   onDeleteInvoice: (id: number) => void;
   onPrintInvoice: (invoice: Invoice) => void;
   onDownloadInvoice: (invoice: Invoice) => void;
@@ -20,7 +19,6 @@ export const InvoiceYearGroup = ({
   months,
   selectedMonth,
   patientDataMap,
-  onEditInvoice,
   onDeleteInvoice,
   onPrintInvoice,
   onDownloadInvoice,
@@ -46,7 +44,6 @@ export const InvoiceYearGroup = ({
             monthKey={monthKey}
             monthInvoices={monthInvoices}
             patientDataMap={patientDataMap}
-            onEditInvoice={onEditInvoice}
             onDeleteInvoice={onDeleteInvoice}
             onPrintInvoice={onPrintInvoice}
             onDownloadInvoice={onDownloadInvoice}
