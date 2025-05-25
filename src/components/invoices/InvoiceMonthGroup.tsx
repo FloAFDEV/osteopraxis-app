@@ -1,3 +1,4 @@
+
 import { InvoiceDetails } from "@/components/invoice-details";
 import {
 	AccordionContent,
@@ -14,7 +15,6 @@ interface InvoiceMonthGroupProps {
 	monthKey: string;
 	monthInvoices: Invoice[];
 	patientDataMap: Map<number, Patient>;
-	onEditInvoice: (id: number) => void;
 	onDeleteInvoice: (id: number) => void;
 	onPrintInvoice: (invoice: Invoice) => void;
 	onDownloadInvoice: (invoice: Invoice) => void;
@@ -25,7 +25,6 @@ export const InvoiceMonthGroup = ({
 	monthKey,
 	monthInvoices,
 	patientDataMap,
-	onEditInvoice,
 	onDeleteInvoice,
 	onPrintInvoice,
 	onDownloadInvoice,
@@ -78,7 +77,6 @@ export const InvoiceMonthGroup = ({
 									patient={patientDataMap.get(
 										invoice.patientId
 									)}
-									onEdit={() => onEditInvoice(invoice.id)}
 									onDelete={() => onDeleteInvoice(invoice.id)}
 									onPrint={() => onPrintInvoice(invoice)}
 									onDownload={() =>

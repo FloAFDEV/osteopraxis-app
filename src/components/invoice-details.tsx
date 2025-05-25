@@ -238,7 +238,7 @@ export const InvoiceDetails = ({
 
 				{/* 🔷 Actions - fixées en bas */}
 				<div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-					{/* Actions à droite (Modifier/Supprimer) */}
+					{/* Actions à droite (Supprimer) */}
 					<div className="flex gap-2 ml-auto">
 						{onDelete && (
 							<Button
