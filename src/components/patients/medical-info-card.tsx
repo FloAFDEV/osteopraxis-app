@@ -15,10 +15,10 @@ export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-lg">
-					{icon}
-					{title}
-				</CardTitle>
+				<CardTitle className="text-lg flex items-center gap-2">
+  {icon}
+  <span>{title}</span>
+</CardTitle>
 			</CardHeader>
 			<CardContent className="px-6 pb-6 pt-0">
 				<dl className="space-y-4">
