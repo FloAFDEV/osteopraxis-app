@@ -288,19 +288,19 @@ const PatientDetailPage = () => {
 						<Tabs defaultValue="medical-info">
 							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="medical-info">
-									<Activity className="h-4 w-4 mr-2" />
+									<Activity className="h-4 w-4 mr-2 text-rose-600" />
 									Dossier médical
 								</TabsTrigger>
 								<TabsTrigger value="upcoming-appointments">
-									<Calendar className="h-4 w-4 mr-2" />
+									<Calendar className="h-4 w-4 mr-2 text-emerald-600" />
 									Séances à venir
 								</TabsTrigger>
 								<TabsTrigger value="history">
-									<History className="h-4 w-4 mr-2" />
+									<History className="h-4 w-4 mr-2 text-blue-600" />
 									Historique
 								</TabsTrigger>
 								<TabsTrigger value="invoices">
-									<Activity className="h-4 w-4 mr-2" />
+									<Activity className="h-4 w-4 mr-2 text-yellow-600" />
 									Notes d'honoraires
 								</TabsTrigger>
 							</TabsList>
