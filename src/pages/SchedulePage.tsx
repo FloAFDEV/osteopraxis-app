@@ -34,6 +34,7 @@ import {
 } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
+	ArrowLeft,
 	Calendar as CalendarIcon,
 	ChevronLeft,
 	ChevronRight,
@@ -42,7 +43,6 @@ import {
 	Trash2,
 	User,
 	X,
-	ArrowLeft,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -458,7 +458,7 @@ const SchedulePage = () => {
 																	<Button
 																		variant="ghost"
 																		size="sm"
-																		className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center" // Responsive width, centered text/icon
+																		className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center space-x-1"
 																		onClick={() =>
 																			handleCancelAppointment(
 																				appointment.id
@@ -473,13 +473,14 @@ const SchedulePage = () => {
 																	>
 																		{actionInProgress?.id ===
 																			appointment.id &&
-																		actionInProgress.action ===
-																			"cancel" ? (
-																			<span className="animate-spin mr-1 text-base">
-																				⏳
-																			</span>
-																		) : null}
-																		<span className="ml-1 sm:ml-0">
+																			actionInProgress.action ===
+																				"cancel" && (
+																				<span className="animate-spin text-base">
+																					⏳
+																				</span>
+																			)}
+																		<X className="w-4 h-4" />
+																		<span className="hidden sm:inline">
 																			Annuler
 																		</span>
 																	</Button>
