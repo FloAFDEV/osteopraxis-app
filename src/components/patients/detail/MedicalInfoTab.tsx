@@ -95,7 +95,9 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Informations médicales générales"
-				icon={<Stethoscope className="h-5 w-5 text-primary" />}
+				icon={
+					<Stethoscope className="h-5 w-5 text-primary text-rose-600" />
+				}
 				items={[
 					{
 						label: "Médecin généraliste",
@@ -132,7 +134,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Activité physique / Sommeil"
-				icon={<Dumbbell className="h-5 w-5 text-primary" />}
+				icon={<Dumbbell className="h-5 w-5 text-emerald-600" />}
 				items={[
 					{
 						label: "Activité physique",
@@ -151,7 +153,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Ophtalmologie / Dentaire"
-				icon={<Eye className="h-5 w-5 text-primary" />}
+				icon={<Eye className="h-5 w-5 text-sky-600" />}
 				items={[
 					{
 						label: "Correction de la vue",
@@ -170,7 +172,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="ORL"
-				icon={<Ear className="h-5 w-5 text-primary" />}
+				icon={<Ear className="h-5 w-5 text-indigo-600" />}
 				items={[
 					{
 						label: "Problèmes ORL",
@@ -189,7 +191,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Digestif"
-				icon={<Soup className="h-5 w-5 text-primary" />}
+				icon={<Soup className="h-5 w-5 text-amber-600" />}
 				items={[
 					{
 						label: "Problèmes digestifs",
@@ -209,7 +211,7 @@ export function MedicalInfoTab({
 			{!isChild && (
 				<MedicalInfoCard
 					title="Gynécologique"
-					icon={<Heart className="h-5 w-5 text-primary" />}
+					icon={<Heart className="h-5 w-5 text-pink-600" />}
 					items={[
 						{
 							label: "Contraception",
@@ -229,7 +231,7 @@ export function MedicalInfoTab({
 
 			<MedicalInfoCard
 				title="Anamnèse complémentaire"
-				icon={<FilePlus2 className="h-5 w-5 text-primary" />}
+				icon={<FilePlus2 className="h-5 w-5 text-lime-600" />}
 				items={[
 					{
 						label: "Examens complémentaires",
@@ -245,7 +247,7 @@ export function MedicalInfoTab({
 			{!isChild && patient.other_comments_adult && (
 				<MedicalInfoCard
 					title="Autres commentaires"
-					icon={<StickyNote className="h-5 w-5 text-primary" />}
+					icon={<StickyNote className="h-5 w-5 text-yellow-600" />}
 					items={[
 						{
 							label: "Notes supplémentaires",
@@ -259,7 +261,7 @@ export function MedicalInfoTab({
 				<>
 					<MedicalInfoCard
 						title="Informations pédiatriques générales"
-						icon={<Baby className="h-5 w-5 text-primary" />}
+						icon={<Baby className="h-5 w-5 text-lime-600" />}
 						items={[
 							{
 								label: "Grossesse",
@@ -297,7 +299,7 @@ export function MedicalInfoTab({
 
 					<MedicalInfoCard
 						title="Développement et suivi"
-						icon={<Activity className="h-5 w-5 text-primary" />}
+						icon={<Activity className="h-5 w-5 text-cyan-600" />}
 						items={[
 							{
 								label: "Développement moteur",
@@ -335,7 +337,7 @@ export function MedicalInfoTab({
 
 					<MedicalInfoCard
 						title="Environnement et suivi"
-						icon={<Home className="h-5 w-5 text-primary" />}
+						icon={<Home className="h-5 w-5 text-violet-600" />}
 						items={[
 							{
 								label: "Mode de garde",
@@ -370,7 +372,7 @@ export function MedicalInfoTab({
 						<MedicalInfoCard
 							title="Autres commentaires"
 							icon={
-								<StickyNote className="h-5 w-5 text-primary" />
+								<StickyNote className="h-5 w-5 text-yellow-600" />
 							}
 							items={[
 								{
