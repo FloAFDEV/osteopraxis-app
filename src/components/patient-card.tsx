@@ -102,7 +102,7 @@ export function PatientCard({ patient }: PatientCardProps) {
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="text-sm text-muted-foreground grid gap-1">
+				<div className="text-sm text-muted-foreground grid gap-1 pt-4">
 					<div className="flex items-center">
 						<Calendar className="w-4 h-4 mr-2" />
 						{patient.birthDate
