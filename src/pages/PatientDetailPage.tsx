@@ -294,7 +294,7 @@ const PatientDetailPage = () => {
 								},
 								{
 									label: (
-										<span className="flex items-center gap-2 text-green-700">
+										<span className="flex items-center gap-2 text-green-500">
 											<Hand className="w-4 h-4 text-green-500" />
 											Latéralité
 										</span>
