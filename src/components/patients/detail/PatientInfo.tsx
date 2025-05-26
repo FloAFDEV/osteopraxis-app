@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	Card,
@@ -8,16 +7,23 @@ import {
 } from "@/components/ui/card";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
-import { Baby, Mail, MapPin, Phone, User, Activity } from "lucide-react";
+import {
+	Baby,
+	Mail,
+	MapPin,
+	Phone,
+	Activity,
+	Ruler,
+	Weight,
+} from "lucide-react";
 
 interface PatientInfoProps {
 	patient: Patient;
 }
 
 export function PatientInfo({ patient }: PatientInfoProps) {
-	const getInitials = (firstName: string, lastName: string) => {
-		return `${firstName.charAt(0)}${lastName.charAt(0)}`;
-	};
+	const getInitials = (firstName: string, lastName: string) =>
+		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 
 	const genderColors = {
 		lightBg:
@@ -34,10 +40,10 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				: "dark:bg-gray-800",
 		textColor:
 			patient?.gender === "Homme"
-				? "text-blue-500"
+				? "text-blue-600"
 				: patient?.gender === "Femme"
-				? "text-pink-500"
-				: "text-gray-500",
+				? "text-pink-600"
+				: "text-gray-600",
 		avatarBg:
 			patient?.gender === "Homme"
 				? "bg-blue-200"
@@ -46,37 +52,57 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				: "bg-gray-200",
 	};
 
-	// Calculer l'âge du patient
+	function getAvatarBg(gender?: string) {
+		switch (gender) {
+			case "Homme":
+				return "bg-blue-200 dark:bg-blue-700";
+			case "Femme":
+				return "bg-pink-200 dark:bg-pink-700";
+			default:
+				return "bg-gray-200 dark:bg-gray-700";
+		}
+	}
+
+	function getAvatarTextColor(gender?: string) {
+		switch (gender) {
+			case "Homme":
+				return "text-blue-900 dark:text-blue-100";
+			case "Femme":
+				return "text-pink-900 dark:text-pink-100";
+			default:
+				return "text-gray-900 dark:text-gray-100";
+		}
+	}
+
 	const age = patient.birthDate
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
-		
-	// Informations sur l'IMC
+
 	const bmiInfo = () => {
 		if (!patient.bmi) return null;
-		
-		let bmiCategory = "";
-		let bmiColor = "text-gray-500";
-		
+		let category = "";
+		let color = "text-gray-500";
+
 		if (patient.bmi < 18.5) {
-			bmiCategory = "Insuffisance pondérale";
-			bmiColor = "text-blue-500";
-		} else if (patient.bmi >= 18.5 && patient.bmi < 25) {
-			bmiCategory = "Corpulence normale";
-			bmiColor = "text-green-500";
-		} else if (patient.bmi >= 25 && patient.bmi < 30) {
-			bmiCategory = "Surpoids";
-			bmiColor = "text-yellow-500";
+			category = "Insuffisance pondérale";
+			color = "text-blue-500";
+		} else if (patient.bmi < 25) {
+			category = "Corpulence normale";
+			color = "text-green-600";
+		} else if (patient.bmi < 30) {
+			category = "Surpoids";
+			color = "text-yellow-500";
 		} else {
-			bmiCategory = "Obésité";
-			bmiColor = "text-red-500";
+			category = "Obésité";
+			color = "text-red-500";
 		}
-		
+
 		return (
-			<div className="mt-2">
-				<span className="font-medium">IMC:</span> 
-				<span className={`${bmiColor} font-bold ml-1`}>{patient.bmi}</span>
-				<span className="ml-1">({bmiCategory})</span>
+			<div className="flex items-center gap-2 text-sm">
+				<Activity className="h-4 w-4 text-muted-foreground" />
+				<span className="font-medium">IMC:</span>
+				<span className={`${color} font-semibold`}>{patient.bmi}</span>
+				<span className="text-muted-foreground">({category})</span>
 			</div>
 		);
 	};
@@ -86,11 +112,15 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 			<CardContent
 				className={`p-6 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
 			>
-				<div className="flex items-center space-x-4">
-					<Avatar
-						className={`h-16 w-16 ${genderColors.darkBg} ${genderColors.textColor}`}
-					>
-						<AvatarFallback className={genderColors.avatarBg}>
+				<div className="flex items-center gap-6 mb-6">
+					<Avatar className="h-16 w-16">
+						<AvatarFallback
+							className={`${getAvatarBg(
+								patient.gender
+							)} ${getAvatarTextColor(
+								patient.gender
+							)} flex items-center justify-center text-xl font-bold`}
+						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
 					</Avatar>
@@ -98,52 +128,54 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 						<CardTitle
 							className={`text-2xl font-bold ${genderColors.textColor}`}
 						>
-							<User className="mr-2 h-6 w-6 inline-block" />
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
-						<CardDescription>
-							{patient.gender === "Homme"
-								? "Homme"
-								: patient.gender === "Femme"
-								? "Femme"
-								: "Non spécifié"}
-							, {age !== null ? `${age} ans` : "âge non spécifié"}
+						<CardDescription className="text-sm">
+							{patient.gender ?? "Genre non spécifié"},{" "}
+							{age !== null ? `${age} ans` : "Âge non spécifié"}
 						</CardDescription>
-						{/* Affichage de l'icône enfant si moins de 12 ans */}
 						{age !== null && age < 12 && (
-							<span className="flex items-center text-amber-500 text-sm">
-								<Baby className="h-6 w-6 mr-1" />
+							<div className="text-amber-600 text-sm flex items-center mt-1">
+								<Baby className="h-4 w-4 mr-1" />
 								Enfant
-							</span>
-						)}
-						
-						{/* Afficher les informations IMC */}
-						{patient.bmi && (
-							<div className="flex items-center mt-1">
-								<Activity className="h-5 w-5 mr-1 text-indigo-500" />
-								{bmiInfo()}
-							</div>
-						)}
-						
-						{/* Afficher taille et poids s'ils existent */}
-						{(patient.height || patient.weight) && (
-							<div className="text-sm text-muted-foreground mt-1">
-								{patient.height && `Taille: ${patient.height} cm`}
-								{patient.height && patient.weight && " · "}
-								{patient.weight && `Poids: ${patient.weight} kg`}
 							</div>
 						)}
 					</div>
 				</div>
 
-				{/* Informations de contact */}
-				<div className="mt-6 space-y-4">
-					<div className="flex items-center space-x-2">
-						<MapPin className="h-4 w-4 text-muted-foreground" />
-						<span>{patient.address || "Adresse non renseignée"}</span>
+				<div className="space-y-2 text-sm text-muted-foreground">
+					{/* Taille et poids */}
+					{(patient.height || patient.weight) && (
+						<div className="flex items-center gap-4">
+							{patient.height && (
+								<div className="flex items-center gap-1">
+									<Ruler className="h-4 w-4" />
+									<span>Taille: {patient.height} cm</span>
+								</div>
+							)}
+							{patient.weight && (
+								<div className="flex items-center gap-1">
+									<Weight className="h-4 w-4" />
+									<span>Poids: {patient.weight} kg</span>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* IMC */}
+					{bmiInfo()}
+
+					{/* Adresse */}
+					<div className="flex items-center gap-2">
+						<MapPin className="h-4 w-4" />
+						<span>
+							{patient.address || "Adresse non renseignée"}
+						</span>
 					</div>
-					<div className="flex items-center space-x-2">
-						<Mail className="h-4 w-4 text-muted-foreground" />
+
+					{/* Email */}
+					<div className="flex items-center gap-2">
+						<Mail className="h-4 w-4" />
 						<a
 							href={`mailto:${patient.email}`}
 							className="hover:underline"
@@ -151,9 +183,13 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							{patient.email || "Email non renseigné"}
 						</a>
 					</div>
-					<div className="flex items-center space-x-2">
-						<Phone className="h-4 w-4 text-muted-foreground" />
-						<span>{patient.phone || "Téléphone non renseigné"}</span>
+
+					{/* Téléphone */}
+					<div className="flex items-center gap-2">
+						<Phone className="h-4 w-4" />
+						<span>
+							{patient.phone || "Téléphone non renseigné"}
+						</span>
 					</div>
 				</div>
 			</CardContent>
