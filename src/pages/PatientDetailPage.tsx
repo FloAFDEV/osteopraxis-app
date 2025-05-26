@@ -20,11 +20,16 @@ import { format } from "date-fns";
 import {
 	Activity,
 	AlertCircle,
+	Baby,
 	Calendar,
+	Cigarette,
 	ClipboardList,
+	Hand,
+	Heart,
 	History,
 	Loader2,
 	Stethoscope,
+	Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -195,6 +200,24 @@ const PatientDetailPage = () => {
 		);
 	}
 
+	function formatChildrenAges(ages: number[]): string {
+		if (!ages || ages.length === 0) return "Aucun enfant";
+
+		const sortedAges = ages.sort((a, b) => a - b);
+		const nb = sortedAges.length;
+
+		const agesText = sortedAges
+			.map((age, i) => {
+				if (i === nb - 1 && nb > 1) return `et ${age}`;
+				return `${age}`;
+			})
+			.join(nb === 2 ? " " : ", ");
+
+		return `${
+			nb === 1 ? "Un enfant de" : `${nb} enfants de`
+		} ${agesText} ans`;
+	}
+
 	return (
 		<Layout>
 			<div className="flex flex-col space-y-6 max-w-6xl mx-auto px-4">
@@ -247,38 +270,61 @@ const PatientDetailPage = () => {
 							title="Informations personnelles"
 							items={[
 								{
-									label: "Statut marital",
-									value: translateMaritalStatus(
-										patient.maritalStatus
+									label: (
+										<span className="flex items-center gap-2 text-pink-600">
+											<Users className="w-4 h-4 text-pink-500" />
+											Statut marital
+										</span>
 									),
-								},
-								{
-									label: "Enfants",
 									value:
-										patient.childrenAges &&
-										patient.childrenAges.length > 0
-											? `${
-													patient.childrenAges.length
-											  } enfant(s) (${patient.childrenAges
-													.sort((a, b) => a - b)
-													.join(", ")} ans)`
-											: "Pas d'enfants",
+										translateMaritalStatus(
+											patient.maritalStatus
+										) || "Non renseigné",
 								},
 								{
-									label: "Latéralité",
-									value: translateHandedness(
-										patient.handedness
+									label: (
+										<span className="flex items-center gap-2 text-blue-700">
+											<Baby className="w-4 h-4 text-blue-500" />
+											Enfants
+										</span>
+									),
+									value: formatChildrenAges(
+										patient.childrenAges || []
 									),
 								},
 								{
-									label: "Tabagisme",
-									value: getSmokerInfo(),
+									label: (
+										<span className="flex items-center gap-2 text-green-700">
+											<Hand className="w-4 h-4 text-green-500" />
+											Latéralité
+										</span>
+									),
+									value:
+										translateHandedness(
+											patient.handedness
+										) || "Non renseignée",
 								},
 								{
-									label: "Contraception",
-									value: translateContraception(
-										patient.contraception
+									label: (
+										<span className="flex items-center gap-2 text-orange-700">
+											<Cigarette className="w-4 h-4 text-orange-500" />
+											Tabagisme
+										</span>
 									),
+									value: getSmokerInfo() || "Non renseigné",
+								},
+								{
+									label: (
+										<span className="flex items-center gap-2 text-purple-700">
+											<Heart className="w-4 h-4 text-purple-500" />
+											Contraception
+										</span>
+									),
+									value:
+										translateContraception(
+											patient.contraception
+										) ||
+										"Non concerné(e) / Non renseigné(e)",
 								},
 							]}
 						/>
