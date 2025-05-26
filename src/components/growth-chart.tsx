@@ -71,17 +71,23 @@ export function GrowthChart({ data }: GrowthChartProps) {
 					<XAxis dataKey="month" tick={{ fontSize: 12 }} />
 					<YAxis tick={{ fontSize: 12 }} />
 					<Tooltip
-						formatter={(value, name) => [
-							value,
-							name === "patients"
-								? "Patients"
-								: "Année précédente",
-						]}
+						formatter={(value, name) => {
+							if (name === "patients")
+								return [value, "Cette année"];
+							if (name === "prevPatients")
+								return [value, "Année précédente"];
+							return [value, name];
+						}}
 						labelFormatter={(label) => `Mois: ${label}`}
 						contentStyle={{
-							backgroundColor: "var(--card)",
-							borderColor: "var(--border)",
+							backgroundColor: "#0891b2",
+							borderColor: "#0891b2",
 							borderRadius: "6px",
+						}}
+						itemStyle={{ color: "#ffffff", fontSize: "14px" }}
+						labelStyle={{
+							color: "#ffffff",
+							fontWeight: "bold",
 						}}
 					/>
 					<Legend content={<CustomBarLegend />} />
