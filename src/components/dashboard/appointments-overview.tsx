@@ -2,9 +2,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/services/api";
 import { Appointment, DashboardData } from "@/types";
-import { format, isToday, isTomorrow, parseISO } from "date-fns";
+import {
+	differenceInYears,
+	format,
+	isToday,
+	isTomorrow,
+	parseISO,
+} from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, Clock, User } from "lucide-react";
+import { Baby, Calendar, Clock, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -93,6 +99,13 @@ export function AppointmentsOverview({
 		return patients.find((p) => p.id === patientId);
 	};
 
+	const isChild = (patient: any) => {
+		if (!patient?.birthDate) return false;
+		const birthDate = parseISO(patient.birthDate);
+		const age = differenceInYears(new Date(), birthDate);
+		return age < 12;
+	};
+
 	const handleAppointmentClick = (appointmentId: number) => {
 		try {
 			// Fix: Assurons-nous que l'ID est un nombre valide
@@ -145,7 +158,7 @@ export function AppointmentsOverview({
 					isHighlighted ? "bg-blue-50 dark:bg-blue-900/10" : ""
 				} ${!isLastItem ? "border-b" : ""}`}
 			>
-				<div className="flex-shrink-0 mr-4">
+				<div className="flex-shrink-0 mr-4 flex items-center space-x-2">
 					<div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
 						<User
 							className={`h-6 w-6 ${
@@ -158,10 +171,11 @@ export function AppointmentsOverview({
 						/>
 					</div>
 				</div>
+
 				<div className="flex-1 min-w-0">
 					<Link
 						to={`/patients/${appointment.patientId}`}
-						className={`font-medium hover:underline text-base truncate block ${
+						className={`font-medium hover:underline text-base truncate inline-flex items-center ${
 							patient?.gender === "Femme"
 								? "text-pink-700 dark:text-pink-400"
 								: patient?.gender === "Homme"
@@ -172,7 +186,13 @@ export function AppointmentsOverview({
 						{patient
 							? `${patient.firstName} ${patient.lastName}`
 							: `Patient #${appointment.patientId}`}
+						{isChild(patient) && (
+							<Baby className="h-5 w-5 text-emerald-400 ml-1">
+								<title>Enfant</title>
+							</Baby>
+						)}
 					</Link>
+
 					<p className="text-sm text-muted-foreground truncate">
 						{appointment.reason}
 					</p>
