@@ -1,23 +1,22 @@
-
-import { format, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
-import {
-	Clock,
-	Calendar,
-	FileText,
-	Edit,
-	X,
-	MessageSquare,
-} from "lucide-react";
-import { Appointment, Patient, AppointmentStatus } from "@/types";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Appointment, AppointmentStatus, Patient } from "@/types";
 import {
 	formatAppointmentDate,
 	formatAppointmentTime,
 } from "@/utils/date-utils";
+import { differenceInYears, parseISO } from "date-fns";
+import {
+	Baby,
+	Calendar,
+	Clock,
+	Edit,
+	FileText,
+	MessageSquare,
+	X,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface AppointmentCardProps {
 	appointment: Appointment;
@@ -36,8 +35,9 @@ export function AppointmentCard({
 	const dateField = appointment.start || appointment.date;
 	const formattedDate = formatAppointmentDate(dateField, "EEEE d MMMM yyyy");
 	const formattedTime = formatAppointmentTime(dateField);
-	const navigate = useNavigate();
-
+	const isChild = patient?.birthDate
+		? differenceInYears(new Date(), parseISO(patient.birthDate)) < 12
+		: false;
 	const getStatusBadge = (status: AppointmentStatus) => {
 		switch (status) {
 			case "SCHEDULED":
@@ -64,7 +64,7 @@ export function AppointmentCard({
 			<CardContent className="p-6">
 				<div className="flex justify-between items-start mb-4">
 					<div>
-						<h3 className="text-lg font-medium">
+						<h3 className="text-lg font-medium flex items-center gap-2">
 							{patient ? (
 								<Link
 									to={`/patients/${patient.id}`}
@@ -74,6 +74,9 @@ export function AppointmentCard({
 								</Link>
 							) : (
 								`Patient #${appointment.patientId}`
+							)}
+							{isChild && (
+								<Baby className="h-4 w-4 text-emerald-400" />
 							)}
 						</h3>
 					</div>
