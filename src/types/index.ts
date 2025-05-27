@@ -132,3 +132,30 @@ export interface Cabinet {
   updatedAt: string;
   tenant_id?: string;
 }
+
+export type PaymentStatus = "PAID" | "UNPAID" | "PARTIALLY_PAID";
+
+export interface DashboardData {
+  totalPatients: number;
+  appointmentsToday: number;
+  revenueThisMonth: number;
+  pendingInvoices: number;
+  weeklyAppointments: Array<{
+    name: string;
+    appointments: number;
+  }>;
+  monthlyRevenue: Array<{
+    name: string;
+    revenue: number;
+  }>;
+  patientsByAge: Array<{
+    range: string;
+    count: number;
+  }>;
+  patientsByGender: Array<{
+    gender: string;
+    count: number;
+    percentage: number;
+  }>;
+  recentAppointments: Appointment[];
+}

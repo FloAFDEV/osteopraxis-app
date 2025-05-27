@@ -115,8 +115,8 @@ export function AppointmentForm({
 	const form = useForm<AppointmentFormValues>({
 		resolver: zodResolver(appointmentFormSchema),
 		defaultValues: {
-			patientId: defaultValues?.patientId || Number(patientIdParam) || 1,
-			cabinetId: defaultValues?.cabinetId || (cabinets.length > 0 ? cabinets[0].id : 1),
+			patientId: defaultValues?.patientId || Number(patientIdParam) || undefined,
+			cabinetId: defaultValues?.cabinetId || (cabinets.length > 0 ? cabinets[0].id : undefined),
 			date: defaultValues?.date
 				? new Date(defaultValues.date)
 				: new Date(),
@@ -127,6 +127,13 @@ export function AppointmentForm({
 			website: defaultValues?.website || "", // Honeypot field
 		},
 	});
+
+	// Mettre à jour le defaultValue du cabinet quand les cabinets sont chargés
+	useEffect(() => {
+		if (cabinets.length > 0 && !form.getValues("cabinetId")) {
+			form.setValue("cabinetId", cabinets[0].id);
+		}
+	}, [cabinets, form]);
 
 	const onSubmit = async (data: AppointmentFormValues) => {
 		try {
@@ -140,7 +147,7 @@ export function AppointmentForm({
 			// Combine date and time
 			const dateTime = new Date(data.date);
 			const timeToUse = useCustomTime ? customTime : data.time;
-			const [hours, minutes] = timeToUse.split(":").map(Number);
+			const [hours, minutes] = timeToUse!.split(":").map(Number);
 
 			// Vérifier que l'heure est entre 8h et 20h
 			if (hours < 8 || hours >= 20) {
@@ -251,7 +258,7 @@ export function AppointmentForm({
 								onValueChange={(value) =>
 									field.onChange(Number(value))
 								}
-								defaultValue={String(field.value)}
+								value={field.value ? String(field.value) : ""}
 							>
 								<FormControl>
 									<SelectTrigger>
@@ -259,7 +266,6 @@ export function AppointmentForm({
 									</SelectTrigger>
 								</FormControl>
 
-								{/* ✅ SelectContent doit être ici, à l'intérieur de Select */}
 								<SelectContent>
 									{[...patients]
 										.sort((a, b) =>
@@ -319,7 +325,7 @@ export function AppointmentForm({
 								onValueChange={(value) =>
 									field.onChange(Number(value))
 								}
-								defaultValue={String(field.value)}
+								value={field.value ? String(field.value) : ""}
 							>
 								<FormControl>
 									<SelectTrigger>
