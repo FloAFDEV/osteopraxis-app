@@ -5,11 +5,11 @@ import { format } from "date-fns";
 const translatePaymentStatus = (status: string) => {
 	switch (status) {
 		case "CANCELED":
-			return "Annulé";
+			return "Annulée";
 		case "PAID":
-			return "Payé";
+			return "Payée";
 		case "PENDING":
-			return "En attente";
+			return "A régulariser";
 		default:
 			return status;
 	}
