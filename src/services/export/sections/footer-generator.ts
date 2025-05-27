@@ -19,22 +19,22 @@ const applyHeaderStyles = (row: ExcelJS.Row) => {
 	row.font = {
 		name: "Arial",
 		bold: true,
-		size: 12,
-		color: { argb: "FF2E5984" },
+		size: 20,
+		color: { argb: "FFFFFFFF" }, // police blanche
 	};
 	row.alignment = { horizontal: "center", vertical: "middle" };
-	row.height = 20;
+	row.height = 30;
 	row.eachCell({ includeEmpty: true }, (cell) => {
 		cell.fill = {
 			type: "pattern",
 			pattern: "solid",
-			fgColor: { argb: "FFDCE6F1" },
+			fgColor: { argb: "FF2E5984" }, // fond bleu
 		};
 		cell.border = {
-			top: { style: "thin", color: { argb: "FF2E5984" } },
-			left: { style: "thin", color: { argb: "FF2E5984" } },
-			bottom: { style: "thin", color: { argb: "FF2E5984" } },
-			right: { style: "thin", color: { argb: "FF2E5984" } },
+			top: { style: "thin", color: { argb: "FFFFFFFF" } },
+			left: { style: "thin", color: { argb: "FFFFFFFF" } },
+			bottom: { style: "thin", color: { argb: "FFFFFFFF" } },
+			right: { style: "thin", color: { argb: "FFFFFFFF" } },
 		};
 	});
 };
@@ -49,9 +49,9 @@ const applyCellBorders = (cell: ExcelJS.Cell) => {
 };
 
 const applyDataRowStyles = (row: ExcelJS.Row) => {
-	row.font = { name: "Arial", size: 11, color: { argb: "FF2E5984" } };
+	row.font = { name: "Arial", size: 20, color: { argb: "FF2E5984" } };
 	row.alignment = { horizontal: "center", vertical: "middle" };
-	row.height = 18;
+	row.height = 25;
 	row.eachCell({ includeEmpty: true }, (cell) => {
 		applyCellBorders(cell);
 	});
@@ -104,7 +104,7 @@ export const generateTableSection = (
 		noInvoiceCell.value = "Aucune facture sur cette période";
 		noInvoiceCell.font = {
 			name: "Arial",
-			size: 12,
+			size: 20,
 			italic: true,
 			color: { argb: "FF888888" },
 		};
@@ -157,7 +157,7 @@ export const generateFooterSection = (
 	invoices: Invoice[],
 	currentYear: string
 ): void => {
-	// Barre bleue (A17:G17)
+	// Barre bleue (A{lastRow+1}:G{lastRow+1})
 	const blueLineRow = lastRow + 1;
 	worksheet.mergeCells(`A${blueLineRow}:G${blueLineRow}`);
 	const blueLineCell = worksheet.getCell(`A${blueLineRow}`);
@@ -168,7 +168,7 @@ export const generateFooterSection = (
 	};
 	worksheet.getRow(blueLineRow).height = 18;
 
-	// Résumé et total (A19:G19)
+	// Résumé et total (A{blueLineRow+2}:G{blueLineRow+2})
 	const summaryRow = blueLineRow + 2;
 	worksheet.mergeCells(`A${summaryRow}:C${summaryRow}`);
 	const summaryCell = worksheet.getCell(`A${summaryRow}`);
@@ -176,20 +176,20 @@ export const generateFooterSection = (
 	summaryCell.font = {
 		name: "Arial",
 		bold: true,
-		size: 12,
+		size: 20,
 		color: { argb: "FF2E5984" },
 	};
 	summaryCell.alignment = {
 		horizontal: "center",
 		vertical: "middle",
 	};
-	worksheet.getRow(summaryRow).height = 18;
+	worksheet.getRow(summaryRow).height = 25;
 
 	worksheet.getCell(`D${summaryRow}`).value = "TOTAL";
 	worksheet.getCell(`D${summaryRow}`).font = {
 		name: "Arial",
 		bold: true,
-		size: 14,
+		size: 20,
 		color: { argb: "FF2E5984" },
 	};
 	worksheet.getCell(`D${summaryRow}`).alignment = {
@@ -197,20 +197,22 @@ export const generateFooterSection = (
 		vertical: "middle",
 	};
 
-	// Somme hors annulées
-	const canceledTotal = invoices
-		.filter((invoice) => invoice.paymentStatus === "CANCELED")
-		.reduce((acc, invoice) => acc + (invoice.amount || 0), 0);
+	// Calcul du total dynamique en fonction du filtre
+	// La colonne "amount" est la 5ème, donc colonne E
+	// startRow est headerRow+1, lastRow est lastRow (dernier data row)
+	const amountStartRow = headerRow + 1;
+	const amountEndRow = lastRow;
 
-	const totalAmount = invoices
-		.filter((invoice) => invoice.paymentStatus !== "CANCELED")
-		.reduce((acc, invoice) => acc + (invoice.amount || 0), 0);
-
-	worksheet.getCell(`F${summaryRow}`).value = totalAmount;
+	worksheet.getCell(`F${summaryRow}`).value = {
+		formula: `SUBTOTAL(109,E${amountStartRow}:E${amountEndRow})`,
+		result: invoices
+			.filter((invoice) => invoice.paymentStatus !== "CANCELED")
+			.reduce((acc, invoice) => acc + (invoice.amount || 0), 0),
+	};
 	worksheet.getCell(`F${summaryRow}`).font = {
 		name: "Arial",
 		bold: true,
-		size: 14,
+		size: 20,
 		color: { argb: "FF2E5984" },
 	};
 	worksheet.getCell(`F${summaryRow}`).numFmt = "# ##0.00 €";
@@ -219,6 +221,10 @@ export const generateFooterSection = (
 		vertical: "middle",
 	};
 
+	// Lignes informations factures annulées
+	const canceledTotal = invoices
+		.filter((invoice) => invoice.paymentStatus === "CANCELED")
+		.reduce((acc, invoice) => acc + (invoice.amount || 0), 0);
 	const canceledCount = invoices.filter(
 		(invoice) => invoice.paymentStatus === "CANCELED"
 	).length;
@@ -228,7 +234,7 @@ export const generateFooterSection = (
 	worksheet.getCell(`F${summaryRow + 1}`).value = canceledAmountMessage;
 	worksheet.getCell(`F${summaryRow + 1}`).font = {
 		name: "Arial",
-		size: 12,
+		size: 20,
 		color: { argb: "FF888888" },
 	};
 	worksheet.getCell(`F${summaryRow + 1}`).alignment = {
@@ -253,17 +259,22 @@ export const generateFooterSection = (
 	labelCell.font = {
 		name: "Arial",
 		bold: true,
-		size: 12,
+		size: 20,
 		color: { argb: "FF2E5984" },
 	};
 	labelCell.alignment = { horizontal: "right", vertical: "middle" };
 
 	const totalReminderCell = worksheet.getCell(`F${totalReminderRow}`);
-	totalReminderCell.value = totalAmount;
+	totalReminderCell.value = {
+		formula: `SUBTOTAL(109,E${amountStartRow}:E${amountEndRow})`,
+		result: invoices
+			.filter((invoice) => invoice.paymentStatus !== "CANCELED")
+			.reduce((acc, invoice) => acc + (invoice.amount || 0), 0),
+	};
 	totalReminderCell.font = {
 		name: "Arial",
 		bold: true,
-		size: 12,
+		size: 20,
 		color: { argb: "FF2E5984" },
 	};
 	totalReminderCell.numFmt = "# ##0.00 €";
@@ -278,46 +289,31 @@ export const generateFooterSection = (
 	// Nombre total de paiements (encadré aussi)
 	const totalCountRow = totalReminderRow + 1;
 	worksheet.mergeCells(`A${totalCountRow}:E${totalCountRow}`);
-	const countLabelCell = worksheet.getCell(`A${totalCountRow}`);
-	countLabelCell.value = `🧾 Nombre total de paiements : ${
-		invoices.filter((inv) => inv.paymentStatus !== "CANCELED").length
-	}`;
-	countLabelCell.font = {
-		name: "Arial",
-		italic: true,
-		size: 11,
-		color: { argb: "FF2E5984" },
-	};
-	countLabelCell.alignment = { horizontal: "right", vertical: "middle" };
-
-	const countValueCell = worksheet.getCell(`F${totalCountRow}`);
-	countValueCell.value = invoices.filter(
-		(inv) => inv.paymentStatus !== "CANCELED"
-	).length;
-	countValueCell.font = {
+	const totalCountLabelCell = worksheet.getCell(`A${totalCountRow}`);
+	totalCountLabelCell.value = "Nombre total de paiements (hors annulées)";
+	totalCountLabelCell.font = {
 		name: "Arial",
 		bold: true,
 		size: 20,
 		color: { argb: "FF2E5984" },
 	};
-	countValueCell.alignment = { horizontal: "center", vertical: "middle" };
-	countValueCell.border = {
+	totalCountLabelCell.alignment = { horizontal: "right", vertical: "middle" };
+
+	const totalCountCell = worksheet.getCell(`F${totalCountRow}`);
+	totalCountCell.value = invoices.filter(
+		(invoice) => invoice.paymentStatus !== "CANCELED"
+	).length;
+	totalCountCell.font = {
+		name: "Arial",
+		bold: true,
+		size: 20,
+		color: { argb: "FF2E5984" },
+	};
+	totalCountCell.alignment = { horizontal: "center", vertical: "middle" };
+	totalCountCell.border = {
 		top: { style: "thin", color: { argb: "FF2E5984" } },
 		left: { style: "thin", color: { argb: "FF2E5984" } },
 		bottom: { style: "thin", color: { argb: "FF2E5984" } },
 		right: { style: "thin", color: { argb: "FF2E5984" } },
 	};
-
-	// Pied de page (A20:G20)
-	const footerRow = totalCountRow + 2;
-	worksheet.mergeCells(`A${footerRow}:G${footerRow}`);
-	const footerCell = worksheet.getCell(`A${footerRow}`);
-	footerCell.value = "Document généré automatiquement – PatientHub";
-	footerCell.font = {
-		name: "Arial",
-		size: 10,
-		italic: true,
-		color: { argb: "FF888888" },
-	};
-	footerCell.alignment = { horizontal: "center" };
 };
