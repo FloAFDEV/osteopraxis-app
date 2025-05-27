@@ -497,7 +497,7 @@ const SchedulePage = () => {
 																				disabled={
 																					isProcessingAction
 																				}
-																				title="Supprimer ce Séance"
+																				title="Supprimer cette séance"
 																			>
 																				<Trash2 className="h-4 w-4 sm:mr-1" />
 																			</Button>
