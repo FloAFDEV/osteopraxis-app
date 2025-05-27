@@ -1,97 +1,144 @@
-
 export interface User {
-	id: number;
-	auth_id: string;
+	id: string;
 	email: string;
-	firstName: string;
-	lastName: string;
-	phone: string;
-	address: string;
-	city: string;
-	zip: string;
-	country: string;
-	createdAt: string;
-	updatedAt: string;
-	role: "ADMIN" | "OSTEOPATH" | "PATIENT";
-	status: "active" | "inactive" | "pending";
-	avatarUrl: string | null;
-	website: string | null;
-	siret: string | null;
-	adeli_number: string | null;
-	ape_code: string | null;
-	professionalProfileId: number | null;
-	tenant_id?: string;
-	osteopathId?: number | null;
+	first_name: string | null;
+	last_name: string | null;
+	role: Role;
+	created_at: string;
+	updated_at: string;
+	osteopathId: number | null;
 }
 
-export interface Osteopath {
+export type Role = "ADMIN" | "OSTEOPATH";
+
+// Ajout des types manquants
+export type Gender = "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
+export type MaritalStatus =
+	| "SINGLE"
+	| "MARRIED"
+	| "DIVORCED"
+	| "WIDOWED"
+	| "SEPARATED"
+	| "ENGAGED"
+	| "PARTNERED";
+export type Handedness = "LEFT" | "RIGHT" | "AMBIDEXTROUS";
+export type Contraception =
+	| "NONE"
+	| "PILLS"
+	| "CONDOM"
+	| "IMPLANTS"
+	| "DIAPHRAGM"
+	| "IUD"
+	| "INJECTION"
+	| "PATCH"
+	| "RING"
+	| "NATURAL_METHODS"
+	| "STERILIZATION"
+	| "IUD_HORMONAL";
+
+export interface Cabinet {
 	id: number;
 	name: string;
-	userId: string;
+	address: string;
+	city: string;
+	postalCode: string;
+	phone: string | null;
+	email: string | null;
+	siret: string | null;
+	iban: string | null;
+	bic: string | null;
+	country: string;
+	osteopathId: number;
 	createdAt: string;
 	updatedAt: string;
-	authId?: string | null;
-	siret?: string | null;
-	adeli_number?: string | null;
-	ape_code?: string | null;
-	professional_title?: string | null;
+	imageUrl?: string | null;
+	logoUrl?: string | null;
+	professionalProfileId?: number | null;
+	tenant_id?: string | null;
 }
 
 export interface Patient {
 	id: number;
 	firstName: string;
 	lastName: string;
-	birthDate: string | null;
-	gender: "Homme" | "Femme" | "Autre" | null;
-	phone: string | null;
 	email: string | null;
+	phone: string | null;
+	birthDate: string | null;
 	address: string | null;
-	city: string | null;
-	zip: string | null;
-	country: string | null;
-	notes: string | null;
-	createdAt: string;
-	updatedAt: string;
-	userId: number | null;
-	emergencyContactName: string | null;
-	emergencyContactPhone: string | null;
-	bloodType:
-		| "A+"
-		| "A-"
-		| "B+"
-		| "B-"
-		| "AB+"
-		| "AB-"
-		| "O+"
-		| "O-"
-		| "Unknown"
-		| null;
+
+	gender: "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
 	height: number | null;
 	weight: number | null;
-	medicalHistory: string | null;
-	allergies: string | null;
-	avatarUrl: string | null;
-	job: string | null;
-	maritalStatus:
-		| "Single"
-		| "Married"
-		| "Divorced"
-		| "Widowed"
-		| "Other"
-		| null;
-	tenant_id?: string;
-	osteopathId?: number | null;
-	cabinetId?: number | null;
-	currentTreatment?: string | null;
-}
-
-export interface ProfessionalProfile {
-	id: number;
-	name: string;
-	description: string;
+	bmi: number | null;
+	osteopathId: string | number | null;
+	cabinetId: number | null;
 	createdAt: string;
 	updatedAt: string;
-	tenant_id?: string;
+	userId: string | null;
+	avatarUrl: string | null;
+	childrenAges: number[] | null;
+	complementaryExams: string | null;
+	generalSymptoms: string | null;
+	pregnancyHistory: string | null;
+	birthDetails: string | null;
+	developmentMilestones: string | null;
+	sleepingPattern: string | null;
+	feeding: string | null;
+	behavior: string | null;
+	childCareContext: string | null;
+	isExSmoker: boolean | null;
+	smokingSince: string | null;
+	smokingAmount: string | null;
+	quitSmokingDate: string | null;
+
+	// Champs ajoutés existants en base de données
+	currentTreatment?: string | null;
+	hdlm?: string | null;
+	hasVisionCorrection?: boolean;
+	isSmoker?: boolean;
+	isDeceased?: boolean;
+	maritalStatus?: string | null;
+	occupation?: string | null;
+	physicalActivity?: string | null;
+	hasChildren?: string | null;
+	generalPractitioner?: string | null;
+	entProblems?: string | null;
+	entDoctorName?: string | null;
+	digestiveProblems?: string | null;
+	digestiveDoctorName?: string | null;
+	ophtalmologistName?: string | null;
+	surgicalHistory?: string | null;
+	traumaHistory?: string | null;
+	rheumatologicalHistory?: string | null;
+	handedness?: string | null;
+	contraception?: string | null;
+	familyStatus?: string | null;
+
+	// Nouveaux champs généraux
+	ent_followup: string | null;
+	intestinal_transit: string | null;
+	sleep_quality: string | null;
+	fracture_history: string | null;
+	dental_health: string | null;
+	sport_frequency: string | null;
+	gynecological_history: string | null;
+	other_comments_adult: string | null;
+
+	// Nouveaux champs spécifiques aux enfants
+	fine_motor_skills: string | null;
+	gross_motor_skills: string | null;
+	weight_at_birth: number | null;
+	height_at_birth: number | null;
+	head_circumference: number | null;
+	apgar_score: string | null;
+	childcare_type: string | null;
+	school_grade: string | null;
+	pediatrician_name: string | null;
+	paramedical_followup: string | null;
+	other_comments_child: string | null;
+
+	// Champs requis par le type
+	allergies: string | null;
 }
 
 export interface Appointment {
@@ -101,96 +148,117 @@ export interface Appointment {
 	osteopathId: number;
 	start: string;
 	end: string;
-	date: string;
-	reason: string;
 	status: AppointmentStatus;
 	notes: string | null;
 	createdAt: string;
 	updatedAt: string;
+	date: string; // Rendu obligatoire pour compatibilité
+	reason: string;
 	notificationSent: boolean;
-	tenant_id?: string;
+	user_id?: string | null;
 }
 
-export type AppointmentStatus =
-	| "SCHEDULED"
-	| "COMPLETED"
-	| "CANCELED"
-	| "RESCHEDULED"
-	| "NO_SHOW";
+// Changed from enum to type union for better compatibility
+export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
 
-export interface Invoice {
-	id: number;
+// Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
+export interface CreateAppointmentPayload {
 	patientId: number;
 	cabinetId: number;
-	appointmentId: number | null;
+	osteopathId: number;
+	start: string;
+	end: string; // Gardé pour compatibilité avec le code client mais non utilisé en DB
+	date: string; // Rendu obligatoire pour compatibilité
+	reason: string;
+	status: AppointmentStatus;
+	notes?: string | null;
+	notificationSent: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+	website?: string; // Ajouté pour le honeypot dans le formulaire
+	user_id?: string | null; // Ajouté pour résoudre l'erreur TypeScript
+}
+
+// Interface Invoice mise à jour pour correspondre exactement à la base de données
+export interface Invoice {
+	id: number;
 	date: string;
-	dueDate: string;
 	amount: number;
-	paymentStatus: "PAID" | "PENDING" | "CANCELED";
-	paymentMethod: "Cash" | "Card" | "Check" | "Other";
-	notes: string | null;
-	createdAt: string;
-	updatedAt: string;
-	tenant_id?: string;
-	tvaExoneration?: boolean;
+	paymentStatus: PaymentStatus;
+	appointmentId?: number | null;
+	patientId: number;
+	tvaExoneration?: boolean | null;
 	tvaMotif?: string | null;
+	notes?: string | null;
+	paymentMethod?: string | null;
+	cabinetId?: number | null;
+	createdAt?: string;
+	updatedAt?: string;
+	// Champs calculés côté client pour la compatibilité avec l'UI
+	Patient?: {
+		firstName: string;
+		lastName: string;
+	};
 }
 
-export interface Cabinet {
-  id: number;
-  name: string;
-  address: string;
-  phone?: string;
-  email?: string;
-  osteopathId: number;
-  professionalProfileId?: number;
-  logoUrl?: string;
-  imageUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  tenant_id?: string;
-}
-
+export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELED";
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 
+export interface Osteopath {
+	id: number;
+	userId: string;
+	name: string;
+	professional_title: string;
+	adeli_number: string | null;
+	siret: string | null;
+	ape_code: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface AuthState {
+	user: User | null;
+	isAuthenticated: boolean;
+	token: string | null;
+	message?: string;
+	needsProfileSetup?: boolean;
+}
+
+// Ajout des types manquants pour le dashboard
+export interface MonthlyGrowth {
+	month: string;
+	patients: number;
+	prevPatients: number;
+	growthText: string;
+	hommes: number;
+	femmes: number;
+	enfants: number;
+}
+
 export interface DashboardData {
-  totalPatients: number;
-  appointmentsToday: number;
-  revenueThisMonth: number;
-  pendingInvoices: number;
-  weeklyAppointments: Array<{
-    name: string;
-    appointments: number;
-  }>;
-  monthlyRevenue: Array<{
-    name: string;
-    revenue: number;
-  }>;
-  patientsByAge: Array<{
-    range: string;
-    count: number;
-  }>;
-  patientsByGender: Array<{
-    gender: string;
-    count: number;
-    percentage: number;
-  }>;
-  recentAppointments: Appointment[];
-  
-  // Additional properties needed by components
-  nextAppointment?: string | null;
-  thirtyDayGrowthPercentage?: number;
-  newPatientsThisMonth?: number;
-  newPatientsLast30Days?: number;
-  annualGrowthPercentage?: number;
-  newPatientsThisYear?: number;
-  maleCount?: number;
-  femaleCount?: number;
-  childrenCount?: number;
-  monthlyGrowth?: Array<{
-    month: string;
-    patients: number;
-    growthText: string;
-  }>;
-  newPatientsLastYear?: number;
+	totalPatients: number;
+	maleCount: number;
+	femaleCount: number;
+	averageAge: number;
+	averageAgeMale: number;
+	averageAgeFemale: number;
+	newPatientsThisMonth: number;
+	newPatientsThisYear: number;
+	newPatientsLastYear: number;
+	appointmentsToday: number;
+	nextAppointment: string;
+	patientsLastYearEnd: number;
+	newPatientsLast30Days: number;
+	thirtyDayGrowthPercentage: number;
+	annualGrowthPercentage: number;
+	monthlyGrowth: {
+		month: string;
+		patients: number;
+		prevPatients: number;
+		growthText: string;
+		hommes: number;
+		femmes: number;
+		enfants: number;
+	}[];
+	childrenCount?: number;
 }
