@@ -1,5 +1,5 @@
 import { api } from "@/services/api";
-import { AppointmentStatus, Patient } from "@/types";
+import { AppointmentStatus, Patient, Cabinet } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInYears, parseISO } from "date-fns";
 import { Baby, CalendarIcon, User } from "lucide-react";
@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
+import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentOsteopath";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +39,9 @@ import { fr } from "date-fns/locale";
 const appointmentFormSchema = z.object({
 	patientId: z.number().min(1, {
 		message: "L'ID du patient est requis",
+	}),
+	cabinetId: z.number().min(1, {
+		message: "Le cabinet est requis",
 	}),
 	date: z.date({
 		required_error: "Une date est requise.",
@@ -72,34 +76,47 @@ export function AppointmentForm({
 }: AppointmentFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [patients, setPatients] = useState<Patient[]>(propPatients || []);
+	const [cabinets, setCabinets] = useState<Cabinet[]>([]);
 	const [customTime, setCustomTime] = useState<string | null>(null);
 	const [useCustomTime, setUseCustomTime] = useState(false);
+	const [osteopathId, setOsteopathId] = useState<number | null>(null);
 	const navigate = useNavigate();
 	const { patientId: patientIdParam } = useParams<{ patientId: string }>();
 
 	useEffect(() => {
-		if (propPatients) {
-			setPatients(propPatients);
-			return;
-		}
-
-		const fetchPatients = async () => {
+		const initializeData = async () => {
 			try {
-				const patientsData = await api.getPatients();
-				setPatients(patientsData);
+				// Récupérer l'ID de l'ostéopathe connecté
+				const currentOsteopathId = await getCurrentOsteopathId();
+				if (!currentOsteopathId) {
+					toast.error("Impossible de récupérer l'ostéopathe connecté");
+					return;
+				}
+				setOsteopathId(currentOsteopathId);
+
+				// Charger les patients si nécessaire
+				if (!propPatients) {
+					const patientsData = await api.getPatients();
+					setPatients(patientsData);
+				}
+
+				// Charger les cabinets de l'ostéopathe
+				const cabinetsData = await api.getCabinets();
+				setCabinets(cabinetsData);
 			} catch (error) {
-				console.error("Error fetching patients:", error);
-				toast.error("Failed to load patients.");
+				console.error("Error initializing form data:", error);
+				toast.error("Erreur lors du chargement des données");
 			}
 		};
 
-		fetchPatients();
+		initializeData();
 	}, [propPatients]);
 
 	const form = useForm<AppointmentFormValues>({
 		resolver: zodResolver(appointmentFormSchema),
 		defaultValues: {
 			patientId: defaultValues?.patientId || Number(patientIdParam) || 1,
+			cabinetId: defaultValues?.cabinetId || (cabinets.length > 0 ? cabinets[0].id : 1),
 			date: defaultValues?.date
 				? new Date(defaultValues.date)
 				: new Date(),
@@ -114,6 +131,11 @@ export function AppointmentForm({
 	const onSubmit = async (data: AppointmentFormValues) => {
 		try {
 			setIsSubmitting(true);
+
+			if (!osteopathId) {
+				toast.error("Impossible de récupérer l'ostéopathe connecté");
+				return;
+			}
 
 			// Combine date and time
 			const dateTime = new Date(data.date);
@@ -154,8 +176,8 @@ export function AppointmentForm({
 				notes: data.notes || null,
 				status: data.status as AppointmentStatus,
 				notificationSent: false,
-				cabinetId: 1, // Valeur par défaut
-				osteopathId: 1, // Valeur par défaut
+				cabinetId: data.cabinetId,
+				osteopathId: osteopathId, // Utiliser l'ostéopathe connecté
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
@@ -280,6 +302,39 @@ export function AppointmentForm({
 												</SelectItem>
 											);
 										})}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="cabinetId"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Cabinet</FormLabel>
+							<Select
+								onValueChange={(value) =>
+									field.onChange(Number(value))
+								}
+								defaultValue={String(field.value)}
+							>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Sélectionner un cabinet" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{cabinets.map((cabinet) => (
+										<SelectItem
+											key={cabinet.id}
+											value={String(cabinet.id)}
+										>
+											{cabinet.name}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 							<FormMessage />
@@ -487,7 +542,7 @@ export function AppointmentForm({
 					>
 						Annuler
 					</Button>
-					<Button type="submit" disabled={isSubmitting}>
+					<Button type="submit" disabled={isSubmitting || !osteopathId}>
 						{isSubmitting
 							? "Enregistrement..."
 							: "Enregistrer la séance"}
