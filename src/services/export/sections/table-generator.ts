@@ -4,7 +4,6 @@ import { Invoice, Patient } from "@/types";
 import {
 	applyHeaderStyles,
 	applyCellBorders,
-	applyAlternatingRowColor,
 	applyDataRowStyles,
 } from "../styles/excel-styles";
 import { translatePaymentStatus } from "../utils/format-utils";
@@ -15,20 +14,17 @@ export const generateTableSection = (
 	patientDataMap: Map<number, Patient>,
 	startRow: number
 ): number => {
-	// Colonnes sans `header` pour éviter la génération automatique d’en-têtes
-	const columnDefinitions = [
-		{ key: "date", width: 18 },
-		{ key: "number", width: 22 },
-		{ key: "lastName", width: 18 },
-		{ key: "firstName", width: 18 },
-		{ key: "amount", width: 15 },
-		{ key: "paymentMethod", width: 20 },
-		{ key: "status", width: 15 },
+	// Définition des colonnes avec tailles spécifiques
+	worksheet.columns = [
+		{ key: "date", width: 25 },
+		{ key: "number", width: 40 },
+		{ key: "lastName", width: 30 },
+		{ key: "firstName", width: 30 },
+		{ key: "amount", width: 20 },
+		{ key: "paymentMethod", width: 75 },
+		{ key: "status", width: 20 },
 	];
 
-	worksheet.columns = columnDefinitions;
-
-	// Création manuelle des en-têtes
 	const headers = [
 		"Date de séance",
 		"N° de Note d'Honoraire",
@@ -41,10 +37,30 @@ export const generateTableSection = (
 
 	const tableHeaderRow = worksheet.getRow(startRow);
 	tableHeaderRow.values = headers;
-	applyHeaderStyles(tableHeaderRow);
+
+	// Appliquer styles aux entêtes (police blanche, fond bleu)
 	tableHeaderRow.eachCell({ includeEmpty: false }, (cell) => {
+		cell.font = {
+			name: "Arial",
+			size: 20,
+			color: { argb: "FFFFFFFF" }, // Blanc
+			bold: true,
+		};
+		cell.fill = {
+			type: "pattern",
+			pattern: "solid",
+			fgColor: { argb: "FF2F75B5" }, // Bleu foncé
+		};
+		cell.alignment = { horizontal: "center", vertical: "middle" };
 		applyCellBorders(cell);
 	});
+	tableHeaderRow.height = 32;
+
+	// Filtres de colonnes A à G
+	worksheet.autoFilter = {
+		from: { row: startRow, column: 1 },
+		to: { row: startRow, column: headers.length },
+	};
 
 	let currentRowNumber = startRow + 1;
 
@@ -55,19 +71,16 @@ export const generateTableSection = (
 		noInvoiceCell.value = "Aucune facture sur cette période";
 		noInvoiceCell.font = {
 			name: "Arial",
-			size: 12,
+			size: 20,
 			italic: true,
 			color: { argb: "FF888888" },
 		};
 		noInvoiceCell.alignment = { horizontal: "center", vertical: "middle" };
-		worksheet.getRow(currentRowNumber).height = 30;
+		worksheet.getRow(currentRowNumber).height = 32;
 		applyCellBorders(noInvoiceCell);
 	} else {
 		invoices.forEach((invoice, dataIndex) => {
-			// Ne pas inclure les factures annulées
-			if (invoice.paymentStatus === "CANCELED") {
-				return;
-			}
+			if (invoice.paymentStatus === "CANCELED") return;
 
 			const patient = patientDataMap.get(invoice.patientId);
 			const lastName = patient ? patient.lastName : "Inconnu";
@@ -83,23 +96,33 @@ export const generateTableSection = (
 				status: translatePaymentStatus(invoice.paymentStatus),
 			});
 			currentRowNumber = row.number;
-			applyDataRowStyles(row);
 
-			// Appliquer une couleur alternée sur les lignes
+			// Alternance de couleurs
 			if ((dataIndex + 1) % 2 === 1) {
-				row.eachCell((cell) => {
-					cell.fill = {
-						type: "pattern",
-						pattern: "solid",
-						fgColor: { argb: "FFF7F9FC" }, // Bleu très pâle
-					};
+				row.eachCell((cell, colNumber) => {
+					if (colNumber <= 7) {
+						cell.fill = {
+							type: "pattern",
+							pattern: "solid",
+							fgColor: { argb: "FFF7F9FC" },
+						};
+					}
 				});
 			}
 
-			// Centrer le contenu des cellules de cette ligne
-			row.eachCell({ includeEmpty: false }, (cell) => {
-				cell.alignment = { horizontal: "center", vertical: "middle" };
+			// Alignement, bordures, police 20
+			row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+				if (colNumber <= 7) {
+					cell.font = { name: "Arial", size: 20 };
+					cell.alignment = {
+						horizontal: "center",
+						vertical: "middle",
+					};
+					applyCellBorders(cell);
+				}
 			});
+
+			row.height = 32;
 		});
 
 		worksheet.getColumn("amount").numFmt = "# ##0.00 €";
