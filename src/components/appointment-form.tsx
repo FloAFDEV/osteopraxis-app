@@ -19,6 +19,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
 	Popover,
 	PopoverContent,
@@ -429,10 +430,14 @@ export function AppointmentForm({
 						<FormItem>
 							<FormLabel>Notes (facultatif)</FormLabel>
 							<FormControl>
-								<Input
+								<Textarea
 									placeholder="Notes additionnelles"
 									disabled={isSubmitting}
 									{...field}
+									style={{
+										height: "150px",
+										resize: "vertical",
+									}}
 								/>
 							</FormControl>
 							<FormMessage />
