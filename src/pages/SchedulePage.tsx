@@ -516,8 +516,8 @@ const SchedulePage = () => {
 																					vouloir
 																					supprimer
 																					définitivement
-																					ce
-																					Séance
+																					cette
+																					séance
 																					?
 																				</AlertDialogDescription>
 																			</AlertDialogHeader>
