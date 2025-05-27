@@ -1,3 +1,4 @@
+
 export interface User {
 	id: number;
 	auth_id: string;
@@ -11,7 +12,7 @@ export interface User {
 	country: string;
 	createdAt: string;
 	updatedAt: string;
-	role: "admin" | "osteopath" | "patient";
+	role: "ADMIN" | "OSTEOPATH" | "PATIENT";
 	status: "active" | "inactive" | "pending";
 	avatarUrl: string | null;
 	website: string | null;
@@ -21,6 +22,19 @@ export interface User {
 	professionalProfileId: number | null;
 	tenant_id?: string;
 	osteopathId?: number | null;
+}
+
+export interface Osteopath {
+	id: number;
+	name: string;
+	userId: string;
+	createdAt: string;
+	updatedAt: string;
+	authId?: string | null;
+	siret?: string | null;
+	adeli_number?: string | null;
+	ape_code?: string | null;
+	professional_title?: string | null;
 }
 
 export interface Patient {
@@ -67,6 +81,8 @@ export interface Patient {
 		| null;
 	tenant_id?: string;
 	osteopathId?: number | null;
+	cabinetId?: number | null;
+	currentTreatment?: string | null;
 }
 
 export interface ProfessionalProfile {
@@ -110,12 +126,14 @@ export interface Invoice {
 	date: string;
 	dueDate: string;
 	amount: number;
-	paymentStatus: "PAID" | "UNPAID" | "PARTIALLY_PAID";
+	paymentStatus: "PAID" | "PENDING" | "CANCELED";
 	paymentMethod: "Cash" | "Card" | "Check" | "Other";
 	notes: string | null;
 	createdAt: string;
 	updatedAt: string;
 	tenant_id?: string;
+	tvaExoneration?: boolean;
+	tvaMotif?: string | null;
 }
 
 export interface Cabinet {
@@ -133,7 +151,7 @@ export interface Cabinet {
   tenant_id?: string;
 }
 
-export type PaymentStatus = "PAID" | "UNPAID" | "PARTIALLY_PAID";
+export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 
 export interface DashboardData {
   totalPatients: number;
@@ -158,4 +176,21 @@ export interface DashboardData {
     percentage: number;
   }>;
   recentAppointments: Appointment[];
+  
+  // Additional properties needed by components
+  nextAppointment?: string | null;
+  thirtyDayGrowthPercentage?: number;
+  newPatientsThisMonth?: number;
+  newPatientsLast30Days?: number;
+  annualGrowthPercentage?: number;
+  newPatientsThisYear?: number;
+  maleCount?: number;
+  femaleCount?: number;
+  childrenCount?: number;
+  monthlyGrowth?: Array<{
+    month: string;
+    patients: number;
+    growthText: string;
+  }>;
+  newPatientsLastYear?: number;
 }
