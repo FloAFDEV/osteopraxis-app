@@ -12,7 +12,7 @@ export const generateHeaderSection = (
 	headerRow.font = {
 		name: "Arial",
 		bold: true,
-		size: 16,
+		size: 20,
 		color: { argb: "FF2E5984" },
 	};
 	headerRow.alignment = { horizontal: "center", vertical: "middle" };
@@ -25,7 +25,7 @@ export const generateHeaderSection = (
 	periodRow.font = {
 		name: "Arial",
 		italic: true,
-		size: 12,
+		size: 20,
 		color: { argb: "FF888888" },
 	};
 	periodRow.alignment = { horizontal: "center", vertical: "middle" };
