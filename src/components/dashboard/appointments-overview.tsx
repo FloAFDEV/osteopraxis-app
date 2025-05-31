@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/services/api";
@@ -10,7 +11,7 @@ import {
 	parseISO,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Baby, Calendar, Clock, User } from "lucide-react";
+import { Baby, Calendar, Clock, User, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -127,6 +128,25 @@ export function AppointmentsOverview({
 		}
 	};
 
+	const handleCreateInvoice = (appointmentId: number) => {
+		try {
+			if (!appointmentId || isNaN(appointmentId)) {
+				toast.error("ID de séance invalide");
+				return;
+			}
+
+			console.log(`Création d'une facture pour la séance #${appointmentId}`);
+			
+			// Naviguer vers la page de création de facture avec l'ID du rendez-vous
+			navigate(`/invoices/new?appointmentId=${appointmentId}`);
+			
+			toast.info("Ouverture du formulaire de création de facture");
+		} catch (error) {
+			console.error("Erreur lors de la création de facture:", error);
+			toast.error("Impossible de créer la facture pour cette séance");
+		}
+	};
+
 	// Fonction pour formater la date du prochain rendez-vous
 	const formatNextAppointmentDate = (dateString: string) => {
 		const date = parseISO(dateString);
@@ -226,12 +246,23 @@ export function AppointmentsOverview({
 						)}
 					</div>
 				</div>
-				<button
-					onClick={() => handleAppointmentClick(appointment.id)}
-					className="ml-2 px-3 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-sky-700 dark:hover:bg-sky-800 dark:text-white text-blue-600 rounded text-xs font-medium transition-colors"
-				>
-					Détails
-				</button>
+				<div className="ml-2 flex gap-2">
+					<button
+						onClick={() => handleAppointmentClick(appointment.id)}
+						className="px-3 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-sky-700 dark:hover:bg-sky-800 dark:text-white text-blue-600 rounded text-xs font-medium transition-colors"
+					>
+						Détails
+					</button>
+					{appointment.status === "COMPLETED" && (
+						<button
+							onClick={() => handleCreateInvoice(appointment.id)}
+							className="px-3 py-1 bg-green-50 hover:bg-green-100 dark:bg-green-700 dark:hover:bg-green-800 dark:text-white text-green-600 rounded text-xs font-medium transition-colors flex items-center gap-1"
+						>
+							<FileText className="h-3 w-3" />
+							Facture
+						</button>
+					)}
+				</div>
 			</div>
 		);
 	};
