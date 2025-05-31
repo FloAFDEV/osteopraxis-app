@@ -1,9 +1,10 @@
+
 export interface User {
 	id: string;
 	email: string;
-	first_name: string | null;
-	last_name: string | null;
-	role: Role;
+	firstName: string | null;
+	lastName: string | null;
+	role: "ADMIN" | "OSTEOPATH";
 	created_at: string;
 	updated_at: string;
 	osteopathId: number | null;
@@ -55,6 +56,8 @@ export interface Cabinet {
 	logoUrl?: string | null;
 	professionalProfileId?: number | null;
 	tenant_id?: string | null;
+	userId?: string | null;
+	website?: string | null;
 }
 
 export interface Patient {
@@ -261,4 +264,9 @@ export interface DashboardData {
 		enfants: number;
 	}[];
 	childrenCount?: number;
+	revenueThisMonth: number;
+	pendingInvoices: number;
+	weeklyAppointments: number[];
+	monthlyRevenue: number[];
+	completedAppointments: number;
 }
