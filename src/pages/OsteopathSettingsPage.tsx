@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { UserCog } from "lucide-react";
 import { api } from "@/services/api";
@@ -60,7 +61,7 @@ const OsteopathSettingsPage = () => {
                 Aucun profil professionnel trouvé. Veuillez en créer un.
               </p>
               <OsteopathProfileForm onSuccess={handleSuccess} defaultValues={{
-            name: user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : ""
+            name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
           }} />
             </div>}
         </div>

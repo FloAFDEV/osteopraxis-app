@@ -186,8 +186,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 						user: session.user ? {
 							id: session.user.id,
 							email: session.user.email || "",
-							first_name: session.user.user_metadata.first_name,
-							last_name: session.user.user_metadata.last_name,
+							firstName: session.user.user_metadata.firstName,
+							lastName: session.user.user_metadata.lastName,
 							role: (session.user.user_metadata.role || "OSTEOPATH") as any,
 							created_at: session.user.created_at,
 							updated_at: new Date().toISOString(),

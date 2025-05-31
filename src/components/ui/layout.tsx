@@ -40,8 +40,8 @@ export function Layout({ children }: LayoutProps) {
 	};
 	const getInitials = () => {
 		if (!user) return "?";
-		const firstName = user.first_name || "";
-		const lastName = user.last_name || "";
+		const firstName = user.firstName || "";
+		const lastName = user.lastName || "";
 		return (
 			`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() ||
 			user.email.charAt(0).toUpperCase()

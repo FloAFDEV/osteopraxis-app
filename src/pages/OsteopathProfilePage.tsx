@@ -27,15 +27,15 @@ const OsteopathProfilePage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
-  // Générer un nom par défaut si first_name et last_name sont manquants
+  // Générer un nom par défaut si firstName et lastName sont manquants
   const getDefaultName = useCallback(() => {
     if (user) {
-      if (user.first_name && user.last_name) {
-        return `${user.first_name} ${user.last_name}`;
-      } else if (user.first_name) {
-        return user.first_name;
-      } else if (user.last_name) {
-        return user.last_name;
+      if (user.firstName && user.lastName) {
+        return `${user.firstName} ${user.lastName}`;
+      } else if (user.firstName) {
+        return user.firstName;
+      } else if (user.lastName) {
+        return user.lastName;
       } else if (user.email) {
         // Extraire un nom à partir de l'email
         const emailName = user.email.split('@')[0];
