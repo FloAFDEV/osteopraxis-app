@@ -9,8 +9,8 @@ const users: User[] = [
   {
     id: "d79c31bc-b1fa-42a2-bbd8-379f03f0d8e9",
     email: "franck.blanchet@example.com",
-    first_name: "Franck",
-    last_name: "BLANCHET",
+    firstName: "Franck",
+    lastName: "BLANCHET",
     role: "OSTEOPATH",
     created_at: "2024-12-20 22:29:30",
     updated_at: "2024-12-20 22:29:30",
@@ -52,8 +52,8 @@ export const authService = {
     const newUser: User = {
       id: `user-${Date.now()}`,
       email: userData.email,
-      first_name: userData.firstName,
-      last_name: userData.lastName,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
       role: "OSTEOPATH",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

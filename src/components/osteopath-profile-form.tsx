@@ -73,8 +73,8 @@ export function OsteopathProfileForm({
     window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname + window.location.search);
   };
   
+  // Récupérer l'URL de retour soit des paramètres de l'URL, soit du sessionStorage
   useEffect(() => {
-    // Récupérer l'URL de retour soit des paramètres de l'URL, soit du sessionStorage
     const urlParams = new URLSearchParams(window.location.search);
     const urlReturnTo = urlParams.get('returnTo');
     const storedReturnUrl = sessionStorage.getItem("profileSetupReturnUrl");
@@ -123,9 +123,9 @@ export function OsteopathProfileForm({
   
   // Mettre à jour les valeurs du formulaire si les props defaultValues changent ou si l'utilisateur est chargé
   useEffect(() => {
-    if ((defaultValues?.name || (user && (user.first_name || user.last_name))) && !form.getValues('name')) {
+    if ((defaultValues?.name || (user && (user.firstName || user.lastName))) && !form.getValues('name')) {
       const fullName = defaultValues?.name || 
-        `${user?.first_name || ''} ${user?.last_name || ''}`.trim();
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
       
       if (fullName) {
         form.setValue('name', fullName);

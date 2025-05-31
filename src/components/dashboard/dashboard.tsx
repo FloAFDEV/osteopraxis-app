@@ -14,8 +14,33 @@ import {
   calculateAppointmentStats, 
   calculateMonthlyBreakdown 
 } from "./utils/dashboard-calculations";
-import { initialDashboardData } from "./utils/constants";
 import { formatAppointmentDate } from "@/utils/date-utils";
+
+// Initial dashboard data with all required properties
+const initialDashboardData: DashboardData = {
+  totalPatients: 0,
+  maleCount: 0,
+  femaleCount: 0,
+  averageAge: 0,
+  averageAgeMale: 0,
+  averageAgeFemale: 0,
+  newPatientsThisMonth: 0,
+  newPatientsThisYear: 0,
+  newPatientsLastYear: 0,
+  appointmentsToday: 0,
+  nextAppointment: "Aucune séance prévue",
+  patientsLastYearEnd: 0,
+  newPatientsLast30Days: 0,
+  thirtyDayGrowthPercentage: 0,
+  annualGrowthPercentage: 0,
+  monthlyGrowth: [],
+  childrenCount: 0,
+  revenueThisMonth: 0,
+  pendingInvoices: 0,
+  weeklyAppointments: [0, 0, 0, 0, 0, 0, 0],
+  monthlyRevenue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  completedAppointments: 0
+};
 
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
@@ -49,7 +74,7 @@ export function Dashboard() {
         // Formatter le prochain rendez-vous pour l'affichage
         const formattedNextAppointment = appointmentStats.nextAppointment 
           ? formatAppointmentDate(appointmentStats.nextAppointment.date, "EEEE d MMMM yyyy 'à' HH:mm")
-          : null;
+          : "Aucune séance prévue";
 
         // Assembler toutes les données pour le tableau de bord
         setDashboardData({
@@ -59,6 +84,12 @@ export function Dashboard() {
           appointmentsToday: appointmentStats.appointmentsToday,
           nextAppointment: formattedNextAppointment,
           monthlyGrowth: monthlyGrowthData,
+          // Add missing properties with default values
+          revenueThisMonth: 0,
+          pendingInvoices: 0,
+          weeklyAppointments: [0, 0, 0, 0, 0, 0, 0],
+          monthlyRevenue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          completedAppointments: appointmentsData.filter(a => a.status === 'COMPLETED').length
         });
       } catch (err) {
         console.error("Erreur lors du chargement des données du tableau de bord:", err);

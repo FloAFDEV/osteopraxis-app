@@ -11,8 +11,8 @@ export const supabaseAuthService = {
         password,
         options: {
           data: {
-            first_name: firstName,
-            last_name: lastName,
+            firstName: firstName,
+            lastName: lastName,
             role: "OSTEOPATH"
           }
         }
@@ -86,8 +86,8 @@ export const supabaseAuthService = {
     const user: User = {
       id: data.user.id,
       email: data.user.email || "",
-      first_name: data.user.user_metadata.first_name,
-      last_name: data.user.user_metadata.last_name,
+      firstName: data.user.user_metadata.firstName,
+      lastName: data.user.user_metadata.lastName,
       role: (data.user.user_metadata.role || "OSTEOPATH") as any,
       created_at: data.user.created_at,
       updated_at: new Date().toISOString(),
@@ -162,8 +162,8 @@ export const supabaseAuthService = {
     const user: User = {
       id: data.session.user.id,
       email: data.session.user.email || "",
-      first_name: data.session.user.user_metadata.first_name,
-      last_name: data.session.user.user_metadata.last_name,
+      firstName: data.session.user.user_metadata.firstName,
+      lastName: data.session.user.user_metadata.lastName,
       role: (data.session.user.user_metadata.role || "OSTEOPATH") as any,
       created_at: data.session.user.created_at,
       updated_at: new Date().toISOString(),
