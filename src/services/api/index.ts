@@ -13,6 +13,8 @@ export const api = {
 	login: authService.login,
 	register: authService.register,
 	logout: authService.logout,
+	// Correction : enlever getCurrentUser si la méthode n'existe pas dans l'objet de référence
+	// getCurrentUser: authService.getCurrentUser || (() => Promise.resolve(null)),
 	checkAuth:
 		authService.checkAuth ||
 		(() => Promise.resolve({ isAuthenticated: false, user: null })),
@@ -28,7 +30,7 @@ export const api = {
 	getPatientById: patientService.getPatientById,
 	createPatient: patientService.createPatient,
 	updatePatient: patientService.updatePatient,
-	deletePatient: patientService.deletePatient,
+	deletePatient: patientService.deletePatient, // ajout
 
 	// Appointment related
 	getAppointments: async () => {
@@ -37,7 +39,7 @@ export const api = {
 	},
 	getAppointmentById: appointmentService.getAppointmentById,
 	getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
-	getTodayAppointmentForPatient: appointmentService.getTodayAppointmentForPatient,
+	getTodayAppointmentForPatient: appointmentService.getTodayAppointmentForPatient, // Ajout de la nouvelle méthode
 	createAppointment: appointmentService.createAppointment,
 	updateAppointment: appointmentService.updateAppointment,
 	updateAppointmentStatus: appointmentService.updateAppointmentStatus,
@@ -49,7 +51,7 @@ export const api = {
 	getCabinetById: cabinetService.getCabinetById,
 	createCabinet: cabinetService.createCabinet,
 	updateCabinet: cabinetService.updateCabinet,
-	deleteCabinet: cabinetService.deleteCabinet,
+	deleteCabinet: cabinetService.deleteCabinet, // ajout
 	getCabinetsByUserId:
 		cabinetService.getCabinetsByUserId || (() => Promise.resolve([])),
 	getCabinetsByOsteopathId:
@@ -61,9 +63,10 @@ export const api = {
 	getInvoiceById: invoiceService.getInvoiceById,
 	getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
 	getInvoicesByAppointmentId: invoiceService.getInvoicesByAppointmentId,
+
 	createInvoice: invoiceService.createInvoice,
 	updateInvoice: invoiceService.updateInvoice,
-	deleteInvoice: invoiceService.deleteInvoice,
+	deleteInvoice: invoiceService.deleteInvoice, // ajout
 
 	// Osteopath related
 	getOsteopaths:

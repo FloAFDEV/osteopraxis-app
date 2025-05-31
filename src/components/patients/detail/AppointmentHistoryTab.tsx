@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -17,11 +16,10 @@ import {
 import { Appointment, AppointmentStatus } from "@/types";
 import { formatAppointmentTime } from "@/utils/date-utils";
 import { format } from "date-fns";
-import { Activity, Edit, MessageSquare, FileText } from "lucide-react";
+import { Activity, Edit, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
-
 interface AppointmentHistoryTabProps {
 	appointments: Appointment[];
 	onStatusChange: (
@@ -31,7 +29,6 @@ interface AppointmentHistoryTabProps {
 	viewMode: "cards" | "table";
 	setViewMode: (mode: "cards" | "table") => void;
 }
-
 export function AppointmentHistoryTab({
 	appointments,
 	onStatusChange,
@@ -115,16 +112,6 @@ export function AppointmentHistoryTab({
 								</div>
 							)}
 							<div className="mt-4 flex justify-end gap-2">
-								{appointment.status === "COMPLETED" && (
-									<Button variant="outline" size="sm" asChild>
-										<Link
-											to={`/invoices/new?appointmentId=${appointment.id}`}
-										>
-											<FileText className="mr-1 h-4 w-4" />
-											Créer facture
-										</Link>
-									</Button>
-								)}
 								<Button variant="outline" size="sm" asChild>
 									<Link
 										to={`/appointments/${appointment.id}/edit`}
@@ -242,35 +229,18 @@ export function AppointmentHistoryTab({
 										)}
 									</TableCell>
 									<TableCell className="text-right">
-										<div className="flex justify-end gap-1">
-											{appointment.status === "COMPLETED" && (
-												<Button
-													variant="outline"
-													size="sm"
-													asChild
-													className="h-8"
-												>
-													<Link
-														to={`/invoices/new?appointmentId=${appointment.id}`}
-													>
-														<FileText className="mr-1 h-3 w-3" />
-														Facture
-													</Link>
-												</Button>
-											)}
-											<Button
-												variant="outline"
-												size="sm"
-												asChild
-												className="h-8"
+										<Button
+											variant="outline"
+											size="sm"
+											asChild
+											className="h-8"
+										>
+											<Link
+												to={`/appointments/${appointment.id}/edit`}
 											>
-												<Link
-													to={`/appointments/${appointment.id}/edit`}
-												>
-													Détails
-												</Link>
-											</Button>
-										</div>
+												Détails
+											</Link>
+										</Button>
 									</TableCell>
 								</TableRow>
 							))}

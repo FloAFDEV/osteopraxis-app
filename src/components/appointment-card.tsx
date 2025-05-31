@@ -16,7 +16,7 @@ import {
 	MessageSquare,
 	X,
 } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface AppointmentCardProps {
 	appointment: Appointment;
@@ -158,14 +158,7 @@ export function AppointmentCard({
 						>
 							<X className="h-4 w-4 mr-1" />
 							Annuler
-						</Button>{" "}
-						<NavLink
-							to="/invoices"
-							className="flex items-center cursor-pointer transition-colors px-3 py-2 rounded text-sm text-muted-foreground"
-						>
-							<FileText className="mr-2 h-4 w-4 text-amber-500" />
-							<span>Notes d'honoraires</span>
-						</NavLink>
+						</Button>
 					</>
 				)}
 			</CardFooter>
