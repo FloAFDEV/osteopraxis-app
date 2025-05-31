@@ -47,6 +47,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 
 const SchedulePage = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -60,6 +61,12 @@ const SchedulePage = () => {
 		action: "cancel" | "delete";
 	} | null>(null);
 	const navigate = useNavigate();
+
+	// Utiliser le hook pour la mise à jour automatique des statuts
+	useAppointmentStatusUpdate({
+		appointments,
+		onAppointmentsUpdate: setAppointments
+	});
 
 	// useEffect for fetching data remains the same
 	useEffect(() => {
@@ -564,7 +571,7 @@ const SchedulePage = () => {
 	);
 };
 
-// --- DaySchedule Component (Check responsiveness of its buttons too) ---
+// DaySchedule Component (Check responsiveness of its buttons too)
 interface DayScheduleProps {
 	date: Date;
 	appointments: Appointment[];

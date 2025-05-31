@@ -15,6 +15,7 @@ import { Baby, Calendar, Clock, User, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 
 interface AppointmentsOverviewProps {
 	data: DashboardData;
@@ -33,60 +34,68 @@ export function AppointmentsOverview({
 	);
 	const [patients, setPatients] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
 	const navigate = useNavigate();
+
+	// Utiliser le hook pour la mise à jour automatique des statuts
+	useAppointmentStatusUpdate({
+		appointments: allAppointments,
+		onAppointmentsUpdate: (updatedAppointments) => {
+			setAllAppointments(updatedAppointments);
+			// Refiltrer les rendez-vous après mise à jour
+			filterAndSetAppointments(updatedAppointments);
+		}
+	});
+
+	const filterAndSetAppointments = (appointmentsData: Appointment[]) => {
+		// Filtrer pour garder seulement les rendez-vous à venir (incluant les COMPLETED)
+		const now = new Date();
+		const filteredAppointments = appointmentsData
+			.filter((appointment) => {
+				const appointmentDate = parseISO(appointment.date);
+				// Inclure maintenant aussi les rendez-vous avec le statut SCHEDULED ou COMPLETED
+				return (
+					appointmentDate >= now &&
+					(appointment.status === "SCHEDULED" ||
+						appointment.status === "COMPLETED")
+				);
+			})
+			.sort(
+				(a, b) =>
+					parseISO(a.date).getTime() -
+					parseISO(b.date).getTime()
+			);
+
+		// Séparer le prochain rendez-vous des autres rendez-vous à venir
+		let nextApp = null;
+		let otherAppointments = [...filteredAppointments];
+
+		if (filteredAppointments.length > 0) {
+			nextApp = filteredAppointments[0];
+			// Garder les 4 rendez-vous suivants (sans le premier qui est affiché séparément)
+			otherAppointments = filteredAppointments.slice(1, 5);
+		}
+
+		setNextAppointment(nextApp);
+		setUpcomingAppointments(otherAppointments);
+	};
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				// Récupérer les Séance et les patients
+				// Récupérer les rendez-vous et les patients
 				const [appointmentsData, patientsData] = await Promise.all([
 					api.getAppointments(),
 					api.getPatients(),
 				]);
 
-				// Filtrer pour garder seulement les Séance à venir (incluant les COMPLETED)
-				const now = new Date();
-				const filteredAppointments = appointmentsData
-					.filter((appointment) => {
-						const appointmentDate = parseISO(appointment.date);
-						// Inclure maintenant aussi les rendez-vous avec le statut SCHEDULED ou COMPLETED
-						return (
-							appointmentDate >= now &&
-							(appointment.status === "SCHEDULED" ||
-								appointment.status === "COMPLETED")
-						);
-					})
-					.sort(
-						(a, b) =>
-							parseISO(a.date).getTime() -
-							parseISO(b.date).getTime()
-					);
-
-				// Séparer le prochain rendez-vous des autres rendez-vous à venir
-				let nextApp = null;
-				let otherAppointments = [...filteredAppointments];
-
-				if (filteredAppointments.length > 0) {
-					nextApp = filteredAppointments[0];
-					// Garder les 4 rendez-vous suivants (sans le premier qui est affiché séparément)
-					otherAppointments = filteredAppointments.slice(1, 5);
-				}
-
-				console.log(
-					`Appointments for dashboard: Total=${
-						filteredAppointments.length
-					}, Next=${nextApp ? "Yes" : "No"}, Others=${
-						otherAppointments.length
-					}`
-				);
-
-				setNextAppointment(nextApp);
-				setUpcomingAppointments(otherAppointments);
+				setAllAppointments(appointmentsData);
 				setPatients(patientsData);
+				filterAndSetAppointments(appointmentsData);
 				setLoading(false);
 			} catch (error) {
 				console.error(
-					"Erreur lors de la récupération des Séance:",
+					"Erreur lors de la récupération des rendez-vous:",
 					error
 				);
 				setLoading(false);
@@ -111,31 +120,31 @@ export function AppointmentsOverview({
 		try {
 			// Fix: Assurons-nous que l'ID est un nombre valide
 			if (!appointmentId || isNaN(appointmentId)) {
-				toast.error("ID de Séance invalide");
+				toast.error("ID de rendez-vous invalide");
 				return;
 			}
 
-			console.log(`Navigation vers la séance #${appointmentId}`);
+			console.log(`Navigation vers le rendez-vous #${appointmentId}`);
 
-			// Naviguer vers la page d'édition du Séance avec l'ID
+			// Naviguer vers la page d'édition du rendez-vous avec l'ID
 			navigate(`/appointments/${appointmentId}/edit`);
 
 			// Afficher un toast pour confirmer l'action
-			toast.info(`Chargement des détails de la séance #${appointmentId}`);
+			toast.info(`Chargement des détails du rendez-vous #${appointmentId}`);
 		} catch (error) {
 			console.error("Erreur lors de la navigation:", error);
-			toast.error("Impossible d'afficher les détails de cette séance");
+			toast.error("Impossible d'afficher les détails de ce rendez-vous");
 		}
 	};
 
 	const handleCreateInvoice = (appointmentId: number) => {
 		try {
 			if (!appointmentId || isNaN(appointmentId)) {
-				toast.error("ID de séance invalide");
+				toast.error("ID de rendez-vous invalide");
 				return;
 			}
 
-			console.log(`Création d'une facture pour la séance #${appointmentId}`);
+			console.log(`Création d'une facture pour le rendez-vous #${appointmentId}`);
 			
 			// Naviguer vers la page de création de facture avec l'ID du rendez-vous
 			navigate(`/invoices/new?appointmentId=${appointmentId}`);
@@ -143,7 +152,7 @@ export function AppointmentsOverview({
 			toast.info("Ouverture du formulaire de création de facture");
 		} catch (error) {
 			console.error("Erreur lors de la création de facture:", error);
-			toast.error("Impossible de créer la facture pour cette séance");
+			toast.error("Impossible de créer la facture pour ce rendez-vous");
 		}
 	};
 
