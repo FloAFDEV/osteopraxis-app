@@ -1,264 +1,202 @@
+export type Role = "admin" | "osteopath" | "patient";
+
+export type AppointmentStatus =
+	| "SCHEDULED"
+	| "COMPLETED"
+	| "CANCELED"
+	| "RESCHEDULED"
+	| "NO_SHOW";
+
+export type PaymentStatus = "PENDING" | "PAID" | "PARTIALLY_PAID" | "REFUNDED";
+
 export interface User {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-	role: Role;
-	created_at: string;
-	updated_at: string;
-	osteopathId: number | null;
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  role: "admin" | "osteopath" | "patient";
+  created_at: string;
+  updated_at?: string;
+  osteopathId?: number;
+  auth_id?: string;
 }
 
-export type Role = "ADMIN" | "OSTEOPATH";
-
-// Ajout des types manquants
-export type Gender = "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
-export type MaritalStatus =
-	| "SINGLE"
-	| "MARRIED"
-	| "DIVORCED"
-	| "WIDOWED"
-	| "SEPARATED"
-	| "ENGAGED"
-	| "PARTNERED";
-export type Handedness = "LEFT" | "RIGHT" | "AMBIDEXTROUS";
-export type Contraception =
-	| "NONE"
-	| "PILLS"
-	| "CONDOM"
-	| "IMPLANTS"
-	| "DIAPHRAGM"
-	| "IUD"
-	| "INJECTION"
-	| "PATCH"
-	| "RING"
-	| "NATURAL_METHODS"
-	| "STERILIZATION"
-	| "IUD_HORMONAL";
-
-export interface Cabinet {
-	id: number;
-	name: string;
-	address: string;
-	city: string;
-	postalCode: string;
-	phone: string | null;
-	email: string | null;
-	siret: string | null;
-	iban: string | null;
-	bic: string | null;
-	country: string;
-	osteopathId: number;
-	createdAt: string;
-	updatedAt: string;
-	imageUrl?: string | null;
-	logoUrl?: string | null;
-	professionalProfileId?: number | null;
-	tenant_id?: string | null;
+export interface Osteopath {
+  id: number;
+  userId: string;
+  name: string;
+  professional_title?: string;
+  siret?: string;
+  adeli_number?: string;
+  ape_code?: string;
+  authId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Patient {
-	id: number;
-	firstName: string;
-	lastName: string;
-	email: string | null;
-	phone: string | null;
-	birthDate: string | null;
-	address: string | null;
-
-	gender: "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
-	height: number | null;
-	weight: number | null;
-	bmi: number | null;
-	osteopathId: string | number | null;
-	cabinetId: number | null;
-	createdAt: string;
-	updatedAt: string;
-	userId: string | null;
-	avatarUrl: string | null;
-	childrenAges: number[] | null;
-	complementaryExams: string | null;
-	generalSymptoms: string | null;
-	pregnancyHistory: string | null;
-	birthDetails: string | null;
-	developmentMilestones: string | null;
-	sleepingPattern: string | null;
-	feeding: string | null;
-	behavior: string | null;
-	childCareContext: string | null;
-	isExSmoker: boolean | null;
-	smokingSince: string | null;
-	smokingAmount: string | null;
-	quitSmokingDate: string | null;
-
-	// Champs ajoutés existants en base de données
-	currentTreatment?: string | null;
-	hdlm?: string | null;
-	hasVisionCorrection?: boolean;
-	isSmoker?: boolean;
-	isDeceased?: boolean;
-	maritalStatus?: string | null;
-	occupation?: string | null;
-	physicalActivity?: string | null;
-	hasChildren?: string | null;
-	generalPractitioner?: string | null;
-	entProblems?: string | null;
-	entDoctorName?: string | null;
-	digestiveProblems?: string | null;
-	digestiveDoctorName?: string | null;
-	ophtalmologistName?: string | null;
-	surgicalHistory?: string | null;
-	traumaHistory?: string | null;
-	rheumatologicalHistory?: string | null;
-	handedness?: string | null;
-	contraception?: string | null;
-	familyStatus?: string | null;
-
-	// Nouveaux champs généraux
-	ent_followup: string | null;
-	intestinal_transit: string | null;
-	sleep_quality: string | null;
-	fracture_history: string | null;
-	dental_health: string | null;
-	sport_frequency: string | null;
-	gynecological_history: string | null;
-	other_comments_adult: string | null;
-
-	// Nouveaux champs spécifiques aux enfants
-	fine_motor_skills: string | null;
-	gross_motor_skills: string | null;
-	weight_at_birth: number | null;
-	height_at_birth: number | null;
-	head_circumference: number | null;
-	apgar_score: string | null;
-	childcare_type: string | null;
-	school_grade: string | null;
-	pediatrician_name: string | null;
-	paramedical_followup: string | null;
-	other_comments_child: string | null;
-
-	// Champs requis par le type
-	allergies: string | null;
+  id: number;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  birthDate?: string;
+  gender?: "Homme" | "Femme" | "MALE" | "FEMALE" | "OTHER";
+  occupation?: string;
+  notes?: string;
+  osteopathId: number;
+  cabinetId?: number;
+  createdAt: string;
+  updatedAt: string;
+  weight?: number;
+  height?: number;
+  bmi?: number;
+  avatarUrl?: string;
+  allergies?: string;
+  currentTreatment?: string;
+  hasChildren?: string;
+  childrenAges?: string[];
+  maritalStatus?: "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED";
+  generalPractitioner?: string;
+  surgicalHistory?: string;
+  traumaHistory?: string;
+  rheumatologicalHistory?: string;
+  medicalHistory?: string;
+  currentMedication?: string;
+  handedness?: "RIGHT" | "LEFT" | "AMBIDEXTROUS";
+  hasVisionCorrection?: boolean;
+  ophtalmologistName?: string;
+  entProblems?: string;
+  entDoctorName?: string;
+  digestiveProblems?: string;
+  digestiveDoctorName?: string;
+  physicalActivity?: string;
+  isSmoker?: boolean;
+  isExSmoker?: boolean;
+  smokingSince?: string;
+  smokingAmount?: string;
+  quitSmokingDate?: string;
+  contraception?: "PILL" | "IUD" | "IMPLANT" | "PATCH" | "RING" | "NONE" | "OTHER";
+  familyStatus?: string;
+  complementaryExams?: string;
+  generalSymptoms?: string;
+  pregnancyHistory?: string;
+  birthDetails?: string;
+  developmentMilestones?: string;
+  sleepingPattern?: string;
+  feeding?: string;
+  behavior?: string;
+  childCareContext?: string;
+  ent_followup?: string;
+  intestinal_transit?: string;
+  sleep_quality?: string;
+  fracture_history?: string;
+  dental_health?: string;
+  sport_frequency?: string;
+  gynecological_history?: string;
+  other_comments_adult?: string;
+  other_comments_child?: string;
+  weight_at_birth?: number;
+  height_at_birth?: number;
+  head_circumference?: number;
+  fine_motor_skills?: string;
+  gross_motor_skills?: string;
+  apgar_score?: string;
+  childcare_type?: string;
+  school_grade?: string;
+  pediatrician_name?: string;
+  paramedical_followup?: string;
+  alcoholConsumption?: string;
+  sportActivity?: string;
+  hdlm?: string;
+  isDeceased?: boolean;
+  smoker?: boolean;
+  smokerSince?: number;
+  userId?: string;
+  job?: string;
 }
 
-export interface Appointment {
-	id: number;
-	patientId: number;
-	cabinetId: number;
-	osteopathId: number;
-	start: string;
-	end: string;
-	status: AppointmentStatus;
-	notes: string | null;
-	createdAt: string;
-	updatedAt: string;
-	date: string; // Rendu obligatoire pour compatibilité
-	reason: string;
-	notificationSent: boolean;
-	user_id?: string | null;
-}
-
-// Changed from enum to type union for better compatibility
-export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
-
-// Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
-export interface CreateAppointmentPayload {
-	patientId: number;
-	cabinetId: number;
-	osteopathId: number;
-	start: string;
-	end: string; // Gardé pour compatibilité avec le code client mais non utilisé en DB
-	date: string; // Rendu obligatoire pour compatibilité
-	reason: string;
-	status: AppointmentStatus;
-	notes?: string | null;
-	notificationSent: boolean;
-	createdAt?: string;
-	updatedAt?: string;
-	website?: string; // Ajouté pour le honeypot dans le formulaire
-	user_id?: string | null; // Ajouté pour résoudre l'erreur TypeScript
-}
-
-// Interface Invoice mise à jour pour correspondre exactement à la base de données
 export interface Invoice {
-	id: number;
-	date: string;
-	amount: number;
-	paymentStatus: PaymentStatus;
-	appointmentId?: number | null;
-	patientId: number;
-	tvaExoneration?: boolean | null;
-	tvaMotif?: string | null;
-	notes?: string | null;
-	paymentMethod?: string | null;
-	cabinetId?: number | null;
-	createdAt?: string;
-	updatedAt?: string;
-	// Champs calculés côté client pour la compatibilité avec l'UI
-	Patient?: {
-		firstName: string;
-		lastName: string;
-	};
-}
-
-export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELED";
-export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
-
-export interface Osteopath {
-	id: number;
-	userId: string;
-	name: string;
-	professional_title: string;
-	adeli_number: string | null;
-	siret: string | null;
-	ape_code: string | null;
-	createdAt: string;
-	updatedAt: string;
-}
-
-export interface AuthState {
-	user: User | null;
-	isAuthenticated: boolean;
-	token: string | null;
-	message?: string;
-	needsProfileSetup?: boolean;
-}
-
-// Ajout des types manquants pour le dashboard
-export interface MonthlyGrowth {
-	month: string;
-	patients: number;
-	prevPatients: number;
-	growthText: string;
-	hommes: number;
-	femmes: number;
-	enfants: number;
+  id: number;
+  patientId: number;
+  cabinetId?: number;
+  appointmentId?: number;
+  date: string;
+  amount: number;
+  paymentStatus: PaymentStatus;
+  paymentMethod?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  tvaExoneration?: boolean;
+  tvaMotif?: string;
+  Patient?: Patient;
 }
 
 export interface DashboardData {
-	totalPatients: number;
-	maleCount: number;
-	femaleCount: number;
-	averageAge: number;
-	averageAgeMale: number;
-	averageAgeFemale: number;
-	newPatientsThisMonth: number;
-	newPatientsThisYear: number;
-	newPatientsLastYear: number;
-	appointmentsToday: number;
-	nextAppointment: string;
-	patientsLastYearEnd: number;
-	newPatientsLast30Days: number;
-	thirtyDayGrowthPercentage: number;
-	annualGrowthPercentage: number;
-	monthlyGrowth: {
-		month: string;
-		patients: number;
-		prevPatients: number;
-		growthText: string;
-		hommes: number;
-		femmes: number;
-		enfants: number;
-	}[];
-	childrenCount?: number;
+  totalPatients: number;
+  maleCount: number;
+  femaleCount: number;
+  childrenCount: number;
+  averageAge: number;
+  averageAgeMale: number;
+  averageAgeFemale: number;
+  newPatientsThisMonth: number;
+  newPatientsThisYear: number;
+  newPatientsLast30Days: number;
+  newPatientsLastYear: number;
+  thirtyDayGrowthPercentage: number;
+  annualGrowthPercentage: number;
+  appointmentsToday: number;
+  nextAppointment?: string;
+  monthlyGrowth: Array<{
+    month: string;
+    patients: number;
+    prevPatients: number;
+    growthText: string;
+    hommes: number;
+    femmes: number;
+    enfants: number;
+  }>;
+  revenueThisMonth: number;
+  pendingInvoices: number;
+  weeklyAppointments: number;
+  monthlyRevenue: number;
+  totalRevenue: number;
+  averageInvoiceAmount: number;
+}
+
+export interface Appointment {
+  id: number;
+  patientId: number;
+  cabinetId: number;
+  osteopathId: number;
+  date: string;
+  start: string;
+  end: string;
+  reason: string;
+  notes: string | null;
+  status: AppointmentStatus;
+  notificationSent: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Cabinet {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+  email: string;
+  website: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
 }
