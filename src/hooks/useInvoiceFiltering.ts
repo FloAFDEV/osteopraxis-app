@@ -82,12 +82,12 @@ export const useInvoiceFiltering = (
     return years.sort((a, b) => parseInt(b) - parseInt(a));
   };
 
-  // Generate month options for filtering based on selected year
+  // Generate month options for filtering based on selected year - now returns string array
   const generateMonthOptions = (
     selectedYear: string,
     invoices: Invoice[]
-  ): { value: string; label: string }[] => {
-    const months: { value: string; label: string }[] = [];
+  ): string[] => {
+    const monthKeys: string[] = [];
     const trackedMonths = new Set<string>();
     
     invoices.forEach(invoice => {
@@ -100,21 +100,15 @@ export const useInvoiceFiltering = (
         
         if (!trackedMonths.has(monthKey)) {
           trackedMonths.add(monthKey);
-          
-          // Format month name
-          const monthLabel = format(date, 'MMMM', { locale: fr });
-          months.push({
-            value: monthKey,
-            label: monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)
-          });
+          monthKeys.push(monthKey);
         }
       }
     });
     
     // Sort by month number (descending)
-    return months.sort((a, b) => {
-      const monthA = parseInt(a.value.split('-')[1]);
-      const monthB = parseInt(b.value.split('-')[1]);
+    return monthKeys.sort((a, b) => {
+      const monthA = parseInt(a.split('-')[1]);
+      const monthB = parseInt(b.split('-')[1]);
       return monthB - monthA;
     });
   };

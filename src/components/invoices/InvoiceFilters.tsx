@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, Download, Filter, Search, X } from "lucide-react";
 
@@ -23,7 +24,7 @@ interface InvoiceFiltersProps {
 	selectedMonth: string | null;
 	setSelectedMonth: (month: string | null) => void;
 	onDownloadAll: () => void;
-	invoiceYears: number[];
+	invoiceYears: string[];
 	monthOptions: string[];
 }
 
@@ -41,6 +42,30 @@ export const InvoiceFilters = ({
 	monthOptions,
 }: InvoiceFiltersProps) => {
 	const { isMobile } = useIsMobile();
+
+	// Helper function to safely format month display
+	const formatMonthDisplay = (monthKey: string): string => {
+		try {
+			// Validate monthKey format (should be YYYY-MM)
+			if (!monthKey || !monthKey.includes('-')) {
+				console.warn(`Invalid monthKey format: ${monthKey}`);
+				return monthKey;
+			}
+			
+			const dateToParse = `${monthKey}-01`;
+			const parsedDate = parseISO(dateToParse);
+			
+			if (!isValid(parsedDate)) {
+				console.warn(`Invalid date parsed from: ${dateToParse}`);
+				return monthKey;
+			}
+			
+			return format(parsedDate, "MMMM yyyy", { locale: fr });
+		} catch (error) {
+			console.error(`Error formatting month display for ${monthKey}:`, error);
+			return monthKey;
+		}
+	};
 
 	return (
 		<Card className="mb-8">
@@ -108,7 +133,7 @@ export const InvoiceFilters = ({
 								{invoiceYears.map((year) => (
 									<SelectItem
 										key={year}
-										value={year.toString()}
+										value={year}
 									>
 										{year}
 									</SelectItem>
@@ -133,13 +158,7 @@ export const InvoiceFilters = ({
 								</SelectItem>
 								{monthOptions.map((monthKey) => (
 									<SelectItem key={monthKey} value={monthKey}>
-										{format(
-											parseISO(`${monthKey}-01`),
-											"MMMM yyyy",
-											{
-												locale: fr,
-											}
-										)}
+										{formatMonthDisplay(monthKey)}
 									</SelectItem>
 								))}
 							</SelectContent>
