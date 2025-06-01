@@ -1,4 +1,5 @@
 
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { format, parseISO, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, Download, Filter, Search, X } from "lucide-react";
+import { InvoiceExportButtons } from "./InvoiceExportButtons";
+import { Invoice, Patient, Osteopath } from "@/types";
 
 interface InvoiceFiltersProps {
 	searchQuery: string;
@@ -26,6 +29,9 @@ interface InvoiceFiltersProps {
 	onDownloadAll: () => void;
 	invoiceYears: string[];
 	monthOptions: string[];
+	invoices: Invoice[];
+	patientDataMap: Map<number, Patient>;
+	osteopath?: Osteopath;
 }
 
 export const InvoiceFilters = ({
@@ -40,6 +46,9 @@ export const InvoiceFilters = ({
 	onDownloadAll,
 	invoiceYears,
 	monthOptions,
+	invoices,
+	patientDataMap,
+	osteopath,
 }: InvoiceFiltersProps) => {
 	const { isMobile } = useIsMobile();
 
@@ -176,9 +185,18 @@ export const InvoiceFilters = ({
 								{selectedMonth ? "mensuel" : "annuel"}
 							</span>
 						</Button>
+
+						<InvoiceExportButtons
+							selectedYear={selectedYear}
+							selectedMonth={selectedMonth}
+							invoices={invoices}
+							patientDataMap={patientDataMap}
+							osteopath={osteopath}
+						/>
 					</div>
 				</div>
 			</CardContent>
 		</Card>
 	);
 };
+

@@ -61,6 +61,13 @@ const InvoicesPage = () => {
 		queryFn: api.getInvoices,
 	});
 
+	// Query for osteopath data
+	const { data: osteopath } = useQuery({
+		queryKey: ["osteopath", user?.osteopathId],
+		queryFn: () => user?.osteopathId ? api.getOsteopathById(user.osteopathId) : null,
+		enabled: !!user?.osteopathId,
+	});
+
 	// Use our custom hook for filtering invoices
 	const {
 		filteredInvoices,
@@ -307,7 +314,7 @@ const InvoicesPage = () => {
 						</Button>
 					</div>
 
-					{/* Filters with corrected props */}
+					{/* Filters avec toutes les props nécessaires */}
 					<InvoiceFilters
 						searchQuery={searchQuery}
 						setSearchQuery={setSearchQuery}
@@ -320,6 +327,9 @@ const InvoicesPage = () => {
 						onDownloadAll={handleDownloadAllInvoices}
 						invoiceYears={yearOptions}
 						monthOptions={monthOptions}
+						invoices={invoices || []}
+						patientDataMap={patientDataMap}
+						osteopath={osteopath}
 					/>
 
 					{/* Content */}
