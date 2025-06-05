@@ -31,7 +31,7 @@ type InsertableAppointment = {
 	reason: string;
 	status: AppointmentStatus;
 	cabinetId?: number;
-	osteopathId: number; // Maintenant obligatoire
+	osteopathId: number;
 	notificationSent: boolean;
 	notes?: string | null;
 };
@@ -244,22 +244,9 @@ export const supabaseAppointmentService = {
 					delete (updatePayload as any)[k]
 			);
 
-			// 4. Ajouter une option de bypass des contraintes pour les annulations
-			let extraHeaders = {};
-			if (updatePayload.status === "CANCELED") {
-				// Ajout d'un header spécial qui sera détecté par notre politique RLS
-				// pour autoriser l'annulation sans vérifier les conflits d'horaire
-				extraHeaders = {
-					"X-Cancellation-Override": "true",
-				};
-			}
+			console.log("En-têtes de la requête:", corsHeaders);
 
-			console.log("En-têtes de la requête:", {
-				...corsHeaders,
-				...extraHeaders,
-			});
-
-			// 5. Utiliser PUT au lieu de PATCH (plus compatible avec les configurations CORS)
+			// 4. Utiliser PUT au lieu de PATCH (plus compatible avec les configurations CORS)
 			const res = await fetch(URL_ENDPOINT, {
 				method: "PUT", // Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
 				headers: {
@@ -268,7 +255,6 @@ export const supabaseAppointmentService = {
 					"Content-Type": "application/json",
 					Prefer: "return=representation",
 					...corsHeaders,
-					...extraHeaders,
 				},
 				body: JSON.stringify(updatePayload),
 			});
@@ -364,7 +350,6 @@ export const supabaseAppointmentService = {
 					Authorization: `Bearer ${token}`,
 					"Content-Type": "application/json",
 					Prefer: "return=representation",
-					"X-Cancellation-Override": "true", // En-tête critique pour contourner la vérification de conflit
 					...corsHeaders,
 				},
 				body: JSON.stringify(updatePayload),

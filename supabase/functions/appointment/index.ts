@@ -152,7 +152,7 @@ serve(async (req: Request) => {
         const { data: newAppointment, error: insertError } = await supabaseClient
           .from("Appointment")
           .insert(postData)
-          .select()
+          .select("*")
           .single();
 
         if (insertError) throw insertError;
@@ -207,7 +207,7 @@ serve(async (req: Request) => {
           .from("Appointment")
           .update(updateData)
           .eq("id", appointmentId)
-          .select()
+          .select("*")
           .single();
 
         if (updateError) throw updateError;
