@@ -67,7 +67,7 @@ serve(async (req: Request) => {
     switch (method) {
       case "GET":
         if (appointmentId) {
-          // Récupérer un rendez-vous spécifique - requête simple avec osteopathId
+          // Récupérer un rendez-vous spécifique
           const { data: appointment, error } = await supabaseClient
             .from("Appointment")
             .select("*")
@@ -89,7 +89,7 @@ serve(async (req: Request) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else if (patientId) {
-          // Récupérer les rendez-vous d'un patient - avec vérification osteopathId
+          // Récupérer les rendez-vous d'un patient
           const { data: appointments, error } = await supabaseClient
             .from("Appointment")
             .select("*")
@@ -104,7 +104,7 @@ serve(async (req: Request) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else {
-          // Récupérer tous les rendez-vous de l'ostéopathe - requête simple !
+          // Récupérer tous les rendez-vous de l'ostéopathe
           const { data: appointments, error } = await supabaseClient
             .from("Appointment")
             .select("*")
@@ -149,6 +149,8 @@ serve(async (req: Request) => {
           }
         });
 
+        console.log("Insertion avec données:", postData);
+
         const { data: newAppointment, error: insertError } = await supabaseClient
           .from("Appointment")
           .insert(postData)
@@ -171,7 +173,7 @@ serve(async (req: Request) => {
           });
         }
 
-        // Vérifier que le rendez-vous appartient à l'ostéopathe - requête simple !
+        // Vérifier que le rendez-vous appartient à l'ostéopathe
         const { data: existingAppointment, error: checkError } = await supabaseClient
           .from("Appointment")
           .select("id")
@@ -225,7 +227,7 @@ serve(async (req: Request) => {
           });
         }
 
-        // Vérifier que le rendez-vous appartient à l'ostéopathe - requête simple !
+        // Vérifier que le rendez-vous appartient à l'ostéopathe
         const { data: appointmentToDelete, error: deleteCheckError } = await supabaseClient
           .from("Appointment")
           .select("id")
