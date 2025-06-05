@@ -17,6 +17,7 @@ export type Database = {
           id: number
           notes: string | null
           notificationSent: boolean
+          osteopathId: number
           patientId: number
           reason: string
           status: Database["public"]["Enums"]["AppointmentStatus"]
@@ -30,6 +31,7 @@ export type Database = {
           id?: number
           notes?: string | null
           notificationSent?: boolean
+          osteopathId: number
           patientId: number
           reason: string
           status: Database["public"]["Enums"]["AppointmentStatus"]
@@ -43,6 +45,7 @@ export type Database = {
           id?: number
           notes?: string | null
           notificationSent?: boolean
+          osteopathId?: number
           patientId?: number
           reason?: string
           status?: Database["public"]["Enums"]["AppointmentStatus"]

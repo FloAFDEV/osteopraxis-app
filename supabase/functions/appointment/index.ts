@@ -67,15 +67,12 @@ serve(async (req: Request) => {
     switch (method) {
       case "GET":
         if (appointmentId) {
-          // Récupérer un rendez-vous spécifique
+          // Récupérer un rendez-vous spécifique - plus besoin de JOIN !
           const { data: appointment, error } = await supabaseClient
             .from("Appointment")
-            .select(`
-              *,
-              Patient!inner(id, firstName, lastName, osteopathId)
-            `)
+            .select("*")
             .eq("id", appointmentId)
-            .eq("Patient.osteopathId", identity.osteopathId)
+            .eq("osteopathId", identity.osteopathId)
             .maybeSingle();
 
           if (error) throw error;
@@ -92,15 +89,12 @@ serve(async (req: Request) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else if (patientId) {
-          // Récupérer les rendez-vous d'un patient
+          // Récupérer les rendez-vous d'un patient - avec vérification osteopathId
           const { data: appointments, error } = await supabaseClient
             .from("Appointment")
-            .select(`
-              *,
-              Patient!inner(id, firstName, lastName, osteopathId)
-            `)
+            .select("*")
             .eq("patientId", patientId)
-            .eq("Patient.osteopathId", identity.osteopathId)
+            .eq("osteopathId", identity.osteopathId)
             .order("date", { ascending: false });
 
           if (error) throw error;
@@ -110,14 +104,11 @@ serve(async (req: Request) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else {
-          // Récupérer tous les rendez-vous de l'ostéopathe
+          // Récupérer tous les rendez-vous de l'ostéopathe - requête simple !
           const { data: appointments, error } = await supabaseClient
             .from("Appointment")
-            .select(`
-              *,
-              Patient!inner(id, firstName, lastName, osteopathId)
-            `)
-            .eq("Patient.osteopathId", identity.osteopathId)
+            .select("*")
+            .eq("osteopathId", identity.osteopathId)
             .order("date", { ascending: true });
 
           if (error) throw error;
@@ -148,6 +139,9 @@ serve(async (req: Request) => {
           }
         }
 
+        // S'assurer que l'osteopathId est inclus dans les données
+        postData.osteopathId = identity.osteopathId;
+
         // Nettoyer les valeurs undefined
         Object.keys(postData).forEach(key => {
           if (postData[key] === undefined) {
@@ -177,15 +171,12 @@ serve(async (req: Request) => {
           });
         }
 
-        // Vérifier que le rendez-vous appartient à l'ostéopathe
+        // Vérifier que le rendez-vous appartient à l'ostéopathe - requête simple !
         const { data: existingAppointment, error: checkError } = await supabaseClient
           .from("Appointment")
-          .select(`
-            id,
-            Patient!inner(osteopathId)
-          `)
+          .select("id")
           .eq("id", appointmentId)
-          .eq("Patient.osteopathId", identity.osteopathId)
+          .eq("osteopathId", identity.osteopathId)
           .maybeSingle();
 
         if (checkError) throw checkError;
@@ -200,9 +191,10 @@ serve(async (req: Request) => {
 
         const patchData = await req.json();
         
-        // Nettoyer les valeurs undefined
+        // Nettoyer les valeurs undefined et empêcher la modification de l'osteopathId
         const updateData = { ...patchData };
         delete updateData.id;
+        delete updateData.osteopathId; // Empêcher la modification de l'osteopathId
         Object.keys(updateData).forEach(key => {
           if (updateData[key] === undefined) {
             delete updateData[key];
@@ -233,15 +225,12 @@ serve(async (req: Request) => {
           });
         }
 
-        // Vérifier que le rendez-vous appartient à l'ostéopathe
+        // Vérifier que le rendez-vous appartient à l'ostéopathe - requête simple !
         const { data: appointmentToDelete, error: deleteCheckError } = await supabaseClient
           .from("Appointment")
-          .select(`
-            id,
-            Patient!inner(osteopathId)
-          `)
+          .select("id")
           .eq("id", appointmentId)
-          .eq("Patient.osteopathId", identity.osteopathId)
+          .eq("osteopathId", identity.osteopathId)
           .maybeSingle();
 
         if (deleteCheckError) throw deleteCheckError;
