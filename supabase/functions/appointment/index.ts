@@ -67,7 +67,7 @@ serve(async (req: Request) => {
     switch (method) {
       case "GET":
         if (appointmentId) {
-          // Récupérer un rendez-vous spécifique - plus besoin de JOIN !
+          // Récupérer un rendez-vous spécifique - requête simple avec osteopathId
           const { data: appointment, error } = await supabaseClient
             .from("Appointment")
             .select("*")
