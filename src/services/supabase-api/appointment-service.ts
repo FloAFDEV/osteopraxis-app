@@ -47,7 +47,7 @@ export const supabaseAppointmentService = {
 			// Récupérer l'ID de l'ostéopathe connecté
 			const osteopathId = await getCurrentOsteopathId();
 			
-			// Récupérer les rendez-vous directement par osteopathId - plus de JOIN nécessaire !
+			// Récupérer les rendez-vous directement par osteopathId - requête simplifiée
 			const { data, error } = await supabase
 				.from("Appointment")
 				.select("*")
@@ -105,7 +105,6 @@ export const supabaseAppointmentService = {
 		}
 	},
 
-	// Nouvelle fonction pour récupérer les rendez-vous du jour pour un patient
 	async getTodayAppointmentForPatient(
 		patientId: number
 	): Promise<Appointment | null> {
@@ -180,10 +179,12 @@ export const supabaseAppointmentService = {
 				adaptedData.status = "CANCELED";
 			}
 
+			console.log("Données adaptées pour insertion:", adaptedData);
+
 			const { data, error } = await supabase
 				.from("Appointment")
 				.insert(adaptedData)
-				.select()
+				.select("*")
 				.single();
 
 			if (error) {

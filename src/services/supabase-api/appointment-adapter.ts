@@ -21,7 +21,7 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 }
 
 export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Partial<Appointment>): any {
-	return {
+	const adaptedData = {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
 		osteopathId: data.osteopathId, // Maintenant inclus dans les données Supabase
@@ -32,6 +32,15 @@ export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Part
 		notificationSent: data.notificationSent || false,
 		user_id: data.user_id || null,
 	};
+
+	// Supprimer les valeurs undefined pour éviter les erreurs
+	Object.keys(adaptedData).forEach(key => {
+		if (adaptedData[key] === undefined) {
+			delete adaptedData[key];
+		}
+	});
+
+	return adaptedData;
 }
 
 export function createAppointmentPayload(data: any): CreateAppointmentPayload {
