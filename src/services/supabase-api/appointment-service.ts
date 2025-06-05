@@ -46,14 +46,11 @@ export const supabaseAppointmentService = {
 			// Récupérer l'ID de l'ostéopathe connecté
 			const osteopathId = await getCurrentOsteopathId();
 			
-			// Récupérer les rendez-vous avec un join sur Patient pour filtrer par osteopathId
+			// Requête simplifiée utilisant directement osteopathId
 			const { data, error } = await supabase
 				.from("Appointment")
-				.select(`
-					*,
-					Patient!inner(osteopathId)
-				`)
-				.eq("Patient.osteopathId", osteopathId)
+				.select("*")
+				.eq("osteopathId", osteopathId)
 				.order("date", { ascending: true });
 
 			if (error) {
@@ -62,11 +59,7 @@ export const supabaseAppointmentService = {
 			}
 
 			console.log(`${data?.length || 0} rendez-vous chargés pour l'ostéopathe ${osteopathId}`);
-			// Adapter les données en retirant la relation Patient du résultat
-			return (data || []).map(item => {
-				const { Patient, ...appointment } = item as any;
-				return adaptAppointmentFromSupabase(appointment);
-			});
+			return (data || []).map(adaptAppointmentFromSupabase);
 		} catch (error) {
 			console.error("Error fetching appointments:", error);
 			throw error;
@@ -111,7 +104,6 @@ export const supabaseAppointmentService = {
 		}
 	},
 
-	// Nouvelle fonction pour récupérer les rendez-vous du jour pour un patient
 	async getTodayAppointmentForPatient(
 		patientId: number
 	): Promise<Appointment | null> {
@@ -156,9 +148,10 @@ export const supabaseAppointmentService = {
 		try {
 			console.log("Création d'un nouveau rendez-vous:", payload);
 			
-			// Vérifier que le patient appartient bien à l'ostéopathe connecté
+			// Récupérer l'osteopathId de l'utilisateur connecté
 			const osteopathId = await getCurrentOsteopathId();
 			
+			// Vérifier que le patient appartient bien à l'ostéopathe connecté
 			const { data: patientCheck, error: patientError } = await supabase
 				.from("Patient")
 				.select("osteopathId")
@@ -175,23 +168,20 @@ export const supabaseAppointmentService = {
 				throw new Error("Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient");
 			}
 
-			// Création de l'objet à insérer - ne pas inclure osteopathId car cette colonne n'existe pas
+			// Création de l'objet à insérer avec osteopathId
 			const adaptedData = adaptAppointmentToSupabase({
 				...payload,
-				// Retirer osteopathId du payload car cette colonne n'existe pas dans Appointment
+				osteopathId: osteopathId, // Forcer l'osteopathId de l'utilisateur connecté
 			});
 
-			// Supprimer osteopathId du payload adapté s'il existe
-			const { osteopathId: _, ...finalData } = adaptedData as any;
-
 			// Convertir le statut si nécessaire (CANCELLED -> CANCELED)
-			if (finalData.status === "CANCELLED") {
-				finalData.status = "CANCELED";
+			if (adaptedData.status === "CANCELLED") {
+				adaptedData.status = "CANCELED";
 			}
 
 			const { data, error } = await supabase
 				.from("Appointment")
-				.insert(finalData)
+				.insert(adaptedData)
 				.select()
 				.single();
 
@@ -352,13 +342,14 @@ export const supabaseAppointmentService = {
 				date: appointment.date, // important, NOT NULL
 				reason: appointment.reason || "", // ou null si autorisé
 				patientId: appointment.patientId,
-				status: "CANCELED", // statut d’annulation
+				status: "CANCELED", // statut d'annulation
 				notificationSent: appointment.notificationSent || false,
 				cabinetId: appointment.cabinetId,
 				createdAt: appointment.createdAt,
 				updatedAt: new Date().toISOString(), // mise à jour
 				user_id: appointment.user_id,
 				notes: appointment.notes || "",
+				osteopathId: appointment.osteopathId, // Inclure osteopathId
 			};
 
 			console.log("Payload d'annulation simplifié:", updatePayload);

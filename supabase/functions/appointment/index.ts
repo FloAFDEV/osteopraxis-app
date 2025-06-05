@@ -67,15 +67,12 @@ serve(async (req: Request) => {
     switch (method) {
       case "GET":
         if (appointmentId) {
-          // Récupérer un rendez-vous spécifique
+          // Récupérer un rendez-vous spécifique - filtrage direct par osteopathId
           const { data: appointment, error } = await supabaseClient
             .from("Appointment")
-            .select(`
-              *,
-              Patient!inner(id, firstName, lastName, osteopathId)
-            `)
+            .select("*")
             .eq("id", appointmentId)
-            .eq("Patient.osteopathId", identity.osteopathId)
+            .eq("osteopathId", identity.osteopathId)
             .maybeSingle();
 
           if (error) throw error;
@@ -92,15 +89,26 @@ serve(async (req: Request) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else if (patientId) {
-          // Récupérer les rendez-vous d'un patient
+          // Récupérer les rendez-vous d'un patient - vérifier d'abord que le patient appartient à l'ostéopathe
+          const { data: patient, error: patientError } = await supabaseClient
+            .from("Patient")
+            .select("id")
+            .eq("id", patientId)
+            .eq("osteopathId", identity.osteopathId)
+            .maybeSingle();
+
+          if (patientError || !patient) {
+            return new Response(JSON.stringify({ error: "Patient non trouvé ou accès non autorisé" }), {
+              status: 403,
+              headers: { ...corsHeaders, "Content-Type": "application/json" }
+            });
+          }
+
           const { data: appointments, error } = await supabaseClient
             .from("Appointment")
-            .select(`
-              *,
-              Patient!inner(id, firstName, lastName, osteopathId)
-            `)
+            .select("*")
             .eq("patientId", patientId)
-            .eq("Patient.osteopathId", identity.osteopathId)
+            .eq("osteopathId", identity.osteopathId)
             .order("date", { ascending: false });
 
           if (error) throw error;
@@ -110,14 +118,11 @@ serve(async (req: Request) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else {
-          // Récupérer tous les rendez-vous de l'ostéopathe
+          // Récupérer tous les rendez-vous de l'ostéopathe - filtrage direct
           const { data: appointments, error } = await supabaseClient
             .from("Appointment")
-            .select(`
-              *,
-              Patient!inner(id, firstName, lastName, osteopathId)
-            `)
-            .eq("Patient.osteopathId", identity.osteopathId)
+            .select("*")
+            .eq("osteopathId", identity.osteopathId)
             .order("date", { ascending: true });
 
           if (error) throw error;
@@ -148,6 +153,9 @@ serve(async (req: Request) => {
           }
         }
 
+        // Forcer l'osteopathId à celui de l'utilisateur connecté
+        postData.osteopathId = identity.osteopathId;
+
         // Nettoyer les valeurs undefined
         Object.keys(postData).forEach(key => {
           if (postData[key] === undefined) {
@@ -177,15 +185,12 @@ serve(async (req: Request) => {
           });
         }
 
-        // Vérifier que le rendez-vous appartient à l'ostéopathe
+        // Vérifier que le rendez-vous appartient à l'ostéopathe - filtrage direct
         const { data: existingAppointment, error: checkError } = await supabaseClient
           .from("Appointment")
-          .select(`
-            id,
-            Patient!inner(osteopathId)
-          `)
+          .select("id")
           .eq("id", appointmentId)
-          .eq("Patient.osteopathId", identity.osteopathId)
+          .eq("osteopathId", identity.osteopathId)
           .maybeSingle();
 
         if (checkError) throw checkError;
@@ -199,6 +204,9 @@ serve(async (req: Request) => {
         }
 
         const patchData = await req.json();
+        
+        // Empêcher la modification de osteopathId
+        delete patchData.osteopathId;
         
         // Nettoyer les valeurs undefined
         const updateData = { ...patchData };
@@ -215,6 +223,7 @@ serve(async (req: Request) => {
           .from("Appointment")
           .update(updateData)
           .eq("id", appointmentId)
+          .eq("osteopathId", identity.osteopathId)
           .select()
           .single();
 
@@ -233,15 +242,12 @@ serve(async (req: Request) => {
           });
         }
 
-        // Vérifier que le rendez-vous appartient à l'ostéopathe
+        // Vérifier que le rendez-vous appartient à l'ostéopathe - filtrage direct
         const { data: appointmentToDelete, error: deleteCheckError } = await supabaseClient
           .from("Appointment")
-          .select(`
-            id,
-            Patient!inner(osteopathId)
-          `)
+          .select("id")
           .eq("id", appointmentId)
-          .eq("Patient.osteopathId", identity.osteopathId)
+          .eq("osteopathId", identity.osteopathId)
           .maybeSingle();
 
         if (deleteCheckError) throw deleteCheckError;
@@ -257,7 +263,8 @@ serve(async (req: Request) => {
         const { error: deleteError } = await supabaseClient
           .from("Appointment")
           .delete()
-          .eq("id", appointmentId);
+          .eq("id", appointmentId)
+          .eq("osteopathId", identity.osteopathId);
 
         if (deleteError) throw deleteError;
 
