@@ -35,7 +35,6 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useAuth } from "@/contexts/AuthContext";
 
 const appointmentFormSchema = z.object({
 	patientId: z.number().min(1, {
@@ -78,7 +77,6 @@ export function AppointmentForm({
 	const [useCustomTime, setUseCustomTime] = useState(false);
 	const navigate = useNavigate();
 	const { patientId: patientIdParam } = useParams<{ patientId: string }>();
-	const { user } = useAuth();
 
 	useEffect(() => {
 		if (propPatients) {
@@ -158,7 +156,7 @@ export function AppointmentForm({
 				status: data.status as AppointmentStatus,
 				notificationSent: false,
 				cabinetId: 1, // Valeur par défaut
-				osteopathId: user?.osteopathId || 1, // Utiliser l'osteopathId de l'utilisateur connecté
+				osteopathId: 1, // Valeur par défaut
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};

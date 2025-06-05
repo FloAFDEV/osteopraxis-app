@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -31,7 +30,7 @@ type InsertableAppointment = {
 	reason: string;
 	status: AppointmentStatus;
 	cabinetId?: number;
-	osteopathId: number;
+	osteopathId?: number;
 	notificationSent: boolean;
 	notes?: string | null;
 };
@@ -47,11 +46,14 @@ export const supabaseAppointmentService = {
 			// Récupérer l'ID de l'ostéopathe connecté
 			const osteopathId = await getCurrentOsteopathId();
 			
-			// Récupérer les rendez-vous directement par osteopathId
+			// Récupérer les rendez-vous avec un join sur Patient pour filtrer par osteopathId
 			const { data, error } = await supabase
 				.from("Appointment")
-				.select("*")
-				.eq("osteopathId", osteopathId)
+				.select(`
+					*,
+					Patient!inner(osteopathId)
+				`)
+				.eq("Patient.osteopathId", osteopathId)
 				.order("date", { ascending: true });
 
 			if (error) {
@@ -60,7 +62,11 @@ export const supabaseAppointmentService = {
 			}
 
 			console.log(`${data?.length || 0} rendez-vous chargés pour l'ostéopathe ${osteopathId}`);
-			return (data || []).map(adaptAppointmentFromSupabase);
+			// Adapter les données en retirant la relation Patient du résultat
+			return (data || []).map(item => {
+				const { Patient, ...appointment } = item as any;
+				return adaptAppointmentFromSupabase(appointment);
+			});
 		} catch (error) {
 			console.error("Error fetching appointments:", error);
 			throw error;
@@ -105,6 +111,7 @@ export const supabaseAppointmentService = {
 		}
 	},
 
+	// Nouvelle fonction pour récupérer les rendez-vous du jour pour un patient
 	async getTodayAppointmentForPatient(
 		patientId: number
 	): Promise<Appointment | null> {
@@ -149,29 +156,43 @@ export const supabaseAppointmentService = {
 		try {
 			console.log("Création d'un nouveau rendez-vous:", payload);
 			
-			// Récupérer l'osteopathId de l'utilisateur connecté pour le forcer dans le payload
+			// Vérifier que le patient appartient bien à l'ostéopathe connecté
 			const osteopathId = await getCurrentOsteopathId();
-			if (!osteopathId) {
-				throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
+			
+			const { data: patientCheck, error: patientError } = await supabase
+				.from("Patient")
+				.select("osteopathId")
+				.eq("id", payload.patientId)
+				.maybeSingle();
+				
+			if (patientError || !patientCheck) {
+				console.error("Patient introuvable ou erreur:", patientError);
+				throw new Error("Patient introuvable");
 			}
 			
-			// Écraser l'osteopathId dans le payload avec celui de l'utilisateur connecté
-			payload.osteopathId = osteopathId;
-			
-			// Utiliser la fonction adaptateur pour créer le payload
-			const adaptedData = adaptAppointmentToSupabase(payload);
+			if (patientCheck.osteopathId !== osteopathId) {
+				console.error("Tentative d'accès non autorisé: le patient n'appartient pas à cet ostéopathe");
+				throw new Error("Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient");
+			}
+
+			// Création de l'objet à insérer - ne pas inclure osteopathId car cette colonne n'existe pas
+			const adaptedData = adaptAppointmentToSupabase({
+				...payload,
+				// Retirer osteopathId du payload car cette colonne n'existe pas dans Appointment
+			});
+
+			// Supprimer osteopathId du payload adapté s'il existe
+			const { osteopathId: _, ...finalData } = adaptedData as any;
 
 			// Convertir le statut si nécessaire (CANCELLED -> CANCELED)
-			if (adaptedData.status === "CANCELLED") {
-				adaptedData.status = "CANCELED";
+			if (finalData.status === "CANCELLED") {
+				finalData.status = "CANCELED";
 			}
-
-			console.log("Données adaptées pour insertion:", adaptedData);
 
 			const { data, error } = await supabase
 				.from("Appointment")
-				.insert(adaptedData)
-				.select("*")
+				.insert(finalData)
+				.select()
 				.single();
 
 			if (error) {
@@ -194,8 +215,29 @@ export const supabaseAppointmentService = {
 		try {
 			console.log(`Mise à jour du rendez-vous ${id}:`, update);
 
-			// Préparer le payload (nettoyage undefined)
+			// 1. Récupérer le token d'auth utilisateur
+			const {
+				data: { session },
+				error: sessionError,
+			} = await supabase.auth.getSession();
+
+			if (sessionError || !session?.access_token) {
+				throw new Error("Utilisateur non authentifié");
+			}
+			const token = session.access_token;
+
+			// 2. Utiliser les constantes importées pour l'URL et la clé API
+			if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+				throw new Error(
+					"Configuration Supabase manquante (URL ou clé API)"
+				);
+			}
+
+			const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
+
+			// 3. Préparer le payload (nettoyage undefined)
 			const updatePayload = {
+				id: id, // IMPORTANT: inclure l'ID dans le corps
 				...update,
 				status: update.status
 					? ensureAppointmentStatus(update.status)
@@ -210,19 +252,51 @@ export const supabaseAppointmentService = {
 					delete (updatePayload as any)[k]
 			);
 
-			const { data, error } = await supabase
-				.from("Appointment")
-				.update(updatePayload)
-				.eq("id", id)
-				.select("*")
-				.single();
-
-			if (error) {
-				console.error("[SUPABASE ERROR]", error);
-				throw error;
+			// 4. Ajouter une option de bypass des contraintes pour les annulations
+			let extraHeaders = {};
+			if (updatePayload.status === "CANCELED") {
+				// Ajout d'un header spécial qui sera détecté par notre politique RLS
+				// pour autoriser l'annulation sans vérifier les conflits d'horaire
+				extraHeaders = {
+					"X-Cancellation-Override": "true",
+				};
 			}
 
-			return adaptAppointmentFromSupabase(data);
+			console.log("En-têtes de la requête:", {
+				...corsHeaders,
+				...extraHeaders,
+			});
+
+			// 5. Utiliser PUT au lieu de PATCH (plus compatible avec les configurations CORS)
+			const res = await fetch(URL_ENDPOINT, {
+				method: "PUT", // Utiliser PUT au lieu de PATCH pour éviter les problèmes CORS
+				headers: {
+					apikey: SUPABASE_API_KEY,
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+					Prefer: "return=representation",
+					...corsHeaders,
+					...extraHeaders,
+				},
+				body: JSON.stringify(updatePayload),
+			});
+
+			if (!res.ok) {
+				const errText = await res.text();
+				console.error(`Erreur HTTP ${res.status}:`, errText);
+				throw new Error(`Erreur HTTP ${res.status}: ${errText}`);
+			}
+
+			// La réponse est toujours un array d'1 element via PostgREST
+			const data = await res.json();
+			console.log("Réponse de Supabase:", data);
+
+			if (Array.isArray(data) && data.length > 0) return data[0];
+			// fallback : parfois selon Prefer/headers c'est un objet direct
+			if (data && typeof data === "object") return data as Appointment;
+			throw new Error(
+				"Aucune donnée retournée lors de la modification du rendez-vous"
+			);
 		} catch (error) {
 			console.error("[SUPABASE ERROR]", error);
 			throw error;
@@ -233,6 +307,31 @@ export const supabaseAppointmentService = {
 	async cancelAppointment(id: number): Promise<Appointment> {
 		try {
 			console.log(`Annulation du rendez-vous ${id}`);
+
+			// 1. Récupérer le token d'auth utilisateur
+			const {
+				data: { session },
+				error: sessionError,
+			} = await supabase.auth.getSession();
+
+			if (sessionError || !session?.access_token) {
+				throw new Error("Utilisateur non authentifié");
+			}
+			const token = session.access_token;
+
+			// Utiliser les constantes importées
+			if (!SUPABASE_API_URL || !SUPABASE_API_KEY) {
+				throw new Error(
+					"Configuration Supabase manquante (URL ou clé API)"
+				);
+			}
+
+			// Construction correcte de l'URL avec les paramètres de requête
+			const URL_ENDPOINT = `${SUPABASE_API_URL}/rest/v1/Appointment?id=eq.${id}`;
+
+			console.log(
+				`Annulation du rendez-vous ${id} - envoi direct à ${URL_ENDPOINT}`
+			);
 
 			// Récupérer les détails du rendez-vous
 			const { data: appointment, error: fetchError } = await supabase
@@ -249,26 +348,55 @@ export const supabaseAppointmentService = {
 
 			// Simplifier le payload - UNIQUEMENT le statut et updatedAt
 			const updatePayload = {
-				status: "CANCELED",
-				updatedAt: new Date().toISOString(),
+				id: appointment.id,
+				date: appointment.date, // important, NOT NULL
+				reason: appointment.reason || "", // ou null si autorisé
+				patientId: appointment.patientId,
+				status: "CANCELED", // statut d’annulation
+				notificationSent: appointment.notificationSent || false,
+				cabinetId: appointment.cabinetId,
+				createdAt: appointment.createdAt,
+				updatedAt: new Date().toISOString(), // mise à jour
+				user_id: appointment.user_id,
+				notes: appointment.notes || "",
 			};
 
 			console.log("Payload d'annulation simplifié:", updatePayload);
 
-			const { data, error } = await supabase
-				.from("Appointment")
-				.update(updatePayload)
-				.eq("id", id)
-				.select("*")
-				.single();
+			// Utiliser PUT au lieu de PATCH pour la compatibilité CORS
+			const res = await fetch(URL_ENDPOINT, {
+				method: "PUT",
+				headers: {
+					apikey: SUPABASE_API_KEY,
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+					Prefer: "return=representation",
+					"X-Cancellation-Override": "true", // En-tête critique pour contourner la vérification de conflit
+					...corsHeaders,
+				},
+				body: JSON.stringify(updatePayload),
+			});
 
-			if (error) {
-				console.error("Erreur lors de l'annulation:", error);
-				throw error;
+			if (!res.ok) {
+				const errorText = await res.text();
+				console.error(
+					"Erreur HTTP lors de l'annulation:",
+					res.status,
+					errorText
+				);
+				throw new Error(
+					`Erreur lors de l'annulation du rendez-vous: ${res.status}`
+				);
 			}
 
+			// Traitement de la réponse
+			const data = await res.json();
 			console.log("Réponse d'annulation:", data);
-			return adaptAppointmentFromSupabase(data);
+			if (Array.isArray(data) && data.length > 0) return data[0];
+			if (data && typeof data === "object") return data as Appointment;
+			throw new Error(
+				"Aucune donnée retournée lors de l'annulation du rendez-vous"
+			);
 		} catch (error) {
 			console.error("[SUPABASE ERROR]", error);
 			throw error;
