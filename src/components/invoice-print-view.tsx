@@ -26,7 +26,6 @@ export const InvoicePrintView = ({
 	const formattedDate = format(new Date(invoice.date), "dd MMMM yyyy", {
 		locale: fr,
 	});
-	const currentDate = format(new Date(), "dd MMMM yyyy", { locale: fr });
 
 	const getPaymentMethod = (method?: string) => {
 		if (!method) return "Non spécifié";
@@ -255,17 +254,6 @@ export const InvoicePrintView = ({
 					En votre aimable règlement à réception. Merci de votre
 					confiance.
 				</p>
-				<div className="flex flex-wrap justify-center items-center gap-2 text-gray-500 text-xs break-all text-center">
-					<span className="whitespace-nowrap">
-						Document généré le {currentDate}
-					</span>
-					<span>|</span>
-					<span className="text-gray-800 dark:text-gray-240 font-semibold text-sm">
-						PatientHub
-					</span>
-					<span>|</span>
-					<span>Logiciel de gestion pour ostéopathes</span>
-				</div>
 			</footer>
 		</div>
 	);
