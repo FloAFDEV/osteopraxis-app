@@ -121,7 +121,7 @@ export function CabinetForm({
         // Update existing cabinet
         await api.updateCabinet(cabinetId, cabinetData);
         
-        // Mettre à jour les informations de l'ostéopathe (y compris stampUrl)
+        // Mettre à jour les informations de l'ostéopathe (y compris stampUrl) VIA LA FONCTION EDGE
         if (osteopathId) {
           const osteopathUpdateData = {
             siret: data.siret || null,
@@ -130,8 +130,10 @@ export function CabinetForm({
             stampUrl: data.stampUrl || null
           };
           
-          console.log('🔍 Données ostéopathe à envoyer:', osteopathUpdateData);
+          console.log('🔍 Données ostéopathe à envoyer (incluant stampUrl):', osteopathUpdateData);
+          console.log('🎯 StampUrl dans les données:', data.stampUrl);
           
+          // Utilisation de la fonction Edge pour éviter les problèmes CORS
           await api.updateOsteopath(osteopathId, osteopathUpdateData);
         }
         
@@ -142,15 +144,19 @@ export function CabinetForm({
         
         // Mise à jour des informations de facturation de l'ostéopathe
         if (newCabinet && newCabinet.osteopathId) {
-          await api.updateOsteopath(newCabinet.osteopathId, {
+          const osteopathUpdateData = {
             siret: data.siret || null,
             rpps_number: data.rppsNumber || null,
             ape_code: data.apeCode || "8690F",
             stampUrl: data.stampUrl || null
-          });
+          };
+          
+          console.log('🔍 Données ostéopathe à envoyer pour nouveau cabinet (incluant stampUrl):', osteopathUpdateData);
+          
+          await api.updateOsteopath(newCabinet.osteopathId, osteopathUpdateData);
         }
         
-        toast.success("✅  Cabinet créé avec succès");
+        toast.success("✅ Cabinet créé avec succès");
       }
       
       // Si un callback de succès est fourni, l'appeler après un court délai
