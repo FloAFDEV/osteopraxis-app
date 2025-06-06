@@ -36,19 +36,41 @@ serve(async (req: Request) => {
   try {
     console.log('🔍 Début du traitement de la requête POST');
     console.log('🔍 Headers reçus:', Object.fromEntries(req.headers.entries()));
+    console.log('🔍 Content-Type:', req.headers.get('content-type'));
+    console.log('🔍 Content-Length:', req.headers.get('content-length'));
     
-    // Lire le corps de la requête directement en JSON
+    // Lire le body comme texte d'abord pour diagnostiquer
+    const bodyText = await req.text();
+    console.log('📥 Corps de la requête reçu (texte brut):', bodyText);
+    console.log('📥 Longueur du corps:', bodyText.length);
+    
+    if (!bodyText || bodyText.length === 0) {
+      console.log('❌ Corps de requête vide');
+      return new Response(JSON.stringify({ 
+        error: 'Corps de requête vide' 
+      }), {
+        status: 400,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      });
+    }
+
+    // Parser le JSON maintenant
     let requestBody;
     try {
-      requestBody = await req.json();
-      console.log('📥 Corps de la requête reçu:', requestBody);
+      requestBody = JSON.parse(bodyText);
+      console.log('📥 Corps parsé avec succès:', requestBody);
       console.log('📥 Type du corps:', typeof requestBody);
       console.log('📥 Clés du corps:', Object.keys(requestBody || {}));
     } catch (parseError) {
       console.error('❌ Erreur de parsing JSON:', parseError);
+      console.error('❌ Texte brut reçu:', bodyText);
       return new Response(JSON.stringify({ 
         error: 'Format JSON invalide dans le corps de la requête',
-        details: parseError.message
+        details: parseError.message,
+        receivedText: bodyText
       }), {
         status: 400,
         headers: { 
