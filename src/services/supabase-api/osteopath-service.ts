@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import {
   supabase,

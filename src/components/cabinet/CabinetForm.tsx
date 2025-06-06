@@ -13,6 +13,7 @@ import { CabinetFormProps, cabinetFormSchema, CabinetFormValues } from "./types"
 import { CabinetInfoFields } from "./CabinetInfoFields";
 import { BillingInfoFields } from "./BillingInfoFields";
 import { ImageFields } from "./ImageFields";
+import { StampUploadField } from "./StampUploadField";
 
 // Image par défaut pour les cabinets
 const DEFAULT_CABINET_IMAGE = "https://img.freepik.com/photos-premium/maison-moderne-exterieur-genere_1116642-246.jpg?ga=GA1.1.290584622.1739450057&semt=ais_hybrid&w=740";
@@ -29,6 +30,7 @@ export function CabinetForm({
   const [osteopathData, setOsteopathData] = useState<any>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [previewLogoUrl, setPreviewLogoUrl] = useState<string | null>(null);
+  const [currentStampUrl, setCurrentStampUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Initialiser les prévisualisations d'image avec les valeurs par défaut
@@ -42,6 +44,10 @@ export function CabinetForm({
     if (defaultValues?.logoUrl) {
       setPreviewLogoUrl(defaultValues.logoUrl);
     }
+
+    if (defaultValues?.stampUrl) {
+      setCurrentStampUrl(defaultValues.stampUrl);
+    }
     
     // Récupérer les données de l'ostéopathe si on est en mode édition
     const fetchOsteopathData = async () => {
@@ -50,6 +56,7 @@ export function CabinetForm({
           const data = await api.getOsteopathById(osteopathId);
           if (data) {
             setOsteopathData(data);
+            setCurrentStampUrl(data.stampUrl || null);
           }
         } catch (error) {
           console.error("⛔ Erreur lors de la récupération des données de l'ostéopathe:", error);
@@ -73,6 +80,7 @@ export function CabinetForm({
       siret: defaultValues?.siret || osteopathData?.siret || "",
       adeliNumber: defaultValues?.adeliNumber || osteopathData?.adeli_number || "",
       apeCode: defaultValues?.apeCode || osteopathData?.ape_code || "8690F",
+      stampUrl: defaultValues?.stampUrl || osteopathData?.stampUrl || "",
     },
   });
 
@@ -82,8 +90,14 @@ export function CabinetForm({
       form.setValue("siret", osteopathData.siret || "");
       form.setValue("adeliNumber", osteopathData.adeli_number || "");
       form.setValue("apeCode", osteopathData.ape_code || "8690F");
+      form.setValue("stampUrl", osteopathData.stampUrl || "");
     }
   }, [osteopathData, form]);
+
+  const handleStampUrlChange = (url: string | null) => {
+    setCurrentStampUrl(url);
+    form.setValue("stampUrl", url || "");
+  };
 
   const onSubmit = async (data: CabinetFormValues) => {
     try {
@@ -108,7 +122,8 @@ export function CabinetForm({
           await api.updateOsteopath(osteopathId, {
             siret: data.siret || null,
             adeli_number: data.adeliNumber || null,
-            ape_code: data.apeCode || "8690F"
+            ape_code: data.apeCode || "8690F",
+            stampUrl: data.stampUrl || null
           });
         }
         
@@ -122,7 +137,8 @@ export function CabinetForm({
           await api.updateOsteopath(newCabinet.osteopathId, {
             siret: data.siret || null,
             adeli_number: data.adeliNumber || null,
-            ape_code: data.apeCode || "8690F"
+            ape_code: data.apeCode || "8690F",
+            stampUrl: data.stampUrl || null
           });
         }
         
@@ -153,6 +169,17 @@ export function CabinetForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <CabinetInfoFields form={form} isSubmitting={isSubmitting} />
         <BillingInfoFields form={form} isSubmitting={isSubmitting} />
+        
+        <div>
+          <h3 className="text-lg font-medium mb-4">Tampon professionnel</h3>
+          <StampUploadField 
+            form={form} 
+            isSubmitting={isSubmitting}
+            currentStampUrl={currentStampUrl}
+            onStampUrlChange={handleStampUrlChange}
+          />
+        </div>
+        
         <ImageFields 
           form={form} 
           isSubmitting={isSubmitting} 

@@ -283,6 +283,7 @@ export type Database = {
           name: string
           professional_title: string | null
           siret: string | null
+          stampUrl: string | null
           updatedAt: string
           userId: string
         }
@@ -295,6 +296,7 @@ export type Database = {
           name: string
           professional_title?: string | null
           siret?: string | null
+          stampUrl?: string | null
           updatedAt?: string
           userId: string
         }
@@ -307,6 +309,7 @@ export type Database = {
           name?: string
           professional_title?: string | null
           siret?: string | null
+          stampUrl?: string | null
           updatedAt?: string
           userId?: string
         }

@@ -119,7 +119,8 @@ const EditCabinetPage = () => {
                 osteopathId: cabinet.osteopathId,
                 siret: osteopathData?.siret || undefined,
                 adeliNumber: osteopathData?.adeli_number || undefined,
-                apeCode: osteopathData?.ape_code || "8690F"
+                apeCode: osteopathData?.ape_code || "8690F",
+                stampUrl: osteopathData?.stampUrl || undefined
               }} 
               cabinetId={cabinet.id} 
               isEditing={true} 
