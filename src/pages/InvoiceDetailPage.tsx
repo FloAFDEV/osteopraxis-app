@@ -109,8 +109,12 @@ const InvoiceDetailPage: React.FC = () => {
       <div className="container mx-auto py-6">
         {/* Navigation et actions */}
         <div className="flex items-center justify-between mb-6 print:hidden">
-        	<Button onClick={() => navigate(-1)} className="mb-4">
-					<ArrowLeft className="mr-2 h-4 w-4" /> Retour à la fiche du patient
+       	<Button
+					onClick={() => navigate(-1)}
+					className="mb-4 bg-amber-500"
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" /> Retour à la fiche du
+					patient
 				</Button>
           <Button onClick={handlePrint} variant="default">
             <Printer className="mr-2 h-4 w-4" /> Imprimer
