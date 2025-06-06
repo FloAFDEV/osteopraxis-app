@@ -15,6 +15,7 @@ import {
 	Activity,
 	Ruler,
 	Weight,
+	Briefcase,
 } from "lucide-react";
 
 interface PatientInfoProps {
@@ -144,6 +145,30 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				</div>
 
 				<div className="space-y-2 text-sm text-muted-foreground">
+					{/* Adresse */}
+					<div className="flex items-center gap-2">
+						<MapPin className="h-4 w-4" />
+						<span>
+							{patient.address || "Adresse non renseignée"}
+						</span>
+					</div>
+					{/* Email */}
+					<div className="flex items-center gap-2">
+						<Mail className="h-4 w-4" />
+						<a
+							href={`mailto:${patient.email}`}
+							className="hover:underline"
+						>
+							{patient.email || "Email non renseigné"}
+						</a>
+					</div>
+					{/* Téléphone */}
+					<div className="flex items-center gap-2">
+						<Phone className="h-4 w-4" />
+						<span>
+							{patient.phone || "Téléphone non renseigné"}
+						</span>
+					</div>
 					{/* Taille et poids */}
 					{(patient.height || patient.weight) && (
 						<div className="flex items-center gap-4">
@@ -161,34 +186,12 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							)}
 						</div>
 					)}
-
 					{/* IMC */}
-					{bmiInfo()}
-
-					{/* Adresse */}
+					{bmiInfo()}{" "}
 					<div className="flex items-center gap-2">
-						<MapPin className="h-4 w-4" />
+						<Briefcase className="h-4 w-4" />
 						<span>
-							{patient.address || "Adresse non renseignée"}
-						</span>
-					</div>
-
-					{/* Email */}
-					<div className="flex items-center gap-2">
-						<Mail className="h-4 w-4" />
-						<a
-							href={`mailto:${patient.email}`}
-							className="hover:underline"
-						>
-							{patient.email || "Email non renseigné"}
-						</a>
-					</div>
-
-					{/* Téléphone */}
-					<div className="flex items-center gap-2">
-						<Phone className="h-4 w-4" />
-						<span>
-							{patient.phone || "Téléphone non renseigné"}
+							{patient.occupation || "profession non renseigné"}
 						</span>
 					</div>
 				</div>
