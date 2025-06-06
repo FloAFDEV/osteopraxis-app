@@ -2,7 +2,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
-import { Baby, Mail, User, UserRound, Users } from "lucide-react";
+import {
+	Baby,
+	User,
+	UserRound,
+	Users,
+	Briefcase,
+	Phone,
+	Mail,
+} from "lucide-react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -97,7 +105,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 										<Mail className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
 										<a
 											href={`mailto:${patient.email}`}
-											className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+											className="hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
 										>
 											{patient.email}
 										</a>
@@ -105,10 +113,11 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 								)}
 
 								{patient.phone && (
-									<span className="text-gray-700 dark:text-gray-200">
+									<span className="flex items-center text-gray-700 dark:text-gray-200">
+										<Phone className="h-3 w-3 mr-1 text-green-600 dark:text-green-400" />
 										<a
 											href={`tel:${patient.phone}`}
-											className="hover:underline text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+											className="hover:underline  hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors"
 										>
 											{patient.phone}
 										</a>
@@ -116,7 +125,8 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 								)}
 
 								{patient.occupation && (
-									<span className="text-gray-400 italic">
+									<span className="flex items-center text-gray-500 dark:text-gray-400 italic">
+										<Briefcase className="h-3 w-3 mr-1 text-amber-500 dark:text-amber-400" />
 										{patient.occupation}
 									</span>
 								)}
