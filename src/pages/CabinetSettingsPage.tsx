@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Building, Phone, MapPin, Save, Mail, Image, FileImage, FileText, CreditCard } from "lucide-react";
 import { api } from "@/services/api";
@@ -26,7 +25,7 @@ const CabinetSettingsPage = () => {
       imageUrl: "",
       logoUrl: "",
       siret: "",
-      adeliNumber: "",
+      rppsNumber: "",
       apeCode: ""
     }
   });
@@ -62,7 +61,7 @@ const CabinetSettingsPage = () => {
               imageUrl: primaryCabinet.imageUrl || "",
               logoUrl: primaryCabinet.logoUrl || "",
               siret: osteopath?.siret || "",
-              adeliNumber: osteopath?.adeli_number || "",
+              rppsNumber: osteopath?.rpps_number || "",
               apeCode: osteopath?.ape_code || "8690F"
             });
           } else {
@@ -74,7 +73,7 @@ const CabinetSettingsPage = () => {
               imageUrl: primaryCabinet.imageUrl || "",
               logoUrl: primaryCabinet.logoUrl || "",
               siret: "",
-              adeliNumber: "",
+              rppsNumber: "",
               apeCode: "8690F"
             });
           }
@@ -100,7 +99,7 @@ const CabinetSettingsPage = () => {
     imageUrl: string; 
     logoUrl: string;
     siret: string;
-    adeliNumber: string;
+    rppsNumber: string;
     apeCode: string;
   }) => {
     if (!cabinet || !user?.id) return;
@@ -125,7 +124,7 @@ const CabinetSettingsPage = () => {
         // Mettre à jour l'ostéopathe avec les infos de facturation
         await api.updateOsteopath(osteopath.id, {
           siret: data.siret || null,
-          adeli_number: data.adeliNumber || null,
+          rpps_number: data.rppsNumber || null,
           ape_code: data.apeCode || "8690F"
         });
       }
@@ -267,18 +266,18 @@ const CabinetSettingsPage = () => {
                   
                   <FormField
                     control={form.control}
-                    name="adeliNumber"
+                    name="rppsNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Numéro ADELI</FormLabel>
+                        <FormLabel>Numéro RPPS</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Numéro ADELI" {...field} />
+                            <Input className="pl-10" placeholder="Numéro RPPS" {...field} />
                           </div>
                         </FormControl>
                         <FormDescription>
-                          Numéro ADELI nécessaire pour la facturation
+                          Numéro RPPS (Répertoire Partagé des Professionnels de Santé) nécessaire pour la facturation
                         </FormDescription>
                       </FormItem>
                     )}

@@ -76,7 +76,7 @@ const SettingsPage = () => {
                         <span className="font-medium">Titre:</span> {osteopath.professional_title || "Non spécifié"}
                       </p>
                       <p className="text-sm">
-                        <span className="font-medium">Numéro ADELI:</span> {osteopath.adeli_number || "Non spécifié"}
+                        <span className="font-medium">Numéro RPPS:</span> {osteopath.rpps_number || "Non spécifié"}
                       </p>
                     </div>
                     <Button asChild variant="outline">

@@ -124,9 +124,9 @@ export const InvoicePrintView = ({
 									SIRET: {osteopath.siret}
 								</p>
 							)}
-							{osteopath?.adeli_number && (
+							{osteopath?.rpps_number && (
 								<p className="font-medium">
-									ADELI: {osteopath.adeli_number}
+									RPPS: {osteopath.rpps_number}
 								</p>
 							)}
 							{osteopath?.ape_code && (
