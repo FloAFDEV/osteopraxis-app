@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -16,8 +15,11 @@ import {
 	FileText,
 	MessageSquare,
 	X,
+	Eye,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/services/api";
 
 interface AppointmentCardProps {
 	appointment: Appointment;
@@ -39,6 +41,16 @@ export function AppointmentCard({
 	const isChild = patient?.birthDate
 		? differenceInYears(new Date(), parseISO(patient.birthDate)) < 12
 		: false;
+
+	// Récupérer les factures existantes pour ce rendez-vous
+	const { data: existingInvoices } = useQuery({
+		queryKey: ["invoices", "appointment", appointment.id],
+		queryFn: () => api.getInvoicesByAppointmentId(appointment.id),
+		enabled: appointment.status === "COMPLETED",
+	});
+
+	const existingInvoice = existingInvoices?.[0];
+
 	const getStatusBadge = (status: AppointmentStatus) => {
 		switch (status) {
 			case "SCHEDULED":
@@ -131,14 +143,23 @@ export function AppointmentCard({
 				{/* Si la séance est terminée, on montre le bouton pour accéder/créer la Note d'honoraire */}
 				{appointment.status === "COMPLETED" && (
 					<>
-						<Button variant="outline" size="sm" asChild>
-							<Link
-								to={`/invoices/new?appointmentId=${appointment.id}`}
-							>
-								<FileText className="h-4 w-4 mr-1" />
-								Créer une note d'honoraire
-							</Link>
-						</Button>
+						{existingInvoice ? (
+							<Button variant="outline" size="sm" asChild>
+								<Link to={`/invoices/${existingInvoice.id}`}>
+									<Eye className="h-4 w-4 mr-1" />
+									Consulter la facture
+								</Link>
+							</Button>
+						) : (
+							<Button variant="outline" size="sm" asChild>
+								<Link
+									to={`/invoices/new?appointmentId=${appointment.id}`}
+								>
+									<FileText className="h-4 w-4 mr-1" />
+									Créer une note d'honoraire
+								</Link>
+							</Button>
+						)}
 					</>
 				)}
 
