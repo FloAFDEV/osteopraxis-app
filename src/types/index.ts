@@ -215,6 +215,7 @@ export interface Osteopath {
 	adeli_number: string | null;
 	siret: string | null;
 	ape_code: string | null;
+  stampUrl?: string;
 	createdAt: string;
 	updatedAt: string;
 }
