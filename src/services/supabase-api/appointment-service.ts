@@ -42,16 +42,13 @@ type UpdateAppointmentPayload = Partial<CreateAppointmentPayload>;
 export const supabaseAppointmentService = {
 	async getAppointments(): Promise<Appointment[]> {
 		try {
-			console.log("Chargement des rendez-vous depuis Supabase");
+			console.log("Chargement des rendez-vous depuis Supabase avec RLS");
 			
-			// Récupérer l'ID de l'ostéopathe connecté
-			const osteopathId = await getCurrentOsteopathId();
-			
-			// Requête simplifiée utilisant directement osteopathId
+			// Avec RLS activé, nous récupérons directement tous les rendez-vous
+			// Les politiques RLS filtreront automatiquement selon l'ostéopathe connecté
 			const { data, error } = await supabase
 				.from("Appointment")
 				.select("*")
-				.eq("osteopathId", osteopathId)
 				.order("date", { ascending: true });
 
 			if (error) {
@@ -59,7 +56,7 @@ export const supabaseAppointmentService = {
 				throw error;
 			}
 
-			console.log(`${data?.length || 0} rendez-vous chargés pour l'ostéopathe ${osteopathId}`);
+			console.log(`${data?.length || 0} rendez-vous chargés`);
 			return (data || []).map(adaptAppointmentFromSupabase);
 		} catch (error) {
 			console.error("Error fetching appointments:", error);
@@ -70,6 +67,7 @@ export const supabaseAppointmentService = {
 	async getAppointmentById(id: number): Promise<Appointment> {
 		try {
 			console.log(`Chargement du rendez-vous ${id}`);
+			// RLS s'applique automatiquement
 			const { data, error } = await supabase
 				.from("Appointment")
 				.select("*")
@@ -90,6 +88,7 @@ export const supabaseAppointmentService = {
 		patientId: number
 	): Promise<Appointment[]> {
 		try {
+			// RLS filtrera automatiquement selon l'ostéopathe connecté
 			const { data, error } = await supabase
 				.from("Appointment")
 				.select("*")
@@ -119,6 +118,7 @@ export const supabaseAppointmentService = {
 				`Recherche des rendez-vous pour le patient ${patientId} aujourd'hui (${today.toISOString()} - ${tomorrow.toISOString()})`
 			);
 
+			// RLS filtrera automatiquement selon l'ostéopathe connecté
 			const { data, error } = await supabase
 				.from("Appointment")
 				.select("*")
@@ -192,6 +192,7 @@ export const supabaseAppointmentService = {
 
 			console.log("finalData à insérer:", finalData);
 
+			// Avec RLS, l'insertion se fera automatiquement avec les bonnes vérifications
 			const { data, error } = await supabase
 				.from("Appointment")
 				.insert(finalData)
@@ -218,30 +219,11 @@ export const supabaseAppointmentService = {
 		try {
 			console.log(`Mise à jour du rendez-vous ${id}:`, update);
 
-			// Récupérer d'abord le rendez-vous existant pour préserver ses données
-			const { data: existingAppointment, error: fetchError } = await supabase
-				.from("Appointment")
-				.select("*")
-				.eq("id", id)
-				.single();
-
-			if (fetchError || !existingAppointment) {
-				throw new Error(`Rendez-vous ${id} non trouvé`);
-			}
-
-			// Préparer le payload de mise à jour en préservant les champs existants
+			// Préparer le payload de mise à jour
 			const updatePayload = {
 				...update,
-				status: update.status ? ensureAppointmentStatus(update.status) : existingAppointment.status,
+				status: update.status ? ensureAppointmentStatus(update.status) : undefined,
 				updatedAt: new Date().toISOString(),
-				// Préserver les champs essentiels s'ils ne sont pas dans la mise à jour
-				date: update.date || existingAppointment.date,
-				reason: update.reason !== undefined ? update.reason : existingAppointment.reason,
-				patientId: update.patientId !== undefined ? update.patientId : existingAppointment.patientId,
-				cabinetId: update.cabinetId !== undefined ? update.cabinetId : existingAppointment.cabinetId,
-				osteopathId: existingAppointment.osteopathId, // Ne jamais permettre la modification de osteopathId
-				notificationSent: update.notificationSent !== undefined ? update.notificationSent : existingAppointment.notificationSent,
-				notes: update.notes !== undefined ? update.notes : existingAppointment.notes,
 			};
 
 			// Supprimer les champs undefined du payload final
@@ -253,6 +235,7 @@ export const supabaseAppointmentService = {
 
 			console.log("Payload de mise à jour final:", updatePayload);
 
+			// RLS s'applique automatiquement pour la mise à jour
 			const { data, error } = await supabase
 				.from("Appointment")
 				.update(updatePayload)
@@ -289,6 +272,7 @@ export const supabaseAppointmentService = {
 	async deleteAppointment(id: number): Promise<boolean> {
 		try {
 			console.log(`Suppression du rendez-vous ${id}`);
+			// RLS s'applique automatiquement pour la suppression
 			const { error } = await supabase
 				.from("Appointment")
 				.delete()
