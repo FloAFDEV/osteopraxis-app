@@ -1,4 +1,3 @@
-
 export interface User {
 	id: string;
 	email: string;
@@ -212,10 +211,10 @@ export interface Osteopath {
 	userId: string;
 	name: string;
 	professional_title: string;
-	adeli_number: string | null;
+	rpps_number: string | null;
 	siret: string | null;
 	ape_code: string | null;
-  stampUrl?: string;
+	stampUrl?: string;
 	createdAt: string;
 	updatedAt: string;
 }
