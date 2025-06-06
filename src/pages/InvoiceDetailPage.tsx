@@ -43,22 +43,18 @@ const InvoiceDetailPage: React.FC = () => {
 
           // Charger les informations de l'ostéopathe et du cabinet
           try {
-            const currentOsteopathData = await api.getCurrentOsteopath();
-            if (currentOsteopathData?.id) {
-              // Récupérer l'objet Osteopath complet en utilisant l'ID
-              const osteopathData = await api.getOsteopathById(currentOsteopathData.id);
-              if (osteopathData) {
-                setOsteopath(osteopathData);
-                
-                // Charger les cabinets de l'ostéopathe
-                const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
-                if (cabinets && cabinets.length > 0) {
-                  // Utiliser le cabinet spécifié dans la facture ou le premier disponible
-                  const selectedCabinet = invoiceData.cabinetId 
-                    ? cabinets.find(c => c.id === invoiceData.cabinetId) || cabinets[0]
-                    : cabinets[0];
-                  setCabinet(selectedCabinet);
-                }
+            const osteopathData = await api.getCurrentOsteopath();
+            if (osteopathData) {
+              setOsteopath(osteopathData);
+              
+              // Charger les cabinets de l'ostéopathe
+              const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+              if (cabinets && cabinets.length > 0) {
+                // Utiliser le cabinet spécifié dans la facture ou le premier disponible
+                const selectedCabinet = invoiceData.cabinetId 
+                  ? cabinets.find(c => c.id === invoiceData.cabinetId) || cabinets[0]
+                  : cabinets[0];
+                setCabinet(selectedCabinet);
               }
             }
           } catch (error) {
@@ -113,9 +109,9 @@ const InvoiceDetailPage: React.FC = () => {
       <div className="container mx-auto py-6">
         {/* Navigation et actions */}
         <div className="flex items-center justify-between mb-6 print:hidden">
-          <Button onClick={() => navigate("/invoices")} variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Retour aux factures
-          </Button>
+        	<Button onClick={() => navigate(-1)} className="mb-4">
+					<ArrowLeft className="mr-2 h-4 w-4" /> Retour à la fiche du patient
+				</Button>
           <Button onClick={handlePrint} variant="default">
             <Printer className="mr-2 h-4 w-4" /> Imprimer
           </Button>
