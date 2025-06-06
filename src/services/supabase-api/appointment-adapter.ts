@@ -6,7 +6,7 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 		id: data.id,
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
-		osteopathId: data.osteopathId || 1, // Utiliser la valeur de la DB, fallback temporaire
+		osteopathId: data.osteopathId,
 		start: data.date, // Utiliser date comme start
 		end: data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : data.date, // Calculer end à partir de date + 30min
 		status: data.status as AppointmentStatus,
@@ -24,7 +24,7 @@ export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Part
 	return {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
-		osteopathId: data.osteopathId, // Inclure osteopathId maintenant que la colonne existe
+		osteopathId: data.osteopathId,
 		date: data.date || data.start,
 		status: data.status,
 		reason: data.reason,
@@ -38,7 +38,7 @@ export function createAppointmentPayload(data: any): CreateAppointmentPayload {
 	return {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId || 1,
-		osteopathId: data.osteopathId || 1, // Peut être utilisé pour validation et sera maintenant sauvé
+		osteopathId: data.osteopathId,
 		start: data.start || data.date,
 		end: data.end || (data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : undefined),
 		date: data.date || data.start,
