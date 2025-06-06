@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -102,6 +103,8 @@ export function CabinetForm({
     try {
       setIsSubmitting(true);
       
+      console.log('🔍 Données du formulaire avant envoi:', data);
+      
       const cabinetData = {
         name: data.name,
         address: data.address,
@@ -112,18 +115,24 @@ export function CabinetForm({
         osteopathId: data.osteopathId,
       };
       
+      console.log('🔍 Données cabinet à envoyer:', cabinetData);
+      
       if (isEditing && cabinetId) {
         // Update existing cabinet
         await api.updateCabinet(cabinetId, cabinetData);
         
-        // Mettre à jour les informations de l'ostéopathe
+        // Mettre à jour les informations de l'ostéopathe (y compris stampUrl)
         if (osteopathId) {
-          await api.updateOsteopath(osteopathId, {
+          const osteopathUpdateData = {
             siret: data.siret || null,
             rpps_number: data.rppsNumber || null,
             ape_code: data.apeCode || "8690F",
             stampUrl: data.stampUrl || null
-          });
+          };
+          
+          console.log('🔍 Données ostéopathe à envoyer:', osteopathUpdateData);
+          
+          await api.updateOsteopath(osteopathId, osteopathUpdateData);
         }
         
         toast.success("✅ Cabinet mis à jour avec succès");

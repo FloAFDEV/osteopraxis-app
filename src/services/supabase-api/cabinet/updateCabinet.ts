@@ -23,6 +23,8 @@ export async function updateCabinet(id: number, cabinet: CabinetUpdateInput): Pr
     }
 
     console.log('📤 Envoi des données à la fonction Edge:', payload);
+    console.log('📤 Type de payload:', typeof payload);
+    console.log('📤 JSON stringified:', JSON.stringify(payload));
 
     // Appeler la fonction Edge pour mettre à jour le cabinet
     const { data, error } = await supabase.functions.invoke('update-cabinet', {
@@ -32,6 +34,8 @@ export async function updateCabinet(id: number, cabinet: CabinetUpdateInput): Pr
       },
       method: 'POST'
     });
+
+    console.log('📡 Réponse de la fonction Edge:', { data, error });
 
     if (error) {
       console.error('🔥 Erreur de la fonction Edge:', error);
