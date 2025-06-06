@@ -12,14 +12,13 @@ export async function updateCabinet(id: number, cabinet: CabinetUpdateInput): Pr
     }
 
     // Appeler la fonction Edge pour mettre à jour le cabinet
-    const { data, error } = await supabase.functions.invoke('update-cabinet', {
+    // Passer l'ID dans l'URL car query n'est pas supporté par FunctionInvokeOptions
+    const { data, error } = await supabase.functions.invoke(`update-cabinet?id=${id}`, {
       body: cabinet,
       headers: {
         'Content-Type': 'application/json',
       },
-      method: 'PATCH',
-      // Passer l'ID du cabinet en tant que paramètre de requête
-      query: { id: id.toString() }
+      method: 'PATCH'
     });
 
     if (error) {
