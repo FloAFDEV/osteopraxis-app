@@ -34,11 +34,45 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Récupérer le corps de la requête
-    const requestBody = await req.json();
+    // Vérifier d'abord si il y a un corps de requête
+    const bodyText = await req.text();
+    console.log('📥 Corps de la requête reçu:', bodyText);
+    
+    if (!bodyText || bodyText.trim() === '') {
+      console.log('❌ Corps de requête vide');
+      return new Response(JSON.stringify({ 
+        error: 'Corps de requête vide. Données requises pour la mise à jour.' 
+      }), {
+        status: 400,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      });
+    }
+
+    // Tenter de parser le JSON
+    let requestBody;
+    try {
+      requestBody = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.log('❌ Erreur de parsing JSON:', parseError);
+      return new Response(JSON.stringify({ 
+        error: 'Format JSON invalide dans le corps de la requête',
+        details: parseError.message 
+      }), {
+        status: 400,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      });
+    }
+
     const { id: cabinetId, ...updateData } = requestBody;
 
     console.log(`🔧 POST request for cabinet ID: ${cabinetId}`);
+    console.log('📝 Données à mettre à jour:', updateData);
 
     if (!cabinetId) {
       return new Response(JSON.stringify({ 
