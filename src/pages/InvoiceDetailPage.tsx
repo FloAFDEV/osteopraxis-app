@@ -43,18 +43,22 @@ const InvoiceDetailPage: React.FC = () => {
 
           // Charger les informations de l'ostéopathe et du cabinet
           try {
-            const osteopathData = await api.getCurrentOsteopath();
-            if (osteopathData) {
-              setOsteopath(osteopathData);
-              
-              // Charger les cabinets de l'ostéopathe
-              const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
-              if (cabinets && cabinets.length > 0) {
-                // Utiliser le cabinet spécifié dans la facture ou le premier disponible
-                const selectedCabinet = invoiceData.cabinetId 
-                  ? cabinets.find(c => c.id === invoiceData.cabinetId) || cabinets[0]
-                  : cabinets[0];
-                setCabinet(selectedCabinet);
+            const currentOsteopathData = await api.getCurrentOsteopath();
+            if (currentOsteopathData?.id) {
+              // Récupérer l'objet Osteopath complet en utilisant l'ID
+              const osteopathData = await api.getOsteopathById(currentOsteopathData.id);
+              if (osteopathData) {
+                setOsteopath(osteopathData);
+                
+                // Charger les cabinets de l'ostéopathe
+                const cabinets = await api.getCabinetsByOsteopathId(osteopathData.id);
+                if (cabinets && cabinets.length > 0) {
+                  // Utiliser le cabinet spécifié dans la facture ou le premier disponible
+                  const selectedCabinet = invoiceData.cabinetId 
+                    ? cabinets.find(c => c.id === invoiceData.cabinetId) || cabinets[0]
+                    : cabinets[0];
+                  setCabinet(selectedCabinet);
+                }
               }
             }
           } catch (error) {
