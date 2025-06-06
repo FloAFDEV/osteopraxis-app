@@ -6,13 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Credentials': 'true',
   'Access-Control-Max-Age': '86400'
 };
 
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('🔧 OPTIONS preflight request received');
     return new Response(null, { 
       status: 204, 
       headers: corsHeaders 
@@ -21,6 +21,7 @@ serve(async (req: Request) => {
 
   // Vérifier que la méthode est PATCH uniquement
   if (req.method !== 'PATCH') {
+    console.log(`❌ Méthode ${req.method} non autorisée`);
     return new Response(JSON.stringify({ 
       error: 'Méthode non autorisée. Seule la méthode PATCH est acceptée.' 
     }), {
@@ -36,6 +37,8 @@ serve(async (req: Request) => {
     // Récupérer l'ID du cabinet depuis les query parameters
     const url = new URL(req.url);
     const cabinetId = url.searchParams.get('id');
+
+    console.log(`🔧 PATCH request for cabinet ID: ${cabinetId}`);
 
     if (!cabinetId) {
       return new Response(JSON.stringify({ 
@@ -106,6 +109,8 @@ serve(async (req: Request) => {
         }
       });
     }
+
+    console.log('✅ Cabinet mis à jour avec succès');
 
     // Retourner le cabinet mis à jour
     return new Response(JSON.stringify({ 
