@@ -15,6 +15,7 @@ import {
 	UserRound,
 	Users,
 	Weight,
+	Briefcase,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -110,19 +111,7 @@ export function PatientCard({ patient }: PatientCardProps) {
 									"fr-FR"
 							  )
 							: "Non renseignée"}
-					</div>
-					<div className="flex items-center">
-						<Mail className="w-4 h-4 mr-2" />
-						{patient.email || "Non renseigné"}
-					</div>
-					<div className="flex items-center">
-						<Phone className="w-4 h-4 mr-2" />
-						{patient.phone || "Non renseigné"}
-					</div>
-					<div className="flex items-center">
-						<MapPin className="w-4 h-4 mr-2" />
-						{patient.address || "Non renseignée"}
-					</div>
+					</div>{" "}
 					<div className="flex items-center">
 						<Weight className="w-4 h-4 mr-2" />
 						{patient.weight
@@ -138,6 +127,22 @@ export function PatientCard({ patient }: PatientCardProps) {
 					<div className="flex items-center">
 						<Activity className="w-4 h-4 mr-2" />
 						{patient.bmi ? `${patient.bmi} IMC` : "IMC non calculé"}
+					</div>
+					<div className="flex items-center">
+						<Mail className="w-4 h-4 mr-2" />
+						{patient.email || "Non renseigné"}
+					</div>
+					<div className="flex items-center">
+						<Phone className="w-4 h-4 mr-2" />
+						{patient.phone || "Non renseigné"}
+					</div>
+					<div className="flex items-center">
+						<MapPin className="w-4 h-4 mr-2" />
+						{patient.address || "Non renseignée"}
+					</div>
+					<div className="flex items-center">
+						<Briefcase className="w-4 h-4 mr-2" />
+						{patient.occupation || "Non renseignée"}
 					</div>
 				</div>
 			</CardContent>{" "}
