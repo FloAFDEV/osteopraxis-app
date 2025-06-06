@@ -82,3 +82,13 @@ function_name = "treatment-history"
 path = "/completer-profil"
 verify_jwt = true
 function_name = "completer-profil"
+
+[[edge_functions]]
+path = "/update-cabinet"
+verify_jwt = true
+function_name = "update-cabinet"
+
+[[edge_functions]]
+path = "/update-osteopath"
+verify_jwt = true
+function_name = "update-osteopath"

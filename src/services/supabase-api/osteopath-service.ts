@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import {
   supabase,
@@ -7,6 +6,7 @@ import {
   SUPABASE_API_KEY,
   removeNullProperties,
 } from "./utils";
+import { updateOsteopath as updateOsteopathEdge } from "./osteopath/updateOsteopath";
 
 export const supabaseOsteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
@@ -73,29 +73,12 @@ export const supabaseOsteopathService = {
     osteoData: Partial<Omit<Osteopath, "id" | "createdAt">>
   ): Promise<Osteopath | undefined> {
     try {
-      const currentOsteopath = await this.getOsteopathById(id);
-
-      if (!currentOsteopath) {
-        throw new Error("Ostéopathe non trouvé");
-      }
-
-      const now = new Date().toISOString();
-
-      const updatePayload = {
-        ...removeNullProperties(osteoData),
-        updatedAt: now,
-      };
-
-      const { data, error } = await supabase
-        .from("Osteopath")
-        .update(updatePayload)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      return data as Osteopath;
+      console.log('🔄 Utilisation de la fonction Edge pour updateOsteopath');
+      
+      // Utiliser la fonction Edge au lieu de l'API directe
+      const result = await updateOsteopathEdge(id, osteoData);
+      
+      return result;
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'ostéopathe:", error);
       throw error;
