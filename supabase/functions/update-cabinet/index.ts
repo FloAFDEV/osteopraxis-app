@@ -34,16 +34,48 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Récupérer le corps de la requête directement via req.json()
-    // supabase.functions.invoke() envoie automatiquement du JSON valide
-    const requestBody = await req.json();
+    // Vérifier d'abord si il y a un corps de requête
+    const bodyText = await req.text();
+    console.log('📥 Corps de la requête reçu (text):', bodyText);
     
-    console.log('📥 Corps de la requête reçu:', requestBody);
-
-    if (!requestBody || Object.keys(requestBody).length === 0) {
-      console.log('❌ Corps de requête vide ou invalide');
+    if (!bodyText || bodyText.trim() === '') {
+      console.log('❌ Corps de requête vide');
       return new Response(JSON.stringify({ 
         error: 'Corps de requête vide. Données requises pour la mise à jour.' 
+      }), {
+        status: 400,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      });
+    }
+
+    // Tenter de parser le JSON avec gestion d'erreur
+    let requestBody;
+    try {
+      requestBody = JSON.parse(bodyText);
+      console.log('✅ JSON parsé avec succès:', requestBody);
+    } catch (parseError) {
+      console.error('❌ Erreur de parsing JSON:', parseError);
+      console.error('❌ Contenu reçu:', bodyText);
+      return new Response(JSON.stringify({ 
+        error: 'Format JSON invalide dans le corps de la requête',
+        details: parseError.message,
+        received: bodyText
+      }), {
+        status: 400,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      });
+    }
+
+    if (!requestBody || Object.keys(requestBody).length === 0) {
+      console.log('❌ Corps de requête vide après parsing');
+      return new Response(JSON.stringify({ 
+        error: 'Données de mise à jour requises dans le corps de la requête' 
       }), {
         status: 400,
         headers: { 
