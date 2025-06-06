@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Max-Age': '86400'
 };
 
@@ -15,20 +15,15 @@ serve(async (req: Request) => {
     console.log('🔧 OPTIONS preflight request received');
     return new Response(null, { 
       status: 204, 
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-        'Access-Control-Max-Age': '86400'
-      }
+      headers: corsHeaders
     });
   }
 
-  // Vérifier que la méthode est PATCH uniquement
-  if (req.method !== 'PATCH') {
+  // Vérifier que la méthode est POST
+  if (req.method !== 'POST') {
     console.log(`❌ Méthode ${req.method} non autorisée`);
     return new Response(JSON.stringify({ 
-      error: 'Méthode non autorisée. Seule la méthode PATCH est acceptée.' 
+      error: 'Méthode non autorisée. Seule la méthode POST est acceptée.' 
     }), {
       status: 405,
       headers: { 
@@ -39,15 +34,15 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Récupérer l'ID du cabinet depuis les query parameters
-    const url = new URL(req.url);
-    const cabinetId = url.searchParams.get('id');
+    // Récupérer le corps de la requête
+    const requestBody = await req.json();
+    const { id: cabinetId, ...updateData } = requestBody;
 
-    console.log(`🔧 PATCH request for cabinet ID: ${cabinetId}`);
+    console.log(`🔧 POST request for cabinet ID: ${cabinetId}`);
 
     if (!cabinetId) {
       return new Response(JSON.stringify({ 
-        error: 'ID du cabinet requis en paramètre (ex: ?id=1)' 
+        error: 'ID du cabinet requis dans le corps de la requête' 
       }), {
         status: 400,
         headers: { 
@@ -56,9 +51,6 @@ serve(async (req: Request) => {
         }
       });
     }
-
-    // Récupérer le corps de la requête
-    const updateData = await req.json();
 
     if (!updateData || Object.keys(updateData).length === 0) {
       return new Response(JSON.stringify({ 
