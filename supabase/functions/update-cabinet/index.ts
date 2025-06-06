@@ -34,11 +34,16 @@ serve(async (req: Request) => {
   }
 
   try {
+    console.log('🔍 Début du traitement de la requête POST');
+    console.log('🔍 Headers reçus:', Object.fromEntries(req.headers.entries()));
+    
     // Lire le corps de la requête directement en JSON
     let requestBody;
     try {
       requestBody = await req.json();
       console.log('📥 Corps de la requête reçu:', requestBody);
+      console.log('📥 Type du corps:', typeof requestBody);
+      console.log('📥 Clés du corps:', Object.keys(requestBody || {}));
     } catch (parseError) {
       console.error('❌ Erreur de parsing JSON:', parseError);
       return new Response(JSON.stringify({ 
@@ -70,8 +75,10 @@ serve(async (req: Request) => {
 
     console.log(`🔧 POST request for cabinet ID: ${cabinetId}`);
     console.log('📝 Données à mettre à jour:', updateData);
+    console.log('📝 Nombre de champs à mettre à jour:', Object.keys(updateData).length);
 
     if (!cabinetId) {
+      console.log('❌ ID du cabinet manquant');
       return new Response(JSON.stringify({ 
         error: 'ID du cabinet requis dans le corps de la requête' 
       }), {
@@ -84,6 +91,7 @@ serve(async (req: Request) => {
     }
 
     if (!updateData || Object.keys(updateData).length === 0) {
+      console.log('❌ Aucune donnée à mettre à jour');
       return new Response(JSON.stringify({ 
         error: 'Données de mise à jour requises dans le corps de la requête' 
       }), {
@@ -99,10 +107,26 @@ serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Variables d\'environnement Supabase manquantes');
+      return new Response(JSON.stringify({ 
+        error: 'Configuration serveur manquante' 
+      }), {
+        status: 500,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Ajouter updatedAt automatiquement
     updateData.updatedAt = new Date().toISOString();
+
+    console.log('🔄 Tentative de mise à jour en base de données...');
+    console.log('🔄 Données finales pour Supabase:', updateData);
 
     // Mettre à jour le cabinet dans la base de données
     const { data, error } = await supabase
@@ -113,7 +137,7 @@ serve(async (req: Request) => {
       .single();
 
     if (error) {
-      console.error('Erreur lors de la mise à jour du cabinet:', error);
+      console.error('❌ Erreur lors de la mise à jour du cabinet:', error);
       return new Response(JSON.stringify({ 
         error: 'Erreur lors de la mise à jour du cabinet',
         details: error.message 
@@ -127,6 +151,7 @@ serve(async (req: Request) => {
     }
 
     if (!data) {
+      console.log('❌ Cabinet non trouvé avec ID:', cabinetId);
       return new Response(JSON.stringify({ 
         error: 'Cabinet non trouvé' 
       }), {
@@ -139,6 +164,7 @@ serve(async (req: Request) => {
     }
 
     console.log('✅ Cabinet mis à jour avec succès');
+    console.log('✅ Données retournées:', data);
 
     // Retourner le cabinet mis à jour
     return new Response(JSON.stringify({ 
@@ -153,7 +179,8 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    console.error('Erreur dans la fonction update-cabinet:', error);
+    console.error('❌ Erreur dans la fonction update-cabinet:', error);
+    console.error('❌ Stack trace:', error.stack);
     return new Response(JSON.stringify({ 
       error: 'Erreur serveur interne',
       details: error.message 
