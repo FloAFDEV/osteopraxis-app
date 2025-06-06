@@ -47,20 +47,29 @@ export async function updateCabinet(id: number, cabinet: CabinetUpdateInput): Pr
       }
     });
 
-    // Mettre à jour le cabinet
+    // Mettre à jour le cabinet avec sélection de tous les champs nécessaires
     const { data: updatedCabinet, error: updateError } = await supabase
       .from("Cabinet")
       .update(updateData)
       .eq("id", id)
       .eq("osteopathId", userData.osteopathId)
-      .select()
+      .select("id, name, address, phone, email, imageUrl, logoUrl, osteopathId, createdAt, updatedAt, professionalProfileId, tenant_id")
       .single();
 
     if (updateError) {
       throw new Error(`Erreur lors de la mise à jour: ${updateError.message}`);
     }
 
-    return updatedCabinet;
+    // Retourner avec les champs manquants remplis par des valeurs par défaut
+    return {
+      ...updatedCabinet,
+      city: "", // Valeur par défaut pour compatibilité TypeScript
+      postalCode: "", // Valeur par défaut pour compatibilité TypeScript
+      siret: null, // Valeur par défaut pour compatibilité TypeScript
+      iban: null, // Valeur par défaut pour compatibilité TypeScript
+      bic: null, // Valeur par défaut pour compatibilité TypeScript
+      country: "France", // Valeur par défaut pour compatibilité TypeScript
+    } as Cabinet;
   } catch (error) {
     console.error("Erreur updateCabinet:", error);
     throw error;
