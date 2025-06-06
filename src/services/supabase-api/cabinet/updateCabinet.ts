@@ -20,8 +20,9 @@ export async function updateCabinet(id: number, cabinet: CabinetUpdateInput): Pr
     console.log('📤 Envoi des données à la fonction Edge:', payload);
 
     // Appeler la fonction Edge pour mettre à jour le cabinet
+    // supabase.functions.invoke gère automatiquement la sérialisation JSON
     const { data, error } = await supabase.functions.invoke('update-cabinet', {
-      body: JSON.stringify(payload),
+      body: payload, // Passer l'objet directement, pas JSON.stringify()
       headers: {
         'Content-Type': 'application/json',
       },
