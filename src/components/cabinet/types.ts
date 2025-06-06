@@ -10,7 +10,7 @@ export const cabinetFormSchema = z.object({
   logoUrl: z.string().optional(),
   osteopathId: z.number(),
   siret: z.string().optional(),
-  adeliNumber: z.string().optional(),
+  rppsNumber: z.string().optional(),
   apeCode: z.string().optional(),
   stampUrl: z.string().optional(),
 });

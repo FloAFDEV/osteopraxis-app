@@ -46,20 +46,20 @@ export function BillingInfoFields({ form, isSubmitting }: BillingInfoFieldsProps
       
       <FormField
         control={form.control}
-        name="adeliNumber"
+        name="rppsNumber"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Numéro ADELI</FormLabel>
+            <FormLabel>Numéro RPPS</FormLabel>
             <FormControl>
               <Input
-                placeholder="Numéro ADELI"
+                placeholder="Numéro RPPS"
                 disabled={isSubmitting}
                 {...field}
                 value={field.value || ""}
               />
             </FormControl>
             <FormDescription>
-              Numéro ADELI nécessaire pour la facturation
+              Numéro RPPS (Répertoire Partagé des Professionnels de Santé) nécessaire pour la facturation
             </FormDescription>
             <FormMessage />
           </FormItem>

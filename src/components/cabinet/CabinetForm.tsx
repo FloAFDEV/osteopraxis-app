@@ -78,7 +78,7 @@ export function CabinetForm({
       logoUrl: defaultValues?.logoUrl || "",
       osteopathId: defaultValues?.osteopathId || osteopathId,
       siret: defaultValues?.siret || osteopathData?.siret || "",
-      adeliNumber: defaultValues?.adeliNumber || osteopathData?.adeli_number || "",
+      rppsNumber: defaultValues?.rppsNumber || osteopathData?.rpps_number || "",
       apeCode: defaultValues?.apeCode || osteopathData?.ape_code || "8690F",
       stampUrl: defaultValues?.stampUrl || osteopathData?.stampUrl || "",
     },
@@ -88,7 +88,7 @@ export function CabinetForm({
   useEffect(() => {
     if (osteopathData) {
       form.setValue("siret", osteopathData.siret || "");
-      form.setValue("adeliNumber", osteopathData.adeli_number || "");
+      form.setValue("rppsNumber", osteopathData.rpps_number || "");
       form.setValue("apeCode", osteopathData.ape_code || "8690F");
       form.setValue("stampUrl", osteopathData.stampUrl || "");
     }
@@ -121,7 +121,7 @@ export function CabinetForm({
         if (osteopathId) {
           await api.updateOsteopath(osteopathId, {
             siret: data.siret || null,
-            adeli_number: data.adeliNumber || null,
+            rpps_number: data.rppsNumber || null,
             ape_code: data.apeCode || "8690F",
             stampUrl: data.stampUrl || null
           });
@@ -136,7 +136,7 @@ export function CabinetForm({
         if (newCabinet && newCabinet.osteopathId) {
           await api.updateOsteopath(newCabinet.osteopathId, {
             siret: data.siret || null,
-            adeli_number: data.adeliNumber || null,
+            rpps_number: data.rppsNumber || null,
             ape_code: data.apeCode || "8690F",
             stampUrl: data.stampUrl || null
           });

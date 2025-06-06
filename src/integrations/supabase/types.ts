@@ -275,39 +275,39 @@ export type Database = {
       }
       Osteopath: {
         Row: {
-          adeli_number: string | null
           ape_code: string | null
           authId: string | null
           createdAt: string
           id: number
           name: string
           professional_title: string | null
+          rpps_number: string | null
           siret: string | null
           stampUrl: string | null
           updatedAt: string
           userId: string
         }
         Insert: {
-          adeli_number?: string | null
           ape_code?: string | null
           authId?: string | null
           createdAt?: string
           id?: number
           name: string
           professional_title?: string | null
+          rpps_number?: string | null
           siret?: string | null
           stampUrl?: string | null
           updatedAt?: string
           userId: string
         }
         Update: {
-          adeli_number?: string | null
           ape_code?: string | null
           authId?: string | null
           createdAt?: string
           id?: number
           name?: string
           professional_title?: string | null
+          rpps_number?: string | null
           siret?: string | null
           stampUrl?: string | null
           updatedAt?: string

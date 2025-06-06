@@ -151,7 +151,7 @@ export const supabaseOsteopathService = {
       if (!osteopath) return false;
 
       return (
-        !!osteopath.adeli_number &&
+        !!osteopath.rpps_number &&
         !!osteopath.siret &&
         !!osteopath.name &&
         !!osteopath.professional_title
