@@ -11,18 +11,22 @@ export async function updateCabinet(id: number, cabinet: CabinetUpdateInput): Pr
       throw new Error("Non autorisé: vous devez être connecté");
     }
 
-    // Préparer les données à envoyer
+    // Préparer les données à envoyer - s'assurer qu'on a au moins un champ
     const payload = {
       id: id,
       ...cabinet
     };
 
+    // Vérifier que le payload n'est pas vide
+    if (!payload || Object.keys(payload).length <= 1) { // Seulement l'id
+      throw new Error("Aucune donnée à mettre à jour");
+    }
+
     console.log('📤 Envoi des données à la fonction Edge:', payload);
 
     // Appeler la fonction Edge pour mettre à jour le cabinet
-    // supabase.functions.invoke gère automatiquement la sérialisation JSON
     const { data, error } = await supabase.functions.invoke('update-cabinet', {
-      body: payload, // Passer l'objet directement, pas JSON.stringify()
+      body: payload,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -44,12 +48,12 @@ export async function updateCabinet(id: number, cabinet: CabinetUpdateInput): Pr
     // Retourner avec les champs manquants remplis par des valeurs par défaut
     return {
       ...data.data,
-      city: data.data.city || "", // Valeur par défaut pour compatibilité TypeScript
-      postalCode: data.data.postalCode || "", // Valeur par défaut pour compatibilité TypeScript
-      siret: data.data.siret || null, // Valeur par défaut pour compatibilité TypeScript
-      iban: data.data.iban || null, // Valeur par défaut pour compatibilité TypeScript
-      bic: data.data.bic || null, // Valeur par défaut pour compatibilité TypeScript
-      country: data.data.country || "France", // Valeur par défaut pour compatibilité TypeScript
+      city: data.data.city || "",
+      postalCode: data.data.postalCode || "",
+      siret: data.data.siret || null,
+      iban: data.data.iban || null,
+      bic: data.data.bic || null,
+      country: data.data.country || "France",
     } as Cabinet;
   } catch (error) {
     console.error("Erreur updateCabinet:", error);

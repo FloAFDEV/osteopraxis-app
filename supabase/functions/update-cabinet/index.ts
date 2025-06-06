@@ -34,35 +34,16 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Vérifier d'abord si il y a un corps de requête
-    const bodyText = await req.text();
-    console.log('📥 Corps de la requête reçu (text):', bodyText);
-    
-    if (!bodyText || bodyText.trim() === '') {
-      console.log('❌ Corps de requête vide');
-      return new Response(JSON.stringify({ 
-        error: 'Corps de requête vide. Données requises pour la mise à jour.' 
-      }), {
-        status: 400,
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        }
-      });
-    }
-
-    // Tenter de parser le JSON avec gestion d'erreur
+    // Lire le corps de la requête directement en JSON
     let requestBody;
     try {
-      requestBody = JSON.parse(bodyText);
-      console.log('✅ JSON parsé avec succès:', requestBody);
+      requestBody = await req.json();
+      console.log('📥 Corps de la requête reçu:', requestBody);
     } catch (parseError) {
       console.error('❌ Erreur de parsing JSON:', parseError);
-      console.error('❌ Contenu reçu:', bodyText);
       return new Response(JSON.stringify({ 
         error: 'Format JSON invalide dans le corps de la requête',
-        details: parseError.message,
-        received: bodyText
+        details: parseError.message
       }), {
         status: 400,
         headers: { 
