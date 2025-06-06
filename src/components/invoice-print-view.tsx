@@ -1,3 +1,4 @@
+
 import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -118,7 +119,7 @@ export const InvoicePrintView = ({
 								</>
 							)}
 						</p>
-						<div className="text-gray-600 mt-2 text-sm">
+						<div className="text-gray-600 mt-3 text-sm space-y-1">
 							{osteopath?.siret && (
 								<p className="font-medium">
 									SIRET: {osteopath.siret}
