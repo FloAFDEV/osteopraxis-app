@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -13,7 +12,7 @@ import { CabinetFormProps, cabinetFormSchema, CabinetFormValues } from "./types"
 import { CabinetInfoFields } from "./CabinetInfoFields";
 import { BillingInfoFields } from "./BillingInfoFields";
 import { ImageFields } from "./ImageFields";
-import { StampUploadField } from "./StampUploadField";
+import { DragDropStampUpload } from "./DragDropStampUpload";
 
 // Image par défaut pour les cabinets
 const DEFAULT_CABINET_IMAGE = "https://img.freepik.com/photos-premium/maison-moderne-exterieur-genere_1116642-246.jpg?ga=GA1.1.290584622.1739450057&semt=ais_hybrid&w=740";
@@ -172,7 +171,7 @@ export function CabinetForm({
         
         <div>
           <h3 className="text-lg font-medium mb-4">Tampon professionnel</h3>
-          <StampUploadField 
+          <DragDropStampUpload 
             form={form} 
             isSubmitting={isSubmitting}
             currentStampUrl={currentStampUrl}

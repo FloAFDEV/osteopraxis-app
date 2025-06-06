@@ -1,4 +1,3 @@
-
 import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -254,6 +253,31 @@ export const InvoicePrintView = ({
 					En votre aimable règlement à réception. Merci de votre
 					confiance.
 				</p>
+
+				{/* Signature/tampon de l'ostéopathe */}
+				{osteopath?.stampUrl && (
+					<div className="flex justify-end mt-8">
+						<div className="text-center">
+							<p className="text-sm text-gray-600 mb-2">
+								{osteopath.professional_title || "Ostéopathe D.O."}
+							</p>
+							<div className="max-h-[100px] max-w-[200px] mx-auto">
+								<img 
+									src={osteopath.stampUrl} 
+									alt="Signature/Tampon professionnel" 
+									className="max-h-[100px] w-auto object-contain"
+									onError={(e) => {
+										const target = e.target as HTMLImageElement;
+										target.style.display = 'none';
+									}}
+								/>
+							</div>
+							<p className="text-sm text-gray-600 mt-2 font-medium">
+								{osteopath.name}
+							</p>
+						</div>
+					</div>
+				)}
 			</footer>
 		</div>
 	);
