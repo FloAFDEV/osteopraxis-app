@@ -50,7 +50,7 @@ export function Layout({ children }: LayoutProps) {
 
 	return (
 		<div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
-			<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
+			<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b print:hidden">
 				<div className="container flex h-16 items-center justify-between">
 					<div className="flex items-center gap-2">
 						<NavLink
@@ -196,7 +196,7 @@ export function Layout({ children }: LayoutProps) {
 			</header>
 
 			{isMenuOpen && (
-				<div className="md:hidden fixed inset-0 z-30 bg-background/95 pt-16">
+				<div className="md:hidden fixed inset-0 z-30 bg-background/95 pt-16 print:hidden">
 					<nav className="container py-4 flex flex-col gap-4">
 						<NavLink
 							to="/"
@@ -323,11 +323,11 @@ export function Layout({ children }: LayoutProps) {
 				</div>
 			)}
 
-			<main className="flex-1 container px-4 md:px-6 py-6">
+			<main className="flex-1 container px-4 md:px-6 py-6 print:p-0 print:m-0">
 				{children}
 			</main>
 
-			<footer className="border-t py-6 bg-muted/30">
+			<footer className="border-t py-6 bg-muted/30 print:hidden">
 				<div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
 					<p>© 2025 PatientHub. Tous droits réservés.</p>
 					<div className="flex items-center gap-4">
