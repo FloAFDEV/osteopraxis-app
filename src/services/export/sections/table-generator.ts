@@ -214,14 +214,12 @@ export const generateTableSection = (
 	const totalSummaryRow = worksheet.getRow(
 		summaryDataStart + distinctPaymentMethods.length + 1
 	);
-	totalSummaryRow.getCell(1).value = "Total Général";
 	totalSummaryRow.getCell(1).font = {
 		name: "Arial",
 		size: 20,
 		bold: true,
 	};
-	totalSummaryRow.getCell(2).value = totalAmount;
-	totalSummaryRow.getCell(2).numFmt = "#,##0.00 €";
+
 	totalSummaryRow.getCell(2).font = {
 		name: "Arial",
 		size: 20,
