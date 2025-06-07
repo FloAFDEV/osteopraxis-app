@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
 	Table,
 	TableBody,
@@ -139,113 +140,129 @@ export function AppointmentHistoryTab({
 					))}
 				</div>
 			) : (
-				<div className="rounded-md border">
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Date</TableHead>
-								<TableHead>Heure</TableHead>
-								<TableHead>Motif</TableHead>
-								<TableHead>Statut</TableHead>
-								<TableHead className="text-purple-700 dark:text-purple-400">
-									Compte-rendu
-								</TableHead>
-								<TableHead className="text-right">
-									Actions
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{appointments.map((appointment) => (
-								<TableRow key={appointment.id}>
-									<TableCell className="font-medium">
-										{format(
-											new Date(appointment.date),
-											"dd/MM/yyyy"
-										)}
-									</TableCell>
-									<TableCell>
-										{formatAppointmentTime(
-											appointment.date
-										)}
-									</TableCell>
-									<TableCell>{appointment.reason}</TableCell>
-									<TableCell>
-										<AppointmentStatusDropdown
-											status={
-												appointment.status as AppointmentStatus
-											}
-											onStatusChange={(status) =>
-												onStatusChange(
-													appointment.id,
-													status
-												)
-											}
-										/>
-									</TableCell>
-									<TableCell>
-										{appointment.notes ? (
-											<TooltipProvider>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<Button
-															variant="ghost"
-															size="sm"
-															className="h-8 flex items-center gap-1"
-															onClick={() => {
-																toast.info(
-																	<div>
-																		<h3 className="font-medium mb-1">
-																			Notes
-																			de
-																			séance
-																		</h3>
-																		<p className="whitespace-pre-line text-sm">
-																			<span className="font-medium text-purple-700 dark:text-purple-400">
-																				Compte-rendu:{" "}
-																			</span>
-																			{
-																				appointment.notes
-																			}
-																		</p>
-																	</div>,
-																	{
-																		duration: 10000,
-																	}
-																);
-															}}
+				<ScrollArea className="w-full">
+					<div className="rounded-md border min-w-full">
+						<Table className="w-full">
+							<TableHeader>
+								<TableRow>
+									<TableHead className="w-[100px]">Date</TableHead>
+									<TableHead className="w-[80px]">Heure</TableHead>
+									<TableHead className="w-[120px]">Motif</TableHead>
+									<TableHead className="w-[120px]">Statut</TableHead>
+									<TableHead className="text-purple-700 dark:text-purple-400 w-[200px] max-w-[200px]">
+										Compte-rendu
+									</TableHead>
+									<TableHead className="text-right w-[150px]">
+										Actions
+									</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{appointments.map((appointment) => (
+									<TableRow key={appointment.id}>
+										<TableCell className="font-medium w-[100px]">
+											{format(
+												new Date(appointment.date),
+												"dd/MM/yyyy"
+											)}
+										</TableCell>
+										<TableCell className="w-[80px]">
+											{formatAppointmentTime(
+												appointment.date
+											)}
+										</TableCell>
+										<TableCell className="w-[120px]">
+											<div className="truncate max-w-[120px]" title={appointment.reason}>
+												{appointment.reason}
+											</div>
+										</TableCell>
+										<TableCell className="w-[120px]">
+											<AppointmentStatusDropdown
+												status={
+													appointment.status as AppointmentStatus
+												}
+												onStatusChange={(status) =>
+													onStatusChange(
+														appointment.id,
+														status
+													)
+												}
+											/>
+										</TableCell>
+										<TableCell className="w-[200px] max-w-[200px]">
+											{appointment.notes ? (
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																variant="ghost"
+																size="sm"
+																className="h-8 flex items-center gap-1 w-full justify-start px-2"
+																onClick={() => {
+																	toast.info(
+																		<div>
+																			<h3 className="font-medium mb-1">
+																				Notes
+																				de
+																				séance
+																			</h3>
+																			<p className="whitespace-pre-line text-sm">
+																				<span className="font-medium text-purple-700 dark:text-purple-400">
+																					Compte-rendu:{" "}
+																				</span>
+																				{
+																					appointment.notes
+																				}
+																			</p>
+																		</div>,
+																		{
+																			duration: 10000,
+																		}
+																	);
+																}}
+															>
+																<MessageSquare className="h-3 w-3 flex-shrink-0" />
+																<span className="truncate text-left">
+																	{appointment.notes.slice(0, 30)}
+																	{appointment.notes.length > 30 ? "..." : ""}
+																</span>
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent side="top" className="max-w-xs">
+															<p className="whitespace-pre-wrap">
+																<span className="font-medium text-purple-700 dark:text-purple-400">
+																	Compte-rendu:{" "}
+																</span>
+																{appointment.notes.slice(0, 100)}
+																{appointment.notes.length > 100 ? "..." : ""}
+															</p>
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											) : (
+												<span className="text-muted-foreground text-sm">
+													Aucune
+												</span>
+											)}
+										</TableCell>
+										<TableCell className="text-right w-[150px]">
+											<div className="flex gap-1 justify-end">
+												{/* Bouton pour créer une facture depuis une séance terminée */}
+												{appointment.status === "COMPLETED" && (
+													<Button
+														variant="outline"
+														size="sm"
+														asChild
+														className="h-8"
+													>
+														<Link
+															to={`/invoices/new?appointmentId=${appointment.id}`}
 														>
-															<MessageSquare className="h-3 w-3" />
-															Voir
-														</Button>
-													</TooltipTrigger>
-													<TooltipContent>
-														<p className="max-w-xs">
-															<span className="font-medium text-purple-700 dark:text-purple-400">
-																Compte-rendu:{" "}
-															</span>
-															{appointment.notes.slice(
-																0,
-																60
-															)}
-															{appointment.notes
-																.length > 60
-																? "..."
-																: ""}
-														</p>
-													</TooltipContent>
-												</Tooltip>
-											</TooltipProvider>
-										) : (
-											<span className="text-muted-foreground text-sm">
-												Aucune
-											</span>
-										)}
-									</TableCell>
-									<TableCell className="text-right">
-										<div className="flex gap-1 justify-end">
-											{/* Bouton pour créer une facture depuis une séance terminée */}
-											{appointment.status === "COMPLETED" && (
+															<FileText className="h-3 w-3 mr-1" />
+															Facture
+														</Link>
+													</Button>
+												)}
 												<Button
 													variant="outline"
 													size="sm"
@@ -253,32 +270,19 @@ export function AppointmentHistoryTab({
 													className="h-8"
 												>
 													<Link
-														to={`/invoices/new?appointmentId=${appointment.id}`}
+														to={`/appointments/${appointment.id}/edit`}
 													>
-														<FileText className="h-3 w-3 mr-1" />
-														Facture
+														Détails
 													</Link>
 												</Button>
-											)}
-											<Button
-												variant="outline"
-												size="sm"
-												asChild
-												className="h-8"
-											>
-												<Link
-													to={`/appointments/${appointment.id}/edit`}
-												>
-													Détails
-												</Link>
-											</Button>
-										</div>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</div>
+											</div>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+				</ScrollArea>
 			)}
 		</div>
 	);
