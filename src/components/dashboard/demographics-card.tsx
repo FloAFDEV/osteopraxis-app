@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardData, Patient } from "@/types";
-import { ChartPie } from "lucide-react";
+import { ChartPie, Globe } from "lucide-react";
 import React, { useEffect } from "react";
 import { ChildrenStats } from "./demographics/children-stats";
 import {
@@ -54,7 +54,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 		return (
 			<Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg">
 				<CardHeader>
-					<CardTitle>Démographie des patients</CardTitle>
+					<CardTitle>Démographie patients</CardTitle>
 					<CardDescription>
 						Chargement des données démographiques...
 					</CardDescription>
@@ -69,17 +69,17 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 	return (
 		<Card className="overflow-hidden rounded-lg bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
 			<CardHeader>
-				<CardTitle className="text-gray-800 dark:text-white">
-					Démographie des patients
+				<CardTitle className="flex items-center gap-2 text-gray-800 dark:text-white">
+					<Globe className="w-5 h-5 text-blue-600" />
+					Démographie patients
 				</CardTitle>
+
 				<CardDescription className="text-gray-600 dark:text-gray-400">
 					Répartition par genre sur un total de {totalPatients}{" "}
 					patients
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				
-
 				{chartData && chartData.length > 0 ? (
 					<GenderPieChart
 						chartData={chartData}
