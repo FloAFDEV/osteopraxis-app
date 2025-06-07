@@ -175,18 +175,18 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 				{/* Métriques résumées */}
 				<div className="grid grid-cols-2 gap-4 pt-2 border-t">
 					<div className="text-center">
-						<p className="text-2xl font-bold text-indigo-600">
+						<p className="text-2xl font-bold text-indigo-500">
 							{data.averageConsultationsPerDay}
 						</p>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-foreground">
 							Consultations/jour
 						</p>
 					</div>
 					<div className="text-center">
-						<p className="text-2xl font-bold text-indigo-600">
+						<p className="text-2xl font-bold text-indigo-500">
 							{data.averageConsultationsPerMonth}
 						</p>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-foreground">
 							Consultations/mois
 						</p>
 					</div>
