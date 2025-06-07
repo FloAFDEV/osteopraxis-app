@@ -66,30 +66,33 @@ export const InvoicePrintView = ({
 	};
 
 	return (
-		<div className="bg-white p-8 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-max print:p-4">
+		<div className="bg-white p-4 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-screen print:p-2">
 			{/* Partie haute */}
 			<div className="flex-1">
 				{/* En-tête */}
 				<div className="flex justify-between items-start mb-16">
+					{/* Colonne gauche : titre + logo + infos */}
 					<div>
-						<h1 className="text-4xl font-extrabold mb-2 text-amber-700">
-							{cabinet?.name || "PatientHub"}
-						</h1>
-						{cabinet?.logoUrl && (
-							<img
-								src={cabinet.logoUrl}
-								alt={`Logo ${cabinet.name}`}
-								className="h-16 mb-3"
-								style={{
-									maxWidth: "200px",
-									objectFit: "contain",
-								}}
-							/>
-						)}
+						{/* Ligne titre + logo */}
+						<div className="flex items-center gap-4 mb-2 mt-6">
+							<h1 className="text-2xl font-extrabold text-amber-700">
+								{cabinet?.name || "PatientHub"}
+							</h1>
+							{cabinet?.logoUrl && (
+								<img
+									src={cabinet.logoUrl}
+									alt={`Logo ${cabinet.name}`}
+									className="h-10 object-contain"
+									style={{ maxWidth: "150px" }}
+								/>
+							)}
+						</div>
+
+						{/* Infos pro */}
 						<p className="text-gray-700 font-medium">
 							{osteopath?.professional_title || "Ostéopathe D.O."}
 						</p>
-						<p className="text-gray-600 mt-2">
+						<p className="text-gray-600 mt-1">
 							{cabinet ? (
 								<>
 									{cabinet.address}
@@ -117,7 +120,9 @@ export const InvoicePrintView = ({
 								</>
 							)}
 						</p>
-						<div className="text-gray-600 mt-3 text-sm space-y-1">
+
+						{/* Infos administratives */}
+						<div className="text-gray-600 mt-2 text-sm space-y-1">
 							{osteopath?.siret && (
 								<p className="font-medium">
 									SIRET: {osteopath.siret}
@@ -135,8 +140,10 @@ export const InvoicePrintView = ({
 							)}
 						</div>
 					</div>
-					<div className="text-right mt-[5.5rem]">
-						<h2 className="text-2xl font-medium text-amber-700 mb-1">
+
+					{/* Colonne droite : info facture */}
+					<div className="text-right mt-6">
+						<h2 className="text-xl font-medium text-amber-700 mb-1">
 							NOTE D'HONORAIRES
 						</h2>
 						<p className="font-medium text-amber-600">
@@ -149,7 +156,7 @@ export const InvoicePrintView = ({
 				</div>
 
 				{/* Infos patient + paiement */}
-				<div className="grid grid-cols-2 gap-8 mb-12">
+				<div className="grid grid-cols-2 gap-8 mb-6">
 					<div>
 						<h3 className="font-medium text-amber-700 mb-3">
 							Facturer à:
@@ -204,7 +211,7 @@ export const InvoicePrintView = ({
 				</div>
 
 				{/* Tableau prestations */}
-				<div className="rounded-lg border border-amber-200 overflow-hidden mb-12">
+				<div className="rounded-lg border border-amber-200 overflow-hidden mb-6">
 					<table className="w-full">
 						<thead>
 							<tr className="bg-gray-100">
@@ -239,9 +246,32 @@ export const InvoicePrintView = ({
 					</table>
 				</div>
 			</div>
-
+			{/* Signature/tampon de l'ostéopathe */}
+			{osteopath?.stampUrl && (
+				<div className="flex-1 flex justify-end">
+					<div className="text-center">
+						<p className="text-sm text-gray-600 mb-2">
+							{osteopath.professional_title || "Ostéopathe D.O."}
+						</p>
+						<div className="max-h-[100px] max-w-[200px] mx-auto">
+							<img
+								src={osteopath.stampUrl}
+								alt="Signature/Tampon professionnel"
+								className="max-h-[100px] w-auto object-contain"
+								onError={(e) => {
+									const target = e.target as HTMLImageElement;
+									target.style.display = "none";
+								}}
+							/>
+						</div>
+						<p className="text-sm text-gray-600 mt-2 font-medium">
+							{osteopath.name}
+						</p>
+					</div>
+				</div>
+			)}
 			{/* Footer Mentions */}
-			<footer className="pt-8 mt-8 border-t border-gray-200">
+			<footer className="pt-6 mt-auto border-t border-gray-200">
 				<h3 className="font-medium text-amber-700 mb-2">
 					Mentions obligatoires:
 				</h3>
@@ -253,31 +283,6 @@ export const InvoicePrintView = ({
 					En votre aimable règlement à réception. Merci de votre
 					confiance.
 				</p>
-
-				{/* Signature/tampon de l'ostéopathe */}
-				{osteopath?.stampUrl && (
-					<div className="flex justify-end mt-8">
-						<div className="text-center">
-							<p className="text-sm text-gray-600 mb-2">
-								{osteopath.professional_title || "Ostéopathe D.O."}
-							</p>
-							<div className="max-h-[100px] max-w-[200px] mx-auto">
-								<img 
-									src={osteopath.stampUrl} 
-									alt="Signature/Tampon professionnel" 
-									className="max-h-[100px] w-auto object-contain"
-									onError={(e) => {
-										const target = e.target as HTMLImageElement;
-										target.style.display = 'none';
-									}}
-								/>
-							</div>
-							<p className="text-sm text-gray-600 mt-2 font-medium">
-								{osteopath.name}
-							</p>
-						</div>
-					</div>
-				)}
 			</footer>
 		</div>
 	);
