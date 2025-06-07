@@ -1,9 +1,10 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatCard from "@/components/ui/stat-card";
 import { DashboardData } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, TrendingUp, UserPlus, Users } from "lucide-react";
+import { Calendar, TrendingUp, UserPlus, Users, Stethoscope } from "lucide-react";
 
 interface DashboardStatsProps {
 	data: DashboardData;
@@ -28,8 +29,8 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 
 	if (!data) {
 		return (
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				{[1, 2, 3, 4].map((item) => (
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+				{[1, 2, 3, 4, 5].map((item) => (
 					<Card
 						key={item}
 						className="overflow-hidden shadow-sm border-t-4 border-t-blue-300"
@@ -50,7 +51,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 	}
 
 	return (
-		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 			<StatCard
 				title="Patients totaux"
 				value={data.totalPatients}
@@ -73,6 +74,20 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 				description={`+${data.newPatientsLast30Days} ces 30 derniers jours`}
 				color="text-purple-500"
 				icon={<UserPlus />}
+			/>
+
+			<StatCard
+				title="Consultations ce mois"
+				value={data.consultationsThisMonth}
+				description={
+					data.consultationsTrend > 0
+						? `+${data.consultationsTrend}% vs mois dernier`
+						: data.consultationsTrend < 0
+						? `${data.consultationsTrend}% vs mois dernier`
+						: `${data.averageConsultationsPerDay} consultations/jour`
+				}
+				color="text-indigo-500"
+				icon={<Stethoscope />}
 			/>
 
 			<StatCard

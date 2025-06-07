@@ -269,4 +269,12 @@ export interface DashboardData {
 	weeklyAppointments: number[];
 	monthlyRevenue: number[];
 	completedAppointments: number;
+	// Nouvelles métriques de consultation
+	consultationsThisMonth: number;
+	consultationsLastMonth: number;
+	averageConsultationsPerDay: number;
+	averageConsultationsPerMonth: number;
+	consultationsTrend: number;
+	consultationsLast7Days: { day: string; consultations: number }[];
+	consultationsLast12Months: { month: string; consultations: number }[];
 }

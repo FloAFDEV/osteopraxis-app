@@ -134,6 +134,114 @@ export function calculateAppointmentStats(appointments: Appointment[], today: Da
 }
 
 /**
+ * Calcule les métriques de consultation (rendez-vous terminés)
+ */
+export function calculateConsultationMetrics(appointments: Appointment[], currentYear: number, currentMonth: number) {
+  const now = new Date();
+  const currentMonthStart = new Date(currentYear, currentMonth, 1);
+  const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
+  const lastMonthEnd = new Date(currentYear, currentMonth, 0);
+
+  // Consultations terminées ce mois
+  const consultationsThisMonth = appointments.filter((a) => {
+    const appDate = new Date(a.date);
+    return (
+      a.status === "COMPLETED" &&
+      appDate >= currentMonthStart &&
+      appDate.getMonth() === currentMonth &&
+      appDate.getFullYear() === currentYear
+    );
+  }).length;
+
+  // Consultations terminées le mois dernier
+  const consultationsLastMonth = appointments.filter((a) => {
+    const appDate = new Date(a.date);
+    return (
+      a.status === "COMPLETED" &&
+      appDate >= lastMonthStart &&
+      appDate <= lastMonthEnd
+    );
+  }).length;
+
+  // Calcul de la tendance (pourcentage de variation)
+  const consultationsTrend = consultationsLastMonth > 0
+    ? Math.round(((consultationsThisMonth - consultationsLastMonth) / consultationsLastMonth) * 100)
+    : consultationsThisMonth > 0 ? 100 : 0;
+
+  // Consultations des 30 derniers jours pour calculer la moyenne quotidienne
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const consultationsLast30Days = appointments.filter((a) => {
+    const appDate = new Date(a.date);
+    return a.status === "COMPLETED" && appDate >= thirtyDaysAgo;
+  }).length;
+
+  const averageConsultationsPerDay = consultationsLast30Days / 30;
+
+  // Consultations des 12 derniers mois pour calculer la moyenne mensuelle
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  const consultationsLast12Months = appointments.filter((a) => {
+    const appDate = new Date(a.date);
+    return a.status === "COMPLETED" && appDate >= twelveMonthsAgo;
+  }).length;
+
+  const averageConsultationsPerMonth = consultationsLast12Months / 12;
+
+  // Données pour graphique des 7 derniers jours
+  const consultationsLast7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dayConsultations = appointments.filter((a) => {
+      const appDate = new Date(a.date);
+      return (
+        a.status === "COMPLETED" &&
+        appDate.toDateString() === date.toDateString()
+      );
+    }).length;
+
+    consultationsLast7Days.push({
+      day: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
+      consultations: dayConsultations,
+    });
+  }
+
+  // Données pour graphique des 12 derniers mois
+  const consultationsLast12MonthsData = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    const monthConsultations = appointments.filter((a) => {
+      const appDate = new Date(a.date);
+      return (
+        a.status === "COMPLETED" &&
+        appDate.getMonth() === month &&
+        appDate.getFullYear() === year
+      );
+    }).length;
+
+    consultationsLast12MonthsData.push({
+      month: date.toLocaleDateString('fr-FR', { month: 'short' }),
+      consultations: monthConsultations,
+    });
+  }
+
+  return {
+    consultationsThisMonth,
+    consultationsLastMonth,
+    consultationsTrend,
+    averageConsultationsPerDay: Math.round(averageConsultationsPerDay * 10) / 10,
+    averageConsultationsPerMonth: Math.round(averageConsultationsPerMonth * 10) / 10,
+    consultationsLast7Days,
+    consultationsLast12Months: consultationsLast12MonthsData,
+  };
+}
+
+/**
  * Calcule la répartition mensuelle des patients
  */
 export function calculateMonthlyBreakdown(

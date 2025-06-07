@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,7 @@ const StatCard = ({
 					"border-purple-500": colorName === "purple-500",
 					"border-amber-500": colorName === "amber-500",
 					"border-blue-500": colorName === "blue-500",
-					// Removed duplicate "border-blue-500" entry
+					"border-indigo-500": colorName === "indigo-500",
 				}
 			)}
 		>

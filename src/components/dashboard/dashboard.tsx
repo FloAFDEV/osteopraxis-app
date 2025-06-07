@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { DashboardStats } from "./dashboard-stats";
 import { DemographicsCard } from "./demographics-card";
 import { AppointmentsOverview } from "./appointments-overview";
+import { ConsultationsChart } from "./consultations-chart";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardContent } from "./dashboard-content";
 import { LoadingState, ErrorState } from "./loading-state";
@@ -12,7 +13,8 @@ import {
   calculateDemographics, 
   calculateGrowthMetrics, 
   calculateAppointmentStats, 
-  calculateMonthlyBreakdown 
+  calculateMonthlyBreakdown,
+  calculateConsultationMetrics
 } from "./utils/dashboard-calculations";
 import { formatAppointmentDate } from "@/utils/date-utils";
 
@@ -39,7 +41,15 @@ const initialDashboardData: DashboardData = {
   pendingInvoices: 0,
   weeklyAppointments: [0, 0, 0, 0, 0, 0, 0],
   monthlyRevenue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  completedAppointments: 0
+  completedAppointments: 0,
+  // Nouvelles métriques de consultation
+  consultationsThisMonth: 0,
+  consultationsLastMonth: 0,
+  averageConsultationsPerDay: 0,
+  averageConsultationsPerMonth: 0,
+  consultationsTrend: 0,
+  consultationsLast7Days: [],
+  consultationsLast12Months: [],
 };
 
 export function Dashboard() {
@@ -69,6 +79,7 @@ export function Dashboard() {
         const demographics = calculateDemographics(patientsData, currentYear);
         const growthMetrics = calculateGrowthMetrics(patientsData, currentYear, currentMonth);
         const appointmentStats = calculateAppointmentStats(appointmentsData, today);
+        const consultationMetrics = calculateConsultationMetrics(appointmentsData, currentYear, currentMonth);
         const monthlyGrowthData = calculateMonthlyBreakdown(patientsData, currentYear);
 
         // Formatter le prochain rendez-vous pour l'affichage
@@ -89,7 +100,9 @@ export function Dashboard() {
           pendingInvoices: 0,
           weeklyAppointments: [0, 0, 0, 0, 0, 0, 0],
           monthlyRevenue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          completedAppointments: appointmentsData.filter(a => a.status === 'COMPLETED').length
+          completedAppointments: appointmentsData.filter(a => a.status === 'COMPLETED').length,
+          // Nouvelles métriques de consultation
+          ...consultationMetrics,
         });
       } catch (err) {
         console.error("Erreur lors du chargement des données du tableau de bord:", err);
@@ -120,11 +133,14 @@ export function Dashboard() {
         <DashboardStats data={dashboardData} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="animate-fade-in animate-delay-100">
           <AppointmentsOverview data={dashboardData} />
         </div>
         <div className="animate-fade-in animate-delay-200">
+          <ConsultationsChart data={dashboardData} />
+        </div>
+        <div className="animate-fade-in animate-delay-300">
           <DemographicsCard
             patients={allPatients}
             data={dashboardData}
