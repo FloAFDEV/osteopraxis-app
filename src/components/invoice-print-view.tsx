@@ -143,7 +143,7 @@ export const InvoicePrintView = ({
 
 					{/* Colonne droite : info facture */}
 					<div className="text-right mt-6">
-						<h2 className="text-xl font-medium text-amber-700 mb-1">
+						<h2 className="text-lg font-medium text-amber-700 mb-1">
 							NOTE D'HONORAIRES
 						</h2>
 						<p className="font-medium text-amber-600">
