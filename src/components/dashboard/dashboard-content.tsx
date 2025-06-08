@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import React, { useState } from "react";
@@ -68,7 +67,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 								}`}
 							>
 								<div className="absolute inset-0 flex items-center justify-center px-2 font-bold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden]">
-									Évolution annuelle
+									Évolution mensuelle
 								</div>
 								<div className="absolute inset-0 flex items-center justify-center px-2 font-bold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden] [transform:rotateY(180deg)]">
 									Comparaison avec N-1
