@@ -8,6 +8,7 @@ interface ChartWrapperProps {
   subtitle?: string;
   isLoading?: boolean;
   children: ReactNode;
+  height?: string;
 }
 
 /**
@@ -18,6 +19,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   subtitle,
   isLoading = false,
   children,
+  height = "400px",
 }) => {
   return (
     <Card className="overflow-hidden rounded-lg bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-1 sm:p-1 shadow-lg">
@@ -31,7 +33,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent style={{ height }} className="flex flex-col">
         {isLoading ? <ChartLoader /> : children}
       </CardContent>
     </Card>

@@ -1,3 +1,4 @@
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardData } from "@/types";
 import { useEffect, useState } from "react";
@@ -83,7 +84,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
 
 	if (!data || !data.monthlyGrowth) {
 		return (
-			<ChartWrapper title="Croissance mensuelle" isLoading={true}>
+			<ChartWrapper title="Croissance mensuelle" isLoading={true} height="100%">
 				<div>Aucune donnée disponible</div>
 			</ChartWrapper>
 		);
@@ -135,8 +136,8 @@ export function GrowthChart({ data }: GrowthChartProps) {
 	};
 
 	return (
-		<ChartWrapper title="Croissance mensuelle" isLoading={isLoading}>
-			<div className="w-full h-full">
+		<ChartWrapper title="Croissance mensuelle" isLoading={isLoading} height="100%">
+			<div className="w-full h-full flex-1">
 				<ResponsiveContainer width="100%" height="100%">
 					<LineChart
 						data={chartData}
