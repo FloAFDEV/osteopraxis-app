@@ -54,21 +54,50 @@ export function MedicalInfoTab({
 	// Fonction helper pour déterminer l'importance médicale
 	const isCriticalCondition = (value: string | null | undefined) => {
 		if (!value) return false;
-		const criticalKeywords = ['allergie', 'urgence', 'critique', 'grave', 'sévère'];
-		return criticalKeywords.some(keyword => 
+		const criticalKeywords = [
+			"allergie",
+			"urgence",
+			"critique",
+			"grave",
+			"sévère",
+		];
+		return criticalKeywords.some((keyword) =>
 			value.toLowerCase().includes(keyword)
 		);
 	};
 
 	const isImportantCondition = (value: string | null | undefined) => {
 		if (!value) return false;
-		const importantKeywords = ['traitement', 'médicament', 'suivi', 'chronique', 'antécédent'];
-		return importantKeywords.some(keyword => 
+		const importantKeywords = [
+			"traitement",
+			"médicament",
+			"suivi",
+			"chronique",
+			"antécédent",
+		];
+		return importantKeywords.some((keyword) =>
 			value.toLowerCase().includes(keyword)
 		);
 	};
 
-	const medicalSections = [
+	type MedicalSectionCategory =
+		| "general"
+		| "lifestyle"
+		| "sensory"
+		| "digestive"
+		| "additional"
+		| "reproductive"
+		| "pediatric";
+
+	const medicalSections: {
+		title: string;
+		icon: any;
+		priority: "high" | "medium" | "low";
+		category: MedicalSectionCategory;
+		defaultOpen?: boolean;
+		sectionId: string;
+		items: any[];
+	}[] = [
 		{
 			title: "Informations médicales générales",
 			icon: Stethoscope,
@@ -80,46 +109,55 @@ export function MedicalInfoTab({
 				{
 					label: "Médecin généraliste",
 					value: patient.generalPractitioner,
-					isImportant: !!patient.generalPractitioner
+					isImportant: !!patient.generalPractitioner,
 				},
 				{
 					label: "Traitement actuel",
 					value: patient.currentTreatment,
 					isCritical: isCriticalCondition(patient.currentTreatment),
-					isImportant: !!patient.currentTreatment
+					isImportant: !!patient.currentTreatment,
 				},
 				{
 					label: "Allergies",
-					value: patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null,
-					isCritical: !!(patient.allergies && patient.allergies !== "NULL"),
-					isImportant: !!(patient.allergies && patient.allergies !== "NULL")
+					value:
+						patient.allergies && patient.allergies !== "NULL"
+							? patient.allergies
+							: null,
+					isCritical: !!(
+						patient.allergies && patient.allergies !== "NULL"
+					),
+					isImportant: !!(
+						patient.allergies && patient.allergies !== "NULL"
+					),
 				},
 				{
 					label: "Antécédents médicaux familiaux",
 					value: patient.familyStatus,
-					isImportant: isImportantCondition(patient.familyStatus)
+					isImportant: isImportantCondition(patient.familyStatus),
 				},
 				{
 					label: "Chirurgie",
 					value: patient.surgicalHistory,
-					isImportant: isImportantCondition(patient.surgicalHistory)
+					isImportant: isImportantCondition(patient.surgicalHistory),
 				},
 				{
 					label: "Fractures",
 					value: patient.fracture_history,
-					isImportant: !!patient.fracture_history
+					isImportant: !!patient.fracture_history,
 				},
 				{
 					label: "Traumatismes",
 					value: patient.traumaHistory,
-					isImportant: !!patient.traumaHistory
+					isImportant: !!patient.traumaHistory,
 				},
 				{
 					label: "Rhumatologie",
 					value: patient.rheumatologicalHistory,
-					isImportant: isImportantCondition(patient.rheumatologicalHistory)
+					isImportant: isImportantCondition(
+						patient.rheumatologicalHistory
+					),
 				},
-			]
+			],
 		},
 		{
 			title: "Activité physique / Sommeil",
@@ -130,19 +168,24 @@ export function MedicalInfoTab({
 			items: [
 				{
 					label: "Activité physique",
-					value: patient.physicalActivity
+					value: patient.physicalActivity,
 				},
 				{
 					label: "Fréquence sportive",
-					value: patient.sport_frequency
+					value: patient.sport_frequency,
 				},
 				{
 					label: "Qualité du sommeil",
 					value: patient.sleep_quality,
-					isImportant: patient.sleep_quality?.toLowerCase().includes('mauvais') || 
-								patient.sleep_quality?.toLowerCase().includes('trouble')
+					isImportant:
+						patient.sleep_quality
+							?.toLowerCase()
+							.includes("mauvais") ||
+						patient.sleep_quality
+							?.toLowerCase()
+							.includes("trouble"),
 				},
-			]
+			],
 		},
 		{
 			title: "Ophtalmologie / Dentaire",
@@ -153,19 +196,24 @@ export function MedicalInfoTab({
 			items: [
 				{
 					label: "Correction de la vue",
-					value: patient.hasVisionCorrection ? "Oui" : "Non"
+					value: patient.hasVisionCorrection ? "Oui" : "Non",
 				},
 				{
 					label: "Ophtalmologue",
-					value: patient.ophtalmologistName
+					value: patient.ophtalmologistName,
 				},
 				{
 					label: "Santé dentaire",
 					value: patient.dental_health,
-					isImportant: patient.dental_health?.toLowerCase().includes('problème') ||
-								patient.dental_health?.toLowerCase().includes('douleur')
+					isImportant:
+						patient.dental_health
+							?.toLowerCase()
+							.includes("problème") ||
+						patient.dental_health
+							?.toLowerCase()
+							.includes("douleur"),
 				},
-			]
+			],
 		},
 		{
 			title: "ORL",
@@ -178,18 +226,18 @@ export function MedicalInfoTab({
 					label: "Problèmes ORL",
 					value: patient.entProblems,
 					isCritical: isCriticalCondition(patient.entProblems),
-					isImportant: !!patient.entProblems
+					isImportant: !!patient.entProblems,
 				},
 				{
 					label: "Médecin ORL",
-					value: patient.entDoctorName
+					value: patient.entDoctorName,
 				},
 				{
 					label: "Suivi ORL",
 					value: patient.ent_followup,
-					isImportant: !!patient.ent_followup
+					isImportant: !!patient.ent_followup,
 				},
-			]
+			],
 		},
 		{
 			title: "Digestif",
@@ -202,19 +250,24 @@ export function MedicalInfoTab({
 					label: "Problèmes digestifs",
 					value: patient.digestiveProblems,
 					isCritical: isCriticalCondition(patient.digestiveProblems),
-					isImportant: !!patient.digestiveProblems
+					isImportant: !!patient.digestiveProblems,
 				},
 				{
 					label: "Transit intestinal",
 					value: patient.intestinal_transit,
-					isImportant: patient.intestinal_transit?.toLowerCase().includes('problème') ||
-								patient.intestinal_transit?.toLowerCase().includes('trouble')
+					isImportant:
+						patient.intestinal_transit
+							?.toLowerCase()
+							.includes("problème") ||
+						patient.intestinal_transit
+							?.toLowerCase()
+							.includes("trouble"),
 				},
 				{
 					label: "Médecin digestif",
-					value: patient.digestiveDoctorName
+					value: patient.digestiveDoctorName,
 				},
-			]
+			],
 		},
 		{
 			title: "Anamnèse complémentaire",
@@ -226,15 +279,15 @@ export function MedicalInfoTab({
 				{
 					label: "Examens complémentaires",
 					value: patient.complementaryExams,
-					isImportant: !!patient.complementaryExams
+					isImportant: !!patient.complementaryExams,
 				},
 				{
 					label: "Symptômes généraux",
 					value: patient.generalSymptoms,
-					isImportant: !!patient.generalSymptoms
+					isImportant: !!patient.generalSymptoms,
 				},
-			]
-		}
+			],
+		},
 	];
 
 	// Sections spécifiques aux adultes
@@ -248,14 +301,18 @@ export function MedicalInfoTab({
 			items: [
 				{
 					label: "Contraception",
-					value: patient.contraception ? String(patient.contraception) : null
+					value: patient.contraception
+						? String(patient.contraception)
+						: null,
 				},
 				{
 					label: "Antécédents gynécologiques",
 					value: patient.gynecological_history,
-					isImportant: isImportantCondition(patient.gynecological_history)
+					isImportant: isImportantCondition(
+						patient.gynecological_history
+					),
 				},
-			]
+			],
 		});
 
 		if (patient.other_comments_adult) {
@@ -269,9 +326,9 @@ export function MedicalInfoTab({
 					{
 						label: "Notes supplémentaires",
 						value: patient.other_comments_adult,
-						isImportant: !!patient.other_comments_adult
+						isImportant: !!patient.other_comments_adult,
 					},
-				]
+				],
 			});
 		}
 	}
@@ -290,34 +347,45 @@ export function MedicalInfoTab({
 					{
 						label: "Grossesse",
 						value: patient.pregnancyHistory,
-						isImportant: isImportantCondition(patient.pregnancyHistory)
+						isImportant: isImportantCondition(
+							patient.pregnancyHistory
+						),
 					},
 					{
 						label: "Naissance",
 						value: patient.birthDetails,
-						isImportant: isImportantCondition(patient.birthDetails)
+						isImportant: isImportantCondition(patient.birthDetails),
 					},
 					{
 						label: "Score APGAR",
 						value: patient.apgar_score,
-						isImportant: patient.apgar_score ? parseFloat(patient.apgar_score) < 7 : false
+						isImportant: patient.apgar_score
+							? parseFloat(patient.apgar_score) < 7
+							: false,
 					},
 					{
 						label: "Poids à la naissance",
-						value: patient.weight_at_birth ? `${patient.weight_at_birth} g` : null,
-						isImportant: patient.weight_at_birth ? (
-							Number(patient.weight_at_birth) < 2500 || Number(patient.weight_at_birth) > 4000
-						) : false
+						value: patient.weight_at_birth
+							? `${patient.weight_at_birth} g`
+							: null,
+						isImportant: patient.weight_at_birth
+							? Number(patient.weight_at_birth) < 2500 ||
+							  Number(patient.weight_at_birth) > 4000
+							: false,
 					},
 					{
 						label: "Taille à la naissance",
-						value: patient.height_at_birth ? `${patient.height_at_birth} cm` : null
+						value: patient.height_at_birth
+							? `${patient.height_at_birth} cm`
+							: null,
 					},
 					{
 						label: "Périmètre crânien",
-						value: patient.head_circumference ? `${patient.head_circumference} cm` : null
+						value: patient.head_circumference
+							? `${patient.head_circumference} cm`
+							: null,
 					},
-				]
+				],
 			},
 			{
 				title: "Développement et suivi",
@@ -329,40 +397,70 @@ export function MedicalInfoTab({
 					{
 						label: "Développement moteur",
 						value: patient.developmentMilestones,
-						isImportant: patient.developmentMilestones?.toLowerCase().includes('retard') ||
-									patient.developmentMilestones?.toLowerCase().includes('problème')
+						isImportant:
+							patient.developmentMilestones
+								?.toLowerCase()
+								.includes("retard") ||
+							patient.developmentMilestones
+								?.toLowerCase()
+								.includes("problème"),
 					},
 					{
 						label: "Motricité fine",
 						value: patient.fine_motor_skills,
-						isImportant: patient.fine_motor_skills?.toLowerCase().includes('difficile') ||
-									patient.fine_motor_skills?.toLowerCase().includes('retard')
+						isImportant:
+							patient.fine_motor_skills
+								?.toLowerCase()
+								.includes("difficile") ||
+							patient.fine_motor_skills
+								?.toLowerCase()
+								.includes("retard"),
 					},
 					{
 						label: "Motricité globale",
 						value: patient.gross_motor_skills,
-						isImportant: patient.gross_motor_skills?.toLowerCase().includes('difficile') ||
-									patient.gross_motor_skills?.toLowerCase().includes('retard')
+						isImportant:
+							patient.gross_motor_skills
+								?.toLowerCase()
+								.includes("difficile") ||
+							patient.gross_motor_skills
+								?.toLowerCase()
+								.includes("retard"),
 					},
 					{
 						label: "Sommeil",
 						value: patient.sleepingPattern,
-						isImportant: patient.sleepingPattern?.toLowerCase().includes('trouble') ||
-									patient.sleepingPattern?.toLowerCase().includes('difficile')
+						isImportant:
+							patient.sleepingPattern
+								?.toLowerCase()
+								.includes("trouble") ||
+							patient.sleepingPattern
+								?.toLowerCase()
+								.includes("difficile"),
 					},
 					{
 						label: "Alimentation",
 						value: patient.feeding,
-						isImportant: patient.feeding?.toLowerCase().includes('problème') ||
-									patient.feeding?.toLowerCase().includes('difficile')
+						isImportant:
+							patient.feeding
+								?.toLowerCase()
+								.includes("problème") ||
+							patient.feeding
+								?.toLowerCase()
+								.includes("difficile"),
 					},
 					{
 						label: "Comportement",
 						value: patient.behavior,
-						isImportant: patient.behavior?.toLowerCase().includes('problème') ||
-									patient.behavior?.toLowerCase().includes('difficile')
+						isImportant:
+							patient.behavior
+								?.toLowerCase()
+								.includes("problème") ||
+							patient.behavior
+								?.toLowerCase()
+								.includes("difficile"),
 					},
-				]
+				],
 			},
 			{
 				title: "Environnement et suivi",
@@ -373,26 +471,26 @@ export function MedicalInfoTab({
 				items: [
 					{
 						label: "Mode de garde",
-						value: patient.childcare_type
+						value: patient.childcare_type,
 					},
 					{
 						label: "Niveau scolaire",
-						value: patient.school_grade
+						value: patient.school_grade,
 					},
 					{
 						label: "Pédiatre",
-						value: patient.pediatrician_name
+						value: patient.pediatrician_name,
 					},
 					{
 						label: "Suivis paramédicaux",
 						value: patient.paramedical_followup,
-						isImportant: !!patient.paramedical_followup
+						isImportant: !!patient.paramedical_followup,
 					},
 					{
 						label: "Contexte de garde",
-						value: patient.childCareContext
+						value: patient.childCareContext,
 					},
-				]
+				],
 			}
 		);
 
@@ -407,9 +505,9 @@ export function MedicalInfoTab({
 					{
 						label: "Notes supplémentaires",
 						value: patient.other_comments_child,
-						isImportant: !!patient.other_comments_child
+						isImportant: !!patient.other_comments_child,
 					},
-				]
+				],
 			});
 		}
 	}
@@ -417,7 +515,7 @@ export function MedicalInfoTab({
 	return (
 		<div className="space-y-6 mt-6">
 			{lastAppointment && (
-				<Card className="border-blue-100 dark:border-slate-900/50">
+				<Card className="border-blue-100 dark:border-slate-900/50 ">
 					<CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-t-lg">
 						<CardTitle className="text-lg flex flex-wrap items-center gap-2">
 							<Calendar className="h-5 w-5 text-blue-500" />
