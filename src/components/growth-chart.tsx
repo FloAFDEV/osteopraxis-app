@@ -8,9 +8,35 @@ import {
 	LegendProps,
 	ResponsiveContainer,
 	Tooltip,
+	TooltipProps,
 	XAxis,
 	YAxis,
 } from "recharts";
+
+export const CustomMinimalTooltip = ({
+	active,
+	payload,
+	label,
+}: TooltipProps<any, any>) => {
+	if (!active || !payload || payload.length === 0) return null;
+
+	return (
+		<div className="rounded-md border bg-white px-3 py-2 text-sm text-gray-800 shadow-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+			<p className="font-medium mb-1">{label}</p>
+			{payload.map((entry, index) => (
+				<div key={index} className="flex items-center gap-2">
+					<span
+						className="inline-block w-2 h-2 rounded-full"
+						style={{ backgroundColor: entry.color }}
+					/>
+					<span>
+						{entry.name}: {entry.value}
+					</span>
+				</div>
+			))}
+		</div>
+	);
+};
 
 interface GrowthChartProps {
 	data: DashboardData;
@@ -70,26 +96,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
 					/>
 					<XAxis dataKey="month" tick={{ fontSize: 12 }} />
 					<YAxis tick={{ fontSize: 12 }} />
-					<Tooltip
-						formatter={(value, name) => {
-							if (name === "patients")
-								return [value, "Cette année"];
-							if (name === "prevPatients")
-								return [value, "Année précédente"];
-							return [value, name];
-						}}
-						labelFormatter={(label) => `Mois: ${label}`}
-						contentStyle={{
-							backgroundColor: "#0891b2",
-							borderColor: "#0891b2",
-							borderRadius: "6px",
-						}}
-						itemStyle={{ color: "#ffffff", fontSize: "14px" }}
-						labelStyle={{
-							color: "#ffffff",
-							fontWeight: "bold",
-						}}
-					/>
+					<Tooltip content={<CustomMinimalTooltip />} />
 					<Legend content={<CustomBarLegend />} />
 					<Bar
 						dataKey="patients"
