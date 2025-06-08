@@ -11,31 +11,50 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize state with a function instead of a direct value
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Use window check to avoid SSR issues
-    if (typeof window !== "undefined") {
-      // Check for saved theme preference or use system preference
-      const savedTheme = localStorage.getItem("theme") as Theme;
-      if (savedTheme) return savedTheme;
-      
-      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
-    // Default to light if window is not available
-    return "light";
-  });
+  // Initialize with a simple default value
+  const [theme, setTheme] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
+  // Handle initial theme loading after component mounts
   useEffect(() => {
     // Only run this effect on the client side
     if (typeof window === "undefined") return;
     
-    // Update localStorage and document class when theme changes
-    localStorage.setItem("theme", theme);
+    try {
+      // Check for saved theme preference or use system preference
+      const savedTheme = localStorage.getItem("theme") as Theme;
+      if (savedTheme && (savedTheme === "light" || savedTheme === "dark")) {
+        setTheme(savedTheme);
+      } else {
+        // Use system preference
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        setTheme(systemTheme);
+      }
+    } catch (error) {
+      console.warn("Could not access localStorage for theme preference", error);
+      // Fallback to system preference
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        setTheme("dark");
+      }
+    }
+    
+    setMounted(true);
+  }, []);
+
+  // Update localStorage and document class when theme changes
+  useEffect(() => {
+    if (!mounted) return;
+    
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (error) {
+      console.warn("Could not save theme preference to localStorage", error);
+    }
     
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
