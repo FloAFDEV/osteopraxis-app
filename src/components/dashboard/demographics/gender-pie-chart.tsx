@@ -1,9 +1,3 @@
-import {
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-	Tooltip as UITooltip,
-} from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChartPie } from "lucide-react";
 import React from "react";
@@ -14,6 +8,7 @@ import {
 	PieChart,
 	ResponsiveContainer,
 	Tooltip,
+	TooltipProps,
 } from "recharts";
 
 export interface GenderChartData {
@@ -28,12 +23,41 @@ interface GenderPieChartProps {
 	totalPatients: number;
 }
 
-// Couleurs plus douces (500) pour cohérence design
 export const GENDER_COLORS = {
-	Homme: "#3b82f6", // blue-500
-	Femme: "#8b5cf6", // purple-500
-	Enfant: "#10b981", // emerald-500
-	"Non spécifié": "#6b7280", // gray-500
+	Homme: "#3b82f6", // bleu-500
+	Femme: "#8b5cf6", // violet-500
+	Enfant: "#10b981", // émeraude-500
+	"Non spécifié": "#6b7280", // gris-500
+};
+
+const CustomMinimalTooltip = ({ active, payload }: TooltipProps<any, any>) => {
+	if (!active || !payload || payload.length === 0) return null;
+
+	return (
+		<div className="rounded-md border bg-white px-3 py-2 text-sm text-gray-800 shadow-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+			<p className="font-medium mb-1">{payload[0].name || "Détail"}</p>
+			{payload.map((entry, index) => {
+				const bgColor =
+					entry.color ||
+					entry.payload.color ||
+					entry.payload.fill ||
+					"#6b7280"; // fallback gris
+
+				return (
+					<div key={index} className="flex items-center gap-2">
+						<span
+							className="inline-block w-3 h-3 rounded-sm"
+							style={{ backgroundColor: bgColor }}
+						/>
+						<span>
+							{entry.name}: {entry.value} (
+							{entry.payload.percentage}%)
+						</span>
+					</div>
+				);
+			})}
+		</div>
+	);
 };
 
 export const GenderPieChart: React.FC<GenderPieChartProps> = ({
@@ -52,6 +76,13 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 			</div>
 		);
 	}
+
+	// Injection de la couleur dans chaque élément du dataset
+	const chartDataWithColors = validChartData.map((item) => ({
+		...item,
+		color:
+			GENDER_COLORS[item.name as keyof typeof GENDER_COLORS] || "#6b7280",
+	}));
 
 	const renderCustomizedLabel = ({
 		cx,
@@ -82,23 +113,6 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 		);
 	};
 
-	const CustomTooltip = ({ active, payload }: any) => {
-		if (active && payload && payload.length) {
-			const data = payload[0].payload;
-			return (
-				<div className="bg-cyan-600 p-3 rounded-md shadow text-white space-y-2">
-					<p className="font-medium">{data.name}s</p>
-					<p className="text-sm">
-						<span className="text-white">{data.value} </span>
-						patients
-					</p>
-					<p className="text-sm">{data.percentage}% du total</p>
-				</div>
-			);
-		}
-		return null;
-	};
-
 	const CustomLegend = ({ payload }: any) => {
 		if (!payload) return null;
 		return (
@@ -112,22 +126,9 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 							className="h-3 w-3 rounded-full"
 							style={{ backgroundColor: entry.color }}
 						/>
-						<TooltipProvider>
-							<UITooltip>
-								<TooltipTrigger asChild>
-									<span className="text-sm cursor-help">
-										{entry.value} (
-										{entry.payload.percentage}%)
-									</span>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>
-										{entry.payload.value} patients (
-										{entry.payload.percentage}% du total)
-									</p>
-								</TooltipContent>
-							</UITooltip>
-						</TooltipProvider>
+						<span className="text-sm cursor-help">
+							{entry.value} ({entry.payload.percentage}%)
+						</span>
 					</li>
 				))}
 			</ul>
@@ -139,7 +140,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 			<ResponsiveContainer width="100%" height="100%" debounce={1}>
 				<PieChart>
 					<Pie
-						data={validChartData}
+						data={chartDataWithColors}
 						cx="50%"
 						cy="50%"
 						labelLine={false}
@@ -149,18 +150,13 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 						dataKey="value"
 						nameKey="name"
 					>
-						{validChartData.map((entry, index) => (
-							<Cell
-								key={`cell-${index}`}
-								fill={
-									GENDER_COLORS[
-										entry.name as keyof typeof GENDER_COLORS
-									] || "#6b7280"
-								}
-							/>
+						{chartDataWithColors.map((entry, index) => (
+							<Cell key={`cell-${index}`} fill={entry.color} />
 						))}
 					</Pie>
-					<Tooltip content={<CustomTooltip />} />
+
+					<Tooltip content={<CustomMinimalTooltip />} />
+
 					<Legend content={<CustomLegend />} />
 				</PieChart>
 			</ResponsiveContainer>
