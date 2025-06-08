@@ -1,4 +1,3 @@
-
 import {
 	Accordion,
 	AccordionContent,
@@ -19,7 +18,14 @@ interface MedicalSectionProps {
 	}[];
 	defaultOpen?: boolean;
 	priority?: "high" | "medium" | "low";
-	category?: "general" | "lifestyle" | "sensory" | "digestive" | "reproductive" | "pediatric" | "additional";
+	category?:
+		| "general"
+		| "lifestyle"
+		| "sensory"
+		| "digestive"
+		| "reproductive"
+		| "pediatric"
+		| "additional";
 	sectionId?: string;
 }
 
@@ -30,44 +36,62 @@ interface MedicalAccordionProps {
 export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 	const getIconColor = (category?: string) => {
 		switch (category) {
-			case "general": 
+			case "general":
 				return "text-red-600 dark:text-red-400";
-			case "lifestyle": 
+			case "lifestyle":
 				return "text-green-600 dark:text-green-400";
-			case "sensory": 
+			case "sensory":
 				return "text-purple-600 dark:text-purple-400";
-			case "digestive": 
+			case "digestive":
 				return "text-orange-600 dark:text-orange-400";
-			case "reproductive": 
+			case "reproductive":
 				return "text-pink-600 dark:text-pink-400";
-			case "pediatric": 
+			case "pediatric":
 				return "text-sky-600 dark:text-sky-400";
-			case "additional": 
+			case "additional":
 				return "text-gray-600 dark:text-gray-400";
-			default: 
+			default:
 				return "text-blue-600 dark:text-blue-400";
 		}
 	};
 
 	const getDefaultValue = () => {
 		const highPrioritySections = sections
-			.filter(section => section.defaultOpen || section.priority === "high")
+			.filter(
+				(section) => section.defaultOpen || section.priority === "high"
+			)
 			.map((_, index) => `section-${index}`);
 		return highPrioritySections;
 	};
 
 	const getImportanceLevel = (section: MedicalSectionProps) => {
-		const criticalItems = section.items.filter(item => item.isCritical && item.value);
-		const importantItems = section.items.filter(item => item.isImportant && item.value);
-		
+		const criticalItems = section.items.filter(
+			(item) => item.isCritical && item.value
+		);
+		const importantItems = section.items.filter(
+			(item) => item.isImportant && item.value
+		);
+
 		if (criticalItems.length > 0) {
-			return { level: "critique", badge: "Critique", variant: "destructive" as const };
+			return {
+				level: "critique",
+				badge: "Critique",
+				variant: "destructive" as const,
+			};
 		}
 		if (importantItems.length >= 2) {
-			return { level: "important", badge: "Important", variant: "destructive" as const };
+			return {
+				level: "important",
+				badge: "Important",
+				variant: "destructive" as const,
+			};
 		}
 		if (importantItems.length === 1) {
-			return { level: "attention", badge: "Attention", variant: "warning" as const };
+			return {
+				level: "attention",
+				badge: "Attention",
+				variant: "warning" as const,
+			};
 		}
 		return null;
 	};
@@ -86,9 +110,9 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 					}
 				`}
 			</style>
-			
-			<Accordion 
-				type="multiple" 
+
+			<Accordion
+				type="multiple"
 				defaultValue={getDefaultValue()}
 				className="space-y-3"
 			>
@@ -96,20 +120,28 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 					const Icon = section.icon;
 					const iconColor = getIconColor(section.category);
 					const importance = getImportanceLevel(section);
-					
+
 					return (
-						<AccordionItem 
-							key={`section-${index}`} 
+						<AccordionItem
+							key={`section-${index}`}
 							value={`section-${index}`}
 							className="border rounded-lg transition-all duration-200 hover:shadow-sm border-gray-200 dark:border-gray-800"
-							data-section={section.sectionId || section.title.toLowerCase().replace(/\s+/g, '-')}
+							data-section={
+								section.sectionId ||
+								section.title.toLowerCase().replace(/\s+/g, "-")
+							}
 						>
 							<AccordionTrigger className="px-4 py-3 hover:no-underline bg-gray-50 dark:bg-gray-950/20 rounded-t-lg">
 								<div className="flex items-center gap-3 text-left w-full">
 									<Icon className={`h-5 w-5 ${iconColor}`} />
-									<span className="font-medium flex-1">{section.title}</span>
+									<span className="font-medium flex-1">
+										{section.title}
+									</span>
 									{importance && (
-										<Badge variant={importance.variant} className="ml-auto">
+										<Badge
+											variant={importance.variant}
+											className="ml-auto"
+										>
 											{importance.badge}
 										</Badge>
 									)}
@@ -119,28 +151,42 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 								<dl className="space-y-3 pt-2">
 									{section.items.map((item, itemIndex) => {
 										if (!item.value) return null;
-										
-										const isHighPriority = item.isCritical || item.isImportant;
-										
+
+										const isHighPriority =
+											item.isCritical || item.isImportant;
+
 										return (
-											<div key={itemIndex} className={isHighPriority ? 
-												`p-3 rounded border-l-4 ${item.isCritical ? 
-													'bg-red-50 dark:bg-red-900/10 border-red-500' : 
-													'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-500'
-												}` : ""
-											}>
+											<div
+												key={itemIndex}
+												className={
+													isHighPriority
+														? `p-3 rounded border-l-4 ${
+																item.isCritical
+																	? "bg-red-50 dark:bg-red-900/10 border-red-500"
+																	: " border-yellow-500"
+														  }`
+														: ""
+												}
+											>
 												<dt className="text-sm font-medium text-muted-foreground">
 													{item.label}
 													{item.isCritical && (
-														<Badge variant="destructive" className="ml-2 text-xs">
+														<Badge
+															variant="destructive"
+															className="ml-2 text-xs"
+														>
 															Critique
 														</Badge>
 													)}
-													{item.isImportant && !item.isCritical && (
-														<Badge variant="warning" className="ml-2 text-xs">
-															Important
-														</Badge>
-													)}
+													{item.isImportant &&
+														!item.isCritical && (
+															<Badge
+																variant="warning"
+																className="ml-2 text-xs"
+															>
+																Important
+															</Badge>
+														)}
 												</dt>
 												<dd className="mt-1 text-sm">
 													{item.value}
