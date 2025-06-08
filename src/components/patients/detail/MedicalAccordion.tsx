@@ -125,13 +125,13 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 						<AccordionItem
 							key={`section-${index}`}
 							value={`section-${index}`}
-							className="border rounded-lg transition-all duration-200 hover:shadow-sm border-gray-200 dark:border-gray-800"
+							className="border rounded-lg transition-all duration-200 hover:shadow-sm border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-800/30"
 							data-section={
 								section.sectionId ||
 								section.title.toLowerCase().replace(/\s+/g, "-")
 							}
 						>
-							<AccordionTrigger className="px-4 py-3 hover:no-underline bg-gray-50 dark:bg-gray-950/20 rounded-t-lg">
+							<AccordionTrigger className="px-4 py-3 hover:no-underline bg-gray-50/80 dark:bg-gray-900/30 rounded-t-lg">
 								<div className="flex items-center gap-3 text-left w-full">
 									<Icon className={`h-5 w-5 ${iconColor}`} />
 									<span className="font-medium flex-1">
@@ -147,7 +147,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 									)}
 								</div>
 							</AccordionTrigger>
-							<AccordionContent className="px-4 pb-4 bg-white dark:bg-gray-950/50">
+							<AccordionContent className="px-4 pb-4 bg-white/70 dark:bg-gray-800/50">
 								<dl className="space-y-3 pt-2">
 									{section.items.map((item, itemIndex) => {
 										if (!item.value) return null;

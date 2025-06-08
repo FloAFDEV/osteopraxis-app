@@ -513,7 +513,7 @@ export function MedicalInfoTab({
 	}
 
 	return (
-		<div className="space-y-6 mt-6">
+		<div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 			{lastAppointment && (
 				<Card className="border-blue-100 dark:border-slate-900/50 ">
 					<CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-t-lg">
