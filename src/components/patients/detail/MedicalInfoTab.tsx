@@ -52,12 +52,31 @@ export function MedicalInfoTab({
 		}
 	}, [patient.birthDate]);
 
+	// Fonction helper pour déterminer l'importance médicale
+	const isCriticalCondition = (value: string | null | undefined) => {
+		if (!value) return false;
+		const criticalKeywords = ['allergie', 'urgence', 'critique', 'grave', 'sévère'];
+		return criticalKeywords.some(keyword => 
+			value.toLowerCase().includes(keyword)
+		);
+	};
+
+	const isImportantCondition = (value: string | null | undefined) => {
+		if (!value) return false;
+		const importantKeywords = ['traitement', 'médicament', 'suivi', 'chronique', 'antécédent'];
+		return importantKeywords.some(keyword => 
+			value.toLowerCase().includes(keyword)
+		);
+	};
+
 	const medicalSections = [
 		{
 			title: "Informations médicales générales",
 			icon: Stethoscope,
 			priority: "high" as const,
+			category: "general" as const,
 			defaultOpen: true,
+			sectionId: "informations-medicales-generales",
 			items: [
 				{
 					label: "Médecin généraliste",
@@ -67,32 +86,39 @@ export function MedicalInfoTab({
 				{
 					label: "Traitement actuel",
 					value: patient.currentTreatment,
+					isCritical: isCriticalCondition(patient.currentTreatment),
 					isImportant: !!patient.currentTreatment
 				},
 				{
 					label: "Allergies",
 					value: patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null,
+					isCritical: !!(patient.allergies && patient.allergies !== "NULL"),
 					isImportant: !!(patient.allergies && patient.allergies !== "NULL")
 				},
 				{
 					label: "Antécédents médicaux familiaux",
-					value: patient.familyStatus
+					value: patient.familyStatus,
+					isImportant: isImportantCondition(patient.familyStatus)
 				},
 				{
 					label: "Chirurgie",
-					value: patient.surgicalHistory
+					value: patient.surgicalHistory,
+					isImportant: isImportantCondition(patient.surgicalHistory)
 				},
 				{
 					label: "Fractures",
-					value: patient.fracture_history
+					value: patient.fracture_history,
+					isImportant: !!patient.fracture_history
 				},
 				{
 					label: "Traumatismes",
-					value: patient.traumaHistory
+					value: patient.traumaHistory,
+					isImportant: !!patient.traumaHistory
 				},
 				{
 					label: "Rhumatologie",
-					value: patient.rheumatologicalHistory
+					value: patient.rheumatologicalHistory,
+					isImportant: isImportantCondition(patient.rheumatologicalHistory)
 				},
 			]
 		},
@@ -100,6 +126,8 @@ export function MedicalInfoTab({
 			title: "Activité physique / Sommeil",
 			icon: Dumbbell,
 			priority: "medium" as const,
+			category: "lifestyle" as const,
+			sectionId: "activite-physique-sommeil",
 			items: [
 				{
 					label: "Activité physique",
@@ -111,7 +139,9 @@ export function MedicalInfoTab({
 				},
 				{
 					label: "Qualité du sommeil",
-					value: patient.sleep_quality
+					value: patient.sleep_quality,
+					isImportant: patient.sleep_quality?.toLowerCase().includes('mauvais') || 
+								patient.sleep_quality?.toLowerCase().includes('trouble')
 				},
 			]
 		},
@@ -119,6 +149,8 @@ export function MedicalInfoTab({
 			title: "Ophtalmologie / Dentaire",
 			icon: Eye,
 			priority: "low" as const,
+			category: "sensory" as const,
+			sectionId: "ophtalmologie-dentaire",
 			items: [
 				{
 					label: "Correction de la vue",
@@ -130,7 +162,9 @@ export function MedicalInfoTab({
 				},
 				{
 					label: "Santé dentaire",
-					value: patient.dental_health
+					value: patient.dental_health,
+					isImportant: patient.dental_health?.toLowerCase().includes('problème') ||
+								patient.dental_health?.toLowerCase().includes('douleur')
 				},
 			]
 		},
@@ -138,10 +172,13 @@ export function MedicalInfoTab({
 			title: "ORL",
 			icon: Ear,
 			priority: "medium" as const,
+			category: "sensory" as const,
+			sectionId: "orl",
 			items: [
 				{
 					label: "Problèmes ORL",
 					value: patient.entProblems,
+					isCritical: isCriticalCondition(patient.entProblems),
 					isImportant: !!patient.entProblems
 				},
 				{
@@ -150,7 +187,8 @@ export function MedicalInfoTab({
 				},
 				{
 					label: "Suivi ORL",
-					value: patient.ent_followup
+					value: patient.ent_followup,
+					isImportant: !!patient.ent_followup
 				},
 			]
 		},
@@ -158,15 +196,20 @@ export function MedicalInfoTab({
 			title: "Digestif",
 			icon: Soup,
 			priority: "medium" as const,
+			category: "digestive" as const,
+			sectionId: "digestif",
 			items: [
 				{
 					label: "Problèmes digestifs",
 					value: patient.digestiveProblems,
+					isCritical: isCriticalCondition(patient.digestiveProblems),
 					isImportant: !!patient.digestiveProblems
 				},
 				{
 					label: "Transit intestinal",
-					value: patient.intestinal_transit
+					value: patient.intestinal_transit,
+					isImportant: patient.intestinal_transit?.toLowerCase().includes('problème') ||
+								patient.intestinal_transit?.toLowerCase().includes('trouble')
 				},
 				{
 					label: "Médecin digestif",
@@ -178,14 +221,18 @@ export function MedicalInfoTab({
 			title: "Anamnèse complémentaire",
 			icon: FilePlus2,
 			priority: "low" as const,
+			category: "additional" as const,
+			sectionId: "anamnese-complementaire",
 			items: [
 				{
 					label: "Examens complémentaires",
-					value: patient.complementaryExams
+					value: patient.complementaryExams,
+					isImportant: !!patient.complementaryExams
 				},
 				{
 					label: "Symptômes généraux",
-					value: patient.generalSymptoms
+					value: patient.generalSymptoms,
+					isImportant: !!patient.generalSymptoms
 				},
 			]
 		}
@@ -197,6 +244,8 @@ export function MedicalInfoTab({
 			title: "Gynécologique",
 			icon: Heart,
 			priority: "medium" as const,
+			category: "reproductive" as const,
+			sectionId: "gynecologique",
 			items: [
 				{
 					label: "Contraception",
@@ -204,7 +253,8 @@ export function MedicalInfoTab({
 				},
 				{
 					label: "Antécédents gynécologiques",
-					value: patient.gynecological_history
+					value: patient.gynecological_history,
+					isImportant: isImportantCondition(patient.gynecological_history)
 				},
 			]
 		});
@@ -214,10 +264,13 @@ export function MedicalInfoTab({
 				title: "Autres commentaires",
 				icon: StickyNote,
 				priority: "low" as const,
+				category: "additional" as const,
+				sectionId: "autres-commentaires-adulte",
 				items: [
 					{
 						label: "Notes supplémentaires",
-						value: patient.other_comments_adult
+						value: patient.other_comments_adult,
+						isImportant: !!patient.other_comments_adult
 					},
 				]
 			});
@@ -231,23 +284,31 @@ export function MedicalInfoTab({
 				title: "Informations pédiatriques générales",
 				icon: Baby,
 				priority: "high" as const,
+				category: "pediatric" as const,
 				defaultOpen: true,
+				sectionId: "informations-pediatriques-generales",
 				items: [
 					{
 						label: "Grossesse",
-						value: patient.pregnancyHistory
+						value: patient.pregnancyHistory,
+						isImportant: isImportantCondition(patient.pregnancyHistory)
 					},
 					{
 						label: "Naissance",
-						value: patient.birthDetails
+						value: patient.birthDetails,
+						isImportant: isImportantCondition(patient.birthDetails)
 					},
 					{
 						label: "Score APGAR",
-						value: patient.apgar_score
+						value: patient.apgar_score,
+						isImportant: patient.apgar_score ? parseInt(patient.apgar_score) < 7 : false
 					},
 					{
 						label: "Poids à la naissance",
-						value: patient.weight_at_birth ? `${patient.weight_at_birth} g` : null
+						value: patient.weight_at_birth ? `${patient.weight_at_birth} g` : null,
+						isImportant: patient.weight_at_birth ? (
+							parseInt(patient.weight_at_birth) < 2500 || parseInt(patient.weight_at_birth) > 4000
+						) : false
 					},
 					{
 						label: "Taille à la naissance",
@@ -263,30 +324,44 @@ export function MedicalInfoTab({
 				title: "Développement et suivi",
 				icon: Activity,
 				priority: "medium" as const,
+				category: "pediatric" as const,
+				sectionId: "developpement-et-suivi",
 				items: [
 					{
 						label: "Développement moteur",
-						value: patient.developmentMilestones
+						value: patient.developmentMilestones,
+						isImportant: patient.developmentMilestones?.toLowerCase().includes('retard') ||
+									patient.developmentMilestones?.toLowerCase().includes('problème')
 					},
 					{
 						label: "Motricité fine",
-						value: patient.fine_motor_skills
+						value: patient.fine_motor_skills,
+						isImportant: patient.fine_motor_skills?.toLowerCase().includes('difficile') ||
+									patient.fine_motor_skills?.toLowerCase().includes('retard')
 					},
 					{
 						label: "Motricité globale",
-						value: patient.gross_motor_skills
+						value: patient.gross_motor_skills,
+						isImportant: patient.gross_motor_skills?.toLowerCase().includes('difficile') ||
+									patient.gross_motor_skills?.toLowerCase().includes('retard')
 					},
 					{
 						label: "Sommeil",
-						value: patient.sleepingPattern
+						value: patient.sleepingPattern,
+						isImportant: patient.sleepingPattern?.toLowerCase().includes('trouble') ||
+									patient.sleepingPattern?.toLowerCase().includes('difficile')
 					},
 					{
 						label: "Alimentation",
-						value: patient.feeding
+						value: patient.feeding,
+						isImportant: patient.feeding?.toLowerCase().includes('problème') ||
+									patient.feeding?.toLowerCase().includes('difficile')
 					},
 					{
 						label: "Comportement",
-						value: patient.behavior
+						value: patient.behavior,
+						isImportant: patient.behavior?.toLowerCase().includes('problème') ||
+									patient.behavior?.toLowerCase().includes('difficile')
 					},
 				]
 			},
@@ -294,6 +369,8 @@ export function MedicalInfoTab({
 				title: "Environnement et suivi",
 				icon: Home,
 				priority: "low" as const,
+				category: "pediatric" as const,
+				sectionId: "environnement-et-suivi",
 				items: [
 					{
 						label: "Mode de garde",
@@ -309,7 +386,8 @@ export function MedicalInfoTab({
 					},
 					{
 						label: "Suivis paramédicaux",
-						value: patient.paramedical_followup
+						value: patient.paramedical_followup,
+						isImportant: !!patient.paramedical_followup
 					},
 					{
 						label: "Contexte de garde",
@@ -324,10 +402,13 @@ export function MedicalInfoTab({
 				title: "Autres commentaires",
 				icon: StickyNote,
 				priority: "low" as const,
+				category: "additional" as const,
+				sectionId: "autres-commentaires-enfant",
 				items: [
 					{
 						label: "Notes supplémentaires",
-						value: patient.other_comments_child
+						value: patient.other_comments_child,
+						isImportant: !!patient.other_comments_child
 					},
 				]
 			});

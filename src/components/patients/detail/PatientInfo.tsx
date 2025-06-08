@@ -5,12 +5,15 @@ import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
 import { Baby, Mail, MapPin, Phone, Activity, Ruler, Weight, Briefcase, AlertTriangle } from "lucide-react";
 import { InfoBubble } from "./InfoBubble";
+import { useSectionNavigation } from "@/hooks/useSectionNavigation";
 
 interface PatientInfoProps {
 	patient: Patient;
 }
 
 export function PatientInfo({ patient }: PatientInfoProps) {
+	const { navigateToSection } = useSectionNavigation();
+	
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 
@@ -47,12 +50,20 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		return { category: "Obésité", variant: "destructive" as const };
 	};
 
+	const handleCurrentTreatmentClick = () => {
+		navigateToSection('informations-medicales-generales');
+	};
+
+	const handleAllergiesClick = () => {
+		navigateToSection('informations-medicales-generales');
+	};
+
 	return (
 		<Card className="h-fit">
-			<CardContent className="p-3 md:p-4">
+			<CardContent className="p-3 md:p-4 lg:p-5">
 				{/* En-tête patient */}
 				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
-					<Avatar className="h-10 w-10 md:h-12 md:w-12 flex-shrink-0">
+					<Avatar className="h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 flex-shrink-0">
 						<AvatarFallback
 							className={`${getAvatarBg(patient.gender)} ${getAvatarTextColor(patient.gender)} flex items-center justify-center text-xs md:text-sm font-bold`}
 						>
@@ -60,7 +71,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 						</AvatarFallback>
 					</Avatar>
 					<div className="flex-1 min-w-0">
-						<CardTitle className="text-base md:text-lg font-bold truncate">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-bold truncate">
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
 						<p className="text-xs md:text-sm text-muted-foreground">
@@ -77,7 +88,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				</div>
 
 				{/* Informations prioritaires en bulles - responsives */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3 md:mb-4">
+				<div className="grid grid-cols-1 gap-2 mb-3 md:mb-4">
 					{patient.currentTreatment && (
 						<InfoBubble
 							icon={Activity}
@@ -85,6 +96,8 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							value={patient.currentTreatment}
 							variant="warning"
 							size="sm"
+							onClick={handleCurrentTreatmentClick}
+							showTooltip={true}
 						/>
 					)}
 					{patient.allergies && patient.allergies !== "NULL" && (
@@ -94,6 +107,8 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							value={patient.allergies}
 							variant="destructive"
 							size="sm"
+							onClick={handleAllergiesClick}
+							showTooltip={true}
 						/>
 					)}
 					{patient.bmi && (

@@ -1,5 +1,6 @@
 
 import { Badge } from "@/components/ui/badge";
+import { CustomTooltip } from "@/components/ui/custom-tooltip";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
@@ -9,6 +10,8 @@ interface InfoBubbleProps {
 	value: string | null | undefined;
 	variant?: "default" | "warning" | "success" | "destructive";
 	size?: "sm" | "md" | "lg";
+	onClick?: () => void;
+	showTooltip?: boolean;
 }
 
 export function InfoBubble({ 
@@ -16,7 +19,9 @@ export function InfoBubble({
 	label, 
 	value, 
 	variant = "default",
-	size = "md" 
+	size = "md",
+	onClick,
+	showTooltip = false
 }: InfoBubbleProps) {
 	if (!value) return null;
 
@@ -33,11 +38,12 @@ export function InfoBubble({
 		destructive: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800"
 	};
 
-	return (
+	const bubbleContent = (
 		<div className={cn(
-			"flex items-center gap-2 rounded-lg border",
+			"flex items-center gap-2 rounded-lg border transition-all duration-200",
 			sizeClasses[size],
-			variantClasses[variant]
+			variantClasses[variant],
+			onClick ? "cursor-pointer hover:shadow-md hover:scale-105" : "",
 		)}>
 			<Icon className="h-4 w-4 flex-shrink-0" />
 			<div className="flex flex-col min-w-0">
@@ -46,4 +52,25 @@ export function InfoBubble({
 			</div>
 		</div>
 	);
+
+	const interactiveBubble = onClick ? (
+		<div onClick={onClick} role="button" tabIndex={0} onKeyDown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				onClick();
+			}
+		}}>
+			{bubbleContent}
+		</div>
+	) : bubbleContent;
+
+	if (showTooltip && value && value.length > 30) {
+		return (
+			<CustomTooltip content={value} side="top">
+				{interactiveBubble}
+			</CustomTooltip>
+		);
+	}
+
+	return interactiveBubble;
 }
