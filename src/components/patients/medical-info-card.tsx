@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -13,7 +14,7 @@ interface MedicalInfoCardProps {
 
 export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 	return (
-		<Card>
+		<Card className="max-h-80 overflow-y-auto">
 			<CardHeader>
 				<CardTitle className="text-lg flex items-center gap-2">
   {icon}
@@ -21,7 +22,7 @@ export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 </CardTitle>
 			</CardHeader>
 			<CardContent className="px-6 pb-6 pt-0">
-				<dl className="space-y-4">
+				<dl className="space-y-3">
 					{items.map(
 						({ label, value, showSeparatorAfter }, index) => (
 							<div key={index}>
@@ -29,12 +30,12 @@ export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 									<dt className="text-sm font-medium text-muted-foreground">
 										{label}
 									</dt>
-									<dd className="mt-1">
+									<dd className="mt-1 text-sm">
 										{value || "Non spécifié"}
 									</dd>
 								</div>
 								{showSeparatorAfter && (
-									<Separator className="my-4" />
+									<Separator className="my-3" />
 								)}
 							</div>
 						)
