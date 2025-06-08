@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -14,7 +13,7 @@ interface MedicalInfoCardProps {
 
 export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 	return (
-		<Card className="h-fit">
+		<Card className="w-auto max-w-[400px] h-fit">
 			<CardHeader className="pb-2 md:pb-3">
 				<CardTitle className="text-base md:text-lg flex items-center gap-2">
 					{icon}
