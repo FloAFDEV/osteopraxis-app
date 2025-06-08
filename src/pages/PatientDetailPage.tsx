@@ -263,7 +263,7 @@ const PatientDetailPage = () => {
 				{/* Main content grid - ordre inversé pour avoir les tabs à gauche */}
 				<div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
 					{/* Left column - Tabs (principal content) - plus large */}
-					<div className="xl:col-span-3 order-1 xl:order-2">
+					<div className="xl:col-span-3 order-2 xl:order-2">
 						<Tabs defaultValue="medical-info">
 							<TabsList className="grid w-full grid-cols-2 md:grid-cols-4 text-xs md:text-sm">
 								<TabsTrigger
@@ -356,7 +356,7 @@ const PatientDetailPage = () => {
 					</div>
 
 					{/* Right column - Patient info (sticky avec comportement amélioré) */}
-					<div className="xl:col-span-1 order-2 xl:order-1 space-y-4 md:space-y-6">
+					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6">
 						<PatientInfo patient={patient} />
 
 						<MedicalInfoCard
