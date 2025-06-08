@@ -1,4 +1,5 @@
 
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	Card,
@@ -110,29 +111,29 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 	};
 
 	return (
-		<Card>
+		<Card className="max-h-96 overflow-y-auto">
 			<CardContent
-				className={`p-4 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
+				className={`p-3 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
 			>
-				<div className="flex items-center gap-4 mb-4">
-					<Avatar className="h-12 w-12">
+				<div className="flex items-center gap-3 mb-3">
+					<Avatar className="h-10 w-10">
 						<AvatarFallback
 							className={`${getAvatarBg(
 								patient.gender
 							)} ${getAvatarTextColor(
 								patient.gender
-							)} flex items-center justify-center text-lg font-bold`}
+							)} flex items-center justify-center text-sm font-bold`}
 						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
 					</Avatar>
-					<div>
+					<div className="flex-1 min-w-0">
 						<CardTitle
-							className={`text-xl font-bold ${genderColors.textColor}`}
+							className={`text-lg font-bold ${genderColors.textColor} truncate`}
 						>
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
-						<CardDescription className="text-sm">
+						<CardDescription className="text-xs">
 							{patient.gender ?? "Genre non spécifié"},{" "}
 							{age !== null ? `${age} ans` : "Âge non spécifié"}
 						</CardDescription>
@@ -145,17 +146,17 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 				</div>
 
-				<div className="space-y-1.5 text-sm text-muted-foreground">
+				<div className="space-y-1 text-xs text-muted-foreground">
 					{/* Adresse */}
 					<div className="flex items-center gap-2">
-						<MapPin className="h-3.5 w-3.5" />
+						<MapPin className="h-3 w-3 flex-shrink-0" />
 						<span className="truncate">
 							{patient.address || "Adresse non renseignée"}
 						</span>
 					</div>
 					{/* Email */}
 					<div className="flex items-center gap-2">
-						<Mail className="h-3.5 w-3.5" />
+						<Mail className="h-3 w-3 flex-shrink-0" />
 						<a
 							href={`mailto:${patient.email}`}
 							className="hover:underline truncate"
@@ -165,24 +166,24 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 					{/* Téléphone */}
 					<div className="flex items-center gap-2">
-						<Phone className="h-3.5 w-3.5" />
-						<span>
+						<Phone className="h-3 w-3 flex-shrink-0" />
+						<span className="truncate">
 							{patient.phone || "Téléphone non renseigné"}
 						</span>
 					</div>
 					{/* Taille et poids - en une ligne compacte */}
 					{(patient.height || patient.weight) && (
-						<div className="flex items-center gap-3 text-xs">
+						<div className="flex items-center gap-2 text-xs">
 							{patient.height && (
 								<div className="flex items-center gap-1">
-									<Ruler className="h-3.5 w-3.5" />
-									<span>{patient.height} cm</span>
+									<Ruler className="h-3 w-3" />
+									<span>{patient.height}cm</span>
 								</div>
 							)}
 							{patient.weight && (
 								<div className="flex items-center gap-1">
-									<Weight className="h-3.5 w-3.5" />
-									<span>{patient.weight} kg</span>
+									<Weight className="h-3 w-3" />
+									<span>{patient.weight}kg</span>
 								</div>
 							)}
 						</div>
@@ -191,7 +192,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					{bmiInfo()}
 					{/* Profession */}
 					<div className="flex items-center gap-2">
-						<Briefcase className="h-3.5 w-3.5" />
+						<Briefcase className="h-3 w-3 flex-shrink-0" />
 						<span className="truncate">
 							{patient.occupation || "Profession non renseignée"}
 						</span>
@@ -201,3 +202,4 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		</Card>
 	);
 }
+
