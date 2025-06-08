@@ -1,4 +1,4 @@
-import { MedicalInfoCard } from "@/components/patients/medical-info-card";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { differenceInYears, format } from "date-fns";
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
+import { MedicalAccordion } from "./MedicalAccordion";
 
 interface MedicalInfoTabProps {
 	patient: Patient;
@@ -34,8 +35,6 @@ export function MedicalInfoTab({
 	patient,
 	pastAppointments,
 }: MedicalInfoTabProps) {
-	const [selectedStatus, setSelectedStatus] =
-		useState<AppointmentStatus>("COMPLETED");
 	const [isChild, setIsChild] = useState<boolean>(false);
 
 	const lastAppointment =
@@ -52,6 +51,288 @@ export function MedicalInfoTab({
 			setIsChild(age < 17);
 		}
 	}, [patient.birthDate]);
+
+	const medicalSections = [
+		{
+			title: "Informations médicales générales",
+			icon: Stethoscope,
+			priority: "high" as const,
+			defaultOpen: true,
+			items: [
+				{
+					label: "Médecin généraliste",
+					value: patient.generalPractitioner,
+					isImportant: !!patient.generalPractitioner
+				},
+				{
+					label: "Traitement actuel",
+					value: patient.currentTreatment,
+					isImportant: !!patient.currentTreatment
+				},
+				{
+					label: "Allergies",
+					value: patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null,
+					isImportant: !!(patient.allergies && patient.allergies !== "NULL")
+				},
+				{
+					label: "Antécédents médicaux familiaux",
+					value: patient.familyStatus
+				},
+				{
+					label: "Chirurgie",
+					value: patient.surgicalHistory
+				},
+				{
+					label: "Fractures",
+					value: patient.fracture_history
+				},
+				{
+					label: "Traumatismes",
+					value: patient.traumaHistory
+				},
+				{
+					label: "Rhumatologie",
+					value: patient.rheumatologicalHistory
+				},
+			]
+		},
+		{
+			title: "Activité physique / Sommeil",
+			icon: Dumbbell,
+			priority: "medium" as const,
+			items: [
+				{
+					label: "Activité physique",
+					value: patient.physicalActivity
+				},
+				{
+					label: "Fréquence sportive",
+					value: patient.sport_frequency
+				},
+				{
+					label: "Qualité du sommeil",
+					value: patient.sleep_quality
+				},
+			]
+		},
+		{
+			title: "Ophtalmologie / Dentaire",
+			icon: Eye,
+			priority: "low" as const,
+			items: [
+				{
+					label: "Correction de la vue",
+					value: patient.hasVisionCorrection ? "Oui" : "Non"
+				},
+				{
+					label: "Ophtalmologue",
+					value: patient.ophtalmologistName
+				},
+				{
+					label: "Santé dentaire",
+					value: patient.dental_health
+				},
+			]
+		},
+		{
+			title: "ORL",
+			icon: Ear,
+			priority: "medium" as const,
+			items: [
+				{
+					label: "Problèmes ORL",
+					value: patient.entProblems,
+					isImportant: !!patient.entProblems
+				},
+				{
+					label: "Médecin ORL",
+					value: patient.entDoctorName
+				},
+				{
+					label: "Suivi ORL",
+					value: patient.ent_followup
+				},
+			]
+		},
+		{
+			title: "Digestif",
+			icon: Soup,
+			priority: "medium" as const,
+			items: [
+				{
+					label: "Problèmes digestifs",
+					value: patient.digestiveProblems,
+					isImportant: !!patient.digestiveProblems
+				},
+				{
+					label: "Transit intestinal",
+					value: patient.intestinal_transit
+				},
+				{
+					label: "Médecin digestif",
+					value: patient.digestiveDoctorName
+				},
+			]
+		},
+		{
+			title: "Anamnèse complémentaire",
+			icon: FilePlus2,
+			priority: "low" as const,
+			items: [
+				{
+					label: "Examens complémentaires",
+					value: patient.complementaryExams
+				},
+				{
+					label: "Symptômes généraux",
+					value: patient.generalSymptoms
+				},
+			]
+		}
+	];
+
+	// Sections spécifiques aux adultes
+	if (!isChild) {
+		medicalSections.push({
+			title: "Gynécologique",
+			icon: Heart,
+			priority: "medium" as const,
+			items: [
+				{
+					label: "Contraception",
+					value: patient.contraception ? String(patient.contraception) : null
+				},
+				{
+					label: "Antécédents gynécologiques",
+					value: patient.gynecological_history
+				},
+			]
+		});
+
+		if (patient.other_comments_adult) {
+			medicalSections.push({
+				title: "Autres commentaires",
+				icon: StickyNote,
+				priority: "low" as const,
+				items: [
+					{
+						label: "Notes supplémentaires",
+						value: patient.other_comments_adult
+					},
+				]
+			});
+		}
+	}
+
+	// Sections spécifiques aux enfants
+	if (isChild) {
+		medicalSections.push(
+			{
+				title: "Informations pédiatriques générales",
+				icon: Baby,
+				priority: "high" as const,
+				defaultOpen: true,
+				items: [
+					{
+						label: "Grossesse",
+						value: patient.pregnancyHistory
+					},
+					{
+						label: "Naissance",
+						value: patient.birthDetails
+					},
+					{
+						label: "Score APGAR",
+						value: patient.apgar_score
+					},
+					{
+						label: "Poids à la naissance",
+						value: patient.weight_at_birth ? `${patient.weight_at_birth} g` : null
+					},
+					{
+						label: "Taille à la naissance",
+						value: patient.height_at_birth ? `${patient.height_at_birth} cm` : null
+					},
+					{
+						label: "Périmètre crânien",
+						value: patient.head_circumference ? `${patient.head_circumference} cm` : null
+					},
+				]
+			},
+			{
+				title: "Développement et suivi",
+				icon: Activity,
+				priority: "medium" as const,
+				items: [
+					{
+						label: "Développement moteur",
+						value: patient.developmentMilestones
+					},
+					{
+						label: "Motricité fine",
+						value: patient.fine_motor_skills
+					},
+					{
+						label: "Motricité globale",
+						value: patient.gross_motor_skills
+					},
+					{
+						label: "Sommeil",
+						value: patient.sleepingPattern
+					},
+					{
+						label: "Alimentation",
+						value: patient.feeding
+					},
+					{
+						label: "Comportement",
+						value: patient.behavior
+					},
+				]
+			},
+			{
+				title: "Environnement et suivi",
+				icon: Home,
+				priority: "low" as const,
+				items: [
+					{
+						label: "Mode de garde",
+						value: patient.childcare_type
+					},
+					{
+						label: "Niveau scolaire",
+						value: patient.school_grade
+					},
+					{
+						label: "Pédiatre",
+						value: patient.pediatrician_name
+					},
+					{
+						label: "Suivis paramédicaux",
+						value: patient.paramedical_followup
+					},
+					{
+						label: "Contexte de garde",
+						value: patient.childCareContext
+					},
+				]
+			}
+		);
+
+		if (patient.other_comments_child) {
+			medicalSections.push({
+				title: "Autres commentaires",
+				icon: StickyNote,
+				priority: "low" as const,
+				items: [
+					{
+						label: "Notes supplémentaires",
+						value: patient.other_comments_child
+					},
+				]
+			});
+		}
+	}
 
 	return (
 		<div className="space-y-6 mt-6">
@@ -93,297 +374,7 @@ export function MedicalInfoTab({
 				</Card>
 			)}
 
-			<MedicalInfoCard
-				title="Informations médicales générales"
-				icon={
-					<Stethoscope className="h-5 w-5 text-primary text-rose-600" />
-				}
-				items={[
-					{
-						label: "Médecin généraliste",
-						value: patient.generalPractitioner || "Non renseigné",
-					},
-					{
-						label: "Traitement actuel",
-						value: patient.currentTreatment || "Aucun",
-					},
-					{
-						label: "Antécédents médicaux familiaux",
-						value: patient.familyStatus || "Non renseigné",
-					},
-					{
-						label: "Chirurgie",
-						value: patient.surgicalHistory || "Aucun antécédent",
-					},
-					{
-						label: "Fractures",
-						value: patient.fracture_history || "Aucun antécédent",
-					},
-					{
-						label: "Traumatismes",
-						value: patient.traumaHistory || "Aucun antécédent",
-					},
-					{
-						label: "Rhumatologie",
-						value:
-							patient.rheumatologicalHistory ||
-							"Aucun antécédent",
-					},
-				]}
-			/>
-
-			<MedicalInfoCard
-				title="Activité physique / Sommeil"
-				icon={<Dumbbell className="h-5 w-5 text-emerald-600" />}
-				items={[
-					{
-						label: "Activité physique",
-						value: patient.physicalActivity || "Non renseigné",
-					},
-					{
-						label: "Fréquence sportive",
-						value: patient.sport_frequency || "Non renseigné",
-					},
-					{
-						label: "Qualité du sommeil",
-						value: patient.sleep_quality || "Non renseigné",
-					},
-				]}
-			/>
-
-			<MedicalInfoCard
-				title="Ophtalmologie / Dentaire"
-				icon={<Eye className="h-5 w-5 text-sky-600" />}
-				items={[
-					{
-						label: "Correction de la vue",
-						value: patient.hasVisionCorrection ? "Oui" : "Non",
-					},
-					{
-						label: "Ophtalmologue",
-						value: patient.ophtalmologistName || "Non renseigné",
-					},
-					{
-						label: "Santé dentaire",
-						value: patient.dental_health || "Non renseigné",
-					},
-				]}
-			/>
-
-			<MedicalInfoCard
-				title="ORL"
-				icon={<Ear className="h-5 w-5 text-indigo-600" />}
-				items={[
-					{
-						label: "Problèmes ORL",
-						value: patient.entProblems || "Aucun",
-					},
-					{
-						label: "Médecin ORL",
-						value: patient.entDoctorName || "Non renseigné",
-					},
-					{
-						label: "Suivi ORL",
-						value: patient.ent_followup || "Non renseigné",
-					},
-				]}
-			/>
-
-			<MedicalInfoCard
-				title="Digestif"
-				icon={<Soup className="h-5 w-5 text-amber-600" />}
-				items={[
-					{
-						label: "Problèmes digestifs",
-						value: patient.digestiveProblems || "Aucun",
-					},
-					{
-						label: "Transit intestinal",
-						value: patient.intestinal_transit || "Non renseigné",
-					},
-					{
-						label: "Médecin digestif",
-						value: patient.digestiveDoctorName || "Non renseigné",
-					},
-				]}
-			/>
-
-			{!isChild && (
-				<MedicalInfoCard
-					title="Gynécologique"
-					icon={<Heart className="h-5 w-5 text-pink-600" />}
-					items={[
-						{
-							label: "Contraception",
-							value: patient.contraception
-								? String(patient.contraception)
-								: "Non renseigné",
-						},
-						{
-							label: "Antécédents gynécologiques",
-							value:
-								patient.gynecological_history ||
-								"Non renseigné",
-						},
-					]}
-				/>
-			)}
-
-			<MedicalInfoCard
-				title="Anamnèse complémentaire"
-				icon={<FilePlus2 className="h-5 w-5 text-lime-600" />}
-				items={[
-					{
-						label: "Examens complémentaires",
-						value: patient.complementaryExams || "Aucun",
-					},
-					{
-						label: "Symptômes généraux",
-						value: patient.generalSymptoms || "Non renseignés",
-					},
-				]}
-			/>
-
-			{!isChild && patient.other_comments_adult && (
-				<MedicalInfoCard
-					title="Autres commentaires"
-					icon={<StickyNote className="h-5 w-5 text-yellow-600" />}
-					items={[
-						{
-							label: "Notes supplémentaires",
-							value: patient.other_comments_adult,
-						},
-					]}
-				/>
-			)}
-
-			{isChild && (
-				<>
-					<MedicalInfoCard
-						title="Informations pédiatriques générales"
-						icon={<Baby className="h-5 w-5 text-lime-600" />}
-						items={[
-							{
-								label: "Grossesse",
-								value:
-									patient.pregnancyHistory || "Non renseigné",
-							},
-							{
-								label: "Naissance",
-								value: patient.birthDetails || "Non renseigné",
-							},
-							{
-								label: "Score APGAR",
-								value: patient.apgar_score || "Non renseigné",
-							},
-							{
-								label: "Poids à la naissance",
-								value: patient.weight_at_birth
-									? `${patient.weight_at_birth} g`
-									: "Non renseigné",
-							},
-							{
-								label: "Taille à la naissance",
-								value: patient.height_at_birth
-									? `${patient.height_at_birth} cm`
-									: "Non renseigné",
-							},
-							{
-								label: "Périmètre crânien",
-								value: patient.head_circumference
-									? `${patient.head_circumference} cm`
-									: "Non renseigné",
-							},
-						]}
-					/>
-
-					<MedicalInfoCard
-						title="Développement et suivi"
-						icon={<Activity className="h-5 w-5 text-cyan-600" />}
-						items={[
-							{
-								label: "Développement moteur",
-								value:
-									patient.developmentMilestones ||
-									"Non renseigné",
-							},
-							{
-								label: "Motricité fine",
-								value:
-									patient.fine_motor_skills ||
-									"Non renseigné",
-							},
-							{
-								label: "Motricité globale",
-								value:
-									patient.gross_motor_skills ||
-									"Non renseigné",
-							},
-							{
-								label: "Sommeil",
-								value:
-									patient.sleepingPattern || "Non renseigné",
-							},
-							{
-								label: "Alimentation",
-								value: patient.feeding || "Non renseigné",
-							},
-							{
-								label: "Comportement",
-								value: patient.behavior || "Non renseigné",
-							},
-						]}
-					/>
-
-					<MedicalInfoCard
-						title="Environnement et suivi"
-						icon={<Home className="h-5 w-5 text-violet-600" />}
-						items={[
-							{
-								label: "Mode de garde",
-								value:
-									patient.childcare_type || "Non renseigné",
-							},
-							{
-								label: "Niveau scolaire",
-								value: patient.school_grade || "Non renseigné",
-							},
-							{
-								label: "Pédiatre",
-								value:
-									patient.pediatrician_name ||
-									"Non renseigné",
-							},
-							{
-								label: "Suivis paramédicaux",
-								value:
-									patient.paramedical_followup ||
-									"Non renseigné",
-							},
-							{
-								label: "Contexte de garde",
-								value:
-									patient.childCareContext || "Non renseigné",
-							},
-						]}
-					/>
-
-					{patient.other_comments_child && (
-						<MedicalInfoCard
-							title="Autres commentaires"
-							icon={
-								<StickyNote className="h-5 w-5 text-yellow-600" />
-							}
-							items={[
-								{
-									label: "Notes supplémentaires",
-									value: patient.other_comments_child,
-								},
-							]}
-						/>
-					)}
-				</>
-			)}
+			<MedicalAccordion sections={medicalSections} />
 		</div>
 	);
 }

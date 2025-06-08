@@ -1,22 +1,10 @@
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
-import {
-	Baby,
-	Mail,
-	MapPin,
-	Phone,
-	Activity,
-	Ruler,
-	Weight,
-	Briefcase,
-} from "lucide-react";
+import { Baby, Mail, MapPin, Phone, Activity, Ruler, Weight, Briefcase, AlertTriangle } from "lucide-react";
+import { InfoBubble } from "./InfoBubble";
 
 interface PatientInfoProps {
 	patient: Patient;
@@ -25,33 +13,6 @@ interface PatientInfoProps {
 export function PatientInfo({ patient }: PatientInfoProps) {
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
-
-	const genderColors = {
-		lightBg:
-			patient?.gender === "Homme"
-				? "bg-blue-100"
-				: patient?.gender === "Femme"
-				? "bg-pink-100"
-				: "bg-gray-100",
-		darkBg:
-			patient?.gender === "Homme"
-				? "dark:bg-blue-950"
-				: patient?.gender === "Femme"
-				? "dark:bg-fuchsia-950"
-				: "dark:bg-gray-800",
-		textColor:
-			patient?.gender === "Homme"
-				? "text-blue-600"
-				: patient?.gender === "Femme"
-				? "text-pink-600"
-				: "text-gray-600",
-		avatarBg:
-			patient?.gender === "Homme"
-				? "bg-blue-200"
-				: patient?.gender === "Femme"
-				? "bg-pink-200"
-				: "bg-gray-200",
-	};
 
 	function getAvatarBg(gender?: string) {
 		switch (gender) {
@@ -79,62 +40,33 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
 
-	const bmiInfo = () => {
-		if (!patient.bmi) return null;
-		let category = "";
-		let color = "text-gray-500";
-
-		if (patient.bmi < 18.5) {
-			category = "Insuffisance pondérale";
-			color = "text-blue-500";
-		} else if (patient.bmi < 25) {
-			category = "Corpulence normale";
-			color = "text-green-600";
-		} else if (patient.bmi < 30) {
-			category = "Surpoids";
-			color = "text-yellow-500";
-		} else {
-			category = "Obésité";
-			color = "text-red-500";
-		}
-
-		return (
-			<div className="flex items-center gap-2 text-sm">
-				<Activity className="h-4 w-4 text-muted-foreground" />
-				<span className="font-medium">IMC:</span>
-				<span className={`${color} font-semibold`}>{patient.bmi}</span>
-				<span className="text-muted-foreground">({category})</span>
-			</div>
-		);
+	const getBmiCategory = (bmi: number) => {
+		if (bmi < 18.5) return { category: "Insuffisance pondérale", variant: "warning" as const };
+		if (bmi < 25) return { category: "Normal", variant: "success" as const };
+		if (bmi < 30) return { category: "Surpoids", variant: "warning" as const };
+		return { category: "Obésité", variant: "destructive" as const };
 	};
 
 	return (
-		<Card className="max-h-60 overflow-y-auto">
-			<CardContent
-				className={`p-3 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
-			>
-				<div className="flex items-center gap-3 mb-3">
-					<Avatar className="h-10 w-10">
+		<Card>
+			<CardContent className="p-4">
+				{/* En-tête patient */}
+				<div className="flex items-center gap-3 mb-4">
+					<Avatar className="h-12 w-12">
 						<AvatarFallback
-							className={`${getAvatarBg(
-								patient.gender
-							)} ${getAvatarTextColor(
-								patient.gender
-							)} flex items-center justify-center text-sm font-bold`}
+							className={`${getAvatarBg(patient.gender)} ${getAvatarTextColor(patient.gender)} flex items-center justify-center text-sm font-bold`}
 						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
 					</Avatar>
 					<div className="flex-1 min-w-0">
-						<CardTitle
-							className={`text-lg font-bold ${genderColors.textColor} truncate`}
-						>
+						<CardTitle className="text-lg font-bold truncate">
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
-						<CardDescription className="text-xs">
+						<p className="text-sm text-muted-foreground">
 							{patient.gender ?? "Genre non spécifié"},{" "}
 							{age !== null ? `${age} ans` : "Âge non spécifié"}
-						</CardDescription>
+						</p>
 						{age !== null && age < 12 && (
 							<div className="text-amber-600 text-xs flex items-center mt-1">
 								<Baby className="h-3 w-3 mr-1" />
@@ -144,34 +76,65 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 				</div>
 
-				<div className="space-y-1 text-sm text-muted-foreground">
-					{/* Adresse */}
+				{/* Informations prioritaires en bulles */}
+				<div className="grid grid-cols-2 gap-2 mb-4">
+					{patient.currentTreatment && (
+						<InfoBubble
+							icon={Activity}
+							label="Traitement actuel"
+							value={patient.currentTreatment}
+							variant="warning"
+							size="sm"
+						/>
+					)}
+					{patient.allergies && patient.allergies !== "NULL" && (
+						<InfoBubble
+							icon={AlertTriangle}
+							label="Allergies"
+							value={patient.allergies}
+							variant="destructive"
+							size="sm"
+						/>
+					)}
+					{patient.bmi && (
+						<InfoBubble
+							icon={Activity}
+							label="IMC"
+							value={`${patient.bmi} (${getBmiCategory(patient.bmi).category})`}
+							variant={getBmiCategory(patient.bmi).variant}
+							size="sm"
+						/>
+					)}
+				</div>
+
+				{/* Informations de contact compactes */}
+				<div className="space-y-2 text-sm text-muted-foreground">
 					<div className="flex items-center gap-2">
 						<MapPin className="h-3 w-3 flex-shrink-0" />
 						<span className="truncate">
 							{patient.address || "Adresse non renseignée"}
 						</span>
 					</div>
-					{/* Email */}
 					<div className="flex items-center gap-2">
 						<Mail className="h-3 w-3 flex-shrink-0" />
-						<a
-							href={`mailto:${patient.email}`}
-							className="hover:underline truncate"
-						>
+						<span className="truncate">
 							{patient.email || "Email non renseigné"}
-						</a>
+						</span>
 					</div>
-					{/* Téléphone */}
 					<div className="flex items-center gap-2">
 						<Phone className="h-3 w-3 flex-shrink-0" />
 						<span className="truncate">
 							{patient.phone || "Téléphone non renseigné"}
 						</span>
 					</div>
-					{/* Taille et poids - en une ligne compacte */}
+					<div className="flex items-center gap-2">
+						<Briefcase className="h-3 w-3 flex-shrink-0" />
+						<span className="truncate">
+							{patient.occupation || "Profession non renseignée"}
+						</span>
+					</div>
 					{(patient.height || patient.weight) && (
-						<div className="flex items-center gap-2 text-sm">
+						<div className="flex items-center gap-4 text-sm">
 							{patient.height && (
 								<div className="flex items-center gap-1">
 									<Ruler className="h-3 w-3" />
@@ -186,15 +149,6 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							)}
 						</div>
 					)}
-					{/* IMC */}
-					{bmiInfo()}
-					{/* Profession */}
-					<div className="flex items-center gap-2">
-						<Briefcase className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate">
-							{patient.occupation || "Profession non renseignée"}
-						</span>
-					</div>
 				</div>
 			</CardContent>
 		</Card>

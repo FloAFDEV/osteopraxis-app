@@ -261,9 +261,9 @@ const PatientDetailPage = () => {
 				</div>
 
 				{/* Main content grid */}
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
 					{/* Left column - Patient info */}
-					<div className="space-y-6">
+					<div className="xl:col-span-2 space-y-6">
 						<PatientInfo patient={patient} />
 
 						<MedicalInfoCard
@@ -330,7 +330,7 @@ const PatientDetailPage = () => {
 						/>
 					</div>
 
-					<div className="lg:col-span-2">
+					<div className="xl:col-span-3">
 						<Tabs defaultValue="medical-info">
 							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="medical-info">
