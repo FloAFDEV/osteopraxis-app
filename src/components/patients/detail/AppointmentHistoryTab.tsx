@@ -14,13 +14,14 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Appointment, AppointmentStatus } from "@/types";
+import { Appointment, AppointmentStatus, Invoice } from "@/types";
 import { formatAppointmentTime } from "@/utils/date-utils";
 import { format } from "date-fns";
-import { Activity, Edit, MessageSquare, FileText } from "lucide-react";
+import { Activity, Edit, MessageSquare, FileText, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
+import { useInvoiceByAppointment } from "@/hooks/useInvoiceByAppointment";
 
 interface AppointmentHistoryTabProps {
 	appointments: Appointment[];
@@ -30,6 +31,35 @@ interface AppointmentHistoryTabProps {
 	) => Promise<void>;
 	viewMode: "cards" | "table";
 	setViewMode: (mode: "cards" | "table") => void;
+	invoices: Invoice[];
+}
+
+// Composant pour le bouton de facture avec logique améliorée
+function InvoiceButton({ appointment, invoices }: { appointment: Appointment, invoices: Invoice[] }) {
+	const existingInvoice = invoices.find(inv => inv.appointmentId === appointment.id);
+
+	if (appointment.status === "COMPLETED") {
+		if (existingInvoice) {
+			return (
+				<Button variant="outline" size="sm" asChild>
+					<Link to={`/invoices/${existingInvoice.id}`}>
+						<ExternalLink className="mr-1 h-4 w-4" />
+						Voir facture
+					</Link>
+				</Button>
+			);
+		} else {
+			return (
+				<Button variant="outline" size="sm" asChild>
+					<Link to={`/invoices/new?appointmentId=${appointment.id}`}>
+						<FileText className="mr-1 h-4 w-4" />
+						Créer facture
+					</Link>
+				</Button>
+			);
+		}
+	}
+	return null;
 }
 
 export function AppointmentHistoryTab({
@@ -37,6 +67,7 @@ export function AppointmentHistoryTab({
 	onStatusChange,
 	viewMode,
 	setViewMode,
+	invoices,
 }: AppointmentHistoryTabProps) {
 	return (
 		<div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow space-y-4 mt-6">
@@ -115,17 +146,7 @@ export function AppointmentHistoryTab({
 								</div>
 							)}
 							<div className="mt-4 flex justify-end gap-2">
-								{/* Bouton pour créer une facture depuis une séance terminée */}
-								{appointment.status === "COMPLETED" && (
-									<Button variant="outline" size="sm" asChild>
-										<Link
-											to={`/invoices/new?appointmentId=${appointment.id}`}
-										>
-											<FileText className="mr-1 h-4 w-4" />
-											Créer facture
-										</Link>
-									</Button>
-								)}
+								<InvoiceButton appointment={appointment} invoices={invoices} />
 								<Button variant="outline" size="sm" asChild>
 									<Link
 										to={`/appointments/${appointment.id}/edit`}
@@ -147,7 +168,6 @@ export function AppointmentHistoryTab({
 									<TableHead className="w-[100px]">
 										Date
 									</TableHead>
-
 									<TableHead className="w-[120px]">
 										Motif
 									</TableHead>
@@ -171,7 +191,6 @@ export function AppointmentHistoryTab({
 												"dd/MM/yyyy"
 											)}
 										</TableCell>
-
 										<TableCell className="w-[120px]">
 											<div
 												className="truncate max-w-[120px]"
@@ -270,23 +289,7 @@ export function AppointmentHistoryTab({
 										</TableCell>
 										<TableCell className="text-right w-[150px]">
 											<div className="flex gap-1 justify-end">
-												{/* Bouton pour créer une facture depuis une séance terminée */}
-												{appointment.status ===
-													"COMPLETED" && (
-													<Button
-														variant="outline"
-														size="sm"
-														asChild
-														className="h-8"
-													>
-														<Link
-															to={`/invoices/new?appointmentId=${appointment.id}`}
-														>
-															<FileText className="h-3 w-3 mr-1" />
-															Facture
-														</Link>
-													</Button>
-												)}
+												<InvoiceButton appointment={appointment} invoices={invoices} />
 												<Button
 													variant="outline"
 													size="sm"

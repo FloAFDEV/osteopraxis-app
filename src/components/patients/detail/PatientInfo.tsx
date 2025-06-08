@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useSectionNavigation } from "@/hooks/useSectionNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
 import {
@@ -22,6 +23,7 @@ interface PatientInfoProps {
 
 export function PatientInfo({ patient }: PatientInfoProps) {
 	const { navigateToSection } = useSectionNavigation();
+	const { isMobile } = useIsMobile();
 
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
@@ -73,8 +75,18 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		navigateToSection("informations-medicales-generales");
 	};
 
+	// Améliorer le comportement sticky pour les tablettes
+	const getStickyClasses = () => {
+		if (isMobile) {
+			return ""; // Pas de sticky sur mobile
+		}
+		// Sur tablette et desktop, utiliser sticky avec un padding bottom approprié
+		return "sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pb-8";
+	};
+
 	return (
-		<Card className="w-auto max-w-[400px] h-fit">
+		<Card className={`w-auto max-w-[400px] h-fit ${getStickyClasses()}`}>
+			
 			<CardContent className="p-3 md:p-4 lg:p-5">
 				{/* En-tête patient */}
 				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
