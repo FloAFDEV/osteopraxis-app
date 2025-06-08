@@ -28,64 +28,24 @@ interface MedicalAccordionProps {
 }
 
 export function MedicalAccordion({ sections }: MedicalAccordionProps) {
-	const getCategoryColors = (category?: string) => {
+	const getIconColor = (category?: string) => {
 		switch (category) {
 			case "general": 
-				return {
-					bg: "bg-red-50 dark:bg-red-950/20",
-					border: "border-red-200 dark:border-red-800",
-					icon: "text-red-600 dark:text-red-400",
-					accent: "border-l-red-500"
-				};
+				return "text-red-600 dark:text-red-400";
 			case "lifestyle": 
-				return {
-					bg: "bg-green-50 dark:bg-green-950/20",
-					border: "border-green-200 dark:border-green-800",
-					icon: "text-green-600 dark:text-green-400",
-					accent: "border-l-green-500"
-				};
+				return "text-green-600 dark:text-green-400";
 			case "sensory": 
-				return {
-					bg: "bg-purple-50 dark:bg-purple-950/20",
-					border: "border-purple-200 dark:border-purple-800",
-					icon: "text-purple-600 dark:text-purple-400",
-					accent: "border-l-purple-500"
-				};
+				return "text-purple-600 dark:text-purple-400";
 			case "digestive": 
-				return {
-					bg: "bg-orange-50 dark:bg-orange-950/20",
-					border: "border-orange-200 dark:border-orange-800",
-					icon: "text-orange-600 dark:text-orange-400",
-					accent: "border-l-orange-500"
-				};
+				return "text-orange-600 dark:text-orange-400";
 			case "reproductive": 
-				return {
-					bg: "bg-pink-50 dark:bg-pink-950/20",
-					border: "border-pink-200 dark:border-pink-800",
-					icon: "text-pink-600 dark:text-pink-400",
-					accent: "border-l-pink-500"
-				};
+				return "text-pink-600 dark:text-pink-400";
 			case "pediatric": 
-				return {
-					bg: "bg-sky-50 dark:bg-sky-950/20",
-					border: "border-sky-200 dark:border-sky-800",
-					icon: "text-sky-600 dark:text-sky-400",
-					accent: "border-l-sky-500"
-				};
+				return "text-sky-600 dark:text-sky-400";
 			case "additional": 
-				return {
-					bg: "bg-gray-50 dark:bg-gray-950/20",
-					border: "border-gray-200 dark:border-gray-800",
-					icon: "text-gray-600 dark:text-gray-400",
-					accent: "border-l-gray-500"
-				};
+				return "text-gray-600 dark:text-gray-400";
 			default: 
-				return {
-					bg: "bg-blue-50 dark:bg-blue-950/20",
-					border: "border-blue-200 dark:border-blue-800",
-					icon: "text-blue-600 dark:text-blue-400",
-					accent: "border-l-blue-500"
-				};
+				return "text-blue-600 dark:text-blue-400";
 		}
 	};
 
@@ -134,19 +94,19 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 			>
 				{sections.map((section, index) => {
 					const Icon = section.icon;
-					const colors = getCategoryColors(section.category);
+					const iconColor = getIconColor(section.category);
 					const importance = getImportanceLevel(section);
 					
 					return (
 						<AccordionItem 
 							key={`section-${index}`} 
 							value={`section-${index}`}
-							className={`border rounded-lg transition-all duration-200 hover:shadow-sm ${colors.border}`}
+							className="border rounded-lg transition-all duration-200 hover:shadow-sm border-gray-200 dark:border-gray-800"
 							data-section={section.sectionId || section.title.toLowerCase().replace(/\s+/g, '-')}
 						>
-							<AccordionTrigger className={`px-4 py-3 hover:no-underline ${colors.bg} rounded-t-lg border-l-4 ${colors.accent}`}>
+							<AccordionTrigger className="px-4 py-3 hover:no-underline bg-gray-50 dark:bg-gray-950/20 rounded-t-lg">
 								<div className="flex items-center gap-3 text-left w-full">
-									<Icon className={`h-5 w-5 ${colors.icon}`} />
+									<Icon className={`h-5 w-5 ${iconColor}`} />
 									<span className="font-medium flex-1">{section.title}</span>
 									{importance && (
 										<Badge variant={importance.variant} className="ml-auto">
@@ -166,7 +126,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 											<div key={itemIndex} className={isHighPriority ? 
 												`p-3 rounded border-l-4 ${item.isCritical ? 
 													'bg-red-50 dark:bg-red-900/10 border-red-500' : 
-													'bg-amber-50 dark:bg-amber-900/10 border-amber-500'
+													'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-500'
 												}` : ""
 											}>
 												<dt className="text-sm font-medium text-muted-foreground">
