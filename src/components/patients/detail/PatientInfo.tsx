@@ -1,11 +1,20 @@
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { useSectionNavigation } from "@/hooks/useSectionNavigation";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
-import { Baby, Mail, MapPin, Phone, Activity, Ruler, Weight, Briefcase, AlertTriangle } from "lucide-react";
+import {
+	Activity,
+	AlertTriangle,
+	Baby,
+	Briefcase,
+	Mail,
+	MapPin,
+	Phone,
+	Ruler,
+	Weight,
+} from "lucide-react";
 import { InfoBubble } from "./InfoBubble";
-import { useSectionNavigation } from "@/hooks/useSectionNavigation";
 
 interface PatientInfoProps {
 	patient: Patient;
@@ -13,7 +22,7 @@ interface PatientInfoProps {
 
 export function PatientInfo({ patient }: PatientInfoProps) {
 	const { navigateToSection } = useSectionNavigation();
-	
+
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 
@@ -44,28 +53,38 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		: null;
 
 	const getBmiCategory = (bmi: number) => {
-		if (bmi < 18.5) return { category: "Insuffisance pondérale", variant: "warning" as const };
-		if (bmi < 25) return { category: "Normal", variant: "success" as const };
-		if (bmi < 30) return { category: "Surpoids", variant: "warning" as const };
+		if (bmi < 18.5)
+			return {
+				category: "Insuffisance pondérale",
+				variant: "warning" as const,
+			};
+		if (bmi < 25)
+			return { category: "Normal", variant: "success" as const };
+		if (bmi < 30)
+			return { category: "Surpoids", variant: "warning" as const };
 		return { category: "Obésité", variant: "destructive" as const };
 	};
 
 	const handleCurrentTreatmentClick = () => {
-		navigateToSection('informations-medicales-generales');
+		navigateToSection("informations-medicales-generales");
 	};
 
 	const handleAllergiesClick = () => {
-		navigateToSection('informations-medicales-generales');
+		navigateToSection("informations-medicales-generales");
 	};
 
 	return (
-		<Card className="h-fit">
+		<Card className="w-auto max-w-[400px] h-fit">
 			<CardContent className="p-3 md:p-4 lg:p-5">
 				{/* En-tête patient */}
 				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
 					<Avatar className="h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 flex-shrink-0">
 						<AvatarFallback
-							className={`${getAvatarBg(patient.gender)} ${getAvatarTextColor(patient.gender)} flex items-center justify-center text-xs md:text-sm font-bold`}
+							className={`${getAvatarBg(
+								patient.gender
+							)} ${getAvatarTextColor(
+								patient.gender
+							)} flex items-center justify-center text-xs md:text-sm font-bold`}
 						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
@@ -115,7 +134,9 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 						<InfoBubble
 							icon={Activity}
 							label="IMC"
-							value={`${patient.bmi} (${getBmiCategory(patient.bmi).category})`}
+							value={`${patient.bmi} (${
+								getBmiCategory(patient.bmi).category
+							})`}
 							variant={getBmiCategory(patient.bmi).variant}
 							size="sm"
 						/>
