@@ -144,7 +144,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 				</div>
 
-				<div className="space-y-1 text-base text-muted-foreground">
+				<div className="space-y-1 text-sm text-muted-foreground">
 					{/* Adresse */}
 					<div className="flex items-center gap-2">
 						<MapPin className="h-3 w-3 flex-shrink-0" />
@@ -171,7 +171,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 					{/* Taille et poids - en une ligne compacte */}
 					{(patient.height || patient.weight) && (
-						<div className="flex items-center gap-2 text-xs">
+						<div className="flex items-center gap-2 text-sm">
 							{patient.height && (
 								<div className="flex items-center gap-1">
 									<Ruler className="h-3 w-3" />
