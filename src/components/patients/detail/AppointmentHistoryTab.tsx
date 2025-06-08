@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -145,14 +144,20 @@ export function AppointmentHistoryTab({
 						<Table className="w-full">
 							<TableHeader>
 								<TableRow>
-									<TableHead className="w-[100px]">Date</TableHead>
-									<TableHead className="w-[80px]">Heure</TableHead>
-									<TableHead className="w-[120px]">Motif</TableHead>
-									<TableHead className="w-[120px]">Statut</TableHead>
+									<TableHead className="w-[100px]">
+										Date
+									</TableHead>
+
+									<TableHead className="w-[120px]">
+										Motif
+									</TableHead>
+									<TableHead className="w-[120px]">
+										Statut
+									</TableHead>
 									<TableHead className="text-purple-700 dark:text-purple-400 w-[200px] max-w-[200px]">
 										Compte-rendu
 									</TableHead>
-									<TableHead className="text-right w-[150px]">
+									<TableHead className="text-center w-[150px]">
 										Actions
 									</TableHead>
 								</TableRow>
@@ -166,13 +171,12 @@ export function AppointmentHistoryTab({
 												"dd/MM/yyyy"
 											)}
 										</TableCell>
-										<TableCell className="w-[80px]">
-											{formatAppointmentTime(
-												appointment.date
-											)}
-										</TableCell>
+
 										<TableCell className="w-[120px]">
-											<div className="truncate max-w-[120px]" title={appointment.reason}>
+											<div
+												className="truncate max-w-[120px]"
+												title={appointment.reason}
+											>
 												{appointment.reason}
 											</div>
 										</TableCell>
@@ -223,18 +227,37 @@ export function AppointmentHistoryTab({
 															>
 																<MessageSquare className="h-3 w-3 flex-shrink-0" />
 																<span className="truncate text-left">
-																	{appointment.notes.slice(0, 30)}
-																	{appointment.notes.length > 30 ? "..." : ""}
+																	{appointment.notes.slice(
+																		0,
+																		30
+																	)}
+																	{appointment
+																		.notes
+																		.length >
+																	30
+																		? "..."
+																		: ""}
 																</span>
 															</Button>
 														</TooltipTrigger>
-														<TooltipContent side="top" className="max-w-xs">
+														<TooltipContent
+															side="top"
+															className="max-w-xs"
+														>
 															<p className="whitespace-pre-wrap">
 																<span className="font-medium text-purple-700 dark:text-purple-400">
 																	Compte-rendu:{" "}
 																</span>
-																{appointment.notes.slice(0, 100)}
-																{appointment.notes.length > 100 ? "..." : ""}
+																{appointment.notes.slice(
+																	0,
+																	100
+																)}
+																{appointment
+																	.notes
+																	.length >
+																100
+																	? "..."
+																	: ""}
 															</p>
 														</TooltipContent>
 													</Tooltip>
@@ -248,7 +271,8 @@ export function AppointmentHistoryTab({
 										<TableCell className="text-right w-[150px]">
 											<div className="flex gap-1 justify-end">
 												{/* Bouton pour créer une facture depuis une séance terminée */}
-												{appointment.status === "COMPLETED" && (
+												{appointment.status ===
+													"COMPLETED" && (
 													<Button
 														variant="outline"
 														size="sm"
