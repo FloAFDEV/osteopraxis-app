@@ -1,22 +1,31 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	CardFooter,
+} from "@/components/ui/card";
 import StatCard from "@/components/ui/stat-card";
 import { WeeklyTrendCard } from "./weekly-trend-card";
 import { DashboardData } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, TrendingUp, UserPlus, Users, Stethoscope } from "lucide-react";
+import {
+	Calendar,
+	TrendingUp,
+	UserPlus,
+	Users,
+	Stethoscope,
+} from "lucide-react";
 
 interface DashboardStatsProps {
 	data: DashboardData;
 }
 
 export function DashboardStats({ data }: DashboardStatsProps) {
-	// Get current day and year for the appointments card
 	const today = new Date();
 	const formattedToday = format(today, "EEEE d MMMM yyyy", { locale: fr });
 
-	// Display the real next appointment information
 	let nextAppointmentText = "Aucune séance prévue";
 
 	if (
@@ -24,27 +33,33 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 		data.nextAppointment &&
 		data.nextAppointment !== "Aucune séance prévue"
 	) {
-		// Use the actual next appointment data from the API
 		nextAppointmentText = `Prochaine: ${data.nextAppointment}`;
 	}
 
 	if (!data) {
 		return (
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-				{[1, 2, 3, 4, 5, 6].map((item) => (
+				{Array.from({ length: 6 }).map((_, i) => (
 					<Card
-						key={item}
-						className="overflow-hidden shadow-sm border-t-4 border-t-blue-300"
+						key={i}
+						className="overflow-hidden border-t-4 border-t-blue-300 h-full"
 					>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">
 								Chargement...
 							</CardTitle>
 						</CardHeader>
-						<CardContent>
-							<div className="animate-pulse h-6 bg-blue-100 dark:bg-blue-800/30 rounded mb-2"></div>
-							<div className="animate-pulse h-4 w-1/2 bg-blue-100 dark:bg-blue-800/30 rounded"></div>
+						<CardContent className="pt-2">
+							<div className="space-y-2">
+								<div className="animate-pulse h-6 bg-blue-100 dark:bg-blue-800/30 rounded" />
+								<div className="animate-pulse h-4 w-1/2 bg-blue-100 dark:bg-blue-800/30 rounded" />
+							</div>
 						</CardContent>
+						<CardFooter className="mt-auto">
+							<div className="text-xs text-muted-foreground">
+								Chargement des données
+							</div>
+						</CardFooter>
 					</Card>
 				))}
 			</div>
@@ -61,11 +76,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 						? `+${data.thirtyDayGrowthPercentage}% ce mois-ci`
 						: `${data.thirtyDayGrowthPercentage}% ce mois-ci`
 				}
-				color={
-					data.thirtyDayGrowthPercentage > 0
-						? "text-blue-500"
-						: "text-blue-500"
-				}
+				color="text-blue-500"
 				icon={<Users />}
 			/>
 
