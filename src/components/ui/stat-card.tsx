@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -9,7 +8,7 @@ interface StatCardProps {
 	description: string;
 	color?: string; // ex: "text-blue-500"
 	icon?: React.ReactNode;
-	subtitle?: string; // Added subtitle prop
+	subtitle?: string;
 }
 
 const StatCard = ({
@@ -20,14 +19,13 @@ const StatCard = ({
 	icon,
 	subtitle,
 }: StatCardProps) => {
-	// Extract the color name (like "blue-500") from the class (like "text-blue-500")
 	const colorName = color.replace("text-", "");
 
 	return (
 		<Card
 			className={cn(
 				"overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-[2px]",
-				"border-t-4", // Apply fixed border-top width
+				"border-t-4",
 				{
 					"border-green-500": colorName === "green-500",
 					"border-purple-500": colorName === "purple-500",
@@ -55,7 +53,8 @@ const StatCard = ({
 					</div>
 				)}
 			</CardHeader>
-			<CardContent>
+
+			<CardContent className="flex flex-col justify-between h-24 pt-0">
 				<div className="text-2xl font-bold">{value}</div>
 				<p className={cn("text-xs text-muted-foreground", color)}>
 					{description}
