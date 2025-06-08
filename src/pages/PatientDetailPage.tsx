@@ -260,78 +260,10 @@ const PatientDetailPage = () => {
 					</div>
 				</div>
 
-				{/* Main content grid */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-4 md:gap-6">
-					{/* Left column - Patient info */}
-					<div className="lg:col-span-1 xl:col-span-2 space-y-4 md:space-y-6">
-						<PatientInfo patient={patient} />
-
-						<MedicalInfoCard
-							title="Informations personnelles"
-							items={[
-								{
-									label: (
-										<span className="flex items-center gap-2 text-pink-600">
-											<Users className="w-3 h-3 md:w-4 md:h-4 text-pink-500" />
-											Statut marital
-										</span>
-									),
-									value:
-										translateMaritalStatus(
-											patient.maritalStatus
-										) || "Non renseigné",
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-blue-700">
-											<Baby className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
-											Enfants
-										</span>
-									),
-									value: formatChildrenAges(
-										patient.childrenAges || []
-									),
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-green-500">
-											<Hand className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
-											Latéralité
-										</span>
-									),
-									value:
-										translateHandedness(
-											patient.handedness
-										) || "Non renseignée",
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-orange-700">
-											<Cigarette className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
-											Tabagisme
-										</span>
-									),
-									value: getSmokerInfo() || "Non renseigné",
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-purple-700">
-											<Heart className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
-											Contraception
-										</span>
-									),
-									value:
-										translateContraception(
-											patient.contraception
-										) ||
-										"Non concerné(e) / Non renseigné(e)",
-								},
-							]}
-						/>
-					</div>
-
-					{/* Right column - Tabs */}
-					<div className="lg:col-span-1 xl:col-span-3">
+				{/* Main content grid - Modified layout */}
+				<div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+					{/* Left column - Tabs (now takes 3 columns) */}
+					<div className="xl:col-span-3 order-2 xl:order-1">
 						<Tabs defaultValue="medical-info">
 							<TabsList className="grid w-full grid-cols-2 md:grid-cols-4 text-xs md:text-sm">
 								<TabsTrigger value="medical-info" className="px-2 md:px-4">
@@ -398,6 +330,74 @@ const PatientDetailPage = () => {
 								/>
 							</TabsContent>
 						</Tabs>
+					</div>
+
+					{/* Right column - Patient info (now takes 1 column) */}
+					<div className="xl:col-span-1 order-1 xl:order-2 space-y-4 md:space-y-6">
+						<PatientInfo patient={patient} />
+
+						<MedicalInfoCard
+							title="Informations personnelles"
+							items={[
+								{
+									label: (
+										<span className="flex items-center gap-2 text-pink-600">
+											<Users className="w-3 h-3 md:w-4 md:h-4 text-pink-500" />
+											Statut marital
+										</span>
+									),
+									value:
+										translateMaritalStatus(
+											patient.maritalStatus
+										) || "Non renseigné",
+								},
+								{
+									label: (
+										<span className="flex items-center gap-2 text-blue-700">
+											<Baby className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
+											Enfants
+										</span>
+									),
+									value: formatChildrenAges(
+										patient.childrenAges || []
+									),
+								},
+								{
+									label: (
+										<span className="flex items-center gap-2 text-green-500">
+											<Hand className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
+											Latéralité
+										</span>
+									),
+									value:
+										translateHandedness(
+											patient.handedness
+										) || "Non renseignée",
+								},
+								{
+									label: (
+										<span className="flex items-center gap-2 text-orange-700">
+											<Cigarette className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
+											Tabagisme
+										</span>
+									),
+									value: getSmokerInfo() || "Non renseigné",
+								},
+								{
+									label: (
+										<span className="flex items-center gap-2 text-purple-700">
+											<Heart className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
+											Contraception
+										</span>
+									),
+									value:
+										translateContraception(
+											patient.contraception
+										) ||
+										"Non concerné(e) / Non renseigné(e)",
+								},
+							]}
+						/>
 					</div>
 				</div>
 			</div>
