@@ -220,7 +220,7 @@ const PatientDetailPage = () => {
 
 	return (
 		<Layout>
-			<div className="flex flex-col space-y-6 max-w-6xl mx-auto px-4">
+			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
 				{/* Header section */}
 				<PatientHeader patientId={patient.id} />
 
