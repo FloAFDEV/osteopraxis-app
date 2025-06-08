@@ -13,7 +13,7 @@ interface MedicalInfoCardProps {
 
 export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 	return (
-		<Card className="max-h-96 overflow-y-auto">
+		<Card className="max-h-max overflow-y-auto">
 			<CardHeader>
 				<CardTitle className="text-lg flex items-center gap-2">
 					{icon}
