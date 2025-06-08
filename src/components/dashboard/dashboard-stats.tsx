@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatCard from "@/components/ui/stat-card";
+import { WeeklyTrendCard } from "./weekly-trend-card";
 import { DashboardData } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -29,8 +30,8 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 
 	if (!data) {
 		return (
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-				{[1, 2, 3, 4, 5].map((item) => (
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+				{[1, 2, 3, 4, 5, 6].map((item) => (
 					<Card
 						key={item}
 						className="overflow-hidden shadow-sm border-t-4 border-t-blue-300"
@@ -51,7 +52,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 	}
 
 	return (
-		<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+		<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 			<StatCard
 				title="Patients totaux"
 				value={data.totalPatients}
@@ -106,6 +107,8 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 				color="text-amber-500"
 				icon={<TrendingUp />}
 			/>
+
+			<WeeklyTrendCard data={data} />
 		</div>
 	);
 }

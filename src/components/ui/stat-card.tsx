@@ -34,6 +34,7 @@ const StatCard = ({
 					"border-amber-500": colorName === "amber-500",
 					"border-blue-500": colorName === "blue-500",
 					"border-indigo-500": colorName === "indigo-500",
+					"border-orange-500": colorName === "orange-500",
 				}
 			)}
 		>
