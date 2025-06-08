@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	Card,
@@ -111,23 +112,23 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 	return (
 		<Card>
 			<CardContent
-				className={`p-6 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
+				className={`p-4 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
 			>
-				<div className="flex items-center gap-6 mb-6">
-					<Avatar className="h-16 w-16">
+				<div className="flex items-center gap-4 mb-4">
+					<Avatar className="h-12 w-12">
 						<AvatarFallback
 							className={`${getAvatarBg(
 								patient.gender
 							)} ${getAvatarTextColor(
 								patient.gender
-							)} flex items-center justify-center text-xl font-bold`}
+							)} flex items-center justify-center text-lg font-bold`}
 						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
 					</Avatar>
 					<div>
 						<CardTitle
-							className={`text-2xl font-bold ${genderColors.textColor}`}
+							className={`text-xl font-bold ${genderColors.textColor}`}
 						>
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
@@ -136,62 +137,63 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							{age !== null ? `${age} ans` : "Âge non spécifié"}
 						</CardDescription>
 						{age !== null && age < 12 && (
-							<div className="text-amber-600 text-sm flex items-center mt-1">
-								<Baby className="h-4 w-4 mr-1" />
+							<div className="text-amber-600 text-xs flex items-center mt-1">
+								<Baby className="h-3 w-3 mr-1" />
 								Enfant
 							</div>
 						)}
 					</div>
 				</div>
 
-				<div className="space-y-2 text-sm text-muted-foreground">
+				<div className="space-y-1.5 text-sm text-muted-foreground">
 					{/* Adresse */}
 					<div className="flex items-center gap-2">
-						<MapPin className="h-4 w-4" />
-						<span>
+						<MapPin className="h-3.5 w-3.5" />
+						<span className="truncate">
 							{patient.address || "Adresse non renseignée"}
 						</span>
 					</div>
 					{/* Email */}
 					<div className="flex items-center gap-2">
-						<Mail className="h-4 w-4" />
+						<Mail className="h-3.5 w-3.5" />
 						<a
 							href={`mailto:${patient.email}`}
-							className="hover:underline"
+							className="hover:underline truncate"
 						>
 							{patient.email || "Email non renseigné"}
 						</a>
 					</div>
 					{/* Téléphone */}
 					<div className="flex items-center gap-2">
-						<Phone className="h-4 w-4" />
+						<Phone className="h-3.5 w-3.5" />
 						<span>
 							{patient.phone || "Téléphone non renseigné"}
 						</span>
 					</div>
-					{/* Taille et poids */}
+					{/* Taille et poids - en une ligne compacte */}
 					{(patient.height || patient.weight) && (
-						<div className="flex items-center gap-4">
+						<div className="flex items-center gap-3 text-xs">
 							{patient.height && (
 								<div className="flex items-center gap-1">
-									<Ruler className="h-4 w-4" />
-									<span>Taille: {patient.height} cm</span>
+									<Ruler className="h-3.5 w-3.5" />
+									<span>{patient.height} cm</span>
 								</div>
 							)}
 							{patient.weight && (
 								<div className="flex items-center gap-1">
-									<Weight className="h-4 w-4" />
-									<span>Poids: {patient.weight} kg</span>
+									<Weight className="h-3.5 w-3.5" />
+									<span>{patient.weight} kg</span>
 								</div>
 							)}
 						</div>
 					)}
 					{/* IMC */}
-					{bmiInfo()}{" "}
+					{bmiInfo()}
+					{/* Profession */}
 					<div className="flex items-center gap-2">
-						<Briefcase className="h-4 w-4" />
-						<span>
-							{patient.occupation || "profession non renseigné"}
+						<Briefcase className="h-3.5 w-3.5" />
+						<span className="truncate">
+							{patient.occupation || "Profession non renseignée"}
 						</span>
 					</div>
 				</div>
