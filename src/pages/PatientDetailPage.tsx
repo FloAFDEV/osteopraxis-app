@@ -260,80 +260,10 @@ const PatientDetailPage = () => {
 					</div>
 				</div>
 
-				{/* Main content grid - Modified layout */}
+				{/* Main content grid */}
 				<div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-					{/* Left column - Tabs (now takes 3 columns) */}
-					<div className="xl:col-span-3 order-2 xl:order-1">
-						<Tabs defaultValue="medical-info">
-							<TabsList className="grid w-full grid-cols-2 md:grid-cols-4 text-xs md:text-sm">
-								<TabsTrigger value="medical-info" className="px-2 md:px-4">
-									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-rose-600" />
-									<span className="hidden sm:inline">Dossier médical</span>
-									<span className="sm:hidden">Médical</span>
-								</TabsTrigger>
-								<TabsTrigger value="upcoming-appointments" className="px-2 md:px-4">
-									<Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-emerald-600" />
-									<span className="hidden sm:inline">Séances à venir</span>
-									<span className="sm:hidden">À venir</span>
-								</TabsTrigger>
-								<TabsTrigger value="history" className="px-2 md:px-4">
-									<History className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-blue-600" />
-									<span className="hidden sm:inline">Historique</span>
-									<span className="sm:hidden">Historique</span>
-								</TabsTrigger>
-								<TabsTrigger value="invoices" className="px-2 md:px-4">
-									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-yellow-600" />
-									<span className="hidden sm:inline">Notes d'honoraires</span>
-									<span className="sm:hidden">Notes</span>
-								</TabsTrigger>
-							</TabsList>
-
-							<TabsContent value="medical-info">
-								<MedicalInfoTab
-									patient={patient}
-									pastAppointments={pastAppointments}
-									onUpdateAppointmentStatus={
-										handleUpdateAppointmentStatus
-									}
-									onNavigateToHistory={navigateToHistoryTab}
-								/>
-							</TabsContent>
-
-							<TabsContent value="upcoming-appointments">
-								<UpcomingAppointmentsTab
-									patient={patient}
-									appointments={upcomingAppointments}
-									onCancelAppointment={
-										handleCancelAppointment
-									}
-									onStatusChange={
-										handleUpdateAppointmentStatus
-									}
-								/>
-							</TabsContent>
-
-							<TabsContent value="history">
-								<AppointmentHistoryTab
-									appointments={pastAppointments}
-									onStatusChange={
-										handleUpdateAppointmentStatus
-									}
-									viewMode={viewMode}
-									setViewMode={setViewMode}
-								/>
-							</TabsContent>
-
-							<TabsContent value="invoices">
-								<InvoicesTab
-									patient={patient}
-									invoices={invoices}
-								/>
-							</TabsContent>
-						</Tabs>
-					</div>
-
-					{/* Right column - Patient info (now takes 1 column) */}
-					<div className="xl:col-span-1 order-1 xl:order-2 space-y-4 md:space-y-6">
+					{/* Left column - Patient info (sticky and fixed on scroll) */}
+					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6 sticky top-20 self-start">
 						<PatientInfo patient={patient} />
 
 						<MedicalInfoCard
@@ -398,6 +328,98 @@ const PatientDetailPage = () => {
 								},
 							]}
 						/>
+					</div>
+
+					{/* Right column - Tabs (principal content) */}
+					<div className="xl:col-span-3 order-2 xl:order-2">
+						<Tabs defaultValue="medical-info">
+							<TabsList className="grid w-full grid-cols-2 md:grid-cols-4 text-xs md:text-sm">
+								<TabsTrigger
+									value="medical-info"
+									className="px-2 md:px-4"
+								>
+									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-rose-600" />
+									<span className="hidden sm:inline">
+										Dossier médical
+									</span>
+									<span className="sm:hidden">Médical</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="upcoming-appointments"
+									className="px-2 md:px-4"
+								>
+									<Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-emerald-600" />
+									<span className="hidden sm:inline">
+										Séances à venir
+									</span>
+									<span className="sm:hidden">À venir</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="history"
+									className="px-2 md:px-4"
+								>
+									<History className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-blue-600" />
+									<span className="hidden sm:inline">
+										Historique
+									</span>
+									<span className="sm:hidden">
+										Historique
+									</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="invoices"
+									className="px-2 md:px-4"
+								>
+									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-yellow-600" />
+									<span className="hidden sm:inline">
+										Notes d'honoraires
+									</span>
+									<span className="sm:hidden">Notes</span>
+								</TabsTrigger>
+							</TabsList>
+
+							<TabsContent value="medical-info">
+								<MedicalInfoTab
+									patient={patient}
+									pastAppointments={pastAppointments}
+									onUpdateAppointmentStatus={
+										handleUpdateAppointmentStatus
+									}
+									onNavigateToHistory={navigateToHistoryTab}
+								/>
+							</TabsContent>
+
+							<TabsContent value="upcoming-appointments">
+								<UpcomingAppointmentsTab
+									patient={patient}
+									appointments={upcomingAppointments}
+									onCancelAppointment={
+										handleCancelAppointment
+									}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
+								/>
+							</TabsContent>
+
+							<TabsContent value="history">
+								<AppointmentHistoryTab
+									appointments={pastAppointments}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
+									viewMode={viewMode}
+									setViewMode={setViewMode}
+								/>
+							</TabsContent>
+
+							<TabsContent value="invoices">
+								<InvoicesTab
+									patient={patient}
+									invoices={invoices}
+								/>
+							</TabsContent>
+						</Tabs>
 					</div>
 				</div>
 			</div>
