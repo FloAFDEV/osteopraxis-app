@@ -261,9 +261,9 @@ const PatientDetailPage = () => {
 				</div>
 
 				{/* Main content grid */}
-				<div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+				<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-4 md:gap-6">
 					{/* Left column - Patient info */}
-					<div className="xl:col-span-2 space-y-6">
+					<div className="lg:col-span-1 xl:col-span-2 space-y-4 md:space-y-6">
 						<PatientInfo patient={patient} />
 
 						<MedicalInfoCard
@@ -272,7 +272,7 @@ const PatientDetailPage = () => {
 								{
 									label: (
 										<span className="flex items-center gap-2 text-pink-600">
-											<Users className="w-4 h-4 text-pink-500" />
+											<Users className="w-3 h-3 md:w-4 md:h-4 text-pink-500" />
 											Statut marital
 										</span>
 									),
@@ -284,7 +284,7 @@ const PatientDetailPage = () => {
 								{
 									label: (
 										<span className="flex items-center gap-2 text-blue-700">
-											<Baby className="w-4 h-4 text-blue-500" />
+											<Baby className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
 											Enfants
 										</span>
 									),
@@ -295,7 +295,7 @@ const PatientDetailPage = () => {
 								{
 									label: (
 										<span className="flex items-center gap-2 text-green-500">
-											<Hand className="w-4 h-4 text-green-500" />
+											<Hand className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
 											Latéralité
 										</span>
 									),
@@ -307,7 +307,7 @@ const PatientDetailPage = () => {
 								{
 									label: (
 										<span className="flex items-center gap-2 text-orange-700">
-											<Cigarette className="w-4 h-4 text-orange-500" />
+											<Cigarette className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
 											Tabagisme
 										</span>
 									),
@@ -316,7 +316,7 @@ const PatientDetailPage = () => {
 								{
 									label: (
 										<span className="flex items-center gap-2 text-purple-700">
-											<Heart className="w-4 h-4 text-purple-500" />
+											<Heart className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
 											Contraception
 										</span>
 									),
@@ -330,24 +330,29 @@ const PatientDetailPage = () => {
 						/>
 					</div>
 
-					<div className="xl:col-span-3">
+					{/* Right column - Tabs */}
+					<div className="lg:col-span-1 xl:col-span-3">
 						<Tabs defaultValue="medical-info">
-							<TabsList className="grid w-full grid-cols-4">
-								<TabsTrigger value="medical-info">
-									<Activity className="h-4 w-4 mr-2 text-rose-600" />
-									Dossier médical
+							<TabsList className="grid w-full grid-cols-2 md:grid-cols-4 text-xs md:text-sm">
+								<TabsTrigger value="medical-info" className="px-2 md:px-4">
+									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-rose-600" />
+									<span className="hidden sm:inline">Dossier médical</span>
+									<span className="sm:hidden">Médical</span>
 								</TabsTrigger>
-								<TabsTrigger value="upcoming-appointments">
-									<Calendar className="h-4 w-4 mr-2 text-emerald-600" />
-									Séances à venir
+								<TabsTrigger value="upcoming-appointments" className="px-2 md:px-4">
+									<Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-emerald-600" />
+									<span className="hidden sm:inline">Séances à venir</span>
+									<span className="sm:hidden">À venir</span>
 								</TabsTrigger>
-								<TabsTrigger value="history">
-									<History className="h-4 w-4 mr-2 text-blue-600" />
-									Historique
+								<TabsTrigger value="history" className="px-2 md:px-4">
+									<History className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-blue-600" />
+									<span className="hidden sm:inline">Historique</span>
+									<span className="sm:hidden">Historique</span>
 								</TabsTrigger>
-								<TabsTrigger value="invoices">
-									<Activity className="h-4 w-4 mr-2 text-yellow-600" />
-									Notes d'honoraires
+								<TabsTrigger value="invoices" className="px-2 md:px-4">
+									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-yellow-600" />
+									<span className="hidden sm:inline">Notes d'honoraires</span>
+									<span className="sm:hidden">Notes</span>
 								</TabsTrigger>
 							</TabsList>
 

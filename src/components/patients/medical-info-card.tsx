@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -7,34 +8,34 @@ interface MedicalInfoCardProps {
 	items: {
 		label: string | JSX.Element;
 		value: string | null | undefined;
-		showSeparatorAfter?: boolean; // ✅ Nouvelle prop pour afficher un séparateur après cet item
+		showSeparatorAfter?: boolean;
 	}[];
 }
 
 export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 	return (
-		<Card className="max-h-96 overflow-y-auto">
-			<CardHeader>
-				<CardTitle className="text-lg flex items-center gap-2">
+		<Card className="h-fit">
+			<CardHeader className="pb-2 md:pb-3">
+				<CardTitle className="text-base md:text-lg flex items-center gap-2">
 					{icon}
-					<span>{title}</span>
+					<span className="truncate">{title}</span>
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="px-6 pb-6 pt-0">
-				<dl className="space-y-3">
+			<CardContent className="px-3 md:px-6 pb-3 md:pb-6 pt-0">
+				<dl className="space-y-2 md:space-y-3">
 					{items.map(
 						({ label, value, showSeparatorAfter }, index) => (
 							<div key={index}>
 								<div>
-									<dt className="text-sm font-medium text-muted-foreground">
+									<dt className="text-xs md:text-sm font-medium text-muted-foreground leading-tight">
 										{label}
 									</dt>
-									<dd className="mt-1 text-sm">
+									<dd className="mt-0.5 md:mt-1 text-xs md:text-sm leading-tight">
 										{value || "Non spécifié"}
 									</dd>
 								</div>
 								{showSeparatorAfter && (
-									<Separator className="my-3" />
+									<Separator className="my-2 md:my-3" />
 								)}
 							</div>
 						)

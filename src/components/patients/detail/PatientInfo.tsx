@@ -48,22 +48,22 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 	};
 
 	return (
-		<Card>
-			<CardContent className="p-4">
+		<Card className="h-fit">
+			<CardContent className="p-3 md:p-4">
 				{/* En-tête patient */}
-				<div className="flex items-center gap-3 mb-4">
-					<Avatar className="h-12 w-12">
+				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+					<Avatar className="h-10 w-10 md:h-12 md:w-12 flex-shrink-0">
 						<AvatarFallback
-							className={`${getAvatarBg(patient.gender)} ${getAvatarTextColor(patient.gender)} flex items-center justify-center text-sm font-bold`}
+							className={`${getAvatarBg(patient.gender)} ${getAvatarTextColor(patient.gender)} flex items-center justify-center text-xs md:text-sm font-bold`}
 						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
 					</Avatar>
 					<div className="flex-1 min-w-0">
-						<CardTitle className="text-lg font-bold truncate">
+						<CardTitle className="text-base md:text-lg font-bold truncate">
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-xs md:text-sm text-muted-foreground">
 							{patient.gender ?? "Genre non spécifié"},{" "}
 							{age !== null ? `${age} ans` : "Âge non spécifié"}
 						</p>
@@ -76,8 +76,8 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 				</div>
 
-				{/* Informations prioritaires en bulles */}
-				<div className="grid grid-cols-2 gap-2 mb-4">
+				{/* Informations prioritaires en bulles - responsives */}
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3 md:mb-4">
 					{patient.currentTreatment && (
 						<InfoBubble
 							icon={Activity}
@@ -108,7 +108,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				</div>
 
 				{/* Informations de contact compactes */}
-				<div className="space-y-2 text-sm text-muted-foreground">
+				<div className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-muted-foreground">
 					<div className="flex items-center gap-2">
 						<MapPin className="h-3 w-3 flex-shrink-0" />
 						<span className="truncate">
@@ -134,7 +134,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 						</span>
 					</div>
 					{(patient.height || patient.weight) && (
-						<div className="flex items-center gap-4 text-sm">
+						<div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm">
 							{patient.height && (
 								<div className="flex items-center gap-1">
 									<Ruler className="h-3 w-3" />
