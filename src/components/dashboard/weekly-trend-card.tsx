@@ -1,20 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { DashboardData } from "@/types";
-import { TrendingDown, TrendingUp, Calendar } from "lucide-react";
-import {
-	Bar,
-	BarChart,
-	ResponsiveContainer,
-	XAxis,
-	YAxis,
-} from "recharts";
+import { Calendar, TrendingDown, TrendingUp } from "lucide-react";
 
 interface WeeklyTrendCardProps {
 	data: DashboardData;
@@ -29,25 +16,35 @@ const chartConfig = {
 
 export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 	// Calculate weekly trend percentage
-	const currentWeekTotal = data.consultationsLast7Days.reduce((sum, day) => sum + day.consultations, 0);
+	const currentWeekTotal = data.consultationsLast7Days.reduce(
+		(sum, day) => sum + day.consultations,
+		0
+	);
 	const weeklyAverage = currentWeekTotal / 7;
-	
+
 	// Determine trend color and icon based on weekly average vs daily average
-	const trendColor = weeklyAverage > data.averageConsultationsPerDay 
-		? "text-green-500" 
-		: weeklyAverage < data.averageConsultationsPerDay
-		? "text-red-500"
-		: "text-gray-500";
+	const trendColor =
+		weeklyAverage > data.averageConsultationsPerDay
+			? "text-green-500"
+			: weeklyAverage < data.averageConsultationsPerDay
+			? "text-red-500"
+			: "text-gray-500";
 
-	const TrendIcon = weeklyAverage > data.averageConsultationsPerDay 
-		? TrendingUp 
-		: weeklyAverage < data.averageConsultationsPerDay
-		? TrendingDown
-		: TrendingUp;
+	const TrendIcon =
+		weeklyAverage > data.averageConsultationsPerDay
+			? TrendingUp
+			: weeklyAverage < data.averageConsultationsPerDay
+			? TrendingDown
+			: TrendingUp;
 
-	const trendPercentage = data.averageConsultationsPerDay > 0 
-		? Math.round(((weeklyAverage - data.averageConsultationsPerDay) / data.averageConsultationsPerDay) * 100)
-		: 0;
+	const trendPercentage =
+		data.averageConsultationsPerDay > 0
+			? Math.round(
+					((weeklyAverage - data.averageConsultationsPerDay) /
+						data.averageConsultationsPerDay) *
+						100
+			  )
+			: 0;
 
 	return (
 		<Card
@@ -75,37 +72,12 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 					<div className="flex items-center gap-1 text-sm font-semibold">
 						<TrendIcon className={cn("h-4 w-4", trendColor)} />
 						<span className={trendColor}>
-							{trendPercentage > 0 ? "+" : ""}{trendPercentage}%
+							{trendPercentage > 0 ? "+" : ""}
+							{trendPercentage}%
 						</span>
 					</div>
 				</div>
-				
-				<ChartContainer config={chartConfig} className="h-[60px]">
-					<ResponsiveContainer width="100%" height="100%">
-						<BarChart data={data.consultationsLast7Days}>
-							<XAxis
-								dataKey="day"
-								axisLine={false}
-								tickLine={false}
-								tick={{
-									fontSize: 10,
-									fill: "hsl(var(--muted-foreground))",
-								}}
-							/>
-							<YAxis hide />
-							<ChartTooltip
-								content={<ChartTooltipContent />}
-								cursor={{ fill: "hsl(var(--muted) / 0.1)" }}
-							/>
-							<Bar
-								dataKey="consultations"
-								fill="rgb(251, 146, 60)"
-								radius={[1, 1, 0, 0]}
-							/>
-						</BarChart>
-					</ResponsiveContainer>
-				</ChartContainer>
-				
+
 				<p className="text-xs text-orange-500">
 					Moyenne: {weeklyAverage.toFixed(1)} consultations/jour
 				</p>
