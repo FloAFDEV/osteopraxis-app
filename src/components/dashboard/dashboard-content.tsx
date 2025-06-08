@@ -47,7 +47,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 							type="button"
 							aria-label={`Changer le type de graphique (actuellement : ${
 								chartType === "detailed"
-									? "Évolution annuelle"
+									? "Évolution mensuelle"
 									: "Comparaison avec N-1"
 							})`}
 							onClick={() =>
