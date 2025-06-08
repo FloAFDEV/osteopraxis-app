@@ -21,7 +21,10 @@ export const CustomMinimalTooltip = ({
 	if (!active || !payload || payload.length === 0) return null;
 
 	return (
-		<div className="rounded-md border bg-white px-3 py-2 text-sm text-gray-800 shadow-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+		<div
+			className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
+             dark:border-slate-700 dark:bg-slate-900 dark:text-gray-100"
+		>
 			<p className="font-medium mb-1">{label}</p>
 			{payload.map((entry, index) => (
 				<div key={index} className="flex items-center gap-2">
@@ -94,8 +97,11 @@ export function GrowthChart({ data }: GrowthChartProps) {
 						strokeDasharray="3 3"
 						stroke="var(--border)"
 					/>
-					<XAxis dataKey="month" tick={{ fontSize: 12 }} />
-					<YAxis tick={{ fontSize: 12 }} />
+					<XAxis
+						dataKey="month"
+						tick={{ fontSize: 12, fill: "#9CA3AF" }}
+					/>
+					<YAxis tick={{ fontSize: 12, fill: "#9CA3AF" }} />
 					<Tooltip content={<CustomMinimalTooltip />} />
 					<Legend content={<CustomBarLegend />} />
 					<Bar
