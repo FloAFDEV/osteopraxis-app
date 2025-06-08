@@ -114,16 +114,18 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 
 	return (
 		<div className="space-y-3">
-			<style jsx>{`
-				.highlight-section {
-					animation: highlight 2s ease-in-out;
-				}
-				
-				@keyframes highlight {
-					0%, 100% { background-color: transparent; }
-					50% { background-color: rgba(59, 130, 246, 0.1); }
-				}
-			`}</style>
+			<style>
+				{`
+					.highlight-section {
+						animation: highlight 2s ease-in-out;
+					}
+					
+					@keyframes highlight {
+						0%, 100% { background-color: transparent; }
+						50% { background-color: rgba(59, 130, 246, 0.1); }
+					}
+				`}
+			</style>
 			
 			<Accordion 
 				type="multiple" 

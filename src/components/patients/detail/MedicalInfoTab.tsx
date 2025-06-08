@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { differenceInYears, format } from "date-fns";
@@ -301,13 +300,13 @@ export function MedicalInfoTab({
 					{
 						label: "Score APGAR",
 						value: patient.apgar_score,
-						isImportant: patient.apgar_score ? parseInt(patient.apgar_score) < 7 : false
+						isImportant: patient.apgar_score ? parseFloat(patient.apgar_score) < 7 : false
 					},
 					{
 						label: "Poids à la naissance",
 						value: patient.weight_at_birth ? `${patient.weight_at_birth} g` : null,
 						isImportant: patient.weight_at_birth ? (
-							parseInt(patient.weight_at_birth) < 2500 || parseInt(patient.weight_at_birth) > 4000
+							Number(patient.weight_at_birth) < 2500 || Number(patient.weight_at_birth) > 4000
 						) : false
 					},
 					{
