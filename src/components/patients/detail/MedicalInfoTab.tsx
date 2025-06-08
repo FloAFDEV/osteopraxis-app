@@ -51,6 +51,17 @@ export function MedicalInfoTab({
 		}
 	}, [patient.birthDate]);
 
+	// Fonction helper pour fusionner traumatismes et fractures
+	const getTraumaAndFractureHistory = () => {
+		const trauma = patient.traumaHistory;
+		const fractures = patient.fracture_history;
+		
+		if (trauma && fractures) {
+			return `${trauma} | ${fractures}`;
+		}
+		return trauma || fractures || null;
+	};
+
 	// Fonction helper pour déterminer l'importance médicale
 	const isCriticalCondition = (value: string | null | undefined) => {
 		if (!value) return false;
@@ -141,14 +152,9 @@ export function MedicalInfoTab({
 					isImportant: isImportantCondition(patient.surgicalHistory),
 				},
 				{
-					label: "Fractures",
-					value: patient.fracture_history,
-					isImportant: !!patient.fracture_history,
-				},
-				{
-					label: "Traumatismes",
-					value: patient.traumaHistory,
-					isImportant: !!patient.traumaHistory,
+					label: "Traumatismes et fractures",
+					value: getTraumaAndFractureHistory(),
+					isImportant: !!(patient.traumaHistory || patient.fracture_history),
 				},
 				{
 					label: "Rhumatologie",

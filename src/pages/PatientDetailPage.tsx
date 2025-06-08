@@ -34,6 +34,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -355,72 +356,10 @@ const PatientDetailPage = () => {
 						</Tabs>
 					</div>
 
-					{/* Right column - Patient info (sticky avec comportement amélioré) */}
+					{/* Right column - Patient info and personal info (sticky avec comportement amélioré) */}
 					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6">
 						<PatientInfo patient={patient} />
-
-						<MedicalInfoCard
-							title="Informations personnelles"
-							items={[
-								{
-									label: (
-										<span className="flex items-center gap-2 text-pink-600">
-											<Users className="w-3 h-3 md:w-4 md:h-4 text-pink-500" />
-											Statut marital
-										</span>
-									),
-									value:
-										translateMaritalStatus(
-											patient.maritalStatus
-										) || "Non renseigné",
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-blue-700">
-											<Baby className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
-											Enfants
-										</span>
-									),
-									value: formatChildrenAges(
-										patient.childrenAges || []
-									),
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-green-500">
-											<Hand className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
-											Latéralité
-										</span>
-									),
-									value:
-										translateHandedness(
-											patient.handedness
-										) || "Non renseignée",
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-orange-700">
-											<Cigarette className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
-											Tabagisme
-										</span>
-									),
-									value: getSmokerInfo() || "Non renseigné",
-								},
-								{
-									label: (
-										<span className="flex items-center gap-2 text-purple-700">
-											<Heart className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
-											Contraception
-										</span>
-									),
-									value:
-										translateContraception(
-											patient.contraception
-										) ||
-										"Non concerné(e) / Non renseigné(e)",
-								},
-							]}
-						/>
+						<PersonalInfoCard patient={patient} />
 					</div>
 				</div>
 			</div>
