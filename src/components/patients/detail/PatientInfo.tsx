@@ -1,5 +1,3 @@
-
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	Card,
@@ -111,90 +109,89 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 	};
 
 	return (
-		<Card className="max-h-96 overflow-y-auto">
+		<Card>
 			<CardContent
-				className={`p-3 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
+				className={`p-6 rounded-md ${genderColors.lightBg} ${genderColors.darkBg}`}
 			>
-				<div className="flex items-center gap-3 mb-3">
-					<Avatar className="h-10 w-10">
+				<div className="flex items-center gap-6 mb-6">
+					<Avatar className="h-16 w-16">
 						<AvatarFallback
 							className={`${getAvatarBg(
 								patient.gender
 							)} ${getAvatarTextColor(
 								patient.gender
-							)} flex items-center justify-center text-sm font-bold`}
+							)} flex items-center justify-center text-xl font-bold`}
 						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
 					</Avatar>
-					<div className="flex-1 min-w-0">
+					<div>
 						<CardTitle
-							className={`text-lg font-bold ${genderColors.textColor} truncate`}
+							className={`text-2xl font-bold ${genderColors.textColor}`}
 						>
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
-						<CardDescription className="text-xs">
+						<CardDescription className="text-sm">
 							{patient.gender ?? "Genre non spécifié"},{" "}
 							{age !== null ? `${age} ans` : "Âge non spécifié"}
 						</CardDescription>
 						{age !== null && age < 12 && (
-							<div className="text-amber-600 text-xs flex items-center mt-1">
-								<Baby className="h-3 w-3 mr-1" />
+							<div className="text-amber-600 text-sm flex items-center mt-1">
+								<Baby className="h-4 w-4 mr-1" />
 								Enfant
 							</div>
 						)}
 					</div>
 				</div>
 
-				<div className="space-y-1 text-xs text-muted-foreground">
+				<div className="space-y-2 text-base text-muted-foreground">
 					{/* Adresse */}
 					<div className="flex items-center gap-2">
-						<MapPin className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate">
+						<MapPin className="h-4 w-4" />
+						<span>
 							{patient.address || "Adresse non renseignée"}
 						</span>
 					</div>
 					{/* Email */}
 					<div className="flex items-center gap-2">
-						<Mail className="h-3 w-3 flex-shrink-0" />
+						<Mail className="h-4 w-4" />
 						<a
 							href={`mailto:${patient.email}`}
-							className="hover:underline truncate"
+							className="hover:underline"
 						>
 							{patient.email || "Email non renseigné"}
 						</a>
 					</div>
 					{/* Téléphone */}
 					<div className="flex items-center gap-2">
-						<Phone className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate">
+						<Phone className="h-4 w-4" />
+						<span>
 							{patient.phone || "Téléphone non renseigné"}
 						</span>
 					</div>
-					{/* Taille et poids - en une ligne compacte */}
+					{/* Taille et poids */}
 					{(patient.height || patient.weight) && (
-						<div className="flex items-center gap-2 text-xs">
+						<div className="flex items-center gap-4">
 							{patient.height && (
 								<div className="flex items-center gap-1">
-									<Ruler className="h-3 w-3" />
-									<span>{patient.height}cm</span>
+									<Ruler className="h-4 w-4" />
+									<span>Taille: {patient.height} cm</span>
 								</div>
 							)}
 							{patient.weight && (
 								<div className="flex items-center gap-1">
-									<Weight className="h-3 w-3" />
-									<span>{patient.weight}kg</span>
+									<Weight className="h-4 w-4" />
+									<span>Poids: {patient.weight} kg</span>
 								</div>
 							)}
 						</div>
 					)}
 					{/* IMC */}
-					{bmiInfo()}
-					{/* Profession */}
+					{bmiInfo()}{" "}
 					<div className="flex items-center gap-2">
-						<Briefcase className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate">
-							{patient.occupation || "Profession non renseignée"}
+						<Briefcase className="h-4 w-4" />
+						<span>
+							{patient.occupation || "profession non renseigné"}
 						</span>
 					</div>
 				</div>
@@ -202,4 +199,3 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		</Card>
 	);
 }
-
