@@ -55,7 +55,7 @@ const CustomBarLegend = ({ payload }: LegendProps) => {
 export function GrowthChart({ data }: GrowthChartProps) {
 	return (
 		<ChartWrapper
-			title="Croissance mensuelle des patients"
+			title="Évolution mensuelle comparée du nombre de patients"
 			subtitle={`${data.newPatientsLastYear} nouveaux patients cette année`}
 			isLoading={!data?.monthlyGrowth?.length}
 		>
