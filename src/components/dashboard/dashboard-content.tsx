@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardData } from "@/types";
 import React, { useState } from "react";
@@ -16,19 +17,16 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 	);
 
 	return (
-		<div className="animate-fade-in animate-delay-300 h-full">
-			<Card className="hover-scale h-full flex flex-col">
-				<CardContent className="p-6 bg-inherit flex flex-col flex-1">
+		<div className="animate-fade-in animate-delay-300 min-h-[600px]">
+			<Card className="hover-scale">
+				<CardContent className="p-6 bg-inherit">
 					{/* En-tête */}
 					<h2 className="text-2xl font-bold mb-4">
 						Évolution de l'activité
 					</h2>
 
-					{/* Graphique */}
-					<div
-						className="flex-1 w-full"
-						style={{ minHeight: "300px" }}
-					>
+					{/* Graphique avec hauteur fixe */}
+					<div className="w-full h-[400px] mb-6">
 						{chartType === "detailed" ? (
 							<DashboardGrowthChart data={dashboardData} />
 						) : (
@@ -36,8 +34,8 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 						)}
 					</div>
 
-					{/* Bouton en bas à gauche */}
-					<div className="mt-4 flex items-center gap-2 justify-start">
+					{/* Bouton en bas */}
+					<div className="flex items-center gap-2 justify-start">
 						<label
 							htmlFor="chartType"
 							className="text-sm font-medium"

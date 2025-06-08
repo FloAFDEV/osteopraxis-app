@@ -40,15 +40,15 @@ export function GrowthChart({ data }: GrowthChartProps) {
 
   if (!data || !data.monthlyGrowth) {
     return (
-      <ChartWrapper title="Croissance mensuelle" isLoading={true} height="100%">
+      <ChartWrapper title="Croissance mensuelle" isLoading={true}>
         <div>Aucune donnée disponible</div>
       </ChartWrapper>
     );
   }
 
   return (
-    <ChartWrapper title="Croissance mensuelle" isLoading={isLoading} height="100%">
-      <div className="w-full h-full flex-1">
+    <ChartWrapper title="Croissance mensuelle" isLoading={isLoading}>
+      <div className="w-full flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
@@ -56,6 +56,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
               top: 5,
               right: 10,
               left: isMobile ? 0 : 1,
+              bottom: 20,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
