@@ -8,7 +8,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient!patientId (firstName, lastName)
+				Patient!Quote_patientId_fkey (firstName, lastName)
 			`)
 			.order('createdAt', { ascending: false });
 
@@ -25,7 +25,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient!patientId (firstName, lastName),
+				Patient!Quote_patientId_fkey (firstName, lastName),
 				QuoteItem (*)
 			`)
 			.eq('id', id)
@@ -44,7 +44,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient!patientId (firstName, lastName),
+				Patient!Quote_patientId_fkey (firstName, lastName),
 				QuoteItem (*)
 			`)
 			.eq('patientId', patientId)
