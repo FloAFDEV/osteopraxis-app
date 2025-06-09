@@ -8,15 +8,12 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 		cabinetId: data.cabinetId,
 		osteopathId: data.osteopathId,
 		start: data.date, // Utiliser date comme start
-		end: data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : data.date, // Calculer end à partir de date + 30min
 		status: data.status as AppointmentStatus,
 		notes: data.notes,
 		createdAt: data.createdAt,
 		updatedAt: data.updatedAt,
 		date: data.date,
 		reason: data.reason,
-		notificationSent: data.notificationSent || false,
-		user_id: data.user_id,
 	};
 }
 
@@ -25,12 +22,10 @@ export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Part
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
 		osteopathId: data.osteopathId,
-		date: data.date || data.start,
+		date: data.date,
 		status: data.status,
 		reason: data.reason,
 		notes: data.notes,
-		notificationSent: data.notificationSent || false,
-		user_id: data.user_id || null,
 	};
 }
 
@@ -39,16 +34,9 @@ export function createAppointmentPayload(data: any): CreateAppointmentPayload {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId || 1,
 		osteopathId: data.osteopathId,
-		start: data.start || data.date,
-		end: data.end || (data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : undefined),
-		date: data.date || data.start,
+		date: data.date,
 		reason: data.reason,
 		status: data.status || "SCHEDULED",
 		notes: data.notes,
-		notificationSent: data.notificationSent || false,
-		createdAt: data.createdAt,
-		updatedAt: data.updatedAt,
-		website: data.website, // Pour le honeypot
-		user_id: data.user_id || null,
 	};
 }
