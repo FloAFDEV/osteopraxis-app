@@ -1,80 +1,254 @@
-
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Patient } from "@/types";
-import { api } from "@/services/api";
-import { Layout } from "@/components/ui/layout";
+import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
+import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
+import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
 import { PatientHeader } from "@/components/patients/detail/PatientHeader";
 import { PatientInfo } from "@/components/patients/detail/PatientInfo";
-import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
-import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
-import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
-import { QuotesTab } from "@/components/patients/detail/QuotesTab";
-import { useSectionNavigation } from "@/hooks/useSectionNavigation";
+import { MedicalInfoCard } from "@/components/patients/medical-info-card";
+import { Layout } from "@/components/ui/layout";
+import { PatientStat } from "@/components/ui/patient-stat";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/services/api";
+import { invoiceService } from "@/services/api/invoice-service";
+import { quoteService } from "@/services/api/quote-service";
+import { Appointment, AppointmentStatus, Invoice, Patient, Quote } from "@/types";
+import {
+	translateContraception,
+	translateHandedness,
+	translateMaritalStatus,
+} from "@/utils/patient-form-helpers";
+import { format } from "date-fns";
+import {
+	Activity,
+	AlertCircle,
+	Baby,
+	Calendar,
+	Cigarette,
+	ClipboardList,
+	Hand,
+	Heart,
+	History,
+	Loader2,
+	Stethoscope,
+	Users,
+	FileText,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
+import { QuoteCard } from "@/components/quote-card";
+import { QuoteForm } from "@/components/quote-form";
+import { Button } from "@/components/ui/button";
 
-const PatientDetailPage: React.FC = () => {
+const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 	const [patient, setPatient] = useState<Patient | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [appointments, setAppointments] = useState<Appointment[]>([]);
+	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [invoices, setInvoices] = useState<Invoice[]>([]);
+	const [quotes, setQuotes] = useState<Quote[]>([]);
+	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+	const [showQuoteForm, setShowQuoteForm] = useState(false);
+	const [editingQuote, setEditingQuote] = useState<Quote | undefined>();
+	const historyTabRef = useRef<HTMLElement | null>(null);
 
-	const { activeTab, setActiveTab } = useSectionNavigation();
-
+	const getSmokerInfo = () => {
+		if (patient.isSmoker) {
+			return `Fumeur${
+				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
+			}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ""}`;
+		} else if (patient.isExSmoker) {
+			return `Ex-fumeur${
+				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
+			}${
+				patient.quitSmokingDate
+					? `, arrêt depuis ${patient.quitSmokingDate}`
+					: ""
+			}`;
+		} else {
+			return "Non-fumeur";
+		}
+	};
 	useEffect(() => {
-		const loadPatient = async () => {
-			if (!id) {
-				setError("ID du patient manquant");
-				setIsLoading(false);
-				return;
-			}
-
-			const numericId = parseInt(id, 10);
-			if (isNaN(numericId)) {
-				setError("ID du patient invalide");
-				setIsLoading(false);
-				return;
-			}
-
+		const fetchPatientData = async () => {
+			setLoading(true);
+			setError(null);
 			try {
-				setIsLoading(true);
-				const patientData = await api.getPatientById(numericId);
-				if (patientData) {
-					setPatient(patientData);
-				} else {
-					setError("Patient non trouvé");
+				if (!id) {
+					setError("Patient ID is missing.");
+					return;
 				}
-			} catch (err) {
-				console.error("Erreur lors du chargement du patient:", err);
-				setError("Erreur lors du chargement du patient");
-				toast.error("Erreur lors du chargement du patient");
+				const patientId = parseInt(id, 10);
+				const [patientData, appointmentsData, invoicesData, quotesData] =
+					await Promise.all([
+						api.getPatientById(patientId),
+						api.getAppointmentsByPatientId(patientId),
+						invoiceService.getInvoicesByPatientId(patientId),
+						quoteService.getQuotesByPatientId(patientId),
+					]);
+
+				setPatient(patientData);
+				setAppointments(appointmentsData);
+				setInvoices(invoicesData);
+				setQuotes(quotesData);
+			} catch (e: any) {
+				setError(e.message || "Failed to load patient data.");
+				toast.error(
+					"Impossible de charger les informations du patient. Veuillez réessayer."
+				);
 			} finally {
-				setIsLoading(false);
+				setLoading(false);
 			}
 		};
-
-		loadPatient();
+		fetchPatientData();
 	}, [id]);
 
-	if (isLoading) {
+	useEffect(() => {
+		// Find and set the history tab element ref after the component mounts
+		const historyTabTrigger = document.querySelector('[value="history"]');
+		if (historyTabTrigger) {
+			historyTabRef.current = historyTabTrigger as HTMLElement;
+		}
+	}, []);
+
+	const upcomingAppointments = appointments
+		.filter((appointment) => new Date(appointment.date) >= new Date())
+		.sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+		);
+
+	const pastAppointments = appointments
+		.filter((appointment) => new Date(appointment.date) < new Date())
+		.sort(
+			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+		);
+
+	const handleCancelAppointment = async (appointmentId: number) => {
+		try {
+			await api.cancelAppointment(appointmentId);
+			// Refresh appointments list
+			const updatedAppointments = await api.getAppointmentsByPatientId(
+				parseInt(id!)
+			);
+			setAppointments(updatedAppointments);
+			toast.success("La séance a été annulée avec succès");
+		} catch (error) {
+			console.error("Error canceling appointment:", error);
+			toast.error("Impossible d'annuler la séance");
+		}
+	};
+
+	const handleUpdateAppointmentStatus = async (
+		appointmentId: number,
+		status: AppointmentStatus
+	) => {
+		try {
+			setLoading(true);
+			await api.updateAppointment(appointmentId, { status });
+			// Refresh appointments list
+			const updatedAppointments = await api.getAppointmentsByPatientId(
+				parseInt(id!)
+			);
+			setAppointments(updatedAppointments);
+			toast.success(
+				`Le statut de la séance a été modifié en "${getStatusLabel(
+					status
+				)}"`
+			);
+		} catch (error) {
+			console.error("Error updating appointment status:", error);
+			toast.error("Impossible de modifier le statut de la séance");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const getStatusLabel = (status: AppointmentStatus): string => {
+		switch (status) {
+			case "SCHEDULED":
+				return "Planifiée";
+			case "COMPLETED":
+				return "Terminée";
+			case "CANCELED":
+				return "Annulée";
+			case "RESCHEDULED":
+				return "Reportée";
+			case "NO_SHOW":
+				return "Absence";
+			default:
+				return status;
+		}
+	};
+
+	const navigateToHistoryTab = () => {
+		if (historyTabRef.current) {
+			historyTabRef.current.click();
+		}
+	};
+
+	const handleSaveQuote = async (quoteData: any) => {
+		try {
+			if (editingQuote) {
+				await quoteService.updateQuote(editingQuote.id, quoteData);
+			} else {
+				await quoteService.createQuote(quoteData);
+			}
+			
+			// Recharger les devis
+			const updatedQuotes = await quoteService.getQuotesByPatientId(parseInt(id!));
+			setQuotes(updatedQuotes);
+			
+			setShowQuoteForm(false);
+			setEditingQuote(undefined);
+		} catch (error) {
+			console.error("Erreur lors de la sauvegarde du devis:", error);
+			throw error;
+		}
+	};
+
+	const handleEditQuote = (quote: Quote) => {
+		setEditingQuote(quote);
+		setShowQuoteForm(true);
+	};
+
+	const handleSendQuote = async (quote: Quote) => {
+		try {
+			await quoteService.sendQuote(quote.id);
+			toast.success("Devis envoyé avec succès");
+			
+			// Recharger les devis pour mettre à jour le statut
+			const updatedQuotes = await quoteService.getQuotesByPatientId(parseInt(id!));
+			setQuotes(updatedQuotes);
+		} catch (error) {
+			console.error("Erreur lors de l'envoi du devis:", error);
+			toast.error("Erreur lors de l'envoi du devis");
+		}
+	};
+
+	const handleDeleteQuote = async (quote: Quote) => {
+		if (confirm("Êtes-vous sûr de vouloir supprimer ce devis ?")) {
+			try {
+				await quoteService.deleteQuote(quote.id);
+				toast.success("Devis supprimé avec succès");
+				
+				// Recharger les devis
+				const updatedQuotes = await quoteService.getQuotesByPatientId(parseInt(id!));
+				setQuotes(updatedQuotes);
+			} catch (error) {
+				console.error("Erreur lors de la suppression du devis:", error);
+				toast.error("Erreur lors de la suppression du devis");
+			}
+		}
+	};
+
+	if (loading) {
 		return (
 			<Layout>
-				<div className="container mx-auto py-6 space-y-6">
-					<Skeleton className="h-8 w-64" />
-					<div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-						<div className="lg:col-span-3 space-y-6">
-							<Skeleton className="h-48 w-full" />
-							<Skeleton className="h-96 w-full" />
-						</div>
-						<div className="lg:col-span-1">
-							<Skeleton className="h-64 w-full" />
-						</div>
-					</div>
+				<div className="flex justify-center items-center h-full">
+					<Loader2 className="h-6 w-6 animate-spin" />
 				</div>
 			</Layout>
 		);
@@ -83,68 +257,229 @@ const PatientDetailPage: React.FC = () => {
 	if (error || !patient) {
 		return (
 			<Layout>
-				<div className="container mx-auto py-6">
-					<div className="text-center">
-						<h1 className="text-2xl font-bold text-gray-900 mb-4">
-							{error || "Patient non trouvé"}
-						</h1>
-						<button
-							onClick={() => navigate("/patients")}
-							className="text-blue-600 hover:text-blue-800 underline"
-						>
-							Retourner à la liste des patients
-						</button>
-					</div>
+				<div className="flex flex-col justify-center items-center h-full">
+					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+					<p className="text-xl font-semibold text-center">
+						{error || "Patient non trouvé"}
+					</p>
 				</div>
 			</Layout>
 		);
 	}
 
+	function formatChildrenAges(ages: number[]): string {
+		if (!ages || ages.length === 0) return "Aucun enfant";
+
+		const sortedAges = ages.sort((a, b) => a - b);
+		const nb = sortedAges.length;
+
+		const agesText = sortedAges
+			.map((age, i) => {
+				if (i === nb - 1 && nb > 1) return `et ${age}`;
+				return `${age}`;
+			})
+			.join(nb === 2 ? " " : ", ");
+
+		return `${
+			nb === 1 ? "Un enfant de" : `${nb} enfants de`
+		} ${agesText} ans`;
+	}
+
 	return (
 		<Layout>
-			<div className="container mx-auto py-6">
-				<PatientHeader patient={patient} />
+			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
+				{/* Header section */}
+				<PatientHeader patientId={patient.id} />
 
-				<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
-					{/* Contenu principal */}
-					<div className="lg:col-span-3">
-						{/* Card PatientInfo */}
-						<PatientInfo patient={patient} />
+				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+						<PatientStat
+							title="Total séances"
+							value={appointments.length}
+							icon={<Calendar className="h-5 w-5" />}
+							colorClass="text-blue-500"
+						/>
+						<PatientStat
+							title="Séances à venir"
+							value={upcomingAppointments.length}
+							icon={<ClipboardList className="h-5 w-5" />}
+							colorClass="text-purple-500"
+						/>
+						<PatientStat
+							title="En cours de traitement"
+							value={patient.currentTreatment ? "Oui" : "Non"}
+							icon={<Stethoscope className="h-5 w-5" />}
+							colorClass="text-emerald-500"
+						/>
+						<PatientStat
+							title="Dernière Séance"
+							value={
+								pastAppointments[0]
+									? format(
+											new Date(pastAppointments[0].date),
+											"dd/MM/yyyy"
+									  )
+									: "Aucune"
+							}
+							icon={<History className="h-5 w-5" />}
+							colorClass="text-amber-500"
+						/>
+					</div>
+				</div>
 
-						{/* Tabs */}
-						<Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-							<TabsList className="grid w-full grid-cols-5">
-								<TabsTrigger value="medical">Médical</TabsTrigger>
-								<TabsTrigger value="upcoming">RDV à venir</TabsTrigger>
-								<TabsTrigger value="history">Historique</TabsTrigger>
-								<TabsTrigger value="invoices">Factures</TabsTrigger>
-								<TabsTrigger value="quotes">Devis</TabsTrigger>
+				{/* Main content grid - ordre inversé pour avoir les tabs à gauche */}
+				<div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+					{/* Left column - Tabs (principal content) - plus large */}
+					<div className="xl:col-span-3 order-2 xl:order-2">
+						<Tabs defaultValue="medical-info">
+							<TabsList className="grid w-full grid-cols-2 md:grid-cols-5 text-xs md:text-sm">
+								<TabsTrigger
+									value="medical-info"
+									className="px-2 md:px-4"
+								>
+									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-rose-600" />
+									<span className="hidden sm:inline">
+										Dossier médical
+									</span>
+									<span className="sm:hidden">Médical</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="upcoming-appointments"
+									className="px-2 md:px-4"
+								>
+									<Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-emerald-600" />
+									<span className="hidden sm:inline">
+										Séances à venir
+									</span>
+									<span className="sm:hidden">À venir</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="history"
+									className="px-2 md:px-4"
+								>
+									<History className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-blue-600" />
+									<span className="hidden sm:inline">
+										Historique
+									</span>
+									<span className="sm:hidden">
+										Historique
+									</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="invoices"
+									className="px-2 md:px-4"
+								>
+									<Activity className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-yellow-600" />
+									<span className="hidden sm:inline">
+										Notes d'honoraires
+									</span>
+									<span className="sm:hidden">Notes</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="quotes"
+									className="px-2 md:px-4"
+								>
+									<FileText className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-purple-600" />
+									<span className="hidden sm:inline">
+										Devis
+									</span>
+									<span className="sm:hidden">Devis</span>
+								</TabsTrigger>
 							</TabsList>
 
-							<TabsContent value="medical" className="mt-6">
-								<MedicalInfoTab patient={patient} />
+							<TabsContent value="medical-info">
+								<MedicalInfoTab
+									patient={patient}
+									pastAppointments={pastAppointments}
+									onUpdateAppointmentStatus={
+										handleUpdateAppointmentStatus
+									}
+									onNavigateToHistory={navigateToHistoryTab}
+								/>
 							</TabsContent>
 
-							<TabsContent value="upcoming" className="mt-6">
-								<UpcomingAppointmentsTab patient={patient} />
+							<TabsContent value="upcoming-appointments">
+								<UpcomingAppointmentsTab
+									patient={patient}
+									appointments={upcomingAppointments}
+									onCancelAppointment={
+										handleCancelAppointment
+									}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
+								/>
 							</TabsContent>
 
-							<TabsContent value="history" className="mt-6">
-								<AppointmentHistoryTab patient={patient} />
+							<TabsContent value="history">
+								<AppointmentHistoryTab
+									appointments={pastAppointments}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
+									viewMode={viewMode}
+									setViewMode={setViewMode}
+									invoices={invoices}
+								/>
 							</TabsContent>
 
-							<TabsContent value="invoices" className="mt-6">
-								<InvoicesTab patient={patient} />
+							<TabsContent value="invoices">
+								<InvoicesTab
+									patient={patient}
+									invoices={invoices}
+								/>
 							</TabsContent>
 
-							<TabsContent value="quotes" className="mt-6">
-								<QuotesTab patient={patient} />
+							<TabsContent value="quotes">
+								{showQuoteForm ? (
+									<QuoteForm
+										patient={patient!}
+										quote={editingQuote}
+										onSave={handleSaveQuote}
+										onCancel={() => {
+											setShowQuoteForm(false);
+											setEditingQuote(undefined);
+										}}
+									/>
+								) : (
+									<div className="space-y-6">
+										<div className="flex justify-between items-center">
+											<h2 className="text-2xl font-bold">Devis</h2>
+											<Button onClick={() => setShowQuoteForm(true)}>
+												<FileText className="h-4 w-4 mr-2" />
+												Nouveau devis
+											</Button>
+										</div>
+
+										{quotes.length === 0 ? (
+											<div className="text-center py-8">
+												<FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+												<p className="text-muted-foreground">
+													Aucun devis créé pour ce patient
+												</p>
+											</div>
+										) : (
+											<div className="grid gap-4">
+												{quotes.map((quote) => (
+													<QuoteCard
+														key={quote.id}
+														quote={quote}
+														onEdit={handleEditQuote}
+														onSend={handleSendQuote}
+														onDelete={handleDeleteQuote}
+													/>
+												))}
+											</div>
+										)}
+									</div>
+								)}
 							</TabsContent>
 						</Tabs>
 					</div>
 
-					{/* Sidebar */}
-					<div className="lg:col-span-1">
+					{/* Right column - Patient info and personal info (sticky avec comportement amélioré) */}
+					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6">
+						<PatientInfo patient={patient} />
 						<PersonalInfoCard patient={patient} />
 					</div>
 				</div>

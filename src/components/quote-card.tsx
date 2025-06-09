@@ -1,20 +1,20 @@
+
 import { Quote } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { FileText, Send, Check, X, Clock, AlertCircle, Printer } from "lucide-react";
+import { FileText, Send, Check, X, Clock, AlertCircle } from "lucide-react";
 
 interface QuoteCardProps {
   quote: Quote;
   onEdit?: (quote: Quote) => void;
   onSend?: (quote: Quote) => void;
   onDelete?: (quote: Quote) => void;
-  onPrint?: (quote: Quote) => void;
 }
 
-export function QuoteCard({ quote, onEdit, onSend, onDelete, onPrint }: QuoteCardProps) {
+export function QuoteCard({ quote, onEdit, onSend, onDelete }: QuoteCardProps) {
   const getStatusBadge = (status: Quote["status"]) => {
     switch (status) {
       case "DRAFT":
@@ -107,12 +107,6 @@ export function QuoteCard({ quote, onEdit, onSend, onDelete, onPrint }: QuoteCar
             <Button size="sm" onClick={() => onSend(quote)}>
               <Send className="h-4 w-4 mr-1" />
               Envoyer
-            </Button>
-          )}
-          {onPrint && (
-            <Button variant="outline" size="sm" onClick={() => onPrint(quote)}>
-              <Printer className="h-4 w-4 mr-1" />
-              Imprimer
             </Button>
           )}
           {canEdit && onDelete && (
