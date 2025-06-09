@@ -119,33 +119,118 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 	const getTraumaAndFractureHistory = () => {
 		const trauma = patient.traumaHistory;
 		const fractures = patient.fracture_history;
-		
+
 		if (trauma && fractures) {
 			return `${trauma} | ${fractures}`;
 		}
 		return trauma || fractures || null;
 	};
 
+	// Fonction pour colorer les parties du texte selon le type médical
+	const colorizeText = (text: string) => {
+		// Définition des couleurs selon les catégories (comme dans MedicalAccordion)
+		const patterns = [
+			{ 
+				pattern: /ORL:/g, 
+				replacement: '<span class="text-purple-600 dark:text-purple-400 font-semibold">ORL:</span>',
+				category: 'sensory'
+			},
+			{ 
+				pattern: /Digestif:/g, 
+				replacement: '<span class="text-orange-600 dark:text-orange-400 font-semibold">Digestif:</span>',
+				category: 'digestive'
+			},
+			{ 
+				pattern: /Allergies:/g, 
+				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Allergies:</span>',
+				category: 'general'
+			},
+			{ 
+				pattern: /Traitement:/g, 
+				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Traitement:</span>',
+				category: 'general'
+			},
+			{ 
+				pattern: /Chirurgie:/g, 
+				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Chirurgie:</span>',
+				category: 'general'
+			},
+			{ 
+				pattern: /Traumatismes:/g, 
+				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Traumatismes:</span>',
+				category: 'general'
+			},
+			{ 
+				pattern: /Fractures:/g, 
+				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Fractures:</span>',
+				category: 'general'
+			},
+			{ 
+				pattern: /Rhumatologie:/g, 
+				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Rhumatologie:</span>',
+				category: 'general'
+			},
+			{ 
+				pattern: /Dentaire:/g, 
+				replacement: '<span class="text-purple-600 dark:text-purple-400 font-semibold">Dentaire:</span>',
+				category: 'sensory'
+			},
+			{ 
+				pattern: /Sommeil:/g, 
+				replacement: '<span class="text-green-600 dark:text-green-400 font-semibold">Sommeil:</span>',
+				category: 'lifestyle'
+			},
+			{ 
+				pattern: /Gynécologique:/g, 
+				replacement: '<span class="text-pink-600 dark:text-pink-400 font-semibold">Gynécologique:</span>',
+				category: 'reproductive'
+			}
+		];
+
+		let colorizedText = text;
+		patterns.forEach(({ pattern, replacement }) => {
+			colorizedText = colorizedText.replace(pattern, replacement);
+		});
+
+		return colorizedText;
+	};
+
 	// Collecte de tous les problèmes médicaux
 	const getMedicalProblems = () => {
 		const problems = [];
-		
+
 		if (patient.entProblems) problems.push(`ORL: ${patient.entProblems}`);
-		if (patient.digestiveProblems) problems.push(`Digestif: ${patient.digestiveProblems}`);
-		if (patient.allergies && patient.allergies !== "NULL") problems.push(`Allergies: ${patient.allergies}`);
-		if (patient.currentTreatment) problems.push(`Traitement: ${patient.currentTreatment}`);
-		if (patient.surgicalHistory) problems.push(`Chirurgie: ${patient.surgicalHistory}`);
-		if (patient.traumaHistory) problems.push(`Traumatismes: ${patient.traumaHistory}`);
-		if (patient.fracture_history) problems.push(`Fractures: ${patient.fracture_history}`);
-		if (patient.rheumatologicalHistory) problems.push(`Rhumatologie: ${patient.rheumatologicalHistory}`);
-		if (patient.dental_health && (patient.dental_health.toLowerCase().includes("problème") || patient.dental_health.toLowerCase().includes("douleur"))) {
+		if (patient.digestiveProblems)
+			problems.push(`Digestif: ${patient.digestiveProblems}`);
+		if (patient.allergies && patient.allergies !== "NULL")
+			problems.push(`Allergies: ${patient.allergies}`);
+		if (patient.currentTreatment)
+			problems.push(`Traitement: ${patient.currentTreatment}`);
+		if (patient.surgicalHistory)
+			problems.push(`Chirurgie: ${patient.surgicalHistory}`);
+		if (patient.traumaHistory)
+			problems.push(`Traumatismes: ${patient.traumaHistory}`);
+		if (patient.fracture_history)
+			problems.push(`Fractures: ${patient.fracture_history}`);
+		if (patient.rheumatologicalHistory)
+			problems.push(`Rhumatologie: ${patient.rheumatologicalHistory}`);
+		if (
+			patient.dental_health &&
+			(patient.dental_health.toLowerCase().includes("problème") ||
+				patient.dental_health.toLowerCase().includes("douleur"))
+		) {
 			problems.push(`Dentaire: ${patient.dental_health}`);
 		}
-		if (patient.sleep_quality && (patient.sleep_quality.toLowerCase().includes("mauvais") || patient.sleep_quality.toLowerCase().includes("trouble"))) {
+		if (
+			patient.sleep_quality &&
+			(patient.sleep_quality.toLowerCase().includes("mauvais") ||
+				patient.sleep_quality.toLowerCase().includes("trouble"))
+		) {
 			problems.push(`Sommeil: ${patient.sleep_quality}`);
 		}
-		if (patient.gynecological_history) problems.push(`Gynécologique: ${patient.gynecological_history}`);
-		
+		if (patient.gynecological_history)
+			problems.push(`Gynécologique: ${patient.gynecological_history}`);
+
 		return problems;
 	};
 
@@ -157,7 +242,9 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 					Statut marital
 				</span>
 			),
-			value: translateMaritalStatus(patient.maritalStatus) || "Non renseigné",
+			value:
+				translateMaritalStatus(patient.maritalStatus) ||
+				"Non renseigné",
 		},
 		{
 			label: (
@@ -193,7 +280,9 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 					Contraception
 				</span>
 			),
-			value: translateContraception(patient.contraception) || "Non concerné(e) / Non renseigné(e)",
+			value:
+				translateContraception(patient.contraception) ||
+				"Non concerné(e) / Non renseigné(e)",
 		},
 		{
 			label: (
@@ -217,12 +306,18 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 				</span>
 			),
 			value: medicalProblems.join(" • "),
+			isColored: true, // Marquer cet item pour la colorisation
 		});
 	}
 
 	// Ajouter traumatismes et fractures s'il y en a (en plus des problèmes médicaux pour les cas où ils ne sont pas déjà inclus)
 	const traumaHistory = getTraumaAndFractureHistory();
-	if (traumaHistory && !medicalProblems.some(p => p.includes("Traumatismes") || p.includes("Fractures"))) {
+	if (
+		traumaHistory &&
+		!medicalProblems.some(
+			(p) => p.includes("Traumatismes") || p.includes("Fractures")
+		)
+	) {
 		personalInfoItems.push({
 			label: (
 				<span className="flex items-center gap-2 text-red-600">
@@ -241,8 +336,10 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		}
 		// Sur desktop, positionner en dessous de la PatientInfo card
 		// PatientInfo fait environ 300px + padding, on ajoute une marge de sécurité
-		return "sticky self-start max-h-[calc(100vh-25rem)] overflow-y-auto pb-8" + 
-			   " top-[30rem]"; // Position en dessous de PatientInfo
+		return (
+			"sticky self-start max-h-[calc(100vh-25rem)] overflow-y-auto pb-8" +
+			" top-[30rem]"
+		); // Position en dessous de PatientInfo
 	};
 
 	return (
@@ -251,7 +348,7 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 				<CardTitle className="text-sm md:text-base lg:text-lg font-bold mb-3 md:mb-4">
 					Informations personnelles
 				</CardTitle>
-				
+
 				<div className="space-y-3">
 					{personalInfoItems.map((item, index) => (
 						<div key={index} className="text-xs md:text-sm">
@@ -259,7 +356,15 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 								{item.label}
 							</div>
 							<div className="text-foreground">
-								{item.value}
+								{item.isColored ? (
+									<span 
+										dangerouslySetInnerHTML={{
+											__html: colorizeText(item.value)
+										}}
+									/>
+								) : (
+									item.value
+								)}
 							</div>
 						</div>
 					))}
