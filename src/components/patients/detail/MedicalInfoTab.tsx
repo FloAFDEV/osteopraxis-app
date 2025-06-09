@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { differenceInYears, format } from "date-fns";
@@ -126,7 +127,7 @@ export function MedicalInfoTab({
 				{
 					label: "Médecin généraliste",
 					value: patient.generalPractitioner,
-					isImportant: !!patient.generalPractitioner,
+					isImportant: false, // Retiré de la liste important
 				},
 				{
 					label: "Traitement actuel",
