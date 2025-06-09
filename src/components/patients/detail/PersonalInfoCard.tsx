@@ -196,7 +196,7 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		// Sur desktop, positionner en dessous de la PatientInfo card
 		// PatientInfo fait environ 300px + padding, on ajoute une marge de sécurité
 		return "sticky self-start max-h-[calc(100vh-25rem)] overflow-y-auto pb-8" + 
-			   " top-[22rem]"; // Position en dessous de PatientInfo
+			   " top-[30rem]"; // Position en dessous de PatientInfo
 	};
 
 	return (
