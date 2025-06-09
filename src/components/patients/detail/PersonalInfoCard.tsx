@@ -1,5 +1,4 @@
 
-
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Patient } from "@/types";
@@ -10,6 +9,7 @@ import {
 	Cigarette,
 	Heart,
 	AlertTriangle,
+	Stethoscope,
 } from "lucide-react";
 
 interface PersonalInfoCardProps {
@@ -126,6 +126,29 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		return trauma || fractures || null;
 	};
 
+	// Collecte de tous les problèmes médicaux
+	const getMedicalProblems = () => {
+		const problems = [];
+		
+		if (patient.entProblems) problems.push(`ORL: ${patient.entProblems}`);
+		if (patient.digestiveProblems) problems.push(`Digestif: ${patient.digestiveProblems}`);
+		if (patient.allergies && patient.allergies !== "NULL") problems.push(`Allergies: ${patient.allergies}`);
+		if (patient.currentTreatment) problems.push(`Traitement: ${patient.currentTreatment}`);
+		if (patient.surgicalHistory) problems.push(`Chirurgie: ${patient.surgicalHistory}`);
+		if (patient.traumaHistory) problems.push(`Traumatismes: ${patient.traumaHistory}`);
+		if (patient.fracture_history) problems.push(`Fractures: ${patient.fracture_history}`);
+		if (patient.rheumatologicalHistory) problems.push(`Rhumatologie: ${patient.rheumatologicalHistory}`);
+		if (patient.dental_health && (patient.dental_health.toLowerCase().includes("problème") || patient.dental_health.toLowerCase().includes("douleur"))) {
+			problems.push(`Dentaire: ${patient.dental_health}`);
+		}
+		if (patient.sleep_quality && (patient.sleep_quality.toLowerCase().includes("mauvais") || patient.sleep_quality.toLowerCase().includes("trouble"))) {
+			problems.push(`Sommeil: ${patient.sleep_quality}`);
+		}
+		if (patient.gynecological_history) problems.push(`Gynécologique: ${patient.gynecological_history}`);
+		
+		return problems;
+	};
+
 	const personalInfoItems = [
 		{
 			label: (
@@ -172,11 +195,34 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 			),
 			value: translateContraception(patient.contraception) || "Non concerné(e) / Non renseigné(e)",
 		},
+		{
+			label: (
+				<span className="flex items-center gap-2 text-teal-700">
+					<Stethoscope className="w-3 h-3 md:w-4 md:h-4 text-teal-500" />
+					Médecin généraliste
+				</span>
+			),
+			value: patient.generalPractitioner || "Non renseigné",
+		},
 	];
 
-	// Ajouter traumatismes et fractures s'il y en a
+	// Ajouter les problèmes médicaux s'il y en a
+	const medicalProblems = getMedicalProblems();
+	if (medicalProblems.length > 0) {
+		personalInfoItems.push({
+			label: (
+				<span className="flex items-center gap-2 text-red-600">
+					<AlertTriangle className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
+					Problèmes médicaux
+				</span>
+			),
+			value: medicalProblems.join(" • "),
+		});
+	}
+
+	// Ajouter traumatismes et fractures s'il y en a (en plus des problèmes médicaux pour les cas où ils ne sont pas déjà inclus)
 	const traumaHistory = getTraumaAndFractureHistory();
-	if (traumaHistory) {
+	if (traumaHistory && !medicalProblems.some(p => p.includes("Traumatismes") || p.includes("Fractures"))) {
 		personalInfoItems.push({
 			label: (
 				<span className="flex items-center gap-2 text-red-600">
@@ -222,4 +268,3 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		</Card>
 	);
 }
-

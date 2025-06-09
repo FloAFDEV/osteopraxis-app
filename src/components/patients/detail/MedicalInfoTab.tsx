@@ -126,7 +126,7 @@ export function MedicalInfoTab({
 				{
 					label: "Médecin généraliste",
 					value: patient.generalPractitioner,
-					isImportant: !!patient.generalPractitioner,
+					// Retiré isImportant pour le médecin généraliste
 				},
 				{
 					label: "Traitement actuel",

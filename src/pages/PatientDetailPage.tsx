@@ -1,5 +1,6 @@
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
+import { QuotesTab } from "@/components/patients/detail/QuotesTab";
 import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
 import { PatientHeader } from "@/components/patients/detail/PatientHeader";
 import { PatientInfo } from "@/components/patients/detail/PatientInfo";
@@ -30,6 +31,7 @@ import {
 	Loader2,
 	Stethoscope,
 	Users,
+	FileText,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -46,6 +48,7 @@ const PatientDetailPage = () => {
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 	const historyTabRef = useRef<HTMLElement | null>(null);
+	
 	const getSmokerInfo = () => {
 		if (patient.isSmoker) {
 			return `Fumeur${
@@ -63,6 +66,7 @@ const PatientDetailPage = () => {
 			return "Non-fumeur";
 		}
 	};
+
 	useEffect(() => {
 		const fetchPatientData = async () => {
 			setLoading(true);
@@ -266,7 +270,7 @@ const PatientDetailPage = () => {
 					{/* Left column - Tabs (principal content) - plus large */}
 					<div className="xl:col-span-3 order-2 xl:order-2">
 						<Tabs defaultValue="medical-info">
-							<TabsList className="grid w-full grid-cols-2 md:grid-cols-4 text-xs md:text-sm">
+							<TabsList className="grid w-full grid-cols-2 md:grid-cols-5 text-xs md:text-sm">
 								<TabsTrigger
 									value="medical-info"
 									className="px-2 md:px-4"
@@ -298,6 +302,16 @@ const PatientDetailPage = () => {
 									<span className="sm:hidden">
 										Historique
 									</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="quotes"
+									className="px-2 md:px-4"
+								>
+									<FileText className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-purple-600" />
+									<span className="hidden sm:inline">
+										Devis
+									</span>
+									<span className="sm:hidden">Devis</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="invoices"
@@ -345,6 +359,10 @@ const PatientDetailPage = () => {
 									setViewMode={setViewMode}
 									invoices={invoices}
 								/>
+							</TabsContent>
+
+							<TabsContent value="quotes">
+								<QuotesTab patient={patient} />
 							</TabsContent>
 
 							<TabsContent value="invoices">
