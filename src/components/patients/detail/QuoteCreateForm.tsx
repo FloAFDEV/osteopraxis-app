@@ -37,6 +37,13 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
       return;
     }
 
+    // Validate and convert amount to number
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount) || numericAmount < 0) {
+      toast.error("Veuillez saisir un montant valide");
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -46,7 +53,7 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
         cabinetId: patient.cabinetId,
         title,
         description: description || null,
-        amount: parseFloat(amount),
+        amount: numericAmount,
         validUntil: format(validUntil, 'yyyy-MM-dd'),
         status: "DRAFT",
         notes: notes || null,
@@ -90,6 +97,7 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
                 id="amount"
                 type="number"
                 step="0.01"
+                min="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
