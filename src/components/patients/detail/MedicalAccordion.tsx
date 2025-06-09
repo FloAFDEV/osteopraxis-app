@@ -1,3 +1,4 @@
+
 import {
 	Accordion,
 	AccordionContent,
@@ -52,6 +53,27 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 				return "text-gray-600 dark:text-gray-400";
 			default:
 				return "text-blue-600 dark:text-blue-400";
+		}
+	};
+
+	const getTitleColor = (category?: string) => {
+		switch (category) {
+			case "general":
+				return "text-red-700 dark:text-red-300";
+			case "lifestyle":
+				return "text-green-700 dark:text-green-300";
+			case "sensory":
+				return "text-purple-700 dark:text-purple-300";
+			case "digestive":
+				return "text-orange-700 dark:text-orange-300";
+			case "reproductive":
+				return "text-pink-700 dark:text-pink-300";
+			case "pediatric":
+				return "text-sky-700 dark:text-sky-300";
+			case "additional":
+				return "text-gray-700 dark:text-gray-300";
+			default:
+				return "text-blue-700 dark:text-blue-300";
 		}
 	};
 
@@ -119,6 +141,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 				{sections.map((section, index) => {
 					const Icon = section.icon;
 					const iconColor = getIconColor(section.category);
+					const titleColor = getTitleColor(section.category);
 					const importance = getImportanceLevel(section);
 
 					return (
@@ -134,7 +157,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 							<AccordionTrigger className="px-4 py-3 hover:no-underline bg-gray-50/80 dark:bg-gray-900/30 rounded-t-lg">
 								<div className="flex items-center gap-3 text-left w-full">
 									<Icon className={`h-5 w-5 ${iconColor}`} />
-									<span className="font-medium flex-1">
+									<span className={`font-semibold text-base ${titleColor} flex-1`}>
 										{section.title}
 									</span>
 									{importance && (
