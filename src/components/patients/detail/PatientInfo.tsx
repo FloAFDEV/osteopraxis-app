@@ -1,8 +1,7 @@
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { useSectionNavigation } from "@/hooks/useSectionNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSectionNavigation } from "@/hooks/useSectionNavigation";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
 import {
@@ -109,7 +108,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							{patient.gender ?? "Genre non spécifié"},{" "}
 							{age !== null ? `${age} ans` : "Âge non spécifié"}
 						</p>
-						{age !== null && age < 12 && (
+						{age !== null && age < 18 && (
 							<div className="text-amber-600 text-xs flex items-center mt-1">
 								<Baby className="h-3 w-3 mr-1" />
 								Enfant
@@ -158,40 +157,73 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				{/* Informations de contact compactes */}
 				<div className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-muted-foreground">
 					<div className="flex items-center gap-2">
-						<MapPin className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate">
-							{patient.address || "Adresse non renseignée"}
-						</span>
+						<MapPin className="h-4 w-4 flex-shrink-0" />
+						{patient.address ? (
+							<a
+								href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+									patient.address
+								)}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="truncate hover:underline"
+							>
+								{patient.address}
+							</a>
+						) : (
+							<span className="truncate">
+								Adresse non renseignée
+							</span>
+						)}
+					</div>
+
+					<div className="flex items-center gap-2">
+						<Mail className="h-4 w-4 flex-shrink-0" />
+						{patient.email ? (
+							<a
+								href={`mailto:${patient.email}`}
+								className="truncate hover:underline"
+							>
+								{patient.email}
+							</a>
+						) : (
+							<span className="truncate">
+								Email non renseigné
+							</span>
+						)}
 					</div>
 					<div className="flex items-center gap-2">
-						<Mail className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate">
-							{patient.email || "Email non renseigné"}
-						</span>
+						<Phone className="h-4 w-4 flex-shrink-0" />
+						{patient.phone ? (
+							<a
+								href={`tel:${patient.phone}`}
+								className="truncate hover:underline"
+							>
+								{patient.phone}
+							</a>
+						) : (
+							<span className="truncate">
+								Téléphone non renseigné
+							</span>
+						)}
 					</div>
 					<div className="flex items-center gap-2">
-						<Phone className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate">
-							{patient.phone || "Téléphone non renseigné"}
-						</span>
-					</div>
-					<div className="flex items-center gap-2">
-						<Briefcase className="h-3 w-3 flex-shrink-0" />
+						<Briefcase className="h-4 w-4 flex-shrink-0" />
 						<span className="truncate">
 							{patient.occupation || "Profession non renseignée"}
 						</span>
 					</div>
+
 					{(patient.height || patient.weight) && (
 						<div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm">
 							{patient.height && (
 								<div className="flex items-center gap-1">
-									<Ruler className="h-3 w-3" />
+									<Ruler className="h-4 w-4" />
 									<span>{patient.height}cm</span>
 								</div>
 							)}
 							{patient.weight && (
 								<div className="flex items-center gap-1">
-									<Weight className="h-3 w-3" />
+									<Weight className="h-4 w-4" />
 									<span>{patient.weight}kg</span>
 								</div>
 							)}
