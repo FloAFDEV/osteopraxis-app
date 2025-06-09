@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Quote, QuoteItem, CreateQuotePayload, QuoteStatus } from "@/types";
 
@@ -8,7 +7,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient!Quote_patientId_fkey (firstName, lastName)
+				Patient:patientId (firstName, lastName)
 			`)
 			.order('createdAt', { ascending: false });
 
@@ -17,7 +16,11 @@ export const quoteService = {
 			throw error;
 		}
 
-		return (data || []) as Quote[];
+		return (data || []).map(quote => ({
+			...quote,
+			status: quote.status as QuoteStatus,
+			Patient: quote.Patient && !('error' in quote.Patient) ? quote.Patient : undefined
+		})) as Quote[];
 	},
 
 	async getQuoteById(id: number): Promise<Quote | null> {
@@ -25,7 +28,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient!Quote_patientId_fkey (firstName, lastName),
+				Patient:patientId (firstName, lastName),
 				QuoteItem (*)
 			`)
 			.eq('id', id)
@@ -36,7 +39,11 @@ export const quoteService = {
 			throw error;
 		}
 
-		return data as Quote;
+		return {
+			...data,
+			status: data.status as QuoteStatus,
+			Patient: data.Patient && !('error' in data.Patient) ? data.Patient : undefined
+		} as Quote;
 	},
 
 	async getQuotesByPatientId(patientId: number): Promise<Quote[]> {
@@ -44,7 +51,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient!Quote_patientId_fkey (firstName, lastName),
+				Patient:patientId (firstName, lastName),
 				QuoteItem (*)
 			`)
 			.eq('patientId', patientId)
@@ -55,7 +62,11 @@ export const quoteService = {
 			throw error;
 		}
 
-		return (data || []) as Quote[];
+		return (data || []).map(quote => ({
+			...quote,
+			status: quote.status as QuoteStatus,
+			Patient: quote.Patient && !('error' in quote.Patient) ? quote.Patient : undefined
+		})) as Quote[];
 	},
 
 	async createQuote(quoteData: CreateQuotePayload): Promise<Quote> {
@@ -90,7 +101,10 @@ export const quoteService = {
 			}
 		}
 
-		return newQuote as Quote;
+		return {
+			...newQuote,
+			status: newQuote.status as QuoteStatus
+		} as Quote;
 	},
 
 	async updateQuote(id: number, updates: Partial<Quote>): Promise<Quote> {
@@ -106,7 +120,10 @@ export const quoteService = {
 			throw error;
 		}
 
-		return data as Quote;
+		return {
+			...data,
+			status: data.status as QuoteStatus
+		} as Quote;
 	},
 
 	async updateQuoteStatus(id: number, status: QuoteStatus): Promise<Quote> {
