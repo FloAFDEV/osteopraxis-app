@@ -9,6 +9,7 @@ import { supabaseAppointmentService } from './appointment-service';
 import { supabaseCabinetService } from './cabinet';
 import { supabaseInvoiceService } from './invoice-service';
 import { supabaseOsteopathService } from './osteopath-service';
+import { supabaseQuoteService } from './quote-service';
 
 // Export services with aliases
 export { patientService, supabasePatientService };
@@ -17,6 +18,7 @@ export { supabaseAppointmentService as appointmentService };
 export { supabaseCabinetService as cabinetService };
 export { supabaseInvoiceService as invoiceService };
 export { supabaseOsteopathService as osteopathService };
+export { supabaseQuoteService as quoteService };
 
 // Export a convenient single API object with all services
 export const supabaseApi = {
@@ -25,5 +27,6 @@ export const supabaseApi = {
   appointments: supabaseAppointmentService,
   cabinets: supabaseCabinetService,
   invoices: supabaseInvoiceService,
-  osteopaths: supabaseOsteopathService
+  osteopaths: supabaseOsteopathService,
+  quotes: supabaseQuoteService
 };
