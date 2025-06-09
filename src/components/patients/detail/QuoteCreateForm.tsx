@@ -44,13 +44,13 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
         
         // Charger les informations de l'ostéopathe
         if (patient.osteopathId) {
-          const osteopath = await api.getOsteopathById(patient.osteopathId);
+          const osteopath = await api.getOsteopathById(Number(patient.osteopathId));
           setOsteopathInfo(osteopath);
         }
         
         // Charger les informations du cabinet
         if (patient.cabinetId) {
-          const cabinet = await api.getCabinetById(patient.cabinetId);
+          const cabinet = await api.getCabinetById(Number(patient.cabinetId));
           setCabinetInfo(cabinet);
         }
       } catch (error) {
@@ -83,8 +83,8 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
       
       const quoteData: CreateQuotePayload = {
         patientId: patient.id,
-        osteopathId: patient.osteopathId,
-        cabinetId: patient.cabinetId,
+        osteopathId: Number(patient.osteopathId),
+        cabinetId: patient.cabinetId ? Number(patient.cabinetId) : null,
         title,
         description: description || null,
         amount: numericAmount,
@@ -166,6 +166,28 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
                 <p className="text-blue-700">TVA non applicable, article 261-4-1° du CGI</p>
               </div>
             </div>
+            
+            {/* Tampon/Signature */}
+            {osteopathInfo?.stampUrl && (
+              <div className="mt-4 pt-4 border-t border-blue-200">
+                <Label className="text-blue-800 font-medium">Tampon/Signature</Label>
+                <div className="mt-2 flex items-center justify-center bg-white rounded p-2 border">
+                  <img 
+                    src={osteopathInfo.stampUrl} 
+                    alt="Tampon/Signature professionnel" 
+                    className="max-h-[80px] w-auto object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                    }}
+                  />
+                </div>
+                <p className="text-blue-600 text-xs mt-1">
+                  Ce tampon/signature sera inclus dans le devis. 
+                  Vous pouvez le modifier dans les paramètres du cabinet.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Détails du devis */}
@@ -285,9 +307,12 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
           {/* Note importante */}
           <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
             <p className="text-amber-800 text-sm">
-              <strong>Important :</strong> Le tampon et la signature seront ajoutés lors de l'impression du devis.
+              <strong>Important :</strong> Le tampon et la signature sont récupérés depuis les paramètres du cabinet et seront automatiquement inclus dans le devis.
               {!osteopathInfo?.rpps_number && !osteopathInfo?.siret && (
                 " Pensez à compléter les informations RPPS/SIRET dans les paramètres du cabinet."
+              )}
+              {!osteopathInfo?.stampUrl && (
+                " Vous pouvez ajouter un tampon/signature dans les paramètres du cabinet pour qu'il apparaisse sur vos devis."
               )}
             </p>
           </div>
