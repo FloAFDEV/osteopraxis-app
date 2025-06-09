@@ -15,6 +15,7 @@ import { Patient, CreateQuotePayload } from "@/types";
 import { quoteService } from "@/services/quote-service";
 import { api } from "@/services/api";
 import { toast } from "sonner";
+import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentOsteopath";
 
 interface QuoteCreateFormProps {
   patient: Patient;
@@ -35,6 +36,7 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
   const [osteopathInfo, setOsteopathInfo] = useState<any>(null);
   const [cabinetInfo, setCabinetInfo] = useState<any>(null);
   const [loadingInfo, setLoadingInfo] = useState(true);
+  const [currentOsteopathId, setCurrentOsteopathId] = useState<number | null>(null);
 
   // Charger les informations de l'ostéopathe et du cabinet
   useEffect(() => {
@@ -42,9 +44,13 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
       try {
         setLoadingInfo(true);
         
+        // Récupérer l'ID de l'ostéopathe connecté
+        const osteopathId = await getCurrentOsteopathId();
+        setCurrentOsteopathId(osteopathId);
+        
         // Charger les informations de l'ostéopathe
-        if (patient.osteopathId) {
-          const osteopath = await api.getOsteopathById(Number(patient.osteopathId));
+        if (osteopathId) {
+          const osteopath = await api.getOsteopathById(osteopathId);
           setOsteopathInfo(osteopath);
         }
         
@@ -61,13 +67,18 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
     };
 
     loadLegalInfo();
-  }, [patient.osteopathId, patient.cabinetId]);
+  }, [patient.cabinetId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title || !amount) {
       toast.error("Veuillez remplir les champs obligatoires");
+      return;
+    }
+
+    if (!currentOsteopathId) {
+      toast.error("Impossible de récupérer les informations de l'ostéopathe");
       return;
     }
 
@@ -83,7 +94,7 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
       
       const quoteData: CreateQuotePayload = {
         patientId: patient.id,
-        osteopathId: Number(patient.osteopathId),
+        osteopathId: currentOsteopathId,
         cabinetId: patient.cabinetId ? Number(patient.cabinetId) : null,
         title,
         description: description || null,
@@ -93,6 +104,7 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
         notes: notes || null,
       };
 
+      console.log('Création du devis avec les données:', quoteData);
       await quoteService.createQuote(quoteData);
       toast.success("Devis créé avec succès");
       onSuccess();
