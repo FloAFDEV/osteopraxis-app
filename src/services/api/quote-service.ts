@@ -1,13 +1,17 @@
 
 import { Quote, CreateQuoteData, UpdateQuoteData } from "@/types";
 import { USE_SUPABASE } from "./config";
+import { supabaseQuoteService } from "../supabase-api/quote-service";
 
 export const quoteService = {
   async getQuotes(): Promise<Quote[]> {
     if (USE_SUPABASE) {
-      // TODO: Implémenter avec Supabase
-      console.log("getQuotes avec Supabase - à implémenter");
-      return [];
+      try {
+        return await supabaseQuoteService.getQuotes();
+      } catch (error) {
+        console.error("Erreur Supabase getQuotes:", error);
+        return [];
+      }
     }
     
     // Mock implementation
@@ -16,9 +20,12 @@ export const quoteService = {
 
   async getQuoteById(id: number): Promise<Quote | undefined> {
     if (USE_SUPABASE) {
-      // TODO: Implémenter avec Supabase
-      console.log("getQuoteById avec Supabase - à implémenter");
-      return undefined;
+      try {
+        return await supabaseQuoteService.getQuoteById(id) || undefined;
+      } catch (error) {
+        console.error("Erreur Supabase getQuoteById:", error);
+        return undefined;
+      }
     }
     
     // Mock implementation
@@ -27,9 +34,12 @@ export const quoteService = {
 
   async getQuotesByPatientId(patientId: number): Promise<Quote[]> {
     if (USE_SUPABASE) {
-      // TODO: Implémenter avec Supabase
-      console.log("getQuotesByPatientId avec Supabase - à implémenter");
-      return [];
+      try {
+        return await supabaseQuoteService.getQuotesByPatientId(patientId);
+      } catch (error) {
+        console.error("Erreur Supabase getQuotesByPatientId:", error);
+        return [];
+      }
     }
     
     // Mock implementation
@@ -38,14 +48,12 @@ export const quoteService = {
 
   async createQuote(quoteData: CreateQuoteData): Promise<Quote> {
     if (USE_SUPABASE) {
-      // TODO: Implémenter avec Supabase
-      console.log("createQuote avec Supabase - à implémenter");
-      return {
-        id: Math.floor(Math.random() * 1000),
-        ...quoteData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      } as Quote;
+      try {
+        return await supabaseQuoteService.createQuote(quoteData);
+      } catch (error) {
+        console.error("Erreur Supabase createQuote:", error);
+        throw error;
+      }
     }
     
     // Mock implementation
@@ -59,9 +67,12 @@ export const quoteService = {
 
   async updateQuote(id: number, quoteData: UpdateQuoteData): Promise<Quote | undefined> {
     if (USE_SUPABASE) {
-      // TODO: Implémenter avec Supabase
-      console.log("updateQuote avec Supabase - à implémenter");
-      return undefined;
+      try {
+        return await supabaseQuoteService.updateQuote(id, quoteData);
+      } catch (error) {
+        console.error("Erreur Supabase updateQuote:", error);
+        return undefined;
+      }
     }
     
     // Mock implementation
@@ -73,9 +84,13 @@ export const quoteService = {
 
   async deleteQuote(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
-      // TODO: Implémenter avec Supabase
-      console.log("deleteQuote avec Supabase - à implémenter");
-      return true;
+      try {
+        const result = await supabaseQuoteService.deleteQuote(id);
+        return !result.error;
+      } catch (error) {
+        console.error("Erreur Supabase deleteQuote:", error);
+        return false;
+      }
     }
     
     // Mock implementation
@@ -84,9 +99,12 @@ export const quoteService = {
 
   async sendQuote(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
-      // TODO: Implémenter avec Supabase - envoi par email
-      console.log("sendQuote avec Supabase - à implémenter");
-      return true;
+      try {
+        return await supabaseQuoteService.sendQuote(id);
+      } catch (error) {
+        console.error("Erreur Supabase sendQuote:", error);
+        return false;
+      }
     }
     
     // Mock implementation

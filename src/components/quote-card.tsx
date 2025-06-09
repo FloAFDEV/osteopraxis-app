@@ -22,11 +22,11 @@ export function QuoteCard({ quote, onEdit, onSend, onDelete }: QuoteCardProps) {
       case "SENT":
         return <Badge variant="default">Envoyé</Badge>;
       case "ACCEPTED":
-        return <Badge variant="success">Accepté</Badge>;
+        return <Badge variant="default" className="bg-green-500 hover:bg-green-600">Accepté</Badge>;
       case "REJECTED":
         return <Badge variant="destructive">Refusé</Badge>;
       case "EXPIRED":
-        return <Badge variant="warning">Expiré</Badge>;
+        return <Badge variant="outline" className="border-orange-500 text-orange-700">Expiré</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
