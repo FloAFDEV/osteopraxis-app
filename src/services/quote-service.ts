@@ -17,7 +17,7 @@ export const quoteService = {
 			throw error;
 		}
 
-		return data || [];
+		return (data || []) as Quote[];
 	},
 
 	async getQuoteById(id: number): Promise<Quote | null> {
@@ -36,7 +36,7 @@ export const quoteService = {
 			throw error;
 		}
 
-		return data;
+		return data as Quote;
 	},
 
 	async getQuotesByPatientId(patientId: number): Promise<Quote[]> {
@@ -55,7 +55,7 @@ export const quoteService = {
 			throw error;
 		}
 
-		return data || [];
+		return (data || []) as Quote[];
 	},
 
 	async createQuote(quoteData: CreateQuotePayload): Promise<Quote> {
@@ -90,7 +90,7 @@ export const quoteService = {
 			}
 		}
 
-		return newQuote;
+		return newQuote as Quote;
 	},
 
 	async updateQuote(id: number, updates: Partial<Quote>): Promise<Quote> {
@@ -106,7 +106,7 @@ export const quoteService = {
 			throw error;
 		}
 
-		return data;
+		return data as Quote;
 	},
 
 	async updateQuoteStatus(id: number, status: QuoteStatus): Promise<Quote> {
