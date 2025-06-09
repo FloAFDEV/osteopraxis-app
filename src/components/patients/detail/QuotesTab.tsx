@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,17 +9,21 @@ import { FileText, Plus, Eye, Edit, Send, CheckCircle, XCircle, Clock, AlertTria
 import { useState, useEffect } from "react";
 import { quoteService } from "@/services/quote-service";
 import { toast } from "sonner";
+import { QuoteCreateForm } from "./QuoteCreateForm";
+
 interface QuotesTabProps {
   patient: Patient;
 }
-export function QuotesTab({
-  patient
-}: QuotesTabProps) {
+
+export function QuotesTab({ patient }: QuotesTabProps) {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
   useEffect(() => {
     loadQuotes();
   }, [patient.id]);
+
   const loadQuotes = async () => {
     try {
       setLoading(true);
@@ -31,6 +36,12 @@ export function QuotesTab({
       setLoading(false);
     }
   };
+
+  const handleCreateSuccess = () => {
+    setShowCreateForm(false);
+    loadQuotes();
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'DRAFT':
@@ -47,6 +58,7 @@ export function QuotesTab({
         return <FileText className="h-4 w-4" />;
     }
   };
+
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'DRAFT':
@@ -63,6 +75,7 @@ export function QuotesTab({
         return status;
     }
   };
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'DRAFT':
@@ -79,101 +92,123 @@ export function QuotesTab({
         return 'secondary';
     }
   };
+
   if (loading) {
-    return <div className="flex justify-center items-center py-8">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-			</div>;
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
-  return <div className="space-y-6">
-			<div className="flex justify-between items-center">
-				<h3 className="text-lg font-semibold">Devis pour {patient.firstName} {patient.lastName}</h3>
-				<Button className="flex items-center gap-2">
-					<Plus className="h-4 w-4" />
-					Nouveau devis
-				</Button>
-			</div>
 
-			{quotes.length === 0 ? <Card>
-					<CardContent className="py-8 text-center">
-						<FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-						<h3 className="text-lg font-medium mb-2">Aucun devis</h3>
-						<p className="text-muted-foreground mb-4">
-							Aucun devis n'a encore été créé pour ce patient.
-						</p>
-						
-					</CardContent>
-				</Card> : <div className="grid gap-4">
-					{quotes.map(quote => <Card key={quote.id} className="hover:shadow-md transition-shadow">
-							<CardHeader className="pb-3">
-								<div className="flex justify-between items-start">
-									<div>
-										<CardTitle className="text-base flex items-center gap-2">
-											<FileText className="h-5 w-5 text-blue-500" />
-											{quote.title}
-										</CardTitle>
-										<p className="text-sm text-muted-foreground mt-1">
-											Créé le {format(new Date(quote.createdAt), 'dd MMMM yyyy', {
-                  locale: fr
-                })}
-										</p>
-									</div>
-									<Badge variant={getStatusVariant(quote.status) as any} className="flex items-center gap-1">
-										{getStatusIcon(quote.status)}
-										{getStatusLabel(quote.status)}
-									</Badge>
-								</div>
-							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-									<div>
-										<span className="text-sm font-medium text-muted-foreground">Montant</span>
-										<p className="text-lg font-semibold">{quote.amount.toFixed(2)} €</p>
-									</div>
-									<div>
-										<span className="text-sm font-medium text-muted-foreground">Valide jusqu'au</span>
-										<p className="text-sm flex items-center gap-1">
-											<Clock className="h-3 w-3" />
-											{format(new Date(quote.validUntil), 'dd/MM/yyyy', {
-                  locale: fr
-                })}
-										</p>
-									</div>
-									<div>
-										<span className="text-sm font-medium text-muted-foreground">Dernière modification</span>
-										<p className="text-sm">
-											{format(new Date(quote.updatedAt), 'dd/MM/yyyy', {
-                  locale: fr
-                })}
-										</p>
-									</div>
-								</div>
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Devis pour {patient.firstName} {patient.lastName}</h3>
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => setShowCreateForm(true)}
+        >
+          <Plus className="h-4 w-4" />
+          Nouveau devis
+        </Button>
+      </div>
 
-								{quote.description && <div className="mb-4">
-										<span className="text-sm font-medium text-muted-foreground">Description</span>
-										<p className="text-sm mt-1">{quote.description}</p>
-									</div>}
+      {showCreateForm && (
+        <QuoteCreateForm
+          patient={patient}
+          onSuccess={handleCreateSuccess}
+          onCancel={() => setShowCreateForm(false)}
+        />
+      )}
 
-								{quote.notes && <div className="mb-4">
-										<span className="text-sm font-medium text-muted-foreground">Notes</span>
-										<p className="text-sm mt-1 italic">{quote.notes}</p>
-									</div>}
+      {quotes.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Aucun devis</h3>
+            <p className="text-muted-foreground mb-4">
+              Aucun devis n'a encore été créé pour ce patient.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {quotes.map((quote) => (
+            <Card key={quote.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-blue-500" />
+                      {quote.title}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Créé le {format(new Date(quote.createdAt), 'dd MMMM yyyy', { locale: fr })}
+                    </p>
+                  </div>
+                  <Badge variant={getStatusVariant(quote.status) as any} className="flex items-center gap-1">
+                    {getStatusIcon(quote.status)}
+                    {getStatusLabel(quote.status)}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Montant</span>
+                    <p className="text-lg font-semibold">{quote.amount.toFixed(2)} €</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Valide jusqu'au</span>
+                    <p className="text-sm flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: fr })}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Dernière modification</span>
+                    <p className="text-sm">
+                      {format(new Date(quote.updatedAt), 'dd/MM/yyyy', { locale: fr })}
+                    </p>
+                  </div>
+                </div>
 
-								<div className="flex justify-end gap-2">
-									<Button variant="outline" size="sm" className="flex items-center gap-1">
-										<Eye className="h-3 w-3" />
-										Voir
-									</Button>
-									<Button variant="outline" size="sm" className="flex items-center gap-1">
-										<Edit className="h-3 w-3" />
-										Modifier
-									</Button>
-									{quote.status === 'DRAFT' && <Button size="sm" className="flex items-center gap-1">
-											<Send className="h-3 w-3" />
-											Envoyer
-										</Button>}
-								</div>
-							</CardContent>
-						</Card>)}
-				</div>}
-		</div>;
+                {quote.description && (
+                  <div className="mb-4">
+                    <span className="text-sm font-medium text-muted-foreground">Description</span>
+                    <p className="text-sm mt-1">{quote.description}</p>
+                  </div>
+                )}
+
+                {quote.notes && (
+                  <div className="mb-4">
+                    <span className="text-sm font-medium text-muted-foreground">Notes</span>
+                    <p className="text-sm mt-1 italic">{quote.notes}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    Voir
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                    <Edit className="h-3 w-3" />
+                    Modifier
+                  </Button>
+                  {quote.status === 'DRAFT' && (
+                    <Button size="sm" className="flex items-center gap-1">
+                      <Send className="h-3 w-3" />
+                      Envoyer
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

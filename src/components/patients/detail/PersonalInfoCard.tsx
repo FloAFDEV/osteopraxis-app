@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Patient } from "@/types";
@@ -121,14 +122,16 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		}
 	};
 
+	// Combine traumatismes et fractures ensemble
 	const getTraumaAndFractureHistory = () => {
 		const trauma = patient.traumaHistory;
 		const fractures = patient.fracture_history;
-
-		if (trauma && fractures) {
-			return `${trauma} | ${fractures}`;
-		}
-		return trauma || fractures || null;
+		
+		const combinedTrauma = [];
+		if (trauma) combinedTrauma.push(trauma);
+		if (fractures) combinedTrauma.push(fractures);
+		
+		return combinedTrauma.length > 0 ? combinedTrauma.join(", ") : null;
 	};
 
 	// Fonction pour colorer les parties du texte selon le type médical
@@ -166,15 +169,9 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 				category: "general",
 			},
 			{
-				pattern: /Traumatismes:/g,
+				pattern: /Traumatismes et fractures:/g,
 				replacement:
-					'<span class="text-red-600 dark:text-red-400 font-semibold">Traumatismes:</span>',
-				category: "general",
-			},
-			{
-				pattern: /Fractures:/g,
-				replacement:
-					'<span class="text-red-600 dark:text-red-400 font-semibold">Fractures:</span>',
+					'<span class="text-red-600 dark:text-red-400 font-semibold">Traumatismes et fractures:</span>',
 				category: "general",
 			},
 			{
@@ -224,12 +221,6 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 			problems.push(`Traitement: ${patient.currentTreatment}`);
 		if (patient.surgicalHistory)
 			problems.push(`Chirurgie: ${patient.surgicalHistory}`);
-		if (patient.traumaHistory) patient.fracture_history;
-		problems.push(
-			`Traumatismes: ${patient.traumaHistory}, ${patient.fracture_history}`
-		);
-		if (patient.fracture_history)
-			problems.push(`Fractures: ${patient.fracture_history}`);
 		if (patient.rheumatologicalHistory)
 			problems.push(`Rhumatologie: ${patient.rheumatologicalHistory}`);
 		if (
@@ -248,6 +239,12 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		}
 		if (patient.gynecological_history)
 			problems.push(`Gynécologique: ${patient.gynecological_history}`);
+
+		// Ajouter traumatismes et fractures combinés
+		const traumaHistory = getTraumaAndFractureHistory();
+		if (traumaHistory) {
+			problems.push(`Traumatismes et fractures: ${traumaHistory}`);
+		}
 
 		return problems;
 	};
@@ -327,25 +324,6 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 				.map((p) => `<li>${p}</li>`)
 				.join("")}</ul>`,
 			isColored: true, // Marquer cet item pour la colorisation
-		});
-	}
-
-	// Ajouter traumatismes et fractures s'il y en a (en plus des problèmes médicaux pour les cas où ils ne sont pas déjà inclus)
-	const traumaHistory = getTraumaAndFractureHistory();
-	if (
-		traumaHistory &&
-		!medicalProblems.some(
-			(p) => p.includes("Traumatismes") || p.includes("Fractures")
-		)
-	) {
-		personalInfoItems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<AlertTriangle className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Traumatismes et fractures
-				</span>
-			),
-			value: traumaHistory,
 		});
 	}
 
