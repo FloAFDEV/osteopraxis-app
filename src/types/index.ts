@@ -182,3 +182,34 @@ export type QuoteStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED'
 
 export interface CreateQuoteData extends Omit<Quote, 'id' | 'createdAt' | 'updatedAt'> {}
 export interface UpdateQuoteData extends Partial<Omit<Quote, 'id' | 'createdAt' | 'updatedAt'>> {}
+
+// Types manquants pour corriger les erreurs de build
+export interface DashboardData {
+  totalPatients: number;
+  totalAppointments: number;
+  monthlyRevenue: number;
+  growthRate: number;
+  recentAppointments: Appointment[];
+  monthlyStats: Array<{
+    month: string;
+    appointments: number;
+    revenue: number;
+    patients: number;
+  }>;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  loading: boolean;
+}
+
+export interface CreateAppointmentPayload {
+  patientId: number;
+  osteopathId: number;
+  cabinetId?: number;
+  date: string;
+  reason: string;
+  notes?: string;
+  status?: AppointmentStatus;
+}

@@ -13,6 +13,7 @@ import {
 	Eye,
 	Ear,
 	Soup,
+	Activity,
 } from "lucide-react";
 
 interface PersonalInfoCardProps {
@@ -130,6 +131,16 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 	};
 
 	const personalInfoItems = [
+		// Traitement actuel en premier (information critique)
+		...(patient.currentTreatment ? [{
+			label: (
+				<span className="flex items-center gap-2 text-red-600">
+					<Activity className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
+					Traitement actuel
+				</span>
+			),
+			value: patient.currentTreatment,
+		}] : []),
 		{
 			label: (
 				<span className="flex items-center gap-2 text-pink-600">
@@ -342,7 +353,7 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		<Card className={`w-auto max-w-[400px] h-fit ${getStickyClasses()}`}>
 			<CardContent className="p-3 md:p-4 lg:p-5">
 				<CardTitle className="text-sm md:text-base lg:text-lg font-bold mb-3 md:mb-4">
-					Informations personnelles
+					Informations essentielles
 				</CardTitle>
 				
 				<div className="space-y-3">
