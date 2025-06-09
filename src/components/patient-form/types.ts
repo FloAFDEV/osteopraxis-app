@@ -8,7 +8,7 @@ export interface PatientFormValues {
   phone?: string | null;
   birthDate?: string | null;
   address?: string | null;
-  gender?: "Homme" | "Femme" | null; // Updated to match Patient interface
+  gender?: "MALE" | "FEMALE" | "OTHER" | "Homme" | "Femme" | null;
   height?: number | null;
   weight?: number | null;
   bmi?: number | null;

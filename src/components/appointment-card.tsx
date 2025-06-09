@@ -34,8 +34,8 @@ export function AppointmentCard({
 	onEdit,
 	onCancel,
 }: AppointmentCardProps) {
-	// Use date field for both start and date compatibility
-	const dateField = appointment.date;
+	// Utiliser start si disponible, sinon utiliser date pour la compatibilité
+	const dateField = appointment.start || appointment.date;
 	const formattedDate = formatAppointmentDate(dateField, "EEEE d MMMM yyyy");
 	const formattedTime = formatAppointmentTime(dateField);
 	const isChild = patient?.birthDate

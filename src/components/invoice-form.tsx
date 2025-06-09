@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -35,7 +34,7 @@ const formSchema = z.object({
 	appointmentId: z.number().optional(),
 	amount: z.number().min(0, "Le montant doit être positif"),
 	date: z.string(),
-	paymentStatus: z.enum(["PAID", "PENDING", "OVERDUE", "CANCELLED"]), // Updated to include all PaymentStatus values
+	paymentStatus: z.enum(["PAID", "PENDING", "CANCELED"]),
 	paymentMethod: z.string().optional(),
 	tvaExoneration: z.boolean().optional(),
 	tvaMotif: z.string().optional(),
@@ -403,10 +402,7 @@ export const InvoiceForm = ({
 									<SelectItem value="PENDING">
 										En attente
 									</SelectItem>
-									<SelectItem value="OVERDUE">
-										En retard
-									</SelectItem>
-									<SelectItem value="CANCELLED">
+									<SelectItem value="CANCELED">
 										Annulée
 									</SelectItem>
 								</SelectContent>
