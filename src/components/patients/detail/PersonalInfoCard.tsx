@@ -1,5 +1,7 @@
 
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Patient } from "@/types";
 import {
 	Users,
@@ -15,6 +17,8 @@ interface PersonalInfoCardProps {
 }
 
 export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
+	const { isMobile } = useIsMobile();
+
 	const getSmokerInfo = () => {
 		if (patient.isSmoker) {
 			return `Fumeur${
@@ -184,8 +188,19 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		});
 	}
 
+	// Modifier le comportement sticky pour éviter le chevauchement avec PatientInfo
+	const getStickyClasses = () => {
+		if (isMobile) {
+			return ""; // Pas de sticky sur mobile
+		}
+		// Sur desktop, positionner en dessous de la PatientInfo card
+		// PatientInfo fait environ 300px + padding, on ajoute une marge de sécurité
+		return "sticky self-start max-h-[calc(100vh-25rem)] overflow-y-auto pb-8" + 
+			   " top-[22rem]"; // Position en dessous de PatientInfo
+	};
+
 	return (
-		<Card className="w-auto max-w-[400px] h-fit sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pb-8">
+		<Card className={`w-auto max-w-[400px] h-fit ${getStickyClasses()}`}>
 			<CardContent className="p-3 md:p-4 lg:p-5">
 				<CardTitle className="text-sm md:text-base lg:text-lg font-bold mb-3 md:mb-4">
 					Informations personnelles
@@ -207,3 +222,4 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		</Card>
 	);
 }
+
