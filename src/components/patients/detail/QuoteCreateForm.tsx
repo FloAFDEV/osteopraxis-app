@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Patient, CreateQuotePayload } from "@/types";
 import { quoteService } from "@/services/quote-service";
+import { api } from "@/services/api";
 import { toast } from "sonner";
 
 interface QuoteCreateFormProps {
@@ -29,6 +30,38 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
   const [consultationDate, setConsultationDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // États pour les informations légales
+  const [osteopathInfo, setOsteopathInfo] = useState<any>(null);
+  const [cabinetInfo, setCabinetInfo] = useState<any>(null);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+
+  // Charger les informations de l'ostéopathe et du cabinet
+  useEffect(() => {
+    const loadLegalInfo = async () => {
+      try {
+        setLoadingInfo(true);
+        
+        // Charger les informations de l'ostéopathe
+        if (patient.osteopathId) {
+          const osteopath = await api.getOsteopathById(patient.osteopathId);
+          setOsteopathInfo(osteopath);
+        }
+        
+        // Charger les informations du cabinet
+        if (patient.cabinetId) {
+          const cabinet = await api.getCabinetById(patient.cabinetId);
+          setCabinetInfo(cabinet);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des informations légales:', error);
+      } finally {
+        setLoadingInfo(false);
+      }
+    };
+
+    loadLegalInfo();
+  }, [patient.osteopathId, patient.cabinetId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +71,7 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
       return;
     }
 
-    // Validate and convert amount to number
+    // Validation et conversion du montant en nombre
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount < 0) {
       toast.error("Veuillez saisir un montant valide");
@@ -71,6 +104,17 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
     }
   };
 
+  if (loadingInfo) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Chargement des informations...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -87,17 +131,35 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <Label className="text-blue-800 font-medium">Ostéopathe</Label>
-                <p className="text-blue-700">Nom et adresse requis</p>
-                <p className="text-xs text-blue-600 mt-1">À compléter dans les paramètres du cabinet</p>
+                {osteopathInfo ? (
+                  <div className="text-blue-700">
+                    <p>{osteopathInfo.name}</p>
+                    {cabinetInfo?.address && <p>{cabinetInfo.address}</p>}
+                  </div>
+                ) : (
+                  <p className="text-blue-600 text-xs">Informations non disponibles</p>
+                )}
               </div>
               <div>
                 <Label className="text-blue-800 font-medium">Patient</Label>
-                <p className="text-blue-700">{patient.firstName} {patient.lastName}</p>
-                <p className="text-blue-700">{patient.address || "Adresse non renseignée"}</p>
+                <div className="text-blue-700">
+                  <p>{patient.firstName} {patient.lastName}</p>
+                  <p>{patient.address || "Adresse non renseignée"}</p>
+                </div>
               </div>
               <div>
                 <Label className="text-blue-800 font-medium">Numéro RPPS/SIRET</Label>
-                <p className="text-blue-700">À compléter dans les paramètres</p>
+                {osteopathInfo ? (
+                  <div className="text-blue-700">
+                    {osteopathInfo.rpps_number && <p>RPPS: {osteopathInfo.rpps_number}</p>}
+                    {osteopathInfo.siret && <p>SIRET: {osteopathInfo.siret}</p>}
+                    {!osteopathInfo.rpps_number && !osteopathInfo.siret && (
+                      <p className="text-blue-600 text-xs">Numéro en cours d'attribution</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-blue-600 text-xs">Numéro en cours d'attribution</p>
+                )}
               </div>
               <div>
                 <Label className="text-blue-800 font-medium">TVA</Label>
@@ -223,8 +285,10 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
           {/* Note importante */}
           <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
             <p className="text-amber-800 text-sm">
-              <strong>Important :</strong> Pour que ce devis soit conforme, vous devez compléter les informations de l'ostéopathe 
-              (nom, adresse, RPPS/SIRET) dans les paramètres du cabinet. Le tampon et la signature seront ajoutés lors de l'impression.
+              <strong>Important :</strong> Le tampon et la signature seront ajoutés lors de l'impression du devis.
+              {!osteopathInfo?.rpps_number && !osteopathInfo?.siret && (
+                " Pensez à compléter les informations RPPS/SIRET dans les paramètres du cabinet."
+              )}
             </p>
           </div>
 
