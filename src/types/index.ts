@@ -88,6 +88,7 @@ export interface Appointment {
   osteopathId: number;
   cabinetId?: number;
   date: string;
+  start?: string; // Add optional start property for compatibility
   reason: string;
   notes?: string;
   status: AppointmentStatus;
@@ -111,6 +112,11 @@ export interface Invoice {
   cabinetId?: number;
   createdAt?: string;
   updatedAt?: string;
+  Patient?: {
+    firstName: string;
+    lastName: string;
+    email?: string;
+  };
 }
 
 export interface Cabinet {
@@ -146,6 +152,8 @@ export interface User {
   email: string;
   first_name?: string;
   last_name?: string;
+  firstName?: string; // Add for compatibility
+  lastName?: string; // Add for compatibility
   role: "OSTEOPATH" | "ADMIN";
   osteopathId?: number;
   auth_id?: string;
@@ -183,14 +191,54 @@ export type QuoteStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED'
 export interface CreateQuoteData extends Omit<Quote, 'id' | 'createdAt' | 'updatedAt'> {}
 export interface UpdateQuoteData extends Partial<Omit<Quote, 'id' | 'createdAt' | 'updatedAt'>> {}
 
-// Types manquants pour corriger les erreurs de build
+// Complete DashboardData interface with all required properties
 export interface DashboardData {
   totalPatients: number;
-  totalAppointments: number;
-  monthlyRevenue: number;
-  growthRate: number;
-  recentAppointments: Appointment[];
-  monthlyStats: Array<{
+  maleCount: number;
+  femaleCount: number;
+  averageAge: number;
+  averageAgeMale: number;
+  averageAgeFemale: number;
+  newPatientsThisMonth: number;
+  newPatientsThisYear: number;
+  newPatientsLastYear: number;
+  appointmentsToday: number;
+  nextAppointment: string;
+  patientsLastYearEnd: number;
+  newPatientsLast30Days: number;
+  thirtyDayGrowthPercentage: number;
+  annualGrowthPercentage: number;
+  monthlyGrowth: Array<{
+    month: string;
+    patients: number;
+    prevPatients: number;
+    growthText: string;
+  }>;
+  childrenCount: number;
+  revenueThisMonth: number;
+  pendingInvoices: number;
+  weeklyAppointments: number[];
+  monthlyRevenue: number[];
+  completedAppointments: number;
+  // Consultation metrics
+  consultationsThisMonth: number;
+  consultationsLastMonth: number;
+  averageConsultationsPerDay: number;
+  averageConsultationsPerMonth: number;
+  consultationsTrend: number;
+  consultationsLast7Days: Array<{
+    day: string;
+    consultations: number;
+  }>;
+  consultationsLast12Months: Array<{
+    month: string;
+    consultations: number;
+  }>;
+  // Legacy properties for compatibility
+  totalAppointments?: number;
+  growthRate?: number;
+  recentAppointments?: Appointment[];
+  monthlyStats?: Array<{
     month: string;
     appointments: number;
     revenue: number;
@@ -202,6 +250,9 @@ export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   loading: boolean;
+  token?: string | null;
+  message?: string;
+  needsProfileSetup?: boolean;
 }
 
 export interface CreateAppointmentPayload {
