@@ -12,6 +12,12 @@ import {
 	Stethoscope,
 } from "lucide-react";
 
+interface PersonalInfoItem {
+	label: JSX.Element;
+	value: string;
+	isColored?: boolean;
+}
+
 interface PersonalInfoCardProps {
 	patient: Patient;
 }
@@ -234,7 +240,7 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		return problems;
 	};
 
-	const personalInfoItems = [
+	const personalInfoItems: PersonalInfoItem[] = [
 		{
 			label: (
 				<span className="flex items-center gap-2 text-pink-600">
