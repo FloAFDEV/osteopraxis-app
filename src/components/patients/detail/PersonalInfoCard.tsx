@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Patient } from "@/types";
@@ -136,61 +135,72 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 	const colorizeText = (text: string) => {
 		// Définition des couleurs selon les catégories (comme dans MedicalAccordion)
 		const patterns = [
-			{ 
-				pattern: /ORL:/g, 
-				replacement: '<span class="text-purple-600 dark:text-purple-400 font-semibold">ORL:</span>',
-				category: 'sensory'
+			{
+				pattern: /ORL:/g,
+				replacement:
+					'<span class="text-purple-600 dark:text-purple-400 font-semibold">ORL:</span>',
+				category: "sensory",
 			},
-			{ 
-				pattern: /Digestif:/g, 
-				replacement: '<span class="text-orange-600 dark:text-orange-400 font-semibold">Digestif:</span>',
-				category: 'digestive'
+			{
+				pattern: /Digestif:/g,
+				replacement:
+					'<span class="text-orange-600 dark:text-orange-400 font-semibold">Digestif:</span>',
+				category: "digestive",
 			},
-			{ 
-				pattern: /Allergies:/g, 
-				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Allergies:</span>',
-				category: 'general'
+			{
+				pattern: /Allergies:/g,
+				replacement:
+					'<span class="text-red-600 dark:text-red-400 font-semibold">Allergies:</span>',
+				category: "general",
 			},
-			{ 
-				pattern: /Traitement:/g, 
-				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Traitement:</span>',
-				category: 'general'
+			{
+				pattern: /Traitement:/g,
+				replacement:
+					'<span class="text-red-600 dark:text-red-400 font-semibold">Traitement:</span>',
+				category: "general",
 			},
-			{ 
-				pattern: /Chirurgie:/g, 
-				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Chirurgie:</span>',
-				category: 'general'
+			{
+				pattern: /Chirurgie:/g,
+				replacement:
+					'<span class="text-red-600 dark:text-red-400 font-semibold">Chirurgie:</span>',
+				category: "general",
 			},
-			{ 
-				pattern: /Traumatismes:/g, 
-				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Traumatismes:</span>',
-				category: 'general'
+			{
+				pattern: /Traumatismes:/g,
+				replacement:
+					'<span class="text-red-600 dark:text-red-400 font-semibold">Traumatismes:</span>',
+				category: "general",
 			},
-			{ 
-				pattern: /Fractures:/g, 
-				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Fractures:</span>',
-				category: 'general'
+			{
+				pattern: /Fractures:/g,
+				replacement:
+					'<span class="text-red-600 dark:text-red-400 font-semibold">Fractures:</span>',
+				category: "general",
 			},
-			{ 
-				pattern: /Rhumatologie:/g, 
-				replacement: '<span class="text-red-600 dark:text-red-400 font-semibold">Rhumatologie:</span>',
-				category: 'general'
+			{
+				pattern: /Rhumatologie:/g,
+				replacement:
+					'<span class="text-red-600 dark:text-red-400 font-semibold">Rhumatologie:</span>',
+				category: "general",
 			},
-			{ 
-				pattern: /Dentaire:/g, 
-				replacement: '<span class="text-purple-600 dark:text-purple-400 font-semibold">Dentaire:</span>',
-				category: 'sensory'
+			{
+				pattern: /Dentaire:/g,
+				replacement:
+					'<span class="text-purple-600 dark:text-purple-400 font-semibold">Dentaire:</span>',
+				category: "sensory",
 			},
-			{ 
-				pattern: /Sommeil:/g, 
-				replacement: '<span class="text-green-600 dark:text-green-400 font-semibold">Sommeil:</span>',
-				category: 'lifestyle'
+			{
+				pattern: /Sommeil:/g,
+				replacement:
+					'<span class="text-green-600 dark:text-green-400 font-semibold">Sommeil:</span>',
+				category: "lifestyle",
 			},
-			{ 
-				pattern: /Gynécologique:/g, 
-				replacement: '<span class="text-pink-600 dark:text-pink-400 font-semibold">Gynécologique:</span>',
-				category: 'reproductive'
-			}
+			{
+				pattern: /Gynécologique:/g,
+				replacement:
+					'<span class="text-pink-600 dark:text-pink-400 font-semibold">Gynécologique:</span>',
+				category: "reproductive",
+			},
 		];
 
 		let colorizedText = text;
@@ -214,8 +224,10 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 			problems.push(`Traitement: ${patient.currentTreatment}`);
 		if (patient.surgicalHistory)
 			problems.push(`Chirurgie: ${patient.surgicalHistory}`);
-		if (patient.traumaHistory)
-			problems.push(`Traumatismes: ${patient.traumaHistory}`);
+		if (patient.traumaHistory) patient.fracture_history;
+		problems.push(
+			`Traumatismes: ${patient.traumaHistory}, ${patient.fracture_history}`
+		);
 		if (patient.fracture_history)
 			problems.push(`Fractures: ${patient.fracture_history}`);
 		if (patient.rheumatologicalHistory)
@@ -311,7 +323,9 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 					Problèmes médicaux
 				</span>
 			),
-			value: medicalProblems.join(" • "),
+			value: `<ul class="list-disc list-inside space-y-1">${medicalProblems
+				.map((p) => `<li>${p}</li>`)
+				.join("")}</ul>`,
 			isColored: true, // Marquer cet item pour la colorisation
 		});
 	}
@@ -352,7 +366,7 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		<Card className={`w-auto max-w-[400px] h-fit ${getStickyClasses()}`}>
 			<CardContent className="p-3 md:p-4 lg:p-5">
 				<CardTitle className="text-sm md:text-base lg:text-lg font-bold mb-3 md:mb-4">
-					Informations personnelles
+					Informations générales
 				</CardTitle>
 
 				<div className="space-y-3">
@@ -363,9 +377,9 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 							</div>
 							<div className="text-foreground">
 								{item.isColored ? (
-									<span 
+									<span
 										dangerouslySetInnerHTML={{
-											__html: colorizeText(item.value)
+											__html: colorizeText(item.value),
 										}}
 									/>
 								) : (
