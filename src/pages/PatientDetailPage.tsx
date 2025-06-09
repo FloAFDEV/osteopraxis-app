@@ -10,8 +10,7 @@ import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
 import { invoiceService } from "@/services/api/invoice-service";
-import { quoteService } from "@/services/api/quote-service";
-import { Appointment, AppointmentStatus, Invoice, Patient, Quote } from "@/types";
+import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
 import {
 	translateContraception,
 	translateHandedness,
@@ -31,15 +30,11 @@ import {
 	Loader2,
 	Stethoscope,
 	Users,
-	FileText,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
-import { QuoteCard } from "@/components/quote-card";
-import { QuoteForm } from "@/components/quote-form";
-import { Button } from "@/components/ui/button";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -49,12 +44,8 @@ const PatientDetailPage = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
-	const [quotes, setQuotes] = useState<Quote[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
-	const [showQuoteForm, setShowQuoteForm] = useState(false);
-	const [editingQuote, setEditingQuote] = useState<Quote | undefined>();
 	const historyTabRef = useRef<HTMLElement | null>(null);
-
 	const getSmokerInfo = () => {
 		if (patient.isSmoker) {
 			return `Fumeur${
@@ -82,18 +73,16 @@ const PatientDetailPage = () => {
 					return;
 				}
 				const patientId = parseInt(id, 10);
-				const [patientData, appointmentsData, invoicesData, quotesData] =
+				const [patientData, appointmentsData, invoicesData] =
 					await Promise.all([
 						api.getPatientById(patientId),
 						api.getAppointmentsByPatientId(patientId),
 						invoiceService.getInvoicesByPatientId(patientId),
-						quoteService.getQuotesByPatientId(patientId),
 					]);
 
 				setPatient(patientData);
 				setAppointments(appointmentsData);
 				setInvoices(invoicesData);
-				setQuotes(quotesData);
 			} catch (e: any) {
 				setError(e.message || "Failed to load patient data.");
 				toast.error(
@@ -189,61 +178,6 @@ const PatientDetailPage = () => {
 		}
 	};
 
-	const handleSaveQuote = async (quoteData: any) => {
-		try {
-			if (editingQuote) {
-				await quoteService.updateQuote(editingQuote.id, quoteData);
-			} else {
-				await quoteService.createQuote(quoteData);
-			}
-			
-			// Recharger les devis
-			const updatedQuotes = await quoteService.getQuotesByPatientId(parseInt(id!));
-			setQuotes(updatedQuotes);
-			
-			setShowQuoteForm(false);
-			setEditingQuote(undefined);
-		} catch (error) {
-			console.error("Erreur lors de la sauvegarde du devis:", error);
-			throw error;
-		}
-	};
-
-	const handleEditQuote = (quote: Quote) => {
-		setEditingQuote(quote);
-		setShowQuoteForm(true);
-	};
-
-	const handleSendQuote = async (quote: Quote) => {
-		try {
-			await quoteService.sendQuote(quote.id);
-			toast.success("Devis envoyé avec succès");
-			
-			// Recharger les devis pour mettre à jour le statut
-			const updatedQuotes = await quoteService.getQuotesByPatientId(parseInt(id!));
-			setQuotes(updatedQuotes);
-		} catch (error) {
-			console.error("Erreur lors de l'envoi du devis:", error);
-			toast.error("Erreur lors de l'envoi du devis");
-		}
-	};
-
-	const handleDeleteQuote = async (quote: Quote) => {
-		if (confirm("Êtes-vous sûr de vouloir supprimer ce devis ?")) {
-			try {
-				await quoteService.deleteQuote(quote.id);
-				toast.success("Devis supprimé avec succès");
-				
-				// Recharger les devis
-				const updatedQuotes = await quoteService.getQuotesByPatientId(parseInt(id!));
-				setQuotes(updatedQuotes);
-			} catch (error) {
-				console.error("Erreur lors de la suppression du devis:", error);
-				toast.error("Erreur lors de la suppression du devis");
-			}
-		}
-	};
-
 	if (loading) {
 		return (
 			<Layout>
@@ -332,7 +266,7 @@ const PatientDetailPage = () => {
 					{/* Left column - Tabs (principal content) - plus large */}
 					<div className="xl:col-span-3 order-2 xl:order-2">
 						<Tabs defaultValue="medical-info">
-							<TabsList className="grid w-full grid-cols-2 md:grid-cols-5 text-xs md:text-sm">
+							<TabsList className="grid w-full grid-cols-2 md:grid-cols-4 text-xs md:text-sm">
 								<TabsTrigger
 									value="medical-info"
 									className="px-2 md:px-4"
@@ -374,16 +308,6 @@ const PatientDetailPage = () => {
 										Notes d'honoraires
 									</span>
 									<span className="sm:hidden">Notes</span>
-								</TabsTrigger>
-								<TabsTrigger
-									value="quotes"
-									className="px-2 md:px-4"
-								>
-									<FileText className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-purple-600" />
-									<span className="hidden sm:inline">
-										Devis
-									</span>
-									<span className="sm:hidden">Devis</span>
 								</TabsTrigger>
 							</TabsList>
 
@@ -428,51 +352,6 @@ const PatientDetailPage = () => {
 									patient={patient}
 									invoices={invoices}
 								/>
-							</TabsContent>
-
-							<TabsContent value="quotes">
-								{showQuoteForm ? (
-									<QuoteForm
-										patient={patient!}
-										quote={editingQuote}
-										onSave={handleSaveQuote}
-										onCancel={() => {
-											setShowQuoteForm(false);
-											setEditingQuote(undefined);
-										}}
-									/>
-								) : (
-									<div className="space-y-6">
-										<div className="flex justify-between items-center">
-											<h2 className="text-2xl font-bold">Devis</h2>
-											<Button onClick={() => setShowQuoteForm(true)}>
-												<FileText className="h-4 w-4 mr-2" />
-												Nouveau devis
-											</Button>
-										</div>
-
-										{quotes.length === 0 ? (
-											<div className="text-center py-8">
-												<FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-												<p className="text-muted-foreground">
-													Aucun devis créé pour ce patient
-												</p>
-											</div>
-										) : (
-											<div className="grid gap-4">
-												{quotes.map((quote) => (
-													<QuoteCard
-														key={quote.id}
-														quote={quote}
-														onEdit={handleEditQuote}
-														onSend={handleSendQuote}
-														onDelete={handleDeleteQuote}
-													/>
-												))}
-											</div>
-										)}
-									</div>
-								)}
 							</TabsContent>
 						</Tabs>
 					</div>

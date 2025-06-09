@@ -1,4 +1,5 @@
 
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Patient } from "@/types";
@@ -9,10 +10,6 @@ import {
 	Cigarette,
 	Heart,
 	AlertTriangle,
-	Stethoscope,
-	Eye,
-	Ear,
-	Soup,
 } from "lucide-react";
 
 interface PersonalInfoCardProps {
@@ -191,142 +188,6 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		});
 	}
 
-	// Ajouter tous les problèmes médicaux
-	const medicalProblems = [];
-
-	if (patient.entProblems) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<Ear className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes ORL
-				</span>
-			),
-			value: patient.entProblems,
-		});
-	}
-
-	if (patient.digestiveProblems) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<Soup className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes digestifs
-				</span>
-			),
-			value: patient.digestiveProblems,
-		});
-	}
-
-	if (patient.dental_health && (
-		patient.dental_health.toLowerCase().includes("problème") ||
-		patient.dental_health.toLowerCase().includes("douleur")
-	)) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<Stethoscope className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes dentaires
-				</span>
-			),
-			value: patient.dental_health,
-		});
-	}
-
-	if (patient.sleep_quality && (
-		patient.sleep_quality.toLowerCase().includes("mauvais") ||
-		patient.sleep_quality.toLowerCase().includes("trouble")
-	)) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<AlertTriangle className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes de sommeil
-				</span>
-			),
-			value: patient.sleep_quality,
-		});
-	}
-
-	if (patient.intestinal_transit && (
-		patient.intestinal_transit.toLowerCase().includes("problème") ||
-		patient.intestinal_transit.toLowerCase().includes("trouble")
-	)) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<Soup className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes de transit
-				</span>
-			),
-			value: patient.intestinal_transit,
-		});
-	}
-
-	// Pour les enfants, ajouter les problèmes spécifiques
-	if (patient.developmentMilestones && (
-		patient.developmentMilestones.toLowerCase().includes("retard") ||
-		patient.developmentMilestones.toLowerCase().includes("problème")
-	)) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<Baby className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes de développement
-				</span>
-			),
-			value: patient.developmentMilestones,
-		});
-	}
-
-	if (patient.behavior && (
-		patient.behavior.toLowerCase().includes("problème") ||
-		patient.behavior.toLowerCase().includes("difficile")
-	)) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<AlertTriangle className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes de comportement
-				</span>
-			),
-			value: patient.behavior,
-		});
-	}
-
-	if (patient.feeding && (
-		patient.feeding.toLowerCase().includes("problème") ||
-		patient.feeding.toLowerCase().includes("difficile")
-	)) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<Soup className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Problèmes d'alimentation
-				</span>
-			),
-			value: patient.feeding,
-		});
-	}
-
-	if (patient.sleepingPattern && (
-		patient.sleepingPattern.toLowerCase().includes("trouble") ||
-		patient.sleepingPattern.toLowerCase().includes("difficile")
-	)) {
-		medicalProblems.push({
-			label: (
-				<span className="flex items-center gap-2 text-red-600">
-					<AlertTriangle className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-					Troubles du sommeil (enfant)
-				</span>
-			),
-			value: patient.sleepingPattern,
-		});
-	}
-
-	// Ajouter les problèmes médicaux à la liste des informations personnelles
-	personalInfoItems.push(...medicalProblems);
-
 	// Modifier le comportement sticky pour éviter le chevauchement avec PatientInfo
 	const getStickyClasses = () => {
 		if (isMobile) {
@@ -361,3 +222,4 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
 		</Card>
 	);
 }
+
