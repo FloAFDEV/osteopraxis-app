@@ -55,7 +55,7 @@ export function MedicalInfoTab({
 	const getTraumaAndFractureHistory = () => {
 		const trauma = patient.traumaHistory;
 		const fractures = patient.fracture_history;
-		
+
 		if (trauma && fractures) {
 			return `${trauma} | ${fractures}`;
 		}
@@ -71,6 +71,11 @@ export function MedicalInfoTab({
 			"critique",
 			"grave",
 			"sévère",
+			"avp",
+			"accident",
+			"hospitalisation",
+			"AVC",
+			"AVP",
 		];
 		return criticalKeywords.some((keyword) =>
 			value.toLowerCase().includes(keyword)
@@ -85,6 +90,7 @@ export function MedicalInfoTab({
 			"suivi",
 			"chronique",
 			"antécédent",
+			"antécédents",
 		];
 		return importantKeywords.some((keyword) =>
 			value.toLowerCase().includes(keyword)
@@ -154,7 +160,9 @@ export function MedicalInfoTab({
 				{
 					label: "Traumatismes et fractures",
 					value: getTraumaAndFractureHistory(),
-					isImportant: !!(patient.traumaHistory || patient.fracture_history),
+					isImportant: !!(
+						patient.traumaHistory || patient.fracture_history
+					),
 				},
 				{
 					label: "Rhumatologie",
