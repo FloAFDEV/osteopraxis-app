@@ -12,7 +12,7 @@ import { fr } from "date-fns/locale";
 import {
 	Building,
 	Calendar,
-	Download,
+	FileDown,
 	FileText,
 	Loader2,
 	MapPin,
@@ -94,112 +94,224 @@ export function QuoteSendModal({
 				<meta charset="utf-8">
 				<title>Devis ${quote.title}</title>
 				<style>
+					@page {
+						size: A4;
+						margin: 15mm;
+					}
+					
 					body {
 						font-family: Arial, sans-serif;
-						margin: 20px;
-						line-height: 1.6;
+						margin: 0;
+						padding: 0;
+						line-height: 1.4;
+						font-size: 12px;
+						color: #333;
+						height: 100vh;
+						display: flex;
+						flex-direction: column;
 					}
+					
 					.header {
 						display: flex;
 						justify-content: space-between;
-						margin-bottom: 40px;
-						padding-bottom: 20px;
+						align-items: flex-start;
+						margin-bottom: 25px;
+						padding-bottom: 15px;
 						border-bottom: 2px solid #f59e0b;
 					}
+					
+					.company-info {
+						flex: 1;
+					}
+					
 					.company-info h1 {
 						color: #b45309;
-						margin-bottom: 10px;
+						margin: 0 0 8px 0;
+						font-size: 22px;
+						font-weight: bold;
 					}
+					
+					.logo-container {
+						margin: 8px 0;
+					}
+					
+					.logo-container img {
+						max-height: 40px;
+						max-width: 150px;
+						object-fit: contain;
+					}
+					
 					.quote-info {
 						text-align: right;
+						flex-shrink: 0;
 					}
+					
 					.quote-info h2 {
 						color: #b45309;
-						margin-bottom: 5px;
+						margin: 0 0 5px 0;
+						font-size: 18px;
 					}
+					
 					.patient-info {
 						background-color: #fef3c7;
-						padding: 15px;
+						padding: 12px;
 						border-left: 4px solid #f59e0b;
-						margin: 20px 0;
+						margin: 15px 0;
 					}
+					
+					.quote-details {
+						margin: 15px 0;
+					}
+					
 					.amount-section {
 						background-color: #f3f4f6;
-						padding: 20px;
+						padding: 15px;
 						border-radius: 8px;
-						margin: 20px 0;
+						margin: 15px 0;
 						text-align: center;
 					}
+					
 					.amount {
-						font-size: 24px;
+						font-size: 20px;
 						font-weight: bold;
 						color: #b45309;
 					}
-					.legal-mentions {
-						margin-top: 30px;
+					
+					.content-area {
+						flex: 1;
+						display: flex;
+						flex-direction: column;
+					}
+					
+					.footer-area {
+						margin-top: auto;
+						display: flex;
+						justify-content: space-between;
+						align-items: flex-end;
 						padding-top: 20px;
 						border-top: 1px solid #d1d5db;
-						font-size: 12px;
+					}
+					
+					.legal-mentions {
+						flex: 1;
+						font-size: 11px;
 						color: #6b7280;
 					}
+					
+					.signature-area {
+						text-align: center;
+						flex-shrink: 0;
+						margin-left: 20px;
+					}
+					
+					.signature-area img {
+						max-height: 80px;
+						max-width: 150px;
+						object-fit: contain;
+					}
+					
 					.description {
-						margin: 20px 0;
-						padding: 15px;
+						margin: 15px 0;
+						padding: 12px;
 						border: 1px solid #e5e7eb;
 						border-radius: 8px;
+						font-size: 11px;
+					}
+					
+					.compact-grid {
+						display: grid;
+						grid-template-columns: 1fr 1fr;
+						gap: 10px;
+						font-size: 11px;
+					}
+					
+					@media print {
+						body {
+							height: auto !important;
+						}
+						
+						.footer-area {
+							position: fixed;
+							bottom: 0;
+							left: 0;
+							right: 0;
+							background: white;
+						}
 					}
 				</style>
 			</head>
 			<body>
-				<div class="header">
-					<div class="company-info">
-						<h1>${cabinetInfo?.name || "PatientHub"}</h1>
-						<p><strong>${osteopathInfo?.professional_title || "Ostéopathe D.O."}</strong></p>
-						<p>${cabinetInfo?.address || ""}</p>
-						${cabinetInfo?.phone ? `<p>Tél: ${cabinetInfo.phone}</p>` : ""}
-						${cabinetInfo?.email ? `<p>Email: ${cabinetInfo.email}</p>` : ""}
+				<div class="content-area">
+					<div class="header">
+						<div class="company-info">
+							<h1>${cabinetInfo?.name || "PatientHub"}</h1>
+							${cabinetInfo?.logoUrl ? `
+								<div class="logo-container">
+									<img src="${cabinetInfo.logoUrl}" alt="Logo ${cabinetInfo.name}" onerror="this.style.display='none'" />
+								</div>
+							` : ''}
+							<p><strong>${osteopathInfo?.professional_title || "Ostéopathe D.O."}</strong></p>
+							<p style="margin: 3px 0;">${cabinetInfo?.address || ""}</p>
+							${cabinetInfo?.phone ? `<p style="margin: 3px 0;">Tél: ${cabinetInfo.phone}</p>` : ""}
+							${cabinetInfo?.email ? `<p style="margin: 3px 0;">Email: ${cabinetInfo.email}</p>` : ""}
+						</div>
+						<div class="quote-info">
+							<h2>DEVIS</h2>
+							<p><strong>N° ${quote.id.toString().padStart(4, "0")}</strong></p>
+							<p>Date: ${format(new Date(), "dd/MM/yyyy")}</p>
+							<p>Valide jusqu'au: ${format(new Date(quote.validUntil), "dd/MM/yyyy")}</p>
+						</div>
 					</div>
-					<div class="quote-info">
-						<h2>DEVIS</h2>
-						<p><strong>N° ${quote.id.toString().padStart(4, "0")}</strong></p>
-						<p>Date: ${format(new Date(), "dd/MM/yyyy")}</p>
-						<p>Valide jusqu'au: ${format(new Date(quote.validUntil), "dd/MM/yyyy")}</p>
+
+					<div class="patient-info">
+						<h3 style="margin: 0 0 8px 0;">Client</h3>
+						<p style="margin: 0;"><strong>${quote.Patient ? `${quote.Patient.firstName} ${quote.Patient.lastName}` : "Non spécifié"}</strong></p>
+					</div>
+
+					<div class="quote-details">
+						<div class="compact-grid">
+							<div><strong>Titre:</strong> ${quote.title}</div>
+							<div><strong>Montant:</strong> ${quote.amount.toFixed(2)} €</div>
+						</div>
+						
+						${quote.description ? `
+						<div class="description">
+							<h4 style="margin: 0 0 8px 0;">Description:</h4>
+							<p style="margin: 0;">${quote.description}</p>
+						</div>
+						` : ""}
+
+						<div class="amount-section">
+							<p style="margin: 0 0 8px 0;">Montant total</p>
+							<div class="amount">${quote.amount.toFixed(2)} €</div>
+						</div>
+
+						${quote.notes ? `
+						<div class="description">
+							<h4 style="margin: 0 0 8px 0;">Notes:</h4>
+							<p style="margin: 0;">${quote.notes}</p>
+						</div>
+						` : ""}
 					</div>
 				</div>
 
-				<div class="patient-info">
-					<h3>Client</h3>
-					<p><strong>${quote.Patient ? `${quote.Patient.firstName} ${quote.Patient.lastName}` : "Non spécifié"}</strong></p>
-				</div>
-
-				<h3>Détails du devis</h3>
-				<p><strong>Titre:</strong> ${quote.title}</p>
-				
-				${quote.description ? `
-				<div class="description">
-					<h4>Description:</h4>
-					<p>${quote.description}</p>
-				</div>
-				` : ""}
-
-				<div class="amount-section">
-					<p>Montant total</p>
-					<div class="amount">${quote.amount.toFixed(2)} €</div>
-				</div>
-
-				${quote.notes ? `
-				<div class="description">
-					<h4>Notes:</h4>
-					<p>${quote.notes}</p>
-				</div>
-				` : ""}
-
-				<div class="legal-mentions">
-					<h4>Mentions légales</h4>
-					${osteopathInfo?.siret ? `<p>SIRET: ${osteopathInfo.siret}</p>` : ""}
-					${osteopathInfo?.rpps_number ? `<p>RPPS: ${osteopathInfo.rpps_number}</p>` : ""}
-					<p><strong>TVA non applicable – article 261-4-1° du CGI</strong></p>
-					<p>Devis valable jusqu'au ${format(new Date(quote.validUntil), "dd MMMM yyyy", { locale: fr })}</p>
+				<div class="footer-area">
+					<div class="legal-mentions">
+						<h4 style="margin: 0 0 8px 0;">Mentions légales</h4>
+						${osteopathInfo?.siret ? `<p style="margin: 2px 0;">SIRET: ${osteopathInfo.siret}</p>` : ""}
+						${osteopathInfo?.rpps_number ? `<p style="margin: 2px 0;">RPPS: ${osteopathInfo.rpps_number}</p>` : ""}
+						<p style="margin: 5px 0;"><strong>TVA non applicable – article 261-4-1° du CGI</strong></p>
+						<p style="margin: 2px 0;">Devis valable jusqu'au ${format(new Date(quote.validUntil), "dd MMMM yyyy", { locale: fr })}</p>
+						<p style="margin: 5px 0 0 0;">En votre aimable règlement à réception. Merci de votre confiance.</p>
+					</div>
+					
+					${osteopathInfo?.stampUrl ? `
+					<div class="signature-area">
+						<p style="margin: 0 0 5px 0; font-size: 10px;">${osteopathInfo.professional_title || "Ostéopathe D.O."}</p>
+						<img src="${osteopathInfo.stampUrl}" alt="Signature/Tampon professionnel" onerror="this.style.display='none'" />
+						<p style="margin: 5px 0 0 0; font-size: 10px; font-weight: bold;">${osteopathInfo.name}</p>
+					</div>
+					` : ''}
 				</div>
 			</body>
 			</html>
@@ -232,7 +344,7 @@ export function QuoteSendModal({
 			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-gray-800">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						<Download className="h-5 w-5 text-blue-500" />
+						<FileDown className="h-5 w-5 text-blue-500" />
 						Télécharger le devis en PDF
 					</DialogTitle>
 				</DialogHeader>
@@ -300,6 +412,16 @@ export function QuoteSendModal({
 												</span>
 											</div>
 										)}
+										{cabinetInfo?.logoUrl && (
+											<div className="flex items-center gap-1">
+												<span className="text-blue-600">✓ Logo du cabinet inclus</span>
+											</div>
+										)}
+										{osteopathInfo?.stampUrl && (
+											<div className="flex items-center gap-1">
+												<span className="text-blue-600">✓ Tampon/Signature inclus</span>
+											</div>
+										)}
 										<div className="flex gap-4">
 											{osteopathInfo.rpps_number && (
 												<span>
@@ -325,8 +447,7 @@ export function QuoteSendModal({
 				</div>
 
 				<div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
-					<strong>Note:</strong> Le PDF sera généré avec toutes les mentions
-					légales obligatoires et ouvrira dans une nouvelle fenêtre pour impression ou sauvegarde.
+					<strong>Note:</strong> Le PDF sera optimisé pour tenir sur une page A4 avec toutes les mentions légales, le logo du cabinet et le tampon professionnel inclus.
 				</div>
 
 				<div className="flex justify-end gap-3 pt-4">
@@ -341,7 +462,7 @@ export function QuoteSendModal({
 						{loading && (
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 						)}
-						<Download className="mr-2 h-4 w-4" />
+						<FileDown className="mr-2 h-4 w-4" />
 						Télécharger le PDF
 					</Button>
 				</div>
