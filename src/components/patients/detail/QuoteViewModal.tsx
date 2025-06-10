@@ -249,7 +249,7 @@ export function QuoteViewModal({
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							{/* Informations ostéopathe/cabinet */}
 							<div className="space-y-3">
-								<h4 className="font-medium text-gray-700">
+								<h4 className="font-medium text-gray-500">
 									Praticien
 								</h4>
 								{loading ? <div className="animate-pulse space-y-2">
@@ -289,7 +289,7 @@ export function QuoteViewModal({
 
 							{/* Numéros légaux */}
 							<div className="space-y-3">
-								<h4 className="font-medium text-gray-700">
+								<h4 className="font-medium text-gray-500">
 									Numéros légaux
 								</h4>
 								{loading ? <div className="animate-pulse space-y-2">
@@ -333,7 +333,7 @@ export function QuoteViewModal({
 						{/* Signature/Tampon */}
 						{osteopathInfo?.stampUrl && <div className="flex justify-end">
 								<div className="text-center space-y-2">
-									<p className="text-sm font-medium text-gray-700">
+									<p className="text-sm font-medium text-gray-500">
 										{osteopathInfo.professional_title || "Ostéopathe D.O."}
 									</p>
 									<div className="flex justify-center">
@@ -342,7 +342,7 @@ export function QuoteViewModal({
                   target.style.display = "none";
                 }} />
 									</div>
-									<p className="text-sm font-medium text-gray-700">
+									<p className="text-sm font-medium text-gray-500">
 										{osteopathInfo.name}
 									</p>
 								</div>
