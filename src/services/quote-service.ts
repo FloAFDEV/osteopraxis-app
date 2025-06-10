@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Quote, QuoteItem, CreateQuotePayload, QuoteStatus } from "@/types";
 
@@ -7,7 +8,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient:patientId (firstName, lastName)
+				Patient!patientId (firstName, lastName)
 			`)
 			.order('createdAt', { ascending: false });
 
@@ -28,7 +29,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient:patientId (firstName, lastName),
+				Patient!patientId (firstName, lastName),
 				QuoteItem (*)
 			`)
 			.eq('id', id)
@@ -51,7 +52,7 @@ export const quoteService = {
 			.from('Quote')
 			.select(`
 				*,
-				Patient:patientId (firstName, lastName),
+				Patient!patientId (firstName, lastName),
 				QuoteItem (*)
 			`)
 			.eq('patientId', patientId)
