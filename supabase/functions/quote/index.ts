@@ -30,7 +30,7 @@ serve(async (req) => {
     const pathParts = url.pathname.split('/');
     const quoteId = pathParts[pathParts.length - 1];
 
-    console.log('Quote operation:', { method: req.method, quoteId, pathname: url.pathname });
+    console.log('Quote operation:', { method: req.method, quoteId });
 
     switch (req.method) {
       case 'GET':
@@ -55,38 +55,24 @@ serve(async (req) => {
           // Get quotes by patient ID from query params
           const patientId = url.searchParams.get('patientId');
           if (!patientId) {
-            // Return all quotes if no patientId specified
-            const { data, error } = await supabase
-              .from('Quote')
-              .select(`
-                *,
-                "Patient"!patientId (firstName, lastName),
-                "QuoteItem" (*)
-              `)
-              .order('createdAt', { ascending: false });
-
-            if (error) throw error;
-
-            return new Response(JSON.stringify(data), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          } else {
-            const { data, error } = await supabase
-              .from('Quote')
-              .select(`
-                *,
-                "Patient"!patientId (firstName, lastName),
-                "QuoteItem" (*)
-              `)
-              .eq('patientId', patientId)
-              .order('createdAt', { ascending: false });
-
-            if (error) throw error;
-
-            return new Response(JSON.stringify(data), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
+            throw new Error('Patient ID is required');
           }
+
+          const { data, error } = await supabase
+            .from('Quote')
+            .select(`
+              *,
+              "Patient"!patientId (firstName, lastName),
+              "QuoteItem" (*)
+            `)
+            .eq('patientId', patientId)
+            .order('createdAt', { ascending: false });
+
+          if (error) throw error;
+
+          return new Response(JSON.stringify(data), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
         }
 
       case 'POST':
