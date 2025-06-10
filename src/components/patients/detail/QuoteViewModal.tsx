@@ -406,7 +406,7 @@ export function QuoteViewModal({
 						{osteopathInfo?.stampUrl && (
 							<div className="flex justify-end">
 								<div className="text-center space-y-2">
-									<p className="text-sm font-medium text-gray-500">
+									<p className="text-sm font-medium text-gray-500 dark:text-gray-300">
 										{osteopathInfo.professional_title ||
 											"Ostéopathe D.O."}
 									</p>
@@ -422,7 +422,7 @@ export function QuoteViewModal({
 											}}
 										/>
 									</div>
-									<p className="text-sm font-medium text-gray-500">
+									<p className="text-sm font-medium text-gray-500 dark:text-gray-300">
 										{osteopathInfo.name}
 									</p>
 								</div>
