@@ -1,9 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
@@ -103,9 +101,6 @@ export function QuoteEditModal({
 			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-gray-800">
 				<DialogHeader>
 					<DialogTitle>Modifier le devis</DialogTitle>
-					<DialogDescription>
-						Modifiez les informations du devis. Les modifications seront sauvegardées automatiquement.
-					</DialogDescription>
 				</DialogHeader>
 
 				<form onSubmit={handleSubmit} className="space-y-4">

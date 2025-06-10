@@ -1,16 +1,23 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Quote, QuoteItem, CreateQuotePayload, QuoteStatus } from "@/types";
 
 export const quoteService = {
 	async getQuotes(): Promise<Quote[]> {
-		const { data, error } = await supabase.functions.invoke('quote');
+		const { data, error } = await supabase
+			.from('Quote')
+			.select(`
+				*,
+				"Patient"!patientId (firstName, lastName)
+			`)
+			.order('createdAt', { ascending: false });
 
 		if (error) {
 			console.error('Error fetching quotes:', error);
 			throw error;
 		}
 
-		return (data || []).map((quote: any) => ({
+		return (data || []).map(quote => ({
 			...quote,
 			status: quote.status as QuoteStatus,
 			Patient: quote.Patient && !('error' in quote.Patient) ? quote.Patient : undefined
@@ -18,7 +25,15 @@ export const quoteService = {
 	},
 
 	async getQuoteById(id: number): Promise<Quote | null> {
-		const { data, error } = await supabase.functions.invoke(`quote/${id}`);
+		const { data, error } = await supabase
+			.from('Quote')
+			.select(`
+				*,
+				"Patient"!patientId (firstName, lastName),
+				"QuoteItem" (*)
+			`)
+			.eq('id', id)
+			.single();
 
 		if (error) {
 			console.error('Error fetching quote:', error);
@@ -33,14 +48,22 @@ export const quoteService = {
 	},
 
 	async getQuotesByPatientId(patientId: number): Promise<Quote[]> {
-		const { data, error } = await supabase.functions.invoke(`quote?patientId=${patientId}`);
+		const { data, error } = await supabase
+			.from('Quote')
+			.select(`
+				*,
+				"Patient"!patientId (firstName, lastName),
+				"QuoteItem" (*)
+			`)
+			.eq('patientId', patientId)
+			.order('createdAt', { ascending: false });
 
 		if (error) {
 			console.error('Error fetching quotes for patient:', error);
 			throw error;
 		}
 
-		return (data || []).map((quote: any) => ({
+		return (data || []).map(quote => ({
 			...quote,
 			status: quote.status as QuoteStatus,
 			Patient: quote.Patient && !('error' in quote.Patient) ? quote.Patient : undefined
@@ -50,10 +73,12 @@ export const quoteService = {
 	async createQuote(quoteData: CreateQuotePayload): Promise<Quote> {
 		const { items, ...quote } = quoteData;
 
-		const { data: newQuote, error: quoteError } = await supabase.functions.invoke('quote', {
-			method: 'POST',
-			body: quote
-		});
+		// Créer le devis
+		const { data: newQuote, error: quoteError } = await supabase
+			.from('Quote')
+			.insert(quote)
+			.select()
+			.single();
 
 		if (quoteError) {
 			console.error('Error creating quote:', quoteError);
@@ -84,10 +109,12 @@ export const quoteService = {
 	},
 
 	async updateQuote(id: number, updates: Partial<Quote>): Promise<Quote> {
-		const { data, error } = await supabase.functions.invoke(`quote/${id}`, {
-			method: 'PATCH',
-			body: updates
-		});
+		const { data, error } = await supabase
+			.from('Quote')
+			.update(updates)
+			.eq('id', id)
+			.select()
+			.single();
 
 		if (error) {
 			console.error('Error updating quote:', error);
@@ -105,9 +132,10 @@ export const quoteService = {
 	},
 
 	async deleteQuote(id: number): Promise<void> {
-		const { error } = await supabase.functions.invoke(`quote/${id}`, {
-			method: 'DELETE'
-		});
+		const { error } = await supabase
+			.from('Quote')
+			.delete()
+			.eq('id', id);
 
 		if (error) {
 			console.error('Error deleting quote:', error);
