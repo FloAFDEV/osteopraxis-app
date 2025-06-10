@@ -8,7 +8,7 @@ interface PatientHeaderProps {
 
 export function PatientHeader({ patientId }: PatientHeaderProps) {
 	return (
-		<div className="flex justify-between items-start">
+		<div className="flex justify-between items-start sticky top-16 z-50 p-4">
 			<div className="flex items-center gap-2">
 				<Button variant="outline" size="sm" asChild>
 					<Link to="/patients">
@@ -17,7 +17,6 @@ export function PatientHeader({ patientId }: PatientHeaderProps) {
 					</Link>
 				</Button>
 			</div>
-
 			<div className="flex gap-2">
 				<Button variant="outline" asChild>
 					<Link to={`/patients/${patientId}/edit`}>
@@ -26,15 +25,9 @@ export function PatientHeader({ patientId }: PatientHeaderProps) {
 					</Link>
 				</Button>
 				<Button variant="outline" asChild>
-					<Link to={`/appointments?patientId=${patientId}`}>
-						<Calendar className="mr-2 h-4 w-4 text-purple-500" />
-						Voir toutes les séances
-					</Link>
-				</Button>
-				<Button variant="outline" asChild>
 					<Link to={`/appointments/new?patientId=${patientId}`}>
 						<Calendar className="mr-2 h-4 w-4 text-purple-600" />
-						Nouvelle séance{" "}
+						Nouvelle séance
 					</Link>
 				</Button>
 			</div>
