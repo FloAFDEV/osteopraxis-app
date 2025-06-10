@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -5,25 +6,21 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/services/api";
-import { quoteService } from "@/services/quote-service";
-import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentOsteopath";
 import { Quote } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
 	Building,
 	Calendar,
+	Download,
 	FileText,
 	Loader2,
-	Mail,
 	MapPin,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { api } from "@/services/api";
+import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentOsteopath";
 
 interface QuoteSendModalProps {
 	quote: Quote | null;
@@ -42,11 +39,6 @@ export function QuoteSendModal({
 	const [osteopathInfo, setOsteopathInfo] = useState<any>(null);
 	const [cabinetInfo, setCabinetInfo] = useState<any>(null);
 	const [loadingInfo, setLoadingInfo] = useState(true);
-	const [emailData, setEmailData] = useState({
-		recipientEmail: "",
-		subject: "",
-		message: "",
-	});
 
 	useEffect(() => {
 		const loadLegalInfo = async () => {
@@ -86,92 +78,166 @@ export function QuoteSendModal({
 		}
 	}, [isOpen, quote]);
 
-	const handleSend = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const generatePDF = () => {
 		if (!quote) return;
 
+		const printWindow = window.open("", "_blank");
+		if (!printWindow) {
+			toast.error("Impossible d'ouvrir la fenêtre d'impression");
+			return;
+		}
+
+		const html = `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<title>Devis ${quote.title}</title>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+						margin: 20px;
+						line-height: 1.6;
+					}
+					.header {
+						display: flex;
+						justify-content: space-between;
+						margin-bottom: 40px;
+						padding-bottom: 20px;
+						border-bottom: 2px solid #f59e0b;
+					}
+					.company-info h1 {
+						color: #b45309;
+						margin-bottom: 10px;
+					}
+					.quote-info {
+						text-align: right;
+					}
+					.quote-info h2 {
+						color: #b45309;
+						margin-bottom: 5px;
+					}
+					.patient-info {
+						background-color: #fef3c7;
+						padding: 15px;
+						border-left: 4px solid #f59e0b;
+						margin: 20px 0;
+					}
+					.amount-section {
+						background-color: #f3f4f6;
+						padding: 20px;
+						border-radius: 8px;
+						margin: 20px 0;
+						text-align: center;
+					}
+					.amount {
+						font-size: 24px;
+						font-weight: bold;
+						color: #b45309;
+					}
+					.legal-mentions {
+						margin-top: 30px;
+						padding-top: 20px;
+						border-top: 1px solid #d1d5db;
+						font-size: 12px;
+						color: #6b7280;
+					}
+					.description {
+						margin: 20px 0;
+						padding: 15px;
+						border: 1px solid #e5e7eb;
+						border-radius: 8px;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="header">
+					<div class="company-info">
+						<h1>${cabinetInfo?.name || "PatientHub"}</h1>
+						<p><strong>${osteopathInfo?.professional_title || "Ostéopathe D.O."}</strong></p>
+						<p>${cabinetInfo?.address || ""}</p>
+						${cabinetInfo?.phone ? `<p>Tél: ${cabinetInfo.phone}</p>` : ""}
+						${cabinetInfo?.email ? `<p>Email: ${cabinetInfo.email}</p>` : ""}
+					</div>
+					<div class="quote-info">
+						<h2>DEVIS</h2>
+						<p><strong>N° ${quote.id.toString().padStart(4, "0")}</strong></p>
+						<p>Date: ${format(new Date(), "dd/MM/yyyy")}</p>
+						<p>Valide jusqu'au: ${format(new Date(quote.validUntil), "dd/MM/yyyy")}</p>
+					</div>
+				</div>
+
+				<div class="patient-info">
+					<h3>Client</h3>
+					<p><strong>${quote.Patient ? `${quote.Patient.firstName} ${quote.Patient.lastName}` : "Non spécifié"}</strong></p>
+				</div>
+
+				<h3>Détails du devis</h3>
+				<p><strong>Titre:</strong> ${quote.title}</p>
+				
+				${quote.description ? `
+				<div class="description">
+					<h4>Description:</h4>
+					<p>${quote.description}</p>
+				</div>
+				` : ""}
+
+				<div class="amount-section">
+					<p>Montant total</p>
+					<div class="amount">${quote.amount.toFixed(2)} €</div>
+				</div>
+
+				${quote.notes ? `
+				<div class="description">
+					<h4>Notes:</h4>
+					<p>${quote.notes}</p>
+				</div>
+				` : ""}
+
+				<div class="legal-mentions">
+					<h4>Mentions légales</h4>
+					${osteopathInfo?.siret ? `<p>SIRET: ${osteopathInfo.siret}</p>` : ""}
+					${osteopathInfo?.rpps_number ? `<p>RPPS: ${osteopathInfo.rpps_number}</p>` : ""}
+					<p><strong>TVA non applicable – article 261-4-1° du CGI</strong></p>
+					<p>Devis valable jusqu'au ${format(new Date(quote.validUntil), "dd MMMM yyyy", { locale: fr })}</p>
+				</div>
+			</body>
+			</html>
+		`;
+
+		printWindow.document.write(html);
+		printWindow.document.close();
+		printWindow.print();
+	};
+
+	const handleDownload = async () => {
 		try {
 			setLoading(true);
-
-			// D'abord, marquer le devis comme envoyé
-			await quoteService.updateQuoteStatus(quote.id, "SENT");
-
-			// TODO: Implémenter l'envoi d'email via une edge function
-			// Pour l'instant, on simule l'envoi
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
-			toast.success("Devis envoyé avec succès");
+			generatePDF();
+			toast.success("PDF généré avec succès");
 			onSuccess();
 			onClose();
 		} catch (error) {
-			console.error("Error sending quote:", error);
-			toast.error("Erreur lors de l'envoi du devis");
+			console.error("Error generating PDF:", error);
+			toast.error("Erreur lors de la génération du PDF");
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const handleChange = (field: string, value: string) => {
-		setEmailData((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-	};
-
 	if (!quote) return null;
-
-	// Préparer les données par défaut
-	const defaultSubject = `Devis ${quote.title} - ${
-		quote.Patient
-			? `${quote.Patient.firstName} ${quote.Patient.lastName}`
-			: ""
-	}`;
-
-	const defaultMessage = `Bonjour,
-
-Veuillez trouver ci-joint votre devis pour les soins d'ostéopathie.
-
-Détails du devis :
-- Titre : ${quote.title}
-- Montant : ${quote.amount.toFixed(2)} €
-- Valide jusqu'au : ${format(new Date(quote.validUntil), "dd MMMM yyyy", {
-		locale: fr,
-	})}
-
-${quote.description ? `Description : ${quote.description}` : ""}
-
-${
-	osteopathInfo
-		? `
-${osteopathInfo.name}
-${osteopathInfo.professional_title || "Ostéopathe D.O."}
-${cabinetInfo?.address || ""}
-${cabinetInfo?.phone ? `Tél: ${cabinetInfo.phone}` : ""}
-${cabinetInfo?.email ? `Email: ${cabinetInfo.email}` : ""}
-
-${osteopathInfo.rpps_number ? `RPPS: ${osteopathInfo.rpps_number}` : ""}
-${osteopathInfo.siret ? `SIRET: ${osteopathInfo.siret}` : ""}
-
-TVA non applicable – article 261-4-1° du CGI
-`
-		: ""
-}
-
-N'hésitez pas à me contacter si vous avez des questions.
-
-Cordialement.`;
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto dark:bg-gray-800">
+			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-gray-800">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						<Mail className="h-5 w-5 text-blue-500" />
-						Envoyer le devis par email
+						<Download className="h-5 w-5 text-blue-500" />
+						Télécharger le devis en PDF
 					</DialogTitle>
 				</DialogHeader>
 
-				{/* Résumé du devis avec aperçu légal */}
+				{/* Résumé du devis */}
 				<div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-4">
 					<div className="flex items-center gap-2 mb-2">
 						<FileText className="h-4 w-4 text-gray-600" />
@@ -203,7 +269,7 @@ Cordialement.`;
 						<div className="flex items-center gap-2 mb-2">
 							<Building className="h-4 w-4 text-gray-600" />
 							<span className="font-medium text-sm">
-								Informations légales incluses
+								Informations incluses dans le PDF
 							</span>
 						</div>
 
@@ -258,73 +324,27 @@ Cordialement.`;
 					</div>
 				</div>
 
-				<form onSubmit={handleSend} className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="recipientEmail">
-							Email du destinataire *
-						</Label>
-						<Input
-							id="recipientEmail"
-							type="email"
-							value={emailData.recipientEmail}
-							onChange={(e) =>
-								handleChange("recipientEmail", e.target.value)
-							}
-							placeholder="patient@example.com"
-							required
-						/>
-					</div>
+				<div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
+					<strong>Note:</strong> Le PDF sera généré avec toutes les mentions
+					légales obligatoires et ouvrira dans une nouvelle fenêtre pour impression ou sauvegarde.
+				</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="subject">Objet de l'email *</Label>
-						<Input
-							id="subject"
-							value={emailData.subject || defaultSubject}
-							onChange={(e) =>
-								handleChange("subject", e.target.value)
-							}
-							placeholder="Objet de l'email"
-							required
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="message">Message</Label>
-						<Textarea
-							id="message"
-							value={emailData.message || defaultMessage}
-							onChange={(e) =>
-								handleChange("message", e.target.value)
-							}
-							placeholder="Message personnalisé"
-							rows={12}
-							className="font-mono text-sm"
-						/>
-					</div>
-
-					<div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
-						<strong>Note:</strong> Le devis sera automatiquement
-						joint au format PDF à cet email avec toutes les mentions
-						légales obligatoires.
-					</div>
-
-					<div className="flex justify-end gap-3 pt-4">
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onClose}
-						>
-							Annuler
-						</Button>
-						<Button type="submit" disabled={loading}>
-							{loading && (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							)}
-							<Mail className="mr-2 h-4 w-4" />
-							Envoyer le devis
-						</Button>
-					</div>
-				</form>
+				<div className="flex justify-end gap-3 pt-4">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={onClose}
+					>
+						Annuler
+					</Button>
+					<Button onClick={handleDownload} disabled={loading}>
+						{loading && (
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						)}
+						<Download className="mr-2 h-4 w-4" />
+						Télécharger le PDF
+					</Button>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);
