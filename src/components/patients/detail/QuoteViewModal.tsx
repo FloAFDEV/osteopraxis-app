@@ -389,14 +389,14 @@ export function QuoteViewModal({
 						</div>
 
 						{/* Mentions TVA */}
-						<div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-							<h4 className="font-medium text-blue-900 mb-2">
+						<div className="bg-blue-50 dark:bg-blue-900/30 p-6 gap-4 rounded-lg border border-blue-200">
+							<h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">
 								Mentions obligatoires
 							</h4>
-							<p className="text-blue-800 text-sm font-medium">
+							<p className="text-blue-800 dark:text-blue-300 text-sm font-medium">
 								TVA non applicable – article 261-4-1° du CGI
 							</p>
-							<p className="text-blue-700 text-sm mt-1">
+							<p className="text-blue-700 dark:text-blue-400 text-sm mt-1">
 								En votre aimable règlement à réception. Merci de
 								votre confiance.
 							</p>
