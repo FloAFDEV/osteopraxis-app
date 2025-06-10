@@ -688,7 +688,29 @@ export type Database = {
           updatedAt?: string
           validUntil?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Quote_cabinetId_fkey"
+            columns: ["cabinetId"]
+            isOneToOne: false
+            referencedRelation: "Cabinet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Quote_osteopathId_fkey"
+            columns: ["osteopathId"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Quote_patientId_fkey"
+            columns: ["patientId"]
+            isOneToOne: false
+            referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       QuoteItem: {
         Row: {
