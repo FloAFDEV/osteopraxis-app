@@ -19,9 +19,7 @@ export const quoteService = {
 	},
 
 	async getQuoteById(id: number): Promise<Quote | null> {
-		const { data, error } = await supabase.functions.invoke('quote', {
-			body: { method: 'GET', path: `/${id}` }
-		});
+		const { data, error } = await supabase.functions.invoke(`quote/${id}`);
 
 		if (error) {
 			console.error('Error fetching quote:', error);
@@ -36,9 +34,7 @@ export const quoteService = {
 	},
 
 	async getQuotesByPatientId(patientId: number): Promise<Quote[]> {
-		const { data, error } = await supabase.functions.invoke('quote', {
-			body: { patientId }
-		});
+		const { data, error } = await supabase.functions.invoke(`quote?patientId=${patientId}`);
 
 		if (error) {
 			console.error('Error fetching quotes for patient:', error);
@@ -56,7 +52,7 @@ export const quoteService = {
 		const { items, ...quote } = quoteData;
 
 		const { data: newQuote, error: quoteError } = await supabase.functions.invoke('quote', {
-			body: { ...quote, method: 'POST' }
+			body: quote
 		});
 
 		if (quoteError) {
@@ -88,15 +84,22 @@ export const quoteService = {
 	},
 
 	async updateQuote(id: number, updates: Partial<Quote>): Promise<Quote> {
-		const { data, error } = await supabase.functions.invoke('quote', {
-			body: { ...updates, method: 'PATCH', quoteId: id }
+		const response = await fetch(`https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/quote/${id}`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+			},
+			body: JSON.stringify(updates)
 		});
 
-		if (error) {
-			console.error('Error updating quote:', error);
-			throw error;
+		if (!response.ok) {
+			const errorData = await response.text();
+			console.error('Error updating quote:', errorData);
+			throw new Error(`Failed to update quote: ${response.status}`);
 		}
 
+		const data = await response.json();
 		return {
 			...data,
 			status: data.status as QuoteStatus
@@ -108,13 +111,17 @@ export const quoteService = {
 	},
 
 	async deleteQuote(id: number): Promise<void> {
-		const { error } = await supabase.functions.invoke('quote', {
-			body: { method: 'DELETE', quoteId: id }
+		const response = await fetch(`https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/quote/${id}`, {
+			method: 'DELETE',
+			headers: {
+				'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+			}
 		});
 
-		if (error) {
-			console.error('Error deleting quote:', error);
-			throw error;
+		if (!response.ok) {
+			const errorData = await response.text();
+			console.error('Error deleting quote:', errorData);
+			throw new Error(`Failed to delete quote: ${response.status}`);
 		}
 	},
 
