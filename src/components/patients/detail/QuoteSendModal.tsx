@@ -100,7 +100,7 @@ export function QuoteSendModal({
 					
 					body {
 						font-family: Arial, sans-serif;
-						margin: 3rem;
+						margin: 0 auto 2rem;
 						padding: 2rem;
 						line-height: 1.4;
 						font-size: 12px;
