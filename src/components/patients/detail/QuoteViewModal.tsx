@@ -4,7 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Quote } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { FileText, Calendar, Euro, User, Building, ScrollText, StickyNote } from "lucide-react";
+import { FileText, Calendar, Euro, User, Building, ScrollText, StickyNote, MapPin, Phone, Mail } from "lucide-react";
+import { useState, useEffect } from "react";
+import { api } from "@/services/api";
+import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentOsteopath";
 
 interface QuoteViewModalProps {
   quote: Quote | null;
@@ -13,6 +16,43 @@ interface QuoteViewModalProps {
 }
 
 export function QuoteViewModal({ quote, isOpen, onClose }: QuoteViewModalProps) {
+  const [osteopathInfo, setOsteopathInfo] = useState<any>(null);
+  const [cabinetInfo, setCabinetInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadLegalInfo = async () => {
+      if (!quote) return;
+
+      try {
+        setLoading(true);
+        
+        // Récupérer l'ID de l'ostéopathe connecté
+        const osteopathId = await getCurrentOsteopathId();
+        
+        // Charger les informations de l'ostéopathe
+        if (osteopathId) {
+          const osteopath = await api.getOsteopathById(osteopathId);
+          setOsteopathInfo(osteopath);
+        }
+        
+        // Charger les informations du cabinet
+        if (quote.cabinetId) {
+          const cabinet = await api.getCabinetById(Number(quote.cabinetId));
+          setCabinetInfo(cabinet);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des informations légales:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isOpen && quote) {
+      loadLegalInfo();
+    }
+  }, [isOpen, quote]);
+
   if (!quote) return null;
 
   const getStatusLabel = (status: string) => {
@@ -51,7 +91,7 @@ export function QuoteViewModal({ quote, isOpen, onClose }: QuoteViewModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-500" />
@@ -174,6 +214,118 @@ export function QuoteViewModal({ quote, isOpen, onClose }: QuoteViewModalProps) 
               </div>
             </div>
           )}
+
+          {/* Informations légales obligatoires */}
+          <div className="border-t pt-6 space-y-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
+              <Building className="h-5 w-5 text-blue-500" />
+              Informations légales
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Informations ostéopathe/cabinet */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-700">Praticien</h4>
+                {loading ? (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                ) : (
+                  <div className="text-sm space-y-2">
+                    {osteopathInfo && (
+                      <>
+                        <p className="font-medium">{osteopathInfo.name}</p>
+                        <p>{osteopathInfo.professional_title || "Ostéopathe D.O."}</p>
+                      </>
+                    )}
+                    {cabinetInfo && (
+                      <>
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                          <span>{cabinetInfo.address}</span>
+                        </div>
+                        {cabinetInfo.phone && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-gray-500" />
+                            <span>{cabinetInfo.phone}</span>
+                          </div>
+                        )}
+                        {cabinetInfo.email && (
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-gray-500" />
+                            <span>{cabinetInfo.email}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Numéros légaux */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-700">Numéros légaux</h4>
+                {loading ? (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                ) : (
+                  <div className="text-sm space-y-2">
+                    {osteopathInfo?.rpps_number && (
+                      <p><strong>RPPS:</strong> {osteopathInfo.rpps_number}</p>
+                    )}
+                    {osteopathInfo?.siret && (
+                      <p><strong>SIRET:</strong> {osteopathInfo.siret}</p>
+                    )}
+                    {osteopathInfo?.ape_code && (
+                      <p><strong>Code APE:</strong> {osteopathInfo.ape_code}</p>
+                    )}
+                    {!osteopathInfo?.rpps_number && !osteopathInfo?.siret && (
+                      <p className="text-gray-500 italic">Numéros en cours d'attribution</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mentions TVA */}
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-900 mb-2">Mentions obligatoires</h4>
+              <p className="text-blue-800 text-sm font-medium">
+                TVA non applicable – article 261-4-1° du CGI
+              </p>
+              <p className="text-blue-700 text-sm mt-1">
+                En votre aimable règlement à réception. Merci de votre confiance.
+              </p>
+            </div>
+
+            {/* Signature/Tampon */}
+            {osteopathInfo?.stampUrl && (
+              <div className="flex justify-end">
+                <div className="text-center space-y-2">
+                  <p className="text-sm font-medium text-gray-700">
+                    {osteopathInfo.professional_title || "Ostéopathe D.O."}
+                  </p>
+                  <div className="flex justify-center">
+                    <img 
+                      src={osteopathInfo.stampUrl} 
+                      alt="Signature/Tampon professionnel" 
+                      className="max-h-[100px] w-auto object-contain"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = "none";
+                      }}
+                    />
+                  </div>
+                  <p className="text-sm font-medium text-gray-700">
+                    {osteopathInfo.name}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Dernière modification */}
           <div className="text-xs text-muted-foreground border-t pt-4">
