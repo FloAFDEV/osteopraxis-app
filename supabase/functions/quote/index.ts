@@ -30,7 +30,7 @@ serve(async (req) => {
     const pathParts = url.pathname.split('/');
     const quoteId = pathParts[pathParts.length - 1];
 
-    console.log('Quote operation:', { method: req.method, quoteId });
+    console.log('Quote operation:', { method: req.method, quoteId, pathname: url.pathname });
 
     switch (req.method) {
       case 'GET':
