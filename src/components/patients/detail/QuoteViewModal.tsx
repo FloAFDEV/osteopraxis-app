@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { api } from "@/services/api";
 import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentOsteopath";
 import { Quote } from "@/types";
@@ -90,6 +90,9 @@ export function QuoteViewModal({
 						<FileText className="h-6 w-6 text-blue-500" />
 						Détails du devis
 					</DialogTitle>
+					<DialogDescription>
+						Consultez toutes les informations détaillées du devis incluant les mentions légales obligatoires
+					</DialogDescription>
 				</DialogHeader>
 
 				<div className="space-y-6">

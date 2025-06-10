@@ -1,7 +1,9 @@
+
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
@@ -169,6 +171,9 @@ Cordialement.`;
 						<Mail className="h-5 w-5 text-blue-500" />
 						Envoyer le devis par email
 					</DialogTitle>
+					<DialogDescription>
+						Envoyez le devis complet avec toutes les mentions légales par email au patient
+					</DialogDescription>
 				</DialogHeader>
 
 				{/* Résumé du devis avec aperçu légal */}

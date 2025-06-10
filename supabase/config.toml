@@ -92,3 +92,8 @@ function_name = "update-cabinet"
 path = "/update-osteopath"
 verify_jwt = true
 function_name = "update-osteopath"
+
+[[edge_functions]]
+path = "/quote"
+verify_jwt = true
+function_name = "quote"
