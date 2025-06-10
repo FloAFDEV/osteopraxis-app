@@ -100,8 +100,8 @@ export function QuoteSendModal({
 					
 					body {
 						font-family: Arial, sans-serif;
-						margin: 0;
-						padding: 0;
+						margin: 3rem;
+						padding: 2rem;
 						line-height: 1.4;
 						font-size: 12px;
 						color: #333;
@@ -188,6 +188,7 @@ export function QuoteSendModal({
 						justify-content: space-between;
 						align-items: flex-end;
 						padding-top: 20px;
+						padding: 2rem;
 						border-top: 1px solid #d1d5db;
 					}
 					
