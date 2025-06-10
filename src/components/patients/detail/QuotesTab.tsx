@@ -5,11 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Quote, Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { FileText, Plus, Eye, Edit, Send, CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
+import { FileText, Plus, Edit, Send, CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { quoteService } from "@/services/quote-service";
 import { toast } from "sonner";
 import { QuoteCreateForm } from "./QuoteCreateForm";
+import { QuoteViewModal } from "./QuoteViewModal";
+import { QuoteEditModal } from "./QuoteEditModal";
+import { QuoteSendModal } from "./QuoteSendModal";
 
 interface QuotesTabProps {
   patient: Patient;
@@ -19,6 +22,9 @@ export function QuotesTab({ patient }: QuotesTabProps) {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [viewQuote, setViewQuote] = useState<Quote | null>(null);
+  const [editQuote, setEditQuote] = useState<Quote | null>(null);
+  const [sendQuote, setSendQuote] = useState<Quote | null>(null);
 
   useEffect(() => {
     loadQuotes();
@@ -39,6 +45,22 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 
   const handleCreateSuccess = () => {
     setShowCreateForm(false);
+    loadQuotes();
+  };
+
+  const handleViewQuote = (quote: Quote) => {
+    setViewQuote(quote);
+  };
+
+  const handleEditQuote = (quote: Quote) => {
+    setEditQuote(quote);
+  };
+
+  const handleSendQuote = (quote: Quote) => {
+    setSendQuote(quote);
+  };
+
+  const handleModalSuccess = () => {
     loadQuotes();
   };
 
@@ -83,11 +105,11 @@ export function QuotesTab({ patient }: QuotesTabProps) {
       case 'SENT':
         return 'default';
       case 'ACCEPTED':
-        return 'success';
+        return 'default';
       case 'REJECTED':
         return 'destructive';
       case 'EXPIRED':
-        return 'warning';
+        return 'destructive';
       default:
         return 'secondary';
     }
@@ -189,18 +211,32 @@ export function QuotesTab({ patient }: QuotesTabProps) {
                 )}
 
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" size="sm" className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => handleViewQuote(quote)}
+                  >
+                    <FileText className="h-3 w-3" />
                     Voir
                   </Button>
-                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => handleEditQuote(quote)}
+                  >
                     <Edit className="h-3 w-3" />
                     Modifier
                   </Button>
-                  {quote.status === 'DRAFT' && (
-                    <Button size="sm" className="flex items-center gap-1">
+                  {(quote.status === 'DRAFT' || quote.status === 'SENT') && (
+                    <Button 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => handleSendQuote(quote)}
+                    >
                       <Send className="h-3 w-3" />
-                      Envoyer
+                      {quote.status === 'DRAFT' ? 'Envoyer' : 'Renvoyer'}
                     </Button>
                   )}
                 </div>
@@ -209,6 +245,27 @@ export function QuotesTab({ patient }: QuotesTabProps) {
           ))}
         </div>
       )}
+
+      {/* Modales */}
+      <QuoteViewModal
+        quote={viewQuote}
+        isOpen={!!viewQuote}
+        onClose={() => setViewQuote(null)}
+      />
+
+      <QuoteEditModal
+        quote={editQuote}
+        isOpen={!!editQuote}
+        onClose={() => setEditQuote(null)}
+        onSuccess={handleModalSuccess}
+      />
+
+      <QuoteSendModal
+        quote={sendQuote}
+        isOpen={!!sendQuote}
+        onClose={() => setSendQuote(null)}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 }
