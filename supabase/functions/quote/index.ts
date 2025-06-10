@@ -40,8 +40,8 @@ serve(async (req) => {
             .from('Quote')
             .select(`
               *,
-              "Patient"!patientId (firstName, lastName),
-              "QuoteItem" (*)
+              Patient!patientId (firstName, lastName),
+              QuoteItem (*)
             `)
             .eq('id', quoteId)
             .single();
@@ -62,8 +62,8 @@ serve(async (req) => {
             .from('Quote')
             .select(`
               *,
-              "Patient"!patientId (firstName, lastName),
-              "QuoteItem" (*)
+              Patient!patientId (firstName, lastName),
+              QuoteItem (*)
             `)
             .eq('patientId', patientId)
             .order('createdAt', { ascending: false });

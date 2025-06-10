@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Quote, QuoteItem, CreateQuotePayload, QuoteStatus } from "@/types";
 
@@ -19,9 +18,7 @@ export const quoteService = {
 	},
 
 	async getQuoteById(id: number): Promise<Quote | null> {
-		const { data, error } = await supabase.functions.invoke('quote', {
-			body: { method: 'GET', path: `/${id}` }
-		});
+		const { data, error } = await supabase.functions.invoke(`quote/${id}`);
 
 		if (error) {
 			console.error('Error fetching quote:', error);
@@ -36,9 +33,7 @@ export const quoteService = {
 	},
 
 	async getQuotesByPatientId(patientId: number): Promise<Quote[]> {
-		const { data, error } = await supabase.functions.invoke('quote', {
-			body: { patientId }
-		});
+		const { data, error } = await supabase.functions.invoke(`quote?patientId=${patientId}`);
 
 		if (error) {
 			console.error('Error fetching quotes for patient:', error);
@@ -56,7 +51,8 @@ export const quoteService = {
 		const { items, ...quote } = quoteData;
 
 		const { data: newQuote, error: quoteError } = await supabase.functions.invoke('quote', {
-			body: { ...quote, method: 'POST' }
+			method: 'POST',
+			body: quote
 		});
 
 		if (quoteError) {
@@ -88,8 +84,9 @@ export const quoteService = {
 	},
 
 	async updateQuote(id: number, updates: Partial<Quote>): Promise<Quote> {
-		const { data, error } = await supabase.functions.invoke('quote', {
-			body: { ...updates, method: 'PATCH', quoteId: id }
+		const { data, error } = await supabase.functions.invoke(`quote/${id}`, {
+			method: 'PATCH',
+			body: updates
 		});
 
 		if (error) {
@@ -108,8 +105,8 @@ export const quoteService = {
 	},
 
 	async deleteQuote(id: number): Promise<void> {
-		const { error } = await supabase.functions.invoke('quote', {
-			body: { method: 'DELETE', quoteId: id }
+		const { error } = await supabase.functions.invoke(`quote/${id}`, {
+			method: 'DELETE'
 		});
 
 		if (error) {
