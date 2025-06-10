@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -245,15 +244,30 @@ export function QuoteSendModal({
 					<div class="header">
 						<div class="company-info">
 							<h1>${cabinetInfo?.name || "PatientHub"}</h1>
-							${cabinetInfo?.logoUrl ? `
+							${
+								cabinetInfo?.logoUrl
+									? `
 								<div class="logo-container">
 									<img src="${cabinetInfo.logoUrl}" alt="Logo ${cabinetInfo.name}" onerror="this.style.display='none'" />
 								</div>
-							` : ''}
-							<p><strong>${osteopathInfo?.professional_title || "Ostéopathe D.O."}</strong></p>
+							`
+									: ""
+							}
+							<p><strong>${
+								osteopathInfo?.professional_title ||
+								"Ostéopathe D.O."
+							}</strong></p>
 							<p style="margin: 3px 0;">${cabinetInfo?.address || ""}</p>
-							${cabinetInfo?.phone ? `<p style="margin: 3px 0;">Tél: ${cabinetInfo.phone}</p>` : ""}
-							${cabinetInfo?.email ? `<p style="margin: 3px 0;">Email: ${cabinetInfo.email}</p>` : ""}
+							${
+								cabinetInfo?.phone
+									? `<p style="margin: 3px 0;">Tél: ${cabinetInfo.phone}</p>`
+									: ""
+							}
+							${
+								cabinetInfo?.email
+									? `<p style="margin: 3px 0;">Email: ${cabinetInfo.email}</p>`
+									: ""
+							}
 						</div>
 						<div class="quote-info">
 							<h2>DEVIS</h2>
@@ -265,7 +279,11 @@ export function QuoteSendModal({
 
 					<div class="patient-info">
 						<h3 style="margin: 0 0 8px 0;">Client</h3>
-						<p style="margin: 0;"><strong>${quote.Patient ? `${quote.Patient.firstName} ${quote.Patient.lastName}` : "Non spécifié"}</strong></p>
+						<p style="margin: 0;"><strong>${
+							quote.Patient
+								? `${quote.Patient.firstName} ${quote.Patient.lastName}`
+								: "Non spécifié"
+						}</strong></p>
 					</div>
 
 					<div class="quote-details">
@@ -274,44 +292,75 @@ export function QuoteSendModal({
 							<div><strong>Montant:</strong> ${quote.amount.toFixed(2)} €</div>
 						</div>
 						
-						${quote.description ? `
+						${
+							quote.description
+								? `
 						<div class="description">
 							<h4 style="margin: 0 0 8px 0;">Description:</h4>
 							<p style="margin: 0;">${quote.description}</p>
 						</div>
-						` : ""}
+						`
+								: ""
+						}
 
 						<div class="amount-section">
 							<p style="margin: 0 0 8px 0;">Montant total</p>
 							<div class="amount">${quote.amount.toFixed(2)} €</div>
 						</div>
 
-						${quote.notes ? `
+						${
+							quote.notes
+								? `
 						<div class="description">
 							<h4 style="margin: 0 0 8px 0;">Notes:</h4>
 							<p style="margin: 0;">${quote.notes}</p>
 						</div>
-						` : ""}
+						`
+								: ""
+						}
 					</div>
 				</div>
 
 				<div class="footer-area">
 					<div class="legal-mentions">
 						<h4 style="margin: 0 0 8px 0;">Mentions légales</h4>
-						${osteopathInfo?.siret ? `<p style="margin: 2px 0;">SIRET: ${osteopathInfo.siret}</p>` : ""}
-						${osteopathInfo?.rpps_number ? `<p style="margin: 2px 0;">RPPS: ${osteopathInfo.rpps_number}</p>` : ""}
+						${
+							osteopathInfo?.siret
+								? `<p style="margin: 2px 0;">SIRET: ${osteopathInfo.siret}</p>`
+								: ""
+						}
+						${
+							osteopathInfo?.rpps_number
+								? `<p style="margin: 2px 0;">RPPS: ${osteopathInfo.rpps_number}</p>`
+								: ""
+						}
 						<p style="margin: 5px 0;"><strong>TVA non applicable – article 261-4-1° du CGI</strong></p>
-						<p style="margin: 2px 0;">Devis valable jusqu'au ${format(new Date(quote.validUntil), "dd MMMM yyyy", { locale: fr })}</p>
+						<p style="margin: 2px 0;">Devis valable jusqu'au ${format(
+							new Date(quote.validUntil),
+							"dd MMMM yyyy",
+							{ locale: fr }
+						)}</p>
 						<p style="margin: 5px 0 0 0;">En votre aimable règlement à réception. Merci de votre confiance.</p>
 					</div>
 					
-					${osteopathInfo?.stampUrl ? `
+					${
+						osteopathInfo?.stampUrl
+							? `
 					<div class="signature-area">
-						<p style="margin: 0 0 5px 0; font-size: 10px;">${osteopathInfo.professional_title || "Ostéopathe D.O."}</p>
-						<img src="${osteopathInfo.stampUrl}" alt="Signature/Tampon professionnel" onerror="this.style.display='none'" />
-						<p style="margin: 5px 0 0 0; font-size: 10px; font-weight: bold;">${osteopathInfo.name}</p>
+						<p style="margin: 0 0 5px 0; font-size: 10px;">${
+							osteopathInfo.professional_title ||
+							"Ostéopathe D.O."
+						}</p>
+						<img src="${
+							osteopathInfo.stampUrl
+						}" alt="Signature/Tampon professionnel" onerror="this.style.display='none'" />
+						<p style="margin: 5px 0 0 0; font-size: 10px; font-weight: bold;">${
+							osteopathInfo.name
+						}</p>
 					</div>
-					` : ''}
+					`
+							: ""
+					}
 				</div>
 			</body>
 			</html>
@@ -350,13 +399,13 @@ export function QuoteSendModal({
 				</DialogHeader>
 
 				{/* Résumé du devis */}
-				<div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-4">
+				<div className="bg-gray-50 dark:bg-gray-700 dark:text-gray-200 p-4 rounded-lg mb-4 space-y-4">
 					<div className="flex items-center gap-2 mb-2">
-						<FileText className="h-4 w-4 text-gray-600" />
+						<FileText className="h-4 w-4 text-gray-600 dark:text-gray-300" />
 						<span className="font-medium">{quote.title}</span>
 					</div>
 
-					<div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+					<div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
 						<div>
 							<strong>Patient:</strong>{" "}
 							{quote.Patient
@@ -368,7 +417,7 @@ export function QuoteSendModal({
 							€
 						</div>
 						<div className="flex items-center gap-1">
-							<Calendar className="h-3 w-3" />
+							<Calendar className="h-3 w-3 dark:text-gray-400" />
 							<strong>Valide jusqu'au:</strong>{" "}
 							{format(new Date(quote.validUntil), "dd/MM/yyyy", {
 								locale: fr,
@@ -377,21 +426,21 @@ export function QuoteSendModal({
 					</div>
 
 					{/* Aperçu des informations légales */}
-					<div className="border-t pt-3 mt-3">
+					<div className="border-t pt-3 mt-3 dark:text-gray-200">
 						<div className="flex items-center gap-2 mb-2">
-							<Building className="h-4 w-4 text-gray-600" />
+							<Building className="h-4 w-4 text-gray-600 dark:text-gray-300" />
 							<span className="font-medium text-sm">
 								Informations incluses dans le PDF
 							</span>
 						</div>
 
 						{loadingInfo ? (
-							<div className="animate-pulse space-y-1">
+							<div className="animate-pulse space-y-1 dark:text-gray-400">
 								<div className="h-3 bg-gray-200 rounded w-3/4"></div>
 								<div className="h-3 bg-gray-200 rounded w-1/2"></div>
 							</div>
 						) : (
-							<div className="text-xs text-gray-600 space-y-1">
+							<div className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
 								{osteopathInfo && (
 									<>
 										<div className="flex items-center gap-1">
@@ -414,12 +463,16 @@ export function QuoteSendModal({
 										)}
 										{cabinetInfo?.logoUrl && (
 											<div className="flex items-center gap-1">
-												<span className="text-blue-600">✓ Logo du cabinet inclus</span>
+												<span className="text-blue-600 dark:text-blue-400">
+													✓ Logo du cabinet inclus
+												</span>
 											</div>
 										)}
 										{osteopathInfo?.stampUrl && (
 											<div className="flex items-center gap-1">
-												<span className="text-blue-600">✓ Tampon/Signature inclus</span>
+												<span className="text-blue-600 dark:text-blue-400">
+													✓ Tampon/Signature inclus
+												</span>
 											</div>
 										)}
 										<div className="flex gap-4">
@@ -435,7 +488,7 @@ export function QuoteSendModal({
 												</span>
 											)}
 										</div>
-										<p className="text-blue-600 font-medium">
+										<p className="text-blue-600 font-medium dark:text-blue-400">
 											TVA non applicable – article
 											261-4-1° du CGI
 										</p>
@@ -446,16 +499,14 @@ export function QuoteSendModal({
 					</div>
 				</div>
 
-				<div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
-					<strong>Note:</strong> Le PDF sera optimisé pour tenir sur une page A4 avec toutes les mentions légales, le logo du cabinet et le tampon professionnel inclus.
+				<div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+					<strong>Note:</strong> Le PDF sera optimisé pour tenir sur
+					une page A4 avec toutes les mentions légales, le logo du
+					cabinet et le tampon professionnel inclus.
 				</div>
 
 				<div className="flex justify-end gap-3 pt-4">
-					<Button
-						type="button"
-						variant="outline"
-						onClick={onClose}
-					>
+					<Button type="button" variant="outline" onClick={onClose}>
 						Annuler
 					</Button>
 					<Button onClick={handleDownload} disabled={loading}>
