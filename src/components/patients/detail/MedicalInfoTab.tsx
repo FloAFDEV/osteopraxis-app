@@ -18,11 +18,13 @@ import {
 	Home,
 	Plus,
 	X,
+	Edit,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { MedicalAccordion } from "./MedicalAccordion";
 import { AppointmentForm } from "@/components/appointment-form";
+import { Link } from "react-router-dom";
 
 interface MedicalInfoTabProps {
 	patient: Patient;
@@ -540,26 +542,37 @@ export function MedicalInfoTab({
 
 	return (
 		<div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-			{/* Bouton pour nouvelle séance */}
+			{/* Boutons d'action */}
 			<div className="flex justify-between items-center">
 				<h3 className="text-lg font-semibold">Dossier médical</h3>
-				<Button 
-					onClick={() => setShowNewAppointmentForm(!showNewAppointmentForm)}
-					variant={showNewAppointmentForm ? "outline" : "default"}
-					className="flex items-center gap-2"
-				>
-					{showNewAppointmentForm ? (
-						<>
-							<X className="h-4 w-4" />
-							Annuler
-						</>
-					) : (
-						<>
-							<Plus className="h-4 w-4" />
-							Nouvelle séance
-						</>
-					)}
-				</Button>
+				<div className="flex gap-2">
+					<Button 
+						variant="outline" 
+						asChild
+					>
+						<Link to={`/patients/${patient.id}/edit`}>
+							<Edit className="mr-2 h-4 w-4 text-amber-500" />
+							Modifier
+						</Link>
+					</Button>
+					<Button 
+						onClick={() => setShowNewAppointmentForm(!showNewAppointmentForm)}
+						variant={showNewAppointmentForm ? "outline" : "default"}
+						className="flex items-center gap-2"
+					>
+						{showNewAppointmentForm ? (
+							<>
+								<X className="h-4 w-4" />
+								Annuler
+							</>
+						) : (
+							<>
+								<Plus className="h-4 w-4" />
+								Nouvelle séance
+							</>
+						)}
+					</Button>
+				</div>
 			</div>
 
 			{/* Formulaire de nouvelle séance */}
@@ -586,6 +599,7 @@ export function MedicalInfoTab({
 				</Card>
 			)}
 
+			{/* Dernière séance */}
 			{lastAppointment && (
 				<Card className="border-blue-100 dark:border-slate-900/50 ">
 					<CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-t-lg">
