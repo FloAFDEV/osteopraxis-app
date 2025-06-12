@@ -1,5 +1,6 @@
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardData } from "@/types";
+import { ChartArea } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
 	CartesianGrid,
@@ -76,7 +77,12 @@ export function GrowthChart({ data }: GrowthChartProps) {
 
 	return (
 		<ChartWrapper
-			title="Évolution mensuelle du nombre de patients"
+			title={
+				<span className="flex items-center gap-2">
+					<ChartArea className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+					Évolution mensuelle du nombre de patients
+				</span>
+			}
 			isLoading={isLoading}
 		>
 			<div className="w-full flex-1 min-h-0">
