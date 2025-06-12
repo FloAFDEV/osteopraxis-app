@@ -37,7 +37,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
-
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
@@ -223,11 +222,22 @@ const PatientDetailPage = () => {
 		} ${agesText} ans`;
 	}
 
+	const handleAppointmentCreated = () => {
+		// Recharger les rendez-vous après création
+		if (id) {
+			api.getAppointmentsByPatientId(parseInt(id)).then(setAppointments);
+		}
+	};
+
 	return (
 		<Layout>
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
 				{/* Header section */}
-				<PatientHeader patientId={patient.id} />
+				<PatientHeader 
+					patientId={patient.id} 
+					patient={patient}
+					onAppointmentCreated={handleAppointmentCreated}
+				/>
 
 				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

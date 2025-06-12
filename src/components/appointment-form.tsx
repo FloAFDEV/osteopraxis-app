@@ -1,3 +1,4 @@
+
 import { api } from "@/services/api";
 import { AppointmentStatus, Patient } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,6 +64,7 @@ interface AppointmentFormProps {
 	appointmentId?: number;
 	patients?: Patient[]; // Ajouté pour NewAppointmentPage
 	isEditing?: boolean;
+	onSuccess?: () => void; // Nouveau prop pour callback de succès
 }
 
 export function AppointmentForm({
@@ -70,6 +72,7 @@ export function AppointmentForm({
 	appointmentId,
 	patients: propPatients,
 	isEditing,
+	onSuccess,
 }: AppointmentFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [patients, setPatients] = useState<Patient[]>(propPatients || []);
@@ -174,9 +177,14 @@ export function AppointmentForm({
 				toast.success("✅ Séance créée avec succès");
 			}
 
-			setTimeout(() => {
-				navigate("/appointments");
-			}, 500);
+			// Si on a un callback de succès, l'utiliser au lieu de naviguer
+			if (onSuccess) {
+				onSuccess();
+			} else {
+				setTimeout(() => {
+					navigate("/appointments");
+				}, 500);
+			}
 		} catch (error) {
 			console.error("Error submitting appointment form:", error);
 			toast.error("⛔ Une erreur est survenue. Veuillez réessayer.");
@@ -487,7 +495,7 @@ export function AppointmentForm({
 					<Button
 						type="button"
 						variant="outline"
-						onClick={() => navigate("/appointments")}
+						onClick={() => onSuccess ? onSuccess() : navigate("/appointments")}
 						disabled={isSubmitting}
 					>
 						Annuler
