@@ -1,33 +1,31 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AppointmentForm } from "@/components/appointment-form";
+import { PatientForm } from "@/components/patient-form";
+import { PatientFormValues } from "@/components/patient-form/types";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { differenceInYears, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
-	Calendar,
-	Stethoscope,
-	Dumbbell,
-	Eye,
-	Ear,
-	Soup,
-	Heart,
-	FilePlus2,
-	StickyNote,
-	Baby,
 	Activity,
+	Baby,
+	Calendar,
+	Dumbbell,
+	Ear,
+	Edit,
+	Eye,
+	FilePlus2,
+	Heart,
 	Home,
 	Plus,
+	Soup,
+	Stethoscope,
+	StickyNote,
 	X,
-	Edit,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { MedicalAccordion } from "./MedicalAccordion";
-import { AppointmentForm } from "@/components/appointment-form";
-import { PatientForm } from "@/components/patient-form";
-import { PatientFormValues } from "@/components/patient-form/types";
-import { Link } from "react-router-dom";
 
 interface MedicalInfoTabProps {
 	patient: Patient;
@@ -577,31 +575,31 @@ export function MedicalInfoTab({
 			<div className="flex justify-between items-center">
 				<h3 className="text-lg font-semibold">Dossier médical</h3>
 				<div className="flex gap-2">
-					<Button 
+					<Button
 						onClick={handleEditClick}
 						variant={showEditPatientForm ? "outline" : "default"}
-						className="flex items-center gap-2"
+						className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 hover:text-white text-white dark:bg-white dark:text-slate-900 dark:hover:bg-white/80"
 					>
 						{showEditPatientForm ? (
 							<>
-								<X className="h-4 w-4" />
+								<X className="h-4 w-4 bg-red-700 hover:text-white dark:text-white" />
 								Annuler
 							</>
 						) : (
 							<>
-								<Edit className="h-4 w-4 text-amber-500" />
+								<Edit className="h-4 w-4" />
 								Modifier
 							</>
 						)}
 					</Button>
-					<Button 
+					<Button
 						onClick={handleNewAppointmentClick}
 						variant={showNewAppointmentForm ? "outline" : "default"}
-						className="flex items-center gap-2"
+						className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-white/80 hover:text-white"
 					>
 						{showNewAppointmentForm ? (
 							<>
-								<X className="h-4 w-4" />
+								<X className="h-4 w-4 bg-red-700 hover:text-white dark:text-white" />
 								Annuler
 							</>
 						) : (
@@ -620,7 +618,10 @@ export function MedicalInfoTab({
 					<CardHeader>
 						<CardTitle className="text-lg flex items-center gap-2">
 							<Edit className="h-5 w-5 text-amber-500" />
-							Modifier les informations de {patient.firstName} {patient.lastName}
+							Modifier les informations de {
+								patient.firstName
+							}{" "}
+							{patient.lastName}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -639,7 +640,8 @@ export function MedicalInfoTab({
 					<CardHeader>
 						<CardTitle className="text-lg flex items-center gap-2">
 							<Calendar className="h-5 w-5 text-blue-500" />
-							Nouvelle séance pour {patient.firstName} {patient.lastName}
+							Nouvelle séance pour {patient.firstName}{" "}
+							{patient.lastName}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
