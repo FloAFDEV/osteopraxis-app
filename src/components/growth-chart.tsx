@@ -1,5 +1,6 @@
 import { ChartWrapper } from "@/components/dashboard/chart/chart-wrapper";
 import { DashboardData } from "@/types";
+import { ChartColumn } from "lucide-react";
 import {
 	Bar,
 	BarChart,
@@ -84,7 +85,12 @@ const CustomBarLegend = ({ payload }: LegendProps) => {
 export function GrowthChart({ data }: GrowthChartProps) {
 	return (
 		<ChartWrapper
-			title="Évolution mensuelle comparée du nombre de patients"
+			title={
+				<span className="flex items-center gap-2">
+					<ChartColumn className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+					Évolution mensuelle comparée du nombre de patients
+				</span>
+			}
 			subtitle={`${data.newPatientsLastYear} nouveaux patients cette année`}
 			isLoading={!data?.monthlyGrowth?.length}
 		>
