@@ -24,6 +24,8 @@ import { useEffect, useState } from "react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { MedicalAccordion } from "./MedicalAccordion";
 import { AppointmentForm } from "@/components/appointment-form";
+import { PatientForm } from "@/components/patient-form";
+import { PatientFormValues } from "@/components/patient-form/types";
 import { Link } from "react-router-dom";
 
 interface MedicalInfoTabProps {
@@ -35,15 +37,20 @@ interface MedicalInfoTabProps {
 	) => Promise<void>;
 	onNavigateToHistory: () => void;
 	onAppointmentCreated?: () => void;
+	onPatientUpdated?: (updatedData: PatientFormValues) => void;
+	selectedCabinetId?: number | null;
 }
 
 export function MedicalInfoTab({
 	patient,
 	pastAppointments,
 	onAppointmentCreated,
+	onPatientUpdated,
+	selectedCabinetId,
 }: MedicalInfoTabProps) {
 	const [isChild, setIsChild] = useState<boolean>(false);
 	const [showNewAppointmentForm, setShowNewAppointmentForm] = useState(false);
+	const [showEditPatientForm, setShowEditPatientForm] = useState(false);
 
 	const lastAppointment =
 		pastAppointments && pastAppointments.length > 0
@@ -540,6 +547,13 @@ export function MedicalInfoTab({
 		setShowNewAppointmentForm(false);
 	};
 
+	const handlePatientUpdate = async (updatedData: PatientFormValues) => {
+		if (onPatientUpdated) {
+			await onPatientUpdated(updatedData);
+			setShowEditPatientForm(false);
+		}
+	};
+
 	return (
 		<div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 			{/* Boutons d'action */}
@@ -547,13 +561,21 @@ export function MedicalInfoTab({
 				<h3 className="text-lg font-semibold">Dossier médical</h3>
 				<div className="flex gap-2">
 					<Button 
-						variant="outline" 
-						asChild
+						onClick={() => setShowEditPatientForm(!showEditPatientForm)}
+						variant={showEditPatientForm ? "outline" : "default"}
+						className="flex items-center gap-2"
 					>
-						<Link to={`/patients/${patient.id}/edit`}>
-							<Edit className="mr-2 h-4 w-4 text-amber-500" />
-							Modifier
-						</Link>
+						{showEditPatientForm ? (
+							<>
+								<X className="h-4 w-4" />
+								Annuler
+							</>
+						) : (
+							<>
+								<Edit className="h-4 w-4 text-amber-500" />
+								Modifier
+							</>
+						)}
 					</Button>
 					<Button 
 						onClick={() => setShowNewAppointmentForm(!showNewAppointmentForm)}
@@ -574,6 +596,25 @@ export function MedicalInfoTab({
 					</Button>
 				</div>
 			</div>
+
+			{/* Formulaire de modification du patient */}
+			{showEditPatientForm && (
+				<Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+					<CardHeader>
+						<CardTitle className="text-lg flex items-center gap-2">
+							<Edit className="h-5 w-5 text-amber-500" />
+							Modifier les informations de {patient.firstName} {patient.lastName}
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<PatientForm
+							patient={patient}
+							onSave={handlePatientUpdate}
+							selectedCabinetId={selectedCabinetId}
+						/>
+					</CardContent>
+				</Card>
+			)}
 
 			{/* Formulaire de nouvelle séance */}
 			{showNewAppointmentForm && (

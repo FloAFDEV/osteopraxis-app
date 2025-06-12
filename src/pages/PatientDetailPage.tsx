@@ -37,6 +37,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
+import { PatientFormValues } from "@/components/patient-form/types";
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
@@ -229,6 +230,37 @@ const PatientDetailPage = () => {
 		}
 	};
 
+	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
+		if (!patient) return;
+		
+		try {
+			setLoading(true);
+			
+			// Convertir les champs numériques correctement
+			if (updatedData.height !== undefined) updatedData.height = updatedData.height ? Number(updatedData.height) : null;
+			if (updatedData.weight !== undefined) updatedData.weight = updatedData.weight ? Number(updatedData.weight) : null;
+			if (updatedData.bmi !== undefined) updatedData.bmi = updatedData.bmi ? Number(updatedData.bmi) : null;
+			if (updatedData.weight_at_birth !== undefined) updatedData.weight_at_birth = updatedData.weight_at_birth ? Number(updatedData.weight_at_birth) : null;
+			if (updatedData.height_at_birth !== undefined) updatedData.height_at_birth = updatedData.height_at_birth ? Number(updatedData.height_at_birth) : null;
+			if (updatedData.head_circumference !== undefined) updatedData.head_circumference = updatedData.head_circumference ? Number(updatedData.head_circumference) : null;
+
+			const patientUpdate = {
+				...patient,
+				...updatedData,
+				updatedAt: new Date().toISOString(),
+			};
+
+			await api.updatePatient(patientUpdate);
+			setPatient(patientUpdate);
+			toast.success("Patient mis à jour avec succès!");
+		} catch (error: any) {
+			console.error("Error updating patient:", error);
+			toast.error("Impossible de mettre à jour le patient");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<Layout>
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
@@ -341,6 +373,8 @@ const PatientDetailPage = () => {
 									}
 									onNavigateToHistory={navigateToHistoryTab}
 									onAppointmentCreated={handleAppointmentCreated}
+									onPatientUpdated={handlePatientUpdated}
+									selectedCabinetId={parseInt(localStorage.getItem("selectedCabinetId") || "1")}
 								/>
 							</TabsContent>
 
