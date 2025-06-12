@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { differenceInYears, format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -15,10 +16,13 @@ import {
 	Baby,
 	Activity,
 	Home,
+	Plus,
+	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { MedicalAccordion } from "./MedicalAccordion";
+import { AppointmentForm } from "@/components/appointment-form";
 
 interface MedicalInfoTabProps {
 	patient: Patient;
@@ -28,13 +32,16 @@ interface MedicalInfoTabProps {
 		status: AppointmentStatus
 	) => Promise<void>;
 	onNavigateToHistory: () => void;
+	onAppointmentCreated?: () => void;
 }
 
 export function MedicalInfoTab({
 	patient,
 	pastAppointments,
+	onAppointmentCreated,
 }: MedicalInfoTabProps) {
 	const [isChild, setIsChild] = useState<boolean>(false);
+	const [showNewAppointmentForm, setShowNewAppointmentForm] = useState(false);
 
 	const lastAppointment =
 		pastAppointments && pastAppointments.length > 0
@@ -526,8 +533,59 @@ export function MedicalInfoTab({
 		}
 	}
 
+	const handleAppointmentSuccess = () => {
+		onAppointmentCreated?.();
+		setShowNewAppointmentForm(false);
+	};
+
 	return (
 		<div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+			{/* Bouton pour nouvelle séance */}
+			<div className="flex justify-between items-center">
+				<h3 className="text-lg font-semibold">Dossier médical</h3>
+				<Button 
+					onClick={() => setShowNewAppointmentForm(!showNewAppointmentForm)}
+					variant={showNewAppointmentForm ? "outline" : "default"}
+					className="flex items-center gap-2"
+				>
+					{showNewAppointmentForm ? (
+						<>
+							<X className="h-4 w-4" />
+							Annuler
+						</>
+					) : (
+						<>
+							<Plus className="h-4 w-4" />
+							Nouvelle séance
+						</>
+					)}
+				</Button>
+			</div>
+
+			{/* Formulaire de nouvelle séance */}
+			{showNewAppointmentForm && (
+				<Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
+					<CardHeader>
+						<CardTitle className="text-lg flex items-center gap-2">
+							<Calendar className="h-5 w-5 text-blue-500" />
+							Nouvelle séance pour {patient.firstName} {patient.lastName}
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<AppointmentForm
+							defaultValues={{
+								patientId: patient.id,
+								date: new Date(),
+								time: "09:00",
+								status: "SCHEDULED",
+								website: "",
+							}}
+							onSuccess={handleAppointmentSuccess}
+						/>
+					</CardContent>
+				</Card>
+			)}
+
 			{lastAppointment && (
 				<Card className="border-blue-100 dark:border-slate-900/50 ">
 					<CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-t-lg">

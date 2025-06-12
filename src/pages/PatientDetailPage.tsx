@@ -343,6 +343,7 @@ const PatientDetailPage = () => {
 										handleUpdateAppointmentStatus
 									}
 									onNavigateToHistory={navigateToHistoryTab}
+									onAppointmentCreated={handleAppointmentCreated}
 								/>
 							</TabsContent>
 
