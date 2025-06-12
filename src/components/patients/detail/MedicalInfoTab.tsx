@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
@@ -554,6 +555,22 @@ export function MedicalInfoTab({
 		}
 	};
 
+	// Gestionnaire pour le bouton Modifier
+	const handleEditClick = () => {
+		if (showNewAppointmentForm) {
+			setShowNewAppointmentForm(false);
+		}
+		setShowEditPatientForm(!showEditPatientForm);
+	};
+
+	// Gestionnaire pour le bouton Nouvelle séance
+	const handleNewAppointmentClick = () => {
+		if (showEditPatientForm) {
+			setShowEditPatientForm(false);
+		}
+		setShowNewAppointmentForm(!showNewAppointmentForm);
+	};
+
 	return (
 		<div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 			{/* Boutons d'action */}
@@ -561,7 +578,7 @@ export function MedicalInfoTab({
 				<h3 className="text-lg font-semibold">Dossier médical</h3>
 				<div className="flex gap-2">
 					<Button 
-						onClick={() => setShowEditPatientForm(!showEditPatientForm)}
+						onClick={handleEditClick}
 						variant={showEditPatientForm ? "outline" : "default"}
 						className="flex items-center gap-2"
 					>
@@ -578,7 +595,7 @@ export function MedicalInfoTab({
 						)}
 					</Button>
 					<Button 
-						onClick={() => setShowNewAppointmentForm(!showNewAppointmentForm)}
+						onClick={handleNewAppointmentClick}
 						variant={showNewAppointmentForm ? "outline" : "default"}
 						className="flex items-center gap-2"
 					>
