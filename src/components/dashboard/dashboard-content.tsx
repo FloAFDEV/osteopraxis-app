@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardData } from "@/types";
+import { ChartLine } from "lucide-react";
 import React, { useState } from "react";
 import { GrowthChart as SimpleGrowthChart } from "../growth-chart";
 import { GrowthChart as DashboardGrowthChart } from "./growth-chart";
@@ -20,7 +21,8 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 			<Card className="hover-scale">
 				<CardContent className="p-6 bg-inherit">
 					{/* En-tête */}
-					<h2 className="text-2xl font-bold mb-4">
+					<h2 className="flex items-center gap-2 text-2xl font-bold mb-4">
+						<ChartLine className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
 						Évolution de l'activité
 					</h2>
 
