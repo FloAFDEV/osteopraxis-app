@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -35,6 +35,7 @@ type MagicLinkFormValues = z.infer<typeof magicLinkSchema>;
 const LoginPage = () => {
 	const { login, loginWithMagicLink, isLoading } = useAuth();
 	const [activeTab, setActiveTab] = useState("password");
+	const [showPassword, setShowPassword] = useState(false);
 	const navigate = useNavigate();
 
 	const loginForm = useForm<LoginFormValues>({
@@ -178,12 +179,45 @@ const LoginPage = () => {
 														<div className="relative">
 															<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
 															<Input
-																type="password"
-																className="pl-10 bg-[#161b22] border-gray-700 text-white"
+																type={
+																	showPassword
+																		? "text"
+																		: "password"
+																}
+																className="pl-10 pr-10 bg-[#161b22] border-gray-700 text-white"
 																placeholder="Votre mot de passe"
 																autoComplete="current-password"
 																{...field}
 															/>
+															<button
+																type="button"
+																onClick={() =>
+																	setShowPassword(
+																		!showPassword
+																	)
+																}
+																className="absolute right-3 top-2.5 h-6 w-6 text-gray-400 hover:text-gray-200 transition"
+																tabIndex={-1}
+																aria-label={
+																	showPassword
+																		? "Cacher le mot de passe"
+																		: "Afficher le mot de passe"
+																}
+															>
+																{showPassword ? (
+																	<EyeOff
+																		size={
+																			16
+																		}
+																	/>
+																) : (
+																	<Eye
+																		size={
+																			16
+																		}
+																	/>
+																)}
+															</button>
 														</div>
 													</FormControl>
 													<FormMessage />
@@ -312,10 +346,10 @@ const LoginPage = () => {
 			<div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
 				<img
 					src="/lovable-uploads/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png"
-					alt="Image d'une colonne vertébrale"
+					alt="Colonne vertébrale"
 					className="w-full h-full object-cover"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 to-transparent"></div>
+				<div className="absolute inset-0 bg-gradient-to-r from-[#0d1127]/80 to-transparent" />
 			</div>
 		</div>
 	);
