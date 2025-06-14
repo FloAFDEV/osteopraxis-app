@@ -1,4 +1,3 @@
-
 import { api } from "@/services/api";
 import { AppointmentStatus, Patient } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -134,13 +133,13 @@ export function AppointmentForm({
 
 			const endDateTime = new Date(dateTime.getTime() + 30 * 60000);
 
-			// Check if the selected date is in the past
-			const now = new Date();
-			if (dateTime < now) {
-				toast.error("Vous ne pouvez pas sélectionner une date passée.");
-				setIsSubmitting(false);
-				return;
-			}
+			// ✅ Retirer ce bloc qui empêche la création en date passée
+			// const now = new Date();
+			// if (dateTime < now) {
+			// 	toast.error("Vous ne pouvez pas sélectionner une date passée.");
+			// 	setIsSubmitting(false);
+			// 	return;
+			// }
 
 			// Check for appointment conflicts (example)
 			// This would require fetching existing appointments and comparing dates/times
