@@ -148,8 +148,8 @@ const CabinetsManagementPage = () => {
 		<Layout>
 			<div className="min-h-screen bg-white dark:bg-gray-900">
 				{/* Header moderne avec couleurs du logo */}
-				<div className="bg-gray-400 dark:from-teal-700 dark:via-cyan-700 dark:to-blue-700 shadow-lg">
-					<div className="container mx-auto px-6 py-8 bg-cyan-950">
+				<div className="bg-gradient-to-br from-cyan-900 via-teal-800 to-blue-900 shadow-lg rounded-lg">
+					<div className="container mx-auto px-6 py-8 bg-white/5 backdrop-blur-sm rounded-xl">
 						<div className="flex items-center gap-4 mb-6">
 							<Button
 								variant="outline"
@@ -166,7 +166,7 @@ const CabinetsManagementPage = () => {
 							<div className="space-y-2">
 								<div className="flex items-center gap-3">
 									<div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-										<Building2 className="h-8 w-8 text-white" />
+										<Building2 className="h-8 w-8 text-green-500" />
 									</div>
 									<div>
 										<h1 className="text-3xl font-bold text-white flex items-center gap-2">
