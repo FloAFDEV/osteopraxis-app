@@ -12,7 +12,7 @@ export default function ScheduleHeader() {
             Planning de vos séances
           </h1>
           <p className="text-base sm:text-lg text-[#398087] dark:text-gray-300 font-medium max-w-2xl">
-            Visualisez votre planning de consultations, naviguez facilement entre les jours ou semaines, et retrouvez tous vos rendez-vous à venir ou passés, le tout dans une interface claire et apaisante.
+            Visualisez votre planning de consultations, naviguez facilement entre les jours ou semaines, et retrouvez tous vos rendez-vous à venir ou passés.
           </p>
         </div>
       </div>
