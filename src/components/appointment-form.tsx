@@ -118,7 +118,7 @@ export function AppointmentForm({
 		try {
 			setIsSubmitting(true);
 
-			// Combine date and time
+			// Combine date and start time
 			const dateTime = new Date(data.date);
 			const timeToUse = useCustomTime ? customTime : data.time;
 			const [hours, minutes] = timeToUse.split(":").map(Number);
@@ -131,28 +131,17 @@ export function AppointmentForm({
 			}
 			dateTime.setHours(hours, minutes);
 
-			const endDateTime = new Date(dateTime.getTime() + 30 * 60000);
-
-			// ✅ Retirer ce bloc qui empêche la création en date passée
-			// const now = new Date();
-			// if (dateTime < now) {
-			// 	toast.error("Vous ne pouvez pas sélectionner une date passée.");
-			// 	setIsSubmitting(false);
-			// 	return;
-			// }
-
-			// Check for appointment conflicts (example)
-			// This would require fetching existing appointments and comparing dates/times
-			// For simplicity, we'll just show a warning
-			if (dateTime.getDay() === 6 || dateTime.getDay() === 0) {
-				toast.warning("Attention : Vous avez sélectionné un week-end.");
+			// L'heure de fin de séance est l'heure du submit SEULEMENT SI statut = COMPLETED
+			let endDateTime: Date | undefined;
+			if (data.status === "COMPLETED") {
+				endDateTime = new Date(); // On prend l'heure du submit
 			}
 
 			const appointmentData = {
 				patientId: data.patientId,
 				date: dateTime.toISOString(),
 				start: dateTime.toISOString(),
-				end: endDateTime.toISOString(),
+				end: endDateTime ? endDateTime.toISOString() : undefined,
 				reason: data.reason,
 				notes: data.notes || null,
 				status: data.status as AppointmentStatus,
@@ -176,7 +165,6 @@ export function AppointmentForm({
 				toast.success("✅ Séance créée avec succès");
 			}
 
-			// Si on a un callback de succès, l'utiliser au lieu de naviguer
 			if (onSuccess) {
 				onSuccess();
 			} else {
@@ -388,7 +376,7 @@ export function AppointmentForm({
 						name="time"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Heure de la séance</FormLabel>
+								<FormLabel>Heure de début de séance</FormLabel>
 								<FormControl>
 									<Input
 										type="time"
@@ -406,6 +394,9 @@ export function AppointmentForm({
 										disabled={isSubmitting}
 									/>
 								</FormControl>
+								<p className="text-xs text-muted-foreground mt-1">
+									Lors de la clôture, l'heure du bouton « Clôturer la séance » sera enregistrée comme heure de fin réelle.
+								</p>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -501,8 +492,12 @@ export function AppointmentForm({
 					</Button>
 					<Button type="submit" disabled={isSubmitting}>
 						{isSubmitting
-							? "Enregistrement..."
-							: "Enregistrer la séance"}
+							? (form.getValues("status") === "COMPLETED"
+								? "Clôture en cours..."
+								: "Enregistrement...")
+							: (form.getValues("status") === "COMPLETED"
+								? "Clôturer la séance"
+								: "Enregistrer la séance")}
 					</Button>
 				</div>
 			</form>
