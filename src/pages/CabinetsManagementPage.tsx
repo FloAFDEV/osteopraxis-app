@@ -31,6 +31,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import CabinetsHeader from "@/components/cabinet/CabinetsHeader";
 const CabinetsManagementPage = () => {
 	const navigate = useNavigate();
 	const [cabinets, setCabinets] = useState<Cabinet[]>([]);
@@ -147,55 +148,9 @@ const CabinetsManagementPage = () => {
 	return (
 		<Layout>
 			<div className="min-h-screen bg-white dark:bg-gray-900">
-				{/* Header moderne avec couleurs du logo */}
-				<div className="bg-gray-400 dark:from-teal-700 dark:via-cyan-700 dark:to-blue-700 shadow-lg">
-					<div className="container mx-auto px-6 py-8 bg-cyan-950">
-						<div className="flex items-center gap-4 mb-6">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => navigate(-1)}
-								className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
-							>
-								<ArrowLeft className="mr-2 h-4 w-4" />
-								Retour
-							</Button>
-						</div>
-
-						<div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-							<div className="space-y-2">
-								<div className="flex items-center gap-3">
-									<div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-										<Building2 className="h-8 w-8 text-white" />
-									</div>
-									<div>
-										<h1 className="text-3xl font-bold text-white flex items-center gap-2">
-											Gestion des Cabinets
-											<Sparkles className="h-6 w-6 text-yellow-300" />
-										</h1>
-										<p className="text-white/80 text-lg">
-											Gérez vos cabinets d'ostéopathie
-											avec style
-										</p>
-									</div>
-								</div>
-							</div>
-
-							<Button
-								asChild
-								size="lg"
-								className="bg-white text-teal-600 hover:bg-gray-200 shadow-lg dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700"
-							>
-								<Link
-									to="/cabinets/new"
-									className="flex items-center gap-2"
-								>
-									<Plus className="h-5 w-5" />
-									Nouveau Cabinet
-								</Link>
-							</Button>
-						</div>
-					</div>
+				{/* Nouveau header modernisé */}
+				<div className="container mx-auto px-6 pt-8">
+					<CabinetsHeader />
 				</div>
 
 				<div className="container mx-auto px-6 py-8">
@@ -224,7 +179,7 @@ const CabinetsManagementPage = () => {
 											Créer mon premier cabinet
 										</Link>
 									</Button>
-								</CardContent>
+								CardContent>
 							</Card>
 						</div>
 					) : (
