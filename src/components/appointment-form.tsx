@@ -395,7 +395,7 @@ export function AppointmentForm({
 									/>
 								</FormControl>
 								<p className="text-xs text-muted-foreground mt-1">
-									Lors de la clôture, l'heure du bouton « Clôturer la séance » sera enregistrée comme heure de fin réelle.
+									ℹ️ Lors de la clôture de la séance (bouton « Clôturer la séance »), l'heure réelle de fin sera automatiquement enregistrée selon l'heure à laquelle vous validez le formulaire.
 								</p>
 								<FormMessage />
 							</FormItem>
