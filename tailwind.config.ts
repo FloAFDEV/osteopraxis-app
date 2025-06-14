@@ -62,19 +62,6 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				},
-				sage: {
-					50: '#f0f9f0',
-					100: '#dcf2dc',
-					200: '#bae5ba',
-					300: '#8dd38d',
-					400: '#5ab85a',
-					500: '#3a9b3a',
-					600: '#2d7d2d',
-					700: '#246324',
-					800: '#1f4f1f',
-					900: '#1a411a',
-					950: '#0d240d'
 				}
 			},
 			borderRadius: {
