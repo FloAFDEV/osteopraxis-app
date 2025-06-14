@@ -1,3 +1,4 @@
+
 import ConfirmDeleteCabinetModal from "@/components/modals/ConfirmDeleteCabinetModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -141,10 +142,10 @@ const CabinetsManagementPage = () => {
 	if (loading) {
 		return (
 			<Layout>
-				<div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+				<div className="min-h-screen bg-white dark:bg-gray-900">
 					<div className="flex justify-center items-center py-20">
 						<div className="text-center space-y-4">
-							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
 							<p className="text-muted-foreground text-lg">
 								Chargement de vos cabinets...
 							</p>
@@ -157,9 +158,9 @@ const CabinetsManagementPage = () => {
 
 	return (
 		<Layout>
-			<div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-				{/* Header moderne avec gradient */}
-				<div className="bg-gradient-to-r from-emerald-600 to-blue-600 dark:from-emerald-700 dark:to-blue-700 shadow-lg">
+			<div className="min-h-screen bg-white dark:bg-gray-900">
+				{/* Header moderne avec couleurs du logo */}
+				<div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 dark:from-teal-700 dark:via-cyan-700 dark:to-blue-700 shadow-lg">
 					<div className="container mx-auto px-6 py-8">
 						<div className="flex items-center gap-4 mb-6">
 							<Button
@@ -191,7 +192,7 @@ const CabinetsManagementPage = () => {
 								</div>
 							</div>
 							
-							<Button asChild size="lg" className="bg-white text-emerald-600 hover:bg-gray-50 shadow-lg">
+							<Button asChild size="lg" className="bg-white text-teal-600 hover:bg-gray-50 shadow-lg">
 								<Link
 									to="/cabinets/new"
 									className="flex items-center gap-2"
@@ -207,10 +208,10 @@ const CabinetsManagementPage = () => {
 				<div className="container mx-auto px-6 py-8">
 					{cabinets.length === 0 ? (
 						<div className="max-w-md mx-auto">
-							<Card className="text-center border-2 border-dashed border-emerald-200 dark:border-emerald-800 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+							<Card className="text-center border-2 border-dashed border-teal-200 dark:border-teal-800 bg-white dark:bg-gray-800 shadow-sm">
 								<CardContent className="py-12">
-									<div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900 dark:to-blue-900 rounded-full flex items-center justify-center">
-										<Building2 className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+									<div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-full flex items-center justify-center">
+										<Building2 className="h-10 w-10 text-teal-600 dark:text-teal-400" />
 									</div>
 									<h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
 										Aucun cabinet trouvé
@@ -219,7 +220,7 @@ const CabinetsManagementPage = () => {
 										Commencez par créer votre premier cabinet
 										d'ostéopathie et développez votre pratique
 									</p>
-									<Button asChild size="lg" className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600">
+									<Button asChild size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600">
 										<Link to="/cabinets/new">
 											<Plus className="mr-2 h-5 w-5" />
 											Créer mon premier cabinet
@@ -233,7 +234,7 @@ const CabinetsManagementPage = () => {
 							{cabinets.map((cabinet) => (
 								<Card
 									key={cabinet.id}
-									className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg"
+									className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md"
 								>
 									{cabinet.imageUrl && (
 										<div className="relative overflow-hidden">
@@ -257,8 +258,8 @@ const CabinetsManagementPage = () => {
 													/>
 												</div>
 											) : (
-												<div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900 dark:to-blue-900 rounded-xl flex items-center justify-center shrink-0 shadow-md">
-													<Building2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+												<div className="w-16 h-16 bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-xl flex items-center justify-center shrink-0 shadow-md">
+													<Building2 className="h-8 w-8 text-teal-600 dark:text-teal-400" />
 												</div>
 											)}
 											<div className="flex-1 min-w-0">
@@ -268,7 +269,7 @@ const CabinetsManagementPage = () => {
 												{osteopathData[
 													cabinet.osteopathId
 												] && (
-													<p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+													<p className="text-sm text-teal-600 dark:text-teal-400 font-medium mt-1">
 														Dr. {
 															osteopathData[
 																cabinet.osteopathId
@@ -311,7 +312,7 @@ const CabinetsManagementPage = () => {
 										{osteopathData[cabinet.osteopathId] && (
 											<div className="pt-4 border-t border-gray-200 dark:border-gray-700">
 												<h4 className="text-sm font-semibold mb-3 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-													<FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+													<FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
 													Informations professionnelles
 												</h4>
 												<div className="flex flex-wrap gap-2">
@@ -323,7 +324,7 @@ const CabinetsManagementPage = () => {
 																<TooltipTrigger>
 																	<Badge
 																		variant="outline"
-																		className="text-xs bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300"
+																		className="text-xs bg-teal-50 border-teal-200 text-teal-700 dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300"
 																	>
 																		SIRET
 																	</Badge>
@@ -350,7 +351,7 @@ const CabinetsManagementPage = () => {
 																<TooltipTrigger>
 																	<Badge
 																		variant="outline"
-																		className="text-xs bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300"
+																		className="text-xs bg-cyan-50 border-cyan-200 text-cyan-700 dark:bg-cyan-900/20 dark:border-cyan-800 dark:text-cyan-300"
 																	>
 																		ADELI
 																	</Badge>
@@ -378,7 +379,7 @@ const CabinetsManagementPage = () => {
 																<TooltipTrigger>
 																	<Badge
 																		variant="outline"
-																		className="text-xs bg-purple-50 border-purple-200 text-purple-700 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-300"
+																		className="text-xs bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300"
 																	>
 																		APE
 																	</Badge>
@@ -402,12 +403,12 @@ const CabinetsManagementPage = () => {
 										)}
 									</CardContent>
 
-									<CardFooter className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-4 border-t border-gray-200 dark:border-gray-600 flex justify-between gap-3">
+									<CardFooter className="bg-gray-50 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-600 flex justify-between gap-3">
 										<Button 
 											variant="outline" 
 											size="sm" 
 											asChild
-											className="flex-1 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-colors"
+											className="flex-1 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 transition-colors"
 										>
 											<Link
 												to={`/cabinets/${cabinet.id}/edit`}
