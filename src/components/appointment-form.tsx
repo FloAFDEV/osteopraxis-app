@@ -185,6 +185,9 @@ export function AppointmentForm({
 		return format(date, "PPP", { locale: fr });
 	};
 
+	const selectedPatient =
+		patients.find((p) => p.id === form.getValues("patientId")) || null;
+
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -215,73 +218,115 @@ export function AppointmentForm({
 					)}
 				/>
 
-				<FormField
-					control={form.control}
-					name="patientId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Patient</FormLabel>
-							<Select
-								onValueChange={(value) =>
-									field.onChange(Number(value))
-								}
-								defaultValue={String(field.value)}
-							>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Sélectionner un patient" />
-									</SelectTrigger>
-								</FormControl>
-
-								{/* ✅ SelectContent doit être ici, à l'intérieur de Select */}
-								<SelectContent>
-									{[...patients]
-										.sort((a, b) =>
-											a.lastName.localeCompare(b.lastName)
-										)
-										.map((patient) => {
-											const age = patient.birthDate
-												? differenceInYears(
-														new Date(),
-														parseISO(
-															patient.birthDate
-														)
-												  )
-												: null;
-
-											const isChild =
-												age !== null && age < 12;
-											const iconColor = isChild
-												? "text-amber-500"
-												: patient.gender === "Homme"
-												? "text-blue-500"
-												: patient.gender === "Femme"
-												? "text-pink-500"
-												: "text-gray-500";
-
-											const Icon = isChild ? Baby : User;
-
-											return (
-												<SelectItem
-													key={patient.id}
-													value={String(patient.id)}
-												>
-													<span className="flex items-center gap-2">
-														<Icon
-															className={`w-4 h-4 ${iconColor}`}
-														/>
-														{patient.lastName}{" "}
-														{patient.firstName}
-													</span>
-												</SelectItem>
-											);
-										})}
-								</SelectContent>
-							</Select>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+				{/** Champ Patient : si patientId fixé, affichage non éditable, sinon Select */}
+				{defaultValues?.patientId && selectedPatient ? (
+					<div>
+						<input
+							type="hidden"
+							name="patientId"
+							value={selectedPatient.id}
+							ref={form.register ? form.register("patientId") : undefined}
+						/>
+						<label className="block text-sm font-medium mb-1">
+							Patient
+						</label>
+						<div className="flex items-center gap-2 bg-muted/40 px-3 py-2 rounded border text-gray-800 dark:text-gray-200">
+							{(() => {
+								const age = selectedPatient.birthDate
+									? differenceInYears(
+											new Date(),
+											parseISO(selectedPatient.birthDate)
+									  )
+									: null;
+								const isChild = age !== null && age < 12;
+								const iconColor = isChild
+									? "text-amber-500"
+									: selectedPatient.gender === "Homme"
+									? "text-blue-500"
+									: selectedPatient.gender === "Femme"
+									? "text-pink-500"
+									: "text-gray-500";
+								const Icon = isChild ? Baby : User;
+								return (
+									<>
+										<Icon className={`w-4 h-4 ${iconColor}`} />
+										<span>
+											{selectedPatient.lastName} {selectedPatient.firstName}
+										</span>
+										{age !== null && (
+											<span className="text-xs text-muted-foreground ml-2">
+												({age} ans)
+											</span>
+										)}
+									</>
+								);
+							})()}
+						</div>
+					</div>
+				) : (
+					<FormField
+						control={form.control}
+						name="patientId"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Patient</FormLabel>
+								<Select
+									onValueChange={(value) =>
+										field.onChange(Number(value))
+									}
+									defaultValue={String(field.value)}
+								>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Sélectionner un patient" />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{[...patients]
+											.sort((a, b) =>
+												a.lastName.localeCompare(b.lastName)
+											)
+											.map((patient) => {
+												const age = patient.birthDate
+													? differenceInYears(
+															new Date(),
+															parseISO(
+																patient.birthDate
+															)
+													  )
+													: null;
+												const isChild =
+													age !== null && age < 12;
+												const iconColor = isChild
+													? "text-amber-500"
+													: patient.gender === "Homme"
+													? "text-blue-500"
+													: patient.gender === "Femme"
+													? "text-pink-500"
+													: "text-gray-500";
+												const Icon = isChild ? Baby : User;
+												return (
+													<SelectItem
+														key={patient.id}
+														value={String(patient.id)}
+													>
+														<span className="flex items-center gap-2">
+															<Icon
+																className={`w-4 h-4 ${iconColor}`}
+															/>
+															{patient.lastName}{" "}
+															{patient.firstName}
+														</span>
+													</SelectItem>
+												);
+											})}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				)}
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<FormField
