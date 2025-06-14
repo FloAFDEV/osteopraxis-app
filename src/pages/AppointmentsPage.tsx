@@ -246,17 +246,9 @@ const AppointmentsPage = () => {
 	const groupedTodayAppointments =
 		groupAppointmentsByMonthAndDay(todayAppointments); // Grouping just to get the date key easily
 
-	// ... keep existing code (rendering the component)
 	return (
 		<Layout>
-			{" "}
-			{/* Decorative background pattern for the whole page */}
-			<div className="fixed inset-0 z-0 pointer-events-none bg-gradient-to-b from-[#F6FAF9] via-[#e4edea] to-white dark:from-[#19272d] dark:to-[#21333b] bg-repeat " style={{ backgroundImage: "radial-gradient(ellipse at 80% 0%, #b8ddd770 0%, transparent 70%), radial-gradient(ellipse at 10% 100%, #e7faeb60 0%, transparent 62%)" }} />
-			
 			<div className="relative z-10">
-				{/* Modern medical header */}
-				<AppointmentsHeader />
-
 				<div className="flex items-center gap-2 mb-2">
 					<Button
 						variant="outline"
@@ -269,6 +261,9 @@ const AppointmentsPage = () => {
 					</Button>
 				</div>
 				<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8">
+					{" "}
+					{/* Modern medical header */}
+					<AppointmentsHeader />
 					{/* Section Titre et Actions */}
 					<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
 						<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800 dark:text-white">
@@ -280,7 +275,9 @@ const AppointmentsPage = () => {
 								variant="outline"
 								size="sm" // Smaller button on mobile
 								disabled={loading}
-								onClick={() => setRefreshKey((prev) => prev + 1)} // Simplified refresh
+								onClick={() =>
+									setRefreshKey((prev) => prev + 1)
+								} // Simplified refresh
 								className="flex items-center gap-2"
 							>
 								<RefreshCw
@@ -292,7 +289,9 @@ const AppointmentsPage = () => {
 									{loading ? "Chargement..." : "Actualiser"}
 								</span>{" "}
 								{/* Hide text on small screens */}
-								<span className="sm:hidden">Actualiser</span>{" "}
+								<span className="sm:hidden">
+									Actualiser
+								</span>{" "}
 								{/* Show text on smaller screens */}
 							</Button>
 							<Button asChild size="sm">
@@ -305,7 +304,9 @@ const AppointmentsPage = () => {
 										Nouvelle séance
 									</span>{" "}
 									{/* Hide text on small screens */}
-									<span className="sm:hidden">Nouveau</span>{" "}
+									<span className="sm:hidden">
+										Nouveau
+									</span>{" "}
 									{/* Shorter text on small screens */}
 								</Link>
 							</Button>
@@ -462,7 +463,9 @@ const AppointmentsPage = () => {
 								<div className="mb-8">
 									<div
 										className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900 dark:text-blue-100 hover:bg-blue-100 dark:hover:bg-blue-700 transition-colors"
-										onClick={() => setShowFuture(!showFuture)}
+										onClick={() =>
+											setShowFuture(!showFuture)
+										}
 									>
 										<div className="flex items-center gap-3">
 											<ArrowRight className="h-5 w-5 text-blue-700 dark:text-blue-300" />
@@ -484,7 +487,10 @@ const AppointmentsPage = () => {
 											{Object.entries(
 												groupedFutureAppointments
 											).map(
-												([monthYear, days], monthIndex) => (
+												(
+													[monthYear, days],
+													monthIndex
+												) => (
 													<div key={monthYear}>
 														<h3
 															className={`text-xl font-semibold text-amber-600 mb-4 ${
@@ -603,7 +609,9 @@ const AppointmentsPage = () => {
 														setSelectedPastYear(
 															value === "all"
 																? undefined
-																: parseInt(value)
+																: parseInt(
+																		value
+																  )
 														)
 													}
 												>
@@ -631,7 +639,8 @@ const AppointmentsPage = () => {
 													</SelectContent>
 												</Select>
 												{/* Message indicating results for the selected year */}
-												{selectedPastYear !== undefined && (
+												{selectedPastYear !==
+													undefined && (
 													<p
 														className={`text-sm font-medium mt-2 sm:mt-0 sm:ml-4 ${
 															filteredPastAppointmentsByYear.length >
@@ -650,8 +659,9 @@ const AppointmentsPage = () => {
 											</div>
 
 											{/* Display grouped past appointments */}
-											{Object.keys(groupedPastAppointments)
-												.length > 0 ? (
+											{Object.keys(
+												groupedPastAppointments
+											).length > 0 ? (
 												Object.entries(
 													groupedPastAppointments
 												).map(
@@ -662,7 +672,8 @@ const AppointmentsPage = () => {
 														<div key={monthYear}>
 															<h3
 																className={`text-xl font-semibold text-amber-500 mb-4 ${
-																	monthIndex > 0
+																	monthIndex >
+																	0
 																		? "mt-6"
 																		: ""
 																}`}
@@ -738,7 +749,8 @@ const AppointmentsPage = () => {
 												// Message if no past appointments match the year filter
 												<div className="text-center py-8 text-gray-500">
 													<p>
-														Aucune séance passée trouvé{" "}
+														Aucune séance passée
+														trouvé{" "}
 														{selectedPastYear
 															? `pour l'année ${selectedPastYear}`
 															: ""}
