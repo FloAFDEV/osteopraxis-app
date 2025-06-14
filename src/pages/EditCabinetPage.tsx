@@ -56,77 +56,98 @@ const EditCabinetPage = () => {
   }, [id, navigate]);
 
   if (loading) {
-    return <Layout>
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement des données...</p>
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground text-lg">Chargement des données...</p>
           </div>
         </div>
-      </Layout>;
+      </Layout>
+    );
   }
 
   if (!cabinet) {
-    return <Layout>
-        <div className="text-center py-12">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-          <h3 className="text-xl font-medium">Cabinet non trouvé</h3>
-          <p className="text-muted-foreground mt-2 mb-6">
-            Le cabinet que vous recherchez n&apos;existe pas ou a été supprimé.
-          </p>
-          <Button asChild>
-            <Link to="/cabinets">
-              Retour aux cabinets
-            </Link>
-          </Button>
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-6 max-w-md">
+            <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold">Cabinet non trouvé</h3>
+              <p className="text-muted-foreground">
+                Le cabinet que vous recherchez n&apos;existe pas ou a été supprimé.
+              </p>
+            </div>
+            <Button asChild size="lg">
+              <Link to="/cabinets">
+                Retour aux cabinets
+              </Link>
+            </Button>
+          </div>
         </div>
-      </Layout>;
+      </Layout>
+    );
   }
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mb-2" 
-            onClick={() => navigate("/cabinets")}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour aux cabinets
-          </Button>
-          
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Building2 className="h-8 w-8 text-green-500" />
-            Modifier le Cabinet
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Modifiez les détails du cabinet en utilisant le formulaire ci-dessous.
-          </p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          {/* Header compact */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate("/cabinets")}
+                className="flex items-center space-x-2 hover:bg-white/50"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Retour</span>
+              </Button>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <Building2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Modifier le Cabinet
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    {cabinet.name}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          {cabinet && (
-            <CabinetForm 
-              defaultValues={{
-                name: cabinet.name,
-                address: cabinet.address,
-                phone: cabinet.phone || undefined,
-                email: cabinet.email || undefined,
-                imageUrl: cabinet.imageUrl || undefined,
-                logoUrl: cabinet.logoUrl || undefined,
-                osteopathId: cabinet.osteopathId,
-                siret: osteopathData?.siret || undefined,
-                rppsNumber: osteopathData?.rpps_number || undefined,
-                apeCode: osteopathData?.ape_code || "8690F",
-                stampUrl: osteopathData?.stampUrl || undefined
-              }} 
-              cabinetId={cabinet.id} 
-              isEditing={true} 
-              osteopathId={cabinet.osteopathId} 
-            />
-          )}
+          {/* Formulaire dans une carte moderne */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="p-8">
+              {cabinet && (
+                <CabinetForm 
+                  defaultValues={{
+                    name: cabinet.name,
+                    address: cabinet.address,
+                    phone: cabinet.phone || undefined,
+                    email: cabinet.email || undefined,
+                    imageUrl: cabinet.imageUrl || undefined,
+                    logoUrl: cabinet.logoUrl || undefined,
+                    osteopathId: cabinet.osteopathId,
+                    siret: osteopathData?.siret || undefined,
+                    rppsNumber: osteopathData?.rpps_number || undefined,
+                    apeCode: osteopathData?.ape_code || "8690F",
+                    stampUrl: osteopathData?.stampUrl || undefined
+                  }} 
+                  cabinetId={cabinet.id} 
+                  isEditing={true} 
+                  osteopathId={cabinet.osteopathId} 
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </Layout>

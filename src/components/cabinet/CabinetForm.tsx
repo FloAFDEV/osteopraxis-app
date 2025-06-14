@@ -180,39 +180,65 @@ export function CabinetForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <CabinetInfoFields form={form} isSubmitting={isSubmitting} />
-        <BillingInfoFields form={form} isSubmitting={isSubmitting} />
-        
-        <div className="border-b pb-6">
-          <h3 className="text-lg font-medium mb-4">Tampon professionnel</h3>
-          <StampManagement 
-            form={form} 
-            isSubmitting={isSubmitting}
-            currentStampUrl={currentStampUrl}
-            onStampUrlChange={handleStampUrlChange}
-          />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Layout en grille pour optimiser l'espace */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Colonne gauche - Informations principales */}
+          <div className="space-y-6">
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6">
+              <CabinetInfoFields form={form} isSubmitting={isSubmitting} />
+            </div>
+            
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
+              <BillingInfoFields form={form} isSubmitting={isSubmitting} />
+            </div>
+          </div>
+          
+          {/* Colonne droite - Images et tampon */}
+          <div className="space-y-6">
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 text-amber-800 dark:text-amber-200">
+                Tampon professionnel
+              </h3>
+              <StampManagement 
+                form={form} 
+                isSubmitting={isSubmitting}
+                currentStampUrl={currentStampUrl}
+                onStampUrlChange={handleStampUrlChange}
+              />
+            </div>
+            
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6">
+              <ImageFields 
+                form={form} 
+                isSubmitting={isSubmitting} 
+                previewImageUrl={previewImageUrl}
+                previewLogoUrl={previewLogoUrl}
+                setPreviewImageUrl={setPreviewImageUrl}
+                setPreviewLogoUrl={setPreviewLogoUrl}
+              />
+            </div>
+          </div>
         </div>
-        
-        <ImageFields 
-          form={form} 
-          isSubmitting={isSubmitting} 
-          previewImageUrl={previewImageUrl}
-          previewLogoUrl={previewLogoUrl}
-          setPreviewImageUrl={setPreviewImageUrl}
-          setPreviewLogoUrl={setPreviewLogoUrl}
-        />
 
-        <div className="flex justify-end gap-2">
+        {/* Boutons d'action centrés */}
+        <div className="flex justify-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
             variant="outline"
             onClick={() => navigate("/cabinets")}
             disabled={isSubmitting}
+            size="lg"
+            className="min-w-[120px]"
           >
             Annuler
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            size="lg"
+            className="min-w-[160px]"
+          >
             {isSubmitting ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Créer le cabinet"}
           </Button>
         </div>
