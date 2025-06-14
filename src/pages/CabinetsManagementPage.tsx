@@ -322,14 +322,6 @@ const CabinetsManagementPage = () => {
 													].siret && (
 														<TooltipProvider>
 															<Tooltip>
-																<TooltipTrigger>
-																	<Badge
-																		variant="outline"
-																		className="text-xs bg-teal-50 border-teal-200 text-teal-700 dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300"
-																	>
-																		SIRET
-																	</Badge>
-																</TooltipTrigger>
 																<TooltipContent>
 																	<p>
 																		{
@@ -347,58 +339,123 @@ const CabinetsManagementPage = () => {
 
 													{osteopathData[
 														cabinet.osteopathId
-													].adeli_number && (
-														<TooltipProvider>
-															<Tooltip>
-																<TooltipTrigger>
-																	<Badge
-																		variant="outline"
-																		className="text-xs bg-cyan-50 border-cyan-200 text-cyan-700 dark:bg-cyan-900/20 dark:border-cyan-800 dark:text-cyan-300"
+													]?.siret && (
+														<div className="flex items-center gap-2">
+															<TooltipProvider>
+																<Tooltip>
+																	<TooltipTrigger
+																		asChild
 																	>
-																		ADELI
-																	</Badge>
-																</TooltipTrigger>
-																<TooltipContent>
-																	<p>
-																		{
-																			osteopathData[
-																				cabinet
-																					.osteopathId
-																			]
-																				.adeli_number
-																		}
-																	</p>
-																</TooltipContent>
-															</Tooltip>
-														</TooltipProvider>
+																		<Badge
+																			variant="outline"
+																			className="text-xs bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300"
+																		>
+																			SIRET
+																		</Badge>
+																	</TooltipTrigger>
+																	<TooltipContent>
+																		<p>
+																			{
+																				osteopathData[
+																					cabinet
+																						.osteopathId
+																				]
+																					.siret
+																			}
+																		</p>
+																	</TooltipContent>
+																</Tooltip>
+															</TooltipProvider>
+															<span className="text-sm text-muted-foreground dark:text-gray-300">
+																{
+																	osteopathData[
+																		cabinet
+																			.osteopathId
+																	].siret
+																}
+															</span>
+														</div>
 													)}
 
 													{osteopathData[
 														cabinet.osteopathId
-													].ape_code && (
-														<TooltipProvider>
-															<Tooltip>
-																<TooltipTrigger>
-																	<Badge
-																		variant="outline"
-																		className="text-xs bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300"
+													]?.rpps_number && (
+														<div className="flex items-center gap-2">
+															<TooltipProvider>
+																<Tooltip>
+																	<TooltipTrigger
+																		asChild
 																	>
-																		APE
-																	</Badge>
-																</TooltipTrigger>
-																<TooltipContent>
-																	<p>
-																		{
-																			osteopathData[
-																				cabinet
-																					.osteopathId
-																			]
-																				.ape_code
-																		}
-																	</p>
-																</TooltipContent>
-															</Tooltip>
-														</TooltipProvider>
+																		<Badge
+																			variant="outline"
+																			className="text-xs bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300"
+																		>
+																			RPPS
+																		</Badge>
+																	</TooltipTrigger>
+																	<TooltipContent>
+																		<p>
+																			{
+																				osteopathData[
+																					cabinet
+																						.osteopathId
+																				]
+																					.rpps_number
+																			}
+																		</p>
+																	</TooltipContent>
+																</Tooltip>
+															</TooltipProvider>
+															<span className="text-sm text-muted-foreground dark:text-gray-300">
+																{
+																	osteopathData[
+																		cabinet
+																			.osteopathId
+																	]
+																		.rpps_number
+																}
+															</span>
+														</div>
+													)}
+
+													{osteopathData[
+														cabinet.osteopathId
+													]?.ape_code && (
+														<div className="flex items-center gap-2">
+															<TooltipProvider>
+																<Tooltip>
+																	<TooltipTrigger
+																		asChild
+																	>
+																		<Badge
+																			variant="outline"
+																			className="text-xs bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300"
+																		>
+																			APE
+																		</Badge>
+																	</TooltipTrigger>
+																	<TooltipContent>
+																		<p>
+																			{
+																				osteopathData[
+																					cabinet
+																						.osteopathId
+																				]
+																					.ape_code
+																			}
+																		</p>
+																	</TooltipContent>
+																</Tooltip>
+															</TooltipProvider>
+															<span className="text-sm text-muted-foreground dark:text-gray-300">
+																{
+																	osteopathData[
+																		cabinet
+																			.osteopathId
+																	].ape_code
+																}
+															</span>
+														</div>
 													)}
 												</div>
 											</div>
