@@ -1,15 +1,9 @@
-
 import { Clock } from "lucide-react";
-
 export default function ScheduleHeader() {
-  return (
-    <div className="relative w-full rounded-2xl overflow-hidden shadow-none mb-8">
+  return <div className="relative w-full rounded-2xl overflow-hidden shadow-none mb-8">
       {/* Fond dégradé bleu/émeraude/ambre selon la thématique planning */}
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-[#22535b] via-[#37c8ab1a] to-amber-100 dark:from-[#18343d] dark:to-[#e8be68b3] opacity-95"
-        aria-hidden="true"
-      />
-      <div className="relative flex z-10 flex-col sm:flex-row items-center gap-4 px-6 py-10 sm:py-14">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#22535b] via-[#37c8ab1a] to-amber-100 dark:from-[#18343d] dark:to-[#e8be68b3] opacity-95" aria-hidden="true" />
+      <div className="relative flex z-10 flex-col sm:flex-row items-center gap-4 px-6 py-10 sm:py-14 ">
         <div className="rounded-full bg-white/70 shadow-md p-4 flex items-center">
           <Clock className="h-9 w-9 text-amber-500" />
         </div>
@@ -22,6 +16,5 @@ export default function ScheduleHeader() {
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
