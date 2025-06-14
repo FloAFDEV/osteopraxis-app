@@ -144,47 +144,47 @@ const CabinetsManagementPage = () => {
 			</Layout>
 		);
 	}
+
 	return (
 		<Layout>
 			<div className="min-h-screen bg-white dark:bg-gray-900">
-				{/* Header moderne avec couleurs du logo */}
-				<div className="bg-gray-400 dark:from-teal-700 dark:via-cyan-700 dark:to-blue-700 shadow-lg">
-					<div className="container mx-auto px-6 py-8 bg-cyan-950">
-						<div className="flex items-center gap-4 mb-6">
+				{/* Nouveau header dans le même style vert */}
+				<section className="relative w-full overflow-hidden shadow-none mb-8">
+					{/* Dégradé vert moderne */}
+					<div
+						className="absolute inset-0 bg-gradient-to-br from-green-400 via-green-600 to-teal-600 dark:from-green-900 dark:via-emerald-800 dark:to-teal-900 opacity-95"
+						aria-hidden="true"
+					/>
+					<div className="relative flex z-10 flex-col md:flex-row md:items-center justify-between gap-4 px-6 py-10 md:py-14 rounded-b-3xl md:rounded-b-[3rem]">
+						<div className="flex items-center gap-5">
+							{/* Icône verte dans cercle blanc */}
+							<div className="rounded-full bg-white shadow-lg p-4 flex items-center justify-center">
+								<Building2 className="h-10 w-10 text-green-600" />
+							</div>
+							<div className="space-y-1">
+								<h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-2 drop-shadow">
+									Gestion des Cabinets
+								</h1>
+								<p className="text-white/90 text-lg">
+									Gérez vos cabinets d'ostéopathie
+									avec style
+								</p>
+							</div>
+						</div>
+						<div className="flex items-center gap-3 mt-6 md:mt-0">
 							<Button
 								variant="outline"
 								size="sm"
 								onClick={() => navigate(-1)}
-								className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+								className="bg-white/20 border-white/30 text-white hover:bg-white/30 hover:text-white"
 							>
 								<ArrowLeft className="mr-2 h-4 w-4" />
 								Retour
 							</Button>
-						</div>
-
-						<div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-							<div className="space-y-2">
-								<div className="flex items-center gap-3">
-									<div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-										<Building2 className="h-8 w-8 text-white" />
-									</div>
-									<div>
-										<h1 className="text-3xl font-bold text-white flex items-center gap-2">
-											Gestion des Cabinets
-											<Sparkles className="h-6 w-6 text-yellow-300" />
-										</h1>
-										<p className="text-white/80 text-lg">
-											Gérez vos cabinets d'ostéopathie
-											avec style
-										</p>
-									</div>
-								</div>
-							</div>
-
 							<Button
 								asChild
 								size="lg"
-								className="bg-white text-teal-600 hover:bg-gray-200 shadow-lg dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700"
+								className="bg-white text-green-600 hover:bg-gray-200 shadow-lg dark:bg-gray-800 dark:text-green-400 dark:hover:bg-gray-700"
 							>
 								<Link
 									to="/cabinets/new"
@@ -196,7 +196,7 @@ const CabinetsManagementPage = () => {
 							</Button>
 						</div>
 					</div>
-				</div>
+				</section>
 
 				<div className="container mx-auto px-6 py-8">
 					{cabinets.length === 0 ? (
