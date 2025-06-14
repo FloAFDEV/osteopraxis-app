@@ -179,7 +179,7 @@ const CabinetsManagementPage = () => {
 											Créer mon premier cabinet
 										</Link>
 									</Button>
-								CardContent>
+								</CardContent>
 							</Card>
 						</div>
 					) : (
@@ -399,7 +399,7 @@ const CabinetsManagementPage = () => {
 																					.ape_code
 																			}
 																		</p>
-																	</TooltipContent>
+																	TooltipContent>
 																</Tooltip>
 															</TooltipProvider>
 															<span className="text-sm text-muted-foreground dark:text-gray-300">
