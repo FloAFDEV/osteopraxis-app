@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { CurrentDateTimeDisplay } from "./CurrentDateTimeDisplay";
 interface LayoutProps {
 	children: React.ReactNode;
 }
@@ -63,18 +64,21 @@ export function Layout({ children }: LayoutProps) {
 							</span>
 						</NavLink>
 					</div>
-
-					<button
-						className="md:hidden p-2 rounded-md"
-						onClick={toggleMenu}
-						aria-label="Toggle menu"
-					>
-						{isMenuOpen ? (
-							<X className="h-6 w-6" />
-						) : (
-							<Menu className="h-6 w-6" />
-						)}
-					</button>
+{/* Ajout de l'affichage de la date et heure courante */}
+					<div className="flex items-center gap-3">
+						<CurrentDateTimeDisplay />
+						<button
+							className="md:hidden p-2 rounded-md"
+							onClick={toggleMenu}
+							aria-label="Toggle menu"
+						>
+							{isMenuOpen ? (
+								<X className="h-6 w-6" />
+							) : (
+								<Menu className="h-6 w-6" />
+							)}
+						</button>
+					</div>
 
 					<nav className="hidden md:flex items-center gap-6">
 						<NavLink
