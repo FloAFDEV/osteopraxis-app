@@ -48,6 +48,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
+import ScheduleHeader from "@/components/schedule/ScheduleHeader";
 
 const SchedulePage = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -190,7 +191,11 @@ const SchedulePage = () => {
 					Retour
 				</Button>
 			</div>
-			<div className="flex flex-col p-4 sm:p-6 lg:p-8 mt-20">
+			
+			{/* Nouveau header planning */}
+			<ScheduleHeader />
+
+			<div className="flex flex-col p-4 sm:p-6 lg:p-8 mt-4">
 				{/* Header remains the same */}
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
