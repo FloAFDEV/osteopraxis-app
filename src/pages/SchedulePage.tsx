@@ -48,6 +48,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
+import ScheduleHeader from "@/components/schedule/ScheduleHeader";
+import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 
 const SchedulePage = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
