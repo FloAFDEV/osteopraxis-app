@@ -221,12 +221,6 @@ export function AppointmentForm({
 				{/** Champ Patient : si patientId fixé, affichage non éditable, sinon Select */}
 				{defaultValues?.patientId && selectedPatient ? (
 					<div>
-						<input
-							type="hidden"
-							name="patientId"
-							value={selectedPatient.id}
-							ref={form.register ? form.register("patientId") : undefined}
-						/>
 						<label className="block text-sm font-medium mb-1">
 							Patient
 						</label>
