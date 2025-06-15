@@ -645,6 +645,22 @@ export function MedicalInfoTab({
     },
   ];
 
+  // 1. Récupérer tous les labels déjà affichés dans groupedMedicalSections
+  const shownLabels = new Set<string>();
+  groupedMedicalSections.forEach(g => {
+    g.items.forEach(item => {
+      if (item.value && item.label) {
+        shownLabels.add(item.label);
+      }
+    });
+  });
+
+  // 2. Filtrer les medicalSections pour ne pas réafficher ces labels
+  const filteredMedicalSections = medicalSections.map(section => ({
+    ...section,
+    items: section.items.filter(item => !shownLabels.has(item.label)),
+  })).filter(section => section.items.length > 0); // ignorer les sections vides
+
   return (
     <div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
       {/* Boutons d'action */}
@@ -827,7 +843,7 @@ export function MedicalInfoTab({
         )
       )}
 
-      <MedicalAccordion sections={medicalSections} />
+      <MedicalAccordion sections={filteredMedicalSections} />
     </div>
   );
 }
