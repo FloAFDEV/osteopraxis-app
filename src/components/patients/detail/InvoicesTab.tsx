@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { InvoicesTableByPeriod } from "./InvoicesTableByPeriod";
 
 interface InvoicesTabProps {
 	patient: Patient;
@@ -72,7 +73,6 @@ export function InvoicesTab({ patient, invoices }: InvoicesTabProps) {
 					</Link>
 				</Button>
 			</div>
-
 			{sortedInvoices.length === 0 ? (
 				<div className="text-center py-8">
 					<Receipt className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -88,13 +88,12 @@ export function InvoicesTab({ patient, invoices }: InvoicesTabProps) {
 					{Object.entries(invoicesByPeriod).map(
 						([periodKey, periodInvoices]) => {
 							const isExpanded =
-								expandedPeriods[periodKey] !== false; // Par défaut, les périodes sont développées
+								expandedPeriods[periodKey] !== false; // Par défaut, développé
 							const periodLabel = format(
 								parseISO(`${periodKey}-01`),
 								"MMMM yyyy",
 								{ locale: fr }
 							);
-
 							return (
 								<div
 									key={periodKey}
@@ -121,88 +120,14 @@ export function InvoicesTab({ patient, invoices }: InvoicesTabProps) {
 											)}
 										</div>
 									</div>
-
 									{isExpanded && (
 										<div className="p-3">
-											<Table>
-												<TableHeader>
-													<TableRow>
-														<TableHead>
-															Date
-														</TableHead>
-														<TableHead>
-															Montant
-														</TableHead>
-														<TableHead>
-															Paiement
-														</TableHead>
-														<TableHead>
-															Statut
-														</TableHead>
-														<TableHead className="text-right">
-															Actions
-														</TableHead>
-													</TableRow>
-												</TableHeader>
-												<TableBody>
-													{periodInvoices.map(
-														(invoice) => (
-															<TableRow
-																key={invoice.id}
-															>
-																<TableCell>
-																	{formatAppointmentDate(
-																		invoice.date,
-																		"dd MMMM yyyy"
-																	)}
-																</TableCell>
-																<TableCell>
-																	{
-																		invoice.amount
-																	}{" "}
-																	€
-																</TableCell>
-																<TableCell className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
-																	<CreditCard className="h-4 w-4 text-gray-400" />
-																	{invoice.paymentMethod ||
-																		"—"}
-																</TableCell>
-																<TableCell>
-																	<div
-																		className={`inline-block px-2 py-1 rounded-full text-xs font-medium 
-        ${
-			invoice.paymentStatus === "PAID"
-				? "bg-green-100 text-green-800"
-				: invoice.paymentStatus === "PENDING"
-				? "bg-amber-100 text-amber-800"
-				: "bg-red-100 text-red-800"
-		}`}
-																	>
-																		{invoice.paymentStatus ===
-																		"PAID"
-																			? "Payée"
-																			: invoice.paymentStatus ===
-																			  "PENDING"
-																			? "En attente"
-																			: "Annulée"}
-																	</div>
-																</TableCell>
-																<TableCell className="text-right">
-																	<Button
-																		variant="ghost"
-																		size="sm"
-																		onClick={() => {
-																			window.location.href = `/invoices/${invoice.id}`;
-																		}}
-																	>
-																		Détails
-																	</Button>
-																</TableCell>
-															</TableRow>
-														)
-													)}
-												</TableBody>
-											</Table>
+											<InvoicesTableByPeriod
+												invoices={periodInvoices}
+												onDetail={(invoiceId) =>
+													window.location.href = `/invoices/${invoiceId}`
+												}
+											/>
 										</div>
 									)}
 								</div>
