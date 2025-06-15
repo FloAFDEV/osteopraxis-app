@@ -14,6 +14,7 @@ import { fr } from "date-fns/locale";
 import { Calendar, Download, Filter, Search, X } from "lucide-react";
 import { InvoiceExportButtons } from "./InvoiceExportButtons";
 import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
+import React from "react";
 
 interface InvoiceFiltersProps {
   searchQuery: string;
@@ -41,6 +42,14 @@ interface InvoiceFiltersProps {
 
 export const InvoiceFilters = (props: InvoiceFiltersProps) => {
   const { isMobile } = useIsMobile();
+
+  // Ajouter des logs pour diagnostiquer cabinets et praticiens reçus
+  React.useEffect(() => {
+    console.log("[InvoiceFilters] cabinets :", props.cabinets);
+    console.log("[InvoiceFilters] praticiens/osteopaths :", props.osteopaths);
+    console.log("[InvoiceFilters] selectedCabinetId :", props.selectedCabinetId);
+    console.log("[InvoiceFilters] selectedOsteopathId :", props.selectedOsteopathId);
+  }, [props.cabinets, props.osteopaths, props.selectedCabinetId, props.selectedOsteopathId]);
 
   // Helper function to safely format month display
   const formatMonthDisplay = (monthKey: string): string => {
@@ -75,7 +84,10 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
             <label className="block text-xs mb-1 font-medium text-muted-foreground">Cabinet</label>
             <Select
               value={props.selectedCabinetId != null ? String(props.selectedCabinetId) : ""}
-              onValueChange={v => props.setSelectedCabinetId(v === "ALL" || v === "" ? null : Number(v))}
+              onValueChange={(v) => {
+                console.log("Changement de valeur du select Cabinet:", v);
+                props.setSelectedCabinetId(v === "ALL" || v === "" ? null : Number(v));
+              }}
             >
               <SelectTrigger className="min-w-[140px] dark:bg-background dark:border-muted-foreground">
                 <SelectValue placeholder="Tous les cabinets" />
@@ -94,7 +106,10 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
             <label className="block text-xs mb-1 font-medium text-muted-foreground">Ostéopathe</label>
             <Select
               value={props.selectedOsteopathId != null ? String(props.selectedOsteopathId) : ""}
-              onValueChange={v => props.setSelectedOsteopathId(v === "ALL" || v === "" ? null : Number(v))}
+              onValueChange={(v) => {
+                console.log("Changement de valeur du select Osteopathe:", v);
+                props.setSelectedOsteopathId(v === "ALL" || v === "" ? null : Number(v));
+              }}
             >
               <SelectTrigger className="min-w-[140px] dark:bg-background dark:border-muted-foreground">
                 <SelectValue placeholder="Tous les praticiens" />

@@ -464,16 +464,6 @@ const InvoicesPage = () => {
               }
             />
           )}
-          <InvoiceExportButtons
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            invoices={invoices || []}
-            patientDataMap={patientDataMap}
-            selectedCabinetId={selectedCabinetId}
-            selectedOsteopathId={selectedOsteopathId}
-            cabinets={cabinets}
-            osteopaths={osteopaths}
-          />
         </div>
         {/* Print / Modal etc */}
         <InvoicePrintWrapper
