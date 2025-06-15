@@ -1,3 +1,4 @@
+
 import {
 	Accordion,
 	AccordionContent,
@@ -32,6 +33,18 @@ interface MedicalSectionProps {
 interface MedicalAccordionProps {
 	sections: MedicalSectionProps[];
 }
+
+const labelColorClasses: Record<string, string> = {
+	"Antécédents de traumatismes": "text-red-400",
+	"Traumatismes": "text-red-400",
+	"Fractures": "text-yellow-600",
+	"Chirurgies": "text-sky-700",
+	"Antécédents médicaux familiaux": "text-purple-600",
+	"Antécédents cardiaques": "text-red-600",
+	"Antécédents pulmonaires": "text-blue-700",
+	"Rhumatologie": "text-orange-600",
+	"Scoliose": "text-yellow-700",
+};
 
 export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 	const getIconColor = (category?: string) => {
@@ -151,10 +164,11 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 								<dl className="space-y-3 pt-2">
 									{section.items.map((item, itemIndex) => {
 										if (!item.value) return null;
-
-										const isHighPriority =
-											item.isCritical || item.isImportant;
-
+										const isHighPriority = item.isCritical || item.isImportant;
+										const colorCls =
+											item.isCritical || item.isImportant
+												? labelColorClasses[item.label] || ""
+												: "";
 										return (
 											<div
 												key={itemIndex}
@@ -168,7 +182,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 														: ""
 												}
 											>
-												<dt className="text-sm font-medium text-muted-foreground">
+												<dt className={`text-sm font-medium text-muted-foreground ${colorCls}`}>
 													{item.label}
 													{item.isCritical && (
 														<Badge
@@ -178,15 +192,6 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 															Critique
 														</Badge>
 													)}
-													{item.isImportant &&
-														!item.isCritical && (
-															<Badge
-																variant="warning"
-																className="ml-2 text-xs"
-															>
-																Important
-															</Badge>
-														)}
 												</dt>
 												<dd className="mt-1 text-sm">
 													{item.value}

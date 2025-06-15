@@ -82,13 +82,21 @@ export function MedicalInfoTab({
   const isCardiacProblem = (text: string | null | undefined) => {
     if (!text) return false;
     const lower = text.toLowerCase();
-    // On cherche les mots clés "cardiaque", "coeur", "cœur", "cardio"
     return (
       lower.includes("cardiaque") ||
       lower.includes("coeur") ||
       lower.includes("cœur") ||
       lower.includes("cardio")
     );
+  };
+
+  // Ajout d'une fonction utilitaire pour savoir si un champ est important ou critique
+  const getMedicalImportance = (label: string, value: string | null | undefined) => {
+    if (!value) return { isImportant: false, isCritical: false };
+    if (label.toLowerCase().includes("cardiaque") || isCardiacProblem(value)) {
+      return { isImportant: false, isCritical: true };
+    }
+    return { isImportant: true, isCritical: false };
   };
 
   // Sphère ORL + ophtalmo + dentaire (fusionnée)
@@ -127,7 +135,7 @@ export function MedicalInfoTab({
     },
   ];
 
-  // Tableau des sphères à afficher (IMC à gauche si voulu)
+  // Tableau des sphères à afficher
   const spheres = [
     {
       title: "Générale",
@@ -135,14 +143,14 @@ export function MedicalInfoTab({
       category: "general" as const,
       defaultOpen: true,
       items: [
-        { label: "Antécédents médicaux familiaux", value: formatValue(patient.familyStatus), isImportant: !!patient.familyStatus },
-        { label: "Antécédents cardiaques", value: formatValue(patient.cardiac_history), isCritical: !!patient.cardiac_history },
-        { label: "Antécédents pulmonaires", value: formatValue(patient.pulmonary_history), isImportant: !!patient.pulmonary_history },
-        { label: "Rhumatologie", value: formatValue(patient.rheumatologicalHistory), isImportant: !!patient.rheumatologicalHistory },
-        { label: "Scoliose", value: formatValue(patient.scoliosis), isImportant: !!patient.scoliosis },
-        { label: "Traumatismes", value: formatValue(patient.traumaHistory), isImportant: !!patient.traumaHistory },
-        { label: "Fractures", value: formatValue(patient.fracture_history), isImportant: !!patient.fracture_history },
-        { label: "Chirurgies", value: formatValue(patient.surgicalHistory), isImportant: !!patient.surgicalHistory },
+        { label: "Antécédents médicaux familiaux", value: formatValue(patient.familyStatus), ...getMedicalImportance("Antécédents médicaux familiaux", patient.familyStatus) },
+        { label: "Antécédents cardiaques", value: formatValue(patient.cardiac_history), ...getMedicalImportance("Antécédents cardiaques", patient.cardiac_history) },
+        { label: "Antécédents pulmonaires", value: formatValue(patient.pulmonary_history), ...getMedicalImportance("Antécédents pulmonaires", patient.pulmonary_history) },
+        { label: "Rhumatologie", value: formatValue(patient.rheumatologicalHistory), ...getMedicalImportance("Rhumatologie", patient.rheumatologicalHistory) },
+        { label: "Scoliose", value: formatValue(patient.scoliosis), ...getMedicalImportance("Scoliose", patient.scoliosis) },
+        { label: "Traumatismes", value: formatValue(patient.traumaHistory), ...getMedicalImportance("Traumatismes", patient.traumaHistory) },
+        { label: "Fractures", value: formatValue(patient.fracture_history), ...getMedicalImportance("Fractures", patient.fracture_history) },
+        { label: "Chirurgies", value: formatValue(patient.surgicalHistory), ...getMedicalImportance("Chirurgies", patient.surgicalHistory) },
         { label: "Médecin généraliste", value: formatValue(patient.generalPractitioner) },
         { label: "Traitement actuel", value: formatValue(patient.currentTreatment) },
         { label: "Allergies", value: formatValue(patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null) },
