@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -8,6 +9,8 @@ import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+
 const NewInvoicePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -16,32 +19,45 @@ const NewInvoicePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pour la sélection patient
+  const [patientsList, setPatientsList] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
+
   // Cabinet & ostéopathe sélectionnés
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
   const [osteopaths, setOsteopaths] = useState<Osteopath[]>([]);
   const [selectedOsteopathId, setSelectedOsteopathId] = useState<number | null>(null);
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
+
   useEffect(() => {
-    // Gestion du paramètre patientId OU appointmentId
     const appointmentId = searchParams.get("appointmentId");
     const patientId = searchParams.get("patientId");
+
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
+
       try {
-        // 1. Si patientId direct dans l’url
+        // 1. Charger tous les patients pour le select s’il n’y a pas de patientId ou d’appointement
+        if (!patientId && !appointmentId) {
+          const allPatients = await api.getPatients();
+          setPatientsList(allPatients || []);
+        }
+
+        // 2. Si patientId direct dans l’url
         if (patientId && !appointmentId) {
           const patient = await api.getPatientById(Number(patientId));
           if (patient) {
             setPatientData(patient);
+            setSelectedPatientId(patient.id);
           } else {
             setError("Patient non trouvé");
             toast.error("Patient non trouvé");
           }
         }
 
-        // 2. Si rendez-vous proposé, priorité : charger le patient lié
+        // 3. Si rendez-vous proposé, priorité : charger le patient lié
         if (appointmentId) {
           const appointment = await api.getAppointmentById(Number(appointmentId));
           if (appointment) {
@@ -50,6 +66,7 @@ const NewInvoicePage = () => {
               const patient = await api.getPatientById(appointment.patientId);
               if (patient) {
                 setPatientData(patient);
+                setSelectedPatientId(patient.id);
               }
             }
           } else {
@@ -58,14 +75,14 @@ const NewInvoicePage = () => {
           }
         }
 
-        // 3. Charger l’ostéopathe courant (émétteur)
-        const osteopaths = await api.getOsteopaths();
+        // 4. Charger l’ostéopathe courant (émétteur)
+        const osteopathsList = await api.getOsteopaths?.() ?? [];
+        setOsteopaths(osteopathsList || []);
         // Sélectionne le premier ostéo s’il y en a qu’un, sinon le connectée
-        if (osteopaths.length === 1) {
-          setOsteopath(osteopaths[0]);
-        } else if (osteopaths.length > 1) {
-          // Si vous avez plusieurs, sélectionnez celui connecté par défaut ici (attention logique projet)
-          setOsteopath(osteopaths[0]);
+        if (osteopathsList.length === 1) {
+          setOsteopath(osteopathsList[0]);
+        } else if (osteopathsList.length > 1) {
+          setOsteopath(osteopathsList[0]);
         }
       } catch (error) {
         setError("Impossible de charger les données nécessaires");
@@ -78,22 +95,38 @@ const NewInvoicePage = () => {
     // eslint-disable-next-line
   }, [searchParams]);
 
-  // Empêcher l’édition tant que l’utilisateur n’a pas choisi un cabinet/ostéo (s’il y a au moins 2 choix)
-  const needCabinetSelect = cabinets.length > 1;
-  const needOsteopathSelect = osteopaths.length > 1;
-  const isReady = (!needCabinetSelect || !!selectedCabinetId) && (!needOsteopathSelect || !!selectedOsteopathId);
+  // Gestion du choix de patient (global)
+  const handlePatientSelect = async (patientId: string) => {
+    setSelectedPatientId(Number(patientId));
+    setIsLoading(true);
+    try {
+      const patient = await api.getPatientById(Number(patientId));
+      if (patient) {
+        setPatientData(patient);
+      }
+    } catch (err) {
+      toast.error("Erreur lors de la sélection du patient");
+    }
+    setIsLoading(false);
+  };
+
+  const needPatientSelection = !patientData && !appointment;
+
   if (isLoading) {
-    return <Layout>
+    return (
+      <Layout>
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Chargement...</p>
           </div>
         </div>
-      </Layout>;
+      </Layout>
+    );
   }
   if (error) {
-    return <Layout>
+    return (
+      <Layout>
         <div className="container mx-auto py-10">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -106,17 +139,54 @@ const NewInvoicePage = () => {
             </Button>
           </div>
         </div>
-      </Layout>;
+      </Layout>
+    );
   }
-  return <Layout>
+  return (
+    <Layout>
       <div className="container mx-auto py-10">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Retour
         </Button>
         <h1 className="text-2xl font-bold mb-4">Nouvelle note d'honoraire</h1>
-        <InvoiceForm patient={patientData} osteopath={osteopath} appointment={appointment} onCreate={() => navigate("/invoices")} />
+        {/* Sélection patient si nécessaire */}
+        {needPatientSelection && (
+          <div className="mb-6 max-w-md">
+            <label className="block mb-2 font-semibold text-muted-foreground">
+              Sélectionner un patient
+            </label>
+            <Select
+              value={selectedPatientId ? String(selectedPatientId) : ""}
+              onValueChange={handlePatientSelect}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choisir le patient" />
+              </SelectTrigger>
+              <SelectContent>
+                {patientsList.length === 0 && (
+                  <SelectItem value="" disabled>Aucun patient trouvé</SelectItem>
+                )}
+                {patientsList.map((patient) => (
+                  <SelectItem key={patient.id} value={String(patient.id)}>
+                    {patient.lastName} {patient.firstName} — {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString() : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        {/* Formulaire de facture que si patient choisi */}
+        {patientData && (
+          <InvoiceForm
+            patient={patientData}
+            osteopath={osteopath}
+            appointment={appointment}
+            onCreate={() => navigate("/invoices")}
+          />
+        )}
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
 export default NewInvoicePage;
