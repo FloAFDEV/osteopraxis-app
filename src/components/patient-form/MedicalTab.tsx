@@ -365,6 +365,85 @@ export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
                         </FormItem>
                     )}
                 />
+				{/* Nouvelle section : Informations cliniques */}
+                <div className="border-t border-gray-200 pt-6 mt-4">
+                  <div className="font-semibold mb-2 flex items-center gap-2 text-blue-900 dark:text-blue-200">
+                    <span role="img" aria-label="medical exam">📝</span>
+                    Informations cliniques (consultation)
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="medical_examination"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Examen médical</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Examen médical/Observations"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="diagnosis"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Diagnostic</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Diagnostic"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <FormField
+                      control={form.control}
+                      name="treatment_plan"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Plan de traitement</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Plan de traitement proposé"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="consultation_conclusion"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conclusion de la consultation</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Synthèse finale"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
             </CardContent>
         </Card>
     );

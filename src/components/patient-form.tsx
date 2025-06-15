@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -132,6 +131,12 @@ export function PatientForm({
       pediatrician_name: patient?.pediatrician_name || null,
       paramedical_followup: patient?.paramedical_followup || null,
       other_comments_child: patient?.other_comments_child || null,
+
+      // Champs cliniques
+      diagnosis: patient?.diagnosis || null,
+      medical_examination: patient?.medical_examination || null,
+      treatment_plan: patient?.treatment_plan || null,
+      consultation_conclusion: patient?.consultation_conclusion || null,
     },
   });
 

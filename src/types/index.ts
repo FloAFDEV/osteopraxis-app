@@ -141,6 +141,12 @@ export interface Patient {
 
 	// Champs requis par le type
 	allergies: string | null;
+
+	// Champs cliniques ajoutés (nouveaux)
+	diagnosis?: string | null;
+	medical_examination?: string | null;
+	treatment_plan?: string | null;
+	consultation_conclusion?: string | null;
 }
 
 export interface Appointment {

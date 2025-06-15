@@ -1,4 +1,3 @@
-
 import { Patient } from "@/types";
 
 export interface PatientFormValues {
@@ -46,7 +45,6 @@ export interface PatientFormValues {
   feeding?: string | null;
   behavior?: string | null;
   childCareContext?: string | null;
-  allergies?: string | null;
   
   // Nouveaux champs généraux
   ent_followup?: string | null;
@@ -89,6 +87,12 @@ export interface PatientFormValues {
   currentMedication?: string | null;
   otherContraception?: string | null;
   notes?: string | null;
+
+  // Champs cliniques
+  diagnosis?: string | null;
+  medical_examination?: string | null;
+  treatment_plan?: string | null;
+  consultation_conclusion?: string | null;
 }
 
 export interface PatientFormProps {

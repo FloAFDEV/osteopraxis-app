@@ -350,6 +350,7 @@ export type Database = {
           childrenAges: number[] | null
           city: string | null
           complementaryExams: string | null
+          consultation_conclusion: string | null
           contraception: Database["public"]["Enums"]["Contraception"] | null
           country: string | null
           createdAt: string
@@ -357,6 +358,7 @@ export type Database = {
           currentTreatment: string | null
           dental_health: string | null
           developmentMilestones: string | null
+          diagnosis: string | null
           digestiveDoctorName: string | null
           digestiveProblems: string | null
           email: string | null
@@ -388,6 +390,7 @@ export type Database = {
           job: string | null
           lastName: string
           maritalStatus: Database["public"]["Enums"]["MaritalStatus"] | null
+          medical_examination: string | null
           medicalHistory: string | null
           notes: string | null
           occupation: string | null
@@ -415,6 +418,7 @@ export type Database = {
           sportActivity: string | null
           surgicalHistory: string | null
           traumaHistory: string | null
+          treatment_plan: string | null
           updatedAt: string
           userId: string | null
           weight: number | null
@@ -436,6 +440,7 @@ export type Database = {
           childrenAges?: number[] | null
           city?: string | null
           complementaryExams?: string | null
+          consultation_conclusion?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           country?: string | null
           createdAt?: string
@@ -443,6 +448,7 @@ export type Database = {
           currentTreatment?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
+          diagnosis?: string | null
           digestiveDoctorName?: string | null
           digestiveProblems?: string | null
           email?: string | null
@@ -474,6 +480,7 @@ export type Database = {
           job?: string | null
           lastName: string
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
+          medical_examination?: string | null
           medicalHistory?: string | null
           notes?: string | null
           occupation?: string | null
@@ -501,6 +508,7 @@ export type Database = {
           sportActivity?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
+          treatment_plan?: string | null
           updatedAt?: string
           userId?: string | null
           weight?: number | null
@@ -522,6 +530,7 @@ export type Database = {
           childrenAges?: number[] | null
           city?: string | null
           complementaryExams?: string | null
+          consultation_conclusion?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           country?: string | null
           createdAt?: string
@@ -529,6 +538,7 @@ export type Database = {
           currentTreatment?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
+          diagnosis?: string | null
           digestiveDoctorName?: string | null
           digestiveProblems?: string | null
           email?: string | null
@@ -560,6 +570,7 @@ export type Database = {
           job?: string | null
           lastName?: string
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
+          medical_examination?: string | null
           medicalHistory?: string | null
           notes?: string | null
           occupation?: string | null
@@ -587,6 +598,7 @@ export type Database = {
           sportActivity?: string | null
           surgicalHistory?: string | null
           traumaHistory?: string | null
+          treatment_plan?: string | null
           updatedAt?: string
           userId?: string | null
           weight?: number | null

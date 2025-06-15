@@ -26,6 +26,7 @@ import {
 import { useEffect, useState } from "react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { MedicalAccordion } from "./MedicalAccordion";
+import { StickyNote, ClipboardList, Stethoscope, ShieldHeart, Brain, Ear, Soup, Activity, User, HeartPulse, FileSignature, Feather, Syringe, CheckCircle2 } from "lucide-react"; // icônes additionnelles si besoin
 
 interface MedicalInfoTabProps {
 	patient: Patient;
@@ -569,6 +570,76 @@ export function MedicalInfoTab({
 		setShowNewAppointmentForm(!showNewAppointmentForm);
 	};
 
+	// Préparer les blocs cliniques
+	const clinicalSections = [
+		{
+			field: patient.medical_examination,
+			title: "Examen médical",
+			icon: <ClipboardList className="h-5 w-5 text-indigo-700" />,
+		},
+		{
+			field: patient.diagnosis,
+			title: "Diagnostic",
+			icon: <Stethoscope className="h-5 w-5 text-pink-700" />,
+		},
+		{
+			field: patient.treatment_plan,
+			title: "Plan de traitement",
+			icon: <Syringe className="h-5 w-5 text-green-800" />,
+		},
+		{
+			field: patient.consultation_conclusion,
+			title: "Conclusion",
+			icon: <CheckCircle2 className="h-5 w-5 text-blue-700" />,
+		},
+	];
+
+	// Regrouper les sphères — ajouté ou déplacé si besoin
+	const groupedMedicalSections = [
+		{
+			group: "ORL",
+			icon: <Ear className="h-4 w-4 text-purple-700" />,
+			items: [
+				{ label: "Médecin ORL", value: patient.entDoctorName },
+				{ label: "Problèmes ORL", value: patient.entProblems },
+				{ label: "Suivi ORL", value: patient.ent_followup },
+			],
+		},
+		{
+			group: "Viscérale",
+			icon: <Soup className="h-4 w-4 text-amber-700" />,
+			items: [
+				{ label: "Médecin digestif", value: patient.digestiveDoctorName },
+				{ label: "Problèmes digestifs", value: patient.digestiveProblems },
+				{ label: "Transit intestinal", value: patient.intestinal_transit },
+			],
+		},
+		{
+			group: "Périphérique",
+			icon: <Activity className="h-4 w-4 text-green-700" />,
+			items: [
+				{ label: "Motricité globale", value: patient.gross_motor_skills },
+				{ label: "Motricité fine", value: patient.fine_motor_skills },
+				{ label: "Fractures", value: patient.fracture_history },
+				{ label: "Antécédents rhumatologiques", value: patient.rheumatologicalHistory },
+				{ label: "Antécédents de traumatismes", value: patient.traumaHistory },
+				{ label: "Fréquence sportive", value: patient.sport_frequency },
+			],
+		},
+		{
+			group: "Générale",
+			icon: <User className="h-4 w-4 text-gray-700" />,
+			items: [
+				{ label: "Symptômes généraux", value: patient.generalSymptoms },
+				{ label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
+				{ label: "Latéralité", value: patient.handedness },
+				{ label: "Qualité du sommeil", value: patient.sleep_quality },
+				{ label: "Alimentation", value: patient.feeding },
+				// ... ajoutez autres champs généraux pertinents si besoin
+			],
+		},
+	];
+
 	return (
 		<div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 			{/* Boutons d'action */}
@@ -696,6 +767,59 @@ export function MedicalInfoTab({
 						</div>
 					</CardContent>
 				</Card>
+			)}
+
+			{/* Nouvelles sections cliniques : affichage conditionnel */}
+			{clinicalSections.some(section => section.field && section.field.trim() !== "") && (
+				<div className="border border-blue-200 dark:border-blue-700 rounded-lg p-4 bg-blue-50/70 dark:bg-blue-950/30 mb-4 space-y-4">
+					<h4 className="font-semibold mb-2 flex items-center gap-2 text-blue-900 dark:text-blue-100">
+						<StickyNote className="h-5 w-5 text-blue-900" />
+						Compte-rendu clinique
+					</h4>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						{clinicalSections.map(
+							(section, idx) =>
+								section.field && section.field.trim() !== "" && (
+									<div key={section.title} className="bg-white dark:bg-slate-800 rounded p-3 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm">
+										<span className="flex items-center gap-2 font-medium text-sm mb-1">
+											{section.icon}
+											{section.title}
+										</span>
+										<span className="text-gray-700 dark:text-gray-100">{section.field}</span>
+									</div>
+								)
+						)}
+					</div>
+				</div>
+			)}
+
+			{/* Séparateurs visuels & regroupement par sphères médicales */}
+			{groupedMedicalSections.map(g =>
+				g.items.some(item => item.value && item.value.trim() !== "") && (
+					<div key={g.group} className="mb-4">
+						<div className="flex items-center gap-2 mb-2 text-lg font-semibold text-gray-700 dark:text-gray-100">
+							{g.icon} {g.group}
+						</div>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							{g.items.map(
+								(item, idx) =>
+									item.value &&
+									item.value.trim() !== "" && (
+										<div
+											key={item.label}
+											className="bg-white dark:bg-slate-800 rounded p-3 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm"
+										>
+											<span className="font-medium text-sm mb-1">{item.label}</span>
+											<span className="text-gray-700 dark:text-gray-100">{item.value}</span>
+										</div>
+									)
+							)}
+						</div>
+						{g !== groupedMedicalSections[groupedMedicalSections.length - 1] && (
+							<hr className="my-6 border-t border-dashed border-gray-300 dark:border-gray-700" />
+						)}
+					</div>
+				)
 			)}
 
 			<MedicalAccordion sections={medicalSections} />
