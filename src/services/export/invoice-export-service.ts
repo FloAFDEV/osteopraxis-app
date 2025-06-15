@@ -17,7 +17,7 @@ export async function generateAccountingExport(
   invoices: Invoice[],
   patientDataMap: Map<number, Patient>,
   period: string,
-  osteopath: Osteopath,
+  osteopath: Osteopath | null, // null si export tous osteos
   cabinet: Cabinet
 ): Promise<Blob> {
   // Création du workbook et de la feuille
@@ -44,12 +44,19 @@ export async function generateAccountingExport(
     }
   });
 
-  // On passe le nom de l'ostéo et le NOM du cabinet au header generator
+  // Info ostéo
+  let osteoName: string | undefined = null;
+  if (osteopath && osteopath.name) {
+    osteoName = osteopath.name;
+  } else if (!osteopath) {
+    osteoName = "Tous les ostéopathes";
+  }
+
   const headerRowIndex = generateHeaderSection(
     worksheet,
     period,
-    osteopath?.name,
-    cabinet?.name // <-- on passe le nom du cabinet ici
+    osteoName,
+    cabinet?.name
   );
 
   const lastRowIndex = generateTableSection(

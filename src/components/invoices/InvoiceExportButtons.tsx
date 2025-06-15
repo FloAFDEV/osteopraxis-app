@@ -28,89 +28,93 @@ export function InvoiceExportButtons({
   invoices,
   patientDataMap,
 }: InvoiceExportButtonsProps) {
-  const [selectedOsteopathId, setSelectedOsteopathId] = useState<number | null>(null);
+  const [selectedOsteopathId, setSelectedOsteopathId] = useState<number | "ALL" | null>(null);
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
   const { osteopaths, loading: loadingOsteo } = useOsteopaths();
-  const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(selectedOsteopathId);
+  const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(selectedCabinetId ?? undefined);
 
-  const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId);
-  const selectedCabinet: Cabinet | undefined = cabinets.find(c => c.id === selectedCabinetId);
+  // Nouvelle liste des ostéos du cabinet sélectionné
+  const osteopathsInCabinet = React.useMemo(() => {
+    if (!selectedCabinetId) return [];
+    // On filtre les ostéos qui exercent bien dans ce cabinet (selon cabinets)
+    // S'il y a une relation directe au cabinet → adapter selon ta structure
+    return osteopaths.filter(o => {
+      // Pour l’instant : garder tous les ostéos listés associés à un cabinet (id), sinon adapter si il y a une réelle table d’association
+      return true;
+    });
+  }, [selectedCabinetId, osteopaths]);
 
-  // Ajout d’un log détaillé pour les factures
+  // log debug
   React.useEffect(() => {
-    console.log("[DEBUG INVOICE] Export - Structure d’une facture (première):", invoices[0]);
-  }, [invoices]);
+    console.log("[DEBUG OSTEOS]", osteopathsInCabinet);
+  }, [osteopathsInCabinet]);
 
-  // Filtrer selon ostéo et cabinet, mais si propr. absente il ne faut pas exclure !
-  const matchingInvoices = invoices.filter(inv => {
-    // On veut comparer seulement si les champs sont définis partout
-    // Surtout, si le champ est undefined dans l’objet, ne pas matcher, mais si le filtre n’est pas appliqué (null), ok
-    const osteoOk =
-      selectedOsteopathId == null ||
-      (inv.osteopathId != null && Number(inv.osteopathId) === Number(selectedOsteopathId));
+  // Sélection de l’ostéo : int/null/"ALL"
+  const selectedOsteopath =
+    selectedOsteopathId && selectedOsteopathId !== "ALL"
+      ? osteopaths.find((o) => o.id === Number(selectedOsteopathId))
+      : undefined;
+  const selectedCabinet = cabinets.find((c) => c.id === selectedCabinetId);
+
+  // Filtrer selon cabinet uniquement si "ALL" est sélectionné pour l’ostéo
+  const matchingInvoices = invoices.filter((inv) => {
     const cabinetOk =
       selectedCabinetId == null ||
       (inv.cabinetId != null && Number(inv.cabinetId) === Number(selectedCabinetId));
-    return osteoOk && cabinetOk;
+    const osteoOk =
+      selectedOsteopathId == null ||
+      selectedOsteopathId === "ALL" ||
+      (inv.osteopathId != null && Number(inv.osteopathId) === Number(selectedOsteopathId));
+    return cabinetOk && osteoOk;
   });
 
   const canExport =
-    !!selectedOsteopath &&
     !!selectedCabinet &&
+    (
+      (selectedOsteopathId !== null && selectedOsteopathId !== undefined) ||
+      selectedOsteopathId === "ALL"
+    ) &&
     !loadingOsteo &&
     !loadingCabs &&
     !isExporting;
 
   // Gérer l'export XLSX
   const exportToExcel = async () => {
-    // Ajout de logs pour debug !
-    console.log("=== [EXPORT DEBUG] ===");
-    console.log("selectedOsteopathId:", selectedOsteopathId, "selectedCabinetId:", selectedCabinetId);
-    console.log("invoices (ids):", invoices.map(inv => ({
-      id: inv.id,
-      osteopathId: inv.osteopathId,
-      cabinetId: inv.cabinetId
-    })));
-    console.log("matchingInvoices (après filtre):", matchingInvoices.map(inv => ({
-      id: inv.id,
-      osteopathId: inv.osteopathId,
-      cabinetId: inv.cabinetId
-    })));
-    console.log("======================");
-
-    if (!selectedOsteopath) {
-      toast.error("Sélectionnez un praticien");
-      return;
-    }
-    if (!selectedCabinet) {
-      toast.error("Sélectionnez un cabinet");
-      return;
-    }
-    if (matchingInvoices.length === 0) {
-      toast.error("Aucune note d’honoraire à exporter pour ce filtre");
-      return;
-    }
     try {
       setIsExporting(true);
       toast.info("Préparation de l’export...");
+
       const periodLabel = selectedMonth ? `${selectedMonth}/${selectedYear}` : selectedYear;
 
-      const blob = await generateAccountingExport(
-        matchingInvoices,
-        patientDataMap,
-        periodLabel,
-        selectedOsteopath,
-        selectedCabinet
-      );
+      let blob;
+      let filename;
+      if (selectedOsteopathId === "ALL") {
+        // Export pour tous les ostéopathes du cabinet
+        blob = await generateAccountingExport(
+          matchingInvoices, // factures déjà filtrées par cabinet seulement
+          patientDataMap,
+          periodLabel,
+          null, // pas d’ostéo => sera affiché comme “Tous”
+          selectedCabinet
+        );
+        filename = `Comptabilite_${periodLabel}_Cab${selectedCabinet.id}_TousOsteos.xlsx`;
+      } else {
+        // Export d’un ostéo précis
+        blob = await generateAccountingExport(
+          matchingInvoices,
+          patientDataMap,
+          periodLabel,
+          selectedOsteopath,
+          selectedCabinet
+        );
+        filename = `Comptabilite_${periodLabel}_Ost${selectedOsteopath?.id}_Cab${selectedCabinet.id}.xlsx`;
+      }
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute(
-        "download",
-        `Comptabilite_${periodLabel}_Ost${selectedOsteopath.id}_Cab${selectedCabinet.id}.xlsx`
-      );
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
@@ -124,12 +128,53 @@ export function InvoiceExportButtons({
 
   return (
     <div>
-      <CabinetOsteopathSelector
-        selectedOsteopathId={selectedOsteopathId}
-        selectedCabinetId={selectedCabinetId}
-        onOsteopathChange={setSelectedOsteopathId}
-        onCabinetChange={setSelectedCabinetId}
-      />
+      {/* Sélection Cabinet */}
+      <div className="flex gap-2 mb-2">
+        <div className="w-1/2">
+          <label className="block text-xs mb-1 font-medium text-muted-foreground">
+            Cabinet
+          </label>
+          <select
+            className="w-full h-10 px-2 border rounded"
+            value={selectedCabinetId ?? ""}
+            onChange={(e) => {
+              setSelectedCabinetId(e.target.value ? Number(e.target.value) : null);
+              setSelectedOsteopathId(null); // reset ostéo à chaque changement de cabinet
+            }}
+          >
+            <option value="">Sélectionner un cabinet</option>
+            {cabinets.map((cab) => (
+              <option key={cab.id} value={cab.id}>
+                {cab.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Sélection Ostéo */}
+        <div className="w-1/2">
+          <label className="block text-xs mb-1 font-medium text-muted-foreground">
+            Ostéopathe
+          </label>
+          <select
+            className="w-full h-10 px-2 border rounded"
+            value={selectedOsteopathId ?? ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedOsteopathId(val === "ALL" ? "ALL" : val ? Number(val) : null);
+            }}
+            disabled={!selectedCabinetId}
+          >
+            <option value="">Sélectionner un ostéopathe</option>
+            <option value="ALL">Tous les ostéopathes du cabinet</option>
+            {osteopathsInCabinet.map((ost) => (
+              <option key={ost.id} value={ost.id}>
+                {ost.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
