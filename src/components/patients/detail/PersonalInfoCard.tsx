@@ -104,7 +104,7 @@ export function PersonalInfoCard({ patient }: { patient: Patient }) {
 
   return (
     <Card className="w-auto max-w-[400px] h-fit">
-      <CardContent className="p-3 md:p-4 lg:p-5">
+      <CardContent className="p-3 md:p-4 lg:p-5 z-[99]">
         <CardTitle className="text-base md:text-lg font-bold mb-3 md:mb-4 flex gap-2 items-center text-red-700">
           <AlertTriangle className="w-5 h-5 text-red-500" />
           Antécédents importants
