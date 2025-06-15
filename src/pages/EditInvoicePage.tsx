@@ -112,7 +112,7 @@ const EditInvoicePage = () => {
         <InvoiceForm 
           invoice={invoice}
           patient={patient}
-          onUpdate={handleSubmit}
+          onUpdate={() => navigate('/invoices')}
           onCreate={() => navigate('/invoices')}
         />
       </div>

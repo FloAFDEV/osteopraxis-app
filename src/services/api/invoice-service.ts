@@ -69,7 +69,7 @@ export const invoiceService = {
     return [];
   },
 
-  async createInvoice(invoiceData: Partial<Invoice>): Promise<Invoice> { // Accept Partial<Invoice> so we can include osteopathId
+  async createInvoice(invoiceData: Partial<Invoice> & { osteopathId?: number }): Promise<Invoice> {
     if (USE_SUPABASE) {
       try {
         let dataToSend = { ...invoiceData };
@@ -86,12 +86,13 @@ export const invoiceService = {
     return {
       id: Math.floor(Math.random() * 1000),
       ...invoiceData,
+      osteopathId: (invoiceData.osteopathId ?? (await getCurrentOsteopathId?.())),
       date: new Date().toISOString(),
       paymentStatus: "PENDING"
     } as Invoice;
   },
 
-  async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice | undefined> {
+  async updateInvoice(id: number, invoiceData: Partial<Invoice> & { osteopathId?: number }): Promise<Invoice | undefined> {
     if (USE_SUPABASE) {
       try {
         let dataToSend = { ...invoiceData };
@@ -107,7 +108,8 @@ export const invoiceService = {
     }
     return { 
       id, 
-      ...invoiceData 
+      ...invoiceData,
+      osteopathId: (invoiceData.osteopathId ?? (await getCurrentOsteopathId?.())),
     } as Invoice;
   },
 
