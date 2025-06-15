@@ -1,5 +1,3 @@
-
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -191,7 +189,6 @@ export const InvoiceFilters = ({
 							selectedMonth={selectedMonth}
 							invoices={invoices}
 							patientDataMap={patientDataMap}
-							osteopath={osteopath}
 						/>
 					</div>
 				</div>
@@ -199,4 +196,3 @@ export const InvoiceFilters = ({
 		</Card>
 	);
 };
-
