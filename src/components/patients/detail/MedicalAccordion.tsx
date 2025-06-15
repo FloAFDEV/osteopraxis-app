@@ -111,6 +111,20 @@ const getImportanceLevel = (section: MedicalSectionProps) => {
 	return null;
 };
 
+// Ajoute une fonction utilitaire locale pour savoir si la valeur est vraiment renseignée
+function isValueFilled(value: string | null | undefined): boolean {
+	if (value == null) return false;
+	const trimmed = value.trim().toLowerCase();
+	return (
+		trimmed !== "" &&
+		trimmed !== "non" &&
+		trimmed !== "aucun" &&
+		trimmed !== "non renseigné" &&
+		trimmed !== "null" &&
+		trimmed !== "-"
+	);
+}
+
 export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 	return (
 		<div className="space-y-3">
@@ -160,9 +174,13 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 								<dl className="space-y-3 pt-2">
 									{section.items.map((item, itemIndex) => {
 										if (!item.value) return null;
+
+										const valueFilled = isValueFilled(item.value);
+
 										let dtClass = "text-sm font-medium text-muted-foreground";
 										let badge = null;
-										if (item.isCritical) {
+										// Afficher le badge critique/rouge UNIQUEMENT si la valeur est bien renseignée
+										if (item.isCritical && valueFilled) {
 											dtClass += " text-red-600";
 											badge = (
 												<Badge
@@ -183,12 +201,13 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 												</Badge>
 											);
 										}
+										// Si le champ est Critique mais valeur non renseigné, badge "important"/jaune si applicable (déjà géré par item.isImportant)
 
 										return (
 											<div
 												key={itemIndex}
 												className={
-													item.isCritical
+													item.isCritical && valueFilled
 														? `p-3 rounded border-l-4 bg-red-50 dark:bg-red-900/10 border-red-500`
 														: item.isImportant
 															? "p-3 rounded border-l-4 bg-yellow-50 dark:bg-amber-900/10 border-yellow-500"
