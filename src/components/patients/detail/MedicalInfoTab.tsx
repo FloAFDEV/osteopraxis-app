@@ -869,6 +869,9 @@ export function MedicalInfoTab({
         </Card>
       )}
 
+      {/* ACCORDEON SECTIONS FILTREES - déplacé ici pour apparaître sous la dernière séance */}
+      <MedicalAccordion sections={filteredMedicalSections} />
+
       {/* Sections cliniques */}
       <ClinicalSections sections={clinicalSections} />
 
@@ -877,9 +880,6 @@ export function MedicalInfoTab({
 
       {/* Sphères spécialisées */}
       <SpecializedSphereSections sections={specializedSphereSections} />
-
-      {/* Accordion autres sections (déjà filtrées) */}
-      <MedicalAccordion sections={filteredMedicalSections} />
     </div>
   );
 }
