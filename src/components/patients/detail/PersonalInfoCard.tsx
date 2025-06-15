@@ -103,8 +103,8 @@ export function PersonalInfoCard({ patient }: { patient: Patient }) {
   const antecedentsItems = getCombinedHistory();
 
   return (
-    <Card className="w-auto max-w-[400px] h-fit">
-      <CardContent className="p-3 md:p-4 lg:p-5 z-[99]">
+    <Card className="w-auto max-w-[400px] h-fit bg-white dark:bg-slate-900 shadow-lg z-[99]">
+      <CardContent className="p-3 md:p-4 lg:p-5 z-[99] bg-white dark:bg-slate-900">
         <CardTitle className="text-base md:text-lg font-bold mb-3 md:mb-4 flex gap-2 items-center text-red-700">
           <AlertTriangle className="w-5 h-5 text-red-500" />
           Antécédents importants
@@ -117,11 +117,10 @@ export function PersonalInfoCard({ patient }: { patient: Patient }) {
               const importance = getImportance(item.label, item.value);
               const icon = getItemIcon(item.label);
               const colorCls = labelColorClasses[item.label] || "";
-              // Affichage en colonne, value séparée
               return (
                 <div
                   key={idx}
-                  className="flex flex-col gap-1 bg-white/70 dark:bg-white/10 px-3 py-2 rounded border border-gray-100 dark:border-gray-800"
+                  className="flex flex-col gap-1 bg-white dark:bg-slate-900 px-3 py-2 rounded border border-gray-100 dark:border-gray-800"
                 >
                   <div className="flex items-center gap-2">
                     {icon}
