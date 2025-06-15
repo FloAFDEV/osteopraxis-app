@@ -29,6 +29,7 @@ import {
   SelectContent,
   SelectItem
 } from "@/components/ui/select";
+import { InvoiceExportButtons } from "@/components/invoices/InvoiceExportButtons";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
