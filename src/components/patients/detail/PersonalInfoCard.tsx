@@ -1,10 +1,9 @@
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Patient } from "@/types";
 import { AlertTriangle, Activity, Heart, Users, Scissors, Bone, Stethoscope } from "lucide-react";
-interface PersonalInfoCardProps {
-  patient: Patient;
-}
+
 const labelColorClasses: Record<string, string> = {
   "Antécédents de traumatismes": "text-red-400",
   "Traumatismes": "text-red-400",
@@ -14,8 +13,9 @@ const labelColorClasses: Record<string, string> = {
   "Antécédents cardiaques": "text-red-600",
   "Antécédents pulmonaires": "text-blue-700",
   "Rhumatologie": "text-orange-600",
-  "Scoliose": "text-yellow-700"
+  "Scoliose": "text-yellow-700",
 };
+
 function getItemIcon(label: string) {
   switch (label) {
     case "Antécédents de traumatismes":
@@ -39,18 +39,22 @@ function getItemIcon(label: string) {
       return <AlertTriangle className="w-4 h-4 text-gray-400" />;
   }
 }
+
 const isCardiacKeyword = (value: string | null) => {
   if (!value) return false;
   const low = value.toLowerCase();
-  return low.includes("cardiaque") || low.includes("coeur") || low.includes("cœur") || low.includes("cardio");
+  return (
+    low.includes("cardiaque") ||
+    low.includes("coeur") ||
+    low.includes("cœur") ||
+    low.includes("cardio")
+  );
 };
+
 function getImportance(label: string, value: string | null) {
   if (!value) return null;
   if (label === "Antécédents cardiaques" || isCardiacKeyword(value)) {
-    return {
-      label: "Critique",
-      variant: "destructive" as const
-    };
+    return { label: "Critique", variant: "destructive" as const };
   }
   // La logique "important" a été supprimée suite à ta demande
   return null;
@@ -60,70 +64,84 @@ function getImportance(label: string, value: string | null) {
 function isValidAntecedent(value: string | null) {
   if (!value) return false;
   const trimmed = value.trim().toLowerCase();
-  return trimmed !== "" && trimmed !== "non" && trimmed !== "aucun" && trimmed !== "non renseigné" && trimmed !== "null" && trimmed !== "-";
+  return (
+    trimmed !== "" &&
+    trimmed !== "non" &&
+    trimmed !== "aucun" &&
+    trimmed !== "non renseigné" &&
+    trimmed !== "null" &&
+    trimmed !== "-"
+  );
 }
-export function PersonalInfoCard({
-  patient
-}: PersonalInfoCardProps) {
+
+export function PersonalInfoCard({ patient }: { patient: Patient }) {
   const getCombinedHistory = () => {
     const items: {
       label: string;
       value: string | null;
     }[] = [];
-    if (isValidAntecedent(patient.traumaHistory)) items.push({
-      label: "Antécédents de traumatismes",
-      value: patient.traumaHistory
-    });
-    if (isValidAntecedent(patient.fracture_history)) items.push({
-      label: "Fractures",
-      value: patient.fracture_history
-    });
-    if (isValidAntecedent(patient.surgicalHistory)) items.push({
-      label: "Chirurgies",
-      value: patient.surgicalHistory
-    });
-    if (isValidAntecedent(patient.familyStatus)) items.push({
-      label: "Antécédents médicaux familiaux",
-      value: patient.familyStatus
-    });
-    if (isValidAntecedent(patient.cardiac_history)) items.push({
-      label: "Antécédents cardiaques",
-      value: patient.cardiac_history
-    });
-    if (isValidAntecedent(patient.pulmonary_history)) items.push({
-      label: "Antécédents pulmonaires",
-      value: patient.pulmonary_history
-    });
+
+    if (isValidAntecedent(patient.traumaHistory))
+      items.push({ label: "Antécédents de traumatismes", value: patient.traumaHistory });
+    if (isValidAntecedent(patient.fracture_history))
+      items.push({ label: "Fractures", value: patient.fracture_history });
+    if (isValidAntecedent(patient.surgicalHistory))
+      items.push({ label: "Chirurgies", value: patient.surgicalHistory });
+    if (isValidAntecedent(patient.familyStatus))
+      items.push({ label: "Antécédents médicaux familiaux", value: patient.familyStatus });
+    if (isValidAntecedent(patient.cardiac_history))
+      items.push({ label: "Antécédents cardiaques", value: patient.cardiac_history });
+    if (isValidAntecedent(patient.pulmonary_history))
+      items.push({ label: "Antécédents pulmonaires", value: patient.pulmonary_history });
     // SUPPRESSION: la ligne suivante retirée car Rhumatologie n’est pas un antécédent ici
     // if (isValidAntecedent(patient.rheumatologicalHistory))
     //   items.push({ label: "Rhumatologie", value: patient.rheumatologicalHistory });
-    if (isValidAntecedent(patient.scoliosis)) items.push({
-      label: "Scoliose",
-      value: patient.scoliosis
-    });
+    if (isValidAntecedent(patient.scoliosis))
+      items.push({ label: "Scoliose", value: patient.scoliosis });
     return items;
   };
+
   const antecedentsItems = getCombinedHistory();
-  return <Card className="w-auto max-w-[400px] h-fit bg-transparent">
-      <CardContent className="p-3 md:p-4 lg:p-5">
+
+  return (
+    // Laisse la carte dans le flow normal, sans z-index exagéré
+    <Card className="w-auto max-w-[400px] h-fit bg-white dark:bg-slate-900 shadow-lg relative mt-0 mb-0">
+      {/* Ne mets pas de z-index sauf overlay nécessaire */}
+      <CardContent className="p-3 md:p-4 lg:p-5 bg-white dark:bg-slate-900">
         <CardTitle className="text-base md:text-lg font-bold mb-3 md:mb-4 flex gap-2 items-center text-red-700">
           <AlertTriangle className="w-5 h-5 text-red-500" />
           Antécédents importants
         </CardTitle>
-        <div className="space-y-3">
-          {antecedentsItems.length === 0 ? <span className="text-sm text-gray-500">Aucun antécédent important renseigné</span> : antecedentsItems.map((item, idx) => {
-          const importance = getImportance(item.label, item.value);
-          const icon = getItemIcon(item.label);
-          const colorCls = labelColorClasses[item.label] || "";
-          return <div key={idx} className="text-xs md:text-sm flex gap-2 items-center">
-                  {icon}
-                  <span className={`font-medium ${colorCls}`}>{item.label} :</span>
-                  <span className="text-foreground">{item.value}</span>
-                  {/* IMPORTANT : on ne garde que le badge Critique, le badge Important est supprimé ici */}
-                  {importance && importance.label === "Critique" && <Badge variant={importance.variant} className="ml-2">{importance.label}</Badge>}
-                </div>;
-        })}
+        <div className="space-y-4">
+          {antecedentsItems.length === 0 ? (
+            <span className="text-sm text-gray-500">Aucun antécédent important renseigné</span>
+          ) : (
+            antecedentsItems.map((item, idx) => {
+              const importance = getImportance(item.label, item.value);
+              const icon = getItemIcon(item.label);
+              const colorCls = labelColorClasses[item.label] || "";
+              return (
+                <div
+                  key={idx}
+                  className="flex flex-col gap-1 bg-white dark:bg-slate-900 px-3 py-2 rounded border border-gray-100 dark:border-gray-800"
+                >
+                  <div className="flex items-center gap-2">
+                    {icon}
+                    <span className={`font-medium ${colorCls}`}>{item.label}</span>
+                    {importance && importance.label === "Critique" && (
+                      <Badge variant={importance.variant} className="ml-2">{importance.label}</Badge>
+                    )}
+                  </div>
+                  <span className={`text-foreground text-xs md:text-sm break-words whitespace-pre-line`}>
+                    {item.value}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }
+
