@@ -148,7 +148,7 @@ const CabinetsManagementPage = () => {
 		<Layout>
 			<div className="min-h-screen bg-white dark:bg-gray-900">
 				{/* Header moderne avec couleurs du logo */}
-				<div className="bg-gradient-to-br from-cyan-900 via-teal-800 to-blue-900 shadow-lg rounded-lg">
+				<div className="bg-gradient-to-br from-cyan-900 via-teal-800 to-blue-900 dark:from-emerald-900 dark:via-teal-800 dark:to-emerald-950 shadow-lg rounded-lg">
 					<div className="container mx-auto px-6 py-8 bg-white/5 backdrop-blur-sm rounded-xl">
 						<div className="flex items-center gap-4 mb-6">
 							<Button
