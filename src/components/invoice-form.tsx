@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Invoice, Appointment, Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -24,12 +23,23 @@ interface InvoiceFormProps {
   invoice?: Invoice | null;
   onCreate?: () => void;
   onUpdate?: () => void;
+  cabinetId?: number;
+  osteopathId?: number;
 }
 
-export function InvoiceForm({ patient, appointment, invoice, onCreate, onUpdate }: InvoiceFormProps) {
+export function InvoiceForm({
+  patient,
+  appointment,
+  invoice,
+  onCreate,
+  onUpdate,
+  cabinetId,
+  osteopathId,
+}: InvoiceFormProps) {
   const isEditing = !!invoice;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [osteopathId, setOsteopathId] = useState<number | null>(null);
+  // Use the passed osteopathId if provided, otherwise try to fetch current
+  const [currentOsteopathId, setCurrentOsteopathId] = useState<number | null>(osteopathId ?? null);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -42,16 +52,19 @@ export function InvoiceForm({ patient, appointment, invoice, onCreate, onUpdate 
   });
 
   useEffect(() => {
-    // On récupère l'ID de l'ostéopathe connecté une seule fois au mount
-    getCurrentOsteopathId().then(oId => setOsteopathId(oId));
-  }, []);
+    if (currentOsteopathId === null && !osteopathId) {
+      // Only fetch if not already provided by props
+      getCurrentOsteopathId().then(oId => setCurrentOsteopathId(oId));
+    }
+  }, [osteopathId, currentOsteopathId]);
 
   const onSubmit = async (data: any) => {
     if (!patient) {
       toast.error("Veuillez spécifier un patient.");
       return;
     }
-    if (!osteopathId) {
+    const assignedOsteopathId = osteopathId ?? currentOsteopathId;
+    if (!assignedOsteopathId) {
       toast.error("Impossible d’identifier l’ostéopathe.");
       return;
     }
@@ -62,9 +75,9 @@ export function InvoiceForm({ patient, appointment, invoice, onCreate, onUpdate 
         ...data,
         patientId: patient.id,
         appointmentId: appointment?.id,
-        osteopathId: osteopathId,
-        // Prêt pour usage futur :
-        cabinetId: appointment?.cabinetId || patient.cabinetId || null,
+        osteopathId: assignedOsteopathId,
+        // Use the passed cabinetId, otherwise fallback
+        cabinetId: cabinetId ?? appointment?.cabinetId ?? patient.cabinetId ?? null,
       };
       if (isEditing && invoice) {
         await api.updateInvoice(invoice.id, invoiceData);
@@ -84,10 +97,10 @@ export function InvoiceForm({ patient, appointment, invoice, onCreate, onUpdate 
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {osteopathId && (
+      {(currentOsteopathId || osteopathId) && (
         <div>
           <label className="block text-sm mb-1 font-semibold text-muted-foreground">Émetteur (Ostéopathe)</label>
-          <Input disabled value={"#" + osteopathId} />
+          <Input disabled value={"#" + (osteopathId ?? currentOsteopathId)} />
           <p className="text-xs text-gray-500">Renseigné automatiquement, non modifiable.</p>
         </div>
       )}
