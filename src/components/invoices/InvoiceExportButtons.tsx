@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +34,7 @@ export function InvoiceExportButtons({
   const { osteopaths, loading: loadingOsteo } = require("@/hooks/useOsteopaths").useOsteopaths();
   const { cabinets, loading: loadingCabs } = require("@/hooks/useCabinetsByOsteopath").useCabinetsByOsteopath(selectedOsteopathId ?? undefined);
 
-  // FIX: Remove ?? undefined, just use find (it already returns undefined if not found)
+  // Correction: Retirer '?? undefined' après .find (natif)
   const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId);
   const selectedCabinet: Cabinet | undefined = cabinets.find(c => c.id === selectedCabinetId);
 
