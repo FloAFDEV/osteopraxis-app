@@ -14,6 +14,7 @@ import { AdditionalFieldsTab } from "./patient-form/AdditionalFieldsTab";
 import { PatientFormProps, PatientFormValues } from "./patient-form/types";
 import getPatientSchema from "@/utils/patient-form-helpers";
 import { Patient } from "@/types";
+import { SpecializedFieldsTab } from "./patient-form/SpecializedFieldsTab";
 
 export function PatientForm({
   patient,
@@ -252,80 +253,7 @@ export function PatientForm({
                 <AdditionalFieldsTab form={form} isChild={isChild} />
               </TabsContent>
               <TabsContent value="specialized">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Cardiaque</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("cardiac_history")} placeholder="Antécédents cardiaques" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Pulmonaire</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("pulmonary_history")} placeholder="Antécédents pulmonaires" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Pelvien / Gynéco-Uro</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("pelvic_history")} placeholder="Historique pelvien/gynéco-uro" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Neurologique</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("neurological_history")} placeholder="Historique neurologique" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Neurodéveloppemental</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("neurodevelopmental_history")} placeholder="Historique neurodéveloppemental" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen nerfs crâniens</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("cranial_nerve_exam")} placeholder="Compte-rendu examen nerfs crâniens" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen dentaire</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("dental_exam")} placeholder="Examen dentaire" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen crânien</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("cranial_exam")} placeholder="Examen crânien" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Tests LMO</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("lmo_tests")} placeholder="Tests LMO" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Membranes crâniennes</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("cranial_membrane_exam")} placeholder="Membranes crâniennes" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Historique musculo-sq.</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("musculoskeletal_history")} placeholder="Historique musculo-squelettique" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen membre inf.</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("lower_limb_exam")} placeholder="Examen membre inférieur" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen membre sup.</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("upper_limb_exam")} placeholder="Examen membre supérieur" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen épaule</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("shoulder_exam")} placeholder="Examen épaule" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Scoliose</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("scoliosis")} placeholder="Scoliose" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen fascias</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("fascia_exam")} placeholder="Examen fascias" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Masque facial</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("facial_mask_exam")} placeholder="Examen masque facial" />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="font-semibold">Examen vasculaire</label>
-                    <textarea className="input w-full resize-none min-h-[80px] rounded-md border border-gray-300 px-3 py-2" {...form.register("vascular_exam")} placeholder="Examen vasculaire" />
-                  </div>
-                </div>
+                <SpecializedFieldsTab form={form} />
               </TabsContent>
             </Tabs>
 
