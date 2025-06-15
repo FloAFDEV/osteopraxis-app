@@ -93,6 +93,9 @@ export interface PatientFormValues {
   medical_examination?: string | null;
   treatment_plan?: string | null;
   consultation_conclusion?: string | null;
+
+  // Ajouté pour corriger le bug (présent dans le formulaire - voir patient-form.tsx)
+  allergies?: string | null;
 }
 
 export interface PatientFormProps {
