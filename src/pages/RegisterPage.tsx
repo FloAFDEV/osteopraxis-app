@@ -151,7 +151,7 @@ const RegisterPage = () => {
                 <div className="w-full border-t border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-[#0d1117] text-gray-400">Inscription</span>
+                <span className="px-2 bg-[#0d1117] text-blue-400">Inscription</span>
               </div>
             </div>
 
