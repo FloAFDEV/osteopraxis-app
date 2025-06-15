@@ -275,7 +275,8 @@ export function calculateMonthlyBreakdown(
     const femmes = thisMonthPatientsList.filter(
       (p) => p.gender === "Femme"
     ).length;
-    const enfants = thisMonthPatientsList.filter(isMinor).length;
+    // Remplacer enfants → mineurs (clé)
+    const mineurs = thisMonthPatientsList.filter(isMinor).length;
 
     const growthRate =
       lastYearPatientsCount > 0
@@ -296,7 +297,7 @@ export function calculateMonthlyBreakdown(
       growthText: `${growthRate}%`,
       hommes,
       femmes,
-      enfants,
+      mineurs, // clé renommée ici
     };
   });
 }

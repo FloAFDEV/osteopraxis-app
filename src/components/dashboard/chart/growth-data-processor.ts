@@ -6,7 +6,7 @@ export interface ProcessedGrowthData {
   total: number;
   hommes: number;
   femmes: number;
-  enfants: number;
+  mineurs: number;
   growthText: string;
 }
 
@@ -41,16 +41,17 @@ export function processGrowthData(data: DashboardData): ProcessedGrowthData[] {
 
     // Calcul des proportions basé sur les pourcentages réels
     const maleCount = Math.round(total * malePercentage);
-    const childCount = Math.round(total * childPercentage);
-    const femaleCount = total - maleCount - childCount;
+    const mineurCount = Math.round(total * childPercentage);
+    const femaleCount = total - maleCount - mineurCount;
 
     return {
       month: monthMap[item.month] || item.month,
       total: total,
       hommes: maleCount,
       femmes: femaleCount,
-      enfants: childCount,
+      mineurs: mineurCount,
       growthText: item.growthText,
     };
   });
 }
+

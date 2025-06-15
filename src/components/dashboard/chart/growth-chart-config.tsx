@@ -5,21 +5,21 @@ export const GROWTH_CHART_COLORS = {
   total: "#9b87f5",
   hommes: "#60a5fa",
   femmes: "#b93dcc",
-  enfants: "#34d399",
+  mineurs: "#34d399",
 } as const;
 
 export const NAME_MAP = {
   total: "Total général",
   hommes: "Hommes",
   femmes: "Femmes",
-  enfants: "Enfants",
+  mineurs: "Mineurs",
 } as const;
 
 export const TOOLTIP_NAME_MAP = {
   total: "Total",
   hommes: "Hommes",
   femmes: "Femmes",
-  enfants: "Enfants",
+  mineurs: "Mineurs",
 } as const;
 
 interface LineConfig {
@@ -53,7 +53,7 @@ const LINE_CONFIGS: LineConfig[] = [
     animationDuration: 1800,
   },
   {
-    dataKey: "enfants",
+    dataKey: "mineurs",
     strokeWidth: 2,
     dotRadius: 3,
     activeDotRadius: 5,
@@ -82,3 +82,4 @@ export function renderGrowthLines() {
     />
   ));
 }
+
