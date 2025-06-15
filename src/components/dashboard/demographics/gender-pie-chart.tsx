@@ -26,7 +26,7 @@ interface GenderPieChartProps {
 export const GENDER_COLORS = {
 	Homme: "#3b82f6", // bleu-500
 	Femme: "#8b5cf6", // violet-500
-	Enfant: "#10b981", // émeraude-500
+	Mineurs: "#10b981", // émeraude-500
 	"Non spécifié": "#6b7280", // gris-500
 };
 
@@ -65,17 +65,19 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 }) => {
 	const { isMobile } = useIsMobile();
 
-	// Correction : forcer la clé "Enfant" pour tout élément dont le nom contient "Enfant" ou "mineur" (pour robustesse)
+	// Correction : forcer la clé "Mineurs" pour tout élément dont le nom contient "enfant" ou "mineur" (pour robustesse)
 	const validChartData =
 		chartData?.filter((item) => item && item.value > 0).map((item) => {
 			if (
 				item.name &&
-				(item.name.toLowerCase().includes("enfant") ||
-					item.name.toLowerCase().includes("mineur"))
+				(
+					item.name.toLowerCase().includes("enfant") ||
+					item.name.toLowerCase().includes("mineur")
+				)
 			) {
 				return {
 					...item,
-					name: "Enfant" // Forcer l’appellation clé du mapping couleur
+					name: "Mineurs" // Toujours forcer l’appellation clé du mapping couleur
 				};
 			}
 			return item;
