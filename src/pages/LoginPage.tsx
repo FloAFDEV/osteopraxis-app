@@ -86,7 +86,7 @@ const LoginPage = () => {
 	return (
 		<div className="min-h-screen flex">
 			{/* Left section - Login form */}
-			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1127]">
+			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
 				<div className="mb-6">
 					<h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
 						PatientHub
@@ -349,7 +349,7 @@ const LoginPage = () => {
 					alt="Colonne vertébrale"
 					className="w-full h-full object-cover"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-r from-[#0d1127]/80 to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 to-transparent"></div>
 			</div>
 		</div>
 	);
