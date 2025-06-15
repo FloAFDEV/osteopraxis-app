@@ -13,6 +13,9 @@ import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
+import { InvoiceDateInput } from "./invoice-form/InvoiceDateInput";
+import { InvoiceAmountInput } from "./invoice-form/InvoiceAmountInput";
+import { InvoicePaymentFields } from "./invoice-form/InvoicePaymentFields";
 
 // Les méthodes de paiement et statuts proposés
 const paymentMethods = [
@@ -23,15 +26,17 @@ const paymentMethods = [
   { value: "AUTRE", label: "Autre" },
 ];
 
+// Labels "statut féminin"
 const paymentStatusOptions = [
   { value: "PENDING", label: "En attente" },
-  { value: "PAID", label: "Payé" },
+  { value: "PAID", label: "Payée" },
   { value: "CANCELED", label: "Annulée" },
 ];
 
 const schema = z.object({
   date: z.string().nonempty("Date requise"),
-  amount: z.number({ invalid_type_error: "Champ obligatoire" }).min(0),
+  amount: z.number({ invalid_type_error: "Champ obligatoire" })
+    .min(0, "Le montant ne peut pas être négatif"),
   notes: z.string().optional(),
   paymentMethod: z.string().optional(),
   paymentStatus: z.string().optional(),
@@ -134,7 +139,11 @@ export function InvoiceForm({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {/* Affichage du nom de l’émetteur */}
+      {/* Titre contextuel */}
+      <h2 className="text-lg font-semibold mb-2">
+        {isEditing ? "Modifier la facture/note d’honoraires" : "Nouvelle facture / Note d'honoraires"}
+      </h2>
+      {/* Émetteur */}
       {(osteopath || osteopathId) && (
         <div>
           <label className="block text-sm mb-1 font-semibold text-muted-foreground">
@@ -149,7 +158,7 @@ export function InvoiceForm({
           </p>
         </div>
       )}
-      {/* Affichage du patient */}
+      {/* Patient */}
       <div>
         <label className="block text-sm mb-1 font-semibold text-muted-foreground">Patient</label>
         <Input
@@ -161,77 +170,12 @@ export function InvoiceForm({
           }
         />
       </div>
-      {/* Champ date facture */}
-      <div>
-        <label className="block text-sm mb-1">Date de la facture</label>
-        <Controller
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <Input
-              type="date"
-              {...field}
-              value={field.value}
-              onChange={e => field.onChange(e.target.value)}
-              disabled={isSubmitting}
-            />
-          )}
-        />
-      </div>
-      {/* Champ montant */}
-      <div>
-        <label className="block text-sm mb-1">Montant (€)</label>
-        <Input
-          step="0.01"
-          type="number"
-          {...form.register("amount", { valueAsNumber: true })}
-          disabled={isSubmitting}
-        />
-      </div>
-      {/* Statut */}
-      <div>
-        <label className="block text-sm mb-1">Statut de paiement</label>
-        <Controller
-          control={form.control}
-          name="paymentStatus"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choisir le statut" />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentStatusOptions.map(opt => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
-      {/* Mode de paiement */}
-      <div>
-        <label className="block text-sm mb-1">Mode de paiement</label>
-        <Controller
-          control={form.control}
-          name="paymentMethod"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner" />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map(method => (
-                  <SelectItem key={method.value} value={method.value}>
-                    {method.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
+      {/* Date */}
+      <InvoiceDateInput control={form.control} isSubmitting={isSubmitting} />
+      {/* Montant */}
+      <InvoiceAmountInput register={form.register} isSubmitting={isSubmitting} />
+      {/* Statut & Paiement */}
+      <InvoicePaymentFields control={form.control} isSubmitting={isSubmitting} />
       {/* Exonération TVA */}
       <div className="mt-2">
         <div className="flex items-center gap-2">
