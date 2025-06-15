@@ -33,6 +33,9 @@ import { ShieldAlert } from "lucide-react";
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { MedicalAccordion } from "./MedicalAccordion";
 import { translateHandedness } from "@/utils/patient-form-helpers";
+import { ClinicalSections } from "./ClinicalSections";
+import { GroupedMedicalSections } from "./GroupedMedicalSections";
+import { SpecializedSphereSections } from "./SpecializedSphereSections";
 
 interface MedicalInfoTabProps {
   patient: Patient;
@@ -641,7 +644,6 @@ export function MedicalInfoTab({
         { label: "Latéralité", value: translateHandedness(patient.handedness) },
         { label: "Qualité du sommeil", value: patient.sleep_quality },
         { label: "Alimentation", value: patient.feeding },
-        // ... ajoutez autres champs généraux pertinents si besoin
       ],
     },
   ];
@@ -867,90 +869,16 @@ export function MedicalInfoTab({
         </Card>
       )}
 
-      {/* Nouvelles sections cliniques : affichage conditionnel */}
-      {clinicalSections.some(section => section.field && section.field.trim() !== "") && (
-        <div className="border border-blue-200 dark:border-blue-700 rounded-lg p-4 bg-blue-50/70 dark:bg-blue-950/30 mb-4 space-y-4">
-          <h4 className="font-semibold mb-2 flex items-center gap-2 text-blue-900 dark:text-blue-100">
-            <StickyNote className="h-5 w-5 text-blue-900" />
-            Compte-rendu clinique
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {clinicalSections.map(
-              (section, idx) =>
-                section.field && section.field.trim() !== "" && (
-                  <div key={section.title} className="bg-white dark:bg-slate-800 rounded p-3 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm">
-                    <span className="flex items-center gap-2 font-medium text-sm mb-1">
-                      {section.icon}
-                      {section.title}
-                    </span>
-                    <span className="text-gray-700 dark:text-gray-100">{section.field}</span>
-                  </div>
-                )
-            )}
-          </div>
-        </div>
-      )}
+      {/* Sections cliniques */}
+      <ClinicalSections sections={clinicalSections} />
 
-      {/* Séparateurs visuels & regroupement par sphères médicales */}
-      {groupedMedicalSections.map(g =>
-        g.items.some(item => item.value && item.value.trim() !== "") && (
-          <div key={g.group} className="mb-4">
-            <div className="flex items-center gap-2 mb-2 text-lg font-semibold text-gray-700 dark:text-gray-100">
-              {g.icon} {g.group}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {g.items.map(
-                (item, idx) =>
-                  item.value &&
-                  item.value.trim() !== "" && (
-                    <div
-                      key={item.label}
-                      className="bg-white dark:bg-slate-800 rounded p-3 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm"
-                    >
-                      <span className="font-medium text-sm mb-1">{item.label}</span>
-                      <span className="text-gray-700 dark:text-gray-100">{item.value}</span>
-                    </div>
-                  )
-              )}
-            </div>
-            {g !== groupedMedicalSections[groupedMedicalSections.length - 1] && (
-              <hr className="my-6 border-t border-dashed border-gray-300 dark:border-gray-700" />
-            )}
-          </div>
-        )
-      )}
+      {/* Sphères médicales groupées */}
+      <GroupedMedicalSections groupedSections={groupedMedicalSections} />
 
-      {/* Section sphères spéciales */}
-      {specializedSphereSections.some(s => s.value && String(s.value).trim() !== "") && (
-        <Card className="border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-900/20">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              Sphères spécialisées
-              <span className="text-sm font-normal text-orange-700 dark:text-orange-200">
-                (nouveaux champs)
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {specializedSphereSections.map(
-                (s, idx) =>
-                  s.value &&
-                  String(s.value).trim() !== "" && (
-                    <div
-                      key={s.title}
-                      className="bg-white dark:bg-slate-800 rounded p-4 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm"
-                    >
-                      <span className="font-semibold text-base mb-1 text-orange-900 dark:text-orange-200">{s.title}</span>
-                      <span className="text-gray-700 dark:text-gray-100 whitespace-pre-line break-words">{s.value}</span>
-                    </div>
-                  )
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
+      {/* Sphères spécialisées */}
+      <SpecializedSphereSections sections={specializedSphereSections} />
+
+      {/* Accordion autres sections (déjà filtrées) */}
       <MedicalAccordion sections={filteredMedicalSections} />
     </div>
   );
