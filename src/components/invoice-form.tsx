@@ -16,32 +16,19 @@ import { format, parseISO } from "date-fns";
 import { InvoiceDateInput } from "./invoice-form/InvoiceDateInput";
 import { InvoiceAmountInput } from "./invoice-form/InvoiceAmountInput";
 import { InvoicePaymentFields } from "./invoice-form/InvoicePaymentFields";
-
-// Les méthodes de paiement et statuts proposés
-const paymentMethods = [
-  { value: "ESPECES", label: "Espèces" },
-  { value: "CARTE", label: "Carte bancaire" },
-  { value: "VIREMENT", label: "Virement" },
-  { value: "CHEQUE", label: "Chèque" },
-  { value: "AUTRE", label: "Autre" },
-];
-
-// Labels "statut féminin"
-const paymentStatusOptions = [
-  { value: "PENDING", label: "En attente" },
-  { value: "PAID", label: "Payée" },
-  { value: "CANCELED", label: "Annulée" },
-];
+import { InvoiceOsteopathInput } from "./invoice-form/InvoiceOsteopathInput";
 
 const schema = z.object({
   date: z.string().nonempty("Date requise"),
-  amount: z.number({ invalid_type_error: "Champ obligatoire" })
+  amount: z
+    .number({ invalid_type_error: "Champ obligatoire" })
     .min(0, "Le montant ne peut pas être négatif"),
   notes: z.string().optional(),
   paymentMethod: z.string().optional(),
   paymentStatus: z.string().optional(),
   tvaExoneration: z.boolean().default(true),
   tvaMotif: z.string().optional(),
+  osteopathId: z.number({ required_error: "Émetteur requis" }),
 });
 
 interface InvoiceFormProps {
@@ -52,7 +39,7 @@ interface InvoiceFormProps {
   onUpdate?: () => void;
   cabinetId?: number;
   osteopathId?: number;
-  osteopath?: Osteopath | null; // Ajout
+  osteopath?: Osteopath | null;
 }
 
 export function InvoiceForm({
@@ -63,15 +50,17 @@ export function InvoiceForm({
   onUpdate,
   cabinetId,
   osteopathId,
-  osteopath, // Ajout
+  osteopath,
 }: InvoiceFormProps) {
   const isEditing = !!invoice;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentOsteopathId, setCurrentOsteopathId] = useState<number | null>(osteopathId ?? null);
 
   const defaultDate = invoice?.date
     ? (invoice.date.length > 10 ? invoice.date.slice(0, 10) : invoice.date)
     : format(new Date(), "yyyy-MM-dd");
+
+  // Si invoice, garder son ostéopathe, sinon celui passé en props
+  const defaultOsteoId = invoice?.osteopathId ?? osteopathId ?? undefined;
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -83,26 +72,20 @@ export function InvoiceForm({
       paymentStatus: invoice?.paymentStatus ?? "PENDING",
       tvaExoneration: invoice?.tvaExoneration ?? true,
       tvaMotif: invoice?.tvaMotif ?? "TVA non applicable - Article 261-4-1° du CGI",
+      osteopathId: defaultOsteoId,
     },
   });
 
-  // Gérer le fetch de l'ostéo courant SI non passé en paramètre
-  useEffect(() => {
-    if (currentOsteopathId === null && !osteopathId) {
-      getCurrentOsteopathId().then(oId => setCurrentOsteopathId(oId));
-    }
-  }, [osteopathId, currentOsteopathId]);
-
   const tvaExoneration = form.watch("tvaExoneration");
 
+  // SUBMIT
   const onSubmit = async (data: any) => {
     if (!patient) {
       toast.error("Veuillez spécifier un patient.");
       return;
     }
-    const assignedOsteopathId = osteopathId ?? currentOsteopathId;
-    if (!assignedOsteopathId) {
-      toast.error("Impossible d’identifier l’ostéopathe.");
+    if (!data.osteopathId) {
+      toast.error("Veuillez sélectionner l'émetteur (ostéopathe).");
       return;
     }
     setIsSubmitting(true);
@@ -110,11 +93,10 @@ export function InvoiceForm({
     try {
       const invoiceData: Partial<Invoice> = {
         ...data,
-        // Conversion nécessaire : date -> ISO string
         date: data.date ? new Date(data.date).toISOString() : undefined,
         patientId: patient.id,
         appointmentId: appointment?.id,
-        osteopathId: assignedOsteopathId,
+        osteopathId: data.osteopathId,
         cabinetId: cabinetId ?? appointment?.cabinetId ?? patient.cabinetId ?? null,
         tvaExoneration: data.tvaExoneration,
         tvaMotif: data.tvaExoneration
@@ -123,11 +105,11 @@ export function InvoiceForm({
       };
       if (isEditing && invoice) {
         await api.updateInvoice(invoice.id, invoiceData);
-        toast.success("Facture mise à jour !");
+        toast.success("Facture / Note d'honoraires mise à jour !");
         onUpdate?.();
       } else {
         await api.createInvoice(invoiceData as any);
-        toast.success("Facture créée !");
+        toast.success("Facture / Note d'honoraires créée !");
         onCreate?.();
       }
     } catch (e) {
@@ -139,25 +121,11 @@ export function InvoiceForm({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {/* Titre contextuel */}
       <h2 className="text-lg font-semibold mb-2">
-        {isEditing ? "Modifier la facture/note d’honoraires" : "Nouvelle facture / Note d'honoraires"}
+        {isEditing ? "Modifier la facture / note d’honoraires" : "Nouvelle facture / Note d'honoraires"}
       </h2>
-      {/* Émetteur */}
-      {(osteopath || osteopathId) && (
-        <div>
-          <label className="block text-sm mb-1 font-semibold text-muted-foreground">
-            Émetteur (Ostéopathe)
-          </label>
-          <Input
-            disabled
-            value={osteopath?.name ?? ("#" + (osteopathId ?? ""))}
-          />
-          <p className="text-xs text-gray-500">
-            Renseigné automatiquement, non modifiable.
-          </p>
-        </div>
-      )}
+      {/* Émetteur (ostéopathe) */}
+      <InvoiceOsteopathInput control={form.control} isSubmitting={isSubmitting} />
       {/* Patient */}
       <div>
         <label className="block text-sm mb-1 font-semibold text-muted-foreground">Patient</label>
