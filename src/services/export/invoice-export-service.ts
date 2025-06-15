@@ -47,14 +47,19 @@ export async function generateAccountingExport(
   // Générer les sections (idéalement, headers reprennent infos ostéo/cabinet !)
   const headerRowIndex = generateHeaderSection(worksheet, period, osteopath, cabinet);
 
+  // FIX: Only pass required arguments to generateTableSection (assuming correct signature)
   const lastRowIndex = generateTableSection(
     worksheet, sortedInvoices, patientDataMap, headerRowIndex
   );
 
   if (sortedInvoices.length > 0) {
-    // Fix: Only pass the arguments expected by generateFooterSection (worksheet, lastRowIndex)
+    // FIX: Pass all required arguments (worksheet, lastRowIndex, headerRowIndex, sortedInvoices, currentYear)
     generateFooterSection(
-      worksheet, lastRowIndex
+      worksheet, 
+      lastRowIndex, 
+      headerRowIndex, 
+      sortedInvoices, 
+      currentYear
     );
   }
 
