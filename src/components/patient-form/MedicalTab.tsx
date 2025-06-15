@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,17 +16,21 @@ interface MedicalTabProps {
 export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
     return (
         <Card>
-            <CardContent className="space-y-4 pt-6">
-                {/* Section: Informations Médicales Générales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-8 pt-6">
+
+                {/* SECTION 1 : Antécédents familiaux */}
+                <div>
+                  <div className="font-semibold text-base border-b pb-1 mb-3 text-blue-900 dark:text-blue-100">
+                    👨‍👩‍👧‍👦 Antécédents familiaux
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name="familyStatus"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Antécédents médicaux
-                                    familiaux
+                                    Antécédents médicaux familiaux
                                 </FormLabel>
                                 <FormControl>
                                     <Input
@@ -59,11 +64,18 @@ export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
                             </FormItem>
                         )}
                     />
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* SECTION 2 : Activité physique & Contraception */}
+                <div>
+                  <div className="font-semibold text-base border-b pb-1 mb-3 text-green-900 dark:text-green-100">
+                    🏃 Activité physique & Contraception
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
-                        name="physicalActivity" // Placé avant contraception pour un flux peut-être plus général
+                        name="physicalActivity"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
@@ -101,28 +113,33 @@ export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
                             </FormItem>
                         )}
                     />
+                  </div>
                 </div>
-                {/* Section: Médecins et Suivis Spécifiques */}
-                {/* Médecin généraliste en pleine largeur */}
-                <FormField
-                    control={form.control}
-                    name="generalPractitioner"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                Médecin généraliste
-                            </FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Médecin généraliste"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* SECTION 3 : Médecins référents */}
+                <div>
+                  <div className="font-semibold text-base border-b pb-1 mb-3 text-purple-900 dark:text-purple-100">
+                    🩺 Médecins référents
+                  </div>
+                  <FormField
+                      control={form.control}
+                      name="generalPractitioner"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>
+                                  Médecin généraliste
+                              </FormLabel>
+                              <FormControl>
+                                  <Input
+                                      placeholder="Médecin généraliste"
+                                      {...field}
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <FormField
                         control={form.control}
                         name="ophtalmologistName"
@@ -148,13 +165,10 @@ export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 md:mt-[28px]">
                                 <div className="space-y-0.5">
                                     <FormLabel className="text-base">
-                                        Correction de la vision
-                                        ?
+                                        Correction de la vision ?
                                     </FormLabel>
                                     <FormDescription>
-                                        Indiquez si le patient a
-                                        une correction de la
-                                        vision.
+                                        Indiquez si le patient a une correction de la vision.
                                     </FormDescription>
                                 </div>
                                 <FormControl>
@@ -168,8 +182,8 @@ export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
                             </FormItem>
                         )}
                     />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <FormField
                         control={form.control}
                         name="entDoctorName"
@@ -206,8 +220,8 @@ export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
                             </FormItem>
                         )}
                     />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <FormField
                         control={form.control}
                         name="digestiveDoctorName"
@@ -244,205 +258,213 @@ export const MedicalTab = ({ form, isChild }: MedicalTabProps) => {
                             </FormItem>
                         )}
                     />
+                  </div>
                 </div>
-                {/* Section: Antécédents Médicaux Détaillés (TextAreas en pleine largeur) */}
-                <FormField
-                    control={form.control}
-                    name="surgicalHistory"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                Antécédents chirurgicaux
-                            </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Antécédents chirurgicaux"
-                                    className="resize-none"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="traumaHistory"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                Antécédents de traumatismes
-                            </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Antécédents de traumatismes"
-                                    className="resize-none"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="rheumatologicalHistory"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                Antécédents rhumatologiques
-                            </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Antécédents rhumatologiques"
-                                    className="resize-none"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="fracture_history"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                Historique des fractures
-                            </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Historique détaillé des fractures"
-                                    className="resize-none"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                {!isChild && (
-                    <FormField
-                        control={form.control}
-                        name="gynecological_history"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Antécédents gynéco-urinaires
-                                </FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Antécédents gynécologiques ou urinaires"
-                                        className="resize-none"
-                                        {...field}
-                                        value={
-                                            field.value || ""
-                                        }
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
-                <FormField
-                    control={form.control}
-                    name="currentTreatment"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                Traitement actuel
-                            </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Traitement actuel"
-                                    className="resize-none"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-				{/* Nouvelle section : Informations cliniques */}
+
+                {/* SECTION 4 : Antécédents médicaux détaillés */}
+                <div>
+                  <div className="font-semibold text-base border-b pb-1 mb-3 text-amber-700 dark:text-amber-100">
+                    🗂️ Antécédents médicaux détaillés
+                  </div>
+                  <FormField
+                      control={form.control}
+                      name="surgicalHistory"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>
+                                  Antécédents chirurgicaux
+                              </FormLabel>
+                              <FormControl>
+                                  <Textarea
+                                      placeholder="Antécédents chirurgicaux"
+                                      className="resize-none"
+                                      {...field}
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="traumaHistory"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>
+                                  Antécédents de traumatismes
+                              </FormLabel>
+                              <FormControl>
+                                  <Textarea
+                                      placeholder="Antécédents de traumatismes"
+                                      className="resize-none"
+                                      {...field}
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="rheumatologicalHistory"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>
+                                  Antécédents rhumatologiques
+                              </FormLabel>
+                              <FormControl>
+                                  <Textarea
+                                      placeholder="Antécédents rhumatologiques"
+                                      className="resize-none"
+                                      {...field}
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="fracture_history"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>
+                                  Historique des fractures
+                              </FormLabel>
+                              <FormControl>
+                                  <Textarea
+                                      placeholder="Historique détaillé des fractures"
+                                      className="resize-none"
+                                      {...field}
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  {!isChild && (
+                      <FormField
+                          control={form.control}
+                          name="gynecological_history"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>
+                                      Antécédents gynéco-urinaires
+                                  </FormLabel>
+                                  <FormControl>
+                                      <Textarea
+                                          placeholder="Antécédents gynécologiques ou urinaires"
+                                          className="resize-none"
+                                          {...field}
+                                          value={
+                                              field.value || ""
+                                          }
+                                      />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                  )}
+                  <FormField
+                      control={form.control}
+                      name="currentTreatment"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>
+                                  Traitement actuel
+                              </FormLabel>
+                              <FormControl>
+                                  <Textarea
+                                      placeholder="Traitement actuel"
+                                      className="resize-none"
+                                      {...field}
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                </div>
+
+                {/* SECTION 5 : Informations cliniques */}
                 <div className="border-t border-gray-200 pt-6 mt-4">
-                  <div className="font-semibold mb-2 flex items-center gap-2 text-blue-900 dark:text-blue-200">
-                    <span role="img" aria-label="medical exam">📝</span>
-                    Informations cliniques (consultation)
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="medical_examination"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Examen médical</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Examen médical/Observations"
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="diagnosis"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Diagnostic</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Diagnostic"
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                    <FormField
-                      control={form.control}
-                      name="treatment_plan"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Plan de traitement</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Plan de traitement proposé"
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="consultation_conclusion"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Conclusion de la consultation</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Synthèse finale"
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                    <div className="font-semibold mb-2 flex items-center gap-2 text-blue-900 dark:text-blue-200">
+                        <span role="img" aria-label="medical exam">📝</span>
+                        Informations cliniques (consultation)
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="medical_examination"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Examen médical</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Examen médical/Observations"
+                                            className="resize-none"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="diagnosis"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Diagnostic</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Diagnostic"
+                                            className="resize-none"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <FormField
+                            control={form.control}
+                            name="treatment_plan"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Plan de traitement</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Plan de traitement proposé"
+                                            className="resize-none"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="consultation_conclusion"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Conclusion de la consultation</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Synthèse finale"
+                                            className="resize-none"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
             </CardContent>
         </Card>
