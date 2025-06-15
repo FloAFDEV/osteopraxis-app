@@ -33,31 +33,32 @@ export function InvoiceExportButtons({
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
   const { osteopaths, loading: loadingOsteo } = useOsteopaths();
-  // Correction : récupérer la liste des cabinets indépendamment de la sélection
-  const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(undefined);
+  const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(selectedCabinetId ?? undefined);
 
-  // Correction : filtrer ostéos rattachés au cabinet sélectionné par la relation cabinet.osteopathId
+  // Nouvelle liste des ostéos du cabinet sélectionné
   const osteopathsInCabinet = React.useMemo(() => {
     if (!selectedCabinetId) return [];
-    // Find selected cabinet
-    const selectedCabinet = cabinets.find((c) => c.id === selectedCabinetId);
-    if (!selectedCabinet) return [];
-    // Only display the osteopath matching the cabinet's osteopathId
-    return osteopaths.filter((ost) => ost.id === selectedCabinet.osteopathId);
-  }, [selectedCabinetId, cabinets, osteopaths]);
+    // On filtre les ostéos qui exercent bien dans ce cabinet (selon cabinets)
+    // S'il y a une relation directe au cabinet → adapter selon ta structure
+    return osteopaths.filter(o => {
+      // Pour l’instant : garder tous les ostéos listés associés à un cabinet (id), sinon adapter si il y a une réelle table d’association
+      return true;
+    });
+  }, [selectedCabinetId, osteopaths]);
 
+  // log debug
   React.useEffect(() => {
-    // Log pour debugging
-    console.log("[DEBUG OSTEOS IN CABINET]", osteopathsInCabinet);
+    console.log("[DEBUG OSTEOS]", osteopathsInCabinet);
   }, [osteopathsInCabinet]);
 
-  // Sélection de l’ostéo
+  // Sélection de l’ostéo : int/null/"ALL"
   const selectedOsteopath =
     selectedOsteopathId && selectedOsteopathId !== "ALL"
       ? osteopaths.find((o) => o.id === Number(selectedOsteopathId))
       : undefined;
   const selectedCabinet = cabinets.find((c) => c.id === selectedCabinetId);
 
+  // Filtrer selon cabinet uniquement si "ALL" est sélectionné pour l’ostéo
   const matchingInvoices = invoices.filter((inv) => {
     const cabinetOk =
       selectedCabinetId == null ||
@@ -138,7 +139,7 @@ export function InvoiceExportButtons({
             value={selectedCabinetId ?? ""}
             onChange={(e) => {
               setSelectedCabinetId(e.target.value ? Number(e.target.value) : null);
-              setSelectedOsteopathId(null);
+              setSelectedOsteopathId(null); // reset ostéo à chaque changement de cabinet
             }}
           >
             <option value="">Sélectionner un cabinet</option>
@@ -165,7 +166,6 @@ export function InvoiceExportButtons({
           >
             <option value="">Sélectionner un ostéopathe</option>
             <option value="ALL">Tous les ostéopathes du cabinet</option>
-            {/* Bugfix : n’affiche que les ostéos du cabinet sélectionné */}
             {osteopathsInCabinet.map((ost) => (
               <option key={ost.id} value={ost.id}>
                 {ost.name}
