@@ -96,6 +96,26 @@ export interface PatientFormValues {
 
   // Ajouté pour corriger le bug (présent dans le formulaire - voir patient-form.tsx)
   allergies?: string | null;
+
+  // Nouvelles sphères - historiques / examens 
+  cardiac_history?: string | null;
+  pulmonary_history?: string | null;
+  pelvic_history?: string | null;
+  neurological_history?: string | null;
+  neurodevelopmental_history?: string | null;
+  cranial_nerve_exam?: string | null;
+  dental_exam?: string | null;
+  cranial_exam?: string | null;
+  lmo_tests?: string | null;
+  cranial_membrane_exam?: string | null;
+  musculoskeletal_history?: string | null;
+  lower_limb_exam?: string | null;
+  upper_limb_exam?: string | null;
+  shoulder_exam?: string | null;
+  scoliosis?: string | null;
+  facial_mask_exam?: string | null;
+  fascia_exam?: string | null;
+  vascular_exam?: string | null;
 }
 
 export interface PatientFormProps {

@@ -661,6 +661,82 @@ export function MedicalInfoTab({
     items: section.items.filter(item => !shownLabels.has(item.label)),
   })).filter(section => section.items.length > 0); // ignorer les sections vides
 
+  // Regroupement pour affichage dédié des nouvelles sphères
+  const specializedSphereSections = [
+    {
+      title: "Cardiaque",
+      value: patient.cardiac_history,
+    },
+    {
+      title: "Pulmonaire",
+      value: patient.pulmonary_history,
+    },
+    {
+      title: "Pelvien / Gynéco-Uro",
+      value: patient.pelvic_history,
+    },
+    {
+      title: "Neurologique",
+      value: patient.neurological_history,
+    },
+    {
+      title: "Neurodéveloppemental",
+      value: patient.neurodevelopmental_history,
+    },
+    {
+      title: "Examen nerfs crâniens",
+      value: patient.cranial_nerve_exam,
+    },
+    {
+      title: "Examen dentaire",
+      value: patient.dental_exam,
+    },
+    {
+      title: "Examen crânien",
+      value: patient.cranial_exam,
+    },
+    {
+      title: "Tests LMO",
+      value: patient.lmo_tests,
+    },
+    {
+      title: "Membranes crâniennes",
+      value: patient.cranial_membrane_exam,
+    },
+    {
+      title: "Musculo-squelettique (historique)",
+      value: patient.musculoskeletal_history,
+    },
+    {
+      title: "Examen membre inférieur",
+      value: patient.lower_limb_exam,
+    },
+    {
+      title: "Examen membre supérieur",
+      value: patient.upper_limb_exam,
+    },
+    {
+      title: "Examen épaule",
+      value: patient.shoulder_exam,
+    },
+    {
+      title: "Scoliose",
+      value: patient.scoliosis,
+    },
+    {
+      title: "Examen fascias",
+      value: patient.fascia_exam,
+    },
+    {
+      title: "Masque facial",
+      value: patient.facial_mask_exam,
+    },
+    {
+      title: "Examen vasculaire",
+      value: patient.vascular_exam,
+    },
+  ];
+
   return (
     <div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
       {/* Boutons d'action */}
@@ -843,6 +919,34 @@ export function MedicalInfoTab({
         )
       )}
 
+      {/* Section sphères spéciales */}
+      {specializedSphereSections.some(s => s.value && String(s.value).trim() !== "") && (
+        <Card className="border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-900/20">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              Sphères spécialisées (nouveaux champs)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {specializedSphereSections.map(
+                (s, idx) =>
+                  s.value &&
+                  String(s.value).trim() !== "" && (
+                    <div
+                      key={s.title}
+                      className="bg-white dark:bg-slate-800 rounded p-3 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm"
+                    >
+                      <span className="font-medium text-sm mb-1">{s.title}</span>
+                      <span className="text-gray-700 dark:text-gray-100">{s.value}</span>
+                    </div>
+                  )
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       <MedicalAccordion sections={filteredMedicalSections} />
     </div>
   );

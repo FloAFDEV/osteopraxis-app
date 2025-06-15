@@ -137,6 +137,24 @@ export function PatientForm({
       medical_examination: patient?.medical_examination || null,
       treatment_plan: patient?.treatment_plan || null,
       consultation_conclusion: patient?.consultation_conclusion || null,
+      cardiac_history: patient?.cardiac_history || null,
+      pulmonary_history: patient?.pulmonary_history || null,
+      pelvic_history: patient?.pelvic_history || null,
+      neurological_history: patient?.neurological_history || null,
+      neurodevelopmental_history: patient?.neurodevelopmental_history || null,
+      cranial_nerve_exam: patient?.cranial_nerve_exam || null,
+      dental_exam: patient?.dental_exam || null,
+      cranial_exam: patient?.cranial_exam || null,
+      lmo_tests: patient?.lmo_tests || null,
+      cranial_membrane_exam: patient?.cranial_membrane_exam || null,
+      musculoskeletal_history: patient?.musculoskeletal_history || null,
+      lower_limb_exam: patient?.lower_limb_exam || null,
+      upper_limb_exam: patient?.upper_limb_exam || null,
+      shoulder_exam: patient?.shoulder_exam || null,
+      scoliosis: patient?.scoliosis || null,
+      facial_mask_exam: patient?.facial_mask_exam || null,
+      fascia_exam: patient?.fascia_exam || null,
+      vascular_exam: patient?.vascular_exam || null,
     },
   });
 
@@ -172,6 +190,7 @@ export function PatientForm({
     { id: "examinations", label: "Examens", icon: "🔬" },
     ...(isChild ? [{ id: "pediatric", label: "Pédiatrie", icon: "👶" }] : []),
     { id: "additional", label: "Supplémentaire", icon: "📋" },
+    { id: "specialized", label: "Sphères spéc.", icon: "🩺" }
   ];
 
   return (
@@ -231,6 +250,82 @@ export function PatientForm({
 
               <TabsContent value="additional">
                 <AdditionalFieldsTab form={form} isChild={isChild} />
+              </TabsContent>
+              <TabsContent value="specialized">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-semibold">Cardiaque</label>
+                    <textarea className="input" {...form.register("cardiac_history")} placeholder="Antécédents cardiaques" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Pulmonaire</label>
+                    <textarea className="input" {...form.register("pulmonary_history")} placeholder="Antécédents pulmonaires" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Pelvien / Gynéco-Uro</label>
+                    <textarea className="input" {...form.register("pelvic_history")} placeholder="Historique pelvien/gynéco-uro" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Neurologique</label>
+                    <textarea className="input" {...form.register("neurological_history")} placeholder="Historique neurologique" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Neurodéveloppemental</label>
+                    <textarea className="input" {...form.register("neurodevelopmental_history")} placeholder="Historique neurodéveloppemental" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen nerfs crâniens</label>
+                    <textarea className="input" {...form.register("cranial_nerve_exam")} placeholder="Compte-rendu examen nerfs crâniens" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen dentaire</label>
+                    <textarea className="input" {...form.register("dental_exam")} placeholder="Examen dentaire" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen crânien</label>
+                    <textarea className="input" {...form.register("cranial_exam")} placeholder="Examen crânien" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Tests LMO</label>
+                    <textarea className="input" {...form.register("lmo_tests")} placeholder="Tests LMO" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Membranes crâniennes</label>
+                    <textarea className="input" {...form.register("cranial_membrane_exam")} placeholder="Membranes crâniennes" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Historique musculo-sq.</label>
+                    <textarea className="input" {...form.register("musculoskeletal_history")} placeholder="Historique musculo-squelettique" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen membre inf.</label>
+                    <textarea className="input" {...form.register("lower_limb_exam")} placeholder="Examen membre inférieur" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen membre sup.</label>
+                    <textarea className="input" {...form.register("upper_limb_exam")} placeholder="Examen membre supérieur" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen épaule</label>
+                    <textarea className="input" {...form.register("shoulder_exam")} placeholder="Examen épaule" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Scoliose</label>
+                    <textarea className="input" {...form.register("scoliosis")} placeholder="Scoliose" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen fascias</label>
+                    <textarea className="input" {...form.register("fascia_exam")} placeholder="Examen fascias" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Masque facial</label>
+                    <textarea className="input" {...form.register("facial_mask_exam")} placeholder="Examen masque facial" />
+                  </div>
+                  <div>
+                    <label className="font-semibold">Examen vasculaire</label>
+                    <textarea className="input" {...form.register("vascular_exam")} placeholder="Examen vasculaire" />
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
 

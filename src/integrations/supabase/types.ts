@@ -345,6 +345,7 @@ export type Database = {
           birthDetails: string | null
           bmi: number | null
           cabinetId: number | null
+          cardiac_history: string | null
           childcare_type: string | null
           childCareContext: string | null
           childrenAges: number[] | null
@@ -353,9 +354,13 @@ export type Database = {
           consultation_conclusion: string | null
           contraception: Database["public"]["Enums"]["Contraception"] | null
           country: string | null
+          cranial_exam: string | null
+          cranial_membrane_exam: string | null
+          cranial_nerve_exam: string | null
           createdAt: string
           currentMedication: string | null
           currentTreatment: string | null
+          dental_exam: string | null
           dental_health: string | null
           developmentMilestones: string | null
           diagnosis: string | null
@@ -365,7 +370,9 @@ export type Database = {
           ent_followup: string | null
           entDoctorName: string | null
           entProblems: string | null
+          facial_mask_exam: string | null
           familyStatus: string | null
+          fascia_exam: string | null
           feeding: string | null
           fine_motor_skills: string | null
           firstName: string
@@ -389,9 +396,14 @@ export type Database = {
           isSmoker: boolean
           job: string | null
           lastName: string
+          lmo_tests: string | null
+          lower_limb_exam: string | null
           maritalStatus: Database["public"]["Enums"]["MaritalStatus"] | null
           medical_examination: string | null
           medicalHistory: string | null
+          musculoskeletal_history: string | null
+          neurodevelopmental_history: string | null
+          neurological_history: string | null
           notes: string | null
           occupation: string | null
           ophtalmologistName: string | null
@@ -401,13 +413,17 @@ export type Database = {
           otherContraception: string | null
           paramedical_followup: string | null
           pediatrician_name: string | null
+          pelvic_history: string | null
           phone: string | null
           physicalActivity: string | null
           postalCode: string | null
           pregnancyHistory: string | null
+          pulmonary_history: string | null
           quitSmokingDate: string | null
           rheumatologicalHistory: string | null
           school_grade: string | null
+          scoliosis: string | null
+          shoulder_exam: string | null
           sleep_quality: string | null
           sleepingPattern: string | null
           smoker: boolean | null
@@ -420,7 +436,9 @@ export type Database = {
           traumaHistory: string | null
           treatment_plan: string | null
           updatedAt: string
+          upper_limb_exam: string | null
           userId: string | null
+          vascular_exam: string | null
           weight: number | null
           weight_at_birth: number | null
         }
@@ -435,6 +453,7 @@ export type Database = {
           birthDetails?: string | null
           bmi?: number | null
           cabinetId?: number | null
+          cardiac_history?: string | null
           childcare_type?: string | null
           childCareContext?: string | null
           childrenAges?: number[] | null
@@ -443,9 +462,13 @@ export type Database = {
           consultation_conclusion?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           country?: string | null
+          cranial_exam?: string | null
+          cranial_membrane_exam?: string | null
+          cranial_nerve_exam?: string | null
           createdAt?: string
           currentMedication?: string | null
           currentTreatment?: string | null
+          dental_exam?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
           diagnosis?: string | null
@@ -455,7 +478,9 @@ export type Database = {
           ent_followup?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
+          facial_mask_exam?: string | null
           familyStatus?: string | null
+          fascia_exam?: string | null
           feeding?: string | null
           fine_motor_skills?: string | null
           firstName: string
@@ -479,9 +504,14 @@ export type Database = {
           isSmoker?: boolean
           job?: string | null
           lastName: string
+          lmo_tests?: string | null
+          lower_limb_exam?: string | null
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
           medical_examination?: string | null
           medicalHistory?: string | null
+          musculoskeletal_history?: string | null
+          neurodevelopmental_history?: string | null
+          neurological_history?: string | null
           notes?: string | null
           occupation?: string | null
           ophtalmologistName?: string | null
@@ -491,13 +521,17 @@ export type Database = {
           otherContraception?: string | null
           paramedical_followup?: string | null
           pediatrician_name?: string | null
+          pelvic_history?: string | null
           phone?: string | null
           physicalActivity?: string | null
           postalCode?: string | null
           pregnancyHistory?: string | null
+          pulmonary_history?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
           school_grade?: string | null
+          scoliosis?: string | null
+          shoulder_exam?: string | null
           sleep_quality?: string | null
           sleepingPattern?: string | null
           smoker?: boolean | null
@@ -510,7 +544,9 @@ export type Database = {
           traumaHistory?: string | null
           treatment_plan?: string | null
           updatedAt?: string
+          upper_limb_exam?: string | null
           userId?: string | null
+          vascular_exam?: string | null
           weight?: number | null
           weight_at_birth?: number | null
         }
@@ -525,6 +561,7 @@ export type Database = {
           birthDetails?: string | null
           bmi?: number | null
           cabinetId?: number | null
+          cardiac_history?: string | null
           childcare_type?: string | null
           childCareContext?: string | null
           childrenAges?: number[] | null
@@ -533,9 +570,13 @@ export type Database = {
           consultation_conclusion?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
           country?: string | null
+          cranial_exam?: string | null
+          cranial_membrane_exam?: string | null
+          cranial_nerve_exam?: string | null
           createdAt?: string
           currentMedication?: string | null
           currentTreatment?: string | null
+          dental_exam?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
           diagnosis?: string | null
@@ -545,7 +586,9 @@ export type Database = {
           ent_followup?: string | null
           entDoctorName?: string | null
           entProblems?: string | null
+          facial_mask_exam?: string | null
           familyStatus?: string | null
+          fascia_exam?: string | null
           feeding?: string | null
           fine_motor_skills?: string | null
           firstName?: string
@@ -569,9 +612,14 @@ export type Database = {
           isSmoker?: boolean
           job?: string | null
           lastName?: string
+          lmo_tests?: string | null
+          lower_limb_exam?: string | null
           maritalStatus?: Database["public"]["Enums"]["MaritalStatus"] | null
           medical_examination?: string | null
           medicalHistory?: string | null
+          musculoskeletal_history?: string | null
+          neurodevelopmental_history?: string | null
+          neurological_history?: string | null
           notes?: string | null
           occupation?: string | null
           ophtalmologistName?: string | null
@@ -581,13 +629,17 @@ export type Database = {
           otherContraception?: string | null
           paramedical_followup?: string | null
           pediatrician_name?: string | null
+          pelvic_history?: string | null
           phone?: string | null
           physicalActivity?: string | null
           postalCode?: string | null
           pregnancyHistory?: string | null
+          pulmonary_history?: string | null
           quitSmokingDate?: string | null
           rheumatologicalHistory?: string | null
           school_grade?: string | null
+          scoliosis?: string | null
+          shoulder_exam?: string | null
           sleep_quality?: string | null
           sleepingPattern?: string | null
           smoker?: boolean | null
@@ -600,7 +652,9 @@ export type Database = {
           traumaHistory?: string | null
           treatment_plan?: string | null
           updatedAt?: string
+          upper_limb_exam?: string | null
           userId?: string | null
+          vascular_exam?: string | null
           weight?: number | null
           weight_at_birth?: number | null
         }

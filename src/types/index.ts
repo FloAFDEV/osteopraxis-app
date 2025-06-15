@@ -147,6 +147,26 @@ export interface Patient {
 	medical_examination?: string | null;
 	treatment_plan?: string | null;
 	consultation_conclusion?: string | null;
+
+	// Nouveaux champs historiques et examens par sphère
+	cardiac_history?: string | null;
+	pulmonary_history?: string | null;
+	pelvic_history?: string | null;
+	neurological_history?: string | null;
+	neurodevelopmental_history?: string | null;
+	cranial_nerve_exam?: string | null;
+	dental_exam?: string | null;
+	cranial_exam?: string | null;
+	lmo_tests?: string | null;
+	cranial_membrane_exam?: string | null;
+	musculoskeletal_history?: string | null;
+	lower_limb_exam?: string | null;
+	upper_limb_exam?: string | null;
+	shoulder_exam?: string | null;
+	scoliosis?: string | null;
+	facial_mask_exam?: string | null;
+	fascia_exam?: string | null;
+	vascular_exam?: string | null;
 }
 
 export interface Appointment {
