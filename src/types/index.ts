@@ -196,6 +196,7 @@ export interface Invoice {
 	cabinetId?: number | null;
 	createdAt?: string;
 	updatedAt?: string;
+	osteopathId?: number | null; // <-- Ajouté pour correction TS
 	// Champs calculés côté client pour la compatibilité avec l'UI
 	Patient?: {
 		firstName: string;
