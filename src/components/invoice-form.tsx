@@ -17,6 +17,7 @@ import { InvoiceDateInput } from "./invoice-form/InvoiceDateInput";
 import { InvoiceAmountInput } from "./invoice-form/InvoiceAmountInput";
 import { InvoicePaymentFields } from "./invoice-form/InvoicePaymentFields";
 import { InvoiceOsteopathInput } from "./invoice-form/InvoiceOsteopathInput";
+import { InvoiceCabinetInput } from "./invoice-form/InvoiceCabinetInput";
 
 const schema = z.object({
   date: z.string().nonempty("Date requise"),
