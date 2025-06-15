@@ -75,14 +75,17 @@ export function MedicalInfoTab({
     }
   }, [patient.birthDate]);
 
-  // Helpers
-  const formatValue = (value: any) => (value || value === 0 ? String(value) : "Non renseigné");
+  // Helper
+  const formatValue = (value: any) =>
+    value || value === 0 ? String(value) : "Non renseigné";
 
-  // Construction des sphères : toutes infos/médicales classées par section avec tous les champs
+  // Tableau des sphères à afficher (sauf l’IMC qui va à gauche !)
   const spheres = [
     {
       title: "Générale",
-      icon: <Stethoscope className="h-5 w-5 text-red-600" />,
+      icon: Stethoscope,
+      category: "general",
+      defaultOpen: true, // Sera dépliée au départ
       items: [
         { label: "Médecin généraliste", value: formatValue(patient.generalPractitioner) },
         { label: "Traitement actuel", value: formatValue(patient.currentTreatment) },
@@ -97,7 +100,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Activité & Hygiène de vie",
-      icon: <Dumbbell className="h-5 w-5 text-green-600" />,
+      icon: Dumbbell,
+      category: "lifestyle",
       items: [
         { label: "Activité physique", value: formatValue(patient.physicalActivity) },
         { label: "Fréquence sportive", value: formatValue(patient.sport_frequency) },
@@ -105,12 +109,13 @@ export function MedicalInfoTab({
         { label: "Alimentation", value: formatValue(patient.feeding) },
         { label: "Poids", value: formatValue(patient.weight) },
         { label: "Taille", value: formatValue(patient.height) },
-        { label: "IMC", value: formatValue(patient.bmi) },
+        // L’IMC n’est plus ici !
       ],
     },
     {
       title: "Sphère ORL",
-      icon: <Ear className="h-5 w-5 text-purple-600" />,
+      icon: Ear,
+      category: "sensory",
       items: [
         { label: "Médecin ORL", value: formatValue(patient.entDoctorName) },
         { label: "Problèmes ORL", value: formatValue(patient.entProblems) },
@@ -119,7 +124,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Sphère ophtalmologique et dentaire",
-      icon: <Eye className="h-5 w-5 text-blue-600" />,
+      icon: Eye,
+      category: "sensory",
       items: [
         { label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
         { label: "Ophtalmologue", value: formatValue(patient.ophtalmologistName) },
@@ -129,7 +135,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Sphère viscérale / digestive",
-      icon: <Soup className="h-5 w-5 text-orange-600" />,
+      icon: Soup,
+      category: "digestive",
       items: [
         { label: "Médecin digestif", value: formatValue(patient.digestiveDoctorName) },
         { label: "Problèmes digestifs", value: formatValue(patient.digestiveProblems) },
@@ -138,7 +145,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Sphère neuro",
-      icon: <User className="h-5 w-5 text-sky-600" />,
+      icon: User,
+      category: "general",
       items: [
         { label: "Antécédents neurologiques", value: formatValue(patient.neurological_history) },
         { label: "Historique neurodéveloppemental", value: formatValue(patient.neurodevelopmental_history) },
@@ -152,7 +160,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Sphère musculo-squelettique",
-      icon: <Activity className="h-5 w-5 text-green-600" />,
+      icon: Activity,
+      category: "general",
       items: [
         { label: "Motricité globale", value: formatValue(patient.gross_motor_skills) },
         { label: "Motricité fine", value: formatValue(patient.fine_motor_skills) },
@@ -168,7 +177,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Sphère pelvienne/gynéco-uro",
-      icon: <Baby className="h-5 w-5 text-pink-600" />,
+      icon: Baby,
+      category: "reproductive",
       items: [
         { label: "Antécédents pelviens/gynéco-uro", value: formatValue(patient.pelvic_history) },
         { label: "Antécédents gynécologiques", value: formatValue(patient.gynecological_history) },
@@ -176,7 +186,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Enfant : données enfant/pédiatrie",
-      icon: <Baby className="h-5 w-5 text-sky-400" />,
+      icon: Baby,
+      category: "pediatric",
       items: [
         { label: "Poids de naissance", value: formatValue(patient.weight_at_birth) },
         { label: "Taille de naissance", value: formatValue(patient.height_at_birth) },
@@ -191,7 +202,8 @@ export function MedicalInfoTab({
     },
     {
       title: "Autres",
-      icon: <StickyNote className="h-5 w-5 text-gray-600" />,
+      icon: StickyNote,
+      category: "additional",
       items: [
         { label: "Examens complémentaires", value: formatValue(patient.complementaryExams) },
         { label: "Chirurgies", value: formatValue(patient.surgicalHistory) },
@@ -385,27 +397,16 @@ export function MedicalInfoTab({
         </Card>
       )}
 
-      {/* Affichage des sphères */}
-      <div className="space-y-6">
-        {spheres.map((sphere, idx) => (
-          <div key={idx} className="mb-3">
-            <div className="flex items-center gap-2 text-lg font-semibold mb-2">
-              {sphere.icon}
-              {sphere.title}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {sphere.items.map((item, i) => (
-                <div key={i} className="rounded bg-white/80 dark:bg-slate-800/70 border border-gray-100 dark:border-gray-700 p-3">
-                  <span className="font-medium text-sm mb-1">{item.label}</span>
-                  <div className="ml-2 text-sm text-gray-700 dark:text-gray-200">
-                    {item.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Affichage des sphères sous forme d'accordéon avec icônes */}
+      <MedicalAccordion
+        sections={spheres.map((sphere) => ({
+          title: sphere.title,
+          icon: sphere.icon,
+          category: sphere.category,
+          items: sphere.items,
+          defaultOpen: sphere.defaultOpen || false,
+        }))}
+      />
       {/* plus de sections si besoin */}
     </div>
   );
