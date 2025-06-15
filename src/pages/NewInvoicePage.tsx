@@ -8,8 +8,9 @@ import { InvoiceForm } from "@/components/invoice-form";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+// import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { PatientCombobox } from "@/components/patients/PatientCombobox";
 
 const NewInvoicePage = () => {
   const [searchParams] = useSearchParams();
@@ -96,7 +97,7 @@ const NewInvoicePage = () => {
   }, [searchParams]);
 
   // Gestion du choix de patient (global)
-  const handlePatientSelect = async (patientId: string) => {
+  const handlePatientSelect = async (patientId: number) => {
     setSelectedPatientId(Number(patientId));
     setIsLoading(true);
     try {
@@ -156,24 +157,11 @@ const NewInvoicePage = () => {
             <label className="block mb-2 font-semibold text-muted-foreground">
               Sélectionner un patient
             </label>
-            <Select
-              value={selectedPatientId ? String(selectedPatientId) : ""}
-              onValueChange={handlePatientSelect}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Choisir le patient" />
-              </SelectTrigger>
-              <SelectContent>
-                {patientsList.length === 0 && (
-                  <SelectItem value="" disabled>Aucun patient trouvé</SelectItem>
-                )}
-                {patientsList.map((patient) => (
-                  <SelectItem key={patient.id} value={String(patient.id)}>
-                    {patient.lastName} {patient.firstName} — {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString() : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <PatientCombobox
+              patients={patientsList}
+              value={selectedPatientId}
+              onChange={handlePatientSelect}
+            />
           </div>
         )}
         {/* Formulaire de facture que si patient choisi */}
