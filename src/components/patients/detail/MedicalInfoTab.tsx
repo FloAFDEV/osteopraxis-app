@@ -79,10 +79,12 @@ export function MedicalInfoTab({
     value || value === 0 ? String(value) : "Non renseigné";
 
   // Helper: détecte la présence de mots-clés de problème cardiaque
-  const isCardiacProblem = (text: string | null | undefined) => {
-    if (!text) return false;
-    const lower = text.toLowerCase();
+  const isCardiacProblem = (label: string, value: string | null | undefined) => {
+    if (!value) return false;
+    const llabel = label.toLowerCase();
+    const lower = String(value).toLowerCase();
     return (
+      llabel.includes("cardiaque") ||
       lower.includes("cardiaque") ||
       lower.includes("coeur") ||
       lower.includes("cœur") ||
@@ -90,23 +92,35 @@ export function MedicalInfoTab({
     );
   };
 
-  // Ajout d'une fonction utilitaire pour savoir si un champ est important ou critique
-  // Critique : si le label contient cardiaque/cardio OU la valeur contient ces mots-clés
-  // Important : tous les champs renseignés (non vides et non critiques)
-  const isFieldCritical = (label: string, value: string | null | undefined) => {
-    if (!value) return false;
-    if (label.toLowerCase().includes("cardiaque")) return true;
-    if (isCardiacProblem(value)) return true;
+  // Helper: détecte les labels à marquer "Important"
+  const importantFieldsList = [
+    "Antécédents médicaux familiaux",
+    "Antécédents pulmonaires",
+    "Antécédents de traumatismes",
+    "Traumatismes",
+    "Fractures",
+    "Chirurgies"
+  ];
+
+  const isFieldImportant = (label: string, value: string | null | undefined) => {
+    if (!label || !value) return false;
+    // Vérifie si le champ fait partie de la liste des importants et qu'il est renseigné et NON cardiaque
+    if (
+      importantFieldsList.includes(label) &&
+      !isFieldCritical(label, value)
+    ) {
+      // Non vide, non générique
+      const notFilled = ["non", "aucun", "non renseigné", "null", "-", ""];
+      if (!notFilled.includes(String(value).trim().toLowerCase())) {
+        return true;
+      }
+    }
     return false;
   };
-  const isFieldImportant = (label: string, value: string | null | undefined) => {
-    if (!value) return false;
-    if (isFieldCritical(label, value)) return false;
-    // Tous les champs renseignés sont "Important", sauf ceux jugés "Critique"
-    // Ici, on exclut les valeurs génériques utilisées pour non-renseigné...
-    const notFilled = ["non", "aucun", "non renseigné", "null", "-", "", "Non renseigné"];
-    if (notFilled.includes(String(value).trim().toLowerCase())) return false;
-    return true;
+
+  // Helper : cardiaque = rouge, pas de badge
+  const isFieldCritical = (label: string, value: string | null | undefined) => {
+    return isCardiacProblem(label, value);
   };
 
   // Sphère ORL + ophtalmo + dentaire (fusionnée)
@@ -151,21 +165,21 @@ export function MedicalInfoTab({
         { label: "Antécédents médicaux familiaux", value: formatValue(patient.familyStatus), isImportant: isFieldImportant("Antécédents médicaux familiaux", formatValue(patient.familyStatus)), isCritical: isFieldCritical("Antécédents médicaux familiaux", formatValue(patient.familyStatus)) },
         { label: "Antécédents cardiaques", value: formatValue(patient.cardiac_history), isImportant: isFieldImportant("Antécédents cardiaques", formatValue(patient.cardiac_history)), isCritical: isFieldCritical("Antécédents cardiaques", formatValue(patient.cardiac_history)) },
         { label: "Antécédents pulmonaires", value: formatValue(patient.pulmonary_history), isImportant: isFieldImportant("Antécédents pulmonaires", formatValue(patient.pulmonary_history)), isCritical: isFieldCritical("Antécédents pulmonaires", formatValue(patient.pulmonary_history)) },
-        // "Rhumatologie" n'est PAS un antécédent important mais affichée ici pour la fiche médicale globale
-        { label: "Rhumatologie", value: formatValue(patient.rheumatologicalHistory), isImportant: isFieldImportant("Rhumatologie", formatValue(patient.rheumatologicalHistory)), isCritical: isFieldCritical("Rhumatologie", formatValue(patient.rheumatologicalHistory)) },
-        { label: "Scoliose", value: formatValue(patient.scoliosis), isImportant: isFieldImportant("Scoliose", formatValue(patient.scoliosis)), isCritical: isFieldCritical("Scoliose", formatValue(patient.scoliosis)) },
+        // Rhumatologie ne fait pas partie des importants ni cardiaque
+        { label: "Rhumatologie", value: formatValue(patient.rheumatologicalHistory), isImportant: false, isCritical: false },
+        { label: "Scoliose", value: formatValue(patient.scoliosis), isImportant: false, isCritical: false },
         { label: "Traumatismes", value: formatValue(patient.traumaHistory), isImportant: isFieldImportant("Traumatismes", formatValue(patient.traumaHistory)), isCritical: isFieldCritical("Traumatismes", formatValue(patient.traumaHistory)) },
         { label: "Fractures", value: formatValue(patient.fracture_history), isImportant: isFieldImportant("Fractures", formatValue(patient.fracture_history)), isCritical: isFieldCritical("Fractures", formatValue(patient.fracture_history)) },
         { label: "Chirurgies", value: formatValue(patient.surgicalHistory), isImportant: isFieldImportant("Chirurgies", formatValue(patient.surgicalHistory)), isCritical: isFieldCritical("Chirurgies", formatValue(patient.surgicalHistory)) },
-        { label: "Médecin généraliste", value: formatValue(patient.generalPractitioner), isImportant: isFieldImportant("Médecin généraliste", formatValue(patient.generalPractitioner)), isCritical: isFieldCritical("Médecin généraliste", formatValue(patient.generalPractitioner)) },
-        { label: "Traitement actuel", value: formatValue(patient.currentTreatment), isImportant: isFieldImportant("Traitement actuel", formatValue(patient.currentTreatment)), isCritical: isFieldCritical("Traitement actuel", formatValue(patient.currentTreatment)) },
-        { label: "Allergies", value: formatValue(patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null), isImportant: isFieldImportant("Allergies", formatValue(patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null)), isCritical: isFieldCritical("Allergies", formatValue(patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null)) },
-        { label: "Examens complémentaires", value: formatValue(patient.complementaryExams), isImportant: isFieldImportant("Examens complémentaires", formatValue(patient.complementaryExams)), isCritical: isFieldCritical("Examens complémentaires", formatValue(patient.complementaryExams)) },
-        { label: "Résumé / Conclusion consultation", value: formatValue(patient.consultation_conclusion), isImportant: isFieldImportant("Résumé / Conclusion consultation", formatValue(patient.consultation_conclusion)), isCritical: isFieldCritical("Résumé / Conclusion consultation", formatValue(patient.consultation_conclusion)) },
-        { label: "Diagnostic", value: formatValue(patient.diagnosis), isImportant: isFieldImportant("Diagnostic", formatValue(patient.diagnosis)), isCritical: isFieldCritical("Diagnostic", formatValue(patient.diagnosis)) },
-        { label: "Plan de traitement", value: formatValue(patient.treatment_plan), isImportant: isFieldImportant("Plan de traitement", formatValue(patient.treatment_plan)), isCritical: isFieldCritical("Plan de traitement", formatValue(patient.treatment_plan)) },
-        { label: "Examen médical", value: formatValue(patient.medical_examination), isImportant: isFieldImportant("Examen médical", formatValue(patient.medical_examination)), isCritical: isFieldCritical("Examen médical", formatValue(patient.medical_examination)) },
-        { label: "Autres commentaires (adulte)", value: formatValue(patient.other_comments_adult), isImportant: isFieldImportant("Autres commentaires (adulte)", formatValue(patient.other_comments_adult)), isCritical: isFieldCritical("Autres commentaires (adulte)", formatValue(patient.other_comments_adult)) },
+        { label: "Médecin généraliste", value: formatValue(patient.generalPractitioner), isImportant: false, isCritical: false },
+        { label: "Traitement actuel", value: formatValue(patient.currentTreatment), isImportant: false, isCritical: false },
+        { label: "Allergies", value: formatValue(patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null), isImportant: false, isCritical: false },
+        { label: "Examens complémentaires", value: formatValue(patient.complementaryExams), isImportant: false, isCritical: false },
+        { label: "Résumé / Conclusion consultation", value: formatValue(patient.consultation_conclusion), isImportant: false, isCritical: false },
+        { label: "Diagnostic", value: formatValue(patient.diagnosis), isImportant: false, isCritical: false },
+        { label: "Plan de traitement", value: formatValue(patient.treatment_plan), isImportant: false, isCritical: false },
+        { label: "Examen médical", value: formatValue(patient.medical_examination), isImportant: false, isCritical: false },
+        { label: "Autres commentaires (adulte)", value: formatValue(patient.other_comments_adult), isImportant: false, isCritical: false },
       ],
     },
     {
@@ -173,28 +187,28 @@ export function MedicalInfoTab({
       icon: Dumbbell,
       category: "lifestyle" as const,
       items: [
-        { label: "Activité physique", value: formatValue(patient.physicalActivity), isImportant: isFieldImportant("Activité physique", formatValue(patient.physicalActivity)), isCritical: isFieldCritical("Activité physique", formatValue(patient.physicalActivity)) },
-        { label: "Fréquence sportive", value: formatValue(patient.sport_frequency), isImportant: isFieldImportant("Fréquence sportive", formatValue(patient.sport_frequency)), isCritical: isFieldCritical("Fréquence sportive", formatValue(patient.sport_frequency)) },
-        { label: "Qualité du sommeil", value: formatValue(patient.sleep_quality), isImportant: isFieldImportant("Qualité du sommeil", formatValue(patient.sleep_quality)), isCritical: isFieldCritical("Qualité du sommeil", formatValue(patient.sleep_quality)) },
-        { label: "Alimentation", value: formatValue(patient.feeding), isImportant: isFieldImportant("Alimentation", formatValue(patient.feeding)), isCritical: isFieldCritical("Alimentation", formatValue(patient.feeding)) },
-        { label: "Poids", value: formatValue(patient.weight), isImportant: isFieldImportant("Poids", formatValue(patient.weight)), isCritical: isFieldCritical("Poids", formatValue(patient.weight)) },
-        { label: "Taille", value: formatValue(patient.height), isImportant: isFieldImportant("Taille", formatValue(patient.height)), isCritical: isFieldCritical("Taille", formatValue(patient.height)) },
+        { label: "Activité physique", value: formatValue(patient.physicalActivity), isImportant: false, isCritical: false },
+        { label: "Fréquence sportive", value: formatValue(patient.sport_frequency), isImportant: false, isCritical: false },
+        { label: "Qualité du sommeil", value: formatValue(patient.sleep_quality), isImportant: false, isCritical: false },
+        { label: "Alimentation", value: formatValue(patient.feeding), isImportant: false, isCritical: false },
+        { label: "Poids", value: formatValue(patient.weight), isImportant: false, isCritical: false },
+        { label: "Taille", value: formatValue(patient.height), isImportant: false, isCritical: false },
       ],
     },
     {
       title: "Sphère ORL / Ophtalmo / Dentaire",
       icon: Eye,
       category: "sensory" as const,
-      items: orlOphDentalItems,
+      items: orlOphDentalItems
     },
     {
       title: "Sphère viscérale / digestive",
       icon: Soup,
       category: "digestive" as const,
       items: [
-        { label: "Médecin digestif", value: formatValue(patient.digestiveDoctorName), isImportant: isFieldImportant("Médecin digestif", patient.digestiveDoctorName), isCritical: isFieldCritical("Médecin digestif", patient.digestiveDoctorName) },
-        { label: "Problèmes digestifs", value: formatValue(patient.digestiveProblems), isImportant: isFieldImportant("Problèmes digestifs", patient.digestiveProblems), isCritical: isFieldCritical("Problèmes digestifs", patient.digestiveProblems) },
-        { label: "Transit intestinal", value: formatValue(patient.intestinal_transit), isImportant: isFieldImportant("Transit intestinal", patient.intestinal_transit), isCritical: isFieldCritical("Transit intestinal", patient.intestinal_transit) },
+        { label: "Médecin digestif", value: formatValue(patient.digestiveDoctorName), isImportant: false, isCritical: isFieldCritical("Médecin digestif", patient.digestiveDoctorName) },
+        { label: "Problèmes digestifs", value: formatValue(patient.digestiveProblems), isImportant: false, isCritical: isFieldCritical("Problèmes digestifs", patient.digestiveProblems) },
+        { label: "Transit intestinal", value: formatValue(patient.intestinal_transit), isImportant: false, isCritical: isFieldCritical("Transit intestinal", patient.intestinal_transit) },
       ],
     },
     {
@@ -202,14 +216,14 @@ export function MedicalInfoTab({
       icon: User,
       category: "general" as const,
       items: [
-        { label: "Antécédents neurologiques", value: formatValue(patient.neurological_history), isImportant: isFieldImportant("Antécédents neurologiques", patient.neurological_history), isCritical: isFieldCritical("Antécédents neurologiques", patient.neurological_history) },
-        { label: "Historique neurodéveloppemental", value: formatValue(patient.neurodevelopmental_history), isImportant: isFieldImportant("Historique neurodéveloppemental", patient.neurodevelopmental_history), isCritical: isFieldCritical("Historique neurodéveloppemental", patient.neurodevelopmental_history) },
-        { label: "Examen des nerfs crâniens", value: formatValue(patient.cranial_nerve_exam), isImportant: isFieldImportant("Examen des nerfs crâniens", patient.cranial_nerve_exam), isCritical: isFieldCritical("Examen des nerfs crâniens", patient.cranial_nerve_exam) },
-        { label: "Examen crânien", value: formatValue(patient.cranial_exam), isImportant: isFieldImportant("Examen crânien", patient.cranial_exam), isCritical: isFieldCritical("Examen crânien", patient.cranial_exam) },
-        { label: "Examen membranes crâniennes", value: formatValue(patient.cranial_membrane_exam), isImportant: isFieldImportant("Examen membranes crâniennes", patient.cranial_membrane_exam), isCritical: isFieldCritical("Examen membranes crâniennes", patient.cranial_membrane_exam) },
-        { label: "Examen des fascias", value: formatValue(patient.fascia_exam), isImportant: isFieldImportant("Examen des fascias", patient.fascia_exam), isCritical: isFieldCritical("Examen des fascias", patient.fascia_exam) },
-        { label: "Examen vasculaire", value: formatValue(patient.vascular_exam), isImportant: isFieldImportant("Examen vasculaire", patient.vascular_exam), isCritical: isFieldCritical("Examen vasculaire", patient.vascular_exam) },
-        { label: "Symptômes généraux", value: formatValue(patient.generalSymptoms), isImportant: isFieldImportant("Symptômes généraux", patient.generalSymptoms), isCritical: isFieldCritical("Symptômes généraux", patient.generalSymptoms) },
+        { label: "Antécédents neurologiques", value: formatValue(patient.neurological_history), isImportant: false, isCritical: isFieldCritical("Antécédents neurologiques", patient.neurological_history) },
+        { label: "Historique neurodéveloppemental", value: formatValue(patient.neurodevelopmental_history), isImportant: false, isCritical: isFieldCritical("Historique neurodéveloppemental", patient.neurodevelopmental_history) },
+        { label: "Examen des nerfs crâniens", value: formatValue(patient.cranial_nerve_exam), isImportant: false, isCritical: isFieldCritical("Examen des nerfs crâniens", patient.cranial_nerve_exam) },
+        { label: "Examen crânien", value: formatValue(patient.cranial_exam), isImportant: false, isCritical: isFieldCritical("Examen crânien", patient.cranial_exam) },
+        { label: "Examen membranes crâniennes", value: formatValue(patient.cranial_membrane_exam), isImportant: false, isCritical: isFieldCritical("Examen membranes crâniennes", patient.cranial_membrane_exam) },
+        { label: "Examen des fascias", value: formatValue(patient.fascia_exam), isImportant: false, isCritical: isFieldCritical("Examen des fascias", patient.fascia_exam) },
+        { label: "Examen vasculaire", value: formatValue(patient.vascular_exam), isImportant: false, isCritical: isFieldCritical("Examen vasculaire", patient.vascular_exam) },
+        { label: "Symptômes généraux", value: formatValue(patient.generalSymptoms), isImportant: false, isCritical: isFieldCritical("Symptômes généraux", patient.generalSymptoms) },
       ],
     },
     {
@@ -218,9 +232,13 @@ export function MedicalInfoTab({
       category: "general" as const,
       items: [
         { label: "Sous-section : Membres supérieurs", value: "" },
-        ...periphericSection[0].items,
+        ...periphericSection[0].items.map((i) => ({
+          ...i, isImportant: false, isCritical: isFieldCritical(i.label, i.value)
+        })),
         { label: "Sous-section : Membres inférieurs", value: "" },
-        ...periphericSection[1].items,
+        ...periphericSection[1].items.map((i) => ({
+          ...i, isImportant: false, isCritical: isFieldCritical(i.label, i.value)
+        })),
       ],
     },
     {
@@ -228,8 +246,8 @@ export function MedicalInfoTab({
       icon: Baby,
       category: "reproductive" as const,
       items: [
-        { label: "Antécédents pelviens/gynéco-uro", value: formatValue(patient.pelvic_history), isImportant: isFieldImportant("Antécédents pelviens/gynéco-uro", patient.pelvic_history), isCritical: isFieldCritical("Antécédents pelviens/gynéco-uro", patient.pelvic_history) },
-        { label: "Antécédents gynécologiques", value: formatValue(patient.gynecological_history), isImportant: isFieldImportant("Antécédents gynécologiques", patient.gynecological_history), isCritical: isFieldCritical("Antécédents gynécologiques", patient.gynecological_history) },
+        { label: "Antécédents pelviens/gynéco-uro", value: formatValue(patient.pelvic_history), isImportant: false, isCritical: isFieldCritical("Antécédents pelviens/gynéco-uro", patient.pelvic_history) },
+        { label: "Antécédents gynécologiques", value: formatValue(patient.gynecological_history), isImportant: false, isCritical: isFieldCritical("Antécédents gynécologiques", patient.gynecological_history) },
       ],
     },
     {
@@ -237,60 +255,15 @@ export function MedicalInfoTab({
       icon: Baby,
       category: "pediatric" as const,
       items: [
-        { 
-          label: "Poids de naissance", 
-          value: formatValue(patient.weight_at_birth), 
-          isImportant: isFieldImportant("Poids de naissance", formatValue(patient.weight_at_birth)), 
-          isCritical: isFieldCritical("Poids de naissance", formatValue(patient.weight_at_birth)) 
-        },
-        { 
-          label: "Taille de naissance", 
-          value: formatValue(patient.height_at_birth), 
-          isImportant: isFieldImportant("Taille de naissance", formatValue(patient.height_at_birth)), 
-          isCritical: isFieldCritical("Taille de naissance", formatValue(patient.height_at_birth)) 
-        },
-        { 
-          label: "Périmètre crânien", 
-          value: formatValue(patient.head_circumference), 
-          isImportant: isFieldImportant("Périmètre crânien", formatValue(patient.head_circumference)), 
-          isCritical: isFieldCritical("Périmètre crânien", formatValue(patient.head_circumference)) 
-        },
-        { 
-          label: "Score d'Apgar", 
-          value: formatValue(patient.apgar_score), 
-          isImportant: isFieldImportant("Score d'Apgar", formatValue(patient.apgar_score)), 
-          isCritical: isFieldCritical("Score d'Apgar", formatValue(patient.apgar_score)) 
-        },
-        { 
-          label: "Mode de garde", 
-          value: formatValue(patient.childcare_type), 
-          isImportant: isFieldImportant("Mode de garde", formatValue(patient.childcare_type)), 
-          isCritical: isFieldCritical("Mode de garde", formatValue(patient.childcare_type)) 
-        },
-        { 
-          label: "Niveau scolaire", 
-          value: formatValue(patient.school_grade), 
-          isImportant: isFieldImportant("Niveau scolaire", formatValue(patient.school_grade)), 
-          isCritical: isFieldCritical("Niveau scolaire", formatValue(patient.school_grade)) 
-        },
-        { 
-          label: "Pédiatre", 
-          value: formatValue(patient.pediatrician_name), 
-          isImportant: isFieldImportant("Pédiatre", formatValue(patient.pediatrician_name)), 
-          isCritical: isFieldCritical("Pédiatre", formatValue(patient.pediatrician_name)) 
-        },
-        { 
-          label: "Suivi paramédical", 
-          value: formatValue(patient.paramedical_followup), 
-          isImportant: isFieldImportant("Suivi paramédical", formatValue(patient.paramedical_followup)), 
-          isCritical: isFieldCritical("Suivi paramédical", formatValue(patient.paramedical_followup)) 
-        },
-        { 
-          label: "Commentaires enfant", 
-          value: formatValue(patient.other_comments_child), 
-          isImportant: isFieldImportant("Commentaires enfant", formatValue(patient.other_comments_child)), 
-          isCritical: isFieldCritical("Commentaires enfant", formatValue(patient.other_comments_child)) 
-        },
+        { label: "Poids de naissance", value: formatValue(patient.weight_at_birth), isImportant: false, isCritical: isFieldCritical("Poids de naissance", formatValue(patient.weight_at_birth)) },
+        { label: "Taille de naissance", value: formatValue(patient.height_at_birth), isImportant: false, isCritical: isFieldCritical("Taille de naissance", formatValue(patient.height_at_birth)) },
+        { label: "Périmètre crânien", value: formatValue(patient.head_circumference), isImportant: false, isCritical: isFieldCritical("Périmètre crânien", formatValue(patient.head_circumference)) },
+        { label: "Score d'Apgar", value: formatValue(patient.apgar_score), isImportant: false, isCritical: isFieldCritical("Score d'Apgar", formatValue(patient.apgar_score)) },
+        { label: "Mode de garde", value: formatValue(patient.childcare_type), isImportant: false, isCritical: isFieldCritical("Mode de garde", formatValue(patient.childcare_type)) },
+        { label: "Niveau scolaire", value: formatValue(patient.school_grade), isImportant: false, isCritical: isFieldCritical("Niveau scolaire", formatValue(patient.school_grade)) },
+        { label: "Pédiatre", value: formatValue(patient.pediatrician_name), isImportant: false, isCritical: isFieldCritical("Pédiatre", formatValue(patient.pediatrician_name)) },
+        { label: "Suivi paramédical", value: formatValue(patient.paramedical_followup), isImportant: false, isCritical: isFieldCritical("Suivi paramédical", formatValue(patient.paramedical_followup)) },
+        { label: "Commentaires enfant", value: formatValue(patient.other_comments_child), isImportant: false, isCritical: isFieldCritical("Commentaires enfant", formatValue(patient.other_comments_child)) },
       ],
     },
   ];
