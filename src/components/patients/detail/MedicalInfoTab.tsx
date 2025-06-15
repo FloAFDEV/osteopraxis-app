@@ -75,335 +75,134 @@ export function MedicalInfoTab({
     }
   }, [patient.birthDate]);
 
-  // Fonction helper pour fusionner traumatismes et fractures
-  const getTraumaAndFractureHistory = () => {
-    const trauma = patient.traumaHistory;
-    const fractures = patient.fracture_history;
+  // Helpers
+  const formatValue = (value: any) => (value || value === 0 ? String(value) : "Non renseigné");
 
-    if (trauma && fractures) {
-      return `${trauma} | ${fractures}`;
-    }
-    return trauma || fractures || null;
-  };
-
-  // Fonction helper pour déterminer l'importance médicale
-  const isCriticalCondition = (value: string | null | undefined) => {
-    if (!value) return false;
-    const criticalKeywords = [
-      "allergie",
-      "urgence",
-      "critique",
-      "grave",
-      "sévère",
-      "avp",
-      "accident",
-      "hospitalisation",
-      "AVC",
-      "AVP",
-    ];
-    return criticalKeywords.some((keyword) =>
-      value.toLowerCase().includes(keyword)
-    );
-  };
-
-  const isImportantCondition = (value: string | null | undefined) => {
-    if (!value) return false;
-    const importantKeywords = [
-      "traitement",
-      "médicament",
-      "suivi",
-      "chronique",
-      "antécédent",
-      "antécédents",
-    ];
-    return importantKeywords.some((keyword) =>
-      value.toLowerCase().includes(keyword)
-    );
-  };
-
-  type MedicalSectionCategory =
-    | "general"
-    | "lifestyle"
-    | "sensory"
-    | "digestive"
-    | "additional"
-    | "reproductive"
-    | "pediatric";
-
-  const medicalSections: {
-    title: string;
-    icon: any;
-    priority: "high" | "medium" | "low";
-    category: MedicalSectionCategory;
-    defaultOpen?: boolean;
-    sectionId: string;
-    items: any[];
-  }[] = [
+  // Construction des sphères : toutes infos/médicales classées par section avec tous les champs
+  const spheres = [
     {
-      title: "Informations médicales générales",
-      icon: Stethoscope,
-      priority: "high" as const,
-      category: "general" as const,
-      defaultOpen: true,
-      sectionId: "informations-medicales-generales",
+      title: "Générale",
+      icon: <Stethoscope className="h-5 w-5 text-red-600" />,
       items: [
-        {
-          label: "Médecin généraliste",
-          value: patient.generalPractitioner,
-          // Retiré isImportant pour le médecin généraliste
-        },
-        {
-          label: "Traitement actuel",
-          value: patient.currentTreatment,
-          isCritical: isCriticalCondition(patient.currentTreatment),
-          isImportant: !!patient.currentTreatment,
-        },
-        {
-          label: "Allergies",
-          value:
-            patient.allergies && patient.allergies !== "NULL"
-              ? patient.allergies
-              : null,
-          isCritical: !!(
-            patient.allergies && patient.allergies !== "NULL"
-          ),
-          isImportant: !!(
-            patient.allergies && patient.allergies !== "NULL"
-          ),
-        },
-        {
-          label: "Antécédents médicaux familiaux",
-          value: patient.familyStatus,
-          isImportant: isImportantCondition(patient.familyStatus),
-        },
-        {
-          label: "Chirurgie",
-          value: patient.surgicalHistory,
-          isImportant: isImportantCondition(patient.surgicalHistory),
-        },
-        {
-          label: "Traumatismes et fractures",
-          value: getTraumaAndFractureHistory(),
-          isImportant: !!(
-            patient.traumaHistory || patient.fracture_history
-          ),
-        },
-        {
-          label: "Rhumatologie",
-          value: patient.rheumatologicalHistory,
-          isImportant: isImportantCondition(
-            patient.rheumatologicalHistory
-          ),
-        },
+        { label: "Médecin généraliste", value: formatValue(patient.generalPractitioner) },
+        { label: "Traitement actuel", value: formatValue(patient.currentTreatment) },
+        { label: "Allergies", value: formatValue(patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null) },
+        { label: "Antécédents médicaux familiaux", value: formatValue(patient.familyStatus) },
+        { label: "Antécédents cardiaques", value: formatValue(patient.cardiac_history) },
+        { label: "Antécédents pulmonaires", value: formatValue(patient.pulmonary_history) },
+        { label: "Rhumatologie", value: formatValue(patient.rheumatologicalHistory) },
+        { label: "Scoliose", value: formatValue(patient.scoliosis) },
+        { label: "Autres commentaires (adulte)", value: formatValue(patient.other_comments_adult) },
       ],
     },
     {
-      title: "Activité physique / Sommeil",
-      icon: Dumbbell,
-      priority: "medium" as const,
-      category: "lifestyle" as const,
-      sectionId: "activite-physique-sommeil",
+      title: "Activité & Hygiène de vie",
+      icon: <Dumbbell className="h-5 w-5 text-green-600" />,
       items: [
-        {
-          label: "Activité physique",
-          value: patient.physicalActivity,
-        },
-        {
-          label: "Fréquence sportive",
-          value: patient.sport_frequency,
-        },
-        {
-          label: "Qualité du sommeil",
-          value: patient.sleep_quality,
-          isImportant:
-            patient.sleep_quality
-              ?.toLowerCase()
-              .includes("mauvais") ||
-            patient.sleep_quality
-              ?.toLowerCase()
-              .includes("trouble"),
-        },
+        { label: "Activité physique", value: formatValue(patient.physicalActivity) },
+        { label: "Fréquence sportive", value: formatValue(patient.sport_frequency) },
+        { label: "Qualité du sommeil", value: formatValue(patient.sleep_quality) },
+        { label: "Alimentation", value: formatValue(patient.feeding) },
+        { label: "Poids", value: formatValue(patient.weight) },
+        { label: "Taille", value: formatValue(patient.height) },
+        { label: "IMC", value: formatValue(patient.bmi) },
       ],
     },
     {
-      title: "Ophtalmologie / Dentaire",
-      icon: Eye,
-      priority: "low" as const,
-      category: "sensory" as const,
-      sectionId: "ophtalmologie-dentaire",
+      title: "Sphère ORL",
+      icon: <Ear className="h-5 w-5 text-purple-600" />,
       items: [
-        {
-          label: "Correction de la vue",
-          value: patient.hasVisionCorrection ? "Oui" : "Non",
-        },
-        {
-          label: "Ophtalmologue",
-          value: patient.ophtalmologistName,
-        },
-        {
-          label: "Santé dentaire",
-          value: patient.dental_health,
-          isImportant:
-            patient.dental_health
-              ?.toLowerCase()
-              .includes("problème") ||
-            patient.dental_health
-              ?.toLowerCase()
-              .includes("douleur"),
-        },
+        { label: "Médecin ORL", value: formatValue(patient.entDoctorName) },
+        { label: "Problèmes ORL", value: formatValue(patient.entProblems) },
+        { label: "Suivi ORL", value: formatValue(patient.ent_followup) },
       ],
     },
     {
-      title: "ORL",
-      icon: Ear,
-      priority: "medium" as const,
-      category: "sensory" as const,
-      sectionId: "orl",
+      title: "Sphère ophtalmologique et dentaire",
+      icon: <Eye className="h-5 w-5 text-blue-600" />,
       items: [
-        {
-          label: "Problèmes ORL",
-          value: patient.entProblems,
-          isCritical: isCriticalCondition(patient.entProblems),
-          isImportant: !!patient.entProblems,
-        },
-        {
-          label: "Médecin ORL",
-          value: patient.entDoctorName,
-        },
-        {
-          label: "Suivi ORL",
-          value: patient.ent_followup,
-          isImportant: !!patient.ent_followup,
-        },
+        { label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
+        { label: "Ophtalmologue", value: formatValue(patient.ophtalmologistName) },
+        { label: "Santé dentaire", value: formatValue(patient.dental_health) },
+        { label: "Examen dentaire", value: formatValue(patient.dental_exam) },
       ],
     },
     {
-      title: "Digestif",
-      icon: Soup,
-      priority: "medium" as const,
-      category: "digestive" as const,
-      sectionId: "digestif",
+      title: "Sphère viscérale / digestive",
+      icon: <Soup className="h-5 w-5 text-orange-600" />,
       items: [
-        {
-          label: "Problèmes digestifs",
-          value: patient.digestiveProblems,
-          isCritical: isCriticalCondition(patient.digestiveProblems),
-          isImportant: !!patient.digestiveProblems,
-        },
-        {
-          label: "Transit intestinal",
-          value: patient.intestinal_transit,
-          isImportant:
-            patient.intestinal_transit
-              ?.toLowerCase()
-              .includes("problème") ||
-            patient.intestinal_transit
-              ?.toLowerCase()
-              .includes("trouble"),
-        },
-        {
-          label: "Médecin digestif",
-          value: patient.digestiveDoctorName,
-        },
+        { label: "Médecin digestif", value: formatValue(patient.digestiveDoctorName) },
+        { label: "Problèmes digestifs", value: formatValue(patient.digestiveProblems) },
+        { label: "Transit intestinal", value: formatValue(patient.intestinal_transit) },
       ],
     },
     {
-      title: "Anamnèse complémentaire",
-      icon: FilePlus2,
-      priority: "low" as const,
-      category: "additional" as const,
-      sectionId: "anamnese-complementaire",
+      title: "Sphère neuro",
+      icon: <User className="h-5 w-5 text-sky-600" />,
       items: [
-        {
-          label: "Examens complémentaires",
-          value: patient.complementaryExams,
-          isImportant: !!patient.complementaryExams,
-        },
-        {
-          label: "Symptômes généraux",
-          value: patient.generalSymptoms,
-          isImportant: !!patient.generalSymptoms,
-        },
+        { label: "Antécédents neurologiques", value: formatValue(patient.neurological_history) },
+        { label: "Historique neurodéveloppemental", value: formatValue(patient.neurodevelopmental_history) },
+        { label: "Examen des nerfs crâniens", value: formatValue(patient.cranial_nerve_exam) },
+        { label: "Examen crânien", value: formatValue(patient.cranial_exam) },
+        { label: "Examen membranes crâniennes", value: formatValue(patient.cranial_membrane_exam) },
+        { label: "Examen des fascias", value: formatValue(patient.fascia_exam) },
+        { label: "Examen vasculaire", value: formatValue(patient.vascular_exam) },
+        { label: "Symptômes généraux", value: formatValue(patient.generalSymptoms) },
+      ],
+    },
+    {
+      title: "Sphère musculo-squelettique",
+      icon: <Activity className="h-5 w-5 text-green-600" />,
+      items: [
+        { label: "Motricité globale", value: formatValue(patient.gross_motor_skills) },
+        { label: "Motricité fine", value: formatValue(patient.fine_motor_skills) },
+        { label: "Fractures", value: formatValue(patient.fracture_history) },
+        { label: "Antécédents de traumatismes", value: formatValue(patient.traumaHistory) },
+        { label: "Historique musculo-squelettique", value: formatValue(patient.musculoskeletal_history) },
+        { label: "Examen membre inférieur", value: formatValue(patient.lower_limb_exam) },
+        { label: "Examen membre supérieur", value: formatValue(patient.upper_limb_exam) },
+        { label: "Examen épaule", value: formatValue(patient.shoulder_exam) },
+        { label: "Tests LMO", value: formatValue(patient.lmo_tests) },
+        { label: "Examen masque facial", value: formatValue(patient.facial_mask_exam) },
+      ],
+    },
+    {
+      title: "Sphère pelvienne/gynéco-uro",
+      icon: <Baby className="h-5 w-5 text-pink-600" />,
+      items: [
+        { label: "Antécédents pelviens/gynéco-uro", value: formatValue(patient.pelvic_history) },
+        { label: "Antécédents gynécologiques", value: formatValue(patient.gynecological_history) },
+      ],
+    },
+    {
+      title: "Enfant : données enfant/pédiatrie",
+      icon: <Baby className="h-5 w-5 text-sky-400" />,
+      items: [
+        { label: "Poids de naissance", value: formatValue(patient.weight_at_birth) },
+        { label: "Taille de naissance", value: formatValue(patient.height_at_birth) },
+        { label: "Périmètre crânien", value: formatValue(patient.head_circumference) },
+        { label: "Score d'Apgar", value: formatValue(patient.apgar_score) },
+        { label: "Mode de garde", value: formatValue(patient.childcare_type) },
+        { label: "Niveau scolaire", value: formatValue(patient.school_grade) },
+        { label: "Pédiatre", value: formatValue(patient.pediatrician_name) },
+        { label: "Suivi paramédical", value: formatValue(patient.paramedical_followup) },
+        { label: "Commentaires enfant", value: formatValue(patient.other_comments_child) },
+      ],
+    },
+    {
+      title: "Autres",
+      icon: <StickyNote className="h-5 w-5 text-gray-600" />,
+      items: [
+        { label: "Examens complémentaires", value: formatValue(patient.complementaryExams) },
+        { label: "Chirurgies", value: formatValue(patient.surgicalHistory) },
+        { label: "Résumé / Conclusion consultation", value: formatValue(patient.consultation_conclusion) },
+        { label: "Diagnostic", value: formatValue(patient.diagnosis) },
+        { label: "Plan de traitement", value: formatValue(patient.treatment_plan) },
+        { label: "Examen médical", value: formatValue(patient.medical_examination) },
+        // autres champs non classés...
       ],
     },
   ];
-
-  // === FUSION DES SPHERES SPECIALISEES DANS LES BLOCS MEDICAUX ===
-
-  // On répartit les sphères logiquement dans medicalSections/groups existants :
-
-  // Ajouts dans medicalSections:
-  // Cardiaque & pulmonaire => Informations médicales générales
-  // Pelvien/gyneco/uro & Sphère gynécologique => section existante adulte
-  // Neuro, neurodéveloppement, nerfs craniens, crânien, dentaire, membranes, fascias, vasculaire => Sphère "générale"
-  // Musculo-squelettique, membres, épaule, scoliose, masque facial => "Périphérique"
-
-  // Ajoutons dynamiquement les nouveaux champs à chaque section selon la cohérence:
-
-  // Ajouts "cardiaque" et "pulmonaire" dans la section générale :
-  medicalSections[0].items.push(
-    {
-      label: "Antécédents cardiaques",
-      value: patient.cardiac_history,
-      isImportant: !!patient.cardiac_history,
-    },
-    {
-      label: "Antécédents pulmonaires",
-      value: patient.pulmonary_history,
-      isImportant: !!patient.pulmonary_history,
-    }
-  );
-
-  // Ajout neuro/général :
-  const generalOrNeuroFields = [
-    { label: "Antécédents neurologiques", value: patient.neurological_history },
-    { label: "Historique neurodéveloppemental", value: patient.neurodevelopmental_history },
-    { label: "Examen des nerfs crâniens", value: patient.cranial_nerve_exam },
-    { label: "Examen crânien", value: patient.cranial_exam },
-    { label: "Examen des membranes crâniennes", value: patient.cranial_membrane_exam },
-    { label: "Examen des fascias", value: patient.fascia_exam },
-    { label: "Examen vasculaire", value: patient.vascular_exam },
-  ];
-  generalOrNeuroFields.forEach(f => {
-    if (f.value) {
-      groupedMedicalSections[3].items.push({ label: f.label, value: f.value });
-    }
-  });
-
-  // Ajout examen dentaire dans section ophtalmo/dentaire :
-  if (patient.dental_exam) {
-    medicalSections[2].items.push({
-      label: "Examen dentaire",
-      value: patient.dental_exam,
-    });
-  }
-
-  // Ajout pelvien/gynéco-uro
-  if (!isChild) {
-    if (patient.pelvic_history) {
-      medicalSections.find(sec => sec.category === "reproductive")?.items.push({
-        label: "Antécédents pelviens / gynéco-uro",
-        value: patient.pelvic_history,
-        isImportant: !!patient.pelvic_history,
-      });
-    }
-  }
-
-  // Ajout musculo-squelettique et membres, épaule, scoliose, masque facial dans "Périphérique"
-  const peripheriqueFields = [
-    { label: "Historique musculo-squelettique", value: patient.musculoskeletal_history },
-    { label: "Examen du membre inférieur", value: patient.lower_limb_exam },
-    { label: "Examen du membre supérieur", value: patient.upper_limb_exam },
-    { label: "Examen de l'épaule", value: patient.shoulder_exam },
-    { label: "Scoliose", value: patient.scoliosis },
-    { label: "Examen du masque facial", value: patient.facial_mask_exam },
-    { label: "Tests LMO", value: patient.lmo_tests },
-  ];
-  peripheriqueFields.forEach(f => {
-    if (f.value) {
-      groupedMedicalSections[2].items.push({ label: f.label, value: f.value });
-    }
-  });
 
   const handleAppointmentSuccess = () => {
     onAppointmentCreated?.();
@@ -456,81 +255,6 @@ export function MedicalInfoTab({
       icon: <CheckCircle2 className="h-5 w-5 text-blue-700" />,
     },
   ];
-
-  // Regrouper les sphères — ajouté ou déplacé si besoin
-  const groupedMedicalSections = [
-    {
-      group: "ORL",
-      icon: <Ear className="h-4 w-4 text-purple-700" />,
-      items: [
-        { label: "Médecin ORL", value: patient.entDoctorName },
-        { label: "Problèmes ORL", value: patient.entProblems },
-        { label: "Suivi ORL", value: patient.ent_followup },
-      ],
-    },
-    {
-      group: "Viscérale",
-      icon: <Soup className="h-4 w-4 text-amber-700" />,
-      items: [
-        { label: "Médecin digestif", value: patient.digestiveDoctorName },
-        { label: "Problèmes digestifs", value: patient.digestiveProblems },
-        { label: "Transit intestinal", value: patient.intestinal_transit },
-      ],
-    },
-    {
-      group: "Périphérique",
-      icon: <Activity className="h-4 w-4 text-green-700" />,
-      items: [
-        { label: "Motricité globale", value: patient.gross_motor_skills },
-        { label: "Motricité fine", value: patient.fine_motor_skills },
-        { label: "Fractures", value: patient.fracture_history },
-        { label: "Antécédents rhumatologiques", value: patient.rheumatologicalHistory },
-        { label: "Antécédents de traumatismes", value: patient.traumaHistory },
-        { label: "Fréquence sportive", value: patient.sport_frequency },
-        { label: "Historique musculo-squelettique", value: patient.musculoskeletal_history },
-        { label: "Examen du membre inférieur", value: patient.lower_limb_exam },
-        { label: "Examen du membre supérieur", value: patient.upper_limb_exam },
-        { label: "Examen de l'épaule", value: patient.shoulder_exam },
-        { label: "Scoliose", value: patient.scoliosis },
-        { label: "Tests LMO", value: patient.lmo_tests },
-        { label: "Examen du masque facial", value: patient.facial_mask_exam },
-      ],
-    },
-    {
-      group: "Générale",
-      icon: <User className="h-4 w-4 text-gray-700" />,
-      items: [
-        { label: "Symptômes généraux", value: patient.generalSymptoms },
-        { label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
-        { label: "Latéralité", value: translateHandedness(patient.handedness) },
-        { label: "Qualité du sommeil", value: patient.sleep_quality },
-        { label: "Alimentation", value: patient.feeding },
-        { label: "Antécédents neurologiques", value: patient.neurological_history },
-        { label: "Historique neurodéveloppemental", value: patient.neurodevelopmental_history },
-        { label: "Examen des nerfs crâniens", value: patient.cranial_nerve_exam },
-        { label: "Examen crânien", value: patient.cranial_exam },
-        { label: "Examen des membranes crâniennes", value: patient.cranial_membrane_exam },
-        { label: "Examen des fascias", value: patient.fascia_exam },
-        { label: "Examen vasculaire", value: patient.vascular_exam },
-      ],
-    },
-  ];
-
-  // 1. Récupérer tous les labels déjà affichés dans groupedMedicalSections
-  const shownLabels = new Set<string>();
-  groupedMedicalSections.forEach(g => {
-    g.items.forEach(item => {
-      if (item.value && item.label) {
-        shownLabels.add(item.label);
-      }
-    });
-  });
-
-  // 2. Filtrer les medicalSections pour ne pas réafficher ces labels
-  const filteredMedicalSections = medicalSections.map(section => ({
-    ...section,
-    items: section.items.filter(item => !shownLabels.has(item.label)),
-  })).filter(section => section.items.length > 0); // ignorer les sections vides
 
   return (
     <div className="space-y-6 mt-6 p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -661,14 +385,28 @@ export function MedicalInfoTab({
         </Card>
       )}
 
-      {/* ACCORDEON SECTIONS FILTREES - déplacé ici pour apparaître sous la dernière séance */}
-      <MedicalAccordion sections={filteredMedicalSections} />
-
-      {/* Sections cliniques */}
-      <ClinicalSections sections={clinicalSections} />
-
-      {/* Sphères médicales groupées */}
-      <GroupedMedicalSections groupedSections={groupedMedicalSections} />
+      {/* Affichage des sphères */}
+      <div className="space-y-6">
+        {spheres.map((sphere, idx) => (
+          <div key={idx} className="mb-3">
+            <div className="flex items-center gap-2 text-lg font-semibold mb-2">
+              {sphere.icon}
+              {sphere.title}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {sphere.items.map((item, i) => (
+                <div key={i} className="rounded bg-white/80 dark:bg-slate-800/70 border border-gray-100 dark:border-gray-700 p-3">
+                  <span className="font-medium text-sm mb-1">{item.label}</span>
+                  <div className="ml-2 text-sm text-gray-700 dark:text-gray-200">
+                    {item.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* plus de sections si besoin */}
     </div>
   );
 }
