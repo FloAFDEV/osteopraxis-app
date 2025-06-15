@@ -261,6 +261,38 @@ const PatientDetailPage = () => {
 		}
 	};
 
+  // Ajout: logique pour swap sticky cards
+  const patientInfoRef = useRef<HTMLDivElement>(null);
+  const [showStickyAntecedents, setShowStickyAntecedents] = useState(false);
+
+  useEffect(() => {
+    // Crée un observer pour suivre si PatientInfo sort de la vue (top)
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.boundingClientRect.top <= 20 && !entry.isIntersecting) {
+          // la carte n'est plus visible dans le conteneur principal, show sticky PersoInfoCard
+          setShowStickyAntecedents(true);
+        } else if (entry.isIntersecting) {
+          setShowStickyAntecedents(false);
+        }
+      });
+    };
+
+    let observer: IntersectionObserver | null = null;
+    const refEl = patientInfoRef.current;
+    if (refEl) {
+      observer = new window.IntersectionObserver(handleIntersection, {
+        root: null,
+        threshold: 0.1,
+        rootMargin: "-20px 0px 0px 0px",
+      });
+      observer.observe(refEl);
+    }
+    return () => {
+      if (observer && refEl) observer.unobserve(refEl);
+    };
+  }, [patient]);
+
 	return (
 		<Layout>
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
@@ -416,11 +448,33 @@ const PatientDetailPage = () => {
 						</Tabs>
 					</div>
 
-					{/* Right column - Patient info and personal info (sticky avec comportement amélioré) */}
-					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6">
-						<PatientInfo patient={patient} />
-						<PersonalInfoCard patient={patient} />
-					</div>
+					{/* Right column: PatientInfo et switch ave PersonalInfoCard sticky */}
+					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6 relative">
+            {/* PatientInfo devient observable */}
+            <div
+              ref={patientInfoRef}
+              className={
+                showStickyAntecedents
+                  ? "invisible h-0 pointer-events-none" // cache quand sticky prend le relais
+                  : ""
+              }
+            >
+              <PatientInfo patient={patient} />
+            </div>
+            {/* Le composant sticky qui vient remplacer si besoin */}
+            <div
+              className={
+                showStickyAntecedents
+                  ? "sticky top-20 z-[99] animate-fade-in"
+                  : "hidden"
+              }
+              style={{ maxWidth: 400 }}
+            >
+              <PersonalInfoCard patient={patient} />
+            </div>
+            {/* Si sticky pas actif, affiche PersoInfoCard normal en dessous */}
+            {!showStickyAntecedents && <PersonalInfoCard patient={patient} />}
+          </div>
 				</div>
 			</div>
 		</Layout>
