@@ -38,11 +38,23 @@ export function InvoiceExportButtons({
   const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId);
   const selectedCabinet: Cabinet | undefined = cabinets.find(c => c.id === selectedCabinetId);
 
-  // Filtrer selon ostéo et cabinet
-  const matchingInvoices = invoices.filter(inv =>
-    (!selectedOsteopathId || inv.osteopathId === selectedOsteopathId) &&
-    (!selectedCabinetId || inv.cabinetId === selectedCabinetId)
-  );
+  // Ajout d’un log détaillé pour les factures
+  React.useEffect(() => {
+    console.log("[DEBUG INVOICE] Export - Structure d’une facture (première):", invoices[0]);
+  }, [invoices]);
+
+  // Filtrer selon ostéo et cabinet, mais si propr. absente il ne faut pas exclure !
+  const matchingInvoices = invoices.filter(inv => {
+    // On veut comparer seulement si les champs sont définis partout
+    // Surtout, si le champ est undefined dans l’objet, ne pas matcher, mais si le filtre n’est pas appliqué (null), ok
+    const osteoOk =
+      selectedOsteopathId == null ||
+      (inv.osteopathId != null && Number(inv.osteopathId) === Number(selectedOsteopathId));
+    const cabinetOk =
+      selectedCabinetId == null ||
+      (inv.cabinetId != null && Number(inv.cabinetId) === Number(selectedCabinetId));
+    return osteoOk && cabinetOk;
+  });
 
   const canExport =
     !!selectedOsteopath &&
