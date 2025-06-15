@@ -664,27 +664,27 @@ export function MedicalInfoTab({
   // Regroupement pour affichage dédié des nouvelles sphères
   const specializedSphereSections = [
     {
-      title: "Cardiaque",
+      title: "Antécédents cardiaques",
       value: patient.cardiac_history,
     },
     {
-      title: "Pulmonaire",
+      title: "Antécédents pulmonaires",
       value: patient.pulmonary_history,
     },
     {
-      title: "Pelvien / Gynéco-Uro",
+      title: "Antécédents pelviens / gynéco-uro",
       value: patient.pelvic_history,
     },
     {
-      title: "Neurologique",
+      title: "Antécédents neurologiques",
       value: patient.neurological_history,
     },
     {
-      title: "Neurodéveloppemental",
+      title: "Historique neurodéveloppemental",
       value: patient.neurodevelopmental_history,
     },
     {
-      title: "Examen nerfs crâniens",
+      title: "Examen des nerfs crâniens",
       value: patient.cranial_nerve_exam,
     },
     {
@@ -700,23 +700,23 @@ export function MedicalInfoTab({
       value: patient.lmo_tests,
     },
     {
-      title: "Membranes crâniennes",
+      title: "Examen des membranes crâniennes",
       value: patient.cranial_membrane_exam,
     },
     {
-      title: "Musculo-squelettique (historique)",
+      title: "Historique musculo-squelettique",
       value: patient.musculoskeletal_history,
     },
     {
-      title: "Examen membre inférieur",
+      title: "Examen du membre inférieur",
       value: patient.lower_limb_exam,
     },
     {
-      title: "Examen membre supérieur",
+      title: "Examen du membre supérieur",
       value: patient.upper_limb_exam,
     },
     {
-      title: "Examen épaule",
+      title: "Examen de l'épaule",
       value: patient.shoulder_exam,
     },
     {
@@ -724,11 +724,11 @@ export function MedicalInfoTab({
       value: patient.scoliosis,
     },
     {
-      title: "Examen fascias",
+      title: "Examen des fascias",
       value: patient.fascia_exam,
     },
     {
-      title: "Masque facial",
+      title: "Examen du masque facial",
       value: patient.facial_mask_exam,
     },
     {
@@ -924,21 +924,24 @@ export function MedicalInfoTab({
         <Card className="border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-900/20">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              Sphères spécialisées (nouveaux champs)
+              Sphères spécialisées
+              <span className="text-sm font-normal text-orange-700 dark:text-orange-200">
+                (nouveaux champs)
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {specializedSphereSections.map(
                 (s, idx) =>
                   s.value &&
                   String(s.value).trim() !== "" && (
                     <div
                       key={s.title}
-                      className="bg-white dark:bg-slate-800 rounded p-3 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm"
+                      className="bg-white dark:bg-slate-800 rounded p-4 border border-muted-200 dark:border-muted-700 flex flex-col shadow-sm"
                     >
-                      <span className="font-medium text-sm mb-1">{s.title}</span>
-                      <span className="text-gray-700 dark:text-gray-100">{s.value}</span>
+                      <span className="font-semibold text-base mb-1 text-orange-900 dark:text-orange-200">{s.title}</span>
+                      <span className="text-gray-700 dark:text-gray-100 whitespace-pre-line break-words">{s.value}</span>
                     </div>
                   )
               )}
