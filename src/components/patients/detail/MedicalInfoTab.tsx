@@ -84,8 +84,8 @@ export function MedicalInfoTab({
     {
       title: "Générale",
       icon: Stethoscope,
-      category: "general",
-      defaultOpen: true, // Sera dépliée au départ
+      category: "general" as const,
+      defaultOpen: true,
       items: [
         { label: "Médecin généraliste", value: formatValue(patient.generalPractitioner) },
         { label: "Traitement actuel", value: formatValue(patient.currentTreatment) },
@@ -101,7 +101,7 @@ export function MedicalInfoTab({
     {
       title: "Activité & Hygiène de vie",
       icon: Dumbbell,
-      category: "lifestyle",
+      category: "lifestyle" as const,
       items: [
         { label: "Activité physique", value: formatValue(patient.physicalActivity) },
         { label: "Fréquence sportive", value: formatValue(patient.sport_frequency) },
@@ -109,13 +109,12 @@ export function MedicalInfoTab({
         { label: "Alimentation", value: formatValue(patient.feeding) },
         { label: "Poids", value: formatValue(patient.weight) },
         { label: "Taille", value: formatValue(patient.height) },
-        // L’IMC n’est plus ici !
       ],
     },
     {
       title: "Sphère ORL",
       icon: Ear,
-      category: "sensory",
+      category: "sensory" as const,
       items: [
         { label: "Médecin ORL", value: formatValue(patient.entDoctorName) },
         { label: "Problèmes ORL", value: formatValue(patient.entProblems) },
@@ -125,7 +124,7 @@ export function MedicalInfoTab({
     {
       title: "Sphère ophtalmologique et dentaire",
       icon: Eye,
-      category: "sensory",
+      category: "sensory" as const,
       items: [
         { label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
         { label: "Ophtalmologue", value: formatValue(patient.ophtalmologistName) },
@@ -136,7 +135,7 @@ export function MedicalInfoTab({
     {
       title: "Sphère viscérale / digestive",
       icon: Soup,
-      category: "digestive",
+      category: "digestive" as const,
       items: [
         { label: "Médecin digestif", value: formatValue(patient.digestiveDoctorName) },
         { label: "Problèmes digestifs", value: formatValue(patient.digestiveProblems) },
@@ -146,7 +145,7 @@ export function MedicalInfoTab({
     {
       title: "Sphère neuro",
       icon: User,
-      category: "general",
+      category: "general" as const,
       items: [
         { label: "Antécédents neurologiques", value: formatValue(patient.neurological_history) },
         { label: "Historique neurodéveloppemental", value: formatValue(patient.neurodevelopmental_history) },
@@ -161,7 +160,7 @@ export function MedicalInfoTab({
     {
       title: "Sphère musculo-squelettique",
       icon: Activity,
-      category: "general",
+      category: "general" as const,
       items: [
         { label: "Motricité globale", value: formatValue(patient.gross_motor_skills) },
         { label: "Motricité fine", value: formatValue(patient.fine_motor_skills) },
@@ -178,7 +177,7 @@ export function MedicalInfoTab({
     {
       title: "Sphère pelvienne/gynéco-uro",
       icon: Baby,
-      category: "reproductive",
+      category: "reproductive" as const,
       items: [
         { label: "Antécédents pelviens/gynéco-uro", value: formatValue(patient.pelvic_history) },
         { label: "Antécédents gynécologiques", value: formatValue(patient.gynecological_history) },
@@ -187,7 +186,7 @@ export function MedicalInfoTab({
     {
       title: "Enfant : données enfant/pédiatrie",
       icon: Baby,
-      category: "pediatric",
+      category: "pediatric" as const,
       items: [
         { label: "Poids de naissance", value: formatValue(patient.weight_at_birth) },
         { label: "Taille de naissance", value: formatValue(patient.height_at_birth) },
@@ -203,7 +202,7 @@ export function MedicalInfoTab({
     {
       title: "Autres",
       icon: StickyNote,
-      category: "additional",
+      category: "additional" as const,
       items: [
         { label: "Examens complémentaires", value: formatValue(patient.complementaryExams) },
         { label: "Chirurgies", value: formatValue(patient.surgicalHistory) },
