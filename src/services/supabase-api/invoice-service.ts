@@ -8,25 +8,18 @@ export const supabaseInvoiceService = {
     try {
       // Récupérer l'ID de l'ostéopathe connecté
       const osteopathId = await getCurrentOsteopathId();
-      
-      // Récupérer d'abord les patients liés à cet ostéopathe
       const { data: patients, error: patientError } = await supabase
         .from("Patient")
         .select("id")
         .eq("osteopathId", osteopathId);
-        
       if (patientError) {
         console.error("Erreur de chargement des patients:", patientError);
         throw patientError;
       }
-      
-      // Si aucun patient trouvé, retourner un tableau vide
       if (!patients || patients.length === 0) {
         console.log("Aucun patient trouvé pour l'ostéopathe", osteopathId);
         return [];
       }
-      
-      // Extraire les IDs de patients pour le filtre
       const patientIds = patients.map(p => p.id);
       console.log(`Filtrage des factures pour ${patientIds.length} patients de l'ostéopathe ${osteopathId}`);
 
@@ -35,15 +28,15 @@ export const supabaseInvoiceService = {
         .select("*")
         .in("patientId", patientIds)
         .order('date', { ascending: false });
-      
       if (error) throw new Error(error.message);
       
-      // Transform data with explicit typing and add missing fields
+      // Correction : toujours inclure cabinetId et osteopathId dans le mapping, jamais undefined
       return (data || []).map(item => {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: item.cabinetId || undefined,
+          cabinetId: item.cabinetId === null || typeof item.cabinetId === "undefined" ? null : Number(item.cabinetId),
+          osteopathId: item.osteopathId === null || typeof item.osteopathId === "undefined" ? null : Number(item.osteopathId),
           appointmentId: item.appointmentId,
           date: item.date,
           amount: item.amount,
@@ -70,23 +63,20 @@ export const supabaseInvoiceService = {
         .select("*")
         .eq("id", id)
         .maybeSingle();
-      
       const { data, error } = await query;
-      
       if (error) {
         if (error.code === "PGRST116") {
           return undefined;
         }
         throw new Error(error.message);
       }
-      
       if (!data) return undefined;
-      
-      // Return the properly typed invoice with all required fields
+
       const invoice: Invoice = {
         id: data.id,
         patientId: data.patientId,
-        cabinetId: data.cabinetId || undefined,
+        cabinetId: data.cabinetId === null || typeof data.cabinetId === "undefined" ? null : Number(data.cabinetId),
+        osteopathId: data.osteopathId === null || typeof data.osteopathId === "undefined" ? null : Number(data.osteopathId),
         appointmentId: data.appointmentId,
         date: data.date,
         amount: data.amount,
@@ -98,7 +88,6 @@ export const supabaseInvoiceService = {
         tvaExoneration: data.tvaExoneration ?? true,
         tvaMotif: data.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
       };
-      
       return invoice;
     } catch (error) {
       console.error("Erreur getInvoiceById:", error);
@@ -113,20 +102,15 @@ export const supabaseInvoiceService = {
         .select("*")
         .eq("patientId", patientId)
         .order('date', { ascending: false });
-      
       const { data, error } = await query;
-      
       if (error) throw new Error(error.message);
-      
-      // Get connected osteopath ID
-      const osteopathId = await getCurrentOsteopathId();
-      
-      // Transform data with explicit typing and add missing fields
+
       return (data || []).map(item => {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: item.cabinetId || undefined,
+          cabinetId: item.cabinetId === null || typeof item.cabinetId === "undefined" ? null : Number(item.cabinetId),
+          osteopathId: item.osteopathId === null || typeof item.osteopathId === "undefined" ? null : Number(item.osteopathId),
           appointmentId: item.appointmentId,
           date: item.date,
           amount: item.amount,
@@ -153,20 +137,15 @@ export const supabaseInvoiceService = {
         .select("*")
         .eq("appointmentId", appointmentId)
         .order('date', { ascending: false });
-      
       const { data, error } = await query;
-      
       if (error) throw new Error(error.message);
-      
-      // Get connected osteopath ID
-      const osteopathId = await getCurrentOsteopathId();
-      
-      // Transform data with explicit typing
+
       return (data || []).map(item => {
         const invoice: Invoice = {
           id: item.id,
           patientId: item.patientId,
-          cabinetId: item.cabinetId || undefined,
+          cabinetId: item.cabinetId === null || typeof item.cabinetId === "undefined" ? null : Number(item.cabinetId),
+          osteopathId: item.osteopathId === null || typeof item.osteopathId === "undefined" ? null : Number(item.osteopathId),
           appointmentId: item.appointmentId,
           date: item.date,
           amount: item.amount,
