@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Patient } from "@/types";
@@ -103,8 +104,10 @@ export function PersonalInfoCard({ patient }: { patient: Patient }) {
   const antecedentsItems = getCombinedHistory();
 
   return (
-    <Card className="w-auto max-w-[400px] h-fit bg-white dark:bg-slate-900 shadow-lg z-[99]">
-      <CardContent className="p-3 md:p-4 lg:p-5 z-[99] bg-white dark:bg-slate-900">
+    // Laisse la carte dans le flow normal, sans z-index exagéré
+    <Card className="w-auto max-w-[400px] h-fit bg-white dark:bg-slate-900 shadow-lg relative mt-0 mb-0">
+      {/* Ne mets pas de z-index sauf overlay nécessaire */}
+      <CardContent className="p-3 md:p-4 lg:p-5 bg-white dark:bg-slate-900">
         <CardTitle className="text-base md:text-lg font-bold mb-3 md:mb-4 flex gap-2 items-center text-red-700">
           <AlertTriangle className="w-5 h-5 text-red-500" />
           Antécédents importants
@@ -141,3 +144,4 @@ export function PersonalInfoCard({ patient }: { patient: Patient }) {
     </Card>
   );
 }
+
