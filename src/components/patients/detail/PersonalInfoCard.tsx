@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Patient } from "@/types";
@@ -97,8 +96,9 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
       items.push({ label: "Antécédents cardiaques", value: patient.cardiac_history });
     if (isValidAntecedent(patient.pulmonary_history))
       items.push({ label: "Antécédents pulmonaires", value: patient.pulmonary_history });
-    if (isValidAntecedent(patient.rheumatologicalHistory))
-      items.push({ label: "Rhumatologie", value: patient.rheumatologicalHistory });
+    // SUPPRESSION: la ligne suivante retirée car Rhumatologie n’est pas un antécédent ici
+    // if (isValidAntecedent(patient.rheumatologicalHistory))
+    //   items.push({ label: "Rhumatologie", value: patient.rheumatologicalHistory });
     if (isValidAntecedent(patient.scoliosis))
       items.push({ label: "Scoliose", value: patient.scoliosis });
     return items;
@@ -126,7 +126,8 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
                   {icon}
                   <span className={`font-medium ${colorCls}`}>{item.label} :</span>
                   <span className="text-foreground">{item.value}</span>
-                  {importance && (
+                  {/* IMPORTANT : on ne garde que le badge Critique, le badge Important est supprimé ici */}
+                  {importance && importance.label === "Critique" && (
                     <Badge variant={importance.variant} className="ml-2">{importance.label}</Badge>
                   )}
                 </div>

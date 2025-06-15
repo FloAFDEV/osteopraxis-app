@@ -1,4 +1,3 @@
-
 import {
 	Accordion,
 	AccordionContent,
@@ -44,71 +43,74 @@ const labelColorClasses: Record<string, string> = {
 	"Antécédents pulmonaires": "text-blue-700",
 	"Rhumatologie": "text-orange-600",
 	"Scoliose": "text-yellow-700",
+	// Ajoute d'autres si besoin pour nouveaux champs
+};
+
+const categoryTitleColorClasses: Record<string, string> = {
+  "general": "text-red-700",
+  "lifestyle": "text-green-700",
+  "sensory": "text-purple-700",
+  "digestive": "text-orange-700",
+  "reproductive": "text-pink-700",
+  "pediatric": "text-sky-700",
+  "additional": "text-gray-700",
+};
+
+const getIconColor = (category?: string) => {
+	switch (category) {
+		case "general":
+			return "text-red-600 dark:text-red-400";
+		case "lifestyle":
+			return "text-green-600 dark:text-green-400";
+		case "sensory":
+			return "text-purple-600 dark:text-purple-400";
+		case "digestive":
+			return "text-orange-600 dark:text-orange-400";
+		case "reproductive":
+			return "text-pink-600 dark:text-pink-400";
+		case "pediatric":
+			return "text-sky-600 dark:text-sky-400";
+		case "additional":
+			return "text-gray-600 dark:text-gray-400";
+		default:
+			return "text-blue-600 dark:text-blue-400";
+	}
+};
+
+const getDefaultValue = () => {
+	const highPrioritySections = sections
+		.filter(
+			(section) => section.defaultOpen || section.priority === "high"
+		)
+		.map((_, index) => `section-${index}`);
+	return highPrioritySections;
+};
+
+const getImportanceLevel = (section: MedicalSectionProps) => {
+	const criticalItems = section.items.filter(
+		(item) => item.isCritical && item.value
+	);
+	const importantItems = section.items.filter(
+		(item) => item.isImportant && !item.isCritical && item.value
+	);
+	if (criticalItems.length > 0) {
+		return {
+			level: "critique",
+			badge: "Critique",
+			variant: "destructive" as const,
+		};
+	}
+	if (importantItems.length > 0) {
+		return {
+			level: "important",
+			badge: "Important",
+			variant: "warning" as const,
+		};
+	}
+	return null;
 };
 
 export function MedicalAccordion({ sections }: MedicalAccordionProps) {
-	const getIconColor = (category?: string) => {
-		switch (category) {
-			case "general":
-				return "text-red-600 dark:text-red-400";
-			case "lifestyle":
-				return "text-green-600 dark:text-green-400";
-			case "sensory":
-				return "text-purple-600 dark:text-purple-400";
-			case "digestive":
-				return "text-orange-600 dark:text-orange-400";
-			case "reproductive":
-				return "text-pink-600 dark:text-pink-400";
-			case "pediatric":
-				return "text-sky-600 dark:text-sky-400";
-			case "additional":
-				return "text-gray-600 dark:text-gray-400";
-			default:
-				return "text-blue-600 dark:text-blue-400";
-		}
-	};
-
-	const getDefaultValue = () => {
-		const highPrioritySections = sections
-			.filter(
-				(section) => section.defaultOpen || section.priority === "high"
-			)
-			.map((_, index) => `section-${index}`);
-		return highPrioritySections;
-	};
-
-	const getImportanceLevel = (section: MedicalSectionProps) => {
-		const criticalItems = section.items.filter(
-			(item) => item.isCritical && item.value
-		);
-		const importantItems = section.items.filter(
-			(item) => item.isImportant && item.value
-		);
-
-		if (criticalItems.length > 0) {
-			return {
-				level: "critique",
-				badge: "Critique",
-				variant: "destructive" as const,
-			};
-		}
-		if (importantItems.length >= 2) {
-			return {
-				level: "important",
-				badge: "Important",
-				variant: "destructive" as const,
-			};
-		}
-		if (importantItems.length === 1) {
-			return {
-				level: "attention",
-				badge: "Attention",
-				variant: "warning" as const,
-			};
-		}
-		return null;
-	};
-
 	return (
 		<div className="space-y-3">
 			<style>
@@ -133,7 +135,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 					const Icon = section.icon;
 					const iconColor = getIconColor(section.category);
 					const importance = getImportanceLevel(section);
-
+					const titleColor = categoryTitleColorClasses[section.category ?? "general"] || "";
 					return (
 						<AccordionItem
 							key={`section-${index}`}
@@ -144,10 +146,10 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 								section.title.toLowerCase().replace(/\s+/g, "-")
 							}
 						>
-							<AccordionTrigger className="px-4 py-3 hover:no-underline bg-gray-50/80 dark:bg-gray-900/30 rounded-t-lg">
+							<AccordionTrigger className={`px-4 py-3 hover:no-underline bg-gray-50/80 dark:bg-gray-900/30 rounded-t-lg ${titleColor}`}>
 								<div className="flex items-center gap-3 text-left w-full">
 									<Icon className={`h-5 w-5 ${iconColor}`} />
-									<span className="font-medium flex-1">
+									<span className={`font-medium flex-1 ${titleColor}`}>
 										{section.title}
 									</span>
 									{importance && (
@@ -177,19 +179,28 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 														? `p-3 rounded border-l-4 ${
 																item.isCritical
 																	? "bg-red-50 dark:bg-red-900/10 border-red-500"
-																	: " border-yellow-500"
+																	: "bg-yellow-50 dark:bg-amber-900/10 border-yellow-500"
 														  }`
 														: ""
 												}
 											>
 												<dt className={`text-sm font-medium text-muted-foreground ${colorCls}`}>
 													{item.label}
+													{/* Badge pour critique/important  */}
 													{item.isCritical && (
 														<Badge
 															variant="destructive"
 															className="ml-2 text-xs"
 														>
 															Critique
+														</Badge>
+													)}
+													{!item.isCritical && item.isImportant && (
+														<Badge
+															variant="warning"
+															className="ml-2 text-xs"
+														>
+															Important
 														</Badge>
 													)}
 												</dt>
