@@ -237,15 +237,60 @@ export function MedicalInfoTab({
       icon: Baby,
       category: "pediatric" as const,
       items: [
-        { label: "Poids de naissance", value: formatValue(patient.weight_at_birth), isImportant: isFieldImportant("Poids de naissance", patient.weight_at_birth), isCritical: isFieldCritical("Poids de naissance", patient.weight_at_birth) },
-        { label: "Taille de naissance", value: formatValue(patient.height_at_birth), isImportant: isFieldImportant("Taille de naissance", patient.height_at_birth), isCritical: isFieldCritical("Taille de naissance", patient.height_at_birth) },
-        { label: "Périmètre crânien", value: formatValue(patient.head_circumference), isImportant: isFieldImportant("Périmètre crânien", patient.head_circumference), isCritical: isFieldCritical("Périmètre crânien", patient.head_circumference) },
-        { label: "Score d'Apgar", value: formatValue(patient.apgar_score), isImportant: isFieldImportant("Score d'Apgar", patient.apgar_score), isCritical: isFieldCritical("Score d'Apgar", patient.apgar_score) },
-        { label: "Mode de garde", value: formatValue(patient.childcare_type), isImportant: isFieldImportant("Mode de garde", patient.childcare_type), isCritical: isFieldCritical("Mode de garde", patient.childcare_type) },
-        { label: "Niveau scolaire", value: formatValue(patient.school_grade), isImportant: isFieldImportant("Niveau scolaire", patient.school_grade), isCritical: isFieldCritical("Niveau scolaire", patient.school_grade) },
-        { label: "Pédiatre", value: formatValue(patient.pediatrician_name), isImportant: isFieldImportant("Pédiatre", patient.pediatrician_name), isCritical: isFieldCritical("Pédiatre", patient.pediatrician_name) },
-        { label: "Suivi paramédical", value: formatValue(patient.paramedical_followup), isImportant: isFieldImportant("Suivi paramédical", patient.paramedical_followup), isCritical: isFieldCritical("Suivi paramédical", patient.paramedical_followup) },
-        { label: "Commentaires enfant", value: formatValue(patient.other_comments_child), isImportant: isFieldImportant("Commentaires enfant", patient.other_comments_child), isCritical: isFieldCritical("Commentaires enfant", patient.other_comments_child) },
+        { 
+          label: "Poids de naissance", 
+          value: formatValue(patient.weight_at_birth), 
+          isImportant: isFieldImportant("Poids de naissance", formatValue(patient.weight_at_birth)), 
+          isCritical: isFieldCritical("Poids de naissance", formatValue(patient.weight_at_birth)) 
+        },
+        { 
+          label: "Taille de naissance", 
+          value: formatValue(patient.height_at_birth), 
+          isImportant: isFieldImportant("Taille de naissance", formatValue(patient.height_at_birth)), 
+          isCritical: isFieldCritical("Taille de naissance", formatValue(patient.height_at_birth)) 
+        },
+        { 
+          label: "Périmètre crânien", 
+          value: formatValue(patient.head_circumference), 
+          isImportant: isFieldImportant("Périmètre crânien", formatValue(patient.head_circumference)), 
+          isCritical: isFieldCritical("Périmètre crânien", formatValue(patient.head_circumference)) 
+        },
+        { 
+          label: "Score d'Apgar", 
+          value: formatValue(patient.apgar_score), 
+          isImportant: isFieldImportant("Score d'Apgar", formatValue(patient.apgar_score)), 
+          isCritical: isFieldCritical("Score d'Apgar", formatValue(patient.apgar_score)) 
+        },
+        { 
+          label: "Mode de garde", 
+          value: formatValue(patient.childcare_type), 
+          isImportant: isFieldImportant("Mode de garde", formatValue(patient.childcare_type)), 
+          isCritical: isFieldCritical("Mode de garde", formatValue(patient.childcare_type)) 
+        },
+        { 
+          label: "Niveau scolaire", 
+          value: formatValue(patient.school_grade), 
+          isImportant: isFieldImportant("Niveau scolaire", formatValue(patient.school_grade)), 
+          isCritical: isFieldCritical("Niveau scolaire", formatValue(patient.school_grade)) 
+        },
+        { 
+          label: "Pédiatre", 
+          value: formatValue(patient.pediatrician_name), 
+          isImportant: isFieldImportant("Pédiatre", formatValue(patient.pediatrician_name)), 
+          isCritical: isFieldCritical("Pédiatre", formatValue(patient.pediatrician_name)) 
+        },
+        { 
+          label: "Suivi paramédical", 
+          value: formatValue(patient.paramedical_followup), 
+          isImportant: isFieldImportant("Suivi paramédical", formatValue(patient.paramedical_followup)), 
+          isCritical: isFieldCritical("Suivi paramédical", formatValue(patient.paramedical_followup)) 
+        },
+        { 
+          label: "Commentaires enfant", 
+          value: formatValue(patient.other_comments_child), 
+          isImportant: isFieldImportant("Commentaires enfant", formatValue(patient.other_comments_child)), 
+          isCritical: isFieldCritical("Commentaires enfant", formatValue(patient.other_comments_child)) 
+        },
       ],
     },
   ];
