@@ -1,14 +1,16 @@
+
 import ExcelJS from "exceljs";
 
 export const generateHeaderSection = (
 	worksheet: ExcelJS.Worksheet,
-	period: string
+	period: string,
+	osteopathName?: string,
+	cabinetId?: number
 ): number => {
 	// Génération de l'en-tête avec le titre et la période
 	const headerRow = worksheet.getRow(1);
 	headerRow.values = ["Récapitulatif Comptable", `Période: ${period}`];
 
-	// Personnalisation de la première ligne (Titre)
 	headerRow.font = {
 		name: "Arial",
 		bold: true,
@@ -19,9 +21,9 @@ export const generateHeaderSection = (
 	headerRow.height = 30;
 	worksheet.mergeCells("A1:G1"); // Fusion des cellules pour centrer le titre
 
-	// Personnalisation de la deuxième ligne pour la période
+	// Deuxième ligne : la période reste
 	const periodRow = worksheet.getRow(2);
-	periodRow.values = [`Période: ${period}`]; // Affichage dynamique de la période
+	periodRow.values = [`Période: ${period}`];
 	periodRow.font = {
 		name: "Arial",
 		italic: true,
@@ -30,12 +32,33 @@ export const generateHeaderSection = (
 	};
 	periodRow.alignment = { horizontal: "center", vertical: "middle" };
 	periodRow.height = 20;
-	worksheet.mergeCells("A2:G2"); // Fusion des cellules pour centrer la période
+	worksheet.mergeCells("A2:G2");
 
-	// Ligne de séparation (A3:G3)
-	const lineRow = worksheet.getRow(3);
-	lineRow.height = 5; // Petite hauteur pour la séparation
+	// Troisième ligne : ostéopathe et cabinet affichés en gras, police normale
+	const infoRow = worksheet.getRow(3);
+	infoRow.values = [
+		osteopathName && cabinetId
+			? `Ostéopathe : ${osteopathName}   |   Cabinet n°${cabinetId}`
+			: osteopathName
+				? `Ostéopathe : ${osteopathName}`
+				: cabinetId
+					? `Cabinet n°${cabinetId}`
+					: ""
+	];
+	infoRow.font = {
+		name: "Arial",
+		bold: true,
+		size: 14,
+		color: { argb: "FF845600" } // Amber foncé pour la visibilité
+	};
+	infoRow.alignment = { horizontal: "center", vertical: "middle" };
+	infoRow.height = 18;
 	worksheet.mergeCells("A3:G3");
 
-	return 4; // La prochaine ligne où les données commenceront
+	// Ligne de séparation (A4:G4)
+	const lineRow = worksheet.getRow(4);
+	lineRow.height = 5;
+	worksheet.mergeCells("A4:G4");
+
+	return 5; // Les données commencent à la ligne 5
 };
