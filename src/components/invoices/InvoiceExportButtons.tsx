@@ -105,7 +105,7 @@ export function InvoiceExportButtons({
       toast.success("Export généré !");
     } catch (error: any) {
       console.error("Erreur lors de l'export Excel:", error);
-      toast.error("Erreur export : " + error?.message ?? error);
+      toast.error("Erreur export : " + (error?.message || String(error)));
     }
     setIsExporting(false);
   };
