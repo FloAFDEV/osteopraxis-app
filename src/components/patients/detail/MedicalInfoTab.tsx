@@ -95,6 +95,13 @@ export function MedicalInfoTab({
         { label: "Antécédents pulmonaires", value: formatValue(patient.pulmonary_history) },
         { label: "Rhumatologie", value: formatValue(patient.rheumatologicalHistory) },
         { label: "Scoliose", value: formatValue(patient.scoliosis) },
+        // INTEGRATION DES CHIRURGIES + AUTRES CHAMPS
+        { label: "Chirurgies", value: formatValue(patient.surgicalHistory), isImportant: !!patient.surgicalHistory },
+        { label: "Examens complémentaires", value: formatValue(patient.complementaryExams) },
+        { label: "Résumé / Conclusion consultation", value: formatValue(patient.consultation_conclusion) },
+        { label: "Diagnostic", value: formatValue(patient.diagnosis) },
+        { label: "Plan de traitement", value: formatValue(patient.treatment_plan) },
+        { label: "Examen médical", value: formatValue(patient.medical_examination) },
         { label: "Autres commentaires (adulte)", value: formatValue(patient.other_comments_adult) },
       ],
     },
@@ -197,20 +204,6 @@ export function MedicalInfoTab({
         { label: "Pédiatre", value: formatValue(patient.pediatrician_name) },
         { label: "Suivi paramédical", value: formatValue(patient.paramedical_followup) },
         { label: "Commentaires enfant", value: formatValue(patient.other_comments_child) },
-      ],
-    },
-    {
-      title: "Autres",
-      icon: StickyNote,
-      category: "additional" as const,
-      items: [
-        { label: "Examens complémentaires", value: formatValue(patient.complementaryExams) },
-        { label: "Chirurgies", value: formatValue(patient.surgicalHistory) },
-        { label: "Résumé / Conclusion consultation", value: formatValue(patient.consultation_conclusion) },
-        { label: "Diagnostic", value: formatValue(patient.diagnosis) },
-        { label: "Plan de traitement", value: formatValue(patient.treatment_plan) },
-        { label: "Examen médical", value: formatValue(patient.medical_examination) },
-        // autres champs non classés...
       ],
     },
   ];
