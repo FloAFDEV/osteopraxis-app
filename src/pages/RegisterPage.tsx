@@ -298,7 +298,7 @@ const RegisterPage = () => {
                 />
                 
                 <Alert className="bg-blue-500/10 border border-blue-500/30 text-blue-400">
-                  <Info className="h-4 w-4" />
+                  <Info className="h-4 w-4 !text-blue-400" />
                   <AlertTitle>Information</AlertTitle>
                   <AlertDescription>
                     Après votre inscription, vous serez guidé pour configurer votre profil professionnel et votre cabinet.
