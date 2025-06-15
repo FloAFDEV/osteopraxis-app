@@ -79,7 +79,38 @@ export function MedicalInfoTab({
   const formatValue = (value: any) =>
     value || value === 0 ? String(value) : "Non renseigné";
 
-  // Tableau des sphères à afficher (sauf l’IMC qui va à gauche !)
+  // Sphère ORL + ophtalmo + dentaire (fusionnée)
+  const orlOphDentalItems = [
+    { label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
+    { label: "Ophtalmologue", value: formatValue(patient.ophtalmologistName) },
+    { label: "Santé dentaire", value: formatValue(patient.dental_health) },
+    { label: "Examen dentaire", value: formatValue(patient.dental_exam) },
+    { label: "Médecin ORL", value: formatValue(patient.entDoctorName) },
+    { label: "Problèmes ORL", value: formatValue(patient.entProblems) },
+    { label: "Suivi ORL", value: formatValue(patient.ent_followup) },
+  ];
+
+  // Section sphère périphériques avec sous-sections
+  const periphericSection = [
+    {
+      title: "Membres supérieurs",
+      items: [
+        { label: "Examen membre supérieur", value: formatValue(patient.upper_limb_exam) },
+        { label: "Examen épaule", value: formatValue(patient.shoulder_exam) },
+        { label: "Motricité fine", value: formatValue(patient.fine_motor_skills) },
+      ],
+    },
+    {
+      title: "Membres inférieurs",
+      items: [
+        { label: "Examen membre inférieur", value: formatValue(patient.lower_limb_exam) },
+        { label: "Motricité globale", value: formatValue(patient.gross_motor_skills) },
+        { label: "Tests LMO", value: formatValue(patient.lmo_tests) },
+      ],
+    },
+  ];
+
+  // Tableau des sphères à afficher (IMC à gauche si voulu)
   const spheres = [
     {
       title: "Générale",
@@ -95,7 +126,6 @@ export function MedicalInfoTab({
         { label: "Traumatismes", value: formatValue(patient.traumaHistory), isImportant: !!patient.traumaHistory },
         { label: "Fractures", value: formatValue(patient.fracture_history), isImportant: !!patient.fracture_history },
         { label: "Chirurgies", value: formatValue(patient.surgicalHistory), isImportant: !!patient.surgicalHistory },
-        // Le reste est non marqué important
         { label: "Médecin généraliste", value: formatValue(patient.generalPractitioner) },
         { label: "Traitement actuel", value: formatValue(patient.currentTreatment) },
         { label: "Allergies", value: formatValue(patient.allergies && patient.allergies !== "NULL" ? patient.allergies : null) },
@@ -121,25 +151,10 @@ export function MedicalInfoTab({
       ],
     },
     {
-      title: "Sphère ORL",
-      icon: Ear,
-      category: "sensory" as const,
-      items: [
-        { label: "Médecin ORL", value: formatValue(patient.entDoctorName) },
-        { label: "Problèmes ORL", value: formatValue(patient.entProblems) },
-        { label: "Suivi ORL", value: formatValue(patient.ent_followup) },
-      ],
-    },
-    {
-      title: "Sphère ophtalmologique et dentaire",
+      title: "Sphère ORL / Ophtalmo / Dentaire",
       icon: Eye,
       category: "sensory" as const,
-      items: [
-        { label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
-        { label: "Ophtalmologue", value: formatValue(patient.ophtalmologistName) },
-        { label: "Santé dentaire", value: formatValue(patient.dental_health) },
-        { label: "Examen dentaire", value: formatValue(patient.dental_exam) },
-      ],
+      items: orlOphDentalItems,
     },
     {
       title: "Sphère viscérale / digestive",
@@ -167,20 +182,14 @@ export function MedicalInfoTab({
       ],
     },
     {
-      title: "Sphère musculo-squelettique",
+      title: "Sphère périphérique",
       icon: Activity,
       category: "general" as const,
       items: [
-        { label: "Motricité globale", value: formatValue(patient.gross_motor_skills) },
-        { label: "Motricité fine", value: formatValue(patient.fine_motor_skills) },
-        { label: "Fractures", value: formatValue(patient.fracture_history) },
-        { label: "Antécédents de traumatismes", value: formatValue(patient.traumaHistory) },
-        { label: "Historique musculo-squelettique", value: formatValue(patient.musculoskeletal_history) },
-        { label: "Examen membre inférieur", value: formatValue(patient.lower_limb_exam) },
-        { label: "Examen membre supérieur", value: formatValue(patient.upper_limb_exam) },
-        { label: "Examen épaule", value: formatValue(patient.shoulder_exam) },
-        { label: "Tests LMO", value: formatValue(patient.lmo_tests) },
-        { label: "Examen masque facial", value: formatValue(patient.facial_mask_exam) },
+        { label: "Sous-section : Membres supérieurs", value: "" },
+        ...periphericSection[0].items,
+        { label: "Sous-section : Membres inférieurs", value: "" },
+        ...periphericSection[1].items,
       ],
     },
     {
