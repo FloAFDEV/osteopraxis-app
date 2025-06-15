@@ -32,6 +32,7 @@ import { ShieldAlert } from "lucide-react";
 
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { MedicalAccordion } from "./MedicalAccordion";
+import { translateHandedness } from "@/utils/patient-form-helpers";
 
 interface MedicalInfoTabProps {
   patient: Patient;
@@ -637,7 +638,7 @@ export function MedicalInfoTab({
       items: [
         { label: "Symptômes généraux", value: patient.generalSymptoms },
         { label: "Correction de la vue", value: patient.hasVisionCorrection ? "Oui" : "Non" },
-        { label: "Latéralité", value: patient.handedness },
+        { label: "Latéralité", value: translateHandedness(patient.handedness) },
         { label: "Qualité du sommeil", value: patient.sleep_quality },
         { label: "Alimentation", value: patient.feeding },
         // ... ajoutez autres champs généraux pertinents si besoin
