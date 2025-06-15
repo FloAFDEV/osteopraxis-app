@@ -1,4 +1,3 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
@@ -70,7 +69,7 @@ export const invoiceService = {
     return [];
   },
 
-  async createInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
+  async createInvoice(invoiceData: Partial<Invoice>): Promise<Invoice> { // Accept Partial<Invoice> so we can include osteopathId
     if (USE_SUPABASE) {
       try {
         let dataToSend = { ...invoiceData };
@@ -78,7 +77,7 @@ export const invoiceService = {
           dataToSend.osteopathId = await getCurrentOsteopathId();
         }
         // On laisse la backend RLS faire la vérification
-        return await supabaseInvoiceService.createInvoice(dataToSend);
+        return await supabaseInvoiceService.createInvoice(dataToSend as Omit<Invoice, "id">);
       } catch (error) {
         console.error("Erreur Supabase createInvoice:", error);
         throw error;

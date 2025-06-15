@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -111,9 +110,9 @@ const EditInvoicePage = () => {
         </div>
         
         <InvoiceForm 
-          initialInvoice={invoice}
+          invoice={invoice}
           patient={patient}
-          onSubmit={handleSubmit}
+          onUpdate={handleSubmit}
           onCreate={() => navigate('/invoices')}
         />
       </div>
