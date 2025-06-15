@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +11,9 @@ import { Invoice, Osteopath, Patient, Cabinet } from "@/types";
 import { Calendar, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { CabinetOsteopathSelector } from "./CabinetOsteopathSelector";
+
+import { useOsteopaths } from "@/hooks/useOsteopaths";
+import { useCabinetsByOsteopath } from "@/hooks/useCabinetsByOsteopath";
 
 interface InvoiceExportButtonsProps {
   selectedYear: string;
@@ -30,9 +32,9 @@ export function InvoiceExportButtons({
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
-  // Fetch selected osteo/cabinet objects
-  const { osteopaths, loading: loadingOsteo } = require("@/hooks/useOsteopaths").useOsteopaths();
-  const { cabinets, loading: loadingCabs } = require("@/hooks/useCabinetsByOsteopath").useCabinetsByOsteopath(selectedOsteopathId ?? undefined);
+  // Appeler les hooks normalement ici :
+  const { osteopaths, loading: loadingOsteo } = useOsteopaths();
+  const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(selectedOsteopathId ?? undefined);
 
   // Correction: Retirer '?? undefined' après .find (natif)
   const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId);
