@@ -11,6 +11,7 @@ import { generateAccountingExport } from "@/services/export/invoice-export-servi
 import { Invoice, Osteopath, Patient, Cabinet } from "@/types";
 import { Calendar, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
+import { CustomTooltip } from "@/components/ui/custom-tooltip";
 
 interface InvoiceExportButtonsProps {
   selectedYear: string;
@@ -109,15 +110,36 @@ export function InvoiceExportButtons({
     <div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="gap-2 bg-amber-50 hover:bg-amber-500 text-amber-700 border-amber-200 dark:bg-amber-900 dark:text-amber-50 dark:border-amber-700 dark:hover:bg-amber-800"
-            disabled={!canExport}
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            {isExporting ? "Préparation..." : "Export comptable"}
-            <Download className="h-3 w-3 ml-1" />
-          </Button>
+          {canExport ? (
+            <Button
+              variant="outline"
+              className="gap-2 bg-amber-50 hover:bg-amber-500 text-amber-700 border-amber-200 dark:bg-amber-900 dark:text-amber-50 dark:border-amber-700 dark:hover:bg-amber-800"
+              disabled={!canExport}
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              {isExporting ? "Préparation..." : "Export comptable"}
+              <Download className="h-3 w-3 ml-1" />
+            </Button>
+          ) : (
+            <CustomTooltip
+              content="Veuillez sélectionner un cabinet précis pour activer l'export comptable. L'export multi-cabinets n'est pas autorisé pour des raisons comptables."
+              side="top"
+              maxWidth="280px"
+            >
+              <span>
+                <Button
+                  variant="outline"
+                  className="gap-2 bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900 dark:text-amber-50 dark:border-amber-700 opacity-70 cursor-not-allowed"
+                  disabled
+                  tabIndex={-1}
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Export comptable
+                  <Download className="h-3 w-3 ml-1" />
+                </Button>
+              </span>
+            </CustomTooltip>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
@@ -133,3 +155,4 @@ export function InvoiceExportButtons({
     </div>
   );
 }
+
