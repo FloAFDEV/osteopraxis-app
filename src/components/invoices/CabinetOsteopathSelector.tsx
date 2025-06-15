@@ -1,6 +1,12 @@
 
 import React from "react";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Osteopath, Cabinet } from "@/types";
 import { useOsteopaths } from "@/hooks/useOsteopaths";
@@ -19,8 +25,8 @@ export function CabinetOsteopathSelector({
   onOsteopathChange,
   onCabinetChange,
 }: CabinetOsteopathSelectorProps) {
-  const { osteopaths, loading: loadingOsteo } = useOsteopaths();
-  const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(selectedOsteopathId ?? undefined);
+  const { osteopaths, loading: loadingOsteo, error: errorOsteo } = useOsteopaths();
+  const { cabinets, loading: loadingCabs, error: errorCabs } = useCabinetsByOsteopath(selectedOsteopathId ?? undefined);
 
   return (
     <div className="flex flex-col md:flex-row gap-3 mb-3">
@@ -30,6 +36,8 @@ export function CabinetOsteopathSelector({
         </label>
         {loadingOsteo ? (
           <Skeleton className="h-9 w-full rounded" />
+        ) : errorOsteo ? (
+          <div className="text-sm text-red-500">Erreur de chargement</div>
         ) : (
           <Select
             value={selectedOsteopathId ? String(selectedOsteopathId) : ""}
@@ -54,6 +62,20 @@ export function CabinetOsteopathSelector({
         </label>
         {loadingCabs ? (
           <Skeleton className="h-9 w-full rounded" />
+        ) : errorCabs ? (
+          <div className="text-sm text-red-500">Erreur de chargement</div>
+        ) : !selectedOsteopathId ? (
+          <Select disabled>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner d'abord un praticien" />
+            </SelectTrigger>
+          </Select>
+        ) : cabinets.length === 0 ? (
+          <Select disabled>
+            <SelectTrigger>
+              <SelectValue placeholder="Aucun cabinet disponible" />
+            </SelectTrigger>
+          </Select>
         ) : (
           <Select
             value={selectedCabinetId ? String(selectedCabinetId) : ""}
@@ -61,7 +83,7 @@ export function CabinetOsteopathSelector({
             disabled={!selectedOsteopathId}
           >
             <SelectTrigger>
-              <SelectValue placeholder={!selectedOsteopathId ? "Sélectionner d'abord un praticien" : "Sélectionner un cabinet"} />
+              <SelectValue placeholder="Sélectionner un cabinet" />
             </SelectTrigger>
             <SelectContent>
               {cabinets.map((cab) => (

@@ -4,19 +4,31 @@ import { Osteopath } from "@/types";
 import { api } from "@/services/api";
 
 /**
- * Récupère la liste des ostéopathes.
+ * Hook personnalisé pour récupérer la liste des ostéopathes.
  */
 export function useOsteopaths() {
   const [osteopaths, setOsteopaths] = useState<Osteopath[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
-    api.getOsteopaths?.().then((data: Osteopath[]) => {
-      if (isMounted) setOsteopaths(data || []);
-    }).finally(() => setLoading(false));
+    setLoading(true);
+    setError(null);
+
+    api.getOsteopaths?.()
+      .then((data: Osteopath[]) => {
+        if (isMounted) setOsteopaths(data || []);
+      })
+      .catch((err) => {
+        setError("Erreur lors du chargement des ostéopathes");
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
     return () => { isMounted = false; };
   }, []);
 
-  return { osteopaths, loading };
+  return { osteopaths, loading, error };
 }
