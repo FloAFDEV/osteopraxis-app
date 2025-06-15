@@ -38,9 +38,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
 import { PatientFormValues } from "@/components/patient-form/types";
+
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
+
+	// ----- ALL HOOKS MUST BE BEFORE ANY RETURN -----
 	const [patient, setPatient] = useState<Patient | null>(null);
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -48,13 +51,19 @@ const PatientDetailPage = () => {
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 	const historyTabRef = useRef<HTMLElement | null>(null);
+
+	// Sticky swap for cards (must also be before return)
+	const patientInfoRef = useRef<HTMLDivElement>(null);
+	const [showStickyAntecedents, setShowStickyAntecedents] = useState(false);
+
+	// ----------------
 	
 	const getSmokerInfo = () => {
-		if (patient.isSmoker) {
+		if (patient && patient.isSmoker) {
 			return `Fumeur${
 				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
 			}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ""}`;
-		} else if (patient.isExSmoker) {
+		} else if (patient && patient.isExSmoker) {
 			return `Ex-fumeur${
 				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
 			}${
@@ -67,6 +76,7 @@ const PatientDetailPage = () => {
 		}
 	};
 
+	// Fetch data
 	useEffect(() => {
 		const fetchPatientData = async () => {
 			setLoading(true);
@@ -106,6 +116,35 @@ const PatientDetailPage = () => {
 			historyTabRef.current = historyTabTrigger as HTMLElement;
 		}
 	}, []);
+
+	// Sticky swap observer
+	useEffect(() => {
+		// Crée un observer pour suivre si PatientInfo sort de la vue (top)
+		const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+			entries.forEach((entry) => {
+				if (entry.boundingClientRect.top <= 20 && !entry.isIntersecting) {
+					// la carte n'est plus visible dans le conteneur principal, show sticky PersoInfoCard
+					setShowStickyAntecedents(true);
+				} else if (entry.isIntersecting) {
+					setShowStickyAntecedents(false);
+				}
+			});
+		};
+
+		let observer: IntersectionObserver | null = null;
+		const refEl = patientInfoRef.current;
+		if (refEl) {
+			observer = new window.IntersectionObserver(handleIntersection, {
+				root: null,
+				threshold: 0.1,
+				rootMargin: "-20px 0px 0px 0px",
+			});
+			observer.observe(refEl);
+		}
+		return () => {
+			if (observer && refEl) observer.unobserve(refEl);
+		};
+	}, [patient]);
 
 	const upcomingAppointments = appointments
 		.filter((appointment) => new Date(appointment.date) >= new Date())
@@ -182,29 +221,6 @@ const PatientDetailPage = () => {
 		}
 	};
 
-	if (loading) {
-		return (
-			<Layout>
-				<div className="flex justify-center items-center h-full">
-					<Loader2 className="h-6 w-6 animate-spin" />
-				</div>
-			</Layout>
-		);
-	}
-
-	if (error || !patient) {
-		return (
-			<Layout>
-				<div className="flex flex-col justify-center items-center h-full">
-					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-					<p className="text-xl font-semibold text-center">
-						{error || "Patient non trouvé"}
-					</p>
-				</div>
-			</Layout>
-		);
-	}
-
 	function formatChildrenAges(ages: number[]): string {
 		if (!ages || ages.length === 0) return "Aucun enfant";
 
@@ -261,37 +277,30 @@ const PatientDetailPage = () => {
 		}
 	};
 
-  // Ajout: logique pour swap sticky cards
-  const patientInfoRef = useRef<HTMLDivElement>(null);
-  const [showStickyAntecedents, setShowStickyAntecedents] = useState(false);
+	// ----- Keep all hooks above! -----
 
-  useEffect(() => {
-    // Crée un observer pour suivre si PatientInfo sort de la vue (top)
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.boundingClientRect.top <= 20 && !entry.isIntersecting) {
-          // la carte n'est plus visible dans le conteneur principal, show sticky PersoInfoCard
-          setShowStickyAntecedents(true);
-        } else if (entry.isIntersecting) {
-          setShowStickyAntecedents(false);
-        }
-      });
-    };
+	if (loading) {
+		return (
+			<Layout>
+				<div className="flex justify-center items-center h-full">
+					<Loader2 className="h-6 w-6 animate-spin" />
+				</div>
+			</Layout>
+		);
+	}
 
-    let observer: IntersectionObserver | null = null;
-    const refEl = patientInfoRef.current;
-    if (refEl) {
-      observer = new window.IntersectionObserver(handleIntersection, {
-        root: null,
-        threshold: 0.1,
-        rootMargin: "-20px 0px 0px 0px",
-      });
-      observer.observe(refEl);
-    }
-    return () => {
-      if (observer && refEl) observer.unobserve(refEl);
-    };
-  }, [patient]);
+	if (error || !patient) {
+		return (
+			<Layout>
+				<div className="flex flex-col justify-center items-center h-full">
+					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+					<p className="text-xl font-semibold text-center">
+						{error || "Patient non trouvé"}
+					</p>
+				</div>
+			</Layout>
+		);
+	}
 
 	return (
 		<Layout>
