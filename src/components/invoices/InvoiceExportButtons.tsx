@@ -36,7 +36,7 @@ export function InvoiceExportButtons({
   const { osteopaths, loading: loadingOsteo } = useOsteopaths();
   const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(selectedOsteopathId ?? undefined);
 
-  // Correction: Retirer '?? undefined' après .find (natif)
+  // Correction: REMOVE '?? undefined' after .find
   const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId);
   const selectedCabinet: Cabinet | undefined = cabinets.find(c => c.id === selectedCabinetId);
 
