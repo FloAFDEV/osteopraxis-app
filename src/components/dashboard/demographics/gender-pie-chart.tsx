@@ -65,8 +65,21 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 }) => {
 	const { isMobile } = useIsMobile();
 
+	// Correction : forcer la clé "Enfant" pour tout élément dont le nom contient "Enfant" ou "mineur" (pour robustesse)
 	const validChartData =
-		chartData?.filter((item) => item && item.value > 0) || [];
+		chartData?.filter((item) => item && item.value > 0).map((item) => {
+			if (
+				item.name &&
+				(item.name.toLowerCase().includes("enfant") ||
+					item.name.toLowerCase().includes("mineur"))
+			) {
+				return {
+					...item,
+					name: "Enfant" // Forcer l’appellation clé du mapping couleur
+				};
+			}
+			return item;
+		}) || [];
 
 	if (!validChartData.length) {
 		return (
@@ -77,7 +90,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 		);
 	}
 
-	// Injection de la couleur dans chaque élément du dataset
+	// Injection de la couleur dans chaque élément du dataset (correction : assure la bonne correspondance)
 	const chartDataWithColors = validChartData.map((item) => ({
 		...item,
 		color:
