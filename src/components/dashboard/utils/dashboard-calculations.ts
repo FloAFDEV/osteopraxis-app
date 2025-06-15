@@ -290,6 +290,7 @@ export function calculateMonthlyBreakdown(
         ? 100
         : 0;
 
+    // Pour compatibilité avec l'ancien type qui attend "enfants", ramener les deux pour l'instant
     return {
       month: monthName,
       patients: thisMonthPatientsList.length,
@@ -297,7 +298,8 @@ export function calculateMonthlyBreakdown(
       growthText: `${growthRate}%`,
       hommes,
       femmes,
-      mineurs, // clé renommée ici
+      mineurs, // nouvelle clé sémantique
+      enfants: mineurs, // clé legacy pour la compatibilité typage
     };
   });
 }

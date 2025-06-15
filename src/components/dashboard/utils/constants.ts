@@ -24,6 +24,7 @@ export const initialMonthlyGrowth = FRENCH_MONTHS.map((month) => ({
   hommes: 0,
   femmes: 0,
   enfants: 0,
+  mineurs: 0, // Ajouter la clé mineurs aussi
 }));
 
 // Structure des données initiales du tableau de bord
