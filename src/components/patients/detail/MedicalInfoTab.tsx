@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { AppointmentForm } from "@/components/appointment-form";
 import { PatientForm } from "@/components/patient-form";
 import { PatientFormValues } from "@/components/patient-form/types";
@@ -27,9 +28,10 @@ import {
   CheckCircle2,
   User,
 } from "lucide-react";
-
-// Removed duplicate imports and replaced ShieldHeart with ShieldAlert
 import { ShieldAlert } from "lucide-react";
+
+import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
+import { MedicalAccordion } from "./MedicalAccordion";
 
 interface MedicalInfoTabProps {
   patient: Patient;
