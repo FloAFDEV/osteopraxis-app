@@ -44,12 +44,12 @@ export async function generateAccountingExport(
     }
   });
 
-  // On passe le nom de l'ostéo et le n° de cabinet au header generator
+  // On passe le nom de l'ostéo et le NOM du cabinet au header generator
   const headerRowIndex = generateHeaderSection(
     worksheet,
     period,
     osteopath?.name,
-    cabinet?.id
+    cabinet?.name // <-- on passe le nom du cabinet ici
   );
 
   const lastRowIndex = generateTableSection(

@@ -5,7 +5,7 @@ export const generateHeaderSection = (
 	worksheet: ExcelJS.Worksheet,
 	period: string,
 	osteopathName?: string,
-	cabinetId?: number
+	cabinetName?: string
 ): number => {
 	// Génération de l'en-tête avec le titre et la période
 	const headerRow = worksheet.getRow(1);
@@ -19,7 +19,7 @@ export const generateHeaderSection = (
 	};
 	headerRow.alignment = { horizontal: "center", vertical: "middle" };
 	headerRow.height = 30;
-	worksheet.mergeCells("A1:G1"); // Fusion des cellules pour centrer le titre
+	worksheet.mergeCells("A1:G1");
 
 	// Deuxième ligne : la période reste
 	const periodRow = worksheet.getRow(2);
@@ -34,22 +34,23 @@ export const generateHeaderSection = (
 	periodRow.height = 20;
 	worksheet.mergeCells("A2:G2");
 
-	// Troisième ligne : ostéopathe et cabinet affichés en gras, police normale
+	// Troisième ligne : ostéopathe et cabinet affichés
+	let infoCell = "";
+	if (osteopathName && cabinetName) {
+		infoCell = `Ostéopathe : ${osteopathName}   |   Cabinet : ${cabinetName}`;
+	} else if (osteopathName) {
+		infoCell = `Ostéopathe : ${osteopathName}`;
+	} else if (cabinetName) {
+		infoCell = `Cabinet : ${cabinetName}`;
+	}
+
 	const infoRow = worksheet.getRow(3);
-	infoRow.values = [
-		osteopathName && cabinetId
-			? `Ostéopathe : ${osteopathName}   |   Cabinet n°${cabinetId}`
-			: osteopathName
-				? `Ostéopathe : ${osteopathName}`
-				: cabinetId
-					? `Cabinet n°${cabinetId}`
-					: ""
-	];
+	infoRow.values = [infoCell];
 	infoRow.font = {
 		name: "Arial",
 		bold: true,
 		size: 14,
-		color: { argb: "FF845600" } // Amber foncé pour la visibilité
+		color: { argb: "FF845600" }
 	};
 	infoRow.alignment = { horizontal: "center", vertical: "middle" };
 	infoRow.height = 18;
