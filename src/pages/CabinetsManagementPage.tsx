@@ -268,7 +268,7 @@ const CabinetsManagementPage = () => {
 													cabinet.osteopathId
 												] && (
 													<p className="text-sm text-teal-600 dark:text-teal-400 font-medium mt-1">
-														Dr.{" "}
+														DO.{" "}
 														{
 															osteopathData[
 																cabinet
