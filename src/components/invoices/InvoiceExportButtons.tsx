@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,8 +33,8 @@ export function InvoiceExportButtons({
   const { osteopaths, loading: loadingOsteo } = require("@/hooks/useOsteopaths").useOsteopaths();
   const { cabinets, loading: loadingCabs } = require("@/hooks/useCabinetsByOsteopath").useCabinetsByOsteopath(selectedOsteopathId ?? undefined);
 
-  const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId) ?? undefined;
-  const selectedCabinet: Cabinet | undefined = cabinets.find(c => c.id === selectedCabinetId) ?? undefined;
+  const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId) || undefined;
+  const selectedCabinet: Cabinet | undefined = cabinets.find(c => c.id === selectedCabinetId) || undefined;
 
   // Filtrer selon ostéo et cabinet
   const matchingInvoices = invoices.filter(inv =>

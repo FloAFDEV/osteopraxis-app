@@ -1,4 +1,3 @@
-
 import ExcelJS from "exceljs";
 import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
 import { generateHeaderSection } from "./sections/header-generator";
@@ -53,8 +52,9 @@ export async function generateAccountingExport(
   );
 
   if (sortedInvoices.length > 0) {
+    // Fix: Only pass the arguments expected by generateFooterSection (worksheet, lastRowIndex)
     generateFooterSection(
-      worksheet, lastRowIndex, headerRowIndex, sortedInvoices, currentYear
+      worksheet, lastRowIndex
     );
   }
 

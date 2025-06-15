@@ -1,2 +1,2 @@
 
-export { invoiceExportService } from './invoice-export-service';
+export { generateAccountingExport } from './invoice-export-service';
