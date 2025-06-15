@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -24,48 +23,65 @@ const NewInvoicePage = () => {
 
   const [osteopaths, setOsteopaths] = useState<Osteopath[]>([]);
   const [selectedOsteopathId, setSelectedOsteopathId] = useState<number | null>(null);
+  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
 
   useEffect(() => {
-    // Charger cabinets et ostéos dispo
-    api.getCabinets().then(cabs => {
-      setCabinets(cabs);
-      if (cabs.length === 1) setSelectedCabinetId(cabs[0].id);
-    });
-    api.getOsteopaths().then(osts => {
-      setOsteopaths(osts);
-      if (osts.length === 1) setSelectedOsteopathId(osts[0].id);
-    });
-  }, []);
-
-  useEffect(() => {
+    // Gestion du paramètre patientId OU appointmentId
     const appointmentId = searchParams.get("appointmentId");
-    if (appointmentId) {
-      const fetchAppointmentAndPatient = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const appointment = await api.getAppointmentById(parseInt(appointmentId));
+    const patientId = searchParams.get("patientId");
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // 1. Si patientId direct dans l’url
+        if (patientId && !appointmentId) {
+          const patient = await api.getPatientById(Number(patientId));
+          if (patient) {
+            setPatientData(patient);
+          } else {
+            setError("Patient non trouvé");
+            toast.error("Patient non trouvé");
+          }
+        }
+
+        // 2. Si rendez-vous proposé, priorité : charger le patient lié
+        if (appointmentId) {
+          const appointment = await api.getAppointmentById(Number(appointmentId));
           if (appointment) {
             setAppointment(appointment);
             if (appointment.patientId) {
               const patient = await api.getPatientById(appointment.patientId);
-              if (patient) setPatientData(patient);
+              if (patient) {
+                setPatientData(patient);
+              }
             }
           } else {
             setError("Rendez-vous non trouvé");
             toast.error("Rendez-vous non trouvé");
           }
-        } catch (error) {
-          setError("Impossible de charger les données du rendez-vous");
-          toast.error("Impossible de charger les données du rendez-vous");
-        } finally {
-          setIsLoading(false);
         }
-      };
-      fetchAppointmentAndPatient();
-    } else {
-      setIsLoading(false);
-    }
+
+        // 3. Charger l’ostéopathe courant (émétteur)
+        const osteopaths = await api.getOsteopaths();
+        // Sélectionne le premier ostéo s’il y en a qu’un, sinon le connectée
+        if (osteopaths.length === 1) {
+          setOsteopath(osteopaths[0]);
+        } else if (osteopaths.length > 1) {
+          // Si vous avez plusieurs, sélectionnez celui connecté par défaut ici (attention logique projet)
+          setOsteopath(osteopaths[0]);
+        }
+      } catch (error) {
+        setError("Impossible de charger les données nécessaires");
+        toast.error("Erreur de chargement");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line
   }, [searchParams]);
 
   // Empêcher l’édition tant que l’utilisateur n’a pas choisi un cabinet/ostéo (s’il y a au moins 2 choix)
@@ -115,55 +131,12 @@ const NewInvoicePage = () => {
           Retour
         </Button>
         <h1 className="text-2xl font-bold mb-4">Nouvelle Facture</h1>
-
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          {needCabinetSelect && (
-            <div className="flex-1 min-w-[220px]">
-              <label className="block text-sm font-medium mb-1">Sélectionner un cabinet</label>
-              <Select value={selectedCabinetId?.toString() || ""} onValueChange={val => setSelectedCabinetId(Number(val))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir le cabinet" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cabinets.map(cab => (
-                    <SelectItem key={cab.id} value={cab.id.toString()}>
-                      {cab.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          {needOsteopathSelect && (
-            <div className="flex-1 min-w-[220px]">
-              <label className="block text-sm font-medium mb-1">Sélectionner l’ostéopathe</label>
-              <Select value={selectedOsteopathId?.toString() || ""} onValueChange={val => setSelectedOsteopathId(Number(val))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir l’ostéopathe" />
-                </SelectTrigger>
-                <SelectContent>
-                  {osteopaths.map(ost => (
-                    <SelectItem key={ost.id} value={ost.id.toString()}>
-                      {ost.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
-
-        {!isReady ? (
-          <div className="text-muted-foreground text-center py-10">Veuillez sélectionner un cabinet et un ostéopathe.</div>
-        ) : (
-          <InvoiceForm
-            patient={patientData}
-            appointment={appointment}
-            onCreate={() => navigate("/invoices")}
-            cabinetId={selectedCabinetId || undefined}
-            osteopathId={selectedOsteopathId || undefined}
-          />
-        )}
+        <InvoiceForm 
+          patient={patientData}
+          osteopath={osteopath}
+          appointment={appointment}
+          onCreate={() => navigate("/invoices")}
+        />
       </div>
     </Layout>
   );

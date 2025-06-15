@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from "react";
-import { Invoice, Appointment, Patient } from "@/types";
+import { Invoice, Appointment, Patient, Osteopath } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,6 +47,7 @@ interface InvoiceFormProps {
   onUpdate?: () => void;
   cabinetId?: number;
   osteopathId?: number;
+  osteopath?: Osteopath | null; // Ajout
 }
 
 export function InvoiceForm({
@@ -58,6 +58,7 @@ export function InvoiceForm({
   onUpdate,
   cabinetId,
   osteopathId,
+  osteopath, // Ajout
 }: InvoiceFormProps) {
   const isEditing = !!invoice;
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -133,16 +134,32 @@ export function InvoiceForm({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {(currentOsteopathId || osteopathId) && (
+      {/* Affichage du nom de l’émetteur */}
+      {(osteopath || osteopathId) && (
         <div>
-          <label className="block text-sm mb-1 font-semibold text-muted-foreground">Émetteur (Ostéopathe)</label>
-          <Input disabled value={"#" + (osteopathId ?? currentOsteopathId)} />
-          <p className="text-xs text-gray-500">Renseigné automatiquement, non modifiable.</p>
+          <label className="block text-sm mb-1 font-semibold text-muted-foreground">
+            Émetteur (Ostéopathe)
+          </label>
+          <Input
+            disabled
+            value={osteopath?.name ?? ("#" + (osteopathId ?? ""))}
+          />
+          <p className="text-xs text-gray-500">
+            Renseigné automatiquement, non modifiable.
+          </p>
         </div>
       )}
+      {/* Affichage du patient */}
       <div>
         <label className="block text-sm mb-1 font-semibold text-muted-foreground">Patient</label>
-        <Input disabled value={patient ? patient.lastName + " " + patient.firstName : ""} />
+        <Input
+          disabled
+          value={
+            patient
+              ? (patient.lastName + " " + patient.firstName)
+              : ""
+          }
+        />
       </div>
       {/* Champ date facture */}
       <div>
