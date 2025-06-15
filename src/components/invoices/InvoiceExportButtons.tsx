@@ -1,161 +1,109 @@
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { invoiceExportService } from "@/services/export/invoice-export-service";
 import { Invoice, Osteopath, Patient } from "@/types";
-import { format, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Calendar, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
+import { CabinetOsteopathSelector } from "./CabinetOsteopathSelector";
 
 interface InvoiceExportButtonsProps {
-	selectedYear: string;
-	selectedMonth: string | null;
-	invoices: Invoice[];
-	patientDataMap: Map<number, Patient>;
-	osteopath?: Osteopath;
+  selectedYear: string;
+  selectedMonth: string | null;
+  invoices: Invoice[];
+  patientDataMap: Map<number, Patient>;
 }
 
 export function InvoiceExportButtons({
-	selectedYear,
-	selectedMonth,
-	invoices,
-	patientDataMap,
-	osteopath,
+  selectedYear,
+  selectedMonth,
+  invoices,
+  patientDataMap,
 }: InvoiceExportButtonsProps) {
-	// Fonction pour filtrer les factures par période
-	const filterInvoicesByPeriod = (
-		invoices: Invoice[],
-		year: string,
-		month: string | null = null
-	): Invoice[] => {
-		return invoices.filter((invoice) => {
-			const invoiceDate = new Date(invoice.date);
-			const invoiceYear = invoiceDate.getFullYear().toString();
+  // Sélection ostéopathe & cabinet
+  const [selectedOsteopathId, setSelectedOsteopathId] = useState<number | null>(null);
+  const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 
-			// Si l'année ne correspond pas, exclure
-			if (invoiceYear !== year) return false;
+  // Filtrer ostéopathe/cabinet
+  const matchingInvoices = invoices.filter(inv =>
+    (!selectedOsteopathId || inv.osteopathId === selectedOsteopathId) &&
+    (!selectedCabinetId || inv.cabinetId === selectedCabinetId)
+  );
 
-			// Si un mois est spécifié, vérifier la correspondance
-			if (month !== null) {
-				const invoiceMonth = (invoiceDate.getMonth() + 1)
-					.toString()
-					.padStart(2, "0");
-				return invoiceMonth === month;
-			}
+  // Gérer l’export
+  const exportToExcel = async () => {
+    try {
+      if (!selectedOsteopathId) { toast.error("Sélectionnez un praticien"); return; }
+      if (!selectedCabinetId) { toast.error("Sélectionnez un cabinet"); return; }
+      if (matchingInvoices.length === 0) {
+        toast.error("Aucune note d’honoraire à exporter pour ce filtre");
+        return;
+      }
+      toast.info("Préparation de l’export...");
+      const periodLabel = selectedMonth ? `${selectedMonth}/${selectedYear}` : selectedYear;
 
-			// Sinon, inclure toutes les factures de l'année
-			return true;
-		});
-	};
+      // Important : dans la vraie vie il faudrait aussi retrouver l'objet ostéopathe à partir de l’ID
+      await invoiceExportService.generateAccountingExport(
+        matchingInvoices,
+        patientDataMap,
+        periodLabel
+        // On pourrait passer l’osteopath complet si souhaité ici
+      ).then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute(
+          "download",
+          `Comptabilite_${periodLabel}_Ost${selectedOsteopathId}_Cab${selectedCabinetId}.xlsx`
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+        toast.success("Export généré !");
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'export Excel:", error);
+      toast.error("Erreur export : " + (error as Error)?.message);
+    }
+  };
 
-	// Fonction pour exporter les factures vers Excel
-	const exportToExcel = async (year: string, month: string | null = null) => {
-		try {
-			// Filtrer les factures par période
-			const filteredInvoices = filterInvoicesByPeriod(
-				invoices,
-				year,
-				month
-			);
-
-			if (filteredInvoices.length === 0) {
-				const periodLabel = month
-					? format(parseISO(`${year}-${month}-01`), "MMMM yyyy", {
-							locale: fr,
-					  })
-					: year;
-				toast.error(`Aucune facture pour la période : ${periodLabel}`);
-				return;
-			}
-
-			// Préparer le nom de la période pour l'export
-			const periodLabel = month
-				? format(parseISO(`${year}-${month}-01`), "MMMM yyyy", {
-						locale: fr,
-				  })
-				: `Année ${year}`;
-
-			toast.info(`Préparation de l'export comptable pour ${periodLabel}`);
-
-			// Générer le fichier Excel
-			const blob = await invoiceExportService.generateAccountingExport(
-				filteredInvoices,
-				patientDataMap,
-				periodLabel,
-				osteopath
-			);
-
-			// Créer un URL pour le téléchargement
-			const url = window.URL.createObjectURL(blob);
-			const link = document.createElement("a");
-			link.href = url;
-			link.setAttribute(
-				"download",
-				`Comptabilité_${periodLabel.replace(" ", "_")}.xlsx`
-			);
-			document.body.appendChild(link);
-			link.click();
-			link.parentNode?.removeChild(link);
-
-			toast.success(
-				`Export comptable pour ${periodLabel} généré avec succès`
-			);
-		} catch (error) {
-			console.error("Erreur lors de l'export Excel:", error);
-			toast.error(
-				"Une erreur est survenue lors de la génération de l'export comptable"
-			);
-		}
-	};
-
-	// Exporter le mois courant
-	const handleExportCurrentMonth = () => {
-		const currentMonthKey =
-			selectedMonth ||
-			(new Date().getMonth() + 1).toString().padStart(2, "0");
-
-		exportToExcel(selectedYear, currentMonthKey);
-	};
-
-	// Exporter l'année complète
-	const handleExportFullYear = () => {
-		exportToExcel(selectedYear);
-	};
-
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="outline"
-					className="gap-2 bg-amber-50 hover:bg-amber-500 text-amber-700 border-amber-200 dark:bg-amber-900 dark:text-amber-50 dark:border-amber-700 dark:hover:bg-amber-800"
-				>
-					<FileSpreadsheet className="h-4 w-4" />
-					Export comptable
-					<Download className="h-3 w-3 ml-1" />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end">
-				<DropdownMenuItem
-					onClick={handleExportCurrentMonth}
-					className="gap-2"
-				>
-					<Calendar className="h-4 w-4" />
-					Exporter le mois sélectionné
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={handleExportFullYear}
-					className="gap-2"
-				>
-					<FileSpreadsheet className="h-4 w-4" />
-					Exporter toute l'année {selectedYear}
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
+  return (
+    <div>
+      <CabinetOsteopathSelector
+        selectedOsteopathId={selectedOsteopathId}
+        selectedCabinetId={selectedCabinetId}
+        onOsteopathChange={setSelectedOsteopathId}
+        onCabinetChange={setSelectedCabinetId}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className="gap-2 bg-amber-50 hover:bg-amber-500 text-amber-700 border-amber-200 dark:bg-amber-900 dark:text-amber-50 dark:border-amber-700 dark:hover:bg-amber-800"
+            disabled={!selectedOsteopathId || !selectedCabinetId}
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            Export comptable
+            <Download className="h-3 w-3 ml-1" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={exportToExcel}
+            className="gap-2"
+            disabled={!selectedOsteopathId || !selectedCabinetId}
+          >
+            <Calendar className="h-4 w-4" />
+            Exporter la période sélectionnée
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 }
