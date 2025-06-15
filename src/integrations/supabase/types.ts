@@ -183,6 +183,7 @@ export type Database = {
           date: string
           id: number
           notes: string | null
+          osteopathId: number | null
           patientId: number
           paymentMethod: string | null
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"]
@@ -198,6 +199,7 @@ export type Database = {
           date?: string
           id?: number
           notes?: string | null
+          osteopathId?: number | null
           patientId: number
           paymentMethod?: string | null
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
@@ -213,6 +215,7 @@ export type Database = {
           date?: string
           id?: number
           notes?: string | null
+          osteopathId?: number | null
           patientId?: number
           paymentMethod?: string | null
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"]
@@ -233,6 +236,13 @@ export type Database = {
             columns: ["cabinetId"]
             isOneToOne: false
             referencedRelation: "Cabinet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Invoice_osteopathId_fkey"
+            columns: ["osteopathId"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
             referencedColumns: ["id"]
           },
           {
