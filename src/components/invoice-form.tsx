@@ -123,7 +123,7 @@ export function InvoiceForm({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
       <h2 className="text-lg font-semibold mb-2">
-        {isEditing ? "Modifier la facture / note d’honoraires" : "Nouvelle facture / Note d'honoraires"}
+        Note d’honoraire
       </h2>
       {/* Émetteur (ostéopathe) */}
       <InvoiceOsteopathInput control={form.control} isSubmitting={isSubmitting} />
