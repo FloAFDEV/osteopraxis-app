@@ -60,8 +60,22 @@ function getImportance(label: string, value: string | null) {
   if (label === "Antécédents cardiaques" || isCardiacKeyword(value)) {
     return { label: "Critique", variant: "destructive" as const };
   }
-  // plus de badge "Important"
+  // La logique "important" a été supprimée suite à ta demande
   return null;
+}
+
+// Nouvelle fonction pour identifier s'il s'agit d'un antécédent à rendre visible (valeur vraiment renseignée)
+function isValidAntecedent(value: string | null) {
+  if (!value) return false;
+  const trimmed = value.trim().toLowerCase();
+  return (
+    trimmed !== "" &&
+    trimmed !== "non" &&
+    trimmed !== "aucun" &&
+    trimmed !== "non renseigné" &&
+    trimmed !== "null" &&
+    trimmed !== "-"
+  );
 }
 
 export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
@@ -71,21 +85,21 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
       value: string | null;
     }[] = [];
 
-    if (patient.traumaHistory)
+    if (isValidAntecedent(patient.traumaHistory))
       items.push({ label: "Antécédents de traumatismes", value: patient.traumaHistory });
-    if (patient.fracture_history)
+    if (isValidAntecedent(patient.fracture_history))
       items.push({ label: "Fractures", value: patient.fracture_history });
-    if (patient.surgicalHistory)
+    if (isValidAntecedent(patient.surgicalHistory))
       items.push({ label: "Chirurgies", value: patient.surgicalHistory });
-    if (patient.familyStatus)
+    if (isValidAntecedent(patient.familyStatus))
       items.push({ label: "Antécédents médicaux familiaux", value: patient.familyStatus });
-    if (patient.cardiac_history)
+    if (isValidAntecedent(patient.cardiac_history))
       items.push({ label: "Antécédents cardiaques", value: patient.cardiac_history });
-    if (patient.pulmonary_history)
+    if (isValidAntecedent(patient.pulmonary_history))
       items.push({ label: "Antécédents pulmonaires", value: patient.pulmonary_history });
-    if (patient.rheumatologicalHistory)
+    if (isValidAntecedent(patient.rheumatologicalHistory))
       items.push({ label: "Rhumatologie", value: patient.rheumatologicalHistory });
-    if (patient.scoliosis)
+    if (isValidAntecedent(patient.scoliosis))
       items.push({ label: "Scoliose", value: patient.scoliosis });
     return items;
   };
@@ -124,4 +138,3 @@ export function PersonalInfoCard({ patient }: PersonalInfoCardProps) {
     </Card>
   );
 }
-
