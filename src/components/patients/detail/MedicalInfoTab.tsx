@@ -75,9 +75,21 @@ export function MedicalInfoTab({
     }
   }, [patient.birthDate]);
 
-  // Helper
   const formatValue = (value: any) =>
     value || value === 0 ? String(value) : "Non renseigné";
+
+  // Helper: détecte la présence de mots-clés de problème cardiaque
+  const isCardiacProblem = (text: string | null | undefined) => {
+    if (!text) return false;
+    const lower = text.toLowerCase();
+    // On cherche les mots clés "cardiaque", "coeur", "cœur", "cardio"
+    return (
+      lower.includes("cardiaque") ||
+      lower.includes("coeur") ||
+      lower.includes("cœur") ||
+      lower.includes("cardio")
+    );
+  };
 
   // Sphère ORL + ophtalmo + dentaire (fusionnée)
   const orlOphDentalItems = [
@@ -86,7 +98,12 @@ export function MedicalInfoTab({
     { label: "Santé dentaire", value: formatValue(patient.dental_health) },
     { label: "Examen dentaire", value: formatValue(patient.dental_exam) },
     { label: "Médecin ORL", value: formatValue(patient.entDoctorName) },
-    { label: "Problèmes ORL", value: formatValue(patient.entProblems) },
+    {
+      label: "Problèmes ORL",
+      value: formatValue(patient.entProblems),
+      isImportant: !!patient.entProblems && !isCardiacProblem(patient.entProblems),
+      isCritical: !!patient.entProblems && isCardiacProblem(patient.entProblems),
+    },
     { label: "Suivi ORL", value: formatValue(patient.ent_followup) },
   ];
 
@@ -119,7 +136,7 @@ export function MedicalInfoTab({
       defaultOpen: true,
       items: [
         { label: "Antécédents médicaux familiaux", value: formatValue(patient.familyStatus), isImportant: !!patient.familyStatus },
-        { label: "Antécédents cardiaques", value: formatValue(patient.cardiac_history), isImportant: !!patient.cardiac_history },
+        { label: "Antécédents cardiaques", value: formatValue(patient.cardiac_history), isCritical: !!patient.cardiac_history },
         { label: "Antécédents pulmonaires", value: formatValue(patient.pulmonary_history), isImportant: !!patient.pulmonary_history },
         { label: "Rhumatologie", value: formatValue(patient.rheumatologicalHistory), isImportant: !!patient.rheumatologicalHistory },
         { label: "Scoliose", value: formatValue(patient.scoliosis), isImportant: !!patient.scoliosis },
