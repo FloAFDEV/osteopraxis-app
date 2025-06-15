@@ -36,15 +36,15 @@ export function InvoiceExportButtons({
   // Correction : récupérer la liste des cabinets indépendamment de la sélection
   const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(undefined);
 
-  // Correction : filtrer VRAIMENT les ostéos rattachés au cabinet sélectionné
+  // Correction : filtrer ostéos rattachés au cabinet sélectionné par la relation cabinet.osteopathId
   const osteopathsInCabinet = React.useMemo(() => {
     if (!selectedCabinetId) return [];
-    return osteopaths.filter((ost) =>
-      ost.cabinetIds && Array.isArray(ost.cabinetIds)
-        ? ost.cabinetIds.includes(selectedCabinetId)
-        : false
-    );
-  }, [selectedCabinetId, osteopaths]);
+    // Find selected cabinet
+    const selectedCabinet = cabinets.find((c) => c.id === selectedCabinetId);
+    if (!selectedCabinet) return [];
+    // Only display the osteopath matching the cabinet's osteopathId
+    return osteopaths.filter((ost) => ost.id === selectedCabinet.osteopathId);
+  }, [selectedCabinetId, cabinets, osteopaths]);
 
   React.useEffect(() => {
     // Log pour debugging
