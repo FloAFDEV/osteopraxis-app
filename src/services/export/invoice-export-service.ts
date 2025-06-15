@@ -48,10 +48,12 @@ export async function generateAccountingExport(
   // Correction ici: header section (si besoin, ajuster arguments selon signature attendue par generateHeaderSection)
   const headerRowIndex = generateHeaderSection(worksheet, period);
 
-  // Correction: passer SEULEMENT worksheet, sortedInvoices à generateTableSection (attend 2 args)
+  // Correction: passer worksheet, sortedInvoices, patientDataMap, headerRowIndex
   const lastRowIndex = generateTableSection(
     worksheet,
-    sortedInvoices
+    sortedInvoices,
+    patientDataMap,
+    headerRowIndex
   );
 
   if (sortedInvoices.length > 0) {
