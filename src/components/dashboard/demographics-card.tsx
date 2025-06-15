@@ -1,3 +1,4 @@
+
 import {
 	Card,
 	CardContent,
@@ -12,7 +13,7 @@ import React, { useEffect } from "react";
 import { ChildrenStats } from "./demographics/children-stats";
 import {
 	calculateGenderData,
-	isChild,
+	isMinor,
 } from "./demographics/gender-chart-utils";
 import { GenderPieChart } from "./demographics/gender-pie-chart";
 
@@ -32,7 +33,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 	// Calculate children count directly from patients list or use the one from data
 	const childrenCount = React.useMemo(() => {
 		if (patientsList.length > 0) {
-			const children = patientsList.filter(isChild);
+			const children = patientsList.filter(isMinor);
 
 			return children.length;
 		}

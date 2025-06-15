@@ -1,7 +1,6 @@
-
 import { Appointment, DashboardData, Patient } from "@/types";
 import { FRENCH_MONTHS } from "./constants";
-import { isChild } from "../demographics/gender-chart-utils";
+import { isMinor } from "../demographics/gender-chart-utils";
 
 /**
  * Calcule les statistiques démographiques des patients
@@ -9,7 +8,7 @@ import { isChild } from "../demographics/gender-chart-utils";
 export function calculateDemographics(patients: Patient[], currentYear: number) {
   const maleCount = patients.filter((p) => p.gender === "Homme").length;
   const femaleCount = patients.filter((p) => p.gender === "Femme").length;
-  const childrenCount = patients.filter(isChild).length;
+  const childrenCount = patients.filter(isMinor).length;
 
   const calculateAverageAge = (patientList: Patient[]): number => {
     const patientsWithBirthDate = patientList.filter((p) => p.birthDate);
@@ -276,7 +275,7 @@ export function calculateMonthlyBreakdown(
     const femmes = thisMonthPatientsList.filter(
       (p) => p.gender === "Femme"
     ).length;
-    const enfants = thisMonthPatientsList.filter(isChild).length;
+    const enfants = thisMonthPatientsList.filter(isMinor).length;
 
     const growthRate =
       lastYearPatientsCount > 0
