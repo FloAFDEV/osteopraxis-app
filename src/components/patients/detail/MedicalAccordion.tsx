@@ -15,6 +15,7 @@ interface MedicalSectionProps {
 		value: string | null | undefined;
 		isImportant?: boolean;
 		isCritical?: boolean;
+		badge?: "critical" | "important" | null;
 	}[];
 	defaultOpen?: boolean;
 	priority?: "high" | "medium" | "low";
@@ -134,8 +135,8 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 				{sections.map((section, index) => {
 					const Icon = section.icon;
 					const iconColor = getIconColor(section.category);
-					const importance = getImportanceLevel(section);
 					const titleColor = categoryTitleColorClasses[section.category ?? "general"] || "";
+
 					return (
 						<AccordionItem
 							key={`section-${index}`}
@@ -152,57 +153,51 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 									<span className={`font-medium flex-1 ${titleColor}`}>
 										{section.title}
 									</span>
-									{importance && (
-										<Badge
-											variant={importance.variant}
-											className="ml-auto"
-										>
-											{importance.badge}
-										</Badge>
-									)}
+									{/* plus de badge global section ici */}
 								</div>
 							</AccordionTrigger>
 							<AccordionContent className="px-4 pb-4 bg-white/70 dark:bg-gray-800/50">
 								<dl className="space-y-3 pt-2">
 									{section.items.map((item, itemIndex) => {
 										if (!item.value) return null;
-										const isHighPriority = item.isCritical || item.isImportant;
-										const colorCls =
-											item.isCritical || item.isImportant
-												? labelColorClasses[item.label] || ""
-												: "";
+										let dtClass = "text-sm font-medium text-muted-foreground";
+										let badge = null;
+										if (item.isCritical) {
+											dtClass += " text-red-600";
+											badge = (
+												<Badge
+													variant="destructive"
+													className="ml-2 text-xs"
+												>
+													Critique
+												</Badge>
+											);
+										} else if (item.isImportant) {
+											dtClass += " text-yellow-700";
+											badge = (
+												<Badge
+													variant="warning"
+													className="ml-2 text-xs"
+												>
+													Important
+												</Badge>
+											);
+										}
+
 										return (
 											<div
 												key={itemIndex}
 												className={
-													isHighPriority
-														? `p-3 rounded border-l-4 ${
-																item.isCritical
-																	? "bg-red-50 dark:bg-red-900/10 border-red-500"
-																	: "bg-yellow-50 dark:bg-amber-900/10 border-yellow-500"
-														  }`
-														: ""
+													item.isCritical
+														? `p-3 rounded border-l-4 bg-red-50 dark:bg-red-900/10 border-red-500`
+														: item.isImportant
+															? "p-3 rounded border-l-4 bg-yellow-50 dark:bg-amber-900/10 border-yellow-500"
+															: ""
 												}
 											>
-												<dt className={`text-sm font-medium text-muted-foreground ${colorCls}`}>
+												<dt className={dtClass}>
 													{item.label}
-													{/* Badge pour critique/important  */}
-													{item.isCritical && (
-														<Badge
-															variant="destructive"
-															className="ml-2 text-xs"
-														>
-															Critique
-														</Badge>
-													)}
-													{!item.isCritical && item.isImportant && (
-														<Badge
-															variant="warning"
-															className="ml-2 text-xs"
-														>
-															Important
-														</Badge>
-													)}
+													{badge}
 												</dt>
 												<dd className="mt-1 text-sm">
 													{item.value}
