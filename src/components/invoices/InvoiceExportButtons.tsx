@@ -32,12 +32,9 @@ export function InvoiceExportButtons({
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
-  // Appeler les hooks normalement ici :
   const { osteopaths, loading: loadingOsteo } = useOsteopaths();
-  // Remove '?? undefined' here
   const { cabinets, loading: loadingCabs } = useCabinetsByOsteopath(selectedOsteopathId);
 
-  // Correction: REMOVE '?? undefined' after .find
   const selectedOsteopath: Osteopath | undefined = osteopaths.find(o => o.id === selectedOsteopathId);
   const selectedCabinet: Cabinet | undefined = cabinets.find(c => c.id === selectedCabinetId);
 
@@ -56,6 +53,21 @@ export function InvoiceExportButtons({
 
   // Gérer l'export XLSX
   const exportToExcel = async () => {
+    // Ajout de logs pour debug !
+    console.log("=== [EXPORT DEBUG] ===");
+    console.log("selectedOsteopathId:", selectedOsteopathId, "selectedCabinetId:", selectedCabinetId);
+    console.log("invoices (ids):", invoices.map(inv => ({
+      id: inv.id,
+      osteopathId: inv.osteopathId,
+      cabinetId: inv.cabinetId
+    })));
+    console.log("matchingInvoices (après filtre):", matchingInvoices.map(inv => ({
+      id: inv.id,
+      osteopathId: inv.osteopathId,
+      cabinetId: inv.cabinetId
+    })));
+    console.log("======================");
+
     if (!selectedOsteopath) {
       toast.error("Sélectionnez un praticien");
       return;
