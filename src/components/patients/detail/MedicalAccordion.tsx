@@ -77,7 +77,7 @@ const getIconColor = (category?: string) => {
 	}
 };
 
-const getDefaultValue = () => {
+const getDefaultValue = (sections: MedicalSectionProps[]) => {
 	const highPrioritySections = sections
 		.filter(
 			(section) => section.defaultOpen || section.priority === "high"
@@ -128,7 +128,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 
 			<Accordion
 				type="multiple"
-				defaultValue={getDefaultValue()}
+				defaultValue={getDefaultValue(sections)}
 				className="space-y-3"
 			>
 				{sections.map((section, index) => {
