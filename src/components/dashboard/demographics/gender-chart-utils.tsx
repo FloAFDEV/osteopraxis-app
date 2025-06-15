@@ -1,9 +1,10 @@
+
 import { Patient } from "@/types";
 import { Baby, User, UserCircle, UserRound } from "lucide-react";
 import { GenderChartData } from "./gender-pie-chart";
 
-// Fonction pour déterminer si un patient est un enfant (âge < 12 ans)
-export const isChild = (patient: Patient): boolean => {
+// Détermine si un patient est un mineur (< 18 ans)
+export const isMinor = (patient: Patient): boolean => {
 	if (!patient.birthDate) return false;
 
 	const birthDate = new Date(patient.birthDate);
@@ -11,7 +12,6 @@ export const isChild = (patient: Patient): boolean => {
 	let age = today.getFullYear() - birthDate.getFullYear();
 	const monthDiff = today.getMonth() - birthDate.getMonth();
 
-	// Ajuster l'âge si l'anniversaire n'a pas encore eu lieu cette année
 	if (
 		monthDiff < 0 ||
 		(monthDiff === 0 && today.getDate() < birthDate.getDate())
@@ -19,7 +19,7 @@ export const isChild = (patient: Patient): boolean => {
 		age--;
 	}
 
-	return age < 12;
+	return age < 18;
 };
 
 // Fonction utilitaire pour calculer les pourcentages
@@ -40,11 +40,8 @@ export const calculateGenderData = (
 
 	const result: GenderChartData[] = [];
 
-	// Si la liste des patients est vide mais que nous avons un total, utiliser des valeurs par défaut
 	if ((!patientsList || patientsList.length === 0) && totalPatients > 0) {
-		console.log(
-			"Using default values for chart data as patient list is empty"
-		);
+		console.log("Using default values for chart data as patient list is empty");
 		return [
 			{
 				name: "Homme",
@@ -59,7 +56,7 @@ export const calculateGenderData = (
 				icon: <UserRound className="h-5 w-5 text-pink-600" />,
 			},
 			{
-				name: "Enfant",
+				name: "Mineur",
 				value: Math.round(totalPatients * 0.2),
 				percentage: 20,
 				icon: <Baby className="h-5 w-5 text-emerald-600" />,
@@ -67,29 +64,24 @@ export const calculateGenderData = (
 		];
 	}
 
-	// Séparer les enfants et adultes
 	const patients = Array.isArray(patientsList) ? patientsList : [];
-	const childPatients = patients.filter(isChild);
-	const adultPatients = patients.filter((patient) => !isChild(patient));
+	const minorPatients = patients.filter(isMinor);
+	const adultPatients = patients.filter((patient) => !isMinor(patient));
 
 	console.log(
-		`Chart data calculation: ${childPatients.length} children and ${adultPatients.length} adults`
+		`Chart data calculation: ${minorPatients.length} mineurs and ${adultPatients.length} adults`
 	);
 
-	// Compter les adultes hommes, femmes, et autres
 	const adultMales = adultPatients.filter((p) => p.gender === "Homme").length;
-	const adultFemales = adultPatients.filter(
-		(p) => p.gender === "Femme"
-	).length;
+	const adultFemales = adultPatients.filter((p) => p.gender === "Femme").length;
 	const otherOrUndefined = adultPatients.filter(
 		(p) => p.gender !== "Homme" && p.gender !== "Femme"
 	).length;
 
-	// Calculer les pourcentages
 	const malePercentage = calculatePercentage(adultMales, totalPatients);
 	const femalePercentage = calculatePercentage(adultFemales, totalPatients);
-	const childrenPercentage = calculatePercentage(
-		childPatients.length,
+	const minorsPercentage = calculatePercentage(
+		minorPatients.length,
 		totalPatients
 	);
 	const otherPercentage = calculatePercentage(
@@ -98,13 +90,12 @@ export const calculateGenderData = (
 	);
 
 	console.log(
-		`Percentages - Male: ${malePercentage}%, Female: ${femalePercentage}%, Children: ${childrenPercentage}%, Other: ${otherPercentage}%`
+		`Percentages - Male: ${malePercentage}%, Female: ${femalePercentage}%, Mineurs: ${minorsPercentage}%, Other: ${otherPercentage}%`
 	);
 	console.log(
-		`Raw counts - Male: ${adultMales}, Female: ${adultFemales}, Children: ${childPatients.length}, Other: ${otherOrUndefined}`
+		`Raw counts - Male: ${adultMales}, Female: ${adultFemales}, Mineurs: ${minorPatients.length}, Other: ${otherOrUndefined}`
 	);
 
-	// Ajouter les catégories au graphique
 	const addToResult = (
 		name: string,
 		value: number,
@@ -129,9 +120,9 @@ export const calculateGenderData = (
 		<UserRound className="h-5 w-5 text-pink-600" />
 	);
 	addToResult(
-		"Enfant",
-		childPatients.length,
-		childrenPercentage,
+		"Mineur",
+		minorPatients.length,
+		minorsPercentage,
 		<Baby className="h-5 w-5 text-emerald-600" />
 	);
 	addToResult(
@@ -141,7 +132,6 @@ export const calculateGenderData = (
 		<UserCircle className="h-5 w-5 text-gray-600" />
 	);
 
-	// Si aucune donnée valide, générer des données factices
 	if (result.length === 0 && totalPatients > 0) {
 		console.warn(
 			"Generated fallback data because no valid data categories were found"
@@ -157,3 +147,4 @@ export const calculateGenderData = (
 	console.log("Final chart data:", result);
 	return result;
 };
+

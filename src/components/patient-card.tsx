@@ -31,8 +31,8 @@ export function PatientCard({ patient }: PatientCardProps) {
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
 
-	// Vérification si c'est un enfant de moins de 12 ans
-	const isChild = age !== null && age < 12;
+	// Mineur = age < 18
+	const isMinor = age !== null && age < 18;
 
 	// Déterminer la couleur et l'icône en fonction du genre, comme dans PatientListItem
 	const getAvatarColor = () => {
@@ -91,11 +91,11 @@ export function PatientCard({ patient }: PatientCardProps) {
 									</span>
 								)}
 							</div>
-							{/* Affichage du badge Enfant si moins de 12 ans */}
-							{isChild && (
+							{/* Affichage du badge Mineur si moins de 18 ans */}
+							{isMinor && (
 								<div className="text-xs text-gray-600 flex items-center gap-1 mt-1">
 									<Baby className="h-5 w-5 text-emerald-600" />
-									<span>Enfant</span>
+									<span>Mineur</span>
 								</div>
 							)}
 						</CardTitle>

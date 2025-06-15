@@ -38,8 +38,8 @@ export function AppointmentCard({
 	const dateField = appointment.start || appointment.date;
 	const formattedDate = formatAppointmentDate(dateField, "EEEE d MMMM yyyy");
 	const formattedTime = formatAppointmentTime(dateField);
-	const isChild = patient?.birthDate
-		? differenceInYears(new Date(), parseISO(patient.birthDate)) < 12
+	const isMinor = patient?.birthDate
+		? differenceInYears(new Date(), parseISO(patient.birthDate)) < 18
 		: false;
 
 	// Récupérer les factures existantes pour ce rendez-vous
@@ -88,8 +88,13 @@ export function AppointmentCard({
 							) : (
 								`Patient #${appointment.patientId}`
 							)}
-							{isChild && (
+							{isMinor && (
 								<Baby className="h-4 w-4 text-emerald-400" />
+							)}
+							{isMinor && (
+								<span className="ml-1 text-xs text-gray-600">
+									Mineur
+								</span>
 							)}
 						</h3>
 					</div>

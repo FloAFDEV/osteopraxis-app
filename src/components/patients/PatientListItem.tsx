@@ -20,12 +20,13 @@ interface PatientListItemProps {
 
 const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 	const navigate = useNavigate();
-	// Calculate age only if birthDate is defined
 	const age = patient.birthDate
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
 
-	// Determine background color and icon based on gender
+	// Mineur = age < 18
+	const isMinor = age !== null && age < 18;
+
 	const getAvatarColor = () => {
 		switch (patient.gender) {
 			case "Homme":
@@ -48,9 +49,6 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 
 	const avatarStyle = getAvatarColor();
 
-	// Vérification si c'est un enfant de moins de 12 ans
-	const isChild = age !== null && age < 12;
-
 	return (
 		<div
 			className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer animate-fade-in"
@@ -59,7 +57,6 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 			<div className="p-4">
 				<div className="flex justify-between items-center">
 					<div className="flex items-center gap-3 flex-grow">
-						{/* Avatar with gender */}
 						<Avatar
 							className={`${avatarStyle.background} h-10 w-10`}
 						>
@@ -90,11 +87,11 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 										({age} ans)
 									</span>
 								)}
-								{/* Si c'est un enfant, ajouter l'icône */}
-								{isChild && (
+								{/* Si mineur, afficher l'icône et le badge */}
+								{isMinor && (
 									<div className="ml-1 text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
 										<Baby className="h-5 w-5 text-emerald-600" />
-										<span>Enfant</span>
+										<span>Mineur</span>
 									</div>
 								)}
 							</div>
