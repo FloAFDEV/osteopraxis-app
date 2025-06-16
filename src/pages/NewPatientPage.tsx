@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { UserPlus, Loader2 } from "lucide-react";
-import { api } from "@/services/api";
-import { Layout } from "@/components/ui/layout";
 import { PatientForm } from "@/components/patient-form";
-import { toast } from "sonner";
-import { Patient } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/services/api";
+import { Patient } from "@/types";
+import { ArrowLeft, Loader2, UserPlus } from "lucide-react"; // Importer ArrowLeft
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const NewPatientPage = () => {
 	const [loading, setLoading] = useState(false);
@@ -16,7 +17,6 @@ const NewPatientPage = () => {
 	const navigate = useNavigate();
 	const { user, isAuthenticated } = useAuth();
 
-	// Récupérer le cabinet sélectionné depuis le localStorage
 	useEffect(() => {
 		const storedCabinetId = localStorage.getItem("selectedCabinetId");
 		if (storedCabinetId) {
@@ -24,7 +24,6 @@ const NewPatientPage = () => {
 		}
 	}, []);
 
-	// Redirection si l'utilisateur n'est pas connecté
 	if (!isAuthenticated || !user) {
 		toast.error("Vous devez être connecté pour ajouter un patient");
 		navigate("/login");
@@ -156,6 +155,22 @@ const NewPatientPage = () => {
 	return (
 		<Layout>
 			<div className="max-w-6xl mx-auto">
+				{/* Bouton Retour */}
+				{/* ... keep existing code (header, search, filters) */}
+				<div className="relative z-10">
+					<div className="flex items-center gap-2 mb-8">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => navigate(-1)}
+							className="flex items-center gap-1"
+						>
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Retour
+						</Button>
+					</div>
+				</div>
+
 				<div className="mb-6">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<UserPlus className="h-8 w-8 text-pink-500" />
