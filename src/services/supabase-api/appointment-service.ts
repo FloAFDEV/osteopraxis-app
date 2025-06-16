@@ -237,17 +237,17 @@ export const supabaseAppointmentService = {
 				throw new Error('No authentication token available');
 			}
 
-			// Préparer le body de la requête - utiliser JSON.stringify explicitement
-			const requestBody = JSON.stringify({
+			// Préparer le body de la requête comme objet
+			const requestBodyObject = {
 				appointmentId: id,
 				updateData: updatePayload
-			});
+			};
 
-			console.log("Request body stringifié pour Edge Function:", requestBody);
+			console.log("Request body object pour Edge Function:", requestBodyObject);
 
-			// Utiliser l'Edge Function pour la mise à jour avec tous les headers nécessaires
+			// Utiliser l'Edge Function pour la mise à jour
 			const { data, error } = await supabase.functions.invoke('update-appointment', {
-				body: requestBody,
+				body: requestBodyObject, // Passer l'objet directement, Supabase se charge de la sérialisation
 				headers: {
 					'Authorization': `Bearer ${session.access_token}`,
 					'Content-Type': 'application/json'
