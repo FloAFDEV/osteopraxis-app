@@ -1,7 +1,10 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
 	ensureAppointmentStatus,
+	SUPABASE_API_URL,
+	SUPABASE_API_KEY,
 } from "./utils";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase, createAppointmentPayload } from "./appointment-adapter";
@@ -215,10 +218,17 @@ export const supabaseAppointmentService = {
 		try {
 			console.log(`Mise à jour du rendez-vous ${id} via Edge Function:`, update);
 
-			// Préparer le payload de mise à jour
+			// Préparer le payload de mise à jour en retirant les champs sensibles
+			const cleanUpdate = { ...update };
+			
+			// Supprimer les champs qui ne doivent pas être mis à jour par l'utilisateur
+			delete cleanUpdate.id;
+			delete cleanUpdate.osteopathId;
+			delete cleanUpdate.userId;
+
 			const updatePayload = {
-				...update,
-				status: update.status ? ensureAppointmentStatus(update.status) : undefined,
+				...cleanUpdate,
+				status: cleanUpdate.status ? ensureAppointmentStatus(cleanUpdate.status) : undefined,
 			};
 
 			// Supprimer les champs undefined du payload final
@@ -244,13 +254,13 @@ export const supabaseAppointmentService = {
 
 			console.log("Request data pour Edge Function:", requestData);
 
-			// Utiliser l'Edge Function pour la mise à jour avec JSON.stringify explicite
-			const response = await fetch(`${supabase.supabaseUrl}/functions/v1/update-appointment`, {
+			// Utiliser l'Edge Function pour la mise à jour avec les constantes exportées
+			const response = await fetch(`${SUPABASE_API_URL}/functions/v1/update-appointment`, {
 				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${session.access_token}`,
 					'Content-Type': 'application/json',
-					'apikey': supabase.supabaseKey,
+					'apikey': SUPABASE_API_KEY,
 				},
 				body: JSON.stringify(requestData)
 			});
