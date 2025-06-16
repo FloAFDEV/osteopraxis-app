@@ -2,11 +2,8 @@
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
-	SUPABASE_API_URL,
-	SUPABASE_API_KEY,
 	ensureAppointmentStatus,
 } from "./utils";
-import { corsHeaders } from "@/services/corsHeaders";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase, createAppointmentPayload } from "./appointment-adapter";
 
@@ -217,13 +214,7 @@ export const supabaseAppointmentService = {
 		update: UpdateAppointmentPayload
 	): Promise<Appointment> {
 		try {
-			console.log(`Mise à jour du rendez-vous ${id} via Edge Function:`, update);
-
-			// Utiliser l'Edge Function au lieu de l'appel direct Supabase pour éviter les problèmes CORS
-			const { data: { session } } = await supabase.auth.getSession();
-			if (!session) {
-				throw new Error("Session non trouvée");
-			}
+			console.log(`Mise à jour du rendez-vous ${id} directement via Supabase:`, update);
 
 			// Préparer le payload de mise à jour
 			const updatePayload = {
@@ -239,29 +230,25 @@ export const supabaseAppointmentService = {
 					delete updatePayload[k]
 			);
 
-			console.log("Payload de mise à jour Edge Function:", updatePayload);
+			console.log("Payload de mise à jour Supabase directe:", updatePayload);
 
-			// Appel de l'Edge Function au lieu de l'appel direct
-			const response = await fetch(`${SUPABASE_API_URL}/functions/v1/appointment?id=${id}`, {
-				method: 'PATCH',
-				headers: {
-					'Authorization': `Bearer ${session.access_token}`,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(updatePayload),
-			});
+			// Utiliser directement Supabase avec RLS pour éviter les problèmes CORS
+			const { data, error } = await supabase
+				.from("Appointment")
+				.update(updatePayload)
+				.eq("id", id)
+				.select()
+				.single();
 
-			if (!response.ok) {
-				const errorText = await response.text();
-				console.error(`Erreur Edge Function (${response.status}):`, errorText);
-				throw new Error(`Erreur lors de la mise à jour: ${errorText}`);
+			if (error) {
+				console.error("[SUPABASE ERROR]", error.code, error.message);
+				throw error;
 			}
 
-			const result = await response.json();
-			console.log("Rendez-vous mis à jour via Edge Function:", result.data);
-			return adaptAppointmentFromSupabase(result.data);
+			console.log("Rendez-vous mis à jour via Supabase directe:", data);
+			return adaptAppointmentFromSupabase(data);
 		} catch (error) {
-			console.error("[EDGE FUNCTION ERROR]", error);
+			console.error("[SUPABASE DIRECT ERROR]", error);
 			throw error;
 		}
 	},
@@ -271,10 +258,10 @@ export const supabaseAppointmentService = {
 		try {
 			console.log(`Annulation du rendez-vous ${id}`);
 
-			// Utiliser la méthode updateAppointment qui utilise maintenant l'Edge Function
+			// Utiliser la méthode updateAppointment qui utilise maintenant Supabase directe
 			return await this.updateAppointment(id, { status: "CANCELED" });
 		} catch (error) {
-			console.error("[EDGE FUNCTION ERROR]", error);
+			console.error("[SUPABASE DIRECT ERROR]", error);
 			throw error;
 		}
 	},
