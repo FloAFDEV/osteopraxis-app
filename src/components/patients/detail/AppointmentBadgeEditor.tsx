@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { 
 	Select,
@@ -48,7 +48,7 @@ export function AppointmentBadgeEditor({ currentStatus, onStatusChange }: Appoin
 			disabled={isLoading}
 		>
 			<SelectTrigger className="w-auto h-auto p-0 border-none bg-transparent hover:bg-gray-50 transition-colors duration-200">
-				<SelectValue asChild>
+				<SelectValue>
 					<Badge className={`${currentOption?.color} transition-colors duration-200 cursor-pointer`}>
 						{isLoading ? "Mise à jour..." : currentOption?.label}
 					</Badge>
