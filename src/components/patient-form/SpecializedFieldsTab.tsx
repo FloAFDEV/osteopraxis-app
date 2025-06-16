@@ -210,7 +210,7 @@ export function SpecializedFieldsTab({ form }: SpecializedFieldsTabProps) {
 				{renderTextareaCard(
 					"Tests LMO",
 					"lmo_tests",
-					"Compte-rendu du diagnostic ostéopathique selon la méthode LMO (examen global, tests de mobilité, tests de tension, tests de douleur, tests de posture)"
+					"Compte-rendu du diagnostic ostéopathique méthode LMO (examen global, tests de mobilité, tension,  douleur, posture)"
 				)}{" "}
 				{renderTextareaCard(
 					"Examen fascias",
