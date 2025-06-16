@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -214,7 +213,7 @@ export const supabaseAppointmentService = {
 		update: UpdateAppointmentPayload
 	): Promise<Appointment> {
 		try {
-			console.log(`Mise à jour du rendez-vous ${id} directement via Supabase:`, update);
+			console.log(`Mise à jour du rendez-vous ${id} via client Supabase:`, update);
 
 			// Préparer le payload de mise à jour
 			const updatePayload = {
@@ -230,9 +229,9 @@ export const supabaseAppointmentService = {
 					delete updatePayload[k]
 			);
 
-			console.log("Payload de mise à jour Supabase directe:", updatePayload);
+			console.log("Payload de mise à jour client Supabase:", updatePayload);
 
-			// Utiliser directement Supabase avec RLS pour éviter les problèmes CORS
+			// Utiliser le client Supabase directement (pas de HTTP/CORS)
 			const { data, error } = await supabase
 				.from("Appointment")
 				.update(updatePayload)
@@ -241,14 +240,14 @@ export const supabaseAppointmentService = {
 				.single();
 
 			if (error) {
-				console.error("[SUPABASE ERROR]", error.code, error.message);
+				console.error("[SUPABASE CLIENT ERROR]", error.code, error.message);
 				throw error;
 			}
 
-			console.log("Rendez-vous mis à jour via Supabase directe:", data);
+			console.log("Rendez-vous mis à jour via client Supabase:", data);
 			return adaptAppointmentFromSupabase(data);
 		} catch (error) {
-			console.error("[SUPABASE DIRECT ERROR]", error);
+			console.error("[SUPABASE CLIENT ERROR]", error);
 			throw error;
 		}
 	},
@@ -258,10 +257,10 @@ export const supabaseAppointmentService = {
 		try {
 			console.log(`Annulation du rendez-vous ${id}`);
 
-			// Utiliser la méthode updateAppointment qui utilise maintenant Supabase directe
+			// Utiliser la méthode updateAppointment qui utilise maintenant le client Supabase
 			return await this.updateAppointment(id, { status: "CANCELED" });
 		} catch (error) {
-			console.error("[SUPABASE DIRECT ERROR]", error);
+			console.error("[SUPABASE CLIENT ERROR]", error);
 			throw error;
 		}
 	},
