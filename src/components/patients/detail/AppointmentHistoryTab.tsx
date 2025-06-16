@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -20,7 +21,7 @@ import { format } from "date-fns";
 import { Activity, Edit, MessageSquare, FileText, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
+import { AppointmentBadgeEditor } from "./AppointmentBadgeEditor";
 import { useInvoiceByAppointment } from "@/hooks/useInvoiceByAppointment";
 
 interface AppointmentHistoryTabProps {
@@ -122,10 +123,8 @@ export function AppointmentHistoryTab({
 										)}
 									</p>
 								</div>
-								<AppointmentStatusDropdown
-									status={
-										appointment.status as AppointmentStatus
-									}
+								<AppointmentBadgeEditor
+									currentStatus={appointment.status as AppointmentStatus}
 									onStatusChange={(status) =>
 										onStatusChange(appointment.id, status)
 									}
@@ -200,15 +199,10 @@ export function AppointmentHistoryTab({
 											</div>
 										</TableCell>
 										<TableCell className="w-[120px]">
-											<AppointmentStatusDropdown
-												status={
-													appointment.status as AppointmentStatus
-												}
+											<AppointmentBadgeEditor
+												currentStatus={appointment.status as AppointmentStatus}
 												onStatusChange={(status) =>
-													onStatusChange(
-														appointment.id,
-														status
-													)
+													onStatusChange(appointment.id, status)
 												}
 											/>
 										</TableCell>
