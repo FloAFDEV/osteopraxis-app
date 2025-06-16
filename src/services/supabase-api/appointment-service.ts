@@ -213,13 +213,12 @@ export const supabaseAppointmentService = {
 		update: UpdateAppointmentPayload
 	): Promise<Appointment> {
 		try {
-			console.log(`Mise à jour du rendez-vous ${id} via client Supabase:`, update);
+			console.log(`Mise à jour du rendez-vous ${id} via Edge Function:`, update);
 
 			// Préparer le payload de mise à jour
 			const updatePayload = {
 				...update,
 				status: update.status ? ensureAppointmentStatus(update.status) : undefined,
-				updatedAt: new Date().toISOString(),
 			};
 
 			// Supprimer les champs undefined du payload final
@@ -229,25 +228,30 @@ export const supabaseAppointmentService = {
 					delete updatePayload[k]
 			);
 
-			console.log("Payload de mise à jour client Supabase:", updatePayload);
+			console.log("Payload de mise à jour Edge Function:", updatePayload);
 
-			// Utiliser le client Supabase directement (pas de HTTP/CORS)
-			const { data, error } = await supabase
-				.from("Appointment")
-				.update(updatePayload)
-				.eq("id", id)
-				.select()
-				.single();
+			// Utiliser l'Edge Function pour la mise à jour
+			const { data, error } = await supabase.functions.invoke('update-appointment', {
+				body: {
+					appointmentId: id,
+					updateData: updatePayload
+				}
+			});
 
 			if (error) {
-				console.error("[SUPABASE CLIENT ERROR]", error.code, error.message);
+				console.error("[EDGE FUNCTION ERROR]", error);
 				throw error;
 			}
 
-			console.log("Rendez-vous mis à jour via client Supabase:", data);
-			return adaptAppointmentFromSupabase(data);
+			if (!data.success) {
+				console.error("[EDGE FUNCTION ERROR]", data.error);
+				throw new Error(data.error);
+			}
+
+			console.log("Rendez-vous mis à jour via Edge Function:", data.data);
+			return adaptAppointmentFromSupabase(data.data);
 		} catch (error) {
-			console.error("[SUPABASE CLIENT ERROR]", error);
+			console.error("[EDGE FUNCTION ERROR]", error);
 			throw error;
 		}
 	},
@@ -257,10 +261,10 @@ export const supabaseAppointmentService = {
 		try {
 			console.log(`Annulation du rendez-vous ${id}`);
 
-			// Utiliser la méthode updateAppointment qui utilise maintenant le client Supabase
+			// Utiliser la méthode updateAppointment qui utilise maintenant l'Edge Function
 			return await this.updateAppointment(id, { status: "CANCELED" });
 		} catch (error) {
-			console.error("[SUPABASE CLIENT ERROR]", error);
+			console.error("[EDGE FUNCTION ERROR]", error);
 			throw error;
 		}
 	},

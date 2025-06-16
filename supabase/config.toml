@@ -44,6 +44,11 @@ verify_jwt = true
 function_name = "appointment"
 
 [[edge_functions]]
+path = "/update-appointment"
+verify_jwt = true
+function_name = "update-appointment"
+
+[[edge_functions]]
 path = "/cabinet"
 verify_jwt = true
 function_name = "cabinet"
