@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -236,12 +237,17 @@ export const supabaseAppointmentService = {
 				throw new Error('No authentication token available');
 			}
 
-			// Utiliser l'Edge Function pour la mise à jour avec tous les headers nécessaires
+			// Préparer le body de la requête comme objet
+			const requestBodyObject = {
+				appointmentId: id,
+				updateData: updatePayload
+			};
+
+			console.log("Request body object pour Edge Function:", requestBodyObject);
+
+			// Utiliser l'Edge Function pour la mise à jour
 			const { data, error } = await supabase.functions.invoke('update-appointment', {
-				body: {
-					appointmentId: id,
-					updateData: updatePayload
-				},
+				body: requestBodyObject, // Passer l'objet directement, Supabase se charge de la sérialisation
 				headers: {
 					'Authorization': `Bearer ${session.access_token}`,
 					'Content-Type': 'application/json'
@@ -253,9 +259,9 @@ export const supabaseAppointmentService = {
 				throw error;
 			}
 
-			if (!data.success) {
-				console.error("[EDGE FUNCTION ERROR]", data.error);
-				throw new Error(data.error);
+			if (!data || !data.success) {
+				console.error("[EDGE FUNCTION ERROR]", data?.error || 'Unknown error');
+				throw new Error(data?.error || 'Unknown error from Edge Function');
 			}
 
 			console.log("Rendez-vous mis à jour via Edge Function:", data.data);

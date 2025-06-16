@@ -76,8 +76,25 @@ Deno.serve(async (req) => {
       return createErrorResponse('Content-Type must be application/json', 400);
     }
 
-    // Récupérer les données de la requête
-    const body = await req.json();
+    // Lire le body comme texte d'abord
+    const bodyText = await req.text();
+    if (!bodyText || bodyText.trim() === '') {
+      return createErrorResponse('Request body is required', 400);
+    }
+
+    console.log('Raw body text reçu:', bodyText);
+
+    // Parser le JSON avec gestion d'erreur robuste
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+      console.log('Body parsé avec succès:', body);
+    } catch (parseError) {
+      console.error('Erreur de parsing JSON:', parseError);
+      console.error('Body text qui a causé l\'erreur:', bodyText);
+      return createErrorResponse(`Invalid JSON in request body: ${parseError.message}`, 400);
+    }
+
     const { appointmentId, updateData } = body;
     
     if (!appointmentId) {

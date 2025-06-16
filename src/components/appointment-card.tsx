@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -20,12 +21,14 @@ import {
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/services/api";
+import { AppointmentBadgeEditor } from "@/components/patients/detail/AppointmentBadgeEditor";
 
 interface AppointmentCardProps {
 	appointment: Appointment;
 	patient?: Patient;
 	onEdit?: () => void;
 	onCancel?: () => void;
+	onStatusChange?: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
 }
 
 export function AppointmentCard({
@@ -33,6 +36,7 @@ export function AppointmentCard({
 	patient,
 	onEdit,
 	onCancel,
+	onStatusChange,
 }: AppointmentCardProps) {
 	// Utiliser start si disponible, sinon utiliser date pour la compatibilité
 	const dateField = appointment.start || appointment.date;
@@ -50,6 +54,12 @@ export function AppointmentCard({
 	});
 
 	const existingInvoice = existingInvoices?.[0];
+
+	const handleStatusChange = async (status: AppointmentStatus) => {
+		if (onStatusChange) {
+			await onStatusChange(appointment.id, status);
+		}
+	};
 
 	const getStatusBadge = (status: AppointmentStatus) => {
 		switch (status) {
@@ -98,7 +108,14 @@ export function AppointmentCard({
 							)}
 						</h3>
 					</div>
-					{getStatusBadge(appointment.status)}
+					{onStatusChange ? (
+						<AppointmentBadgeEditor
+							currentStatus={appointment.status}
+							onStatusChange={handleStatusChange}
+						/>
+					) : (
+						getStatusBadge(appointment.status)
+					)}
 				</div>
 				<div className="space-y-2">
 					{/* Affichage du traitement en cours */}
