@@ -70,17 +70,17 @@ Deno.serve(async (req) => {
 
     console.log('User authenticated:', user.id);
 
-    // Parse le body JSON
+    // Parse le body JSON avec meilleure gestion d'erreur
     let body;
     try {
-      const bodyText = await req.text();
-      console.log('Raw body received:', bodyText);
+      const rawBody = await req.text();
+      console.log('Raw body received:', rawBody);
       
-      if (!bodyText || bodyText.trim() === '') {
+      if (!rawBody || rawBody.trim() === '') {
         return createErrorResponse('Request body is required', 400);
       }
       
-      body = JSON.parse(bodyText);
+      body = JSON.parse(rawBody);
       console.log('Body parsed successfully:', body);
     } catch (parseError) {
       console.error('JSON parsing error:', parseError);
@@ -99,11 +99,16 @@ Deno.serve(async (req) => {
 
     console.log(`Mise à jour du rendez-vous ${appointmentId} via Edge Function:`, updateData);
 
-    // Préparer le payload de mise à jour
+    // Préparer le payload de mise à jour en excluant les champs sensibles
     const updatePayload = {
       ...updateData,
       updatedAt: new Date().toISOString(),
     };
+
+    // Supprimer explicitement les champs interdits pour la sécurité
+    delete updatePayload.id;
+    delete updatePayload.osteopathId;
+    delete updatePayload.userId;
 
     // Supprimer les champs undefined
     Object.keys(updatePayload).forEach(key => {
@@ -112,7 +117,7 @@ Deno.serve(async (req) => {
       }
     });
 
-    console.log("Payload de mise à jour Edge Function:", updatePayload);
+    console.log("Payload de mise à jour Edge Function (nettoyé):", updatePayload);
 
     // Effectuer la mise à jour
     const { data, error } = await supabase

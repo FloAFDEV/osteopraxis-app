@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -237,35 +236,40 @@ export const supabaseAppointmentService = {
 				throw new Error('No authentication token available');
 			}
 
-			// Préparer le body de la requête
-			const requestBody = {
+			// Préparer le body de la requête avec stringify explicite
+			const requestData = {
 				appointmentId: id,
 				updateData: updatePayload
 			};
 
-			console.log("Request body pour Edge Function:", requestBody);
+			console.log("Request data pour Edge Function:", requestData);
 
-			// Utiliser l'Edge Function pour la mise à jour
-			const { data, error } = await supabase.functions.invoke('update-appointment', {
-				body: requestBody,
+			// Utiliser l'Edge Function pour la mise à jour avec JSON.stringify explicite
+			const response = await fetch(`${supabase.supabaseUrl}/functions/v1/update-appointment`, {
+				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${session.access_token}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+					'apikey': supabase.supabaseKey,
+				},
+				body: JSON.stringify(requestData)
 			});
 
-			if (error) {
-				console.error("[EDGE FUNCTION ERROR]", error);
-				throw error;
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error('[EDGE FUNCTION HTTP ERROR]', response.status, errorText);
+				throw new Error(`Edge Function returned ${response.status}: ${errorText}`);
 			}
 
-			if (!data || !data.success) {
-				console.error("[EDGE FUNCTION ERROR]", data?.error || 'Unknown error');
-				throw new Error(data?.error || 'Unknown error from Edge Function');
+			const result = await response.json();
+
+			if (!result || !result.success) {
+				console.error("[EDGE FUNCTION ERROR]", result?.error || 'Unknown error');
+				throw new Error(result?.error || 'Unknown error from Edge Function');
 			}
 
-			console.log("Rendez-vous mis à jour via Edge Function:", data.data);
-			return adaptAppointmentFromSupabase(data.data);
+			console.log("Rendez-vous mis à jour via Edge Function:", result.data);
+			return adaptAppointmentFromSupabase(result.data);
 		} catch (error) {
 			console.error("[EDGE FUNCTION ERROR]", error);
 			throw error;
