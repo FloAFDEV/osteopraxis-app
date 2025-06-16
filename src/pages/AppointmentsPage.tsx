@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/services/api";
-import { Appointment, Patient } from "@/types";
+import { Appointment, Patient, AppointmentStatus } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -89,6 +89,8 @@ const AppointmentsPage = () => {
 	const getPatientById = (patientId: number): Patient | undefined => {
 		return patients.find((patient) => patient.id === patientId);
 	};
+
+	// ... keep existing code (getFilteredAppointments, categorizeAppointments, groupAppointmentsByMonthAndDay)
 
 	// Memoize filtered appointments to avoid recalculation on every render if inputs haven't changed
 	// This would be better with useMemo, but for simplicity here, it's a function call
@@ -223,6 +225,41 @@ const AppointmentsPage = () => {
 		}
 	};
 
+	// Nouveau handler pour la mise à jour de statut via badge
+	const handleStatusChange = async (appointmentId: number, status: AppointmentStatus) => {
+		try {
+			console.log(`Mise à jour du statut du rendez-vous ${appointmentId} vers ${status}`);
+			
+			// Optimistic UI update
+			setAppointments((prevAppointments) =>
+				prevAppointments.map((app) =>
+					app.id === appointmentId
+						? { ...app, status }
+						: app
+				)
+			);
+
+			// Appel API pour mettre à jour le statut
+			await api.updateAppointmentStatus(appointmentId, status);
+			toast.success("Statut mis à jour avec succès");
+		} catch (error) {
+			console.error("Error updating appointment status:", error);
+			toast.error("Erreur lors de la mise à jour du statut");
+			
+			// Rollback optimistic update
+			setAppointments((prevAppointments) =>
+				prevAppointments.map((app) => {
+					if (app.id === appointmentId) {
+						// Find original appointment to restore its status
+						const originalApp = appointments.find(a => a.id === appointmentId);
+						return originalApp ? { ...app, status: originalApp.status } : app;
+					}
+					return app;
+				})
+			);
+		}
+	};
+
 	// --- Data Preparation for Rendering ---
 	const filteredAppointments = getFilteredAppointments();
 	const { pastAppointments, todayAppointments, futureAppointments } =
@@ -248,6 +285,7 @@ const AppointmentsPage = () => {
 
 	return (
 		<Layout>
+			{/* ... keep existing code (header, search, filters) */}
 			<div className="relative z-10">
 				<div className="flex items-center gap-2 mb-2">
 					<Button
@@ -446,6 +484,7 @@ const AppointmentsPage = () => {
 																					appointment
 																				)
 																			}
+																			onStatusChange={handleStatusChange}
 																		/>
 																	)
 																)}
@@ -461,6 +500,7 @@ const AppointmentsPage = () => {
 							{/* --- Future Appointments --- */}
 							{futureAppointments.length > 0 && (
 								<div className="mb-8">
+									{/* ... keep existing code (header) */}
 									<div
 										className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900 dark:text-blue-100 hover:bg-blue-100 dark:hover:bg-blue-700 transition-colors"
 										onClick={() =>
@@ -553,6 +593,7 @@ const AppointmentsPage = () => {
 																									appointment
 																								)
 																							}
+																							onStatusChange={handleStatusChange}
 																						/>
 																					)
 																				)}
@@ -572,6 +613,7 @@ const AppointmentsPage = () => {
 							{/* --- Past Appointments --- */}
 							{pastAppointments.length > 0 && (
 								<div className="mb-8">
+									{/* ... keep existing code (header and content) */}
 									<div
 										className="flex justify-between items-center cursor-pointer p-3 rounded-md border-l-4 border-gray-400 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 										onClick={() => setShowPast(!showPast)}
@@ -732,6 +774,7 @@ const AppointmentsPage = () => {
 																										appointment
 																									)
 																								}
+																								onStatusChange={handleStatusChange}
 																								// Add a visual cue for past appointments if needed inside the card
 																							/>
 																						)
