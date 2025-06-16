@@ -230,11 +230,21 @@ export const supabaseAppointmentService = {
 
 			console.log("Payload de mise à jour Edge Function:", updatePayload);
 
-			// Utiliser l'Edge Function pour la mise à jour
+			// Récupérer le token d'authentification
+			const { data: { session } } = await supabase.auth.getSession();
+			if (!session?.access_token) {
+				throw new Error('No authentication token available');
+			}
+
+			// Utiliser l'Edge Function pour la mise à jour avec tous les headers nécessaires
 			const { data, error } = await supabase.functions.invoke('update-appointment', {
 				body: {
 					appointmentId: id,
 					updateData: updatePayload
+				},
+				headers: {
+					'Authorization': `Bearer ${session.access_token}`,
+					'Content-Type': 'application/json'
 				}
 			});
 

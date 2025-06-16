@@ -5,26 +5,54 @@ import { corsHeaders } from '../_shared/cors.ts';
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+// Helper functions for consistent responses with CORS
+function createSuccessResponse(data: any) {
+  return new Response(
+    JSON.stringify({ success: true, data }),
+    { 
+      status: 200,
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json' 
+      } 
+    }
+  );
+}
+
+function createErrorResponse(error: string, status: number = 500) {
+  return new Response(
+    JSON.stringify({ success: false, error }),
+    { 
+      status,
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json' 
+      } 
+    }
+  );
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Only accept POST and PATCH methods
+  if (!['POST', 'PATCH'].includes(req.method)) {
+    return createErrorResponse('Method not allowed', 405);
+  }
+
   try {
     // Vérifier l'authentification
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization header required' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return createErrorResponse('Authorization header with Bearer token required', 401);
     }
 
-    // Créer le client Supabase avec la clé de service pour contourner RLS si nécessaire
+    console.log('Authorization header found:', authHeader.substring(0, 20) + '...');
+
+    // Créer le client Supabase avec la clé de service
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       global: {
         headers: {
@@ -36,26 +64,28 @@ Deno.serve(async (req) => {
     // Vérifier l'utilisateur connecté
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'User not authenticated' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      console.error('Auth error:', authError);
+      return createErrorResponse('User not authenticated', 401);
+    }
+
+    console.log('User authenticated:', user.id);
+
+    // Vérifier le Content-Type
+    const contentType = req.headers.get('Content-Type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return createErrorResponse('Content-Type must be application/json', 400);
     }
 
     // Récupérer les données de la requête
-    const { appointmentId, updateData } = await req.json();
+    const body = await req.json();
+    const { appointmentId, updateData } = body;
     
     if (!appointmentId) {
-      return new Response(
-        JSON.stringify({ error: 'appointmentId is required' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      return createErrorResponse('appointmentId is required', 400);
+    }
+
+    if (!updateData || typeof updateData !== 'object') {
+      return createErrorResponse('updateData is required and must be an object', 400);
     }
 
     console.log(`Mise à jour du rendez-vous ${appointmentId} via Edge Function:`, updateData);
@@ -85,32 +115,15 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error('[EDGE FUNCTION ERROR]', error);
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      return createErrorResponse(error.message, 500);
     }
 
     console.log("Rendez-vous mis à jour via Edge Function:", data);
 
-    return new Response(
-      JSON.stringify({ success: true, data }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    return createSuccessResponse(data);
 
   } catch (error) {
-    console.error('[EDGE FUNCTION ERROR]', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    console.error('[EDGE FUNCTION CATCH ERROR]', error);
+    return createErrorResponse(error.message || 'Internal server error', 500);
   }
 });
