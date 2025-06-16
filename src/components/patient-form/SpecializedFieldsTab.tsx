@@ -133,7 +133,6 @@ export function SpecializedFieldsTab({ form }: SpecializedFieldsTabProps) {
 					"cranial_nerve_exam",
 					"Compte-rendu examen nerfs crâniens"
 				)}
-				{renderTextareaCard("Scoliose", "scoliosis", "Scoliose")}
 			</Section>
 
 			<Section
@@ -160,7 +159,8 @@ export function SpecializedFieldsTab({ form }: SpecializedFieldsTabProps) {
 					"Examen épaule",
 					"shoulder_exam",
 					"Examen épaule"
-				)}
+				)}{" "}
+				{renderTextareaCard("Scoliose", "scoliosis", "Scoliose")}
 			</Section>
 
 			<Section
@@ -207,7 +207,11 @@ export function SpecializedFieldsTab({ form }: SpecializedFieldsTabProps) {
 				icon={Activity}
 				iconColor="text-cyan-600 dark:text-cyan-400"
 			>
-				{renderTextareaCard("Tests LMO", "lmo_tests", "Tests LMO")}
+				{renderTextareaCard(
+					"Tests LMO",
+					"lmo_tests",
+					"Compte-rendu du diagnostic ostéopathique selon la méthode LMO (examen global, tests de mobilité, tests de tension, tests de douleur, tests de posture)"
+				)}{" "}
 				{renderTextareaCard(
 					"Examen fascias",
 					"fascia_exam",
