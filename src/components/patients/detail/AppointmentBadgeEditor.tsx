@@ -25,11 +25,11 @@ interface AppointmentBadgeEditorProps {
 }
 
 const statusOptions = [
-	{ value: "SCHEDULED", label: "Planifiée", color: "bg-blue-100 text-blue-800" },
-	{ value: "COMPLETED", label: "Terminée", color: "bg-green-100 text-green-800" },
-	{ value: "CANCELED", label: "Annulée", color: "bg-red-100 text-red-800" },
-	{ value: "RESCHEDULED", label: "Reportée", color: "bg-yellow-100 text-yellow-800" },
-	{ value: "NO_SHOW", label: "Absence", color: "bg-gray-100 text-gray-800" },
+	{ value: "SCHEDULED", label: "Planifiée", color: "bg-blue-100 text-blue-800 hover:bg-blue-200" },
+	{ value: "COMPLETED", label: "Terminée", color: "bg-green-100 text-green-800 hover:bg-green-200" },
+	{ value: "CANCELED", label: "Annulée", color: "bg-red-100 text-red-800 hover:bg-red-200" },
+	{ value: "RESCHEDULED", label: "Reportée", color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" },
+	{ value: "NO_SHOW", label: "Absence", color: "bg-gray-100 text-gray-800 hover:bg-gray-200" },
 ] as const;
 
 export function AppointmentBadgeEditor({ currentStatus, onStatusChange }: AppointmentBadgeEditorProps) {
@@ -61,13 +61,13 @@ export function AppointmentBadgeEditor({ currentStatus, onStatusChange }: Appoin
 				<Button
 					variant="ghost"
 					size="sm"
-					className="h-auto p-1 hover:bg-gray-100"
+					className="h-auto p-1 hover:bg-gray-100 transition-colors duration-200"
 				>
 					<div className="flex items-center gap-1">
-						<Badge className={currentOption?.color}>
+						<Badge className={`${currentOption?.color} transition-colors duration-200 cursor-pointer`}>
 							{currentOption?.label}
 						</Badge>
-						<Edit className="h-3 w-3 text-gray-400" />
+						<Edit className="h-3 w-3 text-gray-500 hover:text-gray-700 transition-colors duration-200" />
 					</div>
 				</Button>
 			</DialogTrigger>
@@ -85,7 +85,7 @@ export function AppointmentBadgeEditor({ currentStatus, onStatusChange }: Appoin
 							<SelectContent>
 								{statusOptions.map((option) => (
 									<SelectItem key={option.value} value={option.value}>
-										<Badge className={option.color}>
+										<Badge className={`${option.color} transition-colors duration-200`}>
 											{option.label}
 										</Badge>
 									</SelectItem>
@@ -98,12 +98,14 @@ export function AppointmentBadgeEditor({ currentStatus, onStatusChange }: Appoin
 							variant="outline"
 							onClick={() => setIsOpen(false)}
 							disabled={isLoading}
+							className="hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
 						>
 							Annuler
 						</Button>
 						<Button
 							onClick={handleSave}
 							disabled={isLoading || selectedStatus === currentStatus}
+							className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
 						>
 							{isLoading ? "Enregistrement..." : "Enregistrer"}
 						</Button>
