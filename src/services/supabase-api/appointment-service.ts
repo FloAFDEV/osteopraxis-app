@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -218,25 +217,21 @@ export const supabaseAppointmentService = {
 		try {
 			console.log(`Mise à jour du rendez-vous ${id} via Edge Function:`, update);
 
-			// Préparer le payload de mise à jour en retirant les champs sensibles
-			const cleanUpdate = { ...update };
+			// Préparer le payload de mise à jour en excluant les champs sensibles
+			const updatePayload: Record<string, any> = {};
 			
-			// Supprimer les champs qui ne doivent pas être mis à jour par l'utilisateur
-			delete cleanUpdate.id;
-			delete cleanUpdate.osteopathId;
-			delete cleanUpdate.userId;
+			// Copier seulement les champs autorisés
+			const allowedFields = ['date', 'patientId', 'reason', 'start', 'end', 'status', 'cabinetId', 'notificationSent', 'notes'];
+			for (const field of allowedFields) {
+				if (field in update && update[field as keyof UpdateAppointmentPayload] !== undefined) {
+					updatePayload[field] = update[field as keyof UpdateAppointmentPayload];
+				}
+			}
 
-			const updatePayload = {
-				...cleanUpdate,
-				status: cleanUpdate.status ? ensureAppointmentStatus(cleanUpdate.status) : undefined,
-			};
-
-			// Supprimer les champs undefined du payload final
-			Object.keys(updatePayload).forEach(
-				(k) =>
-					updatePayload[k] === undefined &&
-					delete updatePayload[k]
-			);
+			// Traiter le statut spécialement
+			if (update.status) {
+				updatePayload.status = ensureAppointmentStatus(update.status);
+			}
 
 			console.log("Payload de mise à jour Edge Function:", updatePayload);
 
