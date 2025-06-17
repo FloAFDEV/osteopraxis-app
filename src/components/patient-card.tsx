@@ -48,7 +48,7 @@ export function PatientCard({ patient, compact = false }: PatientCardProps) {
 			case "Femme":
 				return {
 					background: "bg-gradient-to-br from-pink-100 to-pink-200 border border-pink-300",
-					icon: <Heart className="h-6 w-6 text-pink-600" />,
+					icon: <Users className="h-6 w-6 text-pink-600" />,
 				};
 			default:
 				return {
@@ -163,7 +163,6 @@ export function PatientCard({ patient, compact = false }: PatientCardProps) {
 			</CardHeader>
 
 			<CardContent className="space-y-4">
-				{/* Section Santé */}
 				{(patient.weight || patient.height || patient.bmi) && (
 					<div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-3">
 						<h4 className="font-medium text-sm text-blue-800 dark:text-blue-200 mb-2 flex items-center">
@@ -193,7 +192,6 @@ export function PatientCard({ patient, compact = false }: PatientCardProps) {
 					</div>
 				)}
 
-				{/* Section Contact */}
 				{(patient.email || patient.phone || patient.address) && (
 					<div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3">
 						<h4 className="font-medium text-sm text-green-800 dark:text-green-200 mb-2 flex items-center">
@@ -235,7 +233,6 @@ export function PatientCard({ patient, compact = false }: PatientCardProps) {
 					</div>
 				)}
 
-				{/* Section Informations supplémentaires */}
 				{(patient.birthDate || patient.occupation) && (
 					<div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3">
 						<h4 className="font-medium text-sm text-amber-800 dark:text-amber-200 mb-2 flex items-center">
@@ -259,7 +256,6 @@ export function PatientCard({ patient, compact = false }: PatientCardProps) {
 					</div>
 				)}
 
-				{/* Actions rapides */}
 				<div className="pt-2 border-t">
 					<div className="flex justify-between items-center">
 						<PatientQuickActions patient={patient} />
