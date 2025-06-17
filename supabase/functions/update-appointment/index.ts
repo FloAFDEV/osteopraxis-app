@@ -50,8 +50,6 @@ Deno.serve(async (req) => {
       return createErrorResponse('Authorization header with Bearer token required', 401);
     }
 
-    console.log('Authorization header found:', authHeader.substring(0, 20) + '...');
-
     // Créer le client Supabase avec la clé de service
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       global: {
@@ -68,20 +66,16 @@ Deno.serve(async (req) => {
       return createErrorResponse('User not authenticated', 401);
     }
 
-    console.log('User authenticated:', user.id);
-
     // Parse le body JSON avec meilleure gestion d'erreur
     let body;
     try {
       const rawBody = await req.text();
-      console.log('Raw body received:', rawBody);
       
       if (!rawBody || rawBody.trim() === '') {
         return createErrorResponse('Request body is required', 400);
       }
       
       body = JSON.parse(rawBody);
-      console.log('Body parsed successfully:', body);
     } catch (parseError) {
       console.error('JSON parsing error:', parseError);
       return createErrorResponse(`Invalid JSON format: ${parseError.message}`, 400);
@@ -96,8 +90,6 @@ Deno.serve(async (req) => {
     if (!updateData || typeof updateData !== 'object') {
       return createErrorResponse('updateData is required and must be an object', 400);
     }
-
-    console.log(`Mise à jour du rendez-vous ${appointmentId} via Edge Function:`, updateData);
 
     // Préparer le payload de mise à jour en excluant les champs sensibles
     const updatePayload = {
@@ -117,8 +109,6 @@ Deno.serve(async (req) => {
       }
     });
 
-    console.log("Payload de mise à jour Edge Function (nettoyé):", updatePayload);
-
     // Effectuer la mise à jour
     const { data, error } = await supabase
       .from('Appointment')
@@ -131,8 +121,6 @@ Deno.serve(async (req) => {
       console.error('[EDGE FUNCTION ERROR]', error);
       return createErrorResponse(error.message, 500);
     }
-
-    console.log("Rendez-vous mis à jour via Edge Function:", data);
 
     return createSuccessResponse(data);
 

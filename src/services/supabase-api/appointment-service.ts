@@ -1,4 +1,3 @@
-
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -41,8 +40,6 @@ type UpdateAppointmentPayload = Partial<CreateAppointmentPayload>;
 export const supabaseAppointmentService = {
 	async getAppointments(): Promise<Appointment[]> {
 		try {
-			console.log("Chargement des rendez-vous depuis Supabase avec RLS");
-			
 			// Avec RLS activé, nous récupérons directement tous les rendez-vous
 			// Les politiques RLS filtreront automatiquement selon l'ostéopathe connecté
 			const { data, error } = await supabase
@@ -65,7 +62,6 @@ export const supabaseAppointmentService = {
 
 	async getAppointmentById(id: number): Promise<Appointment> {
 		try {
-			console.log(`Chargement du rendez-vous ${id}`);
 			// RLS s'applique automatiquement
 			const { data, error } = await supabase
 				.from("Appointment")
@@ -113,10 +109,6 @@ export const supabaseAppointmentService = {
 			const tomorrow = new Date(today);
 			tomorrow.setDate(tomorrow.getDate() + 1);
 
-			console.log(
-				`Recherche des rendez-vous pour le patient ${patientId} aujourd'hui (${today.toISOString()} - ${tomorrow.toISOString()})`
-			);
-
 			// RLS filtrera automatiquement selon l'ostéopathe connecté
 			const { data, error } = await supabase
 				.from("Appointment")
@@ -146,8 +138,6 @@ export const supabaseAppointmentService = {
 		payload: CreateAppointmentPayload
 	): Promise<Appointment> {
 		try {
-			console.log("Création d'un nouveau rendez-vous:", payload);
-			
 			// Récupérer l'osteopathId de l'utilisateur connecté
 			const osteopathId = await getCurrentOsteopathId();
 			
@@ -174,8 +164,6 @@ export const supabaseAppointmentService = {
 				osteopathId: osteopathId, // Forcer l'osteopathId de l'utilisateur connecté
 			});
 
-			console.log("adaptedData:", adaptedData);
-
 			// Convertir le statut si nécessaire (CANCELLED -> CANCELED)
 			if (adaptedData.status === "CANCELLED") {
 				adaptedData.status = "CANCELED";
@@ -189,8 +177,6 @@ export const supabaseAppointmentService = {
 				}
 			});
 
-			console.log("finalData à insérer:", finalData);
-
 			// Avec RLS, l'insertion se fera automatiquement avec les bonnes vérifications
 			const { data, error } = await supabase
 				.from("Appointment")
@@ -203,7 +189,6 @@ export const supabaseAppointmentService = {
 				throw error;
 			}
 
-			console.log("Rendez-vous créé avec succès:", data);
 			return adaptAppointmentFromSupabase(data);
 		} catch (error: any) {
 			console.error("Error creating appointment:", error);
@@ -216,8 +201,6 @@ export const supabaseAppointmentService = {
 		update: UpdateAppointmentPayload
 	): Promise<Appointment> {
 		try {
-			console.log(`Mise à jour du rendez-vous ${id} via Edge Function:`, update);
-
 			// Préparer le payload de mise à jour en excluant les champs sensibles
 			const updatePayload: Record<string, any> = {};
 			
@@ -234,8 +217,6 @@ export const supabaseAppointmentService = {
 				updatePayload.status = ensureAppointmentStatus(update.status);
 			}
 
-			console.log("Payload de mise à jour Edge Function:", updatePayload);
-
 			// Récupérer le token d'authentification
 			const { data: { session } } = await supabase.auth.getSession();
 			if (!session?.access_token) {
@@ -247,8 +228,6 @@ export const supabaseAppointmentService = {
 				appointmentId: id,
 				updateData: updatePayload
 			};
-
-			console.log("Request data pour Edge Function:", requestData);
 
 			// Utiliser l'Edge Function pour la mise à jour avec les constantes exportées
 			const response = await fetch(`${SUPABASE_API_URL}/functions/v1/update-appointment`, {
@@ -274,7 +253,6 @@ export const supabaseAppointmentService = {
 				throw new Error(result?.error || 'Unknown error from Edge Function');
 			}
 
-			console.log("Rendez-vous mis à jour via Edge Function:", result.data);
 			return adaptAppointmentFromSupabase(result.data);
 		} catch (error) {
 			console.error("[EDGE FUNCTION ERROR]", error);
@@ -285,8 +263,6 @@ export const supabaseAppointmentService = {
 	// Méthode spécifique pour annuler un rendez-vous sans modifier l'heure
 	async cancelAppointment(id: number): Promise<Appointment> {
 		try {
-			console.log(`Annulation du rendez-vous ${id}`);
-
 			// Utiliser la méthode updateAppointment qui utilise maintenant l'Edge Function
 			return await this.updateAppointment(id, { status: "CANCELED" });
 		} catch (error) {
@@ -297,7 +273,6 @@ export const supabaseAppointmentService = {
 
 	async deleteAppointment(id: number): Promise<boolean> {
 		try {
-			console.log(`Suppression du rendez-vous ${id}`);
 			// RLS s'applique automatiquement pour la suppression
 			const { error } = await supabase
 				.from("Appointment")
@@ -308,7 +283,7 @@ export const supabaseAppointmentService = {
 				console.error("[SUPABASE ERROR]", error.code, error.message);
 				throw error;
 			}
-			console.log(`Rendez-vous ${id} supprimé avec succès`);
+			
 			return true;
 		} catch (error: any) {
 			console.error("Error deleting appointment:", error);
