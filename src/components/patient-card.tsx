@@ -112,8 +112,6 @@ export function PatientCard({
 			</CardHeader>
 
 			<CardContent className="space-y-4">
-				{patient.weight || patient.height || patient.bmi}
-
 				{(patient.email || patient.phone || patient.address) && <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3">
 						<h4 className="font-medium text-sm text-green-800 dark:text-green-200 mb-2 flex items-center">
 							<Phone className="h-4 w-4 mr-1" />
