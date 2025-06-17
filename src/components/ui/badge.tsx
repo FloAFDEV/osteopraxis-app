@@ -19,6 +19,8 @@ const badgeVariants = cva(
           "border-transparent bg-amber-500 text-white hover:bg-amber-600",
         outline: "text-foreground",
         gender: "border-transparent shadow-sm cursor-default",
+        minor: "border-transparent bg-emerald-100 text-emerald-800 border-emerald-200",
+        status: "border-transparent bg-blue-100 text-blue-800 border-blue-200",
       },
     },
     defaultVariants: {

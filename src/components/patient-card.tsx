@@ -1,6 +1,8 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
 import {
@@ -18,15 +20,17 @@ import {
 	Briefcase,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { PatientQuickActions } from "@/components/patients/PatientQuickActions";
 
 interface PatientCardProps {
 	patient: Patient;
+	compact?: boolean;
 }
 
-export function PatientCard({ patient }: PatientCardProps) {
+export function PatientCard({ patient, compact = false }: PatientCardProps) {
 	const navigate = useNavigate();
 
-	// Calcul exact de l'âge en années comme dans PatientListItem
+	// Calcul exact de l'âge en années
 	const age = patient.birthDate
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
@@ -34,128 +38,244 @@ export function PatientCard({ patient }: PatientCardProps) {
 	// Mineur = age < 18
 	const isMinor = age !== null && age < 18;
 
-	// Déterminer la couleur et l'icône en fonction du genre, comme dans PatientListItem
+	// Déterminer la couleur et l'icône en fonction du genre
 	const getAvatarColor = () => {
 		switch (patient.gender) {
 			case "Homme":
 				return {
-					background: "bg-blue-300 text-blue-600",
-					icon: <User className="h-5 w-5 text-blue-600" />,
+					background: "bg-gradient-to-br from-blue-100 to-blue-200 border border-blue-300",
+					icon: <User className="h-6 w-6 text-blue-600" />,
 				};
 			case "Femme":
 				return {
-					background: "bg-pink-300 text-pink-600",
-					icon: <UserRound className="h-5 w-5 text-pink-600" />,
+					background: "bg-gradient-to-br from-pink-100 to-pink-200 border border-pink-300",
+					icon: <UserRound className="h-6 w-6 text-pink-600" />,
 				};
 			default:
 				return {
-					background: "bg-purple-200 text-purple-600",
-					icon: <Users className="h-5 w-5 text-purple-600" />,
+					background: "bg-gradient-to-br from-purple-100 to-purple-200 border border-purple-300",
+					icon: <Users className="h-6 w-6 text-purple-600" />,
 				};
 		}
 	};
 
 	const avatarStyle = getAvatarColor();
 
+	const handleCardClick = (e: React.MouseEvent) => {
+		// Éviter la navigation si on clique sur un bouton ou lien
+		if ((e.target as HTMLElement).closest('a, button')) {
+			return;
+		}
+		navigate(`/patients/${patient.id}`);
+	};
+
+	if (compact) {
+		return (
+			<Card 
+				className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-l-blue-500"
+				onClick={handleCardClick}
+			>
+				<CardHeader className="pb-3">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-3">
+							<Avatar className={`${avatarStyle.background} h-10 w-10`}>
+								{patient.avatarUrl ? (
+									<AvatarImage
+										src={patient.avatarUrl}
+										alt={`${patient.firstName} ${patient.lastName}`}
+									/>
+								) : (
+									<AvatarFallback className={avatarStyle.background}>
+										{avatarStyle.icon}
+									</AvatarFallback>
+								)}
+							</Avatar>
+							<div className="flex-1 min-w-0">
+								<h3 className="font-semibold text-lg leading-tight truncate">
+									{patient.lastName} {patient.firstName}
+								</h3>
+								<div className="flex items-center gap-2 mt-1">
+									{age !== null && (
+										<span className="text-sm text-gray-500">
+											{age} ans
+										</span>
+									)}
+									{isMinor && (
+										<Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-2 py-0.5">
+											<Baby className="h-3 w-3 mr-1" />
+											Mineur
+										</Badge>
+									)}
+								</div>
+							</div>
+						</div>
+						<PatientQuickActions patient={patient} variant="compact" />
+					</div>
+				</CardHeader>
+			</Card>
+		);
+	}
+
 	return (
 		<Card
-			className="hover:shadow-md transition-shadow duration-200 cursor-pointer"
-			onClick={() => navigate(`/patients/${patient.id}`)}
+			className="hover:shadow-lg transition-all duration-200 cursor-pointer group"
+			onClick={handleCardClick}
 		>
-			<CardHeader className="pb-2">
+			<CardHeader className="pb-4">
 				<div className="flex items-start justify-between">
-					<div className="flex items-center gap-3">
-						{/* Avatar avec couleur selon le genre */}
-						<Avatar
-							className={`${avatarStyle.background} h-10 w-10`}
-						>
+					<div className="flex items-center gap-4">
+						<Avatar className={`${avatarStyle.background} h-12 w-12 transition-transform group-hover:scale-105`}>
 							{patient.avatarUrl ? (
 								<AvatarImage
 									src={patient.avatarUrl}
 									alt={`${patient.firstName} ${patient.lastName}`}
 								/>
 							) : (
-								<AvatarFallback
-									className={avatarStyle.background}
-								>
+								<AvatarFallback className={avatarStyle.background}>
 									{avatarStyle.icon}
 								</AvatarFallback>
 							)}
 						</Avatar>
-						<CardTitle className="text-base">
-							<div className="flex items-center">
+						<div>
+							<h3 className="font-semibold text-xl leading-tight mb-1">
 								{patient.lastName} {patient.firstName}
+							</h3>
+							<div className="flex items-center gap-2 flex-wrap">
 								{age !== null && (
-									<span className="text-sm ml-2 text-gray-400">
-										({age} ans)
+									<span className="text-sm text-gray-500">
+										{age} ans
 									</span>
 								)}
+								{isMinor && (
+									<Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">
+										<Baby className="h-4 w-4 mr-1" />
+										Mineur
+									</Badge>
+								)}
+								{patient.gender && (
+									<Badge variant="outline" className="text-xs">
+										{patient.gender}
+									</Badge>
+								)}
 							</div>
-							{/* Affichage du badge Mineur si moins de 18 ans */}
-							{isMinor && (
-								<div className="text-xs text-gray-600 flex items-center gap-1 mt-1">
-									<Baby className="h-5 w-5 text-emerald-600" />
-									<span>Mineur</span>
-								</div>
-							)}
-						</CardTitle>
+						</div>
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent>
-				<div className="text-sm text-muted-foreground grid gap-1 pt-4">
-					<div className="flex items-center">
-						<Calendar className="w-4 h-4 mr-2" />
-						{patient.birthDate
-							? new Date(patient.birthDate).toLocaleDateString(
-									"fr-FR"
-							  )
-							: "Non renseignée"}
-					</div>{" "}
-					<div className="flex items-center">
-						<Weight className="w-4 h-4 mr-2" />
-						{patient.weight
-							? `${patient.weight} kg`
-							: "Non renseigné"}
+
+			<CardContent className="space-y-4">
+				{/* Section Santé */}
+				{(patient.weight || patient.height || patient.bmi) && (
+					<div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-3">
+						<h4 className="font-medium text-sm text-blue-800 dark:text-blue-200 mb-2 flex items-center">
+							<Activity className="h-4 w-4 mr-1" />
+							Données de santé
+						</h4>
+						<div className="grid grid-cols-3 gap-2 text-sm">
+							{patient.weight && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<Weight className="h-3 w-3 mr-1 text-blue-600" />
+									{patient.weight} kg
+								</div>
+							)}
+							{patient.height && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<Ruler className="h-3 w-3 mr-1 text-blue-600" />
+									{patient.height} cm
+								</div>
+							)}
+							{patient.bmi && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<Activity className="h-3 w-3 mr-1 text-blue-600" />
+									IMC {patient.bmi}
+								</div>
+							)}
+						</div>
 					</div>
-					<div className="flex items-center">
-						<Ruler className="w-4 h-4 mr-2" />
-						{patient.height
-							? `${patient.height} cm`
-							: "Non renseignée"}
+				)}
+
+				{/* Section Contact */}
+				{(patient.email || patient.phone || patient.address) && (
+					<div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3">
+						<h4 className="font-medium text-sm text-green-800 dark:text-green-200 mb-2 flex items-center">
+							<Phone className="h-4 w-4 mr-1" />
+							Contact
+						</h4>
+						<div className="space-y-1 text-sm">
+							{patient.email && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<Mail className="h-3 w-3 mr-2 text-green-600 flex-shrink-0" />
+									<a
+										href={`mailto:${patient.email}`}
+										className="hover:underline hover:text-green-800 dark:hover:text-green-300 transition-colors truncate"
+										onClick={(e) => e.stopPropagation()}
+									>
+										{patient.email}
+									</a>
+								</div>
+							)}
+							{patient.phone && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<Phone className="h-3 w-3 mr-2 text-green-600 flex-shrink-0" />
+									<a
+										href={`tel:${patient.phone}`}
+										className="hover:underline hover:text-green-800 dark:hover:text-green-300 transition-colors"
+										onClick={(e) => e.stopPropagation()}
+									>
+										{patient.phone}
+									</a>
+								</div>
+							)}
+							{patient.address && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<MapPin className="h-3 w-3 mr-2 text-green-600 flex-shrink-0" />
+									<span className="truncate">{patient.address}</span>
+								</div>
+							)}
+						</div>
 					</div>
-					<div className="flex items-center">
-						<Activity className="w-4 h-4 mr-2" />
-						{patient.bmi ? `${patient.bmi} IMC` : "IMC non calculé"}
+				)}
+
+				{/* Section Informations supplémentaires */}
+				{(patient.birthDate || patient.occupation) && (
+					<div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3">
+						<h4 className="font-medium text-sm text-amber-800 dark:text-amber-200 mb-2 flex items-center">
+							<Calendar className="h-4 w-4 mr-1" />
+							Informations
+						</h4>
+						<div className="space-y-1 text-sm">
+							{patient.birthDate && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<Calendar className="h-3 w-3 mr-2 text-amber-600 flex-shrink-0" />
+									{new Date(patient.birthDate).toLocaleDateString("fr-FR")}
+								</div>
+							)}
+							{patient.occupation && (
+								<div className="flex items-center text-gray-700 dark:text-gray-300">
+									<Briefcase className="h-3 w-3 mr-2 text-amber-600 flex-shrink-0" />
+									<span className="truncate italic">{patient.occupation}</span>
+								</div>
+							)}
+						</div>
 					</div>
-					<div className="flex items-center">
-						<Mail className="w-4 h-4 mr-2" />
-						{patient.email || "Non renseigné"}
-					</div>
-					<div className="flex items-center">
-						<Phone className="w-4 h-4 mr-2" />
-						{patient.phone || "Non renseigné"}
-					</div>
-					<div className="flex items-center">
-						<MapPin className="w-4 h-4 mr-2" />
-						{patient.address || "Non renseignée"}
-					</div>
-					<div className="flex items-center">
-						<Briefcase className="w-4 h-4 mr-2" />
-						{patient.occupation || "Non renseignée"}
+				)}
+
+				{/* Actions rapides */}
+				<div className="pt-2 border-t">
+					<div className="flex justify-between items-center">
+						<PatientQuickActions patient={patient} />
+						<Button
+							variant="default"
+							size="sm"
+							className="bg-blue-600 hover:bg-blue-700 text-white"
+							asChild
+							onClick={(e) => e.stopPropagation()}
+						>
+							<Link to={`/patients/${patient.id}`}>Voir détails</Link>
+						</Button>
 					</div>
 				</div>
-			</CardContent>{" "}
-			<div className="px-4 pb-4 pt-2 flex justify-end">
-				<Button
-					variant="default"
-					size="sm"
-					className="bg-blue-500 hover:bg-blue-600"
-					asChild
-				>
-					<Link to={`/patients/${patient.id}`}>Voir</Link>
-				</Button>
-			</div>
+			</CardContent>
 		</Card>
 	);
 }
