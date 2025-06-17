@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -14,10 +13,10 @@ import {
 	Phone,
 	Ruler,
 	User,
-	UserRound,
 	Users,
 	Weight,
 	Briefcase,
+	Heart,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { PatientQuickActions } from "@/components/patients/PatientQuickActions";
@@ -49,7 +48,7 @@ export function PatientCard({ patient, compact = false }: PatientCardProps) {
 			case "Femme":
 				return {
 					background: "bg-gradient-to-br from-pink-100 to-pink-200 border border-pink-300",
-					icon: <UserRound className="h-6 w-6 text-pink-600" />,
+					icon: <Heart className="h-6 w-6 text-pink-600" />,
 				};
 			default:
 				return {

@@ -5,11 +5,11 @@ import { differenceInYears, parseISO } from "date-fns";
 import {
 	Baby,
 	User,
-	UserRound,
 	Users,
 	Briefcase,
 	Phone,
 	Mail,
+	Heart,
 } from "lucide-react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -37,7 +37,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 			case "Femme":
 				return {
 					background: "bg-pink-200 text-pink-600",
-					icon: <UserRound className="h-5 w-5 text-pink-600" />,
+					icon: <Heart className="h-5 w-5 text-pink-600" />,
 				};
 			default:
 				return {

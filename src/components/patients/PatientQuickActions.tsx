@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Patient } from "@/types";
-import { Calendar, Mail, Phone } from "lucide-react";
+import { Calendar, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface PatientQuickActionsProps {
@@ -11,10 +11,6 @@ interface PatientQuickActionsProps {
 
 export function PatientQuickActions({ patient, variant = "full" }: PatientQuickActionsProps) {
 	const handleEmailClick = (e: React.MouseEvent) => {
-		e.stopPropagation();
-	};
-
-	const handlePhoneClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
 	};
 
@@ -49,19 +45,6 @@ export function PatientQuickActions({ patient, variant = "full" }: PatientQuickA
 						</a>
 					</Button>
 				)}
-				{patient.phone && (
-					<Button
-						variant="ghost"
-						size="sm"
-						className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-						asChild
-						onClick={handlePhoneClick}
-					>
-						<a href={`tel:${patient.phone}`}>
-							<Phone className="h-4 w-4" />
-						</a>
-					</Button>
-				)}
 			</div>
 		);
 	}
@@ -71,7 +54,7 @@ export function PatientQuickActions({ patient, variant = "full" }: PatientQuickA
 			<Button
 				variant="outline"
 				size="sm"
-				className="h-8 px-3 bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+				className="h-8 px-3"
 				asChild
 				onClick={handleNewAppointmentClick}
 			>
@@ -92,21 +75,6 @@ export function PatientQuickActions({ patient, variant = "full" }: PatientQuickA
 					<a href={`mailto:${patient.email}`}>
 						<Mail className="h-3 w-3 mr-1" />
 						Email
-					</a>
-				</Button>
-			)}
-			
-			{patient.phone && (
-				<Button
-					variant="outline"
-					size="sm"
-					className="h-8 px-3 bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-					asChild
-					onClick={handlePhoneClick}
-				>
-					<a href={`tel:${patient.phone}`}>
-						<Phone className="h-3 w-3 mr-1" />
-						Appel
 					</a>
 				</Button>
 			)}
