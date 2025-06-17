@@ -1,3 +1,4 @@
+
 import { Appointment, AppointmentStatus } from "@/types";
 import {
 	supabase,
@@ -220,8 +221,8 @@ export const supabaseAppointmentService = {
 			// Préparer le payload de mise à jour en excluant les champs sensibles
 			const updatePayload: Record<string, any> = {};
 			
-			// Copier seulement les champs autorisés
-			const allowedFields = ['date', 'patientId', 'reason', 'start', 'end', 'status', 'cabinetId', 'notificationSent', 'notes'];
+			// Copier seulement les champs autorisés (sans start/end qui n'existent pas dans la DB)
+			const allowedFields = ['date', 'patientId', 'reason', 'status', 'cabinetId', 'notificationSent', 'notes'];
 			for (const field of allowedFields) {
 				if (field in update && update[field as keyof UpdateAppointmentPayload] !== undefined) {
 					updatePayload[field] = update[field as keyof UpdateAppointmentPayload];

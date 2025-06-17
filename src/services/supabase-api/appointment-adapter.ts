@@ -25,7 +25,7 @@ export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Part
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
 		osteopathId: data.osteopathId,
-		date: data.date || data.start,
+		date: data.date || data.start, // Utiliser date en priorité, sinon start
 		status: data.status,
 		reason: data.reason,
 		notes: data.notes,
