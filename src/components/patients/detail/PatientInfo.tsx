@@ -28,25 +28,14 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 
-	function getAvatarBg(gender?: string) {
+	function getAvatarClasses(gender?: string) {
 		switch (gender) {
 			case "Homme":
-				return "bg-blue-200 dark:bg-blue-700";
+				return "bg-blue-200 dark:bg-blue-700 text-blue-900 dark:text-blue-100";
 			case "Femme":
-				return "bg-pink-200 dark:bg-pink-700";
+				return "bg-pink-200 dark:bg-pink-700 text-pink-900 dark:text-pink-100";
 			default:
-				return "bg-gray-200 dark:bg-gray-700";
-		}
-	}
-
-	function getAvatarTextColor(gender?: string) {
-		switch (gender) {
-			case "Homme":
-				return "text-blue-900 dark:text-blue-100";
-			case "Femme":
-				return "text-pink-900 dark:text-pink-100";
-			default:
-				return "text-gray-900 dark:text-gray-100";
+				return "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100";
 		}
 	}
 
@@ -75,12 +64,8 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		navigateToSection("informations-medicales-generales");
 	};
 
-	// Utiliser le même comportement sticky que PersonalInfoCard
 	const getStickyClasses = () => {
-		if (isMobile) {
-			return ""; // Pas de sticky sur mobile
-		}
-		// Sur tablette et desktop, utiliser sticky avec un padding bottom approprié
+		if (isMobile) return "";
 		return "sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pb-8";
 	};
 
@@ -91,9 +76,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
 					<Avatar className="h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 flex-shrink-0">
 						<AvatarFallback
-							className={`${getAvatarBg(
-								patient.gender
-							)} ${getAvatarTextColor(
+							className={`${getAvatarClasses(
 								patient.gender
 							)} flex items-center justify-center text-xs md:text-sm font-bold`}
 						>
@@ -117,7 +100,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 				</div>
 
-				{/* Informations prioritaires en bulles - responsives */}
+				{/* Informations prioritaires en bulles */}
 				<div className="grid grid-cols-1 gap-2 mb-3 md:mb-4">
 					{patient.currentTreatment && (
 						<InfoBubble
@@ -154,7 +137,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					)}
 				</div>
 
-				{/* Informations de contact compactes */}
+				{/* Informations de contact */}
 				<div className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-muted-foreground">
 					<div className="flex items-center gap-2">
 						<MapPin className="h-4 w-4 flex-shrink-0" />
