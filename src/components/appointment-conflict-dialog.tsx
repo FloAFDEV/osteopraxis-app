@@ -24,7 +24,7 @@ interface ConflictInfo {
 interface AppointmentConflictDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  conflictInfo: ConflictInfo;
+  conflictInfo: ConflictInfo | null;
   onForceUpdate: () => void;
   onCancel: () => void;
 }
@@ -50,6 +50,11 @@ export function AppointmentConflictDialog({
     const statusInfo = statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const };
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
   };
+
+  // Don't render the dialog if conflictInfo is null
+  if (!conflictInfo) {
+    return null;
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
