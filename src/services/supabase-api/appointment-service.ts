@@ -240,13 +240,21 @@ export const supabaseAppointmentService = {
 				body: JSON.stringify(requestData)
 			});
 
-			if (!response.ok) {
-				const errorText = await response.text();
-				console.error('[EDGE FUNCTION HTTP ERROR]', response.status, errorText);
-				throw new Error(`Edge Function returned ${response.status}: ${errorText}`);
-			}
-
 			const result = await response.json();
+
+			if (!response.ok) {
+				// Check if it's a conflict error (409)
+				if (response.status === 409 && result.isConflict) {
+					// Create a custom error with conflict information
+					const conflictError = new Error(result.error || 'Appointment conflict detected');
+					(conflictError as any).isConflict = true;
+					(conflictError as any).conflictInfo = result.conflictInfo;
+					throw conflictError;
+				}
+				
+				console.error('[EDGE FUNCTION HTTP ERROR]', response.status, result);
+				throw new Error(result?.error || `Edge Function returned ${response.status}`);
+			}
 
 			if (!result || !result.success) {
 				console.error("[EDGE FUNCTION ERROR]", result?.error || 'Unknown error');
@@ -255,7 +263,7 @@ export const supabaseAppointmentService = {
 
 			return adaptAppointmentFromSupabase(result.data);
 		} catch (error) {
-			console.error("[EDGE FUNCTION ERROR]", error);
+			console.error("[APPOINTMENT UPDATE ERROR]", error);
 			throw error;
 		}
 	},

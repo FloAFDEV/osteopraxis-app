@@ -32,6 +32,24 @@ function createErrorResponse(error: string, status: number = 500) {
   );
 }
 
+function createConflictResponse(conflictInfo: any) {
+  return new Response(
+    JSON.stringify({ 
+      success: false, 
+      isConflict: true, 
+      conflictInfo,
+      error: "Un rendez-vous existe déjà sur ce créneau horaire pour cet ostéopathe."
+    }),
+    { 
+      status: 409,
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json' 
+      } 
+    }
+  );
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -89,6 +107,68 @@ Deno.serve(async (req) => {
 
     if (!updateData || typeof updateData !== 'object') {
       return createErrorResponse('updateData is required and must be an object', 400);
+    }
+
+    // Récupérer le rendez-vous actuel pour vérifier les conflits si la date change
+    const { data: currentAppointment, error: currentAppError } = await supabase
+      .from('Appointment')
+      .select('*')
+      .eq('id', appointmentId)
+      .single();
+
+    if (currentAppError || !currentAppointment) {
+      return createErrorResponse('Appointment not found', 404);
+    }
+
+    // Si la date change, vérifier les conflits avant de tenter la mise à jour
+    if (updateData.date && updateData.date !== currentAppointment.date) {
+      const appointmentTime = new Date(updateData.date);
+      const endTime = new Date(appointmentTime.getTime() + 60 * 60 * 1000); // 1 heure plus tard
+
+      const { data: conflictingAppointments, error: conflictError } = await supabase
+        .from('Appointment')
+        .select(`
+          id,
+          date,
+          patientId,
+          reason,
+          status,
+          Patient:patientId (
+            id,
+            firstName,
+            lastName,
+            phone,
+            email
+          )
+        `)
+        .eq('osteopathId', currentAppointment.osteopathId)
+        .neq('id', appointmentId)
+        .not('status', 'in', '("CANCELED","NO_SHOW")')
+        .gte('date', appointmentTime.toISOString())
+        .lt('date', endTime.toISOString());
+
+      if (conflictError) {
+        console.error('Error checking conflicts:', conflictError);
+        return createErrorResponse('Error checking appointment conflicts', 500);
+      }
+
+      if (conflictingAppointments && conflictingAppointments.length > 0) {
+        const conflictInfo = {
+          conflictingAppointments: conflictingAppointments.map(apt => ({
+            id: apt.id,
+            date: apt.date,
+            patientName: `${apt.Patient?.firstName} ${apt.Patient?.lastName}`,
+            patientPhone: apt.Patient?.phone,
+            patientEmail: apt.Patient?.email,
+            reason: apt.reason,
+            status: apt.status
+          })),
+          requestedDate: updateData.date,
+          currentDate: currentAppointment.date
+        };
+
+        return createConflictResponse(conflictInfo);
+      }
     }
 
     // Préparer le payload de mise à jour en excluant les champs sensibles
