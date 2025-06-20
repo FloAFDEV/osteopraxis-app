@@ -1,8 +1,8 @@
 
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
-import { appointmentService as supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { AppointmentStatus } from "@/types"; 
+import { supabaseAppointmentService } from "../supabase-api/appointment-service";
+import { AppointmentStatus, CreateAppointmentPayload } from "@/types"; 
 import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
 import { getCurrentOsteopathId } from "@/services";
 
@@ -20,18 +20,6 @@ export class SecurityViolationError extends Error {
     super(message);
     this.name = "SecurityViolationError";
   }
-}
-
-// Interface locale pour CreateAppointmentPayload
-interface CreateAppointmentPayload {
-  date: string;
-  reason: string;
-  status?: string;
-  notes?: string;
-  patientId: number;
-  osteopathId?: number;
-  cabinetId?: number;
-  duration?: number;
 }
 
 // Mock data (replace with actual data fetching)
@@ -72,6 +60,8 @@ export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
+        // Avec RLS, la méthode supabaseAppointmentService.getAppointments() est automatiquement
+        // filtrée par les politiques de sécurité selon l'ostéopathe connecté
         return await supabaseAppointmentService.getAppointments();
       } catch (error) {
         console.error("Erreur Supabase getAppointments:", error);
@@ -79,16 +69,17 @@ export const appointmentService = {
       }
     }
 
+    // Simulation locale filtrée par osteopathId
     await delay(300);
-    const osteopathId = 1;
+    const osteopathId = 1; // Simulated ID for local testing only
     return appointments.filter(appointment => appointment.osteopathId === osteopathId);
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        const result = await supabaseAppointmentService.getAppointmentById(id);
-        return result || undefined;
+        // RLS applique automatiquement les vérifications de sécurité
+        return await supabaseAppointmentService.getAppointmentById(id);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
         throw error;
@@ -102,6 +93,7 @@ export const appointmentService = {
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     if (USE_SUPABASE) {
       try {
+        // RLS applique automatiquement les vérifications de sécurité
         return await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
       } catch (error) {
         console.error("Erreur Supabase getAppointmentsByPatientId:", error);
@@ -116,6 +108,7 @@ export const appointmentService = {
   async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | null> {
     if (USE_SUPABASE) {
       try {
+        // RLS applique automatiquement les vérifications de sécurité
         return await supabaseAppointmentService.getTodayAppointmentForPatient(patientId);
       } catch (error) {
         console.error("Erreur Supabase getTodayAppointmentForPatient:", error);
@@ -123,6 +116,7 @@ export const appointmentService = {
       }
     }
     
+    // Mock implementation for non-Supabase mode
     await delay(200);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -139,12 +133,16 @@ export const appointmentService = {
   async createAppointment(appointmentData: any): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
+        // Récupérer l'osteopathId de l'utilisateur connecté pour le forcer dans le payload
         const osteopathId = await getCurrentOsteopathId();
         if (!osteopathId) {
           throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
         }
         
+        // Écraser l'osteopathId dans le payload avec celui de l'utilisateur connecté
         appointmentData.osteopathId = osteopathId;
+        
+        // Utiliser la fonction adaptateur pour créer le payload
         const payload = createAppointmentPayload(appointmentData);
         return await supabaseAppointmentService.createAppointment(payload);
       } catch (error) {
@@ -154,6 +152,7 @@ export const appointmentService = {
     }
     
     await delay(500);
+    // Assurer que tous les champs nécessaires sont présents
     const appointmentWithAllFields = {
       ...appointmentData,
       id: appointments.length + 1,
@@ -169,6 +168,8 @@ export const appointmentService = {
   async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
+        // RLS applique automatiquement les vérifications de sécurité
+        // Empêcher la modification de l'osteopathId pour la sécurité
         if (update.osteopathId !== undefined) {
           console.warn(`[SECURITY] Tentative de modification de l'osteopathId dans updateAppointment. Cette modification sera ignorée.`);
           delete update.osteopathId;
@@ -191,12 +192,14 @@ export const appointmentService = {
   },
   
   async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
+    // Cette méthode utilise updateAppointment qui est déjà sécurisée
     return this.updateAppointment(id, { status });
   },
   
   async cancelAppointment(id: number): Promise<Appointment> {
     if (USE_SUPABASE) {
       try {
+        // RLS applique automatiquement les vérifications de sécurité
         return await supabaseAppointmentService.cancelAppointment(id);
       } catch (error) {
         console.error("Erreur lors de l'annulation de la séance:", error);
@@ -210,6 +213,7 @@ export const appointmentService = {
   async deleteAppointment(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
+        // RLS applique automatiquement les vérifications de sécurité
         await supabaseAppointmentService.deleteAppointment(id);
         return true;
       } catch (error) {

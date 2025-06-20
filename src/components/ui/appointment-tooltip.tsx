@@ -20,37 +20,26 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      SCHEDULED: { label: "Planifié", variant: "default" as const },
-      COMPLETED: { label: "Terminé", variant: "secondary" as const },
-      CANCELED: { label: "Annulé", variant: "destructive" as const },
-      RESCHEDULED: { label: "Reporté", variant: "outline" as const },
-      NO_SHOW: { label: "Absence", variant: "outline" as const }
+      SCHEDULED: { label: "Planifié", variant: "default" as const, textColor: "text-blue-600 dark:text-blue-300" },
+      COMPLETED: { label: "Terminé", variant: "secondary" as const, textColor: "text-green-600 dark:text-green-300" },
+      CANCELED: { label: "Annulé", variant: "destructive" as const, textColor: "text-red-600 dark:text-red-300" },
+      RESCHEDULED: { label: "Reporté", variant: "outline" as const, textColor: "text-orange-600 dark:text-orange-300" },
+      NO_SHOW: { label: "Absence", variant: "outline" as const, textColor: "text-gray-600 dark:text-gray-300" }
     };
     
-    return statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const };
+    return statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const, textColor: "text-gray-600 dark:text-gray-300" };
   };
 
   const getGenderIcon = (gender?: string | null) => {
-    // Log pour debugging
-    console.log('Gender reçu dans tooltip:', gender, typeof gender);
-    
-    if (!gender) {
-      return <UserIcon className="h-3 w-3 text-green-500 dark:text-green-400 flex-shrink-0" />;
-    }
-    
-    const genderStr = gender.toString().toLowerCase().trim();
-    console.log('Gender normalisé:', genderStr);
-    
-    if (genderStr === "homme" || genderStr === "male" || genderStr === "m") {
+    if (gender === "Homme" || gender === "MALE") {
       return <UserIcon className="h-3 w-3 text-blue-500 dark:text-blue-400 flex-shrink-0" />;
-    } else if (genderStr === "femme" || genderStr === "female" || genderStr === "f") {
+    } else if (gender === "Femme" || gender === "FEMALE") {
       return <UserIcon className="h-3 w-3 text-pink-500 dark:text-pink-400 flex-shrink-0" />;
-    } else {
-      // Vert pour les enfants ou genre non spécifié
-      return <UserIcon className="h-3 w-3 text-green-500 dark:text-green-400 flex-shrink-0" />;
     }
+    return <User className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />;
   };
 
+  // Extraire l'heure depuis la chaîne time (format "HH:mm" ou timestamp)
   const formatAppointmentTime = (timeString: string) => {
     try {
       // Si c'est déjà au format HH:mm
@@ -99,11 +88,11 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1">
                           {getGenderIcon(appointment.patientGender)}
-                          <span className="text-sm truncate font-medium text-gray-700 dark:text-gray-200">
+                          <span className={`text-sm truncate font-medium ${statusInfo.textColor}`}>
                             {appointment.patientName}
                           </span>
                         </div>
-                        <p className="text-xs truncate text-gray-600 dark:text-gray-400 opacity-90">
+                        <p className={`text-xs truncate ${statusInfo.textColor} opacity-90`}>
                           {appointment.reason}
                         </p>
                       </div>
