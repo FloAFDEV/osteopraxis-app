@@ -27,6 +27,7 @@ interface AppointmentConflictDialogProps {
   conflictInfo: ConflictInfo | null;
   onForceUpdate: () => void;
   onCancel: () => void;
+  onShowAlternatives?: () => void;
 }
 
 export function AppointmentConflictDialog({
@@ -34,7 +35,8 @@ export function AppointmentConflictDialog({
   onOpenChange,
   conflictInfo,
   onForceUpdate,
-  onCancel
+  onCancel,
+  onShowAlternatives
 }: AppointmentConflictDialogProps) {
   const formatDateTime = (dateString: string) => {
     return format(new Date(dateString), "PPP 'à' HH:mm", { locale: fr });
@@ -51,7 +53,6 @@ export function AppointmentConflictDialog({
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
   };
 
-  // Don't render the dialog if conflictInfo is null
   if (!conflictInfo) {
     return null;
   }
@@ -126,15 +127,17 @@ export function AppointmentConflictDialog({
           <AlertDialogCancel onClick={onCancel}>
             Annuler et garder l'heure actuelle
           </AlertDialogCancel>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              // TODO: Implement time slot suggestions
-              onCancel();
-            }}
-          >
-            Voir les créneaux libres
-          </Button>
+          {onShowAlternatives && (
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                onShowAlternatives();
+                onOpenChange(false);
+              }}
+            >
+              Voir les créneaux libres
+            </Button>
+          )}
           <Button 
             variant="destructive" 
             onClick={onForceUpdate}

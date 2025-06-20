@@ -36,6 +36,8 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AppointmentConflictDialog } from "@/components/appointment-conflict-dialog";
+import { ConflictResolutionDialog } from "@/components/conflict-resolution-dialog";
+import { EnhancedDatePicker } from "@/components/ui/enhanced-date-picker";
 
 const appointmentFormSchema = z.object({
 	patientId: z.number().min(1, {
@@ -87,6 +89,16 @@ export function AppointmentForm({
 		conflictInfo: null,
 		formData: null
 	});
+	const [conflictResolutionDialog, setConflictResolutionDialog] = useState<{
+		open: boolean;
+		conflictInfo: any;
+		requestedDate: string;
+	}>({
+		open: false,
+		conflictInfo: null,
+		requestedDate: ""
+	});
+	const [appointmentDates, setAppointmentDates] = useState<string[]>([]);
 	const navigate = useNavigate();
 	const { patientId: patientIdParam } = useParams<{ patientId: string }>();
 
@@ -108,6 +120,21 @@ export function AppointmentForm({
 
 		fetchPatients();
 	}, [propPatients]);
+
+	// Load appointment dates for calendar visualization
+	useEffect(() => {
+		const loadAppointmentDates = async () => {
+			try {
+				const appointments = await api.getAppointments();
+				const dates = appointments.map(apt => apt.date);
+				setAppointmentDates(dates);
+			} catch (error) {
+				console.error("Error loading appointment dates:", error);
+			}
+		};
+		
+		loadAppointmentDates();
+	}, []);
 
 	const form = useForm<AppointmentFormValues>({
 		resolver: zodResolver(appointmentFormSchema),
@@ -150,6 +177,11 @@ export function AppointmentForm({
 		} finally {
 			setIsSubmitting(false);
 		}
+	};
+
+	const handleAlternativeSelect = (newDate: string) => {
+		form.setValue("date", new Date(newDate));
+		setConflictResolutionDialog({ open: false, conflictInfo: null, requestedDate: "" });
 	};
 
 	const performUpdate = async (appointmentData: any, force = false) => {
@@ -214,30 +246,19 @@ export function AppointmentForm({
 		} catch (error: any) {
 			console.error("Error submitting appointment form:", error);
 			
-			// Check if it's a conflict error
+			// Enhanced conflict handling with resolution dialog
 			if (error.isConflict && error.conflictInfo) {
 				const selectedPatient = patients.find(p => p.id === data.patientId);
 				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'le patient sélectionné';
 				
-				setConflictDialog({
+				// Show the enhanced conflict resolution dialog
+				setConflictResolutionDialog({
 					open: true,
 					conflictInfo: error.conflictInfo,
-					formData: {
-						patientId: data.patientId,
-						date: new Date(data.date).toISOString(),
-						start: new Date(data.date).toISOString(),
-						reason: data.reason,
-						notes: data.notes || null,
-						status: data.status as AppointmentStatus,
-						notificationSent: false,
-						cabinetId: 1,
-						osteopathId: 1,
-						createdAt: new Date().toISOString(),
-						updatedAt: new Date().toISOString(),
-					}
+					requestedDate: new Date(data.date).toISOString()
 				});
 				
-				toast.warning(`⚠️ Conflit détecté pour ${patientName} le ${format(new Date(data.date), "PPP 'à' HH:mm", { locale: fr })}. Un autre rendez-vous existe déjà sur ce créneau.`, {
+				toast.warning(`⚠️ Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`, {
 					duration: 6000,
 				});
 			} else if (error.message?.includes("créneau horaire")) {
@@ -416,82 +437,16 @@ export function AppointmentForm({
 							render={({ field }) => (
 								<FormItem className="flex flex-col">
 									<FormLabel>Date de la séance</FormLabel>
-									<Popover>
-										<PopoverTrigger asChild>
-											<FormControl>
-												<Button
-													variant={"outline"}
-													className={cn(
-														"w-full pl-3 text-left font-normal",
-														!field.value &&
-															"text-muted-foreground"
-													)}
-												>
-													{field.value ? (
-														formatDate(field.value)
-													) : (
-														<span>
-															Choisir une date
-														</span>
-													)}
-													<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-												</Button>
-											</FormControl>
-										</PopoverTrigger>
-										<PopoverContent
-											className="w-auto p-0"
-											align="start"
-										>
-											{/* Ici nous corrigeons l'erreur en utilisant le composant ui/calendar */}
-											<div className="calendar-container p-3">
-												{field.value && (
-													<div className="text-sm mb-2">
-														Sélection:{" "}
-														{formatDate(field.value)}
-													</div>
-												)}
-												<div className="grid grid-cols-7 gap-2">
-													{Array.from(
-														{ length: 31 },
-														(_, i) => {
-															const day = new Date();
-															day.setDate(
-																day.getDate() +
-																	i -
-																	5
-															);
-															return (
-																<Button
-																	key={i}
-																	type="button"
-																	variant={
-																		field.value &&
-																		day.toDateString() ===
-																			field.value.toDateString()
-																			? "default"
-																			: "outline"
-																	}
-																	className={cn(
-																		"h-9 w-9",
-																		day.getMonth() !==
-																			new Date().getMonth() &&
-																			"opacity-50"
-																	)}
-																	onClick={() =>
-																		field.onChange(
-																			day
-																		)
-																	}
-																>
-																	{day.getDate()}
-																</Button>
-															);
-														}
-													)}
-												</div>
-											</div>
-										</PopoverContent>
-									</Popover>
+									<FormControl>
+										<EnhancedDatePicker
+											date={field.value}
+											onSelect={field.onChange}
+											appointmentDates={appointmentDates}
+											disabled={isSubmitting}
+											placeholder="Choisir une date"
+											className="w-full"
+										/>
+									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -635,6 +590,16 @@ export function AppointmentForm({
 				conflictInfo={conflictDialog.conflictInfo}
 				onForceUpdate={handleConflictForceUpdate}
 				onCancel={() => setConflictDialog({ open: false, conflictInfo: null, formData: null })}
+			/>
+
+			<ConflictResolutionDialog
+				open={conflictResolutionDialog.open}
+				onOpenChange={(open) => setConflictResolutionDialog(prev => ({ ...prev, open }))}
+				conflictInfo={conflictResolutionDialog.conflictInfo}
+				requestedDate={conflictResolutionDialog.requestedDate}
+				onSelectAlternative={handleAlternativeSelect}
+				onForceUpdate={handleConflictForceUpdate}
+				onCancel={() => setConflictResolutionDialog({ open: false, conflictInfo: null, requestedDate: "" })}
 			/>
 		</>
 	);
