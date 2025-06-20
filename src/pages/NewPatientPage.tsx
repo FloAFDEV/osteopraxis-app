@@ -1,10 +1,11 @@
+
 import { PatientForm } from "@/components/patient-form";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
-import { ArrowLeft, Loader2, UserPlus } from "lucide-react"; // Importer ArrowLeft
+import { ArrowLeft, Loader2, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -34,7 +35,7 @@ const NewPatientPage = () => {
 		try {
 			setLoading(true);
 
-			// Vérifier les champs obligatoires
+			// Vérifier les champs obligatoires - supprimer la vérification de l'email
 			if (!patientData.firstName || !patientData.lastName) {
 				toast.error("Veuillez remplir au moins le nom et le prénom");
 				setLoading(false);
