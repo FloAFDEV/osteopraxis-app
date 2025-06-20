@@ -249,7 +249,7 @@ const LoginPage = () => {
 										<div className="w-full border-t border-gray-700"></div>
 									</div>
 									<div className="relative flex justify-center text-sm">
-										<span className="px-2 bg-[#0d1117] text-gray-400">
+										<span className="px-2 bg-[#0d1117] text-blue-400">
 											Connexion par Magic Link
 										</span>
 									</div>
