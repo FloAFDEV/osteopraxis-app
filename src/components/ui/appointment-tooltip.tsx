@@ -2,7 +2,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Clock, User, Calendar } from "lucide-react";
+import { Clock, User, Calendar, UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CalendarAppointment } from "@/types/calendar";
@@ -28,6 +28,15 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
     };
     
     return statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const, textColor: "text-gray-600 dark:text-gray-300" };
+  };
+
+  const getGenderIcon = (gender?: string | null) => {
+    if (gender === "Homme" || gender === "MALE") {
+      return <UserIcon className="h-3 w-3 text-blue-500 dark:text-blue-400 flex-shrink-0" />;
+    } else if (gender === "Femme" || gender === "FEMALE") {
+      return <UserIcon className="h-3 w-3 text-pink-500 dark:text-pink-400 flex-shrink-0" />;
+    }
+    return <User className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />;
   };
 
   const sortedAppointments = [...appointments].sort((a, b) => a.time.localeCompare(b.time));
@@ -63,7 +72,7 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1">
-                          <User className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />
+                          {getGenderIcon(appointment.patientGender)}
                           <span className={`text-sm truncate font-medium ${statusInfo.textColor}`}>
                             {appointment.patientName}
                           </span>
