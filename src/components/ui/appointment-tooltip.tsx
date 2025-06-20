@@ -20,14 +20,14 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      SCHEDULED: { label: "Planifié", variant: "default" as const, color: "text-blue-600 dark:text-blue-400" },
-      COMPLETED: { label: "Terminé", variant: "secondary" as const, color: "text-green-600 dark:text-green-400" },
-      CANCELED: { label: "Annulé", variant: "destructive" as const, color: "text-red-600 dark:text-red-400" },
-      RESCHEDULED: { label: "Reporté", variant: "outline" as const, color: "text-orange-600 dark:text-orange-400" },
-      NO_SHOW: { label: "Absence", variant: "outline" as const, color: "text-gray-600 dark:text-gray-400" }
+      SCHEDULED: { label: "Planifié", variant: "default" as const, textColor: "text-blue-600 dark:text-blue-300" },
+      COMPLETED: { label: "Terminé", variant: "secondary" as const, textColor: "text-green-600 dark:text-green-300" },
+      CANCELED: { label: "Annulé", variant: "destructive" as const, textColor: "text-red-600 dark:text-red-300" },
+      RESCHEDULED: { label: "Reporté", variant: "outline" as const, textColor: "text-orange-600 dark:text-orange-300" },
+      NO_SHOW: { label: "Absence", variant: "outline" as const, textColor: "text-gray-600 dark:text-gray-300" }
     };
     
-    return statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const, color: "text-gray-600 dark:text-gray-400" };
+    return statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const, textColor: "text-gray-600 dark:text-gray-300" };
   };
 
   const sortedAppointments = [...appointments].sort((a, b) => a.time.localeCompare(b.time));
@@ -57,18 +57,18 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
                     className="flex items-center justify-between gap-2 p-2 rounded bg-gray-50 dark:bg-gray-700/50"
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <Clock className="h-3 w-3 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <Clock className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                         {appointment.time}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1">
-                          <User className="h-3 w-3 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                          <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          <User className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />
+                          <span className={`text-sm truncate ${statusInfo.textColor}`}>
                             {appointment.patientName}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+                        <p className={`text-xs truncate ${statusInfo.textColor} opacity-90`}>
                           {appointment.reason}
                         </p>
                       </div>
@@ -84,7 +84,7 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
               })}
               
               {appointments.length > 5 && (
-                <div className="text-center text-xs text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-200 dark:border-gray-600">
+                <div className="text-center text-xs text-gray-500 dark:text-gray-300 pt-1 border-t border-gray-200 dark:border-gray-600">
                   +{appointments.length - 5} autres rendez-vous
                 </div>
               )}
