@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
@@ -389,7 +390,16 @@ function App() {
 					}
 				/>
 			</Routes>
-			<Toaster position="top-right" richColors closeButton />
+			<Toaster 
+				position="top-left" 
+				richColors 
+				closeButton 
+				toastOptions={{
+					style: {
+						marginTop: '80px',
+					},
+				}}
+			/>
 		</>
 	);
 }
