@@ -9,6 +9,7 @@ import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { api } from "@/services/api";
 import { invoiceService } from "@/services/api/invoice-service";
 import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
@@ -32,12 +33,15 @@ import {
 	Stethoscope,
 	Users,
 	FileText,
+	Edit,
+	Plus,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
 import { PatientFormValues } from "@/components/patient-form/types";
+import { NewAppointmentModal } from "@/components/patients/detail/NewAppointmentModal";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -50,6 +54,7 @@ const PatientDetailPage = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+	const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
 	const historyTabRef = useRef<HTMLElement | null>(null);
 
 	// Sticky swap for cards (must also be before return)
@@ -244,6 +249,7 @@ const PatientDetailPage = () => {
 		if (id) {
 			api.getAppointmentsByPatientId(parseInt(id)).then(setAppointments);
 		}
+		setShowNewAppointmentModal(false);
 	};
 
 	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
@@ -307,6 +313,30 @@ const PatientDetailPage = () => {
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
 				{/* Header section */}
 				<PatientHeader patientId={patient.id} />
+
+				{/* Action buttons - visibles sur tous les onglets */}
+				<div className="flex justify-end gap-2 mb-4">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => setShowNewAppointmentModal(true)}
+						className="flex items-center gap-2"
+					>
+						<Plus className="h-4 w-4" />
+						Nouvelle séance
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						asChild
+						className="flex items-center gap-2"
+					>
+						<Link to={`/patients/${patient.id}/edit`}>
+							<Edit className="h-4 w-4" />
+							Modifier
+						</Link>
+					</Button>
+				</div>
 
 				{/* Stats section */}
 				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
@@ -470,6 +500,16 @@ const PatientDetailPage = () => {
 						</div>
 					</div>
 				</div>
+
+				{/* Modal pour nouvelle séance */}
+				{showNewAppointmentModal && (
+					<NewAppointmentModal
+						patient={patient}
+						onClose={() => setShowNewAppointmentModal(false)}
+						onAppointmentCreated={handleAppointmentCreated}
+						selectedCabinetId={parseInt(localStorage.getItem("selectedCabinetId") || "1")}
+					/>
+				)}
 			</div>
 		</Layout>
 	);
