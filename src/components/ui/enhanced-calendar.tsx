@@ -35,7 +35,7 @@ function EnhancedCalendar({
           className={cn(
             buttonVariants({ variant: "ghost" }),
             "h-9 w-9 p-0 font-normal aria-selected:opacity-100 relative",
-            hasAppointment && "bg-blue-50 text-blue-700 hover:bg-blue-100"
+            hasAppointment && "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/50"
           )}
           onClick={() => onDateSelect?.(date)}
         >
@@ -43,7 +43,7 @@ function EnhancedCalendar({
           {hasAppointment && (
             <Badge 
               variant="secondary" 
-              className="absolute -top-1 -right-1 h-2 w-2 p-0 bg-blue-500"
+              className="absolute -top-1 -right-1 h-2 w-2 p-0 bg-blue-500 dark:bg-blue-400"
             />
           )}
         </button>

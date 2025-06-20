@@ -61,29 +61,29 @@ export function AppointmentConflictDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-2xl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-amber-600">
+          <AlertDialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
             <Clock className="h-5 w-5" />
             Conflit de rendez-vous détecté
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-4">
-            <p>
+            <p className="text-foreground">
               Un rendez-vous existe déjà sur le créneau demandé le{" "}
               <strong>{formatDateTime(conflictInfo.requestedDate)}</strong>.
             </p>
             
-            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-              <h4 className="font-medium text-amber-800 mb-3">Rendez-vous en conflit :</h4>
+            <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+              <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-3">Rendez-vous en conflit :</h4>
               {conflictInfo.conflictingAppointments.map((appointment) => (
-                <div key={appointment.id} className="bg-white p-3 rounded border space-y-2">
+                <div key={appointment.id} className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-blue-500" />
-                      <span className="font-medium">{appointment.patientName}</span>
+                      <User className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                      <span className="font-medium text-foreground">{appointment.patientName}</span>
                     </div>
                     {getStatusBadge(appointment.status)}
                   </div>
                   
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="text-sm text-muted-foreground space-y-1">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       <span>{formatDateTime(appointment.date)}</span>
@@ -94,7 +94,7 @@ export function AppointmentConflictDialog({
                   </div>
                   
                   {(appointment.patientPhone || appointment.patientEmail) && (
-                    <div className="text-sm text-gray-500 space-y-1">
+                    <div className="text-sm text-muted-foreground space-y-1">
                       {appointment.patientPhone && (
                         <div className="flex items-center gap-2">
                           <Phone className="h-3 w-3" />
@@ -113,8 +113,8 @@ export function AppointmentConflictDialog({
               ))}
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800">
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
                 <strong>Créneau actuel :</strong> {formatDateTime(conflictInfo.currentDate)}
                 <br />
                 <strong>Nouveau créneau demandé :</strong> {formatDateTime(conflictInfo.requestedDate)}

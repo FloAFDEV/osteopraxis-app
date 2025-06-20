@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, User, Calendar, ChevronRight } from "lucide-react";
 import { format, addMinutes, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface TimeSlot {
   time: string;
@@ -84,32 +85,32 @@ export function ConflictResolutionDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-amber-600">
+          <AlertDialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
             <Clock className="h-5 w-5" />
             Conflit de rendez-vous détecté
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-4">
-            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-              <p className="text-amber-800 font-medium mb-2">
+            <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+              <p className="text-amber-800 dark:text-amber-200 font-medium mb-2">
                 Un rendez-vous existe déjà le {formatDateTime(requestedDate)}
               </p>
               
               {conflictInfo.conflictingAppointments?.map((appointment: any) => (
-                <div key={appointment.id} className="bg-white p-3 rounded border mb-2">
+                <div key={appointment.id} className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700 mb-2">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-blue-500" />
-                      <span className="font-medium">{appointment.patientName}</span>
+                      <User className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                      <span className="font-medium text-foreground">{appointment.patientName}</span>
                     </div>
                     <Badge variant="outline">{appointment.status}</Badge>
                   </div>
-                  <p className="text-sm text-gray-600">{appointment.reason}</p>
+                  <p className="text-sm text-muted-foreground">{appointment.reason}</p>
                 </div>
               ))}
             </div>
 
             <div className="space-y-3">
-              <h4 className="font-medium flex items-center gap-2">
+              <h4 className="font-medium flex items-center gap-2 text-foreground">
                 <Calendar className="h-4 w-4" />
                 Créneaux alternatifs suggérés
               </h4>
@@ -126,26 +127,26 @@ export function ConflictResolutionDialog({
                       className={cn(
                         "flex items-center justify-between p-3 rounded border transition-colors",
                         slot.available 
-                          ? "bg-green-50 border-green-200 hover:bg-green-100 cursor-pointer" 
-                          : "bg-gray-50 border-gray-200 opacity-60"
+                          ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-950/50 cursor-pointer" 
+                          : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60"
                       )}
                       onClick={() => slot.available && handleAlternativeSelect(slot.time)}
                     >
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span>{formatDateTime(slot.time)}</span>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-foreground">{formatDateTime(slot.time)}</span>
                       </div>
                       
                       <div className="flex items-center gap-2">
                         {slot.available ? (
                           <>
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            <Badge variant="secondary" className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                               Disponible
                             </Badge>
-                            <ChevronRight className="h-4 w-4 text-green-600" />
+                            <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
                           </>
                         ) : (
-                          <Badge variant="outline" className="text-gray-600">
+                          <Badge variant="outline" className="text-muted-foreground">
                             {slot.reason}
                           </Badge>
                         )}
