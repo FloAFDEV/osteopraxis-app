@@ -1,54 +1,26 @@
 
-import { Appointment, AppointmentStatus, CreateAppointmentPayload } from "@/types";
+import { Appointment } from "@/types";
 
-export function adaptAppointmentFromSupabase(data: any): Appointment {
-	return {
-		id: data.id,
-		patientId: data.patientId,
-		cabinetId: data.cabinetId,
-		osteopathId: data.osteopathId,
-		start: data.date, // Utiliser date comme start
-		end: data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : data.date, // Calculer end à partir de date + 30min
-		status: data.status as AppointmentStatus,
-		notes: data.notes,
-		createdAt: data.createdAt,
-		updatedAt: data.updatedAt,
-		date: data.date,
-		reason: data.reason,
-		notificationSent: data.notificationSent || false,
-		user_id: data.user_id,
-	};
-}
-
-export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Partial<Appointment>): any {
-	return {
-		patientId: data.patientId,
-		cabinetId: data.cabinetId,
-		osteopathId: data.osteopathId,
-		date: data.date || data.start, // Utiliser date en priorité, sinon start
-		status: data.status,
-		reason: data.reason,
-		notes: data.notes,
-		notificationSent: data.notificationSent || false,
-		user_id: data.user_id || null,
-	};
-}
-
-export function createAppointmentPayload(data: any): CreateAppointmentPayload {
-	return {
-		patientId: data.patientId,
-		cabinetId: data.cabinetId || 1,
-		osteopathId: data.osteopathId,
-		start: data.start || data.date,
-		end: data.end || (data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : undefined),
-		date: data.date || data.start,
-		reason: data.reason,
-		status: data.status || "SCHEDULED",
-		notes: data.notes,
-		notificationSent: data.notificationSent || false,
-		createdAt: data.createdAt,
-		updatedAt: data.updatedAt,
-		website: data.website, // Pour le honeypot
-		user_id: data.user_id || null,
-	};
-}
+export const adaptAppointmentFromSupabase = (data: any): Appointment => {
+  // Log pour debugging les données reçues
+  console.log('Données appointment brutes:', data);
+  console.log('Patient associé:', data.Patient);
+  console.log('Genre du patient:', data.Patient?.gender);
+  
+  return {
+    id: data.id,
+    date: data.date,
+    time: data.time,
+    duration: data.duration,
+    reason: data.reason,
+    status: data.status,
+    notes: data.notes,
+    patientId: data.patientId,
+    patientName: data.Patient ? `${data.Patient.firstName} ${data.Patient.lastName}` : 'Patient inconnu',
+    patientGender: data.Patient?.gender || null, // S'assurer que le genre est correctement mappé
+    osteopathId: data.osteopathId,
+    cabinetId: data.cabinetId,
+    createdAt: data.created_at || data.createdAt,
+    updatedAt: data.updated_at || data.updatedAt,
+  };
+};
