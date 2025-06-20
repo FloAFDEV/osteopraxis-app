@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -30,9 +31,19 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
   };
 
   const getGenderIcon = (gender?: string | null) => {
-    if (gender === "Homme" || gender === "MALE") {
+    // Log pour debugging
+    console.log('Gender reçu dans tooltip:', gender, typeof gender);
+    
+    if (!gender) {
+      return <UserIcon className="h-3 w-3 text-green-500 dark:text-green-400 flex-shrink-0" />;
+    }
+    
+    const genderStr = gender.toString().toLowerCase().trim();
+    console.log('Gender normalisé:', genderStr);
+    
+    if (genderStr === "homme" || genderStr === "male" || genderStr === "m") {
       return <UserIcon className="h-3 w-3 text-blue-500 dark:text-blue-400 flex-shrink-0" />;
-    } else if (gender === "Femme" || gender === "FEMALE") {
+    } else if (genderStr === "femme" || genderStr === "female" || genderStr === "f") {
       return <UserIcon className="h-3 w-3 text-pink-500 dark:text-pink-400 flex-shrink-0" />;
     } else {
       // Vert pour les enfants ou genre non spécifié
