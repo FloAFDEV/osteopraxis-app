@@ -39,6 +39,21 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
     return <User className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />;
   };
 
+  // Extraire l'heure depuis la chaîne time (format "HH:mm" ou timestamp)
+  const formatAppointmentTime = (timeString: string) => {
+    try {
+      // Si c'est déjà au format HH:mm
+      if (timeString.match(/^\d{2}:\d{2}$/)) {
+        return timeString;
+      }
+      // Si c'est un timestamp ISO
+      const date = new Date(timeString);
+      return format(date, "HH:mm");
+    } catch {
+      return timeString; // Retourner tel quel si erreur
+    }
+  };
+
   const sortedAppointments = [...appointments].sort((a, b) => a.time.localeCompare(b.time));
 
   return (
@@ -68,7 +83,7 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Clock className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        {appointment.time}
+                        {formatAppointmentTime(appointment.time)}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1">
