@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -19,14 +20,14 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      SCHEDULED: { label: "Planifié", variant: "default" as const, textColor: "text-blue-600 dark:text-blue-300" },
-      COMPLETED: { label: "Terminé", variant: "secondary" as const, textColor: "text-green-600 dark:text-green-300" },
-      CANCELED: { label: "Annulé", variant: "destructive" as const, textColor: "text-red-600 dark:text-red-300" },
-      RESCHEDULED: { label: "Reporté", variant: "outline" as const, textColor: "text-orange-600 dark:text-orange-300" },
-      NO_SHOW: { label: "Absence", variant: "outline" as const, textColor: "text-gray-600 dark:text-gray-300" }
+      SCHEDULED: { label: "Planifié", variant: "default" as const },
+      COMPLETED: { label: "Terminé", variant: "secondary" as const },
+      CANCELED: { label: "Annulé", variant: "destructive" as const },
+      RESCHEDULED: { label: "Reporté", variant: "outline" as const },
+      NO_SHOW: { label: "Absence", variant: "outline" as const }
     };
     
-    return statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const, textColor: "text-gray-600 dark:text-gray-300" };
+    return statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const };
   };
 
   const getGenderIcon = (gender?: string | null) => {
@@ -88,11 +89,11 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1">
                           {getGenderIcon(appointment.patientGender)}
-                          <span className={`text-sm truncate font-medium ${statusInfo.textColor}`}>
+                          <span className="text-sm truncate font-medium text-gray-700 dark:text-gray-200">
                             {appointment.patientName}
                           </span>
                         </div>
-                        <p className={`text-xs truncate ${statusInfo.textColor} opacity-90`}>
+                        <p className="text-xs truncate text-gray-600 dark:text-gray-400 opacity-90">
                           {appointment.reason}
                         </p>
                       </div>
