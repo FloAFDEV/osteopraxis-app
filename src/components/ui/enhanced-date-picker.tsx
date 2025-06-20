@@ -12,11 +12,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { CalendarAppointment } from "@/types/calendar";
 
 interface EnhancedDatePickerProps {
   date?: Date;
   onSelect?: (date: Date | undefined) => void;
   appointmentDates?: string[];
+  appointments?: CalendarAppointment[];
   disabled?: boolean;
   placeholder?: string;
   className?: string;
@@ -26,6 +28,7 @@ export function EnhancedDatePicker({
   date,
   onSelect,
   appointmentDates = [],
+  appointments = [],
   disabled = false,
   placeholder = "Choisir une date",
   className,
@@ -59,6 +62,7 @@ export function EnhancedDatePicker({
           selected={date}
           onSelect={handleDateSelect}
           appointmentDates={appointmentDates}
+          appointments={appointments}
           onDateSelect={handleDateSelect}
           initialFocus
           className={cn("p-3 pointer-events-auto")}

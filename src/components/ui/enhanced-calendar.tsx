@@ -8,9 +8,12 @@ import { format, isSameDay, parseISO } from "date-fns";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { AppointmentTooltip } from "@/components/ui/appointment-tooltip";
+import { CalendarAppointment } from "@/types/calendar";
 
 export type EnhancedCalendarProps = React.ComponentProps<typeof DayPicker> & {
   appointmentDates?: string[];
+  appointments?: CalendarAppointment[];
   onDateSelect?: (date: Date) => void;
 };
 
@@ -19,36 +22,53 @@ function EnhancedCalendar({
   classNames,
   showOutsideDays = true,
   appointmentDates = [],
+  appointments = [],
   onDateSelect,
   ...props
 }: EnhancedCalendarProps) {
-  // Custom day component to show appointment indicators
+  // Custom day component to show appointment indicators with tooltips
   const CustomDay = ({ date, ...dayProps }: DayProps) => {
     const hasAppointment = appointmentDates.some(aptDate => 
       isSameDay(new Date(aptDate), date)
     );
     
-    return (
-      <div className="relative">
-        <button
-          {...dayProps}
-          className={cn(
-            buttonVariants({ variant: "ghost" }),
-            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 relative",
-            hasAppointment && "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-          )}
-          onClick={() => onDateSelect?.(date)}
-        >
-          {format(date, "d")}
-          {hasAppointment && (
-            <Badge 
-              variant="secondary" 
-              className="absolute -top-1 -right-1 h-2 w-2 p-0 bg-blue-500 dark:bg-blue-400"
-            />
-          )}
-        </button>
-      </div>
+    // Filter appointments for this specific date
+    const dayAppointments = appointments.filter(apt => 
+      isSameDay(new Date(apt.time), date)
     );
+    
+    const dayButton = (
+      <button
+        {...dayProps}
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 relative",
+          hasAppointment && "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/50"
+        )}
+        onClick={() => onDateSelect?.(date)}
+      >
+        {format(date, "d")}
+        {hasAppointment && (
+          <Badge 
+            variant="secondary" 
+            className="absolute -top-1 -right-1 h-2 w-2 p-0 bg-blue-500 dark:bg-blue-400"
+          />
+        )}
+      </button>
+    );
+
+    // Wrap with tooltip if there are appointments
+    if (dayAppointments.length > 0) {
+      return (
+        <div className="relative">
+          <AppointmentTooltip date={date} appointments={dayAppointments}>
+            {dayButton}
+          </AppointmentTooltip>
+        </div>
+      );
+    }
+    
+    return <div className="relative">{dayButton}</div>;
   };
 
   return (

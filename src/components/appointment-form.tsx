@@ -38,6 +38,7 @@ import { fr } from "date-fns/locale";
 import { AppointmentConflictDialog } from "@/components/appointment-conflict-dialog";
 import { ConflictResolutionDialog } from "@/components/conflict-resolution-dialog";
 import { EnhancedDatePicker } from "@/components/ui/enhanced-date-picker";
+import { CalendarAppointment } from "@/types/calendar";
 
 const appointmentFormSchema = z.object({
 	patientId: z.number().min(1, {
@@ -99,6 +100,7 @@ export function AppointmentForm({
 		requestedDate: ""
 	});
 	const [appointmentDates, setAppointmentDates] = useState<string[]>([]);
+	const [calendarAppointments, setCalendarAppointments] = useState<any[]>([]);
 	const navigate = useNavigate();
 	const { patientId: patientIdParam } = useParams<{ patientId: string }>();
 
@@ -121,20 +123,35 @@ export function AppointmentForm({
 		fetchPatients();
 	}, [propPatients]);
 
-	// Load appointment dates for calendar visualization
+	// Updated useEffect to load appointment details for calendar
 	useEffect(() => {
-		const loadAppointmentDates = async () => {
+		const loadAppointmentData = async () => {
 			try {
 				const appointments = await api.getAppointments();
 				const dates = appointments.map(apt => apt.date);
 				setAppointmentDates(dates);
+				
+				// Transform appointments for calendar tooltips
+				const calendarData = appointments.map(apt => {
+					const patient = patients.find(p => p.id === apt.patientId);
+					return {
+						id: apt.id,
+						time: apt.date,
+						patientName: patient ? `${patient.firstName} ${patient.lastName}` : 'Patient inconnu',
+						reason: apt.reason,
+						status: apt.status
+					};
+				});
+				setCalendarAppointments(calendarData);
 			} catch (error) {
-				console.error("Error loading appointment dates:", error);
+				console.error("Error loading appointment data:", error);
 			}
 		};
 		
-		loadAppointmentDates();
-	}, []);
+		if (patients.length > 0) {
+			loadAppointmentData();
+		}
+	}, [patients]);
 
 	const form = useForm<AppointmentFormValues>({
 		resolver: zodResolver(appointmentFormSchema),
@@ -442,6 +459,7 @@ export function AppointmentForm({
 											date={field.value}
 											onSelect={field.onChange}
 											appointmentDates={appointmentDates}
+											appointments={calendarAppointments}
 											disabled={isSubmitting}
 											placeholder="Choisir une date"
 											className="w-full"
