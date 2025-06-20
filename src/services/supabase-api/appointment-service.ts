@@ -1,19 +1,8 @@
+
 import { Appointment } from "@/types";
 import { supabase } from "./utils";
-import { adaptAppointmentFromSupabase } from "./appointment-adapter";
+import { adaptAppointmentFromSupabase, CreateAppointmentPayload } from "./appointment-adapter";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
-
-// Interface pour les données de formulaire d'appointment
-interface AppointmentFormData {
-  date: string;
-  reason: string;
-  status?: string;
-  notes?: string;
-  patientId: number;
-  osteopathId?: number;
-  cabinetId?: number;
-  duration?: number;
-}
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -57,6 +46,34 @@ export const appointmentService = {
     }
   },
 
+  async getAppointmentById(id: number): Promise<Appointment | null> {
+    try {
+      const { data, error } = await supabase
+        .from("Appointment")
+        .select(`
+          *,
+          Patient!inner (
+            id,
+            firstName,
+            lastName,
+            gender
+          )
+        `)
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Erreur lors de la récupération du rendez-vous:", error);
+        throw error;
+      }
+
+      return data ? adaptAppointmentFromSupabase(data) : null;
+    } catch (error) {
+      console.error("Erreur dans getAppointmentById:", error);
+      throw error;
+    }
+  },
+
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     try {
       const osteopathId = await getCurrentOsteopathId();
@@ -96,17 +113,55 @@ export const appointmentService = {
     }
   },
 
-  async createAppointment(appointment: AppointmentFormData): Promise<Appointment> {
+  async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | null> {
     try {
-      const osteopathId = await getCurrentOsteopathId();
-      if (!osteopathId) {
-        throw new Error("Aucun ostéopathe connecté");
-      }
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
 
       const { data, error } = await supabase
         .from("Appointment")
-        .insert([{ ...appointment, osteopathId }])
-        .select()
+        .select(`
+          *,
+          Patient!inner (
+            id,
+            firstName,
+            lastName,
+            gender
+          )
+        `)
+        .eq("patientId", patientId)
+        .gte("date", today.toISOString())
+        .lt("date", tomorrow.toISOString())
+        .maybeSingle();
+
+      if (error) {
+        console.error("Erreur lors de la récupération du rendez-vous du jour:", error);
+        throw error;
+      }
+
+      return data ? adaptAppointmentFromSupabase(data) : null;
+    } catch (error) {
+      console.error("Erreur dans getTodayAppointmentForPatient:", error);
+      throw error;
+    }
+  },
+
+  async createAppointment(appointment: CreateAppointmentPayload): Promise<Appointment> {
+    try {
+      const { data, error } = await supabase
+        .from("Appointment")
+        .insert(appointment)
+        .select(`
+          *,
+          Patient!inner (
+            id,
+            firstName,
+            lastName,
+            gender
+          )
+        `)
         .single();
 
       if (error) {
@@ -127,7 +182,15 @@ export const appointmentService = {
         .from("Appointment")
         .update(updates)
         .eq("id", id)
-        .select()
+        .select(`
+          *,
+          Patient!inner (
+            id,
+            firstName,
+            lastName,
+            gender
+          )
+        `)
         .single();
 
       if (error) {
@@ -142,17 +205,29 @@ export const appointmentService = {
     }
   },
 
-  async cancelAppointment(id: number): Promise<void> {
+  async cancelAppointment(id: number): Promise<Appointment> {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("Appointment")
         .update({ status: 'CANCELED' })
-        .eq("id", id);
+        .eq("id", id)
+        .select(`
+          *,
+          Patient!inner (
+            id,
+            firstName,
+            lastName,
+            gender
+          )
+        `)
+        .single();
 
       if (error) {
         console.error("Erreur lors de l'annulation du rendez-vous:", error);
         throw error;
       }
+
+      return adaptAppointmentFromSupabase(data);
     } catch (error) {
       console.error("Erreur dans cancelAppointment:", error);
       throw error;
@@ -178,5 +253,3 @@ export const appointmentService = {
 };
 
 export default appointmentService;
-// Corriger l'export pour éviter l'erreur
-export { appointmentService as supabaseAppointmentService };

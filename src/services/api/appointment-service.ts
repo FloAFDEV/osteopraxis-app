@@ -1,3 +1,4 @@
+
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { appointmentService as supabaseAppointmentService } from "../supabase-api/appointment-service";
@@ -86,7 +87,8 @@ export const appointmentService = {
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseAppointmentService.getAppointmentById(id);
+        const result = await supabaseAppointmentService.getAppointmentById(id);
+        return result || undefined;
       } catch (error) {
         console.error("Erreur Supabase getAppointmentById:", error);
         throw error;

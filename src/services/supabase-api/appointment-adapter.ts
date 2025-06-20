@@ -10,23 +10,34 @@ export const adaptAppointmentFromSupabase = (data: any): Appointment => {
   return {
     id: data.id,
     date: data.date,
-    // Retirer le champ 'time' qui n'existe pas dans le type Appointment
-    duration: data.duration,
+    start: data.date, // Utiliser date comme start
+    end: data.date ? new Date(new Date(data.date).getTime() + (data.duration || 30) * 60000).toISOString() : data.date,
     reason: data.reason,
     status: data.status,
     notes: data.notes,
     patientId: data.patientId,
     patientName: data.Patient ? `${data.Patient.firstName} ${data.Patient.lastName}` : 'Patient inconnu',
-    patientGender: data.Patient?.gender || null, // S'assurer que le genre est correctement mappé
+    patientGender: data.Patient?.gender || null,
     osteopathId: data.osteopathId,
     cabinetId: data.cabinetId,
     createdAt: data.created_at || data.createdAt,
     updatedAt: data.updated_at || data.updatedAt,
+    notificationSent: data.notificationSent || false,
   };
 };
 
-// Ajouter l'export manquant pour createAppointmentPayload
-export const createAppointmentPayload = (appointmentData: any) => {
+// Interface pour les données de création d'appointment
+export interface CreateAppointmentPayload {
+  date: string;
+  reason: string;
+  status?: string;
+  notes?: string;
+  patientId: number;
+  osteopathId: number;
+  cabinetId?: number;
+}
+
+export const createAppointmentPayload = (appointmentData: any): CreateAppointmentPayload => {
   return {
     date: appointmentData.date,
     reason: appointmentData.reason,
@@ -35,6 +46,5 @@ export const createAppointmentPayload = (appointmentData: any) => {
     patientId: appointmentData.patientId,
     osteopathId: appointmentData.osteopathId,
     cabinetId: appointmentData.cabinetId,
-    duration: appointmentData.duration,
   };
 };
