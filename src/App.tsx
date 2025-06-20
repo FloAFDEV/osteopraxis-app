@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
@@ -390,18 +389,7 @@ function App() {
 					}
 				/>
 			</Routes>
-			{/* Toaster principal déplacé en bas à droite pour éviter la navbar */}
-			<Toaster position="bottom-right" richColors closeButton />
-			{/* Toaster spécifique pour les notes de séances en haut à gauche */}
-			<Toaster 
-				position="top-left" 
-				richColors 
-				closeButton 
-				toastOptions={{
-					// Filtrer seulement les toasts qui contiennent "séance" dans le titre/description
-					duration: 4000,
-				}}
-			/>
+			<Toaster position="top-right" richColors closeButton />
 		</>
 	);
 }
