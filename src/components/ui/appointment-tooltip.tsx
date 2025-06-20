@@ -54,19 +54,17 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
                 return (
                   <div 
                     key={appointment.id} 
-                    className="flex items-start justify-between gap-2 p-2 rounded bg-gray-50 dark:bg-gray-700/50"
+                    className="flex items-center justify-between gap-2 p-2 rounded bg-gray-50 dark:bg-gray-700/50"
                   >
-                    <div className="flex items-start gap-2 min-w-0 flex-1">
-                      <Clock className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0 mt-0.5" />
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <Clock className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                        {appointment.time}
+                      </span>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                            {appointment.time}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 mb-1">
+                        <div className="flex items-center gap-1">
                           <User className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />
-                          <span className={`text-sm font-bold truncate ${statusInfo.textColor}`}>
+                          <span className={`text-sm truncate font-medium ${statusInfo.textColor}`}>
                             {appointment.patientName}
                           </span>
                         </div>

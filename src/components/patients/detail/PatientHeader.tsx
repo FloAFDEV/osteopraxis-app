@@ -9,7 +9,7 @@ interface PatientHeaderProps {
 
 export function PatientHeader({ patientId }: PatientHeaderProps) {
 	return (
-		<div className="flex justify-between items-start mb-6">
+		<div className="flex justify-between items-start sticky top-16 z-50 p-4">
 			<div className="flex items-center gap-2">
 				<Button variant="outline" size="sm" asChild>
 					<Link to="/patients">
