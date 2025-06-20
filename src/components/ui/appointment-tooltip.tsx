@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -35,12 +34,12 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
       return <UserIcon className="h-3 w-3 text-blue-500 dark:text-blue-400 flex-shrink-0" />;
     } else if (gender === "Femme" || gender === "FEMALE") {
       return <UserIcon className="h-3 w-3 text-pink-500 dark:text-pink-400 flex-shrink-0" />;
+    } else {
+      // Vert pour les enfants ou genre non spécifié
+      return <UserIcon className="h-3 w-3 text-green-500 dark:text-green-400 flex-shrink-0" />;
     }
-    // Vert pour les enfants (cas par défaut)
-    return <User className="h-3 w-3 text-green-500 dark:text-green-400 flex-shrink-0" />;
   };
 
-  // Extraire l'heure depuis la chaîne time (format "HH:mm" ou timestamp)
   const formatAppointmentTime = (timeString: string) => {
     try {
       // Si c'est déjà au format HH:mm
