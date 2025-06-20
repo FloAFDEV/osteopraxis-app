@@ -40,7 +40,7 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
         </TooltipTrigger>
         <TooltipContent 
           side="top" 
-          className="max-w-xs p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
+          className="max-w-xs p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-[99]"
         >
           <div className="space-y-2">
             <div className="flex items-center gap-2 font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 pb-2">
@@ -64,7 +64,7 @@ export function AppointmentTooltip({ date, appointments, children }: Appointment
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3 text-gray-500 dark:text-gray-300 flex-shrink-0" />
-                          <span className={`text-sm truncate ${statusInfo.textColor}`}>
+                          <span className={`text-sm truncate font-medium ${statusInfo.textColor}`}>
                             {appointment.patientName}
                           </span>
                         </div>
