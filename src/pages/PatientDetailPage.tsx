@@ -457,33 +457,18 @@ const PatientDetailPage = () => {
 						</Tabs>
 					</div>
 
-					{/* Right column: PatientInfo et switch ave PersonalInfoCard sticky */}
+					{/* Right column: Sticky cards with responsive behavior */}
 					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6 relative">
-            {/* PatientInfo devient observable */}
-            <div
-              ref={patientInfoRef}
-              className={
-                showStickyAntecedents
-                  ? "invisible h-0 pointer-events-none" // cache quand sticky prend le relais
-                  : ""
-              }
-            >
-              <PatientInfo patient={patient} />
-            </div>
-            {/* Le composant sticky qui vient remplacer si besoin */}
-            <div
-              className={
-                showStickyAntecedents
-                  ? "sticky top-20 z-[99] animate-fade-in"
-                  : "hidden"
-              }
-              style={{ maxWidth: 400 }}
-            >
-              <PersonalInfoCard patient={patient} />
-            </div>
-            {/* Si sticky pas actif, affiche PersoInfoCard normal en dessous */}
-            {!showStickyAntecedents && <PersonalInfoCard patient={patient} />}
-          </div>
+						<div className="hidden xl:block xl:sticky xl:top-20 xl:self-start xl:space-y-4">
+							<PatientInfo patient={patient} />
+							<PersonalInfoCard patient={patient} />
+						</div>
+						{/* Mobile/tablet view - non-sticky */}
+						<div className="xl:hidden space-y-4">
+							<PatientInfo patient={patient} />
+							<PersonalInfoCard patient={patient} />
+						</div>
+					</div>
 				</div>
 			</div>
 		</Layout>

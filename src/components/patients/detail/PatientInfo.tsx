@@ -1,7 +1,6 @@
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useSectionNavigation } from "@/hooks/useSectionNavigation";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
 import {
@@ -22,9 +21,6 @@ interface PatientInfoProps {
 }
 
 export function PatientInfo({ patient }: PatientInfoProps) {
-	const { navigateToSection } = useSectionNavigation();
-	const { isMobile } = useIsMobile();
-
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 
@@ -56,21 +52,8 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 		return { category: "Obésité", variant: "destructive" as const };
 	};
 
-	const handleCurrentTreatmentClick = () => {
-		navigateToSection("informations-medicales-generales");
-	};
-
-	const handleAllergiesClick = () => {
-		navigateToSection("informations-medicales-generales");
-	};
-
-	const getStickyClasses = () => {
-		if (isMobile) return "";
-		return "sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pb-8";
-	};
-
 	return (
-		<Card className={`w-auto max-w-[400px] h-fit ${getStickyClasses()}`}>
+		<Card className="w-auto max-w-[400px] h-fit">
 			<CardContent className="p-3 md:p-4 lg:p-5">
 				{/* En-tête patient */}
 				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
@@ -109,7 +92,6 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							value={patient.currentTreatment}
 							variant="warning"
 							size="sm"
-							onClick={handleCurrentTreatmentClick}
 							showTooltip={true}
 						/>
 					)}
@@ -120,7 +102,6 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							value={patient.allergies}
 							variant="destructive"
 							size="sm"
-							onClick={handleAllergiesClick}
 							showTooltip={true}
 						/>
 					)}
