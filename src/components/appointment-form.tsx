@@ -1,4 +1,3 @@
-
 import { api } from "@/services/api";
 import { AppointmentStatus, Patient } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -492,9 +491,7 @@ export function AppointmentForm({
 												</div>
 											</div>
 										</PopoverContent>
-									</Pop
-
-over>
+									</Popover>
 									<FormMessage />
 								</FormItem>
 							)}
