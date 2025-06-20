@@ -186,6 +186,57 @@ export const supabaseAppointmentService = {
 
 			if (error) {
 				console.error("[SUPABASE ERROR]", error.code, error.message);
+				
+				// Gérer spécifiquement l'erreur de conflit de créneaux
+				if (error.code === "P0001" && error.message.includes("créneau horaire")) {
+					// Récupérer les détails du conflit pour une meilleure UX
+					const appointmentTime = new Date(payload.date);
+					const endTime = new Date(appointmentTime.getTime() + 60 * 60 * 1000);
+
+					const { data: conflictingAppointments } = await supabase
+						.from('Appointment')
+						.select(`
+							id,
+							date,
+							patientId,
+							reason,
+							status,
+							Patient:patientId (
+								id,
+								firstName,
+								lastName,
+								phone,
+								email
+							)
+						`)
+						.eq('osteopathId', osteopathId)
+						.not('status', 'in', '("CANCELED","NO_SHOW")')
+						.gte('date', appointmentTime.toISOString())
+						.lt('date', endTime.toISOString());
+
+					if (conflictingAppointments && conflictingAppointments.length > 0) {
+						const conflictInfo = {
+							conflictingAppointments: conflictingAppointments.map(apt => ({
+								id: apt.id,
+								date: apt.date,
+								patientName: `${apt.Patient?.firstName} ${apt.Patient?.lastName}`,
+								patientPhone: apt.Patient?.phone,
+								patientEmail: apt.Patient?.email,
+								reason: apt.reason,
+								status: apt.status
+							})),
+							requestedDate: payload.date,
+							currentDate: new Date().toISOString()
+						};
+
+						// Créer une erreur personnalisée avec les informations de conflit
+						const conflictError = new Error("Un rendez-vous existe déjà sur ce créneau horaire");
+						(conflictError as any).isConflict = true;
+						(conflictError as any).conflictInfo = conflictInfo;
+						throw conflictError;
+					}
+				}
+				
 				throw error;
 			}
 

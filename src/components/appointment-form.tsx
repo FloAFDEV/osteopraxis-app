@@ -1,3 +1,4 @@
+
 import { api } from "@/services/api";
 import { AppointmentStatus, Patient } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -175,7 +176,7 @@ export function AppointmentForm({
 
 			// Vérifier que l'heure est entre 8h et 20h
 			if (hours < 8 || hours >= 20) {
-				toast.error("Les séances doivent être prises entre 8h et 20h");
+				toast.error("⚠️ Les séances doivent être prises entre 8h et 20h");
 				setIsSubmitting(false);
 				return;
 			}
@@ -216,6 +217,9 @@ export function AppointmentForm({
 			
 			// Check if it's a conflict error
 			if (error.isConflict && error.conflictInfo) {
+				const selectedPatient = patients.find(p => p.id === data.patientId);
+				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'le patient sélectionné';
+				
 				setConflictDialog({
 					open: true,
 					conflictInfo: error.conflictInfo,
@@ -234,9 +238,29 @@ export function AppointmentForm({
 					}
 				});
 				
-				toast.warning("⚠️ Conflit de rendez-vous détecté. Veuillez choisir une action.");
+				toast.warning(`⚠️ Conflit détecté pour ${patientName} le ${format(new Date(data.date), "PPP 'à' HH:mm", { locale: fr })}. Un autre rendez-vous existe déjà sur ce créneau.`, {
+					duration: 6000,
+				});
+			} else if (error.message?.includes("créneau horaire")) {
+				// Cas d'erreur de conflit sans détails
+				const selectedPatient = patients.find(p => p.id === data.patientId);
+				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'ce patient';
+				
+				toast.error(`⛔ Impossible de programmer le rendez-vous pour ${patientName}. Ce créneau horaire est déjà occupé par un autre rendez-vous.`, {
+					duration: 8000,
+				});
+			} else if (error.message?.includes("Patient introuvable")) {
+				toast.error("⛔ Patient introuvable. Veuillez actualiser la page et réessayer.");
+			} else if (error.message?.includes("non autorisé")) {
+				toast.error("⛔ Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient.");
 			} else {
-				toast.error("⛔ Une erreur est survenue. Veuillez réessayer.");
+				// Erreur générique avec plus de contexte
+				const selectedPatient = patients.find(p => p.id === data.patientId);
+				const patientName = selectedPatient ? ` pour ${selectedPatient.firstName} ${selectedPatient.lastName}` : '';
+				
+				toast.error(`⛔ Impossible de ${appointmentId ? 'modifier' : 'créer'} le rendez-vous${patientName}. ${error.message || 'Veuillez réessayer dans quelques instants.'}`, {
+					duration: 8000,
+				});
 			}
 		} finally {
 			setIsSubmitting(false);
@@ -468,7 +492,9 @@ export function AppointmentForm({
 												</div>
 											</div>
 										</PopoverContent>
-									</Popover>
+									</Pop
+
+over>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -498,7 +524,7 @@ export function AppointmentForm({
 										/>
 									</FormControl>
 									<p className="text-xs text-muted-foreground mt-1">
-										ℹ️ Lors de la clôture de la séance (bouton « Clôturer la séance »), l'heure réelle de fin sera automatiquement enregistrée selon l'heure à laquelle vous validez le formulaire.
+										ℹ️ Lors de la clôture de la séance (bouton « Clôturer la séance »), l'heure réelle de fin sera automatiquement enregistrée selon l'heure à laquelle vous validez le formulaire.
 									</p>
 									<FormMessage />
 								</FormItem>
