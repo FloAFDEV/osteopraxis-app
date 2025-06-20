@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,10 +46,10 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
 
   // Ajouter des logs pour diagnostiquer cabinets et praticiens reçus
   React.useEffect(() => {
-    console.log("[InvoiceFilters] cabinets :", props.cabinets);
-    console.log("[InvoiceFilters] praticiens/osteopaths :", props.osteopaths);
-    console.log("[InvoiceFilters] selectedCabinetId :", props.selectedCabinetId);
-    console.log("[InvoiceFilters] selectedOsteopathId :", props.selectedOsteopathId);
+    console.log("[InvoiceFilters] cabinets :", props.cabinets);
+    console.log("[InvoiceFilters] praticiens/osteopaths :", props.osteopaths);
+    console.log("[InvoiceFilters] selectedCabinetId :", props.selectedCabinetId);
+    console.log("[InvoiceFilters] selectedOsteopathId :", props.selectedOsteopathId);
   }, [props.cabinets, props.osteopaths, props.selectedCabinetId, props.selectedOsteopathId]);
 
   // Helper function to safely format month display
@@ -78,30 +79,8 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
   return (
     <Card className="mb-8">
       <CardContent className="p-4">
-        {/* Filtres Cabinet/Ostéo */}
+        {/* Filtres Ostéo/Cabinet - Ordre inversé */}
         <div className="flex flex-wrap gap-4 mb-4">
-          <div>
-            <label className="block text-xs mb-1 font-medium text-muted-foreground">Cabinet</label>
-            <Select
-              value={props.selectedCabinetId != null ? String(props.selectedCabinetId) : ""}
-              onValueChange={(v) => {
-                console.log("Changement de valeur du select Cabinet:", v);
-                props.setSelectedCabinetId(v === "ALL" || v === "" ? null : Number(v));
-              }}
-            >
-              <SelectTrigger className="min-w-[140px] dark:bg-background dark:border-muted-foreground">
-                <SelectValue placeholder="Tous les cabinets" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tous les cabinets</SelectItem>
-                {props.cabinets.map((cab) => (
-                  <SelectItem key={cab.id} value={String(cab.id)}>
-                    {cab.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <div>
             <label className="block text-xs mb-1 font-medium text-muted-foreground">Ostéopathe</label>
             <Select
@@ -119,6 +98,28 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
                 {props.osteopaths.map(ost => (
                   <SelectItem key={ost.id} value={String(ost.id)}>
                     {ost.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="block text-xs mb-1 font-medium text-muted-foreground">Cabinet</label>
+            <Select
+              value={props.selectedCabinetId != null ? String(props.selectedCabinetId) : ""}
+              onValueChange={(v) => {
+                console.log("Changement de valeur du select Cabinet:", v);
+                props.setSelectedCabinetId(v === "ALL" || v === "" ? null : Number(v));
+              }}
+            >
+              <SelectTrigger className="min-w-[140px] dark:bg-background dark:border-muted-foreground">
+                <SelectValue placeholder="Tous les cabinets" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Tous les cabinets</SelectItem>
+                {props.cabinets.map((cab) => (
+                  <SelectItem key={cab.id} value={String(cab.id)}>
+                    {cab.name}
                   </SelectItem>
                 ))}
               </SelectContent>
