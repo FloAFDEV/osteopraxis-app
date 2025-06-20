@@ -1,7 +1,19 @@
-import { Appointment, AppointmentFormData } from "@/types";
+import { Appointment } from "@/types";
 import { supabase } from "./utils";
 import { adaptAppointmentFromSupabase } from "./appointment-adapter";
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
+
+// Interface pour les données de formulaire d'appointment
+interface AppointmentFormData {
+  date: string;
+  reason: string;
+  status?: string;
+  notes?: string;
+  patientId: number;
+  osteopathId?: number;
+  cabinetId?: number;
+  duration?: number;
+}
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
@@ -25,8 +37,7 @@ export const appointmentService = {
           )
         `)
         .eq("osteopathId", osteopathId)
-        .order("date", { ascending: true })
-        .order("time", { ascending: true });
+        .order("date", { ascending: true });
 
       if (error) {
         console.error("Erreur lors de la récupération des rendez-vous:", error);
@@ -67,8 +78,7 @@ export const appointmentService = {
         `)
         .eq("patientId", patientId)
         .eq("osteopathId", osteopathId)
-        .order("date", { ascending: false })
-        .order("time", { ascending: false });
+        .order("date", { ascending: false });
 
       if (error) {
         console.error("Erreur lors de la récupération des rendez-vous par patient:", error);
@@ -168,3 +178,5 @@ export const appointmentService = {
 };
 
 export default appointmentService;
+// Corriger l'export pour éviter l'erreur
+export { appointmentService as supabaseAppointmentService };
