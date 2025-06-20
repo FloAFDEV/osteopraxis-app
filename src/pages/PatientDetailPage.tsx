@@ -504,10 +504,10 @@ const PatientDetailPage = () => {
 				{/* Modal pour nouvelle séance */}
 				{showNewAppointmentModal && (
 					<NewAppointmentModal
+						open={showNewAppointmentModal}
+						onOpenChange={setShowNewAppointmentModal}
 						patient={patient}
-						onClose={() => setShowNewAppointmentModal(false)}
 						onAppointmentCreated={handleAppointmentCreated}
-						selectedCabinetId={parseInt(localStorage.getItem("selectedCabinetId") || "1")}
 					/>
 				)}
 			</div>
