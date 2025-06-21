@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface OsteopathReplacement {
@@ -35,7 +34,16 @@ export const osteopathReplacementService = {
     });
 
     if (error) throw error;
-    return data || [];
+    
+    // Assurer que les types correspondent exactement
+    return (data || []).map((item: any): AuthorizedOsteopath => ({
+      id: item.id,
+      name: item.name,
+      professional_title: item.professional_title,
+      rpps_number: item.rpps_number,
+      siret: item.siret,
+      access_type: item.access_type as 'self' | 'replacement' | 'cabinet_colleague'
+    }));
   },
 
   // Récupérer les remplacements pour l'ostéopathe actuel

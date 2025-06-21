@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -241,7 +240,6 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
               selectedCabinetId={props.selectedCabinetId}
               selectedOsteopathId={props.selectedOsteopathId}
               cabinets={props.cabinets}
-              osteopaths={props.osteopaths}
             />
           </div>
         </div>

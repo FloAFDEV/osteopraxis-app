@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +35,6 @@ export function InvoiceExportButtons({
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const { osteopaths } = useAuthorizedOsteopaths();
 
-  // On filtre ICI selon cabinet/osteo
   const matchingInvoices = useMemo(() => {
     return invoices.filter((inv) => {
       const cabinetOk = selectedCabinetId == null || selectedCabinetId === "ALL" ||

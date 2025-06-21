@@ -7,22 +7,22 @@ export function useAuthorizedOsteopaths() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadAuthorizedOsteopaths = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await osteopathReplacementService.getAuthorizedOsteopaths();
-        setOsteopaths(data);
-      } catch (err) {
-        console.error("Erreur lors du chargement des ostéopathes autorisés:", err);
-        setError("Erreur lors du chargement des ostéopathes autorisés");
-        setOsteopaths([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadAuthorizedOsteopaths = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await osteopathReplacementService.getAuthorizedOsteopaths();
+      setOsteopaths(data);
+    } catch (err) {
+      console.error("Erreur lors du chargement des ostéopathes autorisés:", err);
+      setError("Erreur lors du chargement des ostéopathes autorisés");
+      setOsteopaths([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadAuthorizedOsteopaths();
   }, []);
 
