@@ -1,11 +1,19 @@
+
 // Re-exporting services for the application API
-import { appointmentService } from "./appointment-service";
-import { patientService } from "./patient-service";
-import { osteopathService } from "./osteopath-service";
-import { cabinetService } from "./cabinet-service";
-import { invoiceService } from "./invoice-service";
-import { authService } from "./auth-service";
-import { getCurrentOsteopath } from "../supabase-api/utils/getCurrentOsteopath";
+import { appointmentService } from "./api/appointment-service";
+import { patientService } from "./api/patient-service";
+import { osteopathService } from "./api/osteopath-service";
+import { cabinetService } from "./api/cabinet-service";
+import { invoiceService } from "./api/invoice-service";
+import { authService } from "./api/auth-service";
+import { 
+  getCurrentOsteopath, 
+  getCurrentOsteopathId,
+  isPatientOwnedByCurrentOsteopath,
+  isCabinetOwnedByCurrentOsteopath,
+  isAppointmentOwnedByCurrentOsteopath,
+  isInvoiceOwnedByCurrentOsteopath
+} from "./supabase-api/utils/getCurrentOsteopath";
 
 import { osteopathCabinetService } from "./supabase-api/osteopath-cabinet-service";
 
@@ -83,7 +91,16 @@ export const api = {
 	getCurrentOsteopath: getCurrentOsteopath,
 };
 
-export * from "./invoice-service";
+// Export utility functions directly
+export { 
+  getCurrentOsteopathId,
+  isPatientOwnedByCurrentOsteopath,
+  isCabinetOwnedByCurrentOsteopath,
+  isAppointmentOwnedByCurrentOsteopath,
+  isInvoiceOwnedByCurrentOsteopath
+};
+
+export * from "./api/invoice-service";
 
 // Vérifier si un cabinet appartient à l'ostéopathe connecté (avec la nouvelle logique multi-cabinet)
 export async function isCabinetOwnedByCurrentOsteopath(cabinetId: number): Promise<boolean> {
