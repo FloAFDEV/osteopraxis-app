@@ -6,6 +6,7 @@ import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
 import { ReplacementManagement } from "@/components/osteopath/ReplacementManagement";
+import { CabinetAssociationManagement } from "@/components/osteopath/CabinetAssociationManagement";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FancyLoader } from "@/components/ui/fancy-loader";
@@ -85,6 +86,12 @@ const OsteopathSettingsPage = () => {
             </div>
           )}
         </div>
+
+        {/* Séparateur */}
+        <Separator />
+
+        {/* Section Gestion des Associations Cabinet */}
+        <CabinetAssociationManagement />
 
         {/* Séparateur */}
         <Separator />

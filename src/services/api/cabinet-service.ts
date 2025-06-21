@@ -99,5 +99,20 @@ export const cabinetService = {
 
   // Méthodes héritées pour compatibilité
   getCabinetsByUserId: supabaseCabinetService.getCabinetsByUserId,
-  getCabinetsByOsteopathId: supabaseCabinetService.getCabinetsByOsteopathId,
+  getCabinetsByOsteopathId: async (osteopathId: number): Promise<Cabinet[]> => {
+    try {
+      // Récupérer les IDs des cabinets associés
+      const cabinetIds = await osteopathCabinetService.getOsteopathCabinets(osteopathId);
+      
+      // Récupérer les détails de chaque cabinet
+      const cabinets = await Promise.all(
+        cabinetIds.map(id => supabaseCabinetService.getCabinetById(id))
+      );
+      
+      return cabinets.filter(Boolean) as Cabinet[];
+    } catch (error) {
+      console.error("Erreur lors de la récupération des cabinets de l'ostéopathe:", error);
+      return [];
+    }
+  },
 };

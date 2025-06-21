@@ -5,7 +5,6 @@ import { osteopathService } from "./api/osteopath-service";
 import { cabinetService } from "./api/cabinet-service";
 import { invoiceService } from "./api/invoice-service";
 import { authService } from "./api/auth-service";
-import { appointmentService } from "./api/appointment-service";
 
 import { 
   getCurrentOsteopath, 
@@ -40,16 +39,43 @@ export const api = {
 	updatePatient: patientService.updatePatient,
 	deletePatient: patientService.deletePatient,
 
-	// Appointment related - using the service directly
-	getAppointments: appointmentService.getAppointments,
-	getAppointmentById: appointmentService.getAppointmentById,
-	getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
-	getTodayAppointmentForPatient: appointmentService.getTodayAppointmentForPatient,
-	createAppointment: appointmentService.createAppointment,
-	updateAppointment: appointmentService.updateAppointment,
-	updateAppointmentStatus: appointmentService.updateAppointmentStatus,
-	cancelAppointment: appointmentService.cancelAppointment,
-	deleteAppointment: appointmentService.deleteAppointment,
+	// Appointment related - using lazy loading to avoid circular dependencies
+	getAppointments: async () => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.getAppointments();
+	},
+	getAppointmentById: async (id: number) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.getAppointmentById(id);
+	},
+	getAppointmentsByPatientId: async (patientId: number) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.getAppointmentsByPatientId(patientId);
+	},
+	getTodayAppointmentForPatient: async (patientId: number) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.getTodayAppointmentForPatient(patientId);
+	},
+	createAppointment: async (appointment: any) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.createAppointment(appointment);
+	},
+	updateAppointment: async (id: number, appointment: any) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.updateAppointment(id, appointment);
+	},
+	updateAppointmentStatus: async (id: number, status: string) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.updateAppointmentStatus(id, status);
+	},
+	cancelAppointment: async (id: number) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.cancelAppointment(id);
+	},
+	deleteAppointment: async (id: number) => {
+		const { appointmentService } = await import("./api/appointment-service");
+		return appointmentService.deleteAppointment(id);
+	},
 
 	// Cabinet related
 	getCabinets: cabinetService.getCabinets,
