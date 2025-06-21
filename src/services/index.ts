@@ -64,7 +64,7 @@ export const api = {
 		const { appointmentService } = await import("./api/appointment-service");
 		return appointmentService.updateAppointment(id, appointment);
 	},
-	updateAppointmentStatus: async (id: number, status: string) => {
+	updateAppointmentStatus: async (id: number, status: any) => {
 		const { appointmentService } = await import("./api/appointment-service");
 		return appointmentService.updateAppointmentStatus(id, status);
 	},
@@ -88,6 +88,11 @@ export const api = {
 	getCabinetsByOsteopathId:
 		cabinetService.getCabinetsByOsteopathId ||
 		((id: number) => Promise.resolve([])),
+
+	// Cabinet association methods
+	associateOsteopathToCabinet: cabinetService.associateOsteopathToCabinet,
+	dissociateOsteopathFromCabinet: cabinetService.dissociateOsteopathFromCabinet,
+	getOsteopathCabinets: cabinetService.getOsteopathCabinets,
 
 	// Invoice related
 	getInvoices: invoiceService.getInvoices,
