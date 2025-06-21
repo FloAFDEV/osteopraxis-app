@@ -5,6 +5,10 @@ import { osteopathService } from "./api/osteopath-service";
 import { cabinetService } from "./api/cabinet-service";
 import { invoiceService } from "./api/invoice-service";
 import { authService } from "./api/auth-service";
+
+// Import appointment service first to avoid initialization issues
+import { appointmentService as baseAppointmentService } from "./api/appointment-service";
+
 import { 
   getCurrentOsteopath, 
   getCurrentOsteopathId,
@@ -14,9 +18,6 @@ import {
 } from "./supabase-api/utils/getCurrentOsteopath";
 
 import { osteopathCabinetService } from "./supabase-api/osteopath-cabinet-service";
-
-// Import appointment service separately to avoid circular dependency
-import { appointmentService as baseAppointmentService } from "./api/appointment-service";
 
 // Export services with a clean API surface
 export const api = {
