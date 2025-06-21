@@ -5,9 +5,7 @@ import { osteopathService } from "./api/osteopath-service";
 import { cabinetService } from "./api/cabinet-service";
 import { invoiceService } from "./api/invoice-service";
 import { authService } from "./api/auth-service";
-
-// Import appointment service first to avoid initialization issues
-import { appointmentService as baseAppointmentService } from "./api/appointment-service";
+import { appointmentService } from "./api/appointment-service";
 
 import { 
   getCurrentOsteopath, 
@@ -42,19 +40,16 @@ export const api = {
 	updatePatient: patientService.updatePatient,
 	deletePatient: patientService.deletePatient,
 
-	// Appointment related - using the base service directly
-	getAppointments: async () => {
-		console.log("Fetching appointments with cache busting");
-		return baseAppointmentService.getAppointments();
-	},
-	getAppointmentById: baseAppointmentService.getAppointmentById,
-	getAppointmentsByPatientId: baseAppointmentService.getAppointmentsByPatientId,
-	getTodayAppointmentForPatient: baseAppointmentService.getTodayAppointmentForPatient,
-	createAppointment: baseAppointmentService.createAppointment,
-	updateAppointment: baseAppointmentService.updateAppointment,
-	updateAppointmentStatus: baseAppointmentService.updateAppointmentStatus,
-	cancelAppointment: baseAppointmentService.cancelAppointment,
-	deleteAppointment: baseAppointmentService.deleteAppointment,
+	// Appointment related - using the service directly
+	getAppointments: appointmentService.getAppointments,
+	getAppointmentById: appointmentService.getAppointmentById,
+	getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
+	getTodayAppointmentForPatient: appointmentService.getTodayAppointmentForPatient,
+	createAppointment: appointmentService.createAppointment,
+	updateAppointment: appointmentService.updateAppointment,
+	updateAppointmentStatus: appointmentService.updateAppointmentStatus,
+	cancelAppointment: appointmentService.cancelAppointment,
+	deleteAppointment: appointmentService.deleteAppointment,
 
 	// Cabinet related
 	getCabinets: cabinetService.getCabinets,
