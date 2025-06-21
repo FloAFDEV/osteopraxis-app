@@ -333,6 +333,42 @@ export type Database = {
           },
         ]
       }
+      osteopath_cabinet: {
+        Row: {
+          cabinet_id: number
+          created_at: string | null
+          id: number
+          osteopath_id: number
+        }
+        Insert: {
+          cabinet_id: number
+          created_at?: string | null
+          id?: number
+          osteopath_id: number
+        }
+        Update: {
+          cabinet_id?: number
+          created_at?: string | null
+          id?: number
+          osteopath_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "osteopath_cabinet_cabinet_id_fkey"
+            columns: ["cabinet_id"]
+            isOneToOne: false
+            referencedRelation: "Cabinet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "osteopath_cabinet_osteopath_id_fkey"
+            columns: ["osteopath_id"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Patient: {
         Row: {
           address: string | null
@@ -901,6 +937,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_osteopath_access_patient: {
+        Args: { osteopath_auth_id: string; patient_id: number }
+        Returns: boolean
+      }
+      get_osteopath_cabinets: {
+        Args: { osteopath_auth_id: string }
+        Returns: {
+          cabinet_id: number
+        }[]
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean

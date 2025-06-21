@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Patient } from "@/types";
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { PatientOwnershipBadge } from "./PatientOwnershipBadge";
 
 interface PatientListItemProps {
 	patient: Patient;
@@ -73,8 +75,8 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 							)}
 						</Avatar>
 
-						<div>
-							<div className="font-medium text-base flex items-center gap-1">
+						<div className="flex-grow">
+							<div className="font-medium text-base flex items-center gap-2 flex-wrap">
 								<Link
 									to={`/patients/${patient.id}`}
 									className="hover:underline"
@@ -82,14 +84,16 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 									{patient.lastName} {patient.firstName}
 								</Link>
 								{age !== null && (
-									<span className="text-sm ml-2 text-gray-400">
+									<span className="text-sm text-gray-400">
 										({age} ans)
 									</span>
 								)}
+								{/* Badge de propriété du patient */}
+								<PatientOwnershipBadge patientId={patient.id} />
 								{/* Si mineur, afficher l'icône et le badge */}
 								{isMinor && (
-									<div className="ml-1 text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
-										<Baby className="h-5 w-5 text-emerald-600" />
+									<div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+										<Baby className="h-4 w-4 text-emerald-600" />
 										<span>Mineur</span>
 									</div>
 								)}
@@ -139,12 +143,6 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 						>
 							<Link to={`/patients/${patient.id}`}>Voir</Link>
 						</Button>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="h-8 px-2"
-							asChild
-						></Button>
 					</div>
 				</div>
 			</div>

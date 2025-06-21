@@ -1,28 +1,103 @@
+// Re-exporting services for the application API
+import { appointmentService } from "./appointment-service";
+import { patientService } from "./patient-service";
+import { osteopathService } from "./osteopath-service";
+import { cabinetService } from "./cabinet-service";
+import { invoiceService } from "./invoice-service";
+import { authService } from "./auth-service";
+import { getCurrentOsteopath } from "../supabase-api/utils/getCurrentOsteopath";
 
-// Export utility functions first to avoid circular dependencies
-export { convertLocalToUTC, convertUTCToLocal, formatAppointmentDate, formatAppointmentTime } from '@/utils/date-utils';
+import { osteopathCabinetService } from "./supabase-api/osteopath-cabinet-service";
 
-// Export CORS headers
-export { corsHeaders } from './corsHeaders';
+// Export services with a clean API surface
+export const api = {
+	// Auth related
+	login: authService.login,
+	register: authService.register,
+	logout: authService.logout,
+	checkAuth:
+		authService.checkAuth ||
+		(() => Promise.resolve({ isAuthenticated: false, user: null })),
+	loginWithMagicLink:
+		authService.loginWithMagicLink ||
+		((email: string) => Promise.resolve()),
+	promoteToAdmin:
+		authService.promoteToAdmin ||
+		((userId: string) => Promise.resolve(false)),
 
-// Export utility functions
-export { typedData, ensureAppointmentStatus, AppointmentStatusValues } from './supabase-api/utils';
-export { 
-  getCurrentOsteopathId, 
-  getCurrentOsteopath,
-  isSameOsteopath, 
-  isPatientOwnedByCurrentOsteopath, 
-  isCabinetOwnedByCurrentOsteopath,
-  isAppointmentOwnedByCurrentOsteopath,
-  isInvoiceOwnedByCurrentOsteopath
-} from './supabase-api/utils/getCurrentOsteopath';
-export { ensureOsteopathProfile } from './supabase-api/utils/ensureOsteopathProfile';
+	// Patient related
+	getPatients: patientService.getPatients,
+	getPatientById: patientService.getPatientById,
+	createPatient: patientService.createPatient,
+	updatePatient: patientService.updatePatient,
+	deletePatient: patientService.deletePatient,
 
-// Export API errors for better handling
-export { AppointmentConflictError, SecurityViolationError } from './api/appointment-service';
+	// Appointment related
+	getAppointments: async () => {
+		console.log("Fetching appointments with cache busting");
+		return appointmentService.getAppointments();
+	},
+	getAppointmentById: appointmentService.getAppointmentById,
+	getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
+	getTodayAppointmentForPatient: appointmentService.getTodayAppointmentForPatient,
+	createAppointment: appointmentService.createAppointment,
+	updateAppointment: appointmentService.updateAppointment,
+	updateAppointmentStatus: appointmentService.updateAppointmentStatus,
+	cancelAppointment: appointmentService.cancelAppointment,
+	deleteAppointment: appointmentService.deleteAppointment,
 
-// Export API services - this should come last to avoid circular dependencies
-export { api } from './api/index';
+	// Cabinet related
+	getCabinets: cabinetService.getCabinets,
+	getCabinetById: cabinetService.getCabinetById,
+	createCabinet: cabinetService.createCabinet,
+	updateCabinet: cabinetService.updateCabinet,
+	deleteCabinet: cabinetService.deleteCabinet,
+	getCabinetsByUserId:
+		cabinetService.getCabinetsByUserId || (() => Promise.resolve([])),
+	getCabinetsByOsteopathId:
+		cabinetService.getCabinetsByOsteopathId ||
+		((id: number) => Promise.resolve([])),
 
-// Export Supabase client - also last to avoid circular dependencies
-export { supabase } from '@/integrations/supabase/client';
+	// Invoice related
+	getInvoices: invoiceService.getInvoices,
+	getInvoiceById: invoiceService.getInvoiceById,
+	getInvoicesByPatientId: invoiceService.getInvoicesByPatientId,
+	getInvoicesByAppointmentId: invoiceService.getInvoicesByAppointmentId,
+	createInvoice: invoiceService.createInvoice,
+	updateInvoice: invoiceService.updateInvoice,
+	deleteInvoice: invoiceService.deleteInvoice,
+
+	// Osteopath related
+	getOsteopaths:
+		osteopathService.getOsteopaths || (() => Promise.resolve([])),
+	getOsteopathById:
+		osteopathService.getOsteopathById ||
+		((id: number) => Promise.resolve(undefined)),
+	getOsteopathByUserId:
+		osteopathService.getOsteopathByUserId ||
+		((userId: string) => Promise.resolve(undefined)),
+	updateOsteopath: osteopathService.updateOsteopath,
+	createOsteopath:
+		osteopathService.createOsteopath ||
+		((data: any) => Promise.resolve({} as any)),
+	getCurrentOsteopath: getCurrentOsteopath,
+};
+
+export * from "./invoice-service";
+
+// Vérifier si un cabinet appartient à l'ostéopathe connecté (avec la nouvelle logique multi-cabinet)
+export async function isCabinetOwnedByCurrentOsteopath(cabinetId: number): Promise<boolean> {
+  try {
+    const currentOsteopath = await getCurrentOsteopath();
+    if (!currentOsteopath || !currentOsteopath.id) {
+      return false;
+    }
+
+    // Vérifier via les associations ostéopathe-cabinet
+    const osteopathCabinets = await osteopathCabinetService.getOsteopathCabinets(currentOsteopath.id);
+    return osteopathCabinets.includes(cabinetId);
+  } catch (error) {
+    console.error("Erreur lors de la vérification de propriété du cabinet:", error);
+    return false;
+  }
+}
