@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import {
   supabase,
@@ -32,7 +33,7 @@ export const supabaseOsteopathService = {
   },
 
   /**
-   * Recherche l'ostéopathe via la table User en filtrant sur auth_id (UUID Supabase Auth).
+   * Recherche l'ostéopathe via authId (UUID Supabase Auth).
    */
   async getOsteopathByUserId(authId: string): Promise<Osteopath | undefined> {
     console.log("Recherche d'un ostéopathe avec authId:", authId);
@@ -41,31 +42,25 @@ export const supabaseOsteopathService = {
       throw new Error("authId invalide fourni");
     }
 
-    // Récupérer l'utilisateur avec auth_id
-    const { data: users, error: userError } = await supabase
-      .from("User")
-      .select("osteopathId")
-      .eq("auth_id", authId);
+    // Récupérer directement l'ostéopathe avec authId
+    const { data: osteopath, error: osteopathError } = await supabase
+      .from("Osteopath")
+      .select("*")
+      .eq("authId", authId)
+      .maybeSingle();
 
-    if (userError) {
-      console.error("Erreur lors de la récupération de l'utilisateur:", userError);
-      throw new Error(userError.message);
+    if (osteopathError) {
+      console.error("Erreur lors de la récupération de l'ostéopathe:", osteopathError);
+      throw new Error(osteopathError.message);
     }
 
-    if (!users || users.length === 0) {
-      console.log("Aucun utilisateur trouvé avec auth_id:", authId);
-      return undefined;
+    if (osteopath) {
+      console.log("Ostéopathe trouvé:", osteopath);
+      return osteopath as Osteopath;
     }
 
-    const osteopathId = users[0].osteopathId;
-
-    if (!osteopathId) {
-      console.log("L'utilisateur n'a pas d'osteopathId lié.");
-      return undefined;
-    }
-
-    // Récupérer l'ostéopathe lié
-    return this.getOsteopathById(osteopathId);
+    console.log("Aucun ostéopathe trouvé avec authId:", authId);
+    return undefined;
   },
 
   async updateOsteopath(
@@ -110,7 +105,7 @@ export const supabaseOsteopathService = {
         .from("Osteopath")
         .insert({
           ...data,
-          userId: authId, // attention ici userId dans Osteopath est uuid de User
+          authId: authId, // Utiliser authId au lieu de userId
           createdAt: now,
           updatedAt: now,
         })

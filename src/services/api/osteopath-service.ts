@@ -39,7 +39,7 @@ export const osteopathService = {
         console.log("Pas de session active:", error || "Aucune erreur");
       }
       
-      // Première tentative via l'API directe
+      // Utiliser directement l'API Supabase avec authId
       const result = await supabaseOsteopathService.getOsteopathByUserId(userId);
       if (result) return result;
       
@@ -58,7 +58,6 @@ export const osteopathService = {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${sessionData.session.access_token}`
-            // Ne pas inclure les corsHeaders ici - ces headers sont réservés aux réponses du serveur
           },
           body: JSON.stringify({
             osteopathData: {
@@ -96,9 +95,9 @@ export const osteopathService = {
     try {
       console.log(`Mise à jour de l'ostéopathe avec ID: ${id}`, data);
       
-      // S'assurer que nous ne transmettons pas un undefined pour userId qui écraserait la valeur en base
-      if (data.userId === undefined) {
-        delete data.userId; // Supprimer la propriété si elle est undefined pour éviter d'écraser la valeur en base
+      // S'assurer que nous ne transmettons pas un undefined pour authId qui écraserait la valeur en base  
+      if (data.authId === undefined) {
+        delete data.authId; // Supprimer la propriété si elle est undefined pour éviter d'écraser la valeur en base
       }
       
       return await supabaseOsteopathService.updateOsteopath(id, data);
@@ -138,7 +137,6 @@ export const osteopathService = {
               headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${sessionData.session.access_token}`
-                // Ne pas inclure les corsHeaders ici
               },
               body: JSON.stringify({
                 osteopathData: data

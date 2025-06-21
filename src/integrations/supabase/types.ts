@@ -286,7 +286,7 @@ export type Database = {
       Osteopath: {
         Row: {
           ape_code: string | null
-          authId: string | null
+          authId: string
           createdAt: string
           id: number
           name: string
@@ -299,7 +299,7 @@ export type Database = {
         }
         Insert: {
           ape_code?: string | null
-          authId?: string | null
+          authId: string
           createdAt?: string
           id?: number
           name: string
@@ -312,7 +312,7 @@ export type Database = {
         }
         Update: {
           ape_code?: string | null
-          authId?: string | null
+          authId?: string
           createdAt?: string
           id?: number
           name?: string
