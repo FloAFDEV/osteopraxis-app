@@ -1,4 +1,5 @@
 
+
 // Re-exporting services for the application API
 import { appointmentService } from "./api/appointment-service";
 import { patientService } from "./api/patient-service";
@@ -10,7 +11,6 @@ import {
   getCurrentOsteopath, 
   getCurrentOsteopathId,
   isPatientOwnedByCurrentOsteopath,
-  isCabinetOwnedByCurrentOsteopath,
   isAppointmentOwnedByCurrentOsteopath,
   isInvoiceOwnedByCurrentOsteopath
 } from "./supabase-api/utils/getCurrentOsteopath";
@@ -95,7 +95,6 @@ export const api = {
 export { 
   getCurrentOsteopathId,
   isPatientOwnedByCurrentOsteopath,
-  isCabinetOwnedByCurrentOsteopath,
   isAppointmentOwnedByCurrentOsteopath,
   isInvoiceOwnedByCurrentOsteopath
 };
@@ -118,3 +117,4 @@ export async function isCabinetOwnedByCurrentOsteopath(cabinetId: number): Promi
     return false;
   }
 }
+
