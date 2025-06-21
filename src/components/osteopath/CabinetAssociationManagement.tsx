@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Building, AlertCircle } from "lucide-react";
-import { api } from "@/services/api";
+import { api } from "@/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Cabinet } from "@/types";
@@ -42,7 +42,7 @@ export function CabinetAssociationManagement() {
       setLoading(true);
       
       // Charger les cabinets associés à l'ostéopathe
-      const associatedCabinetIds = await api.getCabinetsByOsteopathId(user.osteopathId);
+      const associatedCabinetIds = await api.getOsteopathCabinets(user.osteopathId);
       const associatedCabsData = await Promise.all(
         associatedCabinetIds.map(id => api.getCabinetById(id))
       );
