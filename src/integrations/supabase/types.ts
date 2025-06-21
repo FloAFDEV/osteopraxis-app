@@ -369,6 +369,57 @@ export type Database = {
           },
         ]
       }
+      osteopath_replacement: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: number
+          is_active: boolean | null
+          notes: string | null
+          osteopath_id: number
+          replacement_osteopath_id: number
+          start_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: number
+          is_active?: boolean | null
+          notes?: string | null
+          osteopath_id: number
+          replacement_osteopath_id: number
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: number
+          is_active?: boolean | null
+          notes?: string | null
+          osteopath_id?: number
+          replacement_osteopath_id?: number
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "osteopath_replacement_osteopath_id_fkey"
+            columns: ["osteopath_id"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "osteopath_replacement_replacement_osteopath_id_fkey"
+            columns: ["replacement_osteopath_id"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Patient: {
         Row: {
           address: string | null
@@ -940,6 +991,17 @@ export type Database = {
       can_osteopath_access_patient: {
         Args: { osteopath_auth_id: string; patient_id: number }
         Returns: boolean
+      }
+      get_authorized_osteopaths: {
+        Args: { current_osteopath_auth_id: string }
+        Returns: {
+          id: number
+          name: string
+          professional_title: string
+          rpps_number: string
+          siret: string
+          access_type: string
+        }[]
       }
       get_osteopath_cabinets: {
         Args: { osteopath_auth_id: string }

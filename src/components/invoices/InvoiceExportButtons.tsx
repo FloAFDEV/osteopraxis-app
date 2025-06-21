@@ -8,10 +8,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { generateAccountingExport } from "@/services/export/invoice-export-service";
-import { Invoice, Osteopath, Patient, Cabinet } from "@/types";
+import { Invoice, Patient, Cabinet } from "@/types";
 import { Calendar, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { CustomTooltip } from "@/components/ui/custom-tooltip";
+import { useAuthorizedOsteopaths } from "@/hooks/useAuthorizedOsteopaths";
 
 interface InvoiceExportButtonsProps {
   selectedYear: string;
@@ -21,7 +22,6 @@ interface InvoiceExportButtonsProps {
   selectedCabinetId: number | "ALL" | null;
   selectedOsteopathId: number | "ALL" | null;
   cabinets: Cabinet[];
-  osteopaths: Osteopath[];
 }
 
 export function InvoiceExportButtons({
@@ -32,9 +32,9 @@ export function InvoiceExportButtons({
   selectedCabinetId,
   selectedOsteopathId,
   cabinets,
-  osteopaths,
 }: InvoiceExportButtonsProps) {
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const { osteopaths } = useAuthorizedOsteopaths();
 
   // On filtre ICI selon cabinet/osteo
   const matchingInvoices = useMemo(() => {
@@ -67,7 +67,7 @@ export function InvoiceExportButtons({
   const exportToExcel = async () => {
     try {
       setIsExporting(true);
-      toast.info("Préparation de l’export...");
+      toast.info("Préparation de l'export...");
       const periodLabel = selectedMonth ? `${selectedMonth}/${selectedYear}` : selectedYear;
 
       let blob;
@@ -82,11 +82,26 @@ export function InvoiceExportButtons({
         );
         filename = `Comptabilite_${periodLabel}_Cab${selectedCabinet?.id}_TousOsteos.xlsx`;
       } else {
+        // Convertir AuthorizedOsteopath en Osteopath pour la fonction d'export
+        const osteopathForExport = selectedOsteopath ? {
+          id: selectedOsteopath.id,
+          name: selectedOsteopath.name,
+          professional_title: selectedOsteopath.professional_title || 'Ostéopathe D.O.',
+          rpps_number: selectedOsteopath.rpps_number || '',
+          siret: selectedOsteopath.siret || '',
+          ape_code: '8690F',
+          userId: '',
+          authId: '',
+          createdAt: '',
+          updatedAt: '',
+          stampUrl: null
+        } : null;
+
         blob = await generateAccountingExport(
           matchingInvoices,
           patientDataMap,
           periodLabel,
-          selectedOsteopath,
+          osteopathForExport,
           selectedCabinet
         );
         filename = `Comptabilite_${periodLabel}_Ost${selectedOsteopath?.id}_Cab${selectedCabinet?.id}.xlsx`;
@@ -155,4 +170,3 @@ export function InvoiceExportButtons({
     </div>
   );
 }
-

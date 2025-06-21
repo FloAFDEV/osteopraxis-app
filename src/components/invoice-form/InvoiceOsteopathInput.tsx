@@ -1,10 +1,11 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Controller } from "react-hook-form";
-import { Osteopath } from "@/types";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { api } from "@/services/api";
+import { useAuthorizedOsteopaths } from "@/hooks/useAuthorizedOsteopaths";
+import { Badge } from "@/components/ui/badge";
+import { User, Users, UserCheck } from "lucide-react";
 
 interface InvoiceOsteopathInputProps {
   control: any;
@@ -13,15 +14,7 @@ interface InvoiceOsteopathInputProps {
 }
 
 export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopathInputProps) {
-  const [osteopaths, setOsteopaths] = useState<Osteopath[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    api.getOsteopaths().then(os => {
-      setOsteopaths(os ?? []);
-      setLoading(false);
-    });
-  }, []);
+  const { osteopaths, loading } = useAuthorizedOsteopaths();
 
   if (loading) {
     return (
@@ -31,6 +24,45 @@ export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopat
       </div>
     );
   }
+
+  const getAccessTypeIcon = (accessType: string) => {
+    switch (accessType) {
+      case 'self':
+        return <User className="w-3 h-3" />;
+      case 'replacement':
+        return <UserCheck className="w-3 h-3" />;
+      case 'cabinet_colleague':
+        return <Users className="w-3 h-3" />;
+      default:
+        return <User className="w-3 h-3" />;
+    }
+  };
+
+  const getAccessTypeLabel = (accessType: string) => {
+    switch (accessType) {
+      case 'self':
+        return 'Moi';
+      case 'replacement':
+        return 'Remplacement';
+      case 'cabinet_colleague':
+        return 'Collègue';
+      default:
+        return 'Inconnu';
+    }
+  };
+
+  const getAccessTypeBadgeColor = (accessType: string) => {
+    switch (accessType) {
+      case 'self':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'replacement':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'cabinet_colleague':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
 
   return (
     <div>
@@ -45,18 +77,34 @@ export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopat
             disabled={isSubmitting}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Choisir l’ostéopathe" />
+              <SelectValue placeholder="Choisir l'ostéopathe émetteur" />
             </SelectTrigger>
             <SelectContent>
-              {osteopaths.map(ost => (
-                <SelectItem key={ost.id} value={String(ost.id)}>
-                  {ost.name ?? `#${ost.id}`}
+              {osteopaths.map(osteopath => (
+                <SelectItem key={osteopath.id} value={String(osteopath.id)}>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="flex-1">
+                      {osteopath.name ?? `Ostéopathe #${osteopath.id}`}
+                    </span>
+                    <Badge 
+                      className={`ml-2 text-xs ${getAccessTypeBadgeColor(osteopath.access_type)}`}
+                      variant="outline"
+                    >
+                      {getAccessTypeIcon(osteopath.access_type)}
+                      <span className="ml-1">{getAccessTypeLabel(osteopath.access_type)}</span>
+                    </Badge>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         )}
       />
+      {osteopaths.length === 0 && (
+        <p className="text-sm text-muted-foreground mt-1">
+          Aucun ostéopathe autorisé trouvé
+        </p>
+      )}
     </div>
   );
 }

@@ -3,14 +3,32 @@ import { Osteopath } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
 import { supabase } from '@/integrations/supabase/client';
+import { osteopathReplacementService } from "../supabase-api/osteopath-replacement-service";
 
 export const osteopathService = {
+  // Cette méthode retourne maintenant seulement les ostéopathes autorisés (sécurisé)
   async getOsteopaths(): Promise<Osteopath[]> {
     try {
-      return await supabaseOsteopathService.getOsteopaths();
+      // Utiliser le service de remplacement pour obtenir les ostéopathes autorisés
+      const authorizedOsteopaths = await osteopathReplacementService.getAuthorizedOsteopaths();
+      
+      // Convertir AuthorizedOsteopath en Osteopath pour maintenir la compatibilité
+      return authorizedOsteopaths.map(authOsteo => ({
+        id: authOsteo.id,
+        name: authOsteo.name,
+        professional_title: authOsteo.professional_title || 'Ostéopathe D.O.',
+        rpps_number: authOsteo.rpps_number || '',
+        siret: authOsteo.siret || '',
+        ape_code: '8690F',
+        userId: '', // Ces champs ne sont pas nécessaires pour l'affichage
+        authId: '',
+        createdAt: '',
+        updatedAt: '',
+        stampUrl: null
+      }));
     } catch (error) {
-      console.error("Erreur Supabase getOsteopaths:", error);
-      throw error; // Propagation de l'erreur au lieu de fallback
+      console.error("Erreur lors de la récupération des ostéopathes autorisés:", error);
+      return []; // Retourner un tableau vide plutôt que de propager l'erreur
     }
   },
 
@@ -19,7 +37,7 @@ export const osteopathService = {
       return await supabaseOsteopathService.getOsteopathById(id);
     } catch (error) {
       console.error("Erreur Supabase getOsteopathById:", error);
-      throw error; // Propagation de l'erreur au lieu de fallback
+      throw error;
     }
   },
   
@@ -27,10 +45,8 @@ export const osteopathService = {
     console.log(`Recherche d'ostéopathe par userId: ${userId}`);
     
     try {
-      // Ajout d'un délai court pour s'assurer que l'authentification est établie
       await delay(300);
       
-      // Debug log de la session actuelle
       const { data: sessionData, error } = await supabase.auth.getSession();
       if (sessionData && sessionData.session) {
         console.log("Utilisateur authentifié:", sessionData.session.user.id);
@@ -39,13 +55,11 @@ export const osteopathService = {
         console.log("Pas de session active:", error || "Aucune erreur");
       }
       
-      // Utiliser directement l'API Supabase avec authId
       const result = await supabaseOsteopathService.getOsteopathByUserId(userId);
       if (result) return result;
       
       console.log("Aucun résultat via l'API directe, tentative via la fonction edge");
       
-      // En cas d'absence de résultat, essayer via la fonction edge
       try {
         if (!sessionData || !sessionData.session) {
           console.error("Pas de session pour appeler la fonction edge");
@@ -95,9 +109,8 @@ export const osteopathService = {
     try {
       console.log(`Mise à jour de l'ostéopathe avec ID: ${id}`, data);
       
-      // S'assurer que nous ne transmettons pas un undefined pour authId qui écraserait la valeur en base  
       if ('authId' in data && data.authId === undefined) {
-        delete (data as any).authId; // Supprimer la propriété si elle est undefined pour éviter d'écraser la valeur en base
+        delete (data as any).authId;
       }
       
       return await supabaseOsteopathService.updateOsteopath(id, data);
@@ -111,14 +124,11 @@ export const osteopathService = {
     console.log("Création d'un ostéopathe avec les données:", data);
     
     try {
-      // Ajout d'un délai court pour garantir que l'auth est bien établie
       await delay(300);
       
-      // Vérifier l'état de la session
       const { data: sessionData } = await supabase.auth.getSession();
       console.log("Session avant création:", sessionData.session ? "Authentifié" : "Non authentifié");
       
-      // Premier essai: utilisation directe du service Supabase
       try {
         console.log("Tentative de création via API Supabase");
         const result = await supabaseOsteopathService.createOsteopath(data);
@@ -127,7 +137,6 @@ export const osteopathService = {
       } catch (error) {
         console.error("Erreur lors de la création via API Supabase:", error);
         
-        // En cas d'échec, essayer via la fonction edge
         if (sessionData && sessionData.session) {
           console.log("Tentative via la fonction edge completer-profil");
           
@@ -168,7 +177,7 @@ export const osteopathService = {
       }
     } catch (error) {
       console.error("Erreur globale createOsteopath:", error);
-      throw error; // Propagation de l'erreur sans fallback
+      throw error;
     }
   }
 };
