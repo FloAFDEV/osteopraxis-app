@@ -1,7 +1,5 @@
 
-
 // Re-exporting services for the application API
-import { appointmentService } from "./api/appointment-service";
 import { patientService } from "./api/patient-service";
 import { osteopathService } from "./api/osteopath-service";
 import { cabinetService } from "./api/cabinet-service";
@@ -16,6 +14,9 @@ import {
 } from "./supabase-api/utils/getCurrentOsteopath";
 
 import { osteopathCabinetService } from "./supabase-api/osteopath-cabinet-service";
+
+// Import appointment service separately to avoid circular dependency
+import { appointmentService as baseAppointmentService } from "./api/appointment-service";
 
 // Export services with a clean API surface
 export const api = {
@@ -40,19 +41,19 @@ export const api = {
 	updatePatient: patientService.updatePatient,
 	deletePatient: patientService.deletePatient,
 
-	// Appointment related
+	// Appointment related - using the base service directly
 	getAppointments: async () => {
 		console.log("Fetching appointments with cache busting");
-		return appointmentService.getAppointments();
+		return baseAppointmentService.getAppointments();
 	},
-	getAppointmentById: appointmentService.getAppointmentById,
-	getAppointmentsByPatientId: appointmentService.getAppointmentsByPatientId,
-	getTodayAppointmentForPatient: appointmentService.getTodayAppointmentForPatient,
-	createAppointment: appointmentService.createAppointment,
-	updateAppointment: appointmentService.updateAppointment,
-	updateAppointmentStatus: appointmentService.updateAppointmentStatus,
-	cancelAppointment: appointmentService.cancelAppointment,
-	deleteAppointment: appointmentService.deleteAppointment,
+	getAppointmentById: baseAppointmentService.getAppointmentById,
+	getAppointmentsByPatientId: baseAppointmentService.getAppointmentsByPatientId,
+	getTodayAppointmentForPatient: baseAppointmentService.getTodayAppointmentForPatient,
+	createAppointment: baseAppointmentService.createAppointment,
+	updateAppointment: baseAppointmentService.updateAppointment,
+	updateAppointmentStatus: baseAppointmentService.updateAppointmentStatus,
+	cancelAppointment: baseAppointmentService.cancelAppointment,
+	deleteAppointment: baseAppointmentService.deleteAppointment,
 
 	// Cabinet related
 	getCabinets: cabinetService.getCabinets,
@@ -117,4 +118,3 @@ export async function isCabinetOwnedByCurrentOsteopath(cabinetId: number): Promi
     return false;
   }
 }
-
