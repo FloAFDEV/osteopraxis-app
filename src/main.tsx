@@ -1,7 +1,6 @@
 
 import React from 'react' 
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter as Router } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from './contexts/theme-context'
 
@@ -36,15 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       root.render(
         <React.StrictMode>
-          <Router>
-            <ThemeProvider>
-              <QueryClientProvider client={queryClient}>
-                <AuthProvider>
-                  <App />
-                </AuthProvider>
-              </QueryClientProvider>
-            </ThemeProvider>
-          </Router>
+          <ThemeProvider>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </QueryClientProvider>
+          </ThemeProvider>
         </React.StrictMode>
       );
     } catch (error) {
