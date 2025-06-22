@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Building, Phone, MapPin, Save, Mail, Image, FileImage, FileText, CreditCard } from "lucide-react";
+import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -23,10 +24,7 @@ const CabinetSettingsPage = () => {
       phone: "",
       email: "",
       imageUrl: "",
-      logoUrl: "",
-      siret: "",
-      rppsNumber: "",
-      apeCode: ""
+      logoUrl: ""
     }
   });
 
@@ -49,34 +47,14 @@ const CabinetSettingsPage = () => {
           console.log("Cabinet principal trouvé:", primaryCabinet);
           setCabinet(primaryCabinet);
           
-          // Récupérer les données de l'ostéopathe pour les infos de facturation
-          if (primaryCabinet.osteopathId) {
-            const osteopath = await api.getOsteopathById(primaryCabinet.osteopathId);
-            
-            form.reset({
-              name: primaryCabinet.name || "",
-              address: primaryCabinet.address || "",
-              phone: primaryCabinet.phone || "",
-              email: primaryCabinet.email || "",
-              imageUrl: primaryCabinet.imageUrl || "",
-              logoUrl: primaryCabinet.logoUrl || "",
-              siret: osteopath?.siret || "",
-              rppsNumber: osteopath?.rpps_number || "",
-              apeCode: osteopath?.ape_code || "8690F"
-            });
-          } else {
-            form.reset({
-              name: primaryCabinet.name || "",
-              address: primaryCabinet.address || "",
-              phone: primaryCabinet.phone || "",
-              email: primaryCabinet.email || "",
-              imageUrl: primaryCabinet.imageUrl || "",
-              logoUrl: primaryCabinet.logoUrl || "",
-              siret: "",
-              rppsNumber: "",
-              apeCode: "8690F"
-            });
-          }
+          form.reset({
+            name: primaryCabinet.name || "",
+            address: primaryCabinet.address || "",
+            phone: primaryCabinet.phone || "",
+            email: primaryCabinet.email || "",
+            imageUrl: primaryCabinet.imageUrl || "",
+            logoUrl: primaryCabinet.logoUrl || ""
+          });
         } else {
           console.log("Aucun cabinet trouvé pour l'utilisateur");
         }
@@ -98,16 +76,13 @@ const CabinetSettingsPage = () => {
     email: string; 
     imageUrl: string; 
     logoUrl: string;
-    siret: string;
-    rppsNumber: string;
-    apeCode: string;
   }) => {
     if (!cabinet || !user?.id) return;
     
     try {
       setIsSaving(true);
       
-      // Mettre à jour le cabinet
+      // Mettre à jour le cabinet - uniquement les informations spécifiques au cabinet
       const updatedCabinet = await api.updateCabinet(cabinet.id, {
         name: data.name,
         address: data.address,
@@ -116,18 +91,6 @@ const CabinetSettingsPage = () => {
         imageUrl: data.imageUrl || null,
         logoUrl: data.logoUrl || null
       });
-      
-      // Récupérer l'ostéopathe associé
-      const osteopath = await api.getOsteopathByUserId(user.id);
-      
-      if (osteopath) {
-        // Mettre à jour l'ostéopathe avec les infos de facturation
-        await api.updateOsteopath(osteopath.id, {
-          siret: data.siret || null,
-          rpps_number: data.rppsNumber || null,
-          ape_code: data.apeCode || "8690F"
-        });
-      }
       
       if (updatedCabinet) {
         setCabinet(updatedCabinet);
@@ -152,6 +115,10 @@ const CabinetSettingsPage = () => {
           <p className="text-muted-foreground mt-1">
             Gérez les informations de votre cabinet d'ostéopathie
           </p>
+          <p className="text-sm text-muted-foreground mt-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            💡 <strong>Astuce :</strong> Les informations de facturation (SIRET, RPPS, APE) se trouvent dans 
+            <strong> Paramètres → Profil & Facturation</strong> pour éviter les doublons.
+          </p>
         </div>
 
         {loading ? (
@@ -174,8 +141,8 @@ const CabinetSettingsPage = () => {
           <div className="bg-card rounded-lg border shadow-sm p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="border-b pb-4 mb-4">
-                  <h2 className="text-xl font-semibold mb-2">Informations générales</h2>
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold mb-4">Informations du cabinet</h2>
                   
                   <FormField
                     control={form.control}
@@ -240,109 +207,48 @@ const CabinetSettingsPage = () => {
                       </FormItem>
                     )}
                   />
-                </div>
-                
-                <div className="border-b pb-4 mb-4">
-                  <h2 className="text-xl font-semibold mb-2">Informations de facturation</h2>
-                  
-                  <FormField
-                    control={form.control}
-                    name="siret"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Numéro SIRET</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Numéro SIRET" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Numéro SIRET nécessaire pour la facturation
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="rppsNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Numéro RPPS</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Numéro RPPS" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Numéro RPPS (Répertoire Partagé des Professionnels de Santé) nécessaire pour la facturation
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="apeCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Code APE</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Code APE (par défaut: 8690F)" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Code APE/NAF de votre activité (par défaut: 8690F pour les activités de santé humaine)
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">Images</h2>
-                  
-                  <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL de l'image (facultatif)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          URL d'une image représentant votre cabinet (façade ou intérieur)
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold mb-4">Images du cabinet</h3>
+                    
+                    <FormField
+                      control={form.control}
+                      name="imageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URL de l'image (facultatif)</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            URL d'une image représentant votre cabinet (façade ou intérieur)
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="logoUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL du logo (facultatif)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="URL du logo du cabinet" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          URL de votre logo professionnel
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="logoUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URL du logo (facultatif)</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input className="pl-10" placeholder="URL du logo du cabinet" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            URL de votre logo professionnel
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 <Button type="submit" className="flex gap-2" disabled={isSaving}>

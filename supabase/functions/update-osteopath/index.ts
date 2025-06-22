@@ -12,7 +12,7 @@ const corsHeaders = {
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('🔧 OPTIONS preflight request received');
+    console.log('🔧 OPTIONS preflight request received for update-osteopath');
     return new Response(null, { 
       status: 204, 
       headers: corsHeaders
@@ -21,7 +21,7 @@ serve(async (req: Request) => {
 
   // Vérifier que la méthode est POST
   if (req.method !== 'POST') {
-    console.log(`❌ Méthode ${req.method} non autorisée`);
+    console.log(`❌ Méthode ${req.method} non autorisée pour update-osteopath`);
     return new Response(JSON.stringify({ 
       error: 'Méthode non autorisée. Seule la méthode POST est acceptée.' 
     }), {
@@ -34,13 +34,11 @@ serve(async (req: Request) => {
   }
 
   try {
-    console.log('🔍 Début du traitement de la requête POST');
-    console.log('🔍 Headers reçus:', Object.fromEntries(req.headers.entries()));
+    console.log('🔍 Début du traitement de la requête POST update-osteopath');
     
-    // Lire le body comme texte d'abord pour diagnostiquer
+    // Lire le body
     const bodyText = await req.text();
-    console.log('📥 Corps de la requête reçu (texte brut):', bodyText);
-    console.log('📥 Longueur du corps:', bodyText.length);
+    console.log('📥 Corps de la requête reçu:', bodyText);
     
     if (!bodyText || bodyText.length === 0) {
       console.log('❌ Corps de requête vide');
@@ -55,20 +53,16 @@ serve(async (req: Request) => {
       });
     }
 
-    // Parser le JSON maintenant
+    // Parser le JSON
     let requestBody;
     try {
       requestBody = JSON.parse(bodyText);
       console.log('📥 Corps parsé avec succès:', requestBody);
-      console.log('📥 Type du corps:', typeof requestBody);
-      console.log('📥 Clés du corps:', Object.keys(requestBody || {}));
     } catch (parseError) {
       console.error('❌ Erreur de parsing JSON:', parseError);
-      console.error('❌ Texte brut reçu:', bodyText);
       return new Response(JSON.stringify({ 
         error: 'Format JSON invalide dans le corps de la requête',
-        details: parseError.message,
-        receivedText: bodyText
+        details: parseError.message
       }), {
         status: 400,
         headers: { 
@@ -95,7 +89,6 @@ serve(async (req: Request) => {
 
     console.log(`🔧 POST request for osteopath ID: ${osteopathId}`);
     console.log('📝 Données à mettre à jour:', updateData);
-    console.log('📝 Nombre de champs à mettre à jour:', Object.keys(updateData).length);
 
     if (!osteopathId) {
       console.log('❌ ID de l\'ostéopathe manquant');

@@ -118,6 +118,24 @@ export function ProfileBillingForm({
     },
   });
   
+  // Récupérer le stampUrl existant lors du chargement du composant
+  useEffect(() => {
+    const loadStampUrl = async () => {
+      if (osteopathId) {
+        try {
+          const osteopath = await api.getOsteopathById(osteopathId);
+          if (osteopath?.stampUrl) {
+            setStampUrl(osteopath.stampUrl);
+          }
+        } catch (error) {
+          console.error("Erreur lors du chargement du tampon:", error);
+        }
+      }
+    };
+    
+    loadStampUrl();
+  }, [osteopathId]);
+  
   useEffect(() => {
     if ((defaultValues?.name || (user && (user.firstName || user.lastName))) && !form.getValues('name')) {
       const fullName = defaultValues?.name || 
@@ -162,9 +180,15 @@ export function ProfileBillingForm({
       
       let osteopathResult: Osteopath;
       
+      // Préparer les données à sauvegarder incluant le stampUrl
+      const osteopathData = {
+        ...data,
+        stampUrl: stampUrl // Inclure le stampUrl dans les données
+      };
+      
       if (isEditing && osteopathId) {
-        console.log(`Mise à jour de l'ostéopathe (ID: ${osteopathId}) avec les données:`, data);
-        osteopathResult = await api.updateOsteopath(osteopathId, data) as Osteopath;
+        console.log(`Mise à jour de l'ostéopathe (ID: ${osteopathId}) avec les données:`, osteopathData);
+        osteopathResult = await api.updateOsteopath(osteopathId, osteopathData) as Osteopath;
         toast.success("Profil mis à jour avec succès");
         console.log("Mise à jour réussie:", osteopathResult);
       } else {
@@ -186,17 +210,18 @@ export function ProfileBillingForm({
           } else {
             console.log("Aucun profil existant trouvé, création d'un nouveau profil");
             
-            const osteopathData = {
-              name: data.name,
-              professional_title: data.professional_title || "Ostéopathe D.O.",
-              rpps_number: data.rpps_number || null,
-              siret: data.siret || null,
-              ape_code: data.ape_code || "8690F",
+            const createData = {
+              name: osteopathData.name,
+              professional_title: osteopathData.professional_title || "Ostéopathe D.O.",
+              rpps_number: osteopathData.rpps_number || null,
+              siret: osteopathData.siret || null,
+              ape_code: osteopathData.ape_code || "8690F",
+              stampUrl: osteopathData.stampUrl || null,
               userId: user.id
             };
             
-            console.log("Données pour création:", osteopathData);
-            osteopathResult = await api.createOsteopath(osteopathData);
+            console.log("Données pour création:", createData);
+            osteopathResult = await api.createOsteopath(createData);
             console.log("Création réussie:", osteopathResult);
             
             if (osteopathResult && osteopathResult.id) {
@@ -438,20 +463,18 @@ export function ProfileBillingForm({
 
           <Separator />
 
-          {/* Section Tampon/Signature - Seulement si osteopathId existe */}
-          {osteopathId && (
-            <div className="bg-card rounded-lg border shadow-sm p-6">
-              <h2 className="text-xl font-semibold mb-4">Tampon et Signature</h2>
-              <p className="text-muted-foreground mb-4">
-                Ajoutez votre tampon professionnel pour vos factures et documents.
-              </p>
-              <ProfileStampManagement 
-                currentStampUrl={stampUrl}
-                onStampUrlChange={setStampUrl}
-                isSubmitting={isSubmitting}
-              />
-            </div>
-          )}
+          {/* Section Tampon/Signature - Toujours visible */}
+          <div className="bg-card rounded-lg border shadow-sm p-6">
+            <h2 className="text-xl font-semibold mb-4">Tampon et Signature</h2>
+            <p className="text-muted-foreground mb-4">
+              Ajoutez votre tampon professionnel pour vos factures et documents.
+            </p>
+            <ProfileStampManagement 
+              currentStampUrl={stampUrl}
+              onStampUrlChange={setStampUrl}
+              isSubmitting={isSubmitting}
+            />
+          </div>
 
           <Button 
             type="submit" 
