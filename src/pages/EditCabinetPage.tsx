@@ -1,14 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Building2, AlertCircle } from "lucide-react";
+import { Building2, AlertCircle, Phone, MapPin, Mail, Image, Save } from "lucide-react";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { isCabinetOwnedByCurrentOsteopath } from "@/services";
 import { BackButton } from "@/components/ui/back-button";
@@ -189,7 +189,7 @@ const EditCabinetPage = () => {
                       <FormLabel>Adresse</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input className="pl-10" placeholder="Adresse complète" {...field} />
                         </div>
                       </FormControl>
@@ -205,7 +205,7 @@ const EditCabinetPage = () => {
                       <FormLabel>Numéro de téléphone</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input className="pl-10" placeholder="Numéro de téléphone" {...field} />
                         </div>
                       </FormControl>
@@ -221,7 +221,7 @@ const EditCabinetPage = () => {
                       <FormLabel>Email (facultatif)</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input className="pl-10" placeholder="Email du cabinet" {...field} />
                         </div>
                       </FormControl>
@@ -229,21 +229,28 @@ const EditCabinetPage = () => {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>URL de l'image (facultatif)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold mb-4">Image du cabinet</h3>
+                  
+                  <FormField
+                    control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL de l'image (facultatif)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          URL d'une image représentant votre cabinet (façade ou intérieur)
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <div className="flex gap-4 pt-6 border-t">
@@ -255,7 +262,8 @@ const EditCabinetPage = () => {
                 >
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving} className="flex gap-2">
+                  <Save className="h-4 w-4" />
                   {isSaving ? "Enregistrement..." : "Enregistrer les modifications"}
                 </Button>
               </div>
