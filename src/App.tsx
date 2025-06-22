@@ -45,8 +45,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <Router>
+        <Router>
+          <AuthProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
@@ -88,11 +88,11 @@ function App() {
               
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </Router>
-          
-          <Toaster />
-          <SonnerToaster />
-        </AuthProvider>
+            
+            <Toaster />
+            <SonnerToaster />
+          </AuthProvider>
+        </Router>
       </ThemeProvider>
     </QueryClientProvider>
   );

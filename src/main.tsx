@@ -7,9 +7,6 @@ import { ThemeProvider } from './contexts/theme-context'
 import App from './App.tsx'
 import './index.css'
 
-// Import AuthProvider après les autres imports pour éviter les problèmes de dépendances circulaires
-import { AuthProvider } from './contexts/AuthContext'
-
 // Créer le QueryClient avec les options par défaut en dehors du rendu
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,13 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       root.render(
         <React.StrictMode>
-          <ThemeProvider>
-            <QueryClientProvider client={queryClient}>
-              <AuthProvider>
-                <App />
-              </AuthProvider>
-            </QueryClientProvider>
-          </ThemeProvider>
+          <App />
         </React.StrictMode>
       );
     } catch (error) {
