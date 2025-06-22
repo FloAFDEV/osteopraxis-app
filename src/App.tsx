@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/theme-context';
 import LoginPage from '@/pages/LoginPage';
@@ -9,13 +10,13 @@ import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
 import PatientsPage from '@/pages/PatientsPage';
 import NewPatientPage from '@/pages/NewPatientPage';
-import PatientDetailsPage from '@/pages/PatientDetailsPage';
+import PatientDetailsPage from '@/pages/PatientDetailPage';
 import AppointmentsPage from '@/pages/AppointmentsPage';
 import SchedulePage from '@/pages/SchedulePage';
 import SettingsPage from '@/pages/SettingsPage';
 import AdminPage from '@/pages/AdminPage';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import CabinetsPage from '@/pages/CabinetsPage';
+import CabinetsPage from '@/pages/CabinetsManagementPage';
 import NewCabinetPage from '@/pages/NewCabinetPage';
 import CabinetSettingsPage from '@/pages/CabinetSettingsPage';
 import OsteopathSettingsPage from '@/pages/OsteopathSettingsPage';
@@ -24,9 +25,11 @@ import TermsOfServicePage from '@/pages/TermsOfServicePage';
 import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
 import CollaborationsSettingsPage from '@/pages/CollaborationsSettingsPage';
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <QueryClient>
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
           <BrowserRouter>
@@ -65,7 +68,7 @@ function App() {
           </BrowserRouter>
         </ThemeProvider>
       </AuthProvider>
-    </QueryClient>
+    </QueryClientProvider>
   );
 }
 
