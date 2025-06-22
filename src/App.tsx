@@ -16,6 +16,7 @@ import CabinetsManagementPage from "./pages/CabinetsManagementPage";
 import NewCabinetPage from "./pages/NewCabinetPage";
 import EditCabinetPage from "./pages/EditCabinetPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
+import SchedulePage from "./pages/SchedulePage";
 import InvoicesPage from "./pages/InvoicesPage";
 import NewInvoicePage from "./pages/NewInvoicePage";
 import EditInvoicePage from "./pages/EditInvoicePage";
@@ -123,6 +124,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <AppointmentsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/schedule"
+                  element={
+                    <ProtectedRoute>
+                      <SchedulePage />
                     </ProtectedRoute>
                   }
                 />
