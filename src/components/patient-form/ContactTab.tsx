@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,10 +7,10 @@ import { PatientFormValues } from "./types";
 
 interface ContactTabProps {
     form: UseFormReturn<PatientFormValues>;
-    emailRequired: boolean;
+    emailRequired?: boolean; // Rendre optionnel par défaut
 }
 
-export const ContactTab = ({ form, emailRequired }: ContactTabProps) => {
+export const ContactTab = ({ form, emailRequired = false }: ContactTabProps) => {
     return (
         <Card>
             <CardContent className="space-y-4 mt-6">
@@ -28,7 +29,7 @@ export const ContactTab = ({ form, emailRequired }: ContactTabProps) => {
                             </FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder="Email"
+                                    placeholder="Email (optionnel)"
                                     {...field}
                                     value={field.value || ""}
                                 />

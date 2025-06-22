@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 // Fonction pour convertir hasChildren de string à boolean
@@ -15,20 +14,19 @@ export const convertHasChildrenToBoolean = (
 };
 
 // Schéma de validation pour le formulaire patient
-const getPatientSchema = (emailRequired: boolean) =>
+const getPatientSchema = (emailRequired: boolean = false) =>
 	z.object({
 		address: z.string().optional().nullable(),
 		email: emailRequired
 			? z.string().email("Email invalide").min(1, "Email requis")
-			: z.string().email("Email invalide").optional().nullable(),
+			: z.string().email("Email invalide").optional().nullable().or(z.literal("")),
 		phone: z.string().optional().nullable(),
-		// Corriger le type pour birthDate - accepter string pour le formulaire
 		birthDate: z.string().optional().nullable(),
 		childrenAges: z.array(z.number()).optional().nullable(),
 		firstName: z.string().min(1, "Prénom requis"),
 		lastName: z.string().min(1, "Nom requis"),
 		gender: z.string().optional().nullable(),
-		hasChildren: z.string().optional().nullable(), // Garder en string pour le switch
+		hasChildren: z.string().optional().nullable(),
 		occupation: z.string().optional().nullable(),
 		maritalStatus: z.string().optional().nullable(),
 		contraception: z.string().optional().nullable(),
@@ -52,11 +50,8 @@ const getPatientSchema = (emailRequired: boolean) =>
 		handedness: z.string().optional().nullable(),
 		familyStatus: z.string().optional().nullable(),
 		cabinetId: z.number().optional(),
-		
-		// Champs existants pour tous les patients
 		complementaryExams: z.string().optional().nullable(),
 		generalSymptoms: z.string().optional().nullable(),
-		// Champs existants pour les enfants
 		pregnancyHistory: z.string().optional().nullable(),
 		birthDetails: z.string().optional().nullable(),
 		developmentMilestones: z.string().optional().nullable(),
@@ -64,8 +59,6 @@ const getPatientSchema = (emailRequired: boolean) =>
 		feeding: z.string().optional().nullable(),
 		behavior: z.string().optional().nullable(),
 		childCareContext: z.string().optional().nullable(),
-
-		// Nouveaux champs généraux
 		ent_followup: z.string().optional().nullable(),
 		intestinal_transit: z.string().optional().nullable(),
 		sleep_quality: z.string().optional().nullable(),
@@ -74,8 +67,6 @@ const getPatientSchema = (emailRequired: boolean) =>
 		sport_frequency: z.string().optional().nullable(),
 		gynecological_history: z.string().optional().nullable(),
 		other_comments_adult: z.string().optional().nullable(),
-
-		// Nouveaux champs spécifiques aux enfants
 		fine_motor_skills: z.string().optional().nullable(),
 		gross_motor_skills: z.string().optional().nullable(),
 		weight_at_birth: z.number().optional().nullable(),
@@ -87,13 +78,9 @@ const getPatientSchema = (emailRequired: boolean) =>
 		pediatrician_name: z.string().optional().nullable(),
 		paramedical_followup: z.string().optional().nullable(),
 		other_comments_child: z.string().optional().nullable(),
-        
-        // Ajout pour poids, taille et IMC
         weight: z.number().optional().nullable(),
         height: z.number().optional().nullable(),
         bmi: z.number().optional().nullable(),
-        
-        // Champs manquants ajoutés
         allergies: z.string().optional().nullable(),
         avatarUrl: z.string().optional().nullable(),
         userId: z.string().optional().nullable(),
@@ -111,6 +98,28 @@ const getPatientSchema = (emailRequired: boolean) =>
         medicalHistory: z.string().optional().nullable(),
         currentMedication: z.string().optional().nullable(),
         otherContraception: z.string().optional().nullable(),
+        diagnosis: z.string().optional().nullable(),
+        medical_examination: z.string().optional().nullable(),
+        treatment_plan: z.string().optional().nullable(),
+        consultation_conclusion: z.string().optional().nullable(),
+        cardiac_history: z.string().optional().nullable(),
+        pulmonary_history: z.string().optional().nullable(),
+        pelvic_history: z.string().optional().nullable(),
+        neurological_history: z.string().optional().nullable(),
+        neurodevelopmental_history: z.string().optional().nullable(),
+        cranial_nerve_exam: z.string().optional().nullable(),
+        dental_exam: z.string().optional().nullable(),
+        cranial_exam: z.string().optional().nullable(),
+        lmo_tests: z.string().optional().nullable(),
+        cranial_membrane_exam: z.string().optional().nullable(),
+        musculoskeletal_history: z.string().optional().nullable(),
+        lower_limb_exam: z.string().optional().nullable(),
+        upper_limb_exam: z.string().optional().nullable(),
+        shoulder_exam: z.string().optional().nullable(),
+        scoliosis: z.string().optional().nullable(),
+        facial_mask_exam: z.string().optional().nullable(),
+        fascia_exam: z.string().optional().nullable(),
+        vascular_exam: z.string().optional().nullable(),
 	});
 
 export default getPatientSchema;
@@ -174,7 +183,6 @@ export function getEnumOptions(
 	}
 }
 
-// Fonctions de traduction pour les valeurs d'enum
 export function translateMaritalStatus(
 	status: string | null | undefined
 ): string {

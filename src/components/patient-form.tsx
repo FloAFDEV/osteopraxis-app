@@ -20,7 +20,7 @@ export function PatientForm({
   patient,
   onSubmit,
   onSave,
-  emailRequired = false,
+  emailRequired = false, // Par défaut, email n'est pas obligatoire
   selectedCabinetId,
   isLoading = false,
 }: PatientFormProps) {
@@ -232,9 +232,11 @@ export function PatientForm({
               </TabsContent>
 
               <TabsContent value="contact">
-                <ContactTab form={form} emailRequired={emailRequired} />
+                <ContactTab form={form} emailRequired={false} />
               </TabsContent>
 
+              
+              
               <TabsContent value="medical">
                 <MedicalTab form={form} isChild={isChild} />
               </TabsContent>
@@ -252,6 +254,7 @@ export function PatientForm({
               <TabsContent value="additional">
                 <AdditionalFieldsTab form={form} isChild={isChild} />
               </TabsContent>
+              
               <TabsContent value="specialized">
                 <SpecializedFieldsTab form={form} />
               </TabsContent>
