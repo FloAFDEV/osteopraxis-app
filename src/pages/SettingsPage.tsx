@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from "@/components/ui/layout";
 import { Link } from "react-router-dom";
@@ -8,12 +7,13 @@ import { Settings, Building2, UserCog, Users, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Osteopath } from "@/types";
-
 const SettingsPage = () => {
-  const { isAdmin, user } = useAuth();
+  const {
+    isAdmin,
+    user
+  } = useAuth();
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const loadOsteopathData = async () => {
       if (user?.osteopathId) {
@@ -29,13 +29,10 @@ const SettingsPage = () => {
         setLoading(false);
       }
     };
-
     loadOsteopathData();
   }, [user]);
-
-  return (
-    <Layout>
-      <div className="max-w-4xl mx-auto">
+  return <Layout>
+      <div className="max-w-4xl mx-auto mt-20">
         <div className="mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Settings className="h-8 w-8 text-primary" />
@@ -46,15 +43,12 @@ const SettingsPage = () => {
           </p>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
+        {loading ? <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Chargement des informations...</p>
             </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          </div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -66,8 +60,7 @@ const SettingsPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {osteopath ? (
-                  <>
+                {osteopath ? <>
                     <div className="mb-4 space-y-1">
                       <p className="text-sm">
                         <span className="font-medium">Nom:</span> {osteopath.name}
@@ -85,17 +78,14 @@ const SettingsPage = () => {
                     <Button asChild variant="outline">
                       <Link to="/settings/profile">Modifier mon profil</Link>
                     </Button>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <p className="mb-4 text-sm">
                       Complétez votre profil professionnel pour accéder à toutes les fonctionnalités.
                     </p>
                     <Button asChild>
                       <Link to="/settings/profile">Compléter mon profil</Link>
                     </Button>
-                  </>
-                )}
+                  </>}
               </CardContent>
             </Card>
 
@@ -159,8 +149,7 @@ const SettingsPage = () => {
               </CardContent>
             </Card>
 
-            {isAdmin && (
-              <Card>
+            {isAdmin && <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <UserCog className="h-5 w-5 text-amber-500 dark:text-amber-400" />
@@ -178,13 +167,9 @@ const SettingsPage = () => {
                     <Link to="/admin">Panneau d'administration</Link>
                   </Button>
                 </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+              </Card>}
+          </div>}
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default SettingsPage;
