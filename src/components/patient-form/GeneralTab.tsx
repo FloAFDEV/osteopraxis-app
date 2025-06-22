@@ -1,10 +1,10 @@
-
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { TranslatedSelect } from "@/components/ui/translated-select";
 import { WeightHeightBmiFields } from "./WeightHeightBmiFields";
+import { CabinetSelector } from "./CabinetSelector";
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
 
@@ -74,31 +74,11 @@ export const GeneralTab = ({
                 {/* Ajout des champs taille, poids et IMC */}
                 <WeightHeightBmiFields form={form} />
 
-                {/* Nouveau champ pour le cabinet */}
-                <FormField
-                    control={form.control}
-                    name="cabinetId"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Cabinet</FormLabel>
-                            <FormDescription>
-                                Sélectionnez le cabinet auquel
-                                ce patient est rattaché
-                            </FormDescription>
-                            <FormControl>
-                                <TranslatedSelect
-                                    value={currentCabinetId}
-                                    onValueChange={(value) => {
-                                        setCurrentCabinetId(value);
-                                        field.onChange(parseInt(value));
-                                    }}
-                                    enumType="Cabinet"
-                                    placeholder="Sélectionner un cabinet"
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                {/* Nouveau composant pour le cabinet */}
+                <CabinetSelector 
+                    form={form}
+                    selectedCabinetId={currentCabinetId}
+                    onCabinetChange={setCurrentCabinetId}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

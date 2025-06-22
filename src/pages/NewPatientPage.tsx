@@ -1,28 +1,43 @@
-
 import { PatientForm } from "@/components/patient-form";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
-import { Patient } from "@/types";
-import { ArrowLeft, Loader2, UserPlus } from "lucide-react";
+import { Patient, Cabinet } from "@/types";
+import { ArrowLeft, Loader2, UserPlus, Building } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const NewPatientPage = () => {
 	const [loading, setLoading] = useState(false);
-	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(
-		null
-	);
+	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
+	const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
 	const navigate = useNavigate();
 	const { user, isAuthenticated } = useAuth();
 
 	useEffect(() => {
-		const storedCabinetId = localStorage.getItem("selectedCabinetId");
-		if (storedCabinetId) {
-			setSelectedCabinetId(Number(storedCabinetId));
-		}
+		const fetchCabinetInfo = async () => {
+			// Récupérer le cabinet sélectionné depuis localStorage
+			const storedCabinetId = localStorage.getItem("selectedCabinetId");
+			if (storedCabinetId) {
+				const cabinetId = Number(storedCabinetId);
+				setSelectedCabinetId(cabinetId);
+				
+				// Récupérer les détails du cabinet
+				try {
+					const cabinet = await api.getCabinetById(cabinetId);
+					if (cabinet) {
+						setSelectedCabinet(cabinet);
+					}
+				} catch (error) {
+					console.error("Erreur lors de la récupération du cabinet:", error);
+				}
+			}
+		};
+		
+		fetchCabinetInfo();
 	}, []);
 
 	if (!isAuthenticated || !user) {
@@ -38,6 +53,13 @@ const NewPatientPage = () => {
 			// Vérifier les champs obligatoires - supprimer la vérification de l'email
 			if (!patientData.firstName || !patientData.lastName) {
 				toast.error("Veuillez remplir au moins le nom et le prénom");
+				setLoading(false);
+				return;
+			}
+
+			// Vérifier qu'un cabinet est sélectionné
+			if (!patientData.cabinetId && !selectedCabinetId) {
+				toast.error("Veuillez sélectionner un cabinet");
 				setLoading(false);
 				return;
 			}
@@ -157,7 +179,6 @@ const NewPatientPage = () => {
 		<Layout>
 			<div className="max-w-6xl mx-auto">
 				{/* Bouton Retour */}
-				{/* ... keep existing code (header, search, filters) */}
 				<div className="relative z-10">
 					<div className="flex items-center gap-2 mb-8">
 						<Button
@@ -182,6 +203,21 @@ const NewPatientPage = () => {
 						ci-dessous.
 					</p>
 				</div>
+
+				{/* Affichage du cabinet sélectionné */}
+				{selectedCabinet && (
+					<Alert className="mb-6">
+						<Building className="h-4 w-4" />
+						<AlertDescription>
+							<strong>Cabinet de rattachement :</strong> {selectedCabinet.name}
+							{selectedCabinet.address && (
+								<span className="block text-sm text-muted-foreground mt-1">
+									📍 {selectedCabinet.address}
+								</span>
+							)}
+						</AlertDescription>
+					</Alert>
+				)}
 
 				<div className="relative mb-6 p-4 bg-gradient-to-r from-blue-50 to-pink-50 dark:from-blue-950/20 dark:to-pink-950/20 rounded-lg border border-blue-100 dark:border-blue-900/30">
 					<div className="flex flex-col md:flex-row items-center">
