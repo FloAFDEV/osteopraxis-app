@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -32,40 +32,38 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/patients" element={<ProtectedRoute><PatientsPage /></ProtectedRoute>} />
-              <Route path="/patients/new" element={<ProtectedRoute><NewPatientPage /></ProtectedRoute>} />
-              <Route path="/patients/:id" element={<ProtectedRoute><PatientDetailsPage /></ProtectedRoute>} />
-              <Route path="/appointments" element={<ProtectedRoute><AppointmentsPage /></ProtectedRoute>} />
-              <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-              <Route path="/settings/profile" element={<ProtectedRoute><OsteopathSettingsPage /></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-              <Route path="/cabinets" element={<ProtectedRoute><CabinetsPage /></ProtectedRoute>} />
-              <Route path="/cabinets/new" element={<ProtectedRoute><NewCabinetPage /></ProtectedRoute>} />
-              <Route path="/cabinets/:id" element={<ProtectedRoute><CabinetSettingsPage /></ProtectedRoute>} />
-              <Route path="/invoices" element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
-              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-              
-              {/* Nouvelle route pour les collaborations */}
-              <Route 
-                path="/settings/collaborations" 
-                element={
-                  <ProtectedRoute>
-                    <CollaborationsSettingsPage />
-                  </ProtectedRoute>
-                } 
-              />
-              
-            </Routes>
-            <Toaster />
-          </BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/patients" element={<ProtectedRoute><PatientsPage /></ProtectedRoute>} />
+            <Route path="/patients/new" element={<ProtectedRoute><NewPatientPage /></ProtectedRoute>} />
+            <Route path="/patients/:id" element={<ProtectedRoute><PatientDetailsPage /></ProtectedRoute>} />
+            <Route path="/appointments" element={<ProtectedRoute><AppointmentsPage /></ProtectedRoute>} />
+            <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/settings/profile" element={<ProtectedRoute><OsteopathSettingsPage /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+            <Route path="/cabinets" element={<ProtectedRoute><CabinetsPage /></ProtectedRoute>} />
+            <Route path="/cabinets/new" element={<ProtectedRoute><NewCabinetPage /></ProtectedRoute>} />
+            <Route path="/cabinets/:id" element={<ProtectedRoute><CabinetSettingsPage /></ProtectedRoute>} />
+            <Route path="/invoices" element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            
+            {/* Nouvelle route pour les collaborations */}
+            <Route 
+              path="/settings/collaborations" 
+              element={
+                <ProtectedRoute>
+                  <CollaborationsSettingsPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+          </Routes>
+          <Toaster />
         </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
