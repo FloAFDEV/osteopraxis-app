@@ -11,7 +11,11 @@ const toast = {
         background: '#10b981',
         color: 'white',
         border: '1px solid #059669',
-      }
+      },
+      cancel: {
+        label: "✕",
+        onClick: () => {},
+      },
     });
   },
   
@@ -22,7 +26,11 @@ const toast = {
         background: '#ef4444',
         color: 'white',
         border: '1px solid #dc2626',
-      }
+      },
+      cancel: {
+        label: "✕",
+        onClick: () => {},
+      },
     });
   },
   
@@ -33,7 +41,11 @@ const toast = {
         background: '#f59e0b',
         color: 'white',
         border: '1px solid #d97706',
-      }
+      },
+      cancel: {
+        label: "✕",
+        onClick: () => {},
+      },
     });
   },
   
@@ -44,7 +56,11 @@ const toast = {
         background: '#3b82f6',
         color: 'white',
         border: '1px solid #2563eb',
-      }
+      },
+      cancel: {
+        label: "✕",
+        onClick: () => {},
+      },
     });
   },
 
@@ -52,6 +68,10 @@ const toast = {
   default: (title: string, options?: { description?: string }) => {
     return sonnerToast(title, {
       description: options?.description,
+      cancel: {
+        label: "✕",
+        onClick: () => {},
+      },
     });
   }
 };
