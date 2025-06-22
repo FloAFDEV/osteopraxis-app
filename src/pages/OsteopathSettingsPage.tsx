@@ -6,7 +6,7 @@ import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileBillingForm } from "@/components/settings/ProfileBillingForm";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { BackButton } from "@/components/ui/back-button";
 
