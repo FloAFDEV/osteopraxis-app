@@ -359,7 +359,6 @@ export function ProfileBillingForm({
             </div>
           </div>
 
-          {/* Séparateur */}
           <Separator />
 
           {/* Section Informations de Facturation */}
@@ -435,7 +434,6 @@ export function ProfileBillingForm({
             </div>
           </div>
 
-          {/* Séparateur */}
           <Separator />
 
           {/* Section Tampon/Signature */}
@@ -445,7 +443,7 @@ export function ProfileBillingForm({
               <p className="text-muted-foreground mb-4">
                 Ajoutez votre tampon professionnel pour vos factures et documents.
               </p>
-              <StampManagement osteopathId={osteopathId} />
+              <StampManagement />
             </div>
           )}
 
