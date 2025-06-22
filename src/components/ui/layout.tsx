@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -12,6 +13,7 @@ import {
 	Home,
 	FileText,
 	UserPlus,
+	Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -169,6 +171,15 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuSeparator />
 								<DropdownMenuItem asChild>
 									<NavLink
+										to="/settings"
+										className="flex items-center cursor-pointer"
+									>
+										<Settings className="mr-2 h-4 w-4 text-blue-500" />
+										<span>Paramètres</span>
+									</NavLink>
+								</DropdownMenuItem>
+								<DropdownMenuItem asChild>
+									<NavLink
 										to="/cabinets"
 										className="flex items-center cursor-pointer"
 									>
@@ -276,6 +287,21 @@ export function Layout({ children }: LayoutProps) {
 						>
 							<Clock className="h-5 w-5 text-amber-500" />
 							Planning
+						</NavLink>
+						<NavLink
+							to="/settings"
+							className={({ isActive }) =>
+								cn(
+									"p-2 rounded-md transition-colors flex items-center gap-2",
+									isActive
+										? "bg-blue-500/10 text-foreground"
+										: "text-foreground"
+								)
+							}
+							onClick={() => setIsMenuOpen(false)}
+						>
+							<Settings className="h-5 w-5 text-blue-500" />
+							Paramètres
 						</NavLink>
 						<NavLink
 							to="/invoices"
