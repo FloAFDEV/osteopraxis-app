@@ -1,51 +1,67 @@
 
-import { useToast as useHookToast, toast as hookToast } from "@/hooks/use-toast"
-import type { ToastProps } from "@/components/ui/toast"
+// Utiliser directement Sonner pour les toasts colorés
+import { toast as sonnerToast } from "sonner";
 
 // Créer des versions stylisées du toast pour chaque type de message
 const toast = {
-  ...hookToast,
-  
-  // Toast de succès avec style vert
-  success: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
-    return hookToast({
-      title,
-      variant: "success",
-      className: 'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100',
-      ...options
+  success: (title: string, options?: { description?: string }) => {
+    return sonnerToast.success(title, {
+      description: options?.description,
+      style: {
+        background: '#10b981',
+        color: 'white',
+        border: '1px solid #059669',
+      }
     });
   },
   
-  // Toast d'erreur avec style rouge
-  error: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
-    return hookToast({
-      title,
-      variant: "error",
-      className: 'bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100',
-      ...options
+  error: (title: string, options?: { description?: string }) => {
+    return sonnerToast.error(title, {
+      description: options?.description,
+      style: {
+        background: '#ef4444',
+        color: 'white',
+        border: '1px solid #dc2626',
+      }
     });
   },
   
-  // Toast d'avertissement avec style orange/ambre
-  warning: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
-    return hookToast({
-      title,
-      variant: "warning",
-      className: 'bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100',
-      ...options
+  warning: (title: string, options?: { description?: string }) => {
+    return sonnerToast.warning(title, {
+      description: options?.description,
+      style: {
+        background: '#f59e0b',
+        color: 'white',
+        border: '1px solid #d97706',
+      }
     });
   },
   
-  // Toast d'information avec style bleu
-  info: (title: string, options?: Omit<Parameters<typeof hookToast>[0], "title" | "variant">) => {
-    return hookToast({
-      title,
-      variant: "info",
-      className: 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100',
-      ...options
+  info: (title: string, options?: { description?: string }) => {
+    return sonnerToast.info(title, {
+      description: options?.description,
+      style: {
+        background: '#3b82f6',
+        color: 'white',
+        border: '1px solid #2563eb',
+      }
+    });
+  },
+
+  // Toast par défaut
+  default: (title: string, options?: { description?: string }) => {
+    return sonnerToast(title, {
+      description: options?.description,
     });
   }
 };
 
-// Exporter les fonctions avec le wrapper personnalisé
-export { useHookToast as useToast, toast };
+// Hook compatible avec l'ancien système
+export function useToast() {
+  return {
+    toast,
+    dismiss: sonnerToast.dismiss,
+  };
+}
+
+export { toast };

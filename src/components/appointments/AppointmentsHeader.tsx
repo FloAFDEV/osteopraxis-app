@@ -29,9 +29,12 @@ const AppointmentsHeader = () => {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
             Gestion des Séances
           </h1>
-          <HelpButton 
-            content="Ici vous pouvez voir toutes vos séances : passées, présentes et futures. Vous pouvez les organiser, les modifier et suivre leur statut." 
-          />
+          <div className="bg-white rounded-full p-1 shadow-sm">
+            <HelpButton 
+              content="Ici vous pouvez voir toutes vos séances : passées, présentes et futures. Vous pouvez les organiser, les modifier et suivre leur statut."
+              className="text-blue-600 hover:text-blue-800"
+            />
+          </div>
         </div>
         
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">

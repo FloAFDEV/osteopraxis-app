@@ -27,7 +27,7 @@ export const HelpButton: React.FC<HelpButtonProps> = ({
           <Button
             variant="ghost"
             size={size}
-            className={`p-1 h-auto text-muted-foreground hover:text-primary ${className}`}
+            className={`p-1 h-auto text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors ${className}`}
           >
             <HelpCircle className="h-4 w-4" />
           </Button>

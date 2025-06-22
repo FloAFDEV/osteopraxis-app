@@ -85,7 +85,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
           (item.href !== "/" && location.pathname.startsWith(item.href));
         
         return (
-          <div key={item.name} className="flex items-center">
+          <div key={item.name} className="flex items-center group">
             <Link
               to={item.href}
               className={cn(
@@ -98,10 +98,12 @@ export function SidebarNav({ className }: SidebarNavProps) {
               <item.icon className="mr-3 h-4 w-4" />
               {item.name}
             </Link>
-            <HelpButton 
-              content={item.help}
-              className="ml-1 opacity-60 hover:opacity-100"
-            />
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+              <HelpButton 
+                content={item.help}
+                className="text-blue-500 hover:text-blue-700"
+              />
+            </div>
           </div>
         );
       })}
