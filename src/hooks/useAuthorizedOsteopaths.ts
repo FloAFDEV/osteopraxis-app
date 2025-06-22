@@ -46,7 +46,18 @@ export function useAuthorizedOsteopaths() {
       }
 
       console.log("Ostéopathes autorisés récupérés:", data);
-      setOsteopaths(data || []);
+      
+      // Transformer les données pour s'assurer que le type access_type est correct
+      const transformedData: AuthorizedOsteopath[] = (data || []).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        professional_title: item.professional_title || '',
+        rpps_number: item.rpps_number || '',
+        siret: item.siret || '',
+        access_type: item.access_type as 'self' | 'replacement' | 'cabinet_colleague'
+      }));
+      
+      setOsteopaths(transformedData);
     } catch (err) {
       console.error("Erreur lors du chargement des ostéopathes autorisés:", err);
       setError("Erreur lors du chargement des ostéopathes autorisés");

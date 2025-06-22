@@ -9,14 +9,14 @@ import Index from "./pages/Index";
 import DashboardPage from "./pages/DashboardPage";
 import PatientsPage from "./pages/PatientsPage";
 import PatientDetailPage from "./pages/PatientDetailPage";
-import AddPatientPage from "./pages/AddPatientPage";
+import NewPatientPage from "./pages/NewPatientPage";
 import EditPatientPage from "./pages/EditPatientPage";
-import CabinetsPage from "./pages/CabinetsPage";
-import AddCabinetPage from "./pages/AddCabinetPage";
+import CabinetsManagementPage from "./pages/CabinetsManagementPage";
+import NewCabinetPage from "./pages/NewCabinetPage";
 import EditCabinetPage from "./pages/EditCabinetPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import InvoicesPage from "./pages/InvoicesPage";
-import CreateInvoicePage from "./pages/CreateInvoicePage";
+import NewInvoicePage from "./pages/NewInvoicePage";
 import EditInvoicePage from "./pages/EditInvoicePage";
 import LoginPage from "./pages/LoginPage";
 import OsteopathProfilePage from "./pages/OsteopathProfilePage";
@@ -28,9 +28,9 @@ import HelpPage from "./pages/HelpPage";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   
-  if (loading) {
+  if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Chargement...</div>;
   }
   
@@ -72,7 +72,7 @@ function App() {
                 path="/patients/add"
                 element={
                   <ProtectedRoute>
-                    <AddPatientPage />
+                    <NewPatientPage />
                   </ProtectedRoute>
                 }
               />
@@ -96,7 +96,7 @@ function App() {
                 path="/cabinets"
                 element={
                   <ProtectedRoute>
-                    <CabinetsPage />
+                    <CabinetsManagementPage />
                   </ProtectedRoute>
                 }
               />
@@ -104,7 +104,7 @@ function App() {
                 path="/cabinets/add"
                 element={
                   <ProtectedRoute>
-                    <AddCabinetPage />
+                    <NewCabinetPage />
                   </ProtectedRoute>
                 }
               />
@@ -136,7 +136,7 @@ function App() {
                 path="/invoices/create"
                 element={
                   <ProtectedRoute>
-                    <CreateInvoicePage />
+                    <NewInvoicePage />
                   </ProtectedRoute>
                 }
               />
