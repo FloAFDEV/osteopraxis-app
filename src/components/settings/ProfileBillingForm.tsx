@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -437,7 +438,7 @@ export function ProfileBillingForm({
 
           <Separator />
 
-          {/* Section Tampon/Signature */}
+          {/* Section Tampon/Signature - Seulement si osteopathId existe */}
           {osteopathId && (
             <div className="bg-card rounded-lg border shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-4">Tampon et Signature</h2>

@@ -1,3 +1,4 @@
+
 import { api } from "@/services/api";
 import { DashboardData, Patient } from "@/types";
 import { formatAppointmentDate } from "@/utils/date-utils";
@@ -60,42 +61,50 @@ export function Dashboard() {
 
 	useEffect(() => {
 		const loadDashboardData = async () => {
+			console.log("Dashboard: Début du chargement des données");
 			setLoading(true);
 			setError(null);
 			try {
 				// Récupération des données réelles
+				console.log("Dashboard: Récupération des patients et rendez-vous");
 				const [patientsData, appointmentsData] = await Promise.all([
 					api.getPatients(),
 					api.getAppointments(),
 				]);
 
-				setAllPatients(patientsData); // Stocker tous les patients pour DemographicsCard
+				console.log("Dashboard: Données récupérées", {
+					patientsCount: patientsData?.length || 0,
+					appointmentsCount: appointmentsData?.length || 0
+				});
+
+				setAllPatients(patientsData || []); // Stocker tous les patients pour DemographicsCard
 
 				const today = new Date();
 				const currentYear = today.getFullYear();
 				const currentMonth = today.getMonth();
 
 				// Calculer les différentes métriques
+				console.log("Dashboard: Calcul des métriques");
 				const demographics = calculateDemographics(
-					patientsData,
+					patientsData || [],
 					currentYear
 				);
 				const growthMetrics = calculateGrowthMetrics(
-					patientsData,
+					patientsData || [],
 					currentYear,
 					currentMonth
 				);
 				const appointmentStats = calculateAppointmentStats(
-					appointmentsData,
+					appointmentsData || [],
 					today
 				);
 				const consultationMetrics = calculateConsultationMetrics(
-					appointmentsData,
+					appointmentsData || [],
 					currentYear,
 					currentMonth
 				);
 				const monthlyGrowthData = calculateMonthlyBreakdown(
-					patientsData,
+					patientsData || [],
 					currentYear
 				);
 
@@ -109,8 +118,8 @@ export function Dashboard() {
 						: "Aucune séance prévue";
 
 				// Assembler toutes les données pour le tableau de bord
-				setDashboardData({
-					totalPatients: patientsData.length,
+				const finalDashboardData = {
+					totalPatients: (patientsData || []).length,
 					...demographics,
 					...growthMetrics,
 					appointmentsToday: appointmentStats.appointmentsToday,
@@ -121,12 +130,15 @@ export function Dashboard() {
 					pendingInvoices: 0,
 					weeklyAppointments: [0, 0, 0, 0, 0, 0, 0],
 					monthlyRevenue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-					completedAppointments: appointmentsData.filter(
+					completedAppointments: (appointmentsData || []).filter(
 						(a) => a.status === "COMPLETED"
 					).length,
 					// Nouvelles métriques de consultation
 					...consultationMetrics,
-				});
+				};
+
+				console.log("Dashboard: Données finales calculées", finalDashboardData);
+				setDashboardData(finalDashboardData);
 			} catch (err) {
 				console.error(
 					"Erreur lors du chargement des données du tableau de bord:",
@@ -137,11 +149,14 @@ export function Dashboard() {
 				);
 			} finally {
 				setLoading(false);
+				console.log("Dashboard: Chargement terminé");
 			}
 		};
 
 		loadDashboardData();
 	}, []);
+
+	console.log("Dashboard: Rendu avec", { loading, error, hasData: !!dashboardData });
 
 	if (loading) {
 		return <LoadingState />;
