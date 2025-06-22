@@ -1,34 +1,64 @@
 
 import { useState, useEffect } from "react";
-import { osteopathReplacementService, AuthorizedOsteopath } from "@/services/supabase-api/osteopath-replacement-service";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface AuthorizedOsteopath {
+  id: number;
+  name: string;
+  professional_title: string;
+  rpps_number: string;
+  siret: string;
+  access_type: 'self' | 'replacement' | 'cabinet_colleague';
+}
 
 export function useAuthorizedOsteopaths() {
   const [osteopaths, setOsteopaths] = useState<AuthorizedOsteopath[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    loadAuthorizedOsteopaths();
+  }, []);
+
   const loadAuthorizedOsteopaths = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await osteopathReplacementService.getAuthorizedOsteopaths();
-      setOsteopaths(data);
+      
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log("Aucun utilisateur connecté");
+        setOsteopaths([]);
+        return;
+      }
+
+      console.log("Chargement des ostéopathes autorisés pour l'utilisateur:", user.id);
+
+      // Utiliser la fonction de base de données pour récupérer les ostéopathes autorisés
+      const { data, error } = await supabase.rpc('get_authorized_osteopaths', {
+        current_osteopath_auth_id: user.id
+      });
+
+      if (error) {
+        console.error("Erreur lors de la récupération des ostéopathes autorisés:", error);
+        throw error;
+      }
+
+      console.log("Ostéopathes autorisés récupérés:", data);
+      setOsteopaths(data || []);
     } catch (err) {
       console.error("Erreur lors du chargement des ostéopathes autorisés:", err);
       setError("Erreur lors du chargement des ostéopathes autorisés");
-      setOsteopaths([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadAuthorizedOsteopaths();
-  }, []);
-
-  const reload = () => {
-    loadAuthorizedOsteopaths();
+  return {
+    osteopaths,
+    loading,
+    error,
+    reload: loadAuthorizedOsteopaths
   };
-
-  return { osteopaths, loading, error, reload };
 }

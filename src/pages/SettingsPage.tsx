@@ -1,175 +1,99 @@
-import React, { useState, useEffect } from 'react';
+
 import { Layout } from "@/components/ui/layout";
-import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Building2, UserCog, Users, FileText } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/services/api";
-import { Osteopath } from "@/types";
+import { 
+  Settings, 
+  UserCog, 
+  Users, 
+  HelpCircle,
+  ChevronRight 
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 const SettingsPage = () => {
-  const {
-    isAdmin,
-    user
-  } = useAuth();
-  const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const loadOsteopathData = async () => {
-      if (user?.osteopathId) {
-        try {
-          const osteopathData = await api.getOsteopathById(user.osteopathId);
-          setOsteopath(osteopathData || null);
-        } catch (error) {
-          console.error("Error fetching osteopath data:", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    };
-    loadOsteopathData();
-  }, [user]);
-  return <Layout>
-      <div className="max-w-4xl mx-auto mt-20">
-        <div className="mb-8">
+  const navigate = useNavigate();
+
+  const settingsOptions = [
+    {
+      id: "profile",
+      title: "Profil & Facturation",
+      description: "Gérez vos informations professionnelles et de facturation",
+      icon: UserCog,
+      path: "/settings/profile",
+      color: "text-blue-500"
+    },
+    {
+      id: "collaborations",
+      title: "Collaborations",
+      description: "Gérez vos associations de cabinet et remplacements",
+      icon: Users,
+      path: "/settings/collaborations",
+      color: "text-green-500"
+    },
+    {
+      id: "help",
+      title: "Guide d'utilisation",
+      description: "Consultez la documentation et les guides d'utilisation",
+      icon: HelpCircle,
+      path: "/help",
+      color: "text-purple-500"
+    }
+  ];
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Settings className="h-8 w-8 text-primary" />
+            <Settings className="h-8 w-8 text-amber-500" />
             Paramètres
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gérez les paramètres de votre application
+            Gérez vos préférences et configurations
           </p>
         </div>
 
-        {loading ? <div className="flex justify-center items-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Chargement des informations...</p>
-            </div>
-          </div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserCog className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Profil & Facturation
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos informations professionnelles, données de facturation et tampon
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {osteopath ? <>
-                    <div className="mb-4 space-y-1">
-                      <p className="text-sm">
-                        <span className="font-medium">Nom:</span> {osteopath.name}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Titre:</span> {osteopath.professional_title || "Non spécifié"}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Numéro RPPS:</span> {osteopath.rpps_number || "Non spécifié"}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">SIRET:</span> {osteopath.siret || "Non spécifié"}
-                      </p>
-                    </div>
-                    <Button asChild variant="outline">
-                      <Link to="/settings/profile">Modifier mon profil</Link>
-                    </Button>
-                  </> : <>
-                    <p className="mb-4 text-sm">
-                      Complétez votre profil professionnel pour accéder à toutes les fonctionnalités.
-                    </p>
-                    <Button asChild>
-                      <Link to="/settings/profile">Compléter mon profil</Link>
-                    </Button>
-                  </>}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Mes cabinets
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos cabinets d'ostéopathie
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm">
-                  Ajoutez, modifiez ou supprimez des cabinets pour votre pratique.
-                </p>
-                <Button asChild variant="outline">
-                  <Link to="/cabinets">Gérer les cabinets</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Collaborations
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos associations de cabinet et remplacements
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm">
-                  Configurez vos collaborations avec d'autres ostéopathes.
-                </p>
-                <Button asChild variant="outline">
-                  <Link to="/settings/collaborations">Gérer les collaborations</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Factures
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos factures patients
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm">
-                  Créez et gérez les factures pour vos patients.
-                </p>
-                <Button asChild variant="outline">
-                  <Link to="/invoices">Gérer les factures</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {isAdmin && <Card>
+        <div className="grid gap-6">
+          {settingsOptions.map((option) => {
+            const IconComponent = option.icon;
+            return (
+              <Card key={option.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(option.path)}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserCog className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                    Administration
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <IconComponent className={`h-6 w-6 ${option.color}`} />
+                      {option.title}
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </CardTitle>
                   <CardDescription>
-                    Paramètres administrateur
+                    {option.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="mb-4 text-sm">
-                    Accédez aux paramètres d'administration (réservé aux administrateurs).
-                  </p>
-                  <Button asChild variant="outline">
-                    <Link to="/admin">Panneau d'administration</Link>
-                  </Button>
-                </CardContent>
-              </Card>}
-          </div>}
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Section d'information */}
+        <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800">
+          <CardHeader>
+            <CardTitle className="text-amber-800 dark:text-amber-200">
+              💡 Conseil
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-amber-700 dark:text-amber-300">
+            <p>
+              Commencez par configurer votre profil professionnel, puis gérez vos collaborations 
+              si vous travaillez avec d'autres ostéopathes. Consultez le guide d'utilisation 
+              pour comprendre tous les workflows disponibles.
+            </p>
+          </CardContent>
+        </Card>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default SettingsPage;
