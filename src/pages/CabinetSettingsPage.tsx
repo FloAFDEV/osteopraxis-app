@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
 import { api } from "@/services/api";
@@ -23,8 +24,7 @@ const CabinetSettingsPage = () => {
       address: "",
       phone: "",
       email: "",
-      imageUrl: "",
-      logoUrl: ""
+      imageUrl: ""
     }
   });
 
@@ -38,12 +38,11 @@ const CabinetSettingsPage = () => {
       try {
         console.log("Chargement des cabinets pour l'utilisateur:", user.id);
         
-        // Utiliser la méthode getCabinetsByUserId directement
         const cabinets = await api.getCabinetsByUserId(user.id);
         console.log("Cabinets récupérés:", cabinets);
         
         if (cabinets && cabinets.length > 0) {
-          const primaryCabinet = cabinets[0]; // Use the first cabinet as primary
+          const primaryCabinet = cabinets[0];
           console.log("Cabinet principal trouvé:", primaryCabinet);
           setCabinet(primaryCabinet);
           
@@ -52,8 +51,7 @@ const CabinetSettingsPage = () => {
             address: primaryCabinet.address || "",
             phone: primaryCabinet.phone || "",
             email: primaryCabinet.email || "",
-            imageUrl: primaryCabinet.imageUrl || "",
-            logoUrl: primaryCabinet.logoUrl || ""
+            imageUrl: primaryCabinet.imageUrl || ""
           });
         } else {
           console.log("Aucun cabinet trouvé pour l'utilisateur");
@@ -74,22 +72,19 @@ const CabinetSettingsPage = () => {
     address: string; 
     phone: string; 
     email: string; 
-    imageUrl: string; 
-    logoUrl: string;
+    imageUrl: string;
   }) => {
     if (!cabinet || !user?.id) return;
     
     try {
       setIsSaving(true);
       
-      // Mettre à jour le cabinet - uniquement les informations spécifiques au cabinet
       const updatedCabinet = await api.updateCabinet(cabinet.id, {
         name: data.name,
         address: data.address,
         phone: data.phone || null,
         email: data.email || null,
-        imageUrl: data.imageUrl || null,
-        logoUrl: data.logoUrl || null
+        imageUrl: data.imageUrl || null
       });
       
       if (updatedCabinet) {
@@ -118,13 +113,12 @@ const CabinetSettingsPage = () => {
             Gérez les informations de votre cabinet d'ostéopathie
           </p>
           <p className="text-sm text-muted-foreground mt-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            💡 <strong>Astuce :</strong> Les informations de facturation (SIRET, RPPS, APE) se trouvent dans 
-            <strong> Paramètres → Profil & Facturation</strong> pour éviter les doublons.
+            💡 <strong>Astuce :</strong> Les informations professionnelles et de facturation se trouvent dans 
+            <strong> Paramètres → Profil & Facturation</strong>.
           </p>
         </div>
 
-        {
-        loading ? (
+        {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -212,7 +206,7 @@ const CabinetSettingsPage = () => {
                   />
 
                   <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Images du cabinet</h3>
+                    <h3 className="text-lg font-semibold mb-4">Image du cabinet</h3>
                     
                     <FormField
                       control={form.control}
@@ -232,25 +226,6 @@ const CabinetSettingsPage = () => {
                         </FormItem>
                       )}
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="logoUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>URL du logo (facultatif)</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input className="pl-10" placeholder="URL du logo du cabinet" {...field} />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            URL de votre logo professionnel
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
                   </div>
                 </div>
 
@@ -261,8 +236,7 @@ const CabinetSettingsPage = () => {
               </form>
             </Form>
           </div>
-        )
-}
+        )}
       </div>
     </Layout>
   );

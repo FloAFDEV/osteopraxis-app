@@ -14,6 +14,7 @@ const OsteopathSettingsPage = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [osteopath, setOsteopath] = useState(null);
+  const [cabinetLogo, setCabinetLogo] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +23,14 @@ const OsteopathSettingsPage = () => {
         try {
           const osteopathData = await api.getOsteopathById(user.osteopathId);
           setOsteopath(osteopathData || null);
+          
+          // Récupérer le logo du cabinet s'il existe
+          if (user?.id) {
+            const cabinets = await api.getCabinetsByUserId(user.id);
+            if (cabinets && cabinets.length > 0 && cabinets[0].logoUrl) {
+              setCabinetLogo(cabinets[0].logoUrl);
+            }
+          }
         } catch (error) {
           console.error("Error fetching osteopath data:", error);
           toast.error("Impossible de charger les données du profil.");
@@ -54,13 +63,26 @@ const OsteopathSettingsPage = () => {
         <BackButton to="/settings" />
         
         <div className="mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <UserCog className="h-8 w-8 text-amber-500" />
-            Profil & Facturation
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gérez vos informations professionnelles, données de facturation et tampon
-          </p>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold">
+                Profil & Facturation
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Gérez vos informations professionnelles, données de facturation et tampon
+              </p>
+            </div>
+            {cabinetLogo && (
+              <div className="flex-shrink-0">
+                <img 
+                  src={cabinetLogo} 
+                  alt="Logo du cabinet" 
+                  className="h-16 w-16 object-contain rounded-lg border bg-white p-2"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {osteopath ? (
