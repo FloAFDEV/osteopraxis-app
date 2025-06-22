@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { UserCog } from "lucide-react";
 import { api } from "@/services/api";
@@ -6,7 +5,7 @@ import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileBillingForm } from "@/components/settings/ProfileBillingForm";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { BackButton } from "@/components/ui/back-button";
 
@@ -16,6 +15,7 @@ const OsteopathSettingsPage = () => {
   const [osteopath, setOsteopath] = useState(null);
   const [cabinetLogo, setCabinetLogo] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadOsteopathData = async () => {
@@ -45,9 +45,12 @@ const OsteopathSettingsPage = () => {
   }, [user]);
 
   const handleSuccess = () => {
-    toast.success("Profil mis à jour avec succès");
+    toast({
+      title: "Succès",
+      description: "Profil mis à jour avec succès",
+      variant: "default",
+    });
     // Ne pas rediriger automatiquement, laisser l'utilisateur sur la page
-    // navigate("/settings");
   };
 
   const handleBackToSettings = () => {

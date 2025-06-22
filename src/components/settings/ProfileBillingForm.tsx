@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -254,9 +253,11 @@ export function ProfileBillingForm({
         }
       }
       
+      // Utiliser la fonction onSuccess personnalisée si fournie, sinon rediriger
       if (onSuccess) {
         onSuccess(osteopathResult);
       } else {
+        // Redirection par défaut seulement si pas de onSuccess personnalisée
         if (returnUrl) {
           console.log("Redirection vers l'URL de retour:", returnUrl);
           sessionStorage.removeItem("profileSetupReturnUrl");
