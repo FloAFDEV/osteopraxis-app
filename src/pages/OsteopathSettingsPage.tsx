@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { UserCog } from "lucide-react";
 import { api } from "@/services/api";
@@ -33,7 +34,11 @@ const OsteopathSettingsPage = () => {
           }
         } catch (error) {
           console.error("Error fetching osteopath data:", error);
-          toast.error("Impossible de charger les données du profil.");
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les données du profil.",
+            variant: "destructive",
+          });
         } finally {
           setLoading(false);
         }
@@ -42,7 +47,7 @@ const OsteopathSettingsPage = () => {
       }
     };
     loadOsteopathData();
-  }, [user]);
+  }, [user, toast]);
 
   const handleSuccess = () => {
     toast({
@@ -50,7 +55,7 @@ const OsteopathSettingsPage = () => {
       description: "Profil mis à jour avec succès",
       variant: "default",
     });
-    // Ne pas rediriger automatiquement, laisser l'utilisateur sur la page
+    // Pas de redirection automatique - rester sur la page
   };
 
   const handleBackToSettings = () => {
@@ -93,44 +98,25 @@ const OsteopathSettingsPage = () => {
           </div>
         </div>
 
-        {osteopath ? (
-          <div className="space-y-4">
-            <ProfileBillingForm 
-              defaultValues={osteopath} 
-              osteopathId={osteopath.id} 
-              isEditing={true} 
-              onSuccess={handleSuccess} 
-            />
-            <div className="flex justify-end">
-              <button 
-                onClick={handleBackToSettings}
-                className="text-sm text-muted-foreground hover:text-foreground underline"
-              >
-                Retour aux paramètres
-              </button>
-            </div>
+        {/* Toujours afficher le formulaire, qu'il y ait un profil existant ou non */}
+        <div className="space-y-4">
+          <ProfileBillingForm 
+            defaultValues={osteopath || {
+              name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
+            }}
+            osteopathId={osteopath?.id} 
+            isEditing={!!osteopath} 
+            onSuccess={handleSuccess} 
+          />
+          <div className="flex justify-end">
+            <button 
+              onClick={handleBackToSettings}
+              className="text-sm text-muted-foreground hover:text-foreground underline"
+            >
+              Retour aux paramètres
+            </button>
           </div>
-        ) : (
-          <div className="text-center py-6">
-            <p className="text-muted-foreground mb-4">
-              Aucun profil professionnel trouvé. Veuillez en créer un.
-            </p>
-            <ProfileBillingForm 
-              onSuccess={handleSuccess} 
-              defaultValues={{
-                name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
-              }} 
-            />
-            <div className="mt-4">
-              <button 
-                onClick={handleBackToSettings}
-                className="text-sm text-muted-foreground hover:text-foreground underline"
-              >
-                Retour aux paramètres
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </Layout>
   );

@@ -196,8 +196,9 @@ export function ProfileBillingForm({
           const existingOsteopath = await api.getOsteopathByUserId(user.id);
           
           if (existingOsteopath) {
-            console.log("Un profil ostéopathe existe déjà:", existingOsteopath);
-            osteopathResult = existingOsteopath;
+            console.log("Un profil ostéopathe existe déjà, mise à jour:", existingOsteopath);
+            // Mise à jour du profil existant au lieu de créer un nouveau
+            osteopathResult = await api.updateOsteopath(existingOsteopath.id, osteopathData) as Osteopath;
             
             if (!user.osteopathId && existingOsteopath.id) {
               const updatedUser = { ...user, osteopathId: existingOsteopath.id };
@@ -205,7 +206,7 @@ export function ProfileBillingForm({
               console.log("User mis à jour avec l'osteopathId existant:", existingOsteopath.id);
             }
             
-            toast.success("Profil ostéopathe déjà existant");
+            toast.success("Profil mis à jour avec succès");
           } else {
             console.log("Aucun profil existant trouvé, création d'un nouveau profil");
             
@@ -253,19 +254,12 @@ export function ProfileBillingForm({
         }
       }
       
-      // Utiliser la fonction onSuccess personnalisée si fournie, sinon rediriger
+      // Utiliser la fonction onSuccess personnalisée si fournie
       if (onSuccess) {
         onSuccess(osteopathResult);
-      } else {
-        // Redirection par défaut seulement si pas de onSuccess personnalisée
-        if (returnUrl) {
-          console.log("Redirection vers l'URL de retour:", returnUrl);
-          sessionStorage.removeItem("profileSetupReturnUrl");
-          navigate(returnUrl);
-        } else {
-          navigate("/settings");
-        }
       }
+      // Pas de redirection automatique - rester sur la page pour permettre d'autres modifications
+      
     } catch (error: any) {
       console.error("Error submitting profile form:", error);
       
