@@ -17,8 +17,11 @@ export const PatientOwnershipBadge: React.FC<PatientOwnershipBadgeProps> = ({
 }) => {
   const { isOwnPatient, isCabinetPatient, loading } = usePatientOwnership(patientId);
 
+  // Afficher un skeleton pendant le chargement pour éviter l'effet cascade
   if (loading) {
-    return null;
+    return (
+      <div className="inline-block h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+    );
   }
 
   if (isOwnPatient) {
@@ -45,5 +48,7 @@ export const PatientOwnershipBadge: React.FC<PatientOwnershipBadgeProps> = ({
     );
   }
 
-  return null;
+  return (
+    <div className="inline-block h-5 w-20"></div>
+  );
 };

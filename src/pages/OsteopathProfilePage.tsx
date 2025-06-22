@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "@/services/api";
@@ -349,7 +348,7 @@ const OsteopathProfilePage = () => {
                     <CardDescription>
                       Rejoignez un cabinet existant si vous exercez avec d'autres ostéopathes
                     </CardDescription>
-                  </CardContent>
+                  </CardHeader>
                   <CardContent>
                     <Button 
                       variant="outline" 

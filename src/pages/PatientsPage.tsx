@@ -1,13 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import { api } from "@/services/api";
-import { Patient } from "@/types";
+import { Patient, Cabinet } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { PatientCard } from "@/components/patient-card";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -18,23 +20,37 @@ import PatientLoadingState from "@/components/patients/PatientLoadingState";
 import PatientHeader from "@/components/patients/PatientHeader";
 import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
 import PatientPagination from "@/components/patients/PatientPagination";
+import CabinetFilter from "@/components/patients/CabinetFilter";
 
 type SortOption = "name" | "date" | "email" | "gender";
 
 const PatientsPage = () => {
+	const { user } = useAuth();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [sortBy, setSortBy] = useState<SortOption>("name");
 	const [activeLetter, setActiveLetter] = useState("");
 	const [viewMode, setViewMode] = useState<"cards" | "list">("list");
+	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 
 	// Pagination - updated to 25 patients per page
 	const [currentPage, setCurrentPage] = useState(1);
 	const patientsPerPage = 25;
 
+	// Récupérer les cabinets de l'utilisateur
+	const { data: cabinets = [], isLoading: cabinetsLoading } = useQuery({
+		queryKey: ["cabinets", user?.osteopathId],
+		queryFn: async () => {
+			if (!user?.osteopathId) return [];
+			return await api.getCabinetsByOsteopathId(user.osteopathId);
+		},
+		enabled: !!user?.osteopathId,
+		refetchOnWindowFocus: false,
+	});
+
 	// Use useQuery for better state and cache management
 	const {
-		data: patients,
+		data: allPatients,
 		isLoading,
 		error,
 		refetch,
@@ -53,6 +69,12 @@ const PatientsPage = () => {
 		refetchOnWindowFocus: false,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 	});
+
+	// Filtrer les patients par cabinet sélectionné
+	const patients = allPatients?.filter(patient => {
+		if (!selectedCabinetId) return true;
+		return patient.cabinetId === selectedCabinetId;
+	}) || [];
 
 	// Handler for forcing data reload with animation
 	const handleRetry = async () => {
@@ -94,6 +116,7 @@ const PatientsPage = () => {
 	const handleClearFilter = () => {
 		setActiveLetter("");
 		setSearchQuery("");
+		setSelectedCabinetId(null);
 	};
 
 	const getSortedPatients = () => {
@@ -169,20 +192,30 @@ const PatientsPage = () => {
 			<div className="flex flex-col min-h-full">
 				{/* Header section */}
 				<PatientHeader
-					patientCount={patients?.length || 0}
+					patientCount={allPatients?.length || 0}
 					isRefreshing={isRefreshing}
 					onRefresh={handleRetry}
 				/>
 
 				{/* Search and filter section */}
-				<PatientSearch
-					searchQuery={searchQuery}
-					onSearchChange={handleSearchChange}
-					sortBy={sortBy}
-					onSortChange={(option) => setSortBy(option)}
-					viewMode={viewMode}
-					onViewModeChange={(mode) => setViewMode(mode)}
-				/>
+				<div className="mb-4 space-y-4">
+					<PatientSearch
+						searchQuery={searchQuery}
+						onSearchChange={handleSearchChange}
+						sortBy={sortBy}
+						onSortChange={(option) => setSortBy(option)}
+						viewMode={viewMode}
+						onViewModeChange={(mode) => setViewMode(mode)}
+					/>
+
+					{/* Filtre par cabinet */}
+					<CabinetFilter
+						cabinets={cabinets}
+						selectedCabinetId={selectedCabinetId}
+						onCabinetChange={setSelectedCabinetId}
+						loading={cabinetsLoading}
+					/>
+				</div>
 
 				{/* Alphabet filter */}
 				<AlphabetFilter
