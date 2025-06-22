@@ -1,4 +1,3 @@
-
 import * as React from "react"
 
 import type {
@@ -169,7 +168,7 @@ function toast({ ...props }: Toast) {
   }
 }
 
-// Add variant-specific toast methods
+// Add variant-specific toast methods with better colors
 toast.success = (title: string, options?: Omit<Toast, "title" | "variant">) => {
   return toast({ title, variant: "success", ...options });
 };

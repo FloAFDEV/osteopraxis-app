@@ -32,13 +32,13 @@ const toastVariants = cva(
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
         success: 
-          "border-green-200 bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100 dark:border-green-800",
+          "border-green-500/20 bg-green-500 text-white shadow-lg",
         error: 
-          "border-red-200 bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100 dark:border-red-800",
+          "border-red-500/20 bg-red-500 text-white shadow-lg",
         warning: 
-          "border-orange-200 bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100 dark:border-orange-800",
+          "border-orange-500/20 bg-orange-500 text-white shadow-lg",
         info: 
-          "border-blue-200 bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-800",
+          "border-blue-500/20 bg-blue-500 text-white shadow-lg",
       },
     },
     defaultVariants: {
@@ -84,7 +84,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      "absolute right-2 top-2 rounded-md p-1 text-white/80 opacity-100 transition-opacity hover:text-white hover:bg-white/10 focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100",
       className
     )}
     toast-close=""
@@ -101,7 +101,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold", className)}
+    className={cn("text-sm font-semibold text-white", className)}
     {...props}
   />
 ))
@@ -113,7 +113,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-sm opacity-90", className)}
+    className={cn("text-sm opacity-90 text-white/90", className)}
     {...props}
   />
 ))
