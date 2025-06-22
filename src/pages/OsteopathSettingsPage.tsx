@@ -46,6 +46,11 @@ const OsteopathSettingsPage = () => {
 
   const handleSuccess = () => {
     toast.success("Profil mis à jour avec succès");
+    // Ne pas rediriger automatiquement, laisser l'utilisateur sur la page
+    // navigate("/settings");
+  };
+
+  const handleBackToSettings = () => {
     navigate("/settings");
   };
 
@@ -86,12 +91,22 @@ const OsteopathSettingsPage = () => {
         </div>
 
         {osteopath ? (
-          <ProfileBillingForm 
-            defaultValues={osteopath} 
-            osteopathId={osteopath.id} 
-            isEditing={true} 
-            onSuccess={handleSuccess} 
-          />
+          <div className="space-y-4">
+            <ProfileBillingForm 
+              defaultValues={osteopath} 
+              osteopathId={osteopath.id} 
+              isEditing={true} 
+              onSuccess={handleSuccess} 
+            />
+            <div className="flex justify-end">
+              <button 
+                onClick={handleBackToSettings}
+                className="text-sm text-muted-foreground hover:text-foreground underline"
+              >
+                Retour aux paramètres
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="text-center py-6">
             <p className="text-muted-foreground mb-4">
@@ -103,6 +118,14 @@ const OsteopathSettingsPage = () => {
                 name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
               }} 
             />
+            <div className="mt-4">
+              <button 
+                onClick={handleBackToSettings}
+                className="text-sm text-muted-foreground hover:text-foreground underline"
+              >
+                Retour aux paramètres
+              </button>
+            </div>
           </div>
         )}
       </div>
