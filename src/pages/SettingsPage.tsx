@@ -178,7 +178,7 @@ const SettingsPage = () => {
                     <Link to="/admin">Panneau d'administration</Link>
                   </Button>
                 </CardContent>
-              </CardCard>
+              </Card>
             )}
           </div>
         )}
