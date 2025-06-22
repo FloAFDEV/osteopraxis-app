@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Building2, AlertCircle, Phone, MapPin, Mail, Image, Save } from "lucide-react";
+import { Building2, AlertCircle, Phone, MapPin, Mail, Image, FileImage, Save } from "lucide-react";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { Layout } from "@/components/ui/layout";
@@ -26,7 +26,8 @@ const EditCabinetPage = () => {
       address: "",
       phone: "",
       email: "",
-      imageUrl: ""
+      imageUrl: "",
+      logoUrl: ""
     }
   });
 
@@ -58,7 +59,8 @@ const EditCabinetPage = () => {
           address: cabinetData.address || "",
           phone: cabinetData.phone || "",
           email: cabinetData.email || "",
-          imageUrl: cabinetData.imageUrl || ""
+          imageUrl: cabinetData.imageUrl || "",
+          logoUrl: cabinetData.logoUrl || ""
         });
         
       } catch (error) {
@@ -85,6 +87,7 @@ const EditCabinetPage = () => {
     phone: string; 
     email: string; 
     imageUrl: string;
+    logoUrl: string;
   }) => {
     if (!cabinet) return;
     
@@ -96,7 +99,8 @@ const EditCabinetPage = () => {
         address: data.address,
         phone: data.phone || null,
         email: data.email || null,
-        imageUrl: data.imageUrl || null
+        imageUrl: data.imageUrl || null,
+        logoUrl: data.logoUrl || null
       });
       
       if (updatedCabinet) {
@@ -197,8 +201,8 @@ const EditCabinetPage = () => {
         <div className="bg-card rounded-lg border shadow-sm p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold mb-4">Informations du cabinet</h2>
+              <div className="border-b pb-4 mb-4">
+                <h2 className="text-xl font-semibold mb-4">Informations générales</h2>
                 
                 <FormField
                   control={form.control}
@@ -263,29 +267,48 @@ const EditCabinetPage = () => {
                     </FormItem>
                   )}
                 />
+              </div>
 
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-4">Image du cabinet</h3>
-                  
-                  <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL de l'image (facultatif)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          URL d'une image représentant votre cabinet (façade ou intérieur)
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Images</h2>
+                
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL de l'image (facultatif)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        URL d'une image représentant votre cabinet (façade ou intérieur)
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="logoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL du logo (facultatif)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <FileImage className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input className="pl-10" placeholder="URL du logo du cabinet" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        URL de votre logo professionnel
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="flex gap-4 pt-6 border-t">
