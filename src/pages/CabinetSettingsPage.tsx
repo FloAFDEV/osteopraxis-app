@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
 import { api } from "@/services/api";
@@ -10,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Cabinet } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { BackButton } from "@/components/ui/back-button";
 
 const CabinetSettingsPage = () => {
   const [loading, setLoading] = useState(true);
@@ -107,6 +107,8 @@ const CabinetSettingsPage = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
+        <BackButton to="/settings" />
+        
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Building className="h-8 w-8 text-primary" />
@@ -121,7 +123,8 @@ const CabinetSettingsPage = () => {
           </p>
         </div>
 
-        {loading ? (
+        {
+        loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -258,7 +261,8 @@ const CabinetSettingsPage = () => {
               </form>
             </Form>
           </div>
-        )}
+        )
+}
       </div>
     </Layout>
   );

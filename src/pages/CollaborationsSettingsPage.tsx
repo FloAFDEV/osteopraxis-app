@@ -4,11 +4,14 @@ import { Users } from "lucide-react";
 import { ReplacementManagement } from "@/components/osteopath/ReplacementManagement";
 import { CabinetAssociationManagement } from "@/components/osteopath/CabinetAssociationManagement";
 import { Separator } from "@/components/ui/separator";
+import { BackButton } from "@/components/ui/back-button";
 
 const CollaborationsSettingsPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
+        <BackButton to="/settings" />
+        
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Users className="h-8 w-8 text-amber-500" />

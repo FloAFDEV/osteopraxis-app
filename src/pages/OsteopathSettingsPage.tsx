@@ -8,6 +8,7 @@ import { ProfileBillingForm } from "@/components/settings/ProfileBillingForm";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FancyLoader } from "@/components/ui/fancy-loader";
+import { BackButton } from "@/components/ui/back-button";
 
 const OsteopathSettingsPage = () => {
   const { user } = useAuth();
@@ -50,6 +51,8 @@ const OsteopathSettingsPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
+        <BackButton to="/settings" />
+        
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <UserCog className="h-8 w-8 text-amber-500" />
