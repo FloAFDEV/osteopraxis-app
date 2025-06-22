@@ -4,7 +4,7 @@ import { Layout } from "@/components/ui/layout";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Building2, UserCog, FileText } from "lucide-react";
+import { Settings, Building2, UserCog, Users, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Osteopath } from "@/types";
@@ -59,10 +59,10 @@ const SettingsPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <UserCog className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Profil professionnel
+                  Profil & Facturation
                 </CardTitle>
                 <CardDescription>
-                  Gérez vos informations professionnelles
+                  Gérez vos informations professionnelles, données de facturation et tampon
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -77,6 +77,9 @@ const SettingsPage = () => {
                       </p>
                       <p className="text-sm">
                         <span className="font-medium">Numéro RPPS:</span> {osteopath.rpps_number || "Non spécifié"}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">SIRET:</span> {osteopath.siret || "Non spécifié"}
                       </p>
                     </div>
                     <Button asChild variant="outline">
@@ -100,7 +103,7 @@ const SettingsPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                  Cabinets
+                  Mes cabinets
                 </CardTitle>
                 <CardDescription>
                   Gérez vos cabinets d'ostéopathie
@@ -116,7 +119,26 @@ const SettingsPage = () => {
               </CardContent>
             </Card>
 
-            {/* Ajout de la carte pour les factures */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+                  Collaborations
+                </CardTitle>
+                <CardDescription>
+                  Gérez vos associations de cabinet et remplacements
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-sm">
+                  Configurez vos collaborations avec d'autres ostéopathes.
+                </p>
+                <Button asChild variant="outline">
+                  <Link to="/settings/collaborations">Gérer les collaborations</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -156,7 +178,7 @@ const SettingsPage = () => {
                     <Link to="/admin">Panneau d'administration</Link>
                   </Button>
                 </CardContent>
-              </Card>
+              </CardCard>
             )}
           </div>
         )}

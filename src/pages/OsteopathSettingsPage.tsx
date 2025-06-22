@@ -4,13 +4,10 @@ import { UserCog } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
-import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
-import { ReplacementManagement } from "@/components/osteopath/ReplacementManagement";
-import { CabinetAssociationManagement } from "@/components/osteopath/CabinetAssociationManagement";
+import { ProfileBillingForm } from "@/components/settings/ProfileBillingForm";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FancyLoader } from "@/components/ui/fancy-loader";
-import { Separator } from "@/components/ui/separator";
 
 const OsteopathSettingsPage = () => {
   const { user } = useAuth();
@@ -43,7 +40,7 @@ const OsteopathSettingsPage = () => {
   };
 
   if (!user) {
-    return null; // Will be handled by route protection
+    return null;
   }
 
   if (loading) {
@@ -56,55 +53,33 @@ const OsteopathSettingsPage = () => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <UserCog className="h-8 w-8 text-amber-500" />
-            Modifier mon profil professionnel
+            Profil & Facturation
           </h1>
           <p className="text-muted-foreground mt-1">
-            Ces informations sont utilisées pour vos factures et documents officiels
+            Gérez vos informations professionnelles, données de facturation et tampon
           </p>
         </div>
 
-        {/* Section Profil Professionnel */}
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">Profil Professionnel</h2>
-          {osteopath ? (
-            <OsteopathProfileForm 
-              defaultValues={osteopath} 
-              osteopathId={osteopath.id} 
-              isEditing={true} 
+        {osteopath ? (
+          <ProfileBillingForm 
+            defaultValues={osteopath} 
+            osteopathId={osteopath.id} 
+            isEditing={true} 
+            onSuccess={handleSuccess} 
+          />
+        ) : (
+          <div className="text-center py-6">
+            <p className="text-muted-foreground mb-4">
+              Aucun profil professionnel trouvé. Veuillez en créer un.
+            </p>
+            <ProfileBillingForm 
               onSuccess={handleSuccess} 
+              defaultValues={{
+                name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
+              }} 
             />
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground mb-4">
-                Aucun profil professionnel trouvé. Veuillez en créer un.
-              </p>
-              <OsteopathProfileForm 
-                onSuccess={handleSuccess} 
-                defaultValues={{
-                  name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
-                }} 
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Séparateur */}
-        <Separator />
-
-        {/* Section Gestion des Associations Cabinet */}
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">Associations Cabinet</h2>
-          <CabinetAssociationManagement />
-        </div>
-
-        {/* Séparateur */}
-        <Separator />
-
-        {/* Section Gestion des Remplacements */}
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">Gestion des Remplacements</h2>
-          <ReplacementManagement />
-        </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
