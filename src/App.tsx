@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/theme-context";
 import Index from "./pages/Index";
 import DashboardPage from "./pages/DashboardPage";
 import PatientsPage from "./pages/PatientsPage";
@@ -44,154 +45,156 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/" element={<Index />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/patients"
-                element={
-                  <ProtectedRoute>
-                    <PatientsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/patients/add"
-                element={
-                  <ProtectedRoute>
-                    <NewPatientPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/patients/:id"
-                element={
-                  <ProtectedRoute>
-                    <PatientDetailPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/patients/:id/edit"
-                element={
-                  <ProtectedRoute>
-                    <EditPatientPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/cabinets"
-                element={
-                  <ProtectedRoute>
-                    <CabinetsManagementPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/cabinets/add"
-                element={
-                  <ProtectedRoute>
-                    <NewCabinetPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/cabinets/:id/edit"
-                element={
-                  <ProtectedRoute>
-                    <EditCabinetPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/appointments"
-                element={
-                  <ProtectedRoute>
-                    <AppointmentsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/invoices"
-                element={
-                  <ProtectedRoute>
-                    <InvoicesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/invoices/create"
-                element={
-                  <ProtectedRoute>
-                    <NewInvoicePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/invoices/:id/edit"
-                element={
-                  <ProtectedRoute>
-                    <EditInvoicePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/osteopath-profile"
-                element={
-                  <ProtectedRoute>
-                    <OsteopathProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <SettingsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/profile"
-                element={
-                  <ProtectedRoute>
-                    <OsteopathSettingsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/collaborations"
-                element={
-                  <ProtectedRoute>
-                    <CollaborationsSettingsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/help"
-                element={
-                  <ProtectedRoute>
-                    <HelpPage />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/" element={<Index />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patients"
+                  element={
+                    <ProtectedRoute>
+                      <PatientsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patients/add"
+                  element={
+                    <ProtectedRoute>
+                      <NewPatientPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patients/:id"
+                  element={
+                    <ProtectedRoute>
+                      <PatientDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patients/:id/edit"
+                  element={
+                    <ProtectedRoute>
+                      <EditPatientPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cabinets"
+                  element={
+                    <ProtectedRoute>
+                      <CabinetsManagementPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cabinets/add"
+                  element={
+                    <ProtectedRoute>
+                      <NewCabinetPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cabinets/:id/edit"
+                  element={
+                    <ProtectedRoute>
+                      <EditCabinetPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/appointments"
+                  element={
+                    <ProtectedRoute>
+                      <AppointmentsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/invoices"
+                  element={
+                    <ProtectedRoute>
+                      <InvoicesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/invoices/create"
+                  element={
+                    <ProtectedRoute>
+                      <NewInvoicePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/invoices/:id/edit"
+                  element={
+                    <ProtectedRoute>
+                      <EditInvoicePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/osteopath-profile"
+                  element={
+                    <ProtectedRoute>
+                      <OsteopathProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings/profile"
+                  element={
+                    <ProtectedRoute>
+                      <OsteopathSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings/collaborations"
+                  element={
+                    <ProtectedRoute>
+                      <CollaborationsSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/help"
+                  element={
+                    <ProtectedRoute>
+                      <HelpPage />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
