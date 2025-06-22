@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { supabase } from "@/services/supabase-api/utils";
-import { StampManagement } from "@/components/cabinet/StampManagement";
+import { ProfileStampManagement } from "./ProfileStampManagement";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,6 +62,7 @@ export function ProfileBillingForm({
   const [error, setError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<boolean>(false);
   const [authRetryCount, setAuthRetryCount] = useState(0);
+  const [stampUrl, setStampUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const MAX_AUTH_RETRIES = 2;
   
@@ -443,7 +444,11 @@ export function ProfileBillingForm({
               <p className="text-muted-foreground mb-4">
                 Ajoutez votre tampon professionnel pour vos factures et documents.
               </p>
-              <StampManagement />
+              <ProfileStampManagement 
+                currentStampUrl={stampUrl}
+                onStampUrlChange={setStampUrl}
+                isSubmitting={isSubmitting}
+              />
             </div>
           )}
 
