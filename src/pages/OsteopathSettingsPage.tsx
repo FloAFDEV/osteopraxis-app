@@ -52,7 +52,7 @@ const OsteopathSettingsPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <UserCog className="h-8 w-8 text-amber-500" />
@@ -65,6 +65,7 @@ const OsteopathSettingsPage = () => {
 
         {/* Section Profil Professionnel */}
         <div className="bg-card rounded-lg border shadow-sm p-6">
+          <h2 className="text-xl font-semibold mb-4">Profil Professionnel</h2>
           {osteopath ? (
             <OsteopathProfileForm 
               defaultValues={osteopath} 
@@ -91,13 +92,19 @@ const OsteopathSettingsPage = () => {
         <Separator />
 
         {/* Section Gestion des Associations Cabinet */}
-        <CabinetAssociationManagement />
+        <div className="bg-card rounded-lg border shadow-sm p-6">
+          <h2 className="text-xl font-semibold mb-4">Associations Cabinet</h2>
+          <CabinetAssociationManagement />
+        </div>
 
         {/* Séparateur */}
         <Separator />
 
         {/* Section Gestion des Remplacements */}
-        <ReplacementManagement />
+        <div className="bg-card rounded-lg border shadow-sm p-6">
+          <h2 className="text-xl font-semibold mb-4">Gestion des Remplacements</h2>
+          <ReplacementManagement />
+        </div>
       </div>
     </Layout>
   );
