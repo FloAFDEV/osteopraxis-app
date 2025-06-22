@@ -1,14 +1,10 @@
-
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { Activity, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-
-
 const Index = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="space-y-8">
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 animate-fade-in">
           <div>
@@ -44,29 +40,14 @@ const Index = () => {
         
         <div className="relative mb-8 overflow-hidden rounded-xl shadow-lg transform hover:scale-[1.01] transition-all duration-500 animate-fade-in animate-delay-200">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-blue-500/20 to-blue-500/20 backdrop-blur-sm"></div>
-          <img 
-            src="https://images.unsplash.com/photo-1581091160550-2173dba999ef?auto=format&fit=crop&w=2000&q=80" 
-            alt="Matériel d'ostéopathie"
-            className="w-full h-48 object-cover object-center rounded-xl opacity-60 transition-transform duration-1000 hover:scale-105"
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center px-4">
-              <h2 className="text-2xl font-bold text-white drop-shadow-md mb-2">
-                Simplifiez la gestion de votre cabinet
-              </h2>
-              <p className="text-white/90 max-w-lg mx-auto drop-shadow-md">
-                Concentrez-vous sur vos patients pendant que PatientHub s'occupe de tout le reste
-              </p>
-            </div>
-          </div>
+          
+          
         </div>
         
         <div className="animate-fade-in animate-delay-300">
           <Dashboard />
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Index;
