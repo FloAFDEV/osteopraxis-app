@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { UserCog } from "lucide-react";
 import { api } from "@/services/api";
@@ -34,10 +33,8 @@ const OsteopathSettingsPage = () => {
           }
         } catch (error) {
           console.error("Error fetching osteopath data:", error);
-          toast({
-            title: "Erreur",
-            description: "Impossible de charger les données du profil.",
-            variant: "destructive",
+          toast.error("Erreur", {
+            description: "Impossible de charger les données du profil."
           });
         } finally {
           setLoading(false);
@@ -50,10 +47,8 @@ const OsteopathSettingsPage = () => {
   }, [user, toast]);
 
   const handleSuccess = () => {
-    toast({
-      title: "Succès",
-      description: "Profil mis à jour avec succès",
-      variant: "default",
+    toast.success("Succès", {
+      description: "Profil mis à jour avec succès"
     });
     // Pas de redirection automatique - rester sur la page
   };
