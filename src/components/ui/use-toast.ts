@@ -1,7 +1,7 @@
 
 import { toast as sonnerToast } from "sonner";
 
-// Toast utilisant uniquement Sonner avec des couleurs personnalisées
+// Toast utilisant uniquement Sonner
 const toast = {
   success: (title: string, options?: { description?: string }) => {
     return sonnerToast.success(title, {
@@ -35,7 +35,7 @@ const toast = {
   }
 };
 
-// Hook simplifié
+// Hook simplifié pour Sonner uniquement
 export function useToast() {
   return {
     toast,
