@@ -1,4 +1,3 @@
-
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -176,15 +175,6 @@ export function Layout({ children }: LayoutProps) {
 									>
 										<Settings className="mr-2 h-4 w-4 text-blue-500" />
 										<span>Paramètres</span>
-									</NavLink>
-								</DropdownMenuItem>
-								<DropdownMenuItem asChild>
-									<NavLink
-										to="/cabinets"
-										className="flex items-center cursor-pointer"
-									>
-										<Building className="mr-2 h-4 w-4 text-green-500" />
-										<span>Paramètres du cabinet</span>
 									</NavLink>
 								</DropdownMenuItem>
 								<DropdownMenuItem asChild>
