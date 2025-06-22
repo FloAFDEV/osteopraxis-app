@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { isCabinetOwnedByCurrentOsteopath } from "@/services";
 import { BackButton } from "@/components/ui/back-button";
 
 const EditCabinetPage = () => {
@@ -19,6 +18,7 @@ const EditCabinetPage = () => {
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -32,23 +32,24 @@ const EditCabinetPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+      
       try {
-        // Vérifier que le cabinet appartient à l'ostéopathe connecté
         const cabinetId = parseInt(id);
-        const isCabinetOwned = await isCabinetOwnedByCurrentOsteopath(cabinetId);
         
-        if (!isCabinetOwned) {
-          console.error(`TENTATIVE D'ACCÈS NON AUTORISÉ: Tentative d'édition du cabinet ${id} qui n'appartient pas à l'ostéopathe connecté`);
-          toast.error("Vous n'avez pas accès à ce cabinet");
-          navigate("/cabinets");
+        // Récupérer directement le cabinet sans vérification préalable
+        const cabinetData = await api.getCabinetById(cabinetId);
+        
+        if (!cabinetData) {
+          console.error(`Cabinet ${id} non trouvé`);
+          toast.error("Cabinet non trouvé");
+          setLoading(false);
           return;
         }
         
-        const cabinetData = await api.getCabinetById(cabinetId);
-        if (!cabinetData) {
-          throw new Error("Cabinet non trouvé");
-        }
         setCabinet(cabinetData);
 
         // Remplir le formulaire avec les données existantes
@@ -59,15 +60,24 @@ const EditCabinetPage = () => {
           email: cabinetData.email || "",
           imageUrl: cabinetData.imageUrl || ""
         });
+        
       } catch (error) {
         console.error("Error fetching cabinet:", error);
-        toast.error("Impossible de charger les données du cabinet. Veuillez réessayer.");
+        
+        // Vérifier si c'est une erreur d'accès
+        if (error instanceof Error && error.message.includes('accès')) {
+          setAccessDenied(true);
+          toast.error("Vous n'avez pas accès à ce cabinet");
+        } else {
+          toast.error("Impossible de charger les données du cabinet");
+        }
       } finally {
         setLoading(false);
       }
     };
+    
     fetchData();
-  }, [id, navigate, form]);
+  }, [id, form]);
 
   const onSubmit = async (data: { 
     name: string; 
@@ -92,9 +102,10 @@ const EditCabinetPage = () => {
       if (updatedCabinet) {
         setCabinet(updatedCabinet);
         toast.success("Informations du cabinet mises à jour");
+        // Délai avant la redirection pour laisser voir le toast
         setTimeout(() => {
           navigate("/cabinets");
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       console.error("Error updating cabinet:", error);
@@ -120,6 +131,30 @@ const EditCabinetPage = () => {
     );
   }
 
+  if (accessDenied) {
+    return (
+      <Layout>
+        <div className="max-w-3xl mx-auto">
+          <BackButton to="/cabinets" />
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center space-y-6 max-w-md">
+              <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
+              <div className="space-y-2">
+                <h3 className="text-2xl font-semibold">Accès refusé</h3>
+                <p className="text-muted-foreground">
+                  Vous n&apos;avez pas les droits pour modifier ce cabinet.
+                </p>
+              </div>
+              <Button onClick={() => navigate("/cabinets")} size="lg">
+                Retour aux cabinets
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!cabinet) {
     return (
       <Layout>
@@ -134,8 +169,8 @@ const EditCabinetPage = () => {
                   Le cabinet que vous recherchez n&apos;existe pas ou a été supprimé.
                 </p>
               </div>
-              <Button asChild size="lg">
-                <a href="/cabinets">Retour aux cabinets</a>
+              <Button onClick={() => navigate("/cabinets")} size="lg">
+                Retour aux cabinets
               </Button>
             </div>
           </div>
