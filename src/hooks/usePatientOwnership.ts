@@ -18,6 +18,17 @@ export function usePatientOwnership(patientId: number): PatientOwnershipInfo {
 
   useEffect(() => {
     const checkOwnership = async () => {
+      // Vérification de l'ID patient avant toute opération
+      if (!patientId || isNaN(patientId) || patientId <= 0) {
+        console.warn("usePatientOwnership appelé avec un ID patient invalide:", patientId);
+        setOwnershipInfo({
+          isOwnPatient: false,
+          isCabinetPatient: false,
+          loading: false
+        });
+        return;
+      }
+
       try {
         // Récupérer l'ostéopathe actuel
         const currentOsteopath = await api.getCurrentOsteopath();

@@ -9,8 +9,11 @@ export function useInvoiceByAppointment(appointmentId: number | null) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!appointmentId) {
+    // Vérification de l'ID rendez-vous avant toute opération
+    if (!appointmentId || isNaN(appointmentId) || appointmentId <= 0) {
       setInvoice(null);
+      setLoading(false);
+      setError(null);
       return;
     }
 

@@ -23,11 +23,18 @@ export const patientService = {
   },
 
   async getPatientById(id: number): Promise<Patient | undefined> {
+    // Vérification de l'ID avant toute opération
+    if (!id || isNaN(id) || id <= 0) {
+      console.warn("getPatientById appelé avec un ID invalide:", id);
+      return undefined;
+    }
+
     if (USE_SUPABASE) {
       try {
         return await supabasePatientService.getPatientById(id);
       } catch (error) {
         console.error("Erreur Supabase getPatientById:", error);
+        return undefined;
       }
     }
     
@@ -74,6 +81,11 @@ export const patientService = {
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
+    // Vérification de l'ID avant mise à jour
+    if (!patient.id || isNaN(patient.id) || patient.id <= 0) {
+      throw new Error("ID patient invalide pour la mise à jour");
+    }
+
     if (USE_SUPABASE) {
       try {
         // Use the supabase patient service for update
@@ -102,6 +114,12 @@ export const patientService = {
   },
 
   async deletePatient(id: number): Promise<boolean> {
+    // Vérification de l'ID avant suppression
+    if (!id || isNaN(id) || id <= 0) {
+      console.warn("deletePatient appelé avec un ID invalide:", id);
+      return false;
+    }
+
     if (USE_SUPABASE) {
       try {
         const { error } = await supabasePatientService.deletePatient(id);

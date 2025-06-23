@@ -1,3 +1,4 @@
+
 import { Invoice, PaymentStatus } from "@/types";
 import { USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
@@ -18,6 +19,12 @@ export const invoiceService = {
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
+    // Vérification de l'ID avant toute opération
+    if (!id || isNaN(id) || id <= 0) {
+      console.warn("getInvoiceById appelé avec un ID invalide:", id);
+      return undefined;
+    }
+
     if (USE_SUPABASE) {
       try {
         const isOwned = await isInvoiceOwnedByCurrentOsteopath(id);
@@ -35,6 +42,12 @@ export const invoiceService = {
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
+    // Vérification de l'ID patient avant toute opération
+    if (!patientId || isNaN(patientId) || patientId <= 0) {
+      console.warn("getInvoicesByPatientId appelé avec un ID patient invalide:", patientId);
+      return [];
+    }
+
     if (USE_SUPABASE) {
       try {
         const isOwned = await isPatientOwnedByCurrentOsteopath(patientId);
@@ -52,6 +65,12 @@ export const invoiceService = {
   },
 
   async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {
+    // Vérification de l'ID rendez-vous avant toute opération
+    if (!appointmentId || isNaN(appointmentId) || appointmentId <= 0) {
+      console.warn("getInvoicesByAppointmentId appelé avec un ID rendez-vous invalide:", appointmentId);
+      return [];
+    }
+
     if (USE_SUPABASE) {
       try {
         const { isAppointmentOwnedByCurrentOsteopath } = await import("@/services");
@@ -93,6 +112,12 @@ export const invoiceService = {
   },
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice> & { osteopathId?: number }): Promise<Invoice | undefined> {
+    // Vérification de l'ID avant mise à jour
+    if (!id || isNaN(id) || id <= 0) {
+      console.warn("updateInvoice appelé avec un ID invalide:", id);
+      return undefined;
+    }
+
     if (USE_SUPABASE) {
       try {
         let dataToSend = { ...invoiceData };
@@ -114,6 +139,12 @@ export const invoiceService = {
   },
 
   async deleteInvoice(id: number): Promise<boolean> {
+    // Vérification de l'ID avant suppression
+    if (!id || isNaN(id) || id <= 0) {
+      console.warn("deleteInvoice appelé avec un ID invalide:", id);
+      return false;
+    }
+
     if (USE_SUPABASE) {
       try {
         const isOwned = await isInvoiceOwnedByCurrentOsteopath(id);
