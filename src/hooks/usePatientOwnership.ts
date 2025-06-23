@@ -20,7 +20,7 @@ export function usePatientOwnership(patientId: number | null): PatientOwnershipI
     const checkOwnership = async () => {
       // Si patientId est null, undefined, NaN ou 0, ne pas faire d'appel
       if (!patientId || isNaN(patientId) || patientId <= 0) {
-        console.log("usePatientOwnership: ID patient invalide, pas de vérification nécessaire");
+        console.log("usePatientOwnership: ID patient invalide, arrêt de la vérification:", patientId);
         setOwnershipInfo({
           isOwnPatient: false,
           isCabinetPatient: false,
@@ -28,6 +28,8 @@ export function usePatientOwnership(patientId: number | null): PatientOwnershipI
         });
         return;
       }
+
+      console.log("usePatientOwnership: Vérification de la propriété pour le patient:", patientId);
 
       try {
         // Récupérer l'ostéopathe actuel
