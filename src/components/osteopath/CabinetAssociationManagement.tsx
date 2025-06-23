@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { api } from "@/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Cabinet } from "@/types";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,15 @@ export function CabinetAssociationManagement() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCabinetId, setSelectedCabinetId] = useState<string>("");
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    cabinetId: number | null;
+    cabinetName: string;
+  }>({
+    isOpen: false,
+    cabinetId: null,
+    cabinetName: ""
+  });
 
   useEffect(() => {
     console.log("CabinetAssociationManagement: Composant monté avec user:", user);
@@ -82,30 +91,59 @@ export function CabinetAssociationManagement() {
     try {
       console.log("CabinetAssociationManagement: Association cabinet", selectedCabinetId, "à ostéopathe", user.osteopathId);
       await api.associateOsteopathToCabinet(user.osteopathId, Number(selectedCabinetId));
-      toast.success("Cabinet associé avec succès");
+      toast.success("Cabinet associé avec succès", {
+        description: "Vous pouvez maintenant accéder aux patients de ce cabinet."
+      });
       setIsDialogOpen(false);
       setSelectedCabinetId("");
       await loadCabinets();
     } catch (error) {
       console.error("CabinetAssociationManagement: Erreur lors de l'association:", error);
-      toast.error("Erreur lors de l'association du cabinet");
+      toast.error("Erreur lors de l'association", {
+        description: "Impossible d'associer le cabinet. Veuillez réessayer."
+      });
     }
   };
 
   const handleDissociateCabinet = async (cabinetId: number) => {
     if (!user?.osteopathId) return;
 
-    if (!confirm("Êtes-vous sûr de vouloir dissocier ce cabinet ?")) return;
-
     try {
       console.log("CabinetAssociationManagement: Dissociation cabinet", cabinetId, "de ostéopathe", user.osteopathId);
       await api.dissociateOsteopathFromCabinet(user.osteopathId, cabinetId);
-      toast.success("Cabinet dissocié avec succès");
+      toast.success("Cabinet dissocié avec succès", {
+        description: "Vous n'avez plus accès aux patients de ce cabinet."
+      });
       await loadCabinets();
     } catch (error) {
       console.error("CabinetAssociationManagement: Erreur lors de la dissociation:", error);
-      toast.error("Erreur lors de la dissociation du cabinet");
+      toast.error("Erreur lors de la dissociation", {
+        description: "Impossible de dissocier le cabinet. Veuillez réessayer."
+      });
     }
+  };
+
+  const openConfirmDialog = (cabinet: Cabinet) => {
+    setConfirmDialog({
+      isOpen: true,
+      cabinetId: cabinet.id,
+      cabinetName: cabinet.name
+    });
+  };
+
+  const closeConfirmDialog = () => {
+    setConfirmDialog({
+      isOpen: false,
+      cabinetId: null,
+      cabinetName: ""
+    });
+  };
+
+  const confirmDissociation = () => {
+    if (confirmDialog.cabinetId) {
+      handleDissociateCabinet(confirmDialog.cabinetId);
+    }
+    closeConfirmDialog();
   };
 
   console.log("CabinetAssociationManagement: Rendu avec loading:", loading, "associatedCabinets:", associatedCabinets.length, "availableCabinets:", availableCabinets.length);
@@ -207,7 +245,7 @@ export function CabinetAssociationManagement() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleDissociateCabinet(cabinet.id)}
+                onClick={() => openConfirmDialog(cabinet)}
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
@@ -224,6 +262,17 @@ export function CabinetAssociationManagement() {
           </p>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={closeConfirmDialog}
+        onConfirm={confirmDissociation}
+        title="Confirmer la dissociation"
+        description={`Êtes-vous sûr de vouloir vous dissocier du cabinet "${confirmDialog.cabinetName}" ? Vous n'aurez plus accès aux patients de ce cabinet.`}
+        confirmText="Dissocier"
+        cancelText="Annuler"
+        variant="destructive"
+      />
     </div>
   );
 }
