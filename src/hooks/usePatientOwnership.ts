@@ -18,9 +18,9 @@ export function usePatientOwnership(patientId: number | null): PatientOwnershipI
 
   useEffect(() => {
     const checkOwnership = async () => {
-      // Si patientId est null, undefined, NaN ou 0, ne pas faire d'appel
-      if (!patientId || isNaN(patientId) || patientId <= 0) {
-        console.log("usePatientOwnership: ID patient invalide, arrêt de la vérification:", patientId);
+      // VALIDATION STRICTE : arrêter immédiatement si l'ID est invalide
+      if (!patientId || isNaN(patientId) || patientId <= 0 || patientId === null || patientId === undefined) {
+        console.log("usePatientOwnership: ID patient invalide, arrêt immédiat:", patientId);
         setOwnershipInfo({
           isOwnPatient: false,
           isCabinetPatient: false,
@@ -32,7 +32,6 @@ export function usePatientOwnership(patientId: number | null): PatientOwnershipI
       console.log("usePatientOwnership: Vérification de la propriété pour le patient:", patientId);
 
       try {
-        // Récupérer l'ostéopathe actuel
         const currentOsteopath = await api.getCurrentOsteopath();
         if (!currentOsteopath || !currentOsteopath.id) {
           setOwnershipInfo({
@@ -43,7 +42,6 @@ export function usePatientOwnership(patientId: number | null): PatientOwnershipI
           return;
         }
 
-        // Vérifier si c'est un patient direct
         const isDirectlyOwned = await osteopathCabinetService.isPatientOwnedDirectly(
           patientId, 
           currentOsteopath.id
@@ -51,7 +49,7 @@ export function usePatientOwnership(patientId: number | null): PatientOwnershipI
 
         setOwnershipInfo({
           isOwnPatient: isDirectlyOwned,
-          isCabinetPatient: !isDirectlyOwned, // Si pas directement possédé mais accessible, c'est via le cabinet
+          isCabinetPatient: !isDirectlyOwned,
           loading: false
         });
       } catch (error) {

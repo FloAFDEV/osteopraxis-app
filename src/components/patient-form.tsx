@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +24,7 @@ export function PatientForm({
   patient,
   onSubmit,
   onSave,
-  emailRequired = false, // Par défaut, email n'est pas obligatoire
+  emailRequired = false,
   selectedCabinetId,
   isLoading = false,
   isCreatingNew = false,
@@ -38,37 +37,20 @@ export function PatientForm({
     selectedCabinetId ? selectedCabinetId.toString() : null
   );
 
-  // Calcul de l'âge pour déterminer si c'est un enfant - seulement si on a un patient existant et qu'on n'est pas en création
-  const calculateAge = (birthDate: string | null) => {
-    if (!birthDate) return null;
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
-  // Seulement calculer l'âge si on a un patient existant avec une date de naissance ET qu'on n'est pas en création
-  const isChild = !isCreatingNew && patient && patient.birthDate ? 
-    calculateAge(patient.birthDate) !== null && calculateAge(patient.birthDate)! < 18 : 
-    false;
+  // Pour la création, nous n'avons pas besoin de calculer l'âge
+  // Le formulaire sera adaptatif selon les données saisies
+  const isChild = false; // Pas de détection automatique en création
 
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(getPatientSchema(emailRequired)),
     defaultValues: {
-      // Informations de base
+      // ... keep existing code (all default values initialization)
       firstName: patient?.firstName || "",
       lastName: patient?.lastName || "",
       email: patient?.email || "",
       phone: patient?.phone || "",
-      // Convertir la date en string pour le formulaire seulement si elle existe
       birthDate: patient?.birthDate ? new Date(patient.birthDate).toISOString().split('T')[0] : null,
       address: patient?.address || "",
-      
-      // Informations personnelles
       gender: patient?.gender || null,
       height: patient?.height || null,
       weight: patient?.weight || null,
@@ -78,8 +60,6 @@ export function PatientForm({
       occupation: patient?.occupation || null,
       hasChildren: patient?.hasChildren || null,
       childrenAges: patient?.childrenAges || null,
-      
-      // Médecins et santé
       generalPractitioner: patient?.generalPractitioner || null,
       surgicalHistory: patient?.surgicalHistory || null,
       traumaHistory: patient?.traumaHistory || null,
@@ -93,24 +73,16 @@ export function PatientForm({
       digestiveProblems: patient?.digestiveProblems || null,
       digestiveDoctorName: patient?.digestiveDoctorName || null,
       physicalActivity: patient?.physicalActivity || null,
-      
-      // Tabagisme - utiliser les bonnes propriétés
       isSmoker: patient?.isSmoker || false,
       isExSmoker: patient?.isExSmoker || false,
       smokingSince: patient?.smokingSince || null,
       smokingAmount: patient?.smokingAmount || null,
       quitSmokingDate: patient?.quitSmokingDate || null,
-      
-      // Contraception et statut familial
       contraception: patient?.contraception || null,
       familyStatus: patient?.familyStatus || null,
-      
-      // Examens et symptômes
       complementaryExams: patient?.complementaryExams || null,
       generalSymptoms: patient?.generalSymptoms || null,
       allergies: patient?.allergies || null,
-      
-      // Historique de grossesse et développement (enfants)
       pregnancyHistory: patient?.pregnancyHistory || null,
       birthDetails: patient?.birthDetails || null,
       developmentMilestones: patient?.developmentMilestones || null,
@@ -118,8 +90,6 @@ export function PatientForm({
       feeding: patient?.feeding || null,
       behavior: patient?.behavior || null,
       childCareContext: patient?.childCareContext || null,
-      
-      // Nouveaux champs généraux
       ent_followup: patient?.ent_followup || null,
       intestinal_transit: patient?.intestinal_transit || null,
       sleep_quality: patient?.sleep_quality || null,
@@ -128,8 +98,6 @@ export function PatientForm({
       sport_frequency: patient?.sport_frequency || null,
       gynecological_history: patient?.gynecological_history || null,
       other_comments_adult: patient?.other_comments_adult || null,
-      
-      // Nouveaux champs spécifiques aux enfants
       fine_motor_skills: patient?.fine_motor_skills || null,
       gross_motor_skills: patient?.gross_motor_skills || null,
       weight_at_birth: patient?.weight_at_birth || null,
@@ -141,8 +109,6 @@ export function PatientForm({
       pediatrician_name: patient?.pediatrician_name || null,
       paramedical_followup: patient?.paramedical_followup || null,
       other_comments_child: patient?.other_comments_child || null,
-
-      // Champs cliniques
       diagnosis: patient?.diagnosis || null,
       medical_examination: patient?.medical_examination || null,
       treatment_plan: patient?.treatment_plan || null,
@@ -193,12 +159,13 @@ export function PatientForm({
     }
   };
 
+  // Onglets fixes - pas de détection d'âge en mode création
   const tabs = [
     { id: "general", label: "Général", icon: "👤" },
     { id: "contact", label: "Contact", icon: "📞" },
     { id: "medical", label: "Médical", icon: "🏥" },
     { id: "examinations", label: "Examens", icon: "🔬" },
-    ...(isChild ? [{ id: "pediatric", label: "Pédiatrie", icon: "👶" }] : []),
+    { id: "pediatric", label: "Pédiatrie", icon: "👶" }, // Toujours présent
     { id: "additional", label: "Supplémentaire", icon: "📋" },
     { id: "specialized", label: "Sphères spéc.", icon: "🩺" }
   ];
@@ -208,7 +175,6 @@ export function PatientForm({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {patient ? "Modifier" : "Ajouter"} un patient
-          {isChild && <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Enfant</span>}
         </CardTitle>
         <CardDescription>
           {patient 
@@ -221,7 +187,7 @@ export function PatientForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6">
+              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-7">
                 {tabs.map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="text-xs">
                     <span className="hidden sm:inline">{tab.icon}</span>
@@ -245,21 +211,19 @@ export function PatientForm({
               </TabsContent>
 
               <TabsContent value="medical">
-                <MedicalTab form={form} isChild={isChild} />
+                <MedicalTab form={form} isChild={false} />
               </TabsContent>
 
               <TabsContent value="examinations">
                 <ExaminationsTab form={form} />
               </TabsContent>
 
-              {isChild && (
-                <TabsContent value="pediatric">
-                  <PediatricTab form={form} />
-                </TabsContent>
-              )}
+              <TabsContent value="pediatric">
+                <PediatricTab form={form} />
+              </TabsContent>
 
               <TabsContent value="additional">
-                <AdditionalFieldsTab form={form} isChild={isChild} />
+                <AdditionalFieldsTab form={form} isChild={false} />
               </TabsContent>
               
               <TabsContent value="specialized">
