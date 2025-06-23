@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { supabase } from "@/services/supabase-api/utils";
 import { ProfileStampManagement } from "./ProfileStampManagement";
+import { HelpButton } from "@/components/ui/help-button";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -331,7 +333,12 @@ export function ProfileBillingForm({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Section Profil Professionnel */}
           <div className="bg-card rounded-lg border shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Profil Professionnel</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-xl font-semibold">Profil Professionnel</h2>
+              <HelpButton 
+                content="Renseignez votre nom complet et votre titre professionnel. Ces informations apparaîtront sur vos factures et documents officiels."
+              />
+            </div>
             
             <div className="space-y-6">
               <FormField
@@ -339,7 +346,12 @@ export function ProfileBillingForm({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom et prénom</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>Nom et prénom</FormLabel>
+                      <HelpButton 
+                        content="Votre nom complet tel qu'il doit apparaître sur les factures et documents officiels."
+                      />
+                    </div>
                     <FormControl>
                       <Input 
                         placeholder="Nom et prénom complet"
@@ -357,7 +369,12 @@ export function ProfileBillingForm({
                 name="professional_title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Titre professionnel</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>Titre professionnel</FormLabel>
+                      <HelpButton 
+                        content="Votre titre professionnel officiel. Sélectionnez celui qui correspond à votre diplôme et formation."
+                      />
+                    </div>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value || "Ostéopathe D.O."}
@@ -385,7 +402,12 @@ export function ProfileBillingForm({
 
           {/* Section Informations de Facturation */}
           <div className="bg-card rounded-lg border shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Informations de Facturation</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-xl font-semibold">Informations de Facturation</h2>
+              <HelpButton 
+                content="Ces informations sont obligatoires pour la facturation légale. Votre numéro RPPS et SIRET sont nécessaires pour émettre des factures conformes à la réglementation."
+              />
+            </div>
             
             <div className="space-y-6">
               <FormField
@@ -393,10 +415,15 @@ export function ProfileBillingForm({
                 name="rpps_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Numéro RPPS</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>Numéro RPPS</FormLabel>
+                      <HelpButton 
+                        content="Numéro d'identification au Répertoire Partagé des Professionnels de Santé. C'est un numéro unique à 11 chiffres qui vous identifie en tant que professionnel de santé. Obligatoire pour la facturation."
+                      />
+                    </div>
                     <FormControl>
                       <Input 
-                        placeholder="Numéro RPPS"
+                        placeholder="Numéro RPPS (11 chiffres)"
                         disabled={isSubmitting}
                         {...field}
                         value={field.value || ""}
@@ -415,10 +442,15 @@ export function ProfileBillingForm({
                 name="siret"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Numéro SIRET</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>Numéro SIRET</FormLabel>
+                      <HelpButton 
+                        content="Numéro d'identification de votre établissement (14 chiffres). Il est composé du numéro SIREN de votre entreprise suivi d'un code établissement. Obligatoire pour la facturation officielle."
+                      />
+                    </div>
                     <FormControl>
                       <Input 
-                        placeholder="Numéro SIRET"
+                        placeholder="Numéro SIRET (14 chiffres)"
                         disabled={isSubmitting}
                         {...field}
                         value={field.value || ""}
@@ -437,7 +469,12 @@ export function ProfileBillingForm({
                 name="ape_code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code APE / NAF</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>Code APE / NAF</FormLabel>
+                      <HelpButton 
+                        content="Code d'Activité Principale Exercée attribué par l'INSEE. Pour les ostéopathes, c'est généralement 8690F (Activités de santé humaine non classées ailleurs)."
+                      />
+                    </div>
                     <FormControl>
                       <Input 
                         placeholder="Code APE / NAF"
@@ -460,7 +497,12 @@ export function ProfileBillingForm({
 
           {/* Section Tampon/Signature - Toujours visible */}
           <div className="bg-card rounded-lg border shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Tampon et Signature</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-xl font-semibold">Tampon et Signature</h2>
+              <HelpButton 
+                content="Uploadez votre tampon professionnel qui apparaîtra sur vos factures et documents officiels. Formats acceptés : PNG, JPG. Taille recommandée : 300x200 pixels maximum pour une bonne qualité d'impression."
+              />
+            </div>
             <p className="text-muted-foreground mb-4">
               Ajoutez votre tampon professionnel pour vos factures et documents.
             </p>

@@ -1,170 +1,60 @@
-import React, { useState, useMemo } from "react";
+
+import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { generateAccountingExport } from "@/services/export/invoice-export-service";
-import { Invoice, Patient, Cabinet } from "@/types";
-import { Calendar, Download, FileSpreadsheet } from "lucide-react";
-import { toast } from "sonner";
+import { FileDown, FileSpreadsheet } from "lucide-react";
+import { HelpButton } from "@/components/ui/help-button";
 import { CustomTooltip } from "@/components/ui/custom-tooltip";
-import { useAuthorizedOsteopaths } from "@/hooks/useAuthorizedOsteopaths";
 
 interface InvoiceExportButtonsProps {
-  selectedYear: string;
-  selectedMonth: string | null;
-  invoices: Invoice[];
-  patientDataMap: Map<number, Patient>;
-  selectedCabinetId: number | "ALL" | null;
-  selectedOsteopathId: number | "ALL" | null;
-  cabinets: Cabinet[];
+  onExportPDF: () => void;
+  onExportExcel: () => void;
+  isExporting: boolean;
+  hasInvoices: boolean;
 }
 
-export function InvoiceExportButtons({
-  selectedYear,
-  selectedMonth,
-  invoices,
-  patientDataMap,
-  selectedCabinetId,
-  selectedOsteopathId,
-  cabinets,
-}: InvoiceExportButtonsProps) {
-  const [isExporting, setIsExporting] = useState<boolean>(false);
-  const { osteopaths } = useAuthorizedOsteopaths();
-
-  const matchingInvoices = useMemo(() => {
-    return invoices.filter((inv) => {
-      const cabinetOk = selectedCabinetId == null || selectedCabinetId === "ALL" ||
-        (inv.cabinetId != null && Number(inv.cabinetId) === Number(selectedCabinetId));
-      const osteoOk = selectedOsteopathId == null || selectedOsteopathId === "ALL" ||
-        (inv.osteopathId != null && Number(inv.osteopathId) === Number(selectedOsteopathId));
-      return cabinetOk && osteoOk;
-    });
-  }, [invoices, selectedCabinetId, selectedOsteopathId]);
-
-  const selectedOsteopath =
-    selectedOsteopathId && selectedOsteopathId !== "ALL"
-      ? osteopaths.find((o) => o.id === Number(selectedOsteopathId))
-      : undefined;
-  const selectedCabinet =
-    selectedCabinetId && selectedCabinetId !== "ALL"
-      ? cabinets.find((c) => c.id === Number(selectedCabinetId))
-      : undefined;
-
-  const canExport =
-    !!selectedCabinet &&
-    (
-      (selectedOsteopathId !== null && selectedOsteopathId !== undefined) ||
-      selectedOsteopathId === "ALL"
-    ) &&
-    !isExporting;
-
-  const exportToExcel = async () => {
-    try {
-      setIsExporting(true);
-      toast.info("Préparation de l'export...");
-      const periodLabel = selectedMonth ? `${selectedMonth}/${selectedYear}` : selectedYear;
-
-      let blob;
-      let filename;
-      if (selectedOsteopathId === "ALL") {
-        blob = await generateAccountingExport(
-          matchingInvoices,
-          patientDataMap,
-          periodLabel,
-          null,
-          selectedCabinet
-        );
-        filename = `Comptabilite_${periodLabel}_Cab${selectedCabinet?.id}_TousOsteos.xlsx`;
-      } else {
-        // Convertir AuthorizedOsteopath en Osteopath pour la fonction d'export
-        const osteopathForExport = selectedOsteopath ? {
-          id: selectedOsteopath.id,
-          name: selectedOsteopath.name,
-          professional_title: selectedOsteopath.professional_title || 'Ostéopathe D.O.',
-          rpps_number: selectedOsteopath.rpps_number || '',
-          siret: selectedOsteopath.siret || '',
-          ape_code: '8690F',
-          userId: '',
-          authId: '',
-          createdAt: '',
-          updatedAt: '',
-          stampUrl: null
-        } : null;
-
-        blob = await generateAccountingExport(
-          matchingInvoices,
-          patientDataMap,
-          periodLabel,
-          osteopathForExport,
-          selectedCabinet
-        );
-        filename = `Comptabilite_${periodLabel}_Ost${selectedOsteopath?.id}_Cab${selectedCabinet?.id}.xlsx`;
-      }
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-      toast.success("Export généré !");
-    } catch (error: any) {
-      console.error("Erreur lors de l'export Excel:", error);
-      toast.error("Erreur export : " + (error?.message || String(error)));
-    }
-    setIsExporting(false);
-  };
-
+export const InvoiceExportButtons: React.FC<InvoiceExportButtonsProps> = ({
+  onExportPDF,
+  onExportExcel,
+  isExporting,
+  hasInvoices
+}) => {
   return (
-    <div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          {canExport ? (
-            <Button
-              variant="outline"
-              className="gap-2 bg-amber-50 hover:bg-amber-500 text-amber-700 border-amber-200 dark:bg-amber-900 dark:text-amber-50 dark:border-amber-700 dark:hover:bg-amber-800"
-              disabled={!canExport}
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              {isExporting ? "Préparation..." : "Export comptable"}
-              <Download className="h-3 w-3 ml-1" />
-            </Button>
-          ) : (
-            <CustomTooltip
-              content="Veuillez sélectionner un cabinet précis pour activer l'export comptable. L'export multi-cabinets n'est pas autorisé pour des raisons comptables."
-              side="top"
-              maxWidth="280px"
-            >
-              <span>
-                <Button
-                  variant="outline"
-                  className="gap-2 bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900 dark:text-amber-50 dark:border-amber-700 opacity-70 cursor-not-allowed"
-                  disabled
-                  tabIndex={-1}
-                >
-                  <FileSpreadsheet className="h-4 w-4" />
-                  Export comptable
-                  <Download className="h-3 w-3 ml-1" />
-                </Button>
-              </span>
-            </CustomTooltip>
-          )}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={canExport ? exportToExcel : undefined}
-            className="gap-2"
-            disabled={!canExport}
+    <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-1">
+        <CustomTooltip content="Génère un PDF unique contenant toutes les factures sélectionnées avec leurs informations complètes">
+          <Button
+            onClick={onExportPDF}
+            disabled={isExporting || !hasInvoices}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
           >
-            <Calendar className="h-4 w-4" />
-            Exporter la période sélectionnée
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <FileDown className="h-4 w-4" />
+            Export PDF
+          </Button>
+        </CustomTooltip>
+        <HelpButton 
+          content="Exporte toutes les factures affichées dans un seul fichier PDF. Idéal pour imprimer plusieurs factures ou les envoyer par email en une fois."
+        />
+      </div>
+      
+      <div className="flex items-center gap-1">
+        <CustomTooltip content="Génère un fichier Excel avec le récapitulatif comptable des factures : totaux, statistiques et détails par période">
+          <Button
+            onClick={onExportExcel}
+            disabled={isExporting || !hasInvoices}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            Export Comptable
+          </Button>
+        </CustomTooltip>
+        <HelpButton 
+          content="Génère un fichier Excel avec le récapitulatif comptable : totaux par mois, statistiques de paiement, et détails de chaque facture. Parfait pour votre comptabilité."
+        />
+      </div>
     </div>
   );
-}
+};

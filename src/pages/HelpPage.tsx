@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { HelpButton } from "@/components/ui/help-button";
 import { 
   Building, 
   Users, 
@@ -24,10 +25,15 @@ const HelpPage = () => {
         <BackButton to="/dashboard" />
         
         <div className="mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <HelpCircle className="h-8 w-8 text-blue-500" />
-            Guide d'utilisation
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <HelpCircle className="h-8 w-8 text-blue-500" />
+              Guide d'utilisation
+            </h1>
+            <HelpButton 
+              content="Ce guide complet vous explique comment utiliser toutes les fonctionnalités de l'application : gestion des cabinets, remplacements, patients et facturation. Parcourez les onglets pour découvrir chaque section."
+            />
+          </div>
           <p className="text-muted-foreground mt-1">
             Découvrez comment utiliser efficacement votre application de gestion
           </p>
@@ -47,6 +53,9 @@ const HelpPage = () => {
                 <CardTitle className="flex items-center gap-2">
                   <Building className="h-5 w-5 text-blue-500" />
                   Gestion des Cabinets
+                  <HelpButton 
+                    content="Les cabinets permettent de structurer votre pratique et de collaborer avec d'autres ostéopathes. Vous pouvez créer votre propre cabinet ou rejoindre un cabinet existant."
+                  />
                 </CardTitle>
                 <CardDescription>
                   Comment créer et gérer vos cabinets avec plusieurs ostéopathes
@@ -57,6 +66,9 @@ const HelpPage = () => {
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Scénario 1: Cabinet avec plusieurs ostéopathes
+                    <HelpButton 
+                      content="Configuration recommandée pour les cabinets de groupe où plusieurs ostéopathes travaillent ensemble et partagent une patientèle."
+                    />
                   </h3>
                   <div className="space-y-3 pl-6">
                     <div className="flex items-start gap-3">
@@ -101,6 +113,9 @@ const HelpPage = () => {
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Scénario 2: Ostéopathe en exercice libéral seul
+                    <HelpButton 
+                      content="Configuration pour les praticiens en exercice individuel qui gèrent leur cabinet de manière autonome."
+                    />
                   </h3>
                   <div className="space-y-3 pl-6">
                     <div className="flex items-start gap-3">
@@ -133,6 +148,9 @@ const HelpPage = () => {
                 <CardTitle className="flex items-center gap-2">
                   <UserCheck className="h-5 w-5 text-green-500" />
                   Système de Remplacements
+                  <HelpButton 
+                    content="Le système de remplacements vous permet de déléguer temporairement vos patients à un collègue. Très utile pour les congés, formations ou absences."
+                  />
                 </CardTitle>
                 <CardDescription>
                   Comment configurer et gérer vos remplacements
@@ -143,6 +161,9 @@ const HelpPage = () => {
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Configuration d'un remplacement
+                    <HelpButton 
+                      content="Processus simple en 3 étapes pour mettre en place un remplacement temporaire avec un collègue."
+                    />
                   </h3>
                   <div className="space-y-3 pl-6">
                     <div className="flex items-start gap-3">
@@ -179,6 +200,9 @@ const HelpPage = () => {
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Pendant le remplacement
+                    <HelpButton 
+                      content="Droits et responsabilités du remplaçant pendant la période de remplacement active."
+                    />
                   </h3>
                   <div className="space-y-3 pl-6">
                     <div className="flex items-start gap-3">
@@ -228,6 +252,9 @@ const HelpPage = () => {
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-purple-500" />
                   Gestion des Patients
+                  <HelpButton 
+                    content="Système complet de gestion des dossiers patients avec historique médical, rendez-vous et facturation intégrés."
+                  />
                 </CardTitle>
                 <CardDescription>
                   Comment ajouter et gérer vos patients efficacement
@@ -235,7 +262,12 @@ const HelpPage = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-3">Création d'une fiche patient</h3>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    Création d'une fiche patient
+                    <HelpButton 
+                      content="Guide pour créer un nouveau dossier patient avec toutes les informations nécessaires."
+                    />
+                  </h3>
                   <div className="space-y-2 pl-4">
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                       <ArrowRight className="h-3 w-3" />
@@ -253,7 +285,12 @@ const HelpPage = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-3">Partage des patients</h3>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    Partage des patients
+                    <HelpButton 
+                      content="Règles de visibilité et d'accès aux dossiers patients selon votre organisation (cabinet, remplacement, etc.)."
+                    />
+                  </h3>
                   <div className="space-y-2 pl-4">
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                       <ArrowRight className="h-3 w-3" />
@@ -279,6 +316,9 @@ const HelpPage = () => {
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-amber-500" />
                   Facturation
+                  <HelpButton 
+                    content="Système de facturation conforme à la réglementation avec génération automatique de PDF et exports comptables."
+                  />
                 </CardTitle>
                 <CardDescription>
                   Comprendre le système de facturation et les informations légales
@@ -286,7 +326,12 @@ const HelpPage = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-3">Informations requises</h3>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    Informations requises
+                    <HelpButton 
+                      content="Données obligatoires pour émettre des factures conformes à la réglementation française des professionnels de santé."
+                    />
+                  </h3>
                   <div className="space-y-2 pl-4">
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                       <ArrowRight className="h-3 w-3" />
@@ -308,7 +353,35 @@ const HelpPage = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-3">Facturation en remplacement</h3>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    Génération PDF et exports
+                    <HelpButton 
+                      content="Fonctionnalités d'export pour vos factures : PDF individuels, exports comptables mensuels ou annuels au format Excel."
+                    />
+                  </h3>
+                  <div className="space-y-2 pl-4">
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <ArrowRight className="h-3 w-3" />
+                      <strong>PDF facture :</strong> Génération automatique avec tampon et informations légales
+                    </p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <ArrowRight className="h-3 w-3" />
+                      <strong>Export comptable :</strong> Fichier Excel avec récapitulatif mensuel ou annuel
+                    </p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <ArrowRight className="h-3 w-3" />
+                      <strong>Filtres avancés :</strong> Par période, cabinet, ostéopathe ou statut de paiement
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    Facturation en remplacement
+                    <HelpButton 
+                      content="Spécificités de la facturation lors des remplacements : mentions légales automatiques et informations du titulaire."
+                    />
+                  </h3>
                   <div className="space-y-2 pl-4">
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                       <ArrowRight className="h-3 w-3" />
@@ -339,8 +412,11 @@ const HelpPage = () => {
 
         <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800">
           <CardHeader>
-            <CardTitle className="text-blue-800 dark:text-blue-200">
+            <CardTitle className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
               Besoin d'aide supplémentaire ?
+              <HelpButton 
+                content="Cette section récapitule les différentes façons d'obtenir de l'aide dans l'application et les ressources disponibles."
+              />
             </CardTitle>
           </CardHeader>
           <CardContent className="text-blue-700 dark:text-blue-300">

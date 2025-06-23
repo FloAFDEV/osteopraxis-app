@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { UserCog } from "lucide-react";
 import { api } from "@/services/api";
@@ -8,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { BackButton } from "@/components/ui/back-button";
+import { HelpButton } from "@/components/ui/help-button";
 
 const OsteopathSettingsPage = () => {
   const { user } = useAuth();
@@ -74,9 +76,14 @@ const OsteopathSettingsPage = () => {
           <div className="flex items-center gap-4">
             <UserCog className="h-8 w-8 text-amber-500" />
             <div className="flex-1">
-              <h1 className="text-3xl font-bold">
-                Profil & Facturation
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold">
+                  Profil & Facturation
+                </h1>
+                <HelpButton 
+                  content="Configurez vos informations professionnelles (nom, titre), vos données de facturation (RPPS, SIRET) et uploadez votre tampon professionnel. Ces informations sont essentielles pour la génération de factures conformes et de documents officiels."
+                />
+              </div>
               <p className="text-muted-foreground mt-1">
                 Gérez vos informations professionnelles, données de facturation et tampon
               </p>
