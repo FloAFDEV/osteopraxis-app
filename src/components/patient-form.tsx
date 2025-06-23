@@ -17,6 +17,10 @@ import getPatientSchema from "@/utils/patient-form-helpers";
 import { Patient } from "@/types";
 import { SpecializedFieldsTab } from "./patient-form/SpecializedFieldsTab";
 
+interface ExtendedPatientFormProps extends PatientFormProps {
+  isCreatingNew?: boolean;
+}
+
 export function PatientForm({
   patient,
   onSubmit,
@@ -24,7 +28,8 @@ export function PatientForm({
   emailRequired = false, // Par défaut, email n'est pas obligatoire
   selectedCabinetId,
   isLoading = false,
-}: PatientFormProps) {
+  isCreatingNew = false,
+}: ExtendedPatientFormProps) {
   const [activeTab, setActiveTab] = useState("general");
   const [childrenAgesInput, setChildrenAgesInput] = useState(
     patient?.childrenAges ? patient.childrenAges.join(", ") : ""
@@ -33,7 +38,7 @@ export function PatientForm({
     selectedCabinetId ? selectedCabinetId.toString() : null
   );
 
-  // Calcul de l'âge pour déterminer si c'est un enfant - seulement si on a un patient existant
+  // Calcul de l'âge pour déterminer si c'est un enfant - seulement si on a un patient existant et qu'on n'est pas en création
   const calculateAge = (birthDate: string | null) => {
     if (!birthDate) return null;
     const today = new Date();
@@ -46,8 +51,8 @@ export function PatientForm({
     return age;
   };
 
-  // Seulement calculer l'âge si on a un patient existant avec une date de naissance
-  const isChild = patient && patient.birthDate ? 
+  // Seulement calculer l'âge si on a un patient existant avec une date de naissance ET qu'on n'est pas en création
+  const isChild = !isCreatingNew && patient && patient.birthDate ? 
     calculateAge(patient.birthDate) !== null && calculateAge(patient.birthDate)! < 18 : 
     false;
 
