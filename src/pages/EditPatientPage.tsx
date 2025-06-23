@@ -72,7 +72,7 @@ const EditPatientPage = () => {
 			if (updatedData.head_circumference !== undefined) updatedData.head_circumference = updatedData.head_circumference ? Number(updatedData.head_circumference) : null;
 
 			// Ensure enum fields are properly formatted
-			const patientUpdate = {
+			const patientUpdate: Patient = {
 				...patient,
 				...updatedData,
 				// Préserver le cabinetId existant ou utiliser celui du formulaire ou celui de la navbar
@@ -82,13 +82,11 @@ const EditPatientPage = () => {
 					selectedCabinetId ||
 					1,
 				updatedAt: new Date().toISOString(),
-				// Make sure these fields are properly set for the update
-				gender: updatedData.gender || patient.gender,
-				maritalStatus:
-					updatedData.maritalStatus || patient.maritalStatus,
-				handedness: updatedData.handedness || patient.handedness,
-				contraception:
-					updatedData.contraception || patient.contraception,
+				// Make sure these fields are properly set for the update with proper type casting
+				gender: (updatedData.gender || patient.gender) as Patient['gender'],
+				maritalStatus: (updatedData.maritalStatus || patient.maritalStatus) as Patient['maritalStatus'],
+				handedness: (updatedData.handedness || patient.handedness) as Patient['handedness'],
+				contraception: (updatedData.contraception || patient.contraception) as Patient['contraception'],
 				childrenAges: updatedData.childrenAges || patient.childrenAges || null,
 				// Champs existants
 				complementaryExams:
