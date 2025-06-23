@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { osteopathCabinetService } from "@/services/supabase-api/osteopath-cabinet-service";
-import { api } from "@/services/api";
 
 export interface PatientOwnershipInfo {
   isOwnPatient: boolean;
@@ -17,52 +15,26 @@ export function usePatientOwnership(patientId: number | null): PatientOwnershipI
   });
 
   useEffect(() => {
-    const checkOwnership = async () => {
-      // VALIDATION STRICTE : arrêter immédiatement si l'ID est invalide
-      if (!patientId || isNaN(patientId) || patientId <= 0 || patientId === null || patientId === undefined) {
-        console.log("usePatientOwnership: ID patient invalide, arrêt immédiat:", patientId);
-        setOwnershipInfo({
-          isOwnPatient: false,
-          isCabinetPatient: false,
-          loading: false
-        });
-        return;
-      }
+    // VALIDATION STRICTE : arrêter immédiatement si l'ID est invalide
+    if (!patientId || isNaN(patientId) || patientId <= 0) {
+      console.log("usePatientOwnership: ID patient invalide, arrêt immédiat:", patientId);
+      setOwnershipInfo({
+        isOwnPatient: false,
+        isCabinetPatient: false,
+        loading: false
+      });
+      return;
+    }
 
-      console.log("usePatientOwnership: Vérification de la propriété pour le patient:", patientId);
+    console.log("usePatientOwnership: Vérification de la propriété pour le patient:", patientId);
 
-      try {
-        const currentOsteopath = await api.getCurrentOsteopath();
-        if (!currentOsteopath || !currentOsteopath.id) {
-          setOwnershipInfo({
-            isOwnPatient: false,
-            isCabinetPatient: false,
-            loading: false
-          });
-          return;
-        }
-
-        const isDirectlyOwned = await osteopathCabinetService.isPatientOwnedDirectly(
-          patientId, 
-          currentOsteopath.id
-        );
-
-        setOwnershipInfo({
-          isOwnPatient: isDirectlyOwned,
-          isCabinetPatient: !isDirectlyOwned,
-          loading: false
-        });
-      } catch (error) {
-        console.error("Erreur lors de la vérification de propriété du patient:", error);
-        setOwnershipInfo({
-          isOwnPatient: false,
-          isCabinetPatient: false,
-          loading: false
-        });
-      }
-    };
-
-    checkOwnership();
+    // Avec les nouvelles politiques RLS, si on peut accéder au patient, c'est qu'on y a le droit
+    // Simplifier la logique en considérant que l'accès est géré par les politiques RLS
+    setOwnershipInfo({
+      isOwnPatient: true, // Si on peut y accéder, on considère qu'on peut le gérer
+      isCabinetPatient: false,
+      loading: false
+    });
   }, [patientId]);
 
   return ownershipInfo;

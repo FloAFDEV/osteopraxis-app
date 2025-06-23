@@ -1,60 +1,52 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "@/types";
-import { supabase } from "../utils";
-import { adaptPatientFromSupabase } from "../patient-adapter";
-import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
 
 export async function getPatientById(id: number): Promise<Patient | null> {
+  console.log("=== DÉBUT getPatientById ===", id);
+  
+  // Validation stricte de l'ID
+  if (!id || isNaN(id) || id <= 0) {
+    console.error("ID patient invalide:", id);
+    return null;
+  }
+
   try {
-    // Vérifier que l'ID est valide
-    if (!id || isNaN(id) || id <= 0) {
-      console.error("ID patient invalide:", id);
+    // Vérifier l'authentification
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error("Erreur de session:", sessionError);
       return null;
     }
 
-    // Récupérer l'ID de l'ostéopathe connecté
-    const osteopathId = await getCurrentOsteopathId();
-    
-    if (!osteopathId) {
-      console.error("Impossible de récupérer un patient: aucun ostéopathe connecté");
-      throw new Error("Non autorisé: vous devez être connecté en tant qu'ostéopathe");
+    if (!session) {
+      console.error("Aucune session active");
+      return null;
     }
-    
-    console.log(`Récupération du patient ${id} pour l'ostéopathe ${osteopathId}`);
-    
-    // Utiliser maybeSingle() et filtrer par osteopathId pour sécuriser l'accès
-    const { data, error } = await supabase
+
+    // Récupérer le patient (les politiques RLS vérifieront l'accès)
+    const { data: patient, error } = await supabase
       .from("Patient")
       .select("*")
       .eq("id", id)
-      .eq("osteopathId", osteopathId)
       .maybeSingle();
 
     if (error) {
-      console.error(`Error fetching patient with id ${id}:`, error);
-      throw error;
-    }
-    
-    if (!data) {
-      // SÉCURITÉ RENFORCÉE: Vérifier si le patient existe mais appartient à un autre ostéopathe
-      const { data: anyPatient } = await supabase
-        .from("Patient")
-        .select("id")
-        .eq("id", id)
-        .maybeSingle();
-      
-      if (anyPatient) {
-        console.error(`TENTATIVE D'ACCÈS NON AUTORISÉ: L'ostéopathe ${osteopathId} a tenté d'accéder au patient ${id} qui ne lui appartient pas`);
-        throw new Error("Accès non autorisé: ce patient n'est pas associé à votre compte");
-      }
-      
-      console.log(`Aucun patient trouvé avec l'ID ${id} pour l'ostéopathe ${osteopathId}`);
+      console.error("Erreur lors de la récupération du patient:", error);
       return null;
     }
+
+    if (!patient) {
+      console.log("Patient non trouvé ou accès non autorisé pour l'ID:", id);
+      return null;
+    }
+
+    console.log("Patient récupéré avec succès:", patient.firstName, patient.lastName);
+    return patient;
     
-    return adaptPatientFromSupabase(data);
   } catch (error) {
-    console.error(`Error in getPatientById:`, error);
-    throw error;
+    console.error("Erreur dans getPatientById:", error);
+    return null;
   }
 }

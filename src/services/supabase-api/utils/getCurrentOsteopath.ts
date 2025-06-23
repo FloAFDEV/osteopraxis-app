@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Osteopath } from "@/types";
 
 /**
- * Récupère l'ID de l'ostéopathe actuellement connecté
+ * Récupère l'ID de l'ostéopathe actuellement connecté en utilisant la fonction SQL
  */
 export const getCurrentOsteopathId = async (): Promise<number | null> => {
   try {
@@ -14,29 +14,19 @@ export const getCurrentOsteopathId = async (): Promise<number | null> => {
       return null;
     }
 
-    const authId = sessionData.session.user.id;
-    console.log("Auth ID de l'utilisateur connecté:", authId);
+    console.log("Auth ID de l'utilisateur connecté:", sessionData.session.user.id);
 
-    // Récupérer l'utilisateur avec auth_id pour obtenir osteopathId
-    const { data: users, error: userError } = await supabase
-      .from("User")
-      .select("osteopathId")
-      .eq("auth_id", authId);
+    // Utiliser la nouvelle fonction SQL pour récupérer l'ID de l'ostéopathe
+    const { data, error } = await supabase
+      .rpc('get_current_osteopath_id');
 
-    if (userError) {
-      console.error("Erreur lors de la récupération de l'utilisateur:", userError);
+    if (error) {
+      console.error("Erreur lors de la récupération de l'ID de l'ostéopathe:", error);
       return null;
     }
 
-    if (!users || users.length === 0) {
-      console.log("Aucun utilisateur trouvé avec auth_id:", authId);
-      return null;
-    }
-
-    const osteopathId = users[0].osteopathId;
-    console.log("ID de l'ostéopathe récupéré:", osteopathId);
-
-    return osteopathId;
+    console.log("ID de l'ostéopathe récupéré:", data);
+    return data;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID de l'ostéopathe:", error);
     return null;
@@ -97,10 +87,10 @@ export const isPatientOwnedByCurrentOsteopath = async (patientId: number): Promi
       return false;
     }
 
-    // Vérifier que le patient appartient bien à cet ostéopathe
+    // Vérifier que le patient appartient bien à cet ostéopathe (la RLS s'occupera du reste)
     const { data: patient, error } = await supabase
       .from("Patient")
-      .select("osteopathId")
+      .select("osteopathId, cabinetId")
       .eq("id", patientId)
       .single();
 
@@ -109,8 +99,9 @@ export const isPatientOwnedByCurrentOsteopath = async (patientId: number): Promi
       return false;
     }
 
-    const isOwned = patient && patient.osteopathId === currentOsteopathId;
-    console.log(`Patient ${patientId} appartient à l'ostéopathe ${currentOsteopathId}:`, isOwned);
+    // Si on peut récupérer le patient, c'est que les politiques RLS l'autorisent
+    const isOwned = !!patient;
+    console.log(`Patient ${patientId} accessible par l'ostéopathe ${currentOsteopathId}:`, isOwned);
     
     return isOwned;
   } catch (error) {
@@ -131,9 +122,10 @@ export const isCabinetOwnedByCurrentOsteopath = async (cabinetId: number): Promi
       return false;
     }
 
+    // Vérifier via les politiques RLS
     const { data: cabinet, error } = await supabase
       .from("Cabinet")
-      .select("osteopathId")
+      .select("id")
       .eq("id", cabinetId)
       .single();
 
@@ -142,8 +134,8 @@ export const isCabinetOwnedByCurrentOsteopath = async (cabinetId: number): Promi
       return false;
     }
 
-    const isOwned = cabinet && cabinet.osteopathId === currentOsteopathId;
-    console.log(`Cabinet ${cabinetId} appartient à l'ostéopathe ${currentOsteopathId}:`, isOwned);
+    const isOwned = !!cabinet;
+    console.log(`Cabinet ${cabinetId} accessible par l'ostéopathe ${currentOsteopathId}:`, isOwned);
     
     return isOwned;
   } catch (error) {
@@ -166,7 +158,7 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
 
     const { data: appointment, error } = await supabase
       .from("Appointment")
-      .select("osteopathId")
+      .select("id")
       .eq("id", appointmentId)
       .single();
 
@@ -175,8 +167,8 @@ export const isAppointmentOwnedByCurrentOsteopath = async (appointmentId: number
       return false;
     }
 
-    const isOwned = appointment && appointment.osteopathId === currentOsteopathId;
-    console.log(`Rendez-vous ${appointmentId} appartient à l'ostéopathe ${currentOsteopathId}:`, isOwned);
+    const isOwned = !!appointment;
+    console.log(`Rendez-vous ${appointmentId} accessible par l'ostéopathe ${currentOsteopathId}:`, isOwned);
     
     return isOwned;
   } catch (error) {
@@ -197,24 +189,21 @@ export const isInvoiceOwnedByCurrentOsteopath = async (invoiceId: number): Promi
       return false;
     }
 
-    // D'abord récupérer la facture pour avoir le patientId
-    const { data: invoice, error: invoiceError } = await supabase
+    const { data: invoice, error } = await supabase
       .from("Invoice")
-      .select("patientId")
+      .select("id")
       .eq("id", invoiceId)
       .single();
 
-    if (invoiceError) {
-      console.error("Erreur lors de la récupération de la facture:", invoiceError);
+    if (error) {
+      console.error("Erreur lors de la vérification de propriété de la facture:", error);
       return false;
     }
 
-    if (!invoice) {
-      return false;
-    }
-
-    // Ensuite vérifier que le patient appartient à l'ostéopathe
-    return await isPatientOwnedByCurrentOsteopath(invoice.patientId);
+    const isOwned = !!invoice;
+    console.log(`Facture ${invoiceId} accessible par l'ostéopathe ${currentOsteopathId}:`, isOwned);
+    
+    return isOwned;
   } catch (error) {
     console.error("Erreur lors de la vérification de propriété de la facture:", error);
     return false;

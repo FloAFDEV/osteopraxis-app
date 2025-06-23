@@ -1,72 +1,42 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "@/types";
-import { adaptPatientFromSupabase } from "../patient-adapter";
-import { supabase } from "../utils";
-import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
 
 export async function getPatients(): Promise<Patient[]> {
-	try {
-		// Récupérer l'ID de l'ostéopathe connecté
-		const osteopathId = await getCurrentOsteopathId();
-		
-		// Si aucun osteopathId n'est trouvé, retourner un tableau vide et journaliser clairement
-		if (!osteopathId) {
-			console.warn("ACCÈS REFUSÉ: Tentative d'accès à la liste des patients sans profil ostéopathe");
-			console.log("L'utilisateur doit compléter son profil ostéopathe avant de pouvoir accéder aux patients");
-			// On pourrait ici notifier l'utilisateur qu'il doit configurer son profil
-			return [];
-		}
-		
-		console.log("Filtrage des patients par osteopathId:", osteopathId);
+  console.log("=== DÉBUT getPatients ===");
+  
+  try {
+    // Vérifier l'authentification
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error("Erreur de session:", sessionError);
+      throw new Error("Erreur d'authentification");
+    }
 
-		// Appliquer le filtre par osteopathId - CRUCIAL pour la sécurité multi-tenant
-		const { data, error } = await supabase
-			.from("Patient")
-			.select("*")
-			.eq("osteopathId", osteopathId);
+    if (!session) {
+      console.error("Aucune session active");
+      throw new Error("Utilisateur non authentifié");
+    }
 
-		if (error) {
-			console.error("Error fetching patients:", error);
-			throw error;
-		}
+    console.log("Session active pour:", session.user.email);
 
-		// Vérifier si data est null ou undefined
-		if (!data) {
-			console.log("Aucune donnée de patients retournée");
-			return [];
-		}
+    // Récupérer tous les patients (les politiques RLS se chargeront du filtrage)
+    const { data: patients, error } = await supabase
+      .from("Patient")
+      .select("*")
+      .order("lastName", { ascending: true });
 
-		const patients = data.map(adaptPatientFromSupabase);
+    if (error) {
+      console.error("Erreur lors de la récupération des patients:", error);
+      throw error;
+    }
 
-		// Statistiques et logs
-		const maleCount = patients.filter((p) => p.gender === "Homme").length;
-		const femaleCount = patients.filter((p) => p.gender === "Femme").length;
-
-		const childrenPatients = patients.filter((p) => {
-			if (!p.birthDate) return false;
-			const birthDate = new Date(p.birthDate);
-			const today = new Date();
-			let age = today.getFullYear() - birthDate.getFullYear();
-			const monthDiff = today.getMonth() - birthDate.getMonth();
-			if (
-				monthDiff < 0 ||
-				(monthDiff === 0 && today.getDate() < birthDate.getDate())
-			) {
-				age--;
-			}
-			return age < 12;
-		});
-
-		console.log(
-			`GetPatients: Found ${childrenPatients.length} children among ${patients.length} total patients for osteopath ${osteopathId}`
-		);
-		console.log(
-			`GetPatients: Gender distribution - ${maleCount} men, ${femaleCount} women`
-		);
-
-		return patients;
-	} catch (error) {
-		console.error("Error in getPatients:", error);
-		throw error;
-	}
+    console.log(`${patients?.length || 0} patients récupérés`);
+    return patients || [];
+    
+  } catch (error) {
+    console.error("Erreur dans getPatients:", error);
+    throw error;
+  }
 }
