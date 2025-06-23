@@ -1,3 +1,4 @@
+
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -22,6 +23,7 @@ import {
 	Activity,
 	AlertCircle,
 	Baby,
+	Calendar,
 	Cigarette,
 	ClipboardList,
 	Hand,
