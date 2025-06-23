@@ -1,4 +1,5 @@
 
+
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -41,26 +42,47 @@ import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard"
 import { PatientFormValues } from "@/components/patient-form/types";
 
 const PatientDetailPage = () => {
-	const params = useParams<{ id: string }>();
+	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 
-	// Vérification et validation de l'ID patient
-	const patientId = useMemo(() => {
-		if (!params?.id) {
-			console.warn("PatientDetailPage: Aucun ID de patient fourni dans l'URL");
-			return null;
-		}
-		
-		const id = parseInt(params.id, 10);
-		if (isNaN(id) || id <= 0) {
-			console.warn("PatientDetailPage: ID de patient invalide:", params.id);
-			return null;
-		}
-		
-		return id;
-	}, [params?.id]);
+	// Guard: Vérifier si l'ID est "new" ou invalide
+	if (!id || id === "new") {
+		console.warn("PatientDetailPage: ID de patient invalide ou route 'new':", id);
+		return (
+			<Layout>
+				<div className="flex flex-col justify-center items-center h-full">
+					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+					<p className="text-xl font-semibold text-center">
+						Accès non autorisé
+					</p>
+					<p className="text-muted-foreground mt-2">
+						Cette page est réservée aux détails des patients existants
+					</p>
+				</div>
+			</Layout>
+		);
+	}
 
-	// ----- ALL HOOKS MUST BE BEFORE ANY RETURN -----
+	const patientId = parseInt(id, 10);
+
+	if (isNaN(patientId) || patientId <= 0) {
+		console.warn("PatientDetailPage: ID de patient non numérique ou invalide:", id);
+		return (
+			<Layout>
+				<div className="flex flex-col justify-center items-center h-full">
+					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+					<p className="text-xl font-semibold text-center">
+						ID de patient invalide
+					</p>
+					<p className="text-muted-foreground mt-2">
+						L'identifiant du patient doit être un nombre valide
+					</p>
+				</div>
+			</Layout>
+		);
+	}
+
+	// ----- ALL HOOKS MUST BE AFTER GUARDS -----
 	const [patient, setPatient] = useState<Patient | null>(null);
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -121,12 +143,6 @@ const PatientDetailPage = () => {
 	// Fetch data
 	useEffect(() => {
 		const fetchPatientData = async () => {
-			if (!patientId) {
-				setError("ID de patient manquant ou invalide");
-				setLoading(false);
-				return;
-			}
-
 			setLoading(true);
 			setError(null);
 			
@@ -196,8 +212,6 @@ const PatientDetailPage = () => {
 	}, [patient]);
 
 	const handleCancelAppointment = async (appointmentId: number) => {
-		if (!patientId) return;
-		
 		try {
 			await api.cancelAppointment(appointmentId);
 			// Refresh appointments list
@@ -214,8 +228,6 @@ const PatientDetailPage = () => {
 		appointmentId: number,
 		status: AppointmentStatus
 	) => {
-		if (!patientId) return;
-		
 		try {
 			setLoading(true);
 			await api.updateAppointment(appointmentId, { status });
@@ -274,13 +286,11 @@ const PatientDetailPage = () => {
 
 	const handleAppointmentCreated = () => {
 		// Recharger les rendez-vous après création
-		if (patientId) {
-			api.getAppointmentsByPatientId(patientId).then(setAppointments);
-		}
+		api.getAppointmentsByPatientId(patientId).then(setAppointments);
 	};
 
 	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
-		if (!patient || !patientId) return;
+		if (!patient) return;
 		
 		try {
 			setLoading(true);
@@ -312,25 +322,6 @@ const PatientDetailPage = () => {
 			setLoading(false);
 		}
 	};
-
-	// ----- Keep all hooks above! -----
-
-	// Early return for invalid patient ID
-	if (!patientId) {
-		return (
-			<Layout>
-				<div className="flex flex-col justify-center items-center h-full">
-					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-					<p className="text-xl font-semibold text-center">
-						ID de patient manquant ou invalide
-					</p>
-					<p className="text-muted-foreground mt-2">
-						Veuillez accéder à cette page via un lien valide
-					</p>
-				</div>
-			</Layout>
-		);
-	}
 
 	if (loading) {
 		return (
