@@ -22,7 +22,6 @@ import {
 	Activity,
 	AlertCircle,
 	Baby,
-	Calendar,
 	Cigarette,
 	ClipboardList,
 	Hand,
@@ -33,15 +32,31 @@ import {
 	Users,
 	FileText,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
 import { PatientFormValues } from "@/components/patient-form/types";
 
 const PatientDetailPage = () => {
-	const { id } = useParams<{ id: string }>();
+	const params = useParams<{ id: string }>();
 	const navigate = useNavigate();
+
+	// Vérification et validation de l'ID patient
+	const patientId = useMemo(() => {
+		if (!params?.id) {
+			console.warn("PatientDetailPage: Aucun ID de patient fourni dans l'URL");
+			return null;
+		}
+		
+		const id = parseInt(params.id, 10);
+		if (isNaN(id) || id <= 0) {
+			console.warn("PatientDetailPage: ID de patient invalide:", params.id);
+			return null;
+		}
+		
+		return id;
+	}, [params?.id]);
 
 	// ----- ALL HOOKS MUST BE BEFORE ANY RETURN -----
 	const [patient, setPatient] = useState<Patient | null>(null);
@@ -56,58 +71,90 @@ const PatientDetailPage = () => {
 	const patientInfoRef = useRef<HTMLDivElement>(null);
 	const [showStickyAntecedents, setShowStickyAntecedents] = useState(false);
 
+	// Helper function to convert values to nullable numbers
+	const toNullableNumber = (val: any) => {
+		if (val === undefined || val === "" || val === null) return null;
+		const num = Number(val);
+		return isNaN(num) ? null : num;
+	};
+
+	// Helper function for error handling
+	const handleError = (message = "Une erreur est survenue") => {
+		toast.error(message);
+		setError(message);
+		setLoading(false);
+	};
+
 	// ----------------
 	
 	const getSmokerInfo = () => {
-		if (patient && patient.isSmoker) {
-			return `Fumeur${
-				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
-			}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ""}`;
-		} else if (patient && patient.isExSmoker) {
-			return `Ex-fumeur${
-				patient.smokingAmount ? ` (${patient.smokingAmount})` : ""
-			}${
-				patient.quitSmokingDate
-					? `, arrêt depuis ${patient.quitSmokingDate}`
-					: ""
-			}`;
-		} else {
-			return "Non-fumeur";
+		if (!patient) return "";
+
+		if (patient.isSmoker) {
+			return `Fumeur${patient.smokingAmount ? ` (${patient.smokingAmount})` : ""}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ""}`;
 		}
+
+		if (patient.isExSmoker) {
+			return `Ex-fumeur${patient.smokingAmount ? ` (${patient.smokingAmount})` : ""}${patient.quitSmokingDate ? `, arrêt depuis ${patient.quitSmokingDate}` : ""}`;
+		}
+
+		return "Non-fumeur";
 	};
+
+	// Memoized appointment filtering and sorting
+	const upcomingAppointments = useMemo(() => 
+		appointments
+			.filter((appointment) => new Date(appointment.date) >= new Date())
+			.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+		[appointments]
+	);
+
+	const pastAppointments = useMemo(() => 
+		appointments
+			.filter((appointment) => new Date(appointment.date) < new Date())
+			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+		[appointments]
+	);
 
 	// Fetch data
 	useEffect(() => {
 		const fetchPatientData = async () => {
+			if (!patientId) {
+				setError("ID de patient manquant ou invalide");
+				setLoading(false);
+				return;
+			}
+
 			setLoading(true);
 			setError(null);
+			
 			try {
-				if (!id) {
-					setError("Patient ID is missing.");
+				console.log("Chargement des données pour le patient ID:", patientId);
+				
+				const [patientData, appointmentsData, invoicesData] = await Promise.all([
+					api.getPatientById(patientId),
+					api.getAppointmentsByPatientId(patientId),
+					invoiceService.getInvoicesByPatientId(patientId),
+				]);
+
+				if (!patientData) {
+					setError("Patient non trouvé");
 					return;
 				}
-				const patientId = parseInt(id, 10);
-				const [patientData, appointmentsData, invoicesData] =
-					await Promise.all([
-						api.getPatientById(patientId),
-						api.getAppointmentsByPatientId(patientId),
-						invoiceService.getInvoicesByPatientId(patientId),
-					]);
 
 				setPatient(patientData);
-				setAppointments(appointmentsData);
-				setInvoices(invoicesData);
+				setAppointments(appointmentsData || []);
+				setInvoices(invoicesData || []);
 			} catch (e: any) {
-				setError(e.message || "Failed to load patient data.");
-				toast.error(
-					"Impossible de charger les informations du patient. Veuillez réessayer."
-				);
+				console.error("Erreur lors du chargement des données du patient:", e);
+				handleError("Impossible de charger les informations du patient. Veuillez réessayer.");
 			} finally {
 				setLoading(false);
 			}
 		};
+
 		fetchPatientData();
-	}, [id]);
+	}, [patientId]);
 
 	useEffect(() => {
 		// Find and set the history tab element ref after the component mounts
@@ -146,25 +193,13 @@ const PatientDetailPage = () => {
 		};
 	}, [patient]);
 
-	const upcomingAppointments = appointments
-		.filter((appointment) => new Date(appointment.date) >= new Date())
-		.sort(
-			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-		);
-
-	const pastAppointments = appointments
-		.filter((appointment) => new Date(appointment.date) < new Date())
-		.sort(
-			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-		);
-
 	const handleCancelAppointment = async (appointmentId: number) => {
+		if (!patientId) return;
+		
 		try {
 			await api.cancelAppointment(appointmentId);
 			// Refresh appointments list
-			const updatedAppointments = await api.getAppointmentsByPatientId(
-				parseInt(id!)
-			);
+			const updatedAppointments = await api.getAppointmentsByPatientId(patientId);
 			setAppointments(updatedAppointments);
 			toast.success("La séance a été annulée avec succès");
 		} catch (error) {
@@ -177,18 +212,16 @@ const PatientDetailPage = () => {
 		appointmentId: number,
 		status: AppointmentStatus
 	) => {
+		if (!patientId) return;
+		
 		try {
 			setLoading(true);
 			await api.updateAppointment(appointmentId, { status });
 			// Refresh appointments list
-			const updatedAppointments = await api.getAppointmentsByPatientId(
-				parseInt(id!)
-			);
+			const updatedAppointments = await api.getAppointmentsByPatientId(patientId);
 			setAppointments(updatedAppointments);
 			toast.success(
-				`Le statut de la séance a été modifié en "${getStatusLabel(
-					status
-				)}"`
+				`Le statut de la séance a été modifié en "${getStatusLabel(status)}"`
 			);
 		} catch (error) {
 			console.error("Error updating appointment status:", error);
@@ -234,35 +267,36 @@ const PatientDetailPage = () => {
 			})
 			.join(nb === 2 ? " " : ", ");
 
-		return `${
-			nb === 1 ? "Un enfant de" : `${nb} enfants de`
-		} ${agesText} ans`;
+		return `${nb === 1 ? "Un enfant de" : `${nb} enfants de`} ${agesText} ans`;
 	}
 
 	const handleAppointmentCreated = () => {
 		// Recharger les rendez-vous après création
-		if (id) {
-			api.getAppointmentsByPatientId(parseInt(id)).then(setAppointments);
+		if (patientId) {
+			api.getAppointmentsByPatientId(patientId).then(setAppointments);
 		}
 	};
 
 	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
-		if (!patient) return;
+		if (!patient || !patientId) return;
 		
 		try {
 			setLoading(true);
 			
-			// Convertir les champs numériques correctement
-			if (updatedData.height !== undefined) updatedData.height = updatedData.height ? Number(updatedData.height) : null;
-			if (updatedData.weight !== undefined) updatedData.weight = updatedData.weight ? Number(updatedData.weight) : null;
-			if (updatedData.bmi !== undefined) updatedData.bmi = updatedData.bmi ? Number(updatedData.bmi) : null;
-			if (updatedData.weight_at_birth !== undefined) updatedData.weight_at_birth = updatedData.weight_at_birth ? Number(updatedData.weight_at_birth) : null;
-			if (updatedData.height_at_birth !== undefined) updatedData.height_at_birth = updatedData.height_at_birth ? Number(updatedData.height_at_birth) : null;
-			if (updatedData.head_circumference !== undefined) updatedData.head_circumference = updatedData.head_circumference ? Number(updatedData.head_circumference) : null;
+			// Convertir les champs numériques correctement avec le helper
+			const processedData = {
+				...updatedData,
+				height: toNullableNumber(updatedData.height),
+				weight: toNullableNumber(updatedData.weight),
+				bmi: toNullableNumber(updatedData.bmi),
+				weight_at_birth: toNullableNumber(updatedData.weight_at_birth),
+				height_at_birth: toNullableNumber(updatedData.height_at_birth),
+				head_circumference: toNullableNumber(updatedData.head_circumference),
+			};
 
 			const patientUpdate = {
 				...patient,
-				...updatedData,
+				...processedData,
 				updatedAt: new Date().toISOString(),
 			};
 
@@ -278,6 +312,23 @@ const PatientDetailPage = () => {
 	};
 
 	// ----- Keep all hooks above! -----
+
+	// Early return for invalid patient ID
+	if (!patientId) {
+		return (
+			<Layout>
+				<div className="flex flex-col justify-center items-center h-full">
+					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+					<p className="text-xl font-semibold text-center">
+						ID de patient manquant ou invalide
+					</p>
+					<p className="text-muted-foreground mt-2">
+						Veuillez accéder à cette page via un lien valide
+					</p>
+				</div>
+			</Layout>
+		);
+	}
 
 	if (loading) {
 		return (
@@ -309,7 +360,7 @@ const PatientDetailPage = () => {
 				<PatientHeader patientId={patient.id} />
 
 				{/* Stats section */}
-				<div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
+				<section className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 						<PatientStat
 							title="Total séances"
@@ -343,10 +394,10 @@ const PatientDetailPage = () => {
 							colorClass="text-amber-500"
 						/>
 					</div>
-				</div>
+				</section>
 
 				{/* Main content grid - ordre inversé pour avoir les tabs à gauche */}
-				<div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+				<section className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
 					{/* Left column - Tabs (principal content) - plus large */}
 					<div className="xl:col-span-3 order-2 xl:order-2">
 						<Tabs defaultValue="medical-info">
@@ -458,7 +509,7 @@ const PatientDetailPage = () => {
 					</div>
 
 					{/* Right column: Sticky cards with responsive behavior */}
-					<div className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6 relative">
+					<aside className="xl:col-span-1 order-1 xl:order-1 space-y-4 md:space-y-6 relative">
 						<div className="hidden xl:block xl:sticky xl:top-20 xl:self-start xl:space-y-4">
 							<PatientInfo patient={patient} />
 							<PersonalInfoCard patient={patient} />
@@ -468,8 +519,8 @@ const PatientDetailPage = () => {
 							<PatientInfo patient={patient} />
 							<PersonalInfoCard patient={patient} />
 						</div>
-					</div>
-				</div>
+					</aside>
+				</section>
 			</div>
 		</Layout>
 	);
