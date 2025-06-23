@@ -83,6 +83,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/patients/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewPatientPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/patients/:id"
                   element={
                     <ProtectedRoute>
