@@ -19,11 +19,13 @@ const NewPatientPage = () => {
 
 	useEffect(() => {
 		const fetchCabinetInfo = async () => {
+			// Récupérer le cabinet sélectionné depuis localStorage
 			const storedCabinetId = localStorage.getItem("selectedCabinetId");
 			if (storedCabinetId) {
 				const cabinetId = Number(storedCabinetId);
 				setSelectedCabinetId(cabinetId);
 				
+				// Récupérer les détails du cabinet
 				try {
 					const cabinet = await api.getCabinetById(cabinetId);
 					if (cabinet) {
@@ -48,23 +50,26 @@ const NewPatientPage = () => {
 		try {
 			setLoading(true);
 
+			// Vérifier les champs obligatoires - supprimer la vérification de l'email
 			if (!patientData.firstName || !patientData.lastName) {
 				toast.error("Veuillez remplir au moins le nom et le prénom");
 				setLoading(false);
 				return;
 			}
 
+			// Vérifier qu'un cabinet est sélectionné
 			if (!patientData.cabinetId && !selectedCabinetId) {
 				toast.error("Veuillez sélectionner un cabinet");
 				setLoading(false);
 				return;
 			}
 
-			// ... keep existing code (data formatting and conversion)
+			// Convertir la date si elle est au format Date
 			if (patientData.birthDate instanceof Date) {
 				patientData.birthDate = patientData.birthDate.toISOString();
 			}
 
+			// Assurer le bon type pour les valeurs numériques
 			if (patientData.height)
 				patientData.height = Number(patientData.height);
 			if (patientData.weight)
@@ -85,11 +90,13 @@ const NewPatientPage = () => {
 
 			console.log("Données patient avant création:", patientData);
 
+			// Utiliser l'ID de l'ostéopathe connecté et le cabinet sélectionné
 			const patientToCreate = {
 				...patientData,
-				osteopathId: user.osteopathId || user.id,
-				cabinetId: patientData.cabinetId || selectedCabinetId || 1,
-				userId: null,
+				osteopathId: user.osteopathId || user.id, // Utilise osteopathId ou id selon ce qui est disponible
+				cabinetId: patientData.cabinetId || selectedCabinetId || 1, // Utiliser le cabinetId du formulaire ou celui sélectionné dans la navbar
+				userId: null, // Requis par le type mais peut être null
+				// Champs existants requis
 				complementaryExams: patientData.complementaryExams || null,
 				generalSymptoms: patientData.generalSymptoms || null,
 				pregnancyHistory: patientData.pregnancyHistory || null,
@@ -104,6 +111,8 @@ const NewPatientPage = () => {
 				smokingSince: patientData.smokingSince || null,
 				smokingAmount: patientData.smokingAmount || null,
 				quitSmokingDate: patientData.quitSmokingDate || null,
+
+				// Nouveaux champs généraux
 				ent_followup: patientData.ent_followup || null,
 				intestinal_transit: patientData.intestinal_transit || null,
 				sleep_quality: patientData.sleep_quality || null,
@@ -113,6 +122,8 @@ const NewPatientPage = () => {
 				gynecological_history:
 					patientData.gynecological_history || null,
 				other_comments_adult: patientData.other_comments_adult || null,
+
+				// Nouveaux champs spécifiques aux enfants
 				fine_motor_skills: patientData.fine_motor_skills || null,
 				gross_motor_skills: patientData.gross_motor_skills || null,
 				weight_at_birth: patientData.weight_at_birth || null,
@@ -124,6 +135,8 @@ const NewPatientPage = () => {
 				pediatrician_name: patientData.pediatrician_name || null,
 				paramedical_followup: patientData.paramedical_followup || null,
 				other_comments_child: patientData.other_comments_child || null,
+
+				// Gestion des champs taille, poids et IMC
 				height: patientData.height || null,
 				weight: patientData.weight || null,
 				bmi: patientData.bmi || null,
@@ -165,6 +178,7 @@ const NewPatientPage = () => {
 	return (
 		<Layout>
 			<div className="max-w-6xl mx-auto">
+				{/* Bouton Retour */}
 				<div className="relative z-10">
 					<div className="flex items-center gap-2 mb-8">
 						<Button
@@ -190,6 +204,7 @@ const NewPatientPage = () => {
 					</p>
 				</div>
 
+				{/* Affichage du cabinet sélectionné */}
 				{selectedCabinet && (
 					<Alert className="mb-6">
 						<Building className="h-4 w-4" />
@@ -204,7 +219,6 @@ const NewPatientPage = () => {
 					</Alert>
 				)}
 
-				{/* ... keep existing code (banner section) */}
 				<div className="relative mb-6 p-4 bg-gradient-to-r from-blue-50 to-pink-50 dark:from-blue-950/20 dark:to-pink-950/20 rounded-lg border border-blue-100 dark:border-blue-900/30">
 					<div className="flex flex-col md:flex-row items-center">
 						<img
@@ -241,7 +255,6 @@ const NewPatientPage = () => {
 							onSave={handleAddPatient}
 							emailRequired={false}
 							selectedCabinetId={selectedCabinetId}
-							isCreatingNew={true}
 						/>
 					</div>
 				)}

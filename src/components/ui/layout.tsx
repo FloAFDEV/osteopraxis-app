@@ -128,7 +128,7 @@ export function Layout({ children }: LayoutProps) {
               <User className="h-5 w-5 text-pink-500" />
               Patients
             </NavLink>
-            <NavLink to="/patients/add" className={({ isActive }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
+            <NavLink to="/patients/new" className={({ isActive }) => cn("p-2 rounded-md transition-colors flex items-center gap-2", isActive ? "bg-blue-500/10 text-foreground" : "text-foreground")} onClick={() => setIsMenuOpen(false)}>
               <UserPlus className="h-5 w-5 text-blue-500" />
               Ajouter un patient
             </NavLink>

@@ -24,8 +24,6 @@ import SettingsPage from "./pages/SettingsPage";
 import OsteopathSettingsPage from "./pages/OsteopathSettingsPage";
 import CollaborationsSettingsPage from "./pages/CollaborationsSettingsPage";
 import HelpPage from "./pages/HelpPage";
-import TermsOfServicePage from "./pages/TermsOfServicePage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 const queryClient = new QueryClient();
 
@@ -60,8 +58,6 @@ function App() {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/" element={<Index />} />
-                <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route
                   path="/dashboard"
                   element={
@@ -78,7 +74,6 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                {/* IMPORTANT: Route spécifique pour /patients/add AVANT /patients/:id */}
                 <Route
                   path="/patients/add"
                   element={

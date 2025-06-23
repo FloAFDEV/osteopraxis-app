@@ -1,4 +1,3 @@
-
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -261,15 +260,10 @@ const PatientDetailPage = () => {
 			if (updatedData.height_at_birth !== undefined) updatedData.height_at_birth = updatedData.height_at_birth ? Number(updatedData.height_at_birth) : null;
 			if (updatedData.head_circumference !== undefined) updatedData.head_circumference = updatedData.head_circumference ? Number(updatedData.head_circumference) : null;
 
-			const patientUpdate: Patient = {
+			const patientUpdate = {
 				...patient,
 				...updatedData,
 				updatedAt: new Date().toISOString(),
-				// Properly cast enum fields to avoid TypeScript errors
-				gender: (updatedData.gender || patient.gender) as Patient['gender'],
-				maritalStatus: (updatedData.maritalStatus || patient.maritalStatus) as Patient['maritalStatus'],
-				handedness: (updatedData.handedness || patient.handedness) as Patient['handedness'],
-				contraception: (updatedData.contraception || patient.contraception) as Patient['contraception'],
 			};
 
 			await api.updatePatient(patientUpdate);

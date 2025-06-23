@@ -18,12 +18,6 @@ export const invoiceService = {
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
-    // Vérifier que l'ID est valide
-    if (!id || isNaN(id) || id <= 0) {
-      console.error("ID facture invalide pour getInvoiceById:", id);
-      return undefined;
-    }
-
     if (USE_SUPABASE) {
       try {
         const isOwned = await isInvoiceOwnedByCurrentOsteopath(id);
@@ -41,12 +35,6 @@ export const invoiceService = {
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
-    // Vérifier que l'ID patient est valide
-    if (!patientId || isNaN(patientId) || patientId <= 0) {
-      console.error("ID patient invalide pour getInvoicesByPatientId:", patientId);
-      return [];
-    }
-
     if (USE_SUPABASE) {
       try {
         const isOwned = await isPatientOwnedByCurrentOsteopath(patientId);
@@ -64,12 +52,6 @@ export const invoiceService = {
   },
 
   async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {
-    // Vérifier que l'ID rendez-vous est valide
-    if (!appointmentId || isNaN(appointmentId) || appointmentId <= 0) {
-      console.error("ID rendez-vous invalide pour getInvoicesByAppointmentId:", appointmentId);
-      return [];
-    }
-
     if (USE_SUPABASE) {
       try {
         const { isAppointmentOwnedByCurrentOsteopath } = await import("@/services");

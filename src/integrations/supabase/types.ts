@@ -1003,10 +1003,6 @@ export type Database = {
           access_type: string
         }[]
       }
-      get_current_osteopath_id: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
       get_osteopath_cabinets: {
         Args: { osteopath_auth_id: string }
         Returns: {
