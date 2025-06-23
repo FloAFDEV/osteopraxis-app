@@ -6,6 +6,12 @@ import { getCurrentOsteopathId } from "../utils/getCurrentOsteopath";
 
 export async function getPatientById(id: number): Promise<Patient | null> {
   try {
+    // Vérifier que l'ID est valide
+    if (!id || isNaN(id) || id <= 0) {
+      console.error("ID patient invalide:", id);
+      return null;
+    }
+
     // Récupérer l'ID de l'ostéopathe connecté
     const osteopathId = await getCurrentOsteopathId();
     

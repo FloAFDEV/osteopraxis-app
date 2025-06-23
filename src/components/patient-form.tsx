@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +33,7 @@ export function PatientForm({
     selectedCabinetId ? selectedCabinetId.toString() : null
   );
 
-  // Calcul de l'âge pour déterminer si c'est un enfant
+  // Calcul de l'âge pour déterminer si c'est un enfant - seulement si on a un patient existant
   const calculateAge = (birthDate: string | null) => {
     if (!birthDate) return null;
     const today = new Date();
@@ -45,7 +46,10 @@ export function PatientForm({
     return age;
   };
 
-  const isChild = patient ? calculateAge(patient.birthDate) !== null && calculateAge(patient.birthDate)! < 18 : false;
+  // Seulement calculer l'âge si on a un patient existant avec une date de naissance
+  const isChild = patient && patient.birthDate ? 
+    calculateAge(patient.birthDate) !== null && calculateAge(patient.birthDate)! < 18 : 
+    false;
 
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(getPatientSchema(emailRequired)),
@@ -55,7 +59,7 @@ export function PatientForm({
       lastName: patient?.lastName || "",
       email: patient?.email || "",
       phone: patient?.phone || "",
-      // Convertir la date en string pour le formulaire
+      // Convertir la date en string pour le formulaire seulement si elle existe
       birthDate: patient?.birthDate ? new Date(patient.birthDate).toISOString().split('T')[0] : null,
       address: patient?.address || "",
       
@@ -235,8 +239,6 @@ export function PatientForm({
                 <ContactTab form={form} emailRequired={false} />
               </TabsContent>
 
-              
-              
               <TabsContent value="medical">
                 <MedicalTab form={form} isChild={isChild} />
               </TabsContent>

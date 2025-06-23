@@ -23,6 +23,12 @@ export const patientService = {
   },
 
   async getPatientById(id: number): Promise<Patient | undefined> {
+    // Vérifier que l'ID est valide avant d'essayer de récupérer le patient
+    if (!id || isNaN(id) || id <= 0) {
+      console.error("ID patient invalide pour getPatientById:", id);
+      return undefined;
+    }
+
     if (USE_SUPABASE) {
       try {
         return await supabasePatientService.getPatientById(id);
@@ -102,6 +108,12 @@ export const patientService = {
   },
 
   async deletePatient(id: number): Promise<boolean> {
+    // Vérifier que l'ID est valide avant d'essayer de supprimer le patient
+    if (!id || isNaN(id) || id <= 0) {
+      console.error("ID patient invalide pour deletePatient:", id);
+      return false;
+    }
+
     if (USE_SUPABASE) {
       try {
         const { error } = await supabasePatientService.deletePatient(id);

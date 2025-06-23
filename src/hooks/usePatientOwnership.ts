@@ -9,7 +9,7 @@ export interface PatientOwnershipInfo {
   loading: boolean;
 }
 
-export function usePatientOwnership(patientId: number): PatientOwnershipInfo {
+export function usePatientOwnership(patientId: number | null): PatientOwnershipInfo {
   const [ownershipInfo, setOwnershipInfo] = useState<PatientOwnershipInfo>({
     isOwnPatient: false,
     isCabinetPatient: false,
@@ -18,6 +18,16 @@ export function usePatientOwnership(patientId: number): PatientOwnershipInfo {
 
   useEffect(() => {
     const checkOwnership = async () => {
+      // Si patientId est null, undefined, NaN ou 0, ne pas faire d'appel
+      if (!patientId || isNaN(patientId) || patientId <= 0) {
+        setOwnershipInfo({
+          isOwnPatient: false,
+          isCabinetPatient: false,
+          loading: false
+        });
+        return;
+      }
+
       try {
         // Récupérer l'ostéopathe actuel
         const currentOsteopath = await api.getCurrentOsteopath();
@@ -51,9 +61,7 @@ export function usePatientOwnership(patientId: number): PatientOwnershipInfo {
       }
     };
 
-    if (patientId) {
-      checkOwnership();
-    }
+    checkOwnership();
   }, [patientId]);
 
   return ownershipInfo;
