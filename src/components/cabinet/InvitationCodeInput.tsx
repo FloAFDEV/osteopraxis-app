@@ -53,7 +53,7 @@ export function InvitationCodeInput({
       if (result.valid && result.cabinet_name) {
         onValidCode?.(codeToValidate.trim().toUpperCase(), result.cabinet_name);
       } else {
-        onInvalidCode?();
+        onInvalidCode?.();
       }
     } catch (error) {
       console.error("Erreur lors de la validation:", error);
@@ -62,7 +62,7 @@ export function InvitationCodeInput({
         isValid: false,
         error: "Erreur lors de la validation"
       });
-      onInvalidCode?();
+      onInvalidCode?.();
     }
   };
 

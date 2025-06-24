@@ -1,3 +1,4 @@
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import CabinetsManagementPage from "./pages/CabinetsManagementPage";
 import NewCabinetPage from "./pages/NewCabinetPage";
 import EditCabinetPage from "./pages/EditCabinetPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
+import NewAppointmentPage from "./pages/NewAppointmentPage";
 import SchedulePage from "./pages/SchedulePage";
 import InvoicesPage from "./pages/InvoicesPage";
 import NewInvoicePage from "./pages/NewInvoicePage";
@@ -144,6 +146,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/appointments/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewAppointmentPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/schedule"
                   element={
                     <ProtectedRoute>
@@ -161,6 +171,14 @@ function App() {
                 />
                 <Route
                   path="/invoices/create"
+                  element={
+                    <ProtectedRoute>
+                      <NewInvoicePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/invoices/new"
                   element={
                     <ProtectedRoute>
                       <NewInvoicePage />
