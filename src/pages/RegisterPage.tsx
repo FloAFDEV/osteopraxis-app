@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Mail, Lock, Activity, User, UserPlus, Info } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +10,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InvitationCodeInput } from "@/components/cabinet/InvitationCodeInput";
+import { Separator } from "@/components/ui/separator";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),
@@ -18,12 +19,12 @@ const registerSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   confirmPassword: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  website: z.string().optional() // Champ honeypot pour détecter les bots
+  website: z.string().optional(),
+  invitationCode: z.string().optional()
 }).refine((data) => data.password === data.confirmPassword, {
   path: ["confirmPassword"],
   message: "Les mots de passe ne correspondent pas",
 }).superRefine((data, ctx) => {
-  // Vérification du honeypot - si rempli, c'est probablement un bot
   if (data.website && data.website.length > 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -39,10 +40,12 @@ const RegisterPage = () => {
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const initialInvitationCode = searchParams.get("invitation") || "";
   const returnTo = searchParams.get("returnTo") || "/profile/setup";
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState(4);
+  const [validInvitation, setValidInvitation] = useState<{code: string, cabinetName: string} | null>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -52,9 +55,16 @@ const RegisterPage = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      website: "", // Initialiser le honeypot
+      website: "",
+      invitationCode: initialInvitationCode,
     },
   });
+
+  useEffect(() => {
+    if (initialInvitationCode) {
+      form.setValue("invitationCode", initialInvitationCode);
+    }
+  }, [initialInvitationCode, form]);
 
   const onSubmit = async (data: RegisterFormValues) => {
     setRegisterError(null);
@@ -77,7 +87,11 @@ const RegisterPage = () => {
         
         if (counter <= 0) {
           clearInterval(countdownInterval);
-          navigate(returnTo);
+          // Si on a une invitation valide, rediriger vers la configuration avec le code
+          const targetUrl = validInvitation?.code 
+            ? `/profile/setup?invitation=${validInvitation.code}`
+            : returnTo;
+          navigate(targetUrl);
         }
       }, 1000);
     } catch (error: any) {
@@ -86,8 +100,16 @@ const RegisterPage = () => {
       toast.error(error.message || "Erreur lors de la création du compte");
     }
   };
+
+  const handleValidInvitation = (code: string, cabinetName: string) => {
+    setValidInvitation({ code, cabinetName });
+    form.setValue("invitationCode", code);
+  };
+
+  const handleInvalidInvitation = () => {
+    setValidInvitation(null);
+  };
   
-  // Si l'inscription a réussi, afficher un message de confirmation
   if (registrationSuccess) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[#0d1117]">
@@ -100,7 +122,12 @@ const RegisterPage = () => {
               </div>
             </div>
             <p className="text-gray-300 mb-6">
-              Votre compte a été créé avec succès. Vous allez être redirigé vers la configuration de votre profil professionnel.
+              Votre compte a été créé avec succès.
+              {validInvitation && (
+                <span className="block mt-2 text-blue-300">
+                  Vous allez être redirigé vers la configuration avec votre invitation pour {validInvitation.cabinetName}.
+                </span>
+              )}
             </p>
             <div className="flex justify-center mb-4">
               <div className="bg-blue-500/20 rounded-full px-4 py-2">
@@ -113,7 +140,7 @@ const RegisterPage = () => {
             <p className="text-gray-400 text-sm">
               Si vous n'êtes pas redirigé automatiquement, 
               <button 
-                onClick={() => navigate(returnTo)}
+                onClick={() => navigate(validInvitation?.code ? `/profile/setup?invitation=${validInvitation.code}` : returnTo)}
                 className="text-blue-400 hover:underline ml-1"
               >
                 cliquez ici
@@ -146,6 +173,18 @@ const RegisterPage = () => {
               </p>
             </div>
 
+            {/* Invitation section */}
+            {(initialInvitationCode || form.watch("invitationCode")) && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                <h3 className="text-blue-400 font-medium mb-3">Invitation Cabinet</h3>
+                <InvitationCodeInput
+                  initialCode={initialInvitationCode}
+                  onValidCode={handleValidInvitation}
+                  onInvalidCode={handleInvalidInvitation}
+                />
+              </div>
+            )}
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-700"></div>
@@ -165,7 +204,7 @@ const RegisterPage = () => {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Honeypot field - hidden from users but might be filled by bots */}
+                {/* Honeypot field */}
                 <FormField
                   control={form.control}
                   name="website"
@@ -228,6 +267,8 @@ const RegisterPage = () => {
                     )}
                   />
                 </div>
+
+                
 
                 <FormField
                   control={form.control}
@@ -302,6 +343,11 @@ const RegisterPage = () => {
                   <AlertTitle>Information</AlertTitle>
                   <AlertDescription>
                     Après votre inscription, vous serez guidé pour configurer votre profil professionnel et votre cabinet.
+                    {validInvitation && (
+                      <span className="block mt-2 font-medium">
+                        Vous serez automatiquement associé au cabinet "{validInvitation.cabinetName}".
+                      </span>
+                    )}
                   </AlertDescription>
                 </Alert>
 
@@ -333,6 +379,7 @@ const RegisterPage = () => {
           </div>
         </div>
         
+        
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>
             La plateforme conçue pour faciliter la gestion des données médicales.<br />
@@ -358,4 +405,3 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
-

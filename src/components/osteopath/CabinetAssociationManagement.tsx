@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Building, AlertCircle } from "lucide-react";
+import { Trash2, Building, AlertCircle, Plus } from "lucide-react";
 import { api } from "@/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Cabinet } from "@/types";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { SecureCabinetJoin } from "@/components/cabinet/SecureCabinetJoin";
 import {
   Dialog,
   DialogContent,
@@ -15,21 +17,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export function CabinetAssociationManagement() {
   const { user } = useAuth();
   const [associatedCabinets, setAssociatedCabinets] = useState<Cabinet[]>([]);
-  const [availableCabinets, setAvailableCabinets] = useState<Cabinet[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedCabinetId, setSelectedCabinetId] = useState<string>("");
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     cabinetId: number | null;
@@ -67,41 +60,11 @@ export function CabinetAssociationManagement() {
       setAssociatedCabinets(validAssociatedCabs);
       console.log("CabinetAssociationManagement: Cabinets associés:", validAssociatedCabs);
       
-      // Charger tous les cabinets disponibles
-      const allCabinets = await api.getCabinets();
-      console.log("CabinetAssociationManagement: Tous les cabinets:", allCabinets);
-      
-      const availableCabs = allCabinets.filter(
-        cabinet => !associatedCabinetIds.includes(cabinet.id)
-      );
-      setAvailableCabinets(availableCabs);
-      console.log("CabinetAssociationManagement: Cabinets disponibles:", availableCabs);
-      
     } catch (error) {
       console.error("CabinetAssociationManagement: Erreur lors du chargement des cabinets:", error);
       toast.error("Erreur lors du chargement des cabinets");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAssociateCabinet = async () => {
-    if (!user?.osteopathId || !selectedCabinetId) return;
-
-    try {
-      console.log("CabinetAssociationManagement: Association cabinet", selectedCabinetId, "à ostéopathe", user.osteopathId);
-      await api.associateOsteopathToCabinet(user.osteopathId, Number(selectedCabinetId));
-      toast.success("Cabinet associé avec succès", {
-        description: "Vous pouvez maintenant accéder aux patients de ce cabinet."
-      });
-      setIsDialogOpen(false);
-      setSelectedCabinetId("");
-      await loadCabinets();
-    } catch (error) {
-      console.error("CabinetAssociationManagement: Erreur lors de l'association:", error);
-      toast.error("Erreur lors de l'association", {
-        description: "Impossible d'associer le cabinet. Veuillez réessayer."
-      });
     }
   };
 
@@ -146,7 +109,12 @@ export function CabinetAssociationManagement() {
     closeConfirmDialog();
   };
 
-  console.log("CabinetAssociationManagement: Rendu avec loading:", loading, "associatedCabinets:", associatedCabinets.length, "availableCabinets:", availableCabinets.length);
+  const handleJoinSuccess = () => {
+    setJoinDialogOpen(false);
+    loadCabinets();
+  };
+
+  console.log("CabinetAssociationManagement: Rendu avec loading:", loading, "associatedCabinets:", associatedCabinets.length);
 
   if (loading) {
     return (
@@ -166,50 +134,21 @@ export function CabinetAssociationManagement() {
             Associations Cabinet
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Gérez les cabinets auxquels vous êtes associé
+            Gérez les cabinets auxquels vous êtes associé (sécurisé par invitations)
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
           <DialogTrigger asChild>
-            <Button disabled={availableCabinets.length === 0}>
+            <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Associer un cabinet
+              Rejoindre un cabinet
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Associer à un nouveau cabinet</DialogTitle>
+              <DialogTitle>Rejoindre un cabinet</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Sélectionner un cabinet
-                </label>
-                <Select
-                  value={selectedCabinetId}
-                  onValueChange={setSelectedCabinetId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choisir un cabinet" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableCabinets.map((cabinet) => (
-                      <SelectItem key={cabinet.id} value={String(cabinet.id)}>
-                        {cabinet.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button onClick={handleAssociateCabinet} disabled={!selectedCabinetId}>
-                  Associer
-                </Button>
-              </div>
-            </div>
+            <SecureCabinetJoin onSuccess={handleJoinSuccess} />
           </DialogContent>
         </Dialog>
       </div>
@@ -221,7 +160,7 @@ export function CabinetAssociationManagement() {
             Aucun cabinet associé
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Associez-vous à un cabinet pour partager des patients et gérer des remplacements.
+            Pour des raisons de sécurité, vous devez recevoir une invitation du propriétaire d'un cabinet pour vous y associer.
           </p>
         </div>
       ) : (
@@ -252,14 +191,6 @@ export function CabinetAssociationManagement() {
               </Button>
             </div>
           ))}
-        </div>
-      )}
-
-      {availableCabinets.length === 0 && associatedCabinets.length > 0 && (
-        <div className="text-center py-4 bg-blue-50 dark:bg-blue-950/50 rounded-lg border">
-          <p className="text-blue-700 dark:text-blue-300 text-sm">
-            Tous les cabinets disponibles sont déjà associés.
-          </p>
         </div>
       )}
 

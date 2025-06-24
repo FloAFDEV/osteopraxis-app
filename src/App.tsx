@@ -1,4 +1,3 @@
-
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,6 +26,8 @@ import CollaborationsSettingsPage from "./pages/CollaborationsSettingsPage";
 import HelpPage from "./pages/HelpPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import RegisterPage from "./pages/RegisterPage";
+import CabinetInvitationsPage from "./pages/CabinetInvitationsPage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ function App() {
             <AuthProvider>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
                 <Route path="/" element={<Index />} />
                 <Route
                   path="/dashboard"
@@ -210,6 +212,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <HelpPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cabinets/:id/invitations"
+                  element={
+                    <ProtectedRoute>
+                      <CabinetInvitationsPage />
                     </ProtectedRoute>
                   }
                 />

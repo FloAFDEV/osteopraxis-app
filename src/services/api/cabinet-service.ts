@@ -84,7 +84,7 @@ export const cabinetService = {
     return false;
   },
 
-  // Méthodes pour la gestion des associations ostéopathe-cabinet
+  // Méthodes pour la gestion des associations ostéopathe-cabinet (sécurisées)
   async associateOsteopathToCabinet(osteopathId: number, cabinetId: number): Promise<void> {
     return await osteopathCabinetService.associateOsteopathToCabinet(osteopathId, cabinetId);
   },
@@ -101,7 +101,7 @@ export const cabinetService = {
   getCabinetsByUserId: supabaseCabinetService.getCabinetsByUserId,
   getCabinetsByOsteopathId: async (osteopathId: number): Promise<Cabinet[]> => {
     try {
-      // Récupérer les IDs des cabinets associés
+      // Récupérer les IDs des cabinets associés via le système sécurisé
       const cabinetIds = await osteopathCabinetService.getOsteopathCabinets(osteopathId);
       
       // Récupérer les détails de chaque cabinet
