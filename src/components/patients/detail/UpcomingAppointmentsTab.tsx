@@ -4,7 +4,7 @@ import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { formatAppointmentTime } from "@/utils/date-utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, Edit, Plus, X } from "lucide-react";
+import { Calendar, Edit, X } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
 import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
 
@@ -13,15 +13,13 @@ interface UpcomingAppointmentsTabProps {
 	appointments: Appointment[];
 	onCancelAppointment: (appointmentId: number) => Promise<void>;
 	onStatusChange: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
-	onNewAppointmentClick?: () => void;
 }
 
 export function UpcomingAppointmentsTab({
 	patient,
 	appointments,
 	onCancelAppointment,
-	onStatusChange,
-	onNewAppointmentClick
+	onStatusChange
 }: UpcomingAppointmentsTabProps) {
 	return (
 		<div className="space-y-4 mt-6">
@@ -34,13 +32,9 @@ export function UpcomingAppointmentsTab({
 					<p className="text-muted-foreground m-2">
 						Ce patient n'a pas de séance planifiée.
 					</p>
-					<Button 
-						variant="outline"
-						onClick={onNewAppointmentClick}
-					>
-						<Plus className="mr-2 h-4 w-4" />
-						Planifier une séance
-					</Button>
+					<p className="text-sm text-muted-foreground">
+						Utilisez l'onglet "Nouvelle séance" pour en planifier une.
+					</p>
 				</div>
 			) : (
 				<div className="grid gap-4">

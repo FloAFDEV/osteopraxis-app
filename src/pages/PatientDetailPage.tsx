@@ -1,3 +1,4 @@
+
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -6,7 +7,7 @@ import { PatientHeader } from "@/components/patients/detail/PatientHeader";
 import { PatientInfo } from "@/components/patients/detail/PatientInfo";
 import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
-import { NewAppointmentModal } from "@/components/patients/detail/NewAppointmentModal";
+import { NewAppointmentTab } from "@/components/patients/detail/NewAppointmentTab";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +34,7 @@ import {
 	Stethoscope,
 	Users,
 	FileText,
+	Plus,
 } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -88,7 +90,6 @@ const PatientDetailPage = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
-	const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
 	const historyTabRef = useRef<HTMLElement | null>(null);
 
 	// Sticky swap for cards (must also be before return)
@@ -348,14 +349,6 @@ const PatientDetailPage = () => {
 
 	return (
 		<Layout>
-			{/* Modal pour nouveau rendez-vous */}
-			<NewAppointmentModal
-				open={showNewAppointmentModal}
-				onOpenChange={setShowNewAppointmentModal}
-				patient={patient}
-				onAppointmentCreated={handleAppointmentCreated}
-			/>
-
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
 				{/* Header section */}
 				<PatientHeader patientId={patient.id} />
@@ -402,7 +395,7 @@ const PatientDetailPage = () => {
 					{/* Left column - Tabs (principal content) - plus large */}
 					<div className="xl:col-span-3 order-2 xl:order-2">
 						<Tabs defaultValue="medical-info">
-							<TabsList className="grid w-full grid-cols-2 md:grid-cols-5 text-xs md:text-sm">
+							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 text-xs md:text-sm">
 								<TabsTrigger
 									value="medical-info"
 									className="px-2 md:px-4"
@@ -412,6 +405,16 @@ const PatientDetailPage = () => {
 										Dossier médical
 									</span>
 									<span className="sm:hidden">Médical</span>
+								</TabsTrigger>
+								<TabsTrigger
+									value="new-appointment"
+									className="px-2 md:px-4"
+								>
+									<Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2 text-green-600" />
+									<span className="hidden sm:inline">
+										Nouvelle séance
+									</span>
+									<span className="sm:hidden">Nouvelle</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="upcoming-appointments"
@@ -468,7 +471,13 @@ const PatientDetailPage = () => {
 									onAppointmentCreated={handleAppointmentCreated}
 									onPatientUpdated={handlePatientUpdated}
 									selectedCabinetId={parseInt(localStorage.getItem("selectedCabinetId") || "1")}
-									onNewAppointmentClick={() => setShowNewAppointmentModal(true)}
+								/>
+							</TabsContent>
+
+							<TabsContent value="new-appointment">
+								<NewAppointmentTab
+									patient={patient}
+									onAppointmentCreated={handleAppointmentCreated}
 								/>
 							</TabsContent>
 
@@ -482,7 +491,6 @@ const PatientDetailPage = () => {
 									onStatusChange={
 										handleUpdateAppointmentStatus
 									}
-									onNewAppointmentClick={() => setShowNewAppointmentModal(true)}
 								/>
 							</TabsContent>
 
