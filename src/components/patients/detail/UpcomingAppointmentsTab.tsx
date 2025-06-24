@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
 import { formatAppointmentTime } from "@/utils/date-utils";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale"; // Importation correcte de la locale française
-import { Calendar, Edit, Link, Plus, X } from "lucide-react";
+import { fr } from "date-fns/locale";
+import { Calendar, Edit, Plus, X } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
 import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
 
@@ -13,13 +13,15 @@ interface UpcomingAppointmentsTabProps {
 	appointments: Appointment[];
 	onCancelAppointment: (appointmentId: number) => Promise<void>;
 	onStatusChange: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
+	onNewAppointmentClick?: () => void;
 }
 
 export function UpcomingAppointmentsTab({
 	patient,
 	appointments,
 	onCancelAppointment,
-	onStatusChange
+	onStatusChange,
+	onNewAppointmentClick
 }: UpcomingAppointmentsTabProps) {
 	return (
 		<div className="space-y-4 mt-6">
@@ -32,11 +34,12 @@ export function UpcomingAppointmentsTab({
 					<p className="text-muted-foreground m-2">
 						Ce patient n'a pas de séance planifiée.
 					</p>
-					<Button asChild variant="outline">
-						<RouterLink to={`/appointments/new?patientId=${patient.id}`}>
-							<Plus className="mr-2 h-4 w-4" />
-							Planifier une séance
-						</RouterLink>
+					<Button 
+						variant="outline"
+						onClick={onNewAppointmentClick}
+					>
+						<Plus className="mr-2 h-4 w-4" />
+						Planifier une séance
 					</Button>
 				</div>
 			) : (
@@ -49,7 +52,7 @@ export function UpcomingAppointmentsTab({
 										{format(
 											new Date(appointment.date),
 											"EEEE dd MMMM yyyy",
-											{ locale: fr } // Utilisation correcte de la locale importée
+											{ locale: fr }
 										)}
 									</h3>
 									<p className="text-sm text-muted-foreground">

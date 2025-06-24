@@ -129,6 +129,67 @@ export type Database = {
           },
         ]
       }
+      cabinet_invitations: {
+        Row: {
+          cabinet_id: number
+          created_at: string | null
+          email: string | null
+          expires_at: string
+          id: string
+          invitation_code: string
+          inviter_osteopath_id: number
+          notes: string | null
+          used_at: string | null
+          used_by_osteopath_id: number | null
+        }
+        Insert: {
+          cabinet_id: number
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invitation_code: string
+          inviter_osteopath_id: number
+          notes?: string | null
+          used_at?: string | null
+          used_by_osteopath_id?: number | null
+        }
+        Update: {
+          cabinet_id?: number
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invitation_code?: string
+          inviter_osteopath_id?: number
+          notes?: string | null
+          used_at?: string | null
+          used_by_osteopath_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cabinet_invitations_cabinet_id_fkey"
+            columns: ["cabinet_id"]
+            isOneToOne: false
+            referencedRelation: "Cabinet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cabinet_invitations_inviter_osteopath_id_fkey"
+            columns: ["inviter_osteopath_id"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cabinet_invitations_used_by_osteopath_id_fkey"
+            columns: ["used_by_osteopath_id"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Consultation: {
         Row: {
           cancellationReason: string | null
@@ -992,6 +1053,10 @@ export type Database = {
         Args: { osteopath_auth_id: string; patient_id: number }
         Returns: boolean
       }
+      generate_invitation_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_authorized_osteopaths: {
         Args: { current_osteopath_auth_id: string }
         Returns: {
@@ -1020,6 +1085,10 @@ export type Database = {
       is_admin_user: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      use_cabinet_invitation: {
+        Args: { p_invitation_code: string; p_osteopath_id: number }
+        Returns: Json
       }
     }
     Enums: {

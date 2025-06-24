@@ -1,5 +1,3 @@
-
-
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -8,6 +6,7 @@ import { PatientHeader } from "@/components/patients/detail/PatientHeader";
 import { PatientInfo } from "@/components/patients/detail/PatientInfo";
 import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
 import { MedicalInfoCard } from "@/components/patients/medical-info-card";
+import { NewAppointmentModal } from "@/components/patients/detail/NewAppointmentModal";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -89,6 +88,7 @@ const PatientDetailPage = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+	const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
 	const historyTabRef = useRef<HTMLElement | null>(null);
 
 	// Sticky swap for cards (must also be before return)
@@ -140,7 +140,7 @@ const PatientDetailPage = () => {
 		[appointments]
 	);
 
-	// Fetch data
+	// Fetch data OPTIMISÉ - une seule fois au mount, pas de refetch automatique
 	useEffect(() => {
 		const fetchPatientData = async () => {
 			setLoading(true);
@@ -172,7 +172,7 @@ const PatientDetailPage = () => {
 		};
 
 		fetchPatientData();
-	}, [patientId]);
+	}, [patientId]); // Uniquement quand l'ID change
 
 	useEffect(() => {
 		// Find and set the history tab element ref after the component mounts
@@ -348,6 +348,14 @@ const PatientDetailPage = () => {
 
 	return (
 		<Layout>
+			{/* Modal pour nouveau rendez-vous */}
+			<NewAppointmentModal
+				open={showNewAppointmentModal}
+				onOpenChange={setShowNewAppointmentModal}
+				patient={patient}
+				onAppointmentCreated={handleAppointmentCreated}
+			/>
+
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
 				{/* Header section */}
 				<PatientHeader patientId={patient.id} />
@@ -460,6 +468,7 @@ const PatientDetailPage = () => {
 									onAppointmentCreated={handleAppointmentCreated}
 									onPatientUpdated={handlePatientUpdated}
 									selectedCabinetId={parseInt(localStorage.getItem("selectedCabinetId") || "1")}
+									onNewAppointmentClick={() => setShowNewAppointmentModal(true)}
 								/>
 							</TabsContent>
 
@@ -473,6 +482,7 @@ const PatientDetailPage = () => {
 									onStatusChange={
 										handleUpdateAppointmentStatus
 									}
+									onNewAppointmentClick={() => setShowNewAppointmentModal(true)}
 								/>
 							</TabsContent>
 
