@@ -24,14 +24,14 @@ export const cabinetInvitationService = {
   async createInvitation(data: CreateInvitationData): Promise<CabinetInvitation> {
     try {
       const inviterId = await this.getCurrentOsteopathId();
-      const invitationCode = await this.generateInvitationCode();
       
+      // Ne pas spécifier invitation_code - laissons la DB le générer via DEFAULT
       const { data: invitation, error } = await supabase
         .from("cabinet_invitations")
         .insert({
           cabinet_id: data.cabinet_id,
           inviter_osteopath_id: inviterId,
-          invitation_code: invitationCode,
+          // invitation_code sera généré automatiquement par la fonction DB
           email: data.email,
           notes: data.notes,
           expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 jours
@@ -169,28 +169,5 @@ export const cabinetInvitationService = {
 
     if (error) throw error;
     return data.id;
-  },
-
-  async generateInvitationCode(): Promise<string> {
-    // Génération d'un code unique de 8 caractères
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    
-    // Vérifier l'unicité
-    const { data: existing } = await supabase
-      .from("cabinet_invitations")
-      .select("id")
-      .eq("invitation_code", result)
-      .single();
-
-    // Si le code existe déjà, régénérer
-    if (existing) {
-      return this.generateInvitationCode();
-    }
-
-    return result;
   }
 };
