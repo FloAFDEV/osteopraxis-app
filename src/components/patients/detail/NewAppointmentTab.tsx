@@ -5,7 +5,7 @@ import { Calendar } from "lucide-react";
 
 interface NewAppointmentTabProps {
 	patient: Patient;
-	onAppointmentCreated: () => void;
+	onAppointmentCreated: (newAppointment?: any) => void;
 }
 
 export function NewAppointmentTab({

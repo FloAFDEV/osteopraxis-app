@@ -1,4 +1,3 @@
-
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -6,45 +5,33 @@ import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
 import { PatientHeader } from "@/components/patients/detail/PatientHeader";
 import { PatientInfo } from "@/components/patients/detail/PatientInfo";
 import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
-import { MedicalInfoCard } from "@/components/patients/medical-info-card";
 import { NewAppointmentTab } from "@/components/patients/detail/NewAppointmentTab";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/services/api";
-import { invoiceService } from "@/services/api/invoice-service";
-import { Appointment, AppointmentStatus, Invoice, Patient } from "@/types";
-import {
-	translateContraception,
-	translateHandedness,
-	translateMaritalStatus,
-} from "@/utils/patient-form-helpers";
+import { AppointmentStatus } from "@/types";
 import { format } from "date-fns";
 import {
 	Activity,
 	AlertCircle,
-	Baby,
 	Calendar,
-	Cigarette,
 	ClipboardList,
-	Hand,
-	Heart,
 	History,
 	Loader2,
 	Stethoscope,
-	Users,
 	FileText,
 	Plus,
 } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
 import { PatientFormValues } from "@/components/patient-form/types";
+import { usePatientDetail } from "@/hooks/usePatientDetail";
+import { api } from "@/services/api";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
-	const navigate = useNavigate();
 
 	// Guard: Vérifier si l'ID est "new" ou invalide
 	if (!id || id === "new") {
@@ -84,11 +71,16 @@ const PatientDetailPage = () => {
 	}
 
 	// ----- ALL HOOKS MUST BE AFTER GUARDS -----
-	const [patient, setPatient] = useState<Patient | null>(null);
-	const [appointments, setAppointments] = useState<Appointment[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [invoices, setInvoices] = useState<Invoice[]>([]);
+	const {
+		patient,
+		appointments,
+		invoices,
+		isLoading,
+		error,
+		updateAppointmentStatusOptimistically,
+		addAppointmentOptimistically
+	} = usePatientDetail(patientId);
+
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 	const historyTabRef = useRef<HTMLElement | null>(null);
 
@@ -101,29 +93,6 @@ const PatientDetailPage = () => {
 		if (val === undefined || val === "" || val === null) return null;
 		const num = Number(val);
 		return isNaN(num) ? null : num;
-	};
-
-	// Helper function for error handling
-	const handleError = (message = "Une erreur est survenue") => {
-		toast.error(message);
-		setError(message);
-		setLoading(false);
-	};
-
-	// ----------------
-	
-	const getSmokerInfo = () => {
-		if (!patient) return "";
-
-		if (patient.isSmoker) {
-			return `Fumeur${patient.smokingAmount ? ` (${patient.smokingAmount})` : ""}${patient.smokingSince ? ` depuis ${patient.smokingSince}` : ""}`;
-		}
-
-		if (patient.isExSmoker) {
-			return `Ex-fumeur${patient.smokingAmount ? ` (${patient.smokingAmount})` : ""}${patient.quitSmokingDate ? `, arrêt depuis ${patient.quitSmokingDate}` : ""}`;
-		}
-
-		return "Non-fumeur";
 	};
 
 	// Memoized appointment filtering and sorting
@@ -140,40 +109,6 @@ const PatientDetailPage = () => {
 			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
 		[appointments]
 	);
-
-	// Fetch data OPTIMISÉ - une seule fois au mount, pas de refetch automatique
-	useEffect(() => {
-		const fetchPatientData = async () => {
-			setLoading(true);
-			setError(null);
-			
-			try {
-				console.log("Chargement des données pour le patient ID:", patientId);
-				
-				const [patientData, appointmentsData, invoicesData] = await Promise.all([
-					api.getPatientById(patientId),
-					api.getAppointmentsByPatientId(patientId),
-					invoiceService.getInvoicesByPatientId(patientId),
-				]);
-
-				if (!patientData) {
-					setError("Patient non trouvé");
-					return;
-				}
-
-				setPatient(patientData);
-				setAppointments(appointmentsData || []);
-				setInvoices(invoicesData || []);
-			} catch (e: any) {
-				console.error("Erreur lors du chargement des données du patient:", e);
-				handleError("Impossible de charger les informations du patient. Veuillez réessayer.");
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchPatientData();
-	}, [patientId]); // Uniquement quand l'ID change
 
 	useEffect(() => {
 		// Find and set the history tab element ref after the component mounts
@@ -214,10 +149,7 @@ const PatientDetailPage = () => {
 
 	const handleCancelAppointment = async (appointmentId: number) => {
 		try {
-			await api.cancelAppointment(appointmentId);
-			// Refresh appointments list
-			const updatedAppointments = await api.getAppointmentsByPatientId(patientId);
-			setAppointments(updatedAppointments);
+			await updateAppointmentStatusOptimistically(appointmentId, "CANCELED");
 			toast.success("La séance a été annulée avec succès");
 		} catch (error) {
 			console.error("Error canceling appointment:", error);
@@ -230,36 +162,9 @@ const PatientDetailPage = () => {
 		status: AppointmentStatus
 	) => {
 		try {
-			setLoading(true);
-			await api.updateAppointment(appointmentId, { status });
-			// Refresh appointments list
-			const updatedAppointments = await api.getAppointmentsByPatientId(patientId);
-			setAppointments(updatedAppointments);
-			toast.success(
-				`Le statut de la séance a été modifié en "${getStatusLabel(status)}"`
-			);
+			await updateAppointmentStatusOptimistically(appointmentId, status);
 		} catch (error) {
 			console.error("Error updating appointment status:", error);
-			toast.error("Impossible de modifier le statut de la séance");
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const getStatusLabel = (status: AppointmentStatus): string => {
-		switch (status) {
-			case "SCHEDULED":
-				return "Planifiée";
-			case "COMPLETED":
-				return "Terminée";
-			case "CANCELED":
-				return "Annulée";
-			case "RESCHEDULED":
-				return "Reportée";
-			case "NO_SHOW":
-				return "Absence";
-			default:
-				return status;
 		}
 	};
 
@@ -285,16 +190,19 @@ const PatientDetailPage = () => {
 		return `${nb === 1 ? "Un enfant de" : `${nb} enfants de`} ${agesText} ans`;
 	}
 
-	const handleAppointmentCreated = () => {
-		// Recharger les rendez-vous après création
-		api.getAppointmentsByPatientId(patientId).then(setAppointments);
+	const handleAppointmentCreated = (newAppointment?: any) => {
+		// Optimistic update - add the appointment immediately to the UI
+		if (newAppointment) {
+			addAppointmentOptimistically(newAppointment);
+		}
+		toast.success("Séance créée avec succès");
 	};
 
 	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
 		if (!patient) return;
 		
 		try {
-			setLoading(true);
+			//setLoading(true); // No longer needed with React Query
 			
 			// Convertir les champs numériques correctement avec le helper
 			const processedData = {
@@ -314,17 +222,17 @@ const PatientDetailPage = () => {
 			};
 
 			await api.updatePatient(patientUpdate);
-			setPatient(patientUpdate);
+			//setPatient(patientUpdate); // React Query will handle the update
 			toast.success("Patient mis à jour avec succès!");
 		} catch (error: any) {
 			console.error("Error updating patient:", error);
 			toast.error("Impossible de mettre à jour le patient");
 		} finally {
-			setLoading(false);
+			//setLoading(false); // No longer needed with React Query
 		}
 	};
 
-	if (loading) {
+	if (isLoading) {
 		return (
 			<Layout>
 				<div className="flex justify-center items-center h-full">
@@ -464,9 +372,7 @@ const PatientDetailPage = () => {
 								<MedicalInfoTab
 									patient={patient}
 									pastAppointments={pastAppointments}
-									onUpdateAppointmentStatus={
-										handleUpdateAppointmentStatus
-									}
+									onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
 									onNavigateToHistory={navigateToHistoryTab}
 									onAppointmentCreated={handleAppointmentCreated}
 									onPatientUpdated={handlePatientUpdated}
@@ -485,21 +391,15 @@ const PatientDetailPage = () => {
 								<UpcomingAppointmentsTab
 									patient={patient}
 									appointments={upcomingAppointments}
-									onCancelAppointment={
-										handleCancelAppointment
-									}
-									onStatusChange={
-										handleUpdateAppointmentStatus
-									}
+									onCancelAppointment={handleCancelAppointment}
+									onStatusChange={handleUpdateAppointmentStatus}
 								/>
 							</TabsContent>
 
 							<TabsContent value="history">
 								<AppointmentHistoryTab
 									appointments={pastAppointments}
-									onStatusChange={
-										handleUpdateAppointmentStatus
-									}
+									onStatusChange={handleUpdateAppointmentStatus}
 									viewMode={viewMode}
 									setViewMode={setViewMode}
 									invoices={invoices}

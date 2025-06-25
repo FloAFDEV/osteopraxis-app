@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, Edit, X } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
-import { AppointmentStatusDropdown } from "./AppointmentStatusDropdown";
+import { OptimizedAppointmentStatusDropdown } from "./OptimizedAppointmentStatusDropdown";
 
 interface UpcomingAppointmentsTabProps {
 	patient: Patient;
@@ -53,7 +53,7 @@ export function UpcomingAppointmentsTab({
 										{formatAppointmentTime(appointment.date)}
 									</p>
 								</div>
-								<AppointmentStatusDropdown
+								<OptimizedAppointmentStatusDropdown
 									status={appointment.status as AppointmentStatus}
 									onStatusChange={(status) => onStatusChange(appointment.id, status)}
 								/>
