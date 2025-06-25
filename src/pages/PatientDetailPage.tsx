@@ -1,3 +1,4 @@
+
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -202,8 +203,6 @@ const PatientDetailPage = () => {
 		if (!patient) return;
 		
 		try {
-			//setLoading(true); // No longer needed with React Query
-			
 			// Convertir les champs numériques correctement avec le helper
 			const processedData = {
 				...updatedData,
@@ -222,13 +221,10 @@ const PatientDetailPage = () => {
 			};
 
 			await api.updatePatient(patientUpdate);
-			//setPatient(patientUpdate); // React Query will handle the update
 			toast.success("Patient mis à jour avec succès!");
 		} catch (error: any) {
 			console.error("Error updating patient:", error);
 			toast.error("Impossible de mettre à jour le patient");
-		} finally {
-			//setLoading(false); // No longer needed with React Query
 		}
 	};
 
@@ -243,12 +239,13 @@ const PatientDetailPage = () => {
 	}
 
 	if (error || !patient) {
+		const errorMessage = error instanceof Error ? error.message : String(error || "Patient non trouvé");
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">
 					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
 					<p className="text-xl font-semibold text-center">
-						{error || "Patient non trouvé"}
+						{errorMessage}
 					</p>
 				</div>
 			</Layout>

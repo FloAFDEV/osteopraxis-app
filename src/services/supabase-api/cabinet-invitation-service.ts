@@ -21,25 +21,140 @@ export interface CreateInvitationData {
 }
 
 export const cabinetInvitationService = {
-  // TEMPORAIREMENT DÉSACTIVÉ - En attente de la mise à jour des types Supabase
   async createInvitation(data: CreateInvitationData): Promise<CabinetInvitation> {
-    throw new Error("Service temporairement indisponible - table cabinet_invitations non créée");
+    try {
+      const inviterId = await this.getCurrentOsteopathId();
+      const invitationCode = await this.generateInvitationCode();
+      
+      const { data: invitation, error } = await supabase
+        .from("cabinet_invitations")
+        .insert({
+          cabinet_id: data.cabinet_id,
+          inviter_osteopath_id: inviterId,
+          invitation_code: invitationCode,
+          email: data.email,
+          notes: data.notes,
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 jours
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return invitation;
+    } catch (error) {
+      console.error("Erreur lors de la création de l'invitation:", error);
+      throw error;
+    }
   },
 
   async getCabinetInvitations(cabinetId: number): Promise<CabinetInvitation[]> {
-    throw new Error("Service temporairement indisponible - table cabinet_invitations non créée");
+    try {
+      const { data, error } = await supabase
+        .from("cabinet_invitations")
+        .select("*")
+        .eq("cabinet_id", cabinetId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Erreur lors de la récupération des invitations:", error);
+      throw error;
+    }
   },
 
   async useInvitation(invitationCode: string): Promise<{success: boolean, error?: string, cabinet_id?: number}> {
-    throw new Error("Service temporairement indisponible - table cabinet_invitations non créée");
+    try {
+      const osteopathId = await this.getCurrentOsteopathId();
+      
+      // Vérifier si l'invitation existe et est valide
+      const { data: invitation, error: fetchError } = await supabase
+        .from("cabinet_invitations")
+        .select("*")
+        .eq("invitation_code", invitationCode)
+        .is("used_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .single();
+
+      if (fetchError || !invitation) {
+        return { success: false, error: "Code d'invitation invalide ou expiré" };
+      }
+
+      // Marquer l'invitation comme utilisée
+      const { error: updateError } = await supabase
+        .from("cabinet_invitations")
+        .update({
+          used_at: new Date().toISOString(),
+          used_by_osteopath_id: osteopathId
+        })
+        .eq("id", invitation.id);
+
+      if (updateError) {
+        return { success: false, error: "Erreur lors de l'utilisation de l'invitation" };
+      }
+
+      // Associer l'ostéopathe au cabinet
+      const { error: associationError } = await supabase
+        .from("osteopath_cabinet")
+        .insert({
+          osteopath_id: osteopathId,
+          cabinet_id: invitation.cabinet_id
+        });
+
+      if (associationError) {
+        return { success: false, error: "Erreur lors de l'association au cabinet" };
+      }
+
+      return { success: true, cabinet_id: invitation.cabinet_id };
+    } catch (error) {
+      console.error("Erreur lors de l'utilisation de l'invitation:", error);
+      return { success: false, error: "Erreur inattendue" };
+    }
   },
 
   async validateInvitationCode(code: string): Promise<{valid: boolean, cabinet_name?: string}> {
-    throw new Error("Service temporairement indisponible - table cabinet_invitations non créée");
+    try {
+      const { data: invitation, error } = await supabase
+        .from("cabinet_invitations")
+        .select(`
+          *,
+          Cabinet:cabinet_id (
+            name
+          )
+        `)
+        .eq("invitation_code", code)
+        .is("used_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .single();
+
+      if (error || !invitation) {
+        return { valid: false };
+      }
+
+      return { 
+        valid: true, 
+        cabinet_name: invitation.Cabinet?.name 
+      };
+    } catch (error) {
+      console.error("Erreur lors de la validation:", error);
+      return { valid: false };
+    }
   },
 
   async revokeInvitation(invitationId: string): Promise<void> {
-    throw new Error("Service temporairement indisponible - table cabinet_invitations non créée");
+    try {
+      const { error } = await supabase
+        .from("cabinet_invitations")
+        .update({
+          expires_at: new Date().toISOString() // Expirer immédiatement
+        })
+        .eq("id", invitationId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Erreur lors de la révocation:", error);
+      throw error;
+    }
   },
 
   async getCurrentOsteopathId(): Promise<number> {
@@ -57,7 +172,25 @@ export const cabinetInvitationService = {
   },
 
   async generateInvitationCode(): Promise<string> {
-    // Génération locale temporaire
-    return Math.random().toString(36).substring(2, 10).toUpperCase();
+    // Génération d'un code unique de 8 caractères
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    // Vérifier l'unicité
+    const { data: existing } = await supabase
+      .from("cabinet_invitations")
+      .select("id")
+      .eq("invitation_code", result)
+      .single();
+
+    // Si le code existe déjà, régénérer
+    if (existing) {
+      return this.generateInvitationCode();
+    }
+
+    return result;
   }
 };
