@@ -163,21 +163,21 @@ const CabinetsManagementPage = () => {
 	return (
 		<Layout>
 			<div className="min-h-screen bg-white dark:bg-gray-900">
+				{" "}
+				<div className="flex items-center gap-4 mb-6">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => navigate(-1)}
+						className="flex items-center gap-1"
+					>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Retour
+					</Button>
+				</div>
 				{/* Header moderne avec couleurs du logo */}
-				<div className="bg-gradient-to-br from-cyan-900 via-teal-800 to-blue-900 dark:from-emerald-900 dark:via-teal-800 dark:to-emerald-950 shadow-lg rounded-lg">
+				<div className="mt-20 bg-gradient-to-br from-cyan-900 via-teal-800 to-blue-900 dark:from-emerald-900 dark:via-teal-800 dark:to-emerald-950 shadow-lg rounded-lg">
 					<div className="container mx-auto px-6 py-8 bg-white/5 backdrop-blur-sm rounded-xl">
-						<div className="flex items-center gap-4 mb-6">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => navigate(-1)}
-								className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
-							>
-								<ArrowLeft className="mr-2 h-4 w-4" />
-								Retour
-							</Button>
-						</div>
-
 						<div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
 							<div className="space-y-2">
 								<div className="flex items-center gap-3">
@@ -219,7 +219,6 @@ const CabinetsManagementPage = () => {
 						</div>
 					</div>
 				</div>
-
 				<div className="container mx-auto px-6 py-8">
 					{cabinets.length === 0 ? (
 						<div className="max-w-md mx-auto">
