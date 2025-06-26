@@ -148,7 +148,7 @@ export type Database = {
           email?: string | null
           expires_at?: string
           id?: string
-          invitation_code: string
+          invitation_code?: string
           inviter_osteopath_id: number
           notes?: string | null
           used_at?: string | null
