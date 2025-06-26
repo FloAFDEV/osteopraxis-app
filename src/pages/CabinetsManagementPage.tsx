@@ -7,6 +7,7 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/components/ui/card";
+import { HelpButton } from "@/components/ui/help-button";
 import { Layout } from "@/components/ui/layout";
 import {
 	Tooltip,
@@ -14,7 +15,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HelpButton } from "@/components/ui/help-button";
+import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import {
@@ -33,7 +34,6 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 
 const CabinetsManagementPage = () => {
 	const navigate = useNavigate();
@@ -190,13 +190,14 @@ const CabinetsManagementPage = () => {
 												Gestion des Cabinets
 												<Sparkles className="h-6 w-6 text-yellow-300" />
 											</h1>
-											<HelpButton 
+											<HelpButton
 												content="Créez et gérez vos cabinets d'ostéopathie. En tant que propriétaire, vous pouvez inviter d'autres ostéopathes à rejoindre votre cabinet pour une pratique collaborative sécurisée."
 												className="text-white/70 hover:text-white"
 											/>
 										</div>
 										<p className="text-white/80 text-lg">
-											Gérez vos cabinets d'ostéopathie avec style
+											Gérez vos cabinets d'ostéopathie
+											avec style
 										</p>
 									</div>
 								</div>
@@ -253,7 +254,7 @@ const CabinetsManagementPage = () => {
 							{cabinets.map((cabinet) => (
 								<Card
 									key={cabinet.id}
-									className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md"
+									className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md"
 								>
 									{cabinet.imageUrl && (
 										<div className="relative overflow-hidden">
@@ -287,7 +288,10 @@ const CabinetsManagementPage = () => {
 														{cabinet.name}
 													</h3>
 													{isOwner(cabinet) && (
-														<Badge variant="outline" className="text-xs bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300">
+														<Badge
+															variant="outline"
+															className="text-xs bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300"
+														>
 															Propriétaire
 														</Badge>
 													)}
@@ -538,7 +542,7 @@ const CabinetsManagementPage = () => {
 															Invitations
 														</Link>
 													</Button>
-													<HelpButton 
+													<HelpButton
 														content="En tant que propriétaire, générez des codes d'invitation sécurisés pour inviter d'autres ostéopathes à rejoindre votre cabinet. Parfait pour la collaboration en équipe !"
 														size="sm"
 													/>
