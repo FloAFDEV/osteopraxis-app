@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { RefreshCw, Users } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface PatientHeaderProps {
 	patientCount: number;
@@ -58,7 +58,7 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({
 							<Button
 								onClick={onRefresh}
 								variant="outline"
-								className="w-auto hover:bg-slate-500"
+								className="w-auto hover:bg-slate-200 dark:hover:bg-slate-700"
 								disabled={isRefreshing}
 							>
 								<RefreshCw
