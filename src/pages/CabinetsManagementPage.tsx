@@ -14,6 +14,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { HelpButton } from "@/components/ui/help-button";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import {
@@ -27,12 +28,16 @@ import {
 	Plus,
 	Sparkles,
 	Trash2,
+	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+
 const CabinetsManagementPage = () => {
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const [cabinets, setCabinets] = useState<Cabinet[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -40,42 +45,12 @@ const CabinetsManagementPage = () => {
 		null
 	);
 	const [osteopathData, setOsteopathData] = useState<Record<number, any>>({});
-	useEffect(() => {
-		const fetchCabinets = async () => {
-			try {
-				const cabinetData = await api.getCabinets();
-				setCabinets(cabinetData);
 
-				// Fetch osteopath data for each cabinet to get billing information
-				const osteopathIds = [
-					...new Set(cabinetData.map((c) => c.osteopathId)),
-				];
-				const osteopathInfo: Record<number, any> = {};
-				for (const id of osteopathIds) {
-					const data = await api.getOsteopathById(id);
-					if (data) {
-						osteopathInfo[id] = data;
-					}
-				}
-				setOsteopathData(osteopathInfo);
-			} catch (error) {
-				console.error(
-					"Erreur lors de la récupération des cabinets:",
-					error
-				);
-				toast.error(
-					"Impossible de charger les cabinets. Veuillez réessayer."
-				);
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchCabinets();
-	}, []);
 	const confirmDelete = (cabinet: Cabinet) => {
 		setCabinetToDelete(cabinet);
 		setDeleteModalOpen(true);
 	};
+
 	const handleDelete = async () => {
 		if (!cabinetToDelete) return;
 		try {
@@ -92,6 +67,7 @@ const CabinetsManagementPage = () => {
 			setCabinetToDelete(null);
 		}
 	};
+
 	const ImageWithLoader = ({
 		src,
 		alt,
@@ -128,6 +104,45 @@ const CabinetsManagementPage = () => {
 			</div>
 		);
 	};
+
+	// Vérifier si l'utilisateur est propriétaire du cabinet
+	const isOwner = (cabinet: Cabinet) => {
+		return cabinet.osteopathId === user?.osteopathId;
+	};
+
+	useEffect(() => {
+		const fetchCabinets = async () => {
+			try {
+				const cabinetData = await api.getCabinets();
+				setCabinets(cabinetData);
+
+				// Fetch osteopath data for each cabinet to get billing information
+				const osteopathIds = [
+					...new Set(cabinetData.map((c) => c.osteopathId)),
+				];
+				const osteopathInfo: Record<number, any> = {};
+				for (const id of osteopathIds) {
+					const data = await api.getOsteopathById(id);
+					if (data) {
+						osteopathInfo[id] = data;
+					}
+				}
+				setOsteopathData(osteopathInfo);
+			} catch (error) {
+				console.error(
+					"Erreur lors de la récupération des cabinets:",
+					error
+				);
+				toast.error(
+					"Impossible de charger les cabinets. Veuillez réessayer."
+				);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchCabinets();
+	}, []);
+
 	if (loading) {
 		return (
 			<Layout>
@@ -144,6 +159,7 @@ const CabinetsManagementPage = () => {
 			</Layout>
 		);
 	}
+
 	return (
 		<Layout>
 			<div className="min-h-screen bg-white dark:bg-gray-900">
@@ -169,13 +185,18 @@ const CabinetsManagementPage = () => {
 										<Building2 className="h-8 w-8 text-green-500" />
 									</div>
 									<div>
-										<h1 className="text-3xl font-bold text-white flex items-center gap-2">
-											Gestion des Cabinets
-											<Sparkles className="h-6 w-6 text-yellow-300" />
-										</h1>
+										<div className="flex items-center gap-2">
+											<h1 className="text-3xl font-bold text-white flex items-center gap-2">
+												Gestion des Cabinets
+												<Sparkles className="h-6 w-6 text-yellow-300" />
+											</h1>
+											<HelpButton 
+												content="Créez et gérez vos cabinets d'ostéopathie. En tant que propriétaire, vous pouvez inviter d'autres ostéopathes à rejoindre votre cabinet pour une pratique collaborative sécurisée."
+												className="text-white/70 hover:text-white"
+											/>
+										</div>
 										<p className="text-white/80 text-lg">
-											Gérez vos cabinets d'ostéopathie
-											avec style
+											Gérez vos cabinets d'ostéopathie avec style
 										</p>
 									</div>
 								</div>
@@ -261,9 +282,16 @@ const CabinetsManagementPage = () => {
 												</div>
 											)}
 											<div className="flex-1 min-w-0">
-												<h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2">
-													{cabinet.name}
-												</h3>
+												<div className="flex items-center gap-2">
+													<h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2">
+														{cabinet.name}
+													</h3>
+													{isOwner(cabinet) && (
+														<Badge variant="outline" className="text-xs bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300">
+															Propriétaire
+														</Badge>
+													)}
+												</div>
 												{osteopathData[
 													cabinet.osteopathId
 												] && (
@@ -462,32 +490,61 @@ const CabinetsManagementPage = () => {
 										)}
 									</CardContent>
 
-									<CardFooter className="bg-gray-50 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-600 flex justify-between gap-3">
-										<Button
-											variant="outline"
-											size="sm"
-											asChild
-											className="flex-1 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 transition-colors"
-										>
-											<Link
-												to={`/cabinets/${cabinet.id}/edit`}
-												className="flex items-center justify-center gap-2"
-											>
-												<Edit className="h-4 w-4" />
-												Modifier
-											</Link>
-										</Button>
-										<Button
-											variant="destructive"
-											size="sm"
-											className="flex-1 bg-red-500 hover:bg-red-600 transition-colors"
-											onClick={() =>
-												confirmDelete(cabinet)
-											}
-										>
-											<Trash2 className="h-4 w-4 mr-2" />
-											Supprimer
-										</Button>
+									<CardFooter className="bg-gray-50 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-600">
+										<div className="flex flex-col gap-3 w-full">
+											{/* Première ligne : Modifier et Supprimer */}
+											<div className="flex justify-between gap-3">
+												<Button
+													variant="outline"
+													size="sm"
+													asChild
+													className="flex-1 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 transition-colors"
+												>
+													<Link
+														to={`/cabinets/${cabinet.id}/edit`}
+														className="flex items-center justify-center gap-2"
+													>
+														<Edit className="h-4 w-4" />
+														Modifier
+													</Link>
+												</Button>
+												<Button
+													variant="destructive"
+													size="sm"
+													className="flex-1 bg-red-500 hover:bg-red-600 transition-colors"
+													onClick={() =>
+														confirmDelete(cabinet)
+													}
+												>
+													<Trash2 className="h-4 w-4 mr-2" />
+													Supprimer
+												</Button>
+											</div>
+
+											{/* Deuxième ligne : Invitations (uniquement pour les propriétaires) */}
+											{isOwner(cabinet) && (
+												<div className="flex items-center gap-2">
+													<Button
+														variant="outline"
+														size="sm"
+														asChild
+														className="flex-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/30"
+													>
+														<Link
+															to={`/cabinets/${cabinet.id}/invitations`}
+															className="flex items-center justify-center gap-2"
+														>
+															<Users className="h-4 w-4" />
+															Invitations
+														</Link>
+													</Button>
+													<HelpButton 
+														content="En tant que propriétaire, générez des codes d'invitation sécurisés pour inviter d'autres ostéopathes à rejoindre votre cabinet. Parfait pour la collaboration en équipe !"
+														size="sm"
+													/>
+												</div>
+											)}
+										</div>
 									</CardFooter>
 								</Card>
 							))}
