@@ -32,8 +32,12 @@ export const HelpButton: React.FC<HelpButtonProps> = ({
             <HelpCircle className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          <p className="max-w-xs text-sm">{content}</p>
+        <TooltipContent 
+          side="top" 
+          className="z-[9999] max-w-xs p-3 text-sm break-words bg-popover border shadow-lg"
+          sideOffset={8}
+        >
+          <p>{content}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

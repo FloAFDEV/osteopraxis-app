@@ -23,8 +23,9 @@ export function CustomTooltip({
         </TooltipTrigger>
         <TooltipContent 
           side={side} 
-          className="max-w-xs p-3 text-sm break-words"
+          className="z-[9999] max-w-xs p-3 text-sm break-words bg-popover border shadow-lg"
           style={{ maxWidth }}
+          sideOffset={8}
         >
           <p>{content}</p>
         </TooltipContent>
