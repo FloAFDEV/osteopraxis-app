@@ -88,8 +88,11 @@ const LoginPage = () => {
 			{/* Left section - Login form */}
 			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
 				<div className="mb-6">
-					<h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 w-fit">
-						PatientHub
+					<h1 className="text-4xl font-extrabold tracking-tight">
+						<span className="text-white">Patient</span>
+						<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+							Hub
+						</span>
 					</h1>
 				</div>
 
