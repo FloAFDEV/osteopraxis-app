@@ -1,6 +1,6 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 import { api } from "@/services/api";
 import { Appointment, DashboardData } from "@/types";
 import {
@@ -11,11 +11,10 @@ import {
 	parseISO,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Baby, Calendar, Clock, User, FileText } from "lucide-react";
+import { Baby, Calendar, Clock, FileText, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 
 interface AppointmentsOverviewProps {
 	data: DashboardData;
@@ -44,7 +43,7 @@ export function AppointmentsOverview({
 			setAllAppointments(updatedAppointments);
 			// Refiltrer les rendez-vous après mise à jour
 			filterAndSetAppointments(updatedAppointments);
-		}
+		},
 	});
 
 	const filterAndSetAppointments = (appointmentsData: Appointment[]) => {
@@ -62,8 +61,7 @@ export function AppointmentsOverview({
 			})
 			.sort(
 				(a, b) =>
-					parseISO(a.date).getTime() -
-					parseISO(b.date).getTime()
+					parseISO(a.date).getTime() - parseISO(b.date).getTime()
 			);
 
 		// Séparer le prochain rendez-vous des autres rendez-vous à venir
@@ -130,7 +128,9 @@ export function AppointmentsOverview({
 			navigate(`/appointments/${appointmentId}/edit`);
 
 			// Afficher un toast pour confirmer l'action
-			toast.info(`Chargement des détails du rendez-vous #${appointmentId}`);
+			toast.info(
+				`Chargement des détails du rendez-vous #${appointmentId}`
+			);
 		} catch (error) {
 			console.error("Erreur lors de la navigation:", error);
 			toast.error("Impossible d'afficher les détails de ce rendez-vous");
@@ -144,11 +144,13 @@ export function AppointmentsOverview({
 				return;
 			}
 
-			console.log(`Création d'une facture pour le rendez-vous #${appointmentId}`);
-			
+			console.log(
+				`Création d'une facture pour le rendez-vous #${appointmentId}`
+			);
+
 			// Naviguer vers la page de création de facture avec l'ID du rendez-vous
 			navigate(`/invoices/new?appointmentId=${appointmentId}`);
-			
+
 			toast.info("Ouverture du formulaire de création de facture");
 		} catch (error) {
 			console.error("Erreur lors de la création de facture:", error);
@@ -244,12 +246,12 @@ export function AppointmentsOverview({
 							</Badge>
 						)}
 						{isHighlighted && !isToday(appointmentDate) && (
-							<Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-normal">
+							<Badge className="bg-blue-100 hover:bg-blue-200 transition-colors duration-150 ease-in text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-normal">
 								Prochain
 							</Badge>
 						)}
 						{appointment.status === "COMPLETED" && (
-							<Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-xs font-normal">
+							<Badge className="bg-amber-100 hover:bg-amber-200 transition-colors duration-150 ease-in text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-xs font-normal">
 								Terminé
 							</Badge>
 						)}
