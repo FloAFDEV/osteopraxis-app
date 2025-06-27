@@ -971,6 +971,84 @@ export type Database = {
           },
         ]
       }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          max_cabinets: number | null
+          max_patients: number | null
+          name: string
+          price_monthly: number
+          price_yearly: number | null
+          stripe_price_id_monthly: string | null
+          stripe_price_id_yearly: string | null
+        }
+        Insert: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          max_cabinets?: number | null
+          max_patients?: number | null
+          name: string
+          price_monthly: number
+          price_yearly?: number | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+        }
+        Update: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          max_cabinets?: number | null
+          max_patients?: number | null
+          name?: string
+          price_monthly?: number
+          price_yearly?: number | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+        }
+        Relationships: []
+      }
       TreatmentHistory: {
         Row: {
           consultationId: number
@@ -999,6 +1077,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      usage_tracking: {
+        Row: {
+          created_at: string
+          id: string
+          metric_name: string
+          metric_value: number
+          period_end: string
+          period_start: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_name: string
+          metric_value?: number
+          period_end: string
+          period_start: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_name?: string
+          metric_value?: number
+          period_end?: string
+          period_start?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       User: {
         Row: {
@@ -1053,6 +1161,10 @@ export type Database = {
         Args: { osteopath_auth_id: string; patient_id: number }
         Returns: boolean
       }
+      can_perform_action: {
+        Args: { user_uuid: string; action_type: string }
+        Returns: boolean
+      }
       generate_invitation_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1076,6 +1188,15 @@ export type Database = {
         Args: { osteopath_auth_id: string }
         Returns: {
           cabinet_id: number
+        }[]
+      }
+      get_subscription_limits: {
+        Args: { user_uuid: string }
+        Returns: {
+          max_patients: number
+          max_cabinets: number
+          features: Json
+          subscription_tier: string
         }[]
       }
       is_admin: {
