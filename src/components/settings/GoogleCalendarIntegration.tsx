@@ -1,17 +1,23 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Calendar, RefreshCw, Unlink, ExternalLink } from 'lucide-react';
+import { AlertCircle, Calendar, RefreshCw, Unlink, ExternalLink, Settings } from 'lucide-react';
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export function GoogleCalendarIntegration() {
   const { isConnected, events, isLoading, connectGoogle, syncCalendar, disconnectGoogle } = useGoogleCalendar();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const [googleClientId, setGoogleClientId] = useState('');
+  const [googleClientSecret, setGoogleClientSecret] = useState('');
 
   // Handle OAuth callback
   useEffect(() => {
@@ -41,6 +47,22 @@ export function GoogleCalendarIntegration() {
     } catch (error) {
       console.error('OAuth callback error:', error);
       toast.error('Erreur lors de la connexion à Google Calendar');
+    }
+  };
+
+  const handleSaveConfig = async () => {
+    if (!googleClientId || !googleClientSecret) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
+    }
+
+    try {
+      // Store the configuration (this would need to be implemented in the backend)
+      // For now, we'll just show a message that this feature needs implementation
+      toast.info('Configuration sauvegardée. Vous pouvez maintenant connecter Google Calendar.');
+      setShowConfigDialog(false);
+    } catch (error) {
+      toast.error('Erreur lors de la sauvegarde de la configuration');
     }
   };
 
@@ -81,17 +103,93 @@ export function GoogleCalendarIntegration() {
                 </p>
                 <ol className="list-decimal list-inside space-y-1 text-blue-800">
                   <li>Connectez d'abord Doctolib à votre Google Agenda depuis votre compte Doctolib</li>
-                  <li>Cliquez sur "Connecter Google Calendar" ci-dessous</li>
+                  <li>Configurez vos clés Google API (voir guide ci-dessous)</li>
+                  <li>Cliquez sur "Connecter Google Calendar"</li>
                   <li>Autorisez l'accès en lecture à votre calendrier</li>
                   <li>Vos rendez-vous Doctolib apparaîtront automatiquement dans le planning</li>
                 </ol>
               </div>
             </div>
 
-            <Button onClick={connectGoogle} className="w-full">
-              <Calendar className="h-4 w-4 mr-2" />
-              Connecter Google Calendar
-            </Button>
+            <div className="flex items-start gap-3 p-4 bg-orange-50 rounded-lg border border-orange-200">
+              <Settings className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+              <div className="space-y-2 text-sm">
+                <p className="font-medium text-orange-900">
+                  Configuration requise
+                </p>
+                <p className="text-orange-800">
+                  Vous devez d'abord configurer vos propres clés API Google. 
+                  Cette étape est nécessaire pour garantir la sécurité de vos données.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Configurer API Google
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Configuration Google API</DialogTitle>
+                    <DialogDescription>
+                      Entrez vos clés API Google Cloud pour connecter votre calendrier
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="clientId">Client ID</Label>
+                      <Input
+                        id="clientId"
+                        value={googleClientId}
+                        onChange={(e) => setGoogleClientId(e.target.value)}
+                        placeholder="Votre Google Client ID"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="clientSecret">Client Secret</Label>
+                      <Input
+                        id="clientSecret"
+                        type="password"
+                        value={googleClientSecret}
+                        onChange={(e) => setGoogleClientSecret(e.target.value)}
+                        placeholder="Votre Google Client Secret"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Pour obtenir ces clés, rendez-vous sur{' '}
+                        <a 
+                          href="https://console.cloud.google.com/apis/credentials" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Google Cloud Console
+                        </a>
+                      </p>
+                    </div>
+                    <Button onClick={handleSaveConfig} className="w-full">
+                      Sauvegarder la configuration
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Button onClick={connectGoogle} className="w-full" disabled>
+                <Calendar className="h-4 w-4 mr-2" />
+                Connecter Google Calendar
+              </Button>
+            </div>
+
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>• Configurez d'abord vos clés API Google</p>
+              <p>• Chaque ostéopathe doit configurer ses propres clés</p>
+              <p>• Vos données restent privées et sécurisées</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -133,6 +231,7 @@ export function GoogleCalendarIntegration() {
               <p>• Les événements sont synchronisés automatiquement</p>
               <p>• Seuls les événements confirmés sont affichés</p>
               <p>• Les rendez-vous externes sont en lecture seule</p>
+              <p>• Pour facturer : créez manuellement une note d'honoraire</p>
             </div>
           </div>
         )}

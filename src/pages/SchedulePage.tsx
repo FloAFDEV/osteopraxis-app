@@ -1,3 +1,4 @@
+
 import ScheduleHeader from "@/components/schedule/ScheduleHeader";
 import {
 	AlertDialog,
@@ -171,6 +172,7 @@ const SchedulePage = () => {
 			setActionInProgress(null);
 		}
 	};
+
 	const handleDeleteAppointment = async (appointmentId: number) => {
 		try {
 			setActionInProgress({
@@ -291,14 +293,12 @@ const SchedulePage = () => {
 				{/* Loading state remains the same */}
 				{loading ? (
 					<div className="flex justify-center items-center py-12">
-						{/* ... loading indicator ... */}
+						<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
 					</div>
 				) : (
 					<Tabs value={view} defaultValue={view}>
 						{/* TabsContent value="day" remains the same */}
 						<TabsContent value="day">
-							{/* ... Day view content ... */}
-							{/* Note: DaySchedule component below also needs its buttons checked if they need responsiveness */}
 							<div className="space-y-4">
 								<div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
 									<div className="flex gap-2">
@@ -339,6 +339,9 @@ const SchedulePage = () => {
 								<DaySchedule
 									date={selectedDate}
 									appointments={getDayAppointments(
+										selectedDate
+									)}
+									googleEvents={getDayGoogleEvents(
 										selectedDate
 									)}
 									getPatientById={getPatientById}
@@ -486,154 +489,149 @@ const SchedulePage = () => {
 															const patient = getPatientById(appointment.patientId);
 															const appointmentTime = format(parseISO(appointment.date), "HH:mm");
 															const isProcessingAction = actionInProgress?.id === appointment.id;
-														return (
-															<Card
-																key={
-																	appointment.id
-																}
-																className="hover-scale flex flex-col"
-															>
-																{" "}
-																{/* Added flex flex-col */}
-																<CardContent className="p-3 flex-grow">
-																	{" "}
-																	{/* Added flex-grow */}
-																	{/* Top section: Time Badge */}
-																	<div className="flex items-center justify-between mb-2">
-																		{" "}
-																		{/* Adjusted margin */}
-																		<Badge className="bg-blue-500">
-																			{
-																				appointmentTime
-																			}
-																		</Badge>
-																		{appointment.status ===
-																			"COMPLETED" && (
-																			<Badge className="bg-amber-500">
-																				Terminé
-																			</Badge>
-																		)}
-																		{/* Buttons removed from here */}
-																	</div>
-																	{/* Middle section: Link to patient/reason */}
-																	<Link
-																		to={`/appointments/${appointment.id}/edit`}
-																		className="block group mb-3" // Added bottom margin
-																	>
-																		<h3 className="font-medium group-hover:text-primary truncate">
-																			{patient
-																				? `${patient.firstName} ${patient.lastName}`
-																				: `Patient #${appointment.patientId}`}
-																		</h3>
-																		<p className="text-sm text-muted-foreground truncate">
-																			{
-																				appointment.reason
-																			}
-																		</p>
-																	</Link>
-																</CardContent>
-																{/* --- Bottom section: Action Buttons --- */}
-																<div className="flex flex-col sm:flex-row items-center justify-end gap-2 p-2 border-t bg-muted/30">
-																	{/* Cancel Button */}
-																	<Button
-																		variant="ghost"
-																		size="sm"
-																		className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center space-x-1"
-																		onClick={() =>
-																			handleCancelAppointment(
-																				appointment.id
-																			)
-																		}
-																		disabled={
-																			isProcessingAction ||
-																			appointment.status ===
-																				"COMPLETED"
-																		}
-																		title="Annuler cette séance"
-																	>
-																		{actionInProgress?.id ===
-																			appointment.id &&
-																			actionInProgress.action ===
-																				"cancel" && (
-																				<span className="animate-spin text-base">
-																					⏳
-																				</span>
-																			)}
-																		<X className="w-4 h-4" />
-																		<span className="hidden sm:inline">
-																			Annuler
-																		</span>
-																	</Button>
 
-																	{/* Delete Button Trigger */}
-																	<AlertDialog>
-																		<AlertDialogTrigger
-																			asChild
-																		>
-																			<Button
-																				variant="ghost"
-																				size="sm"
-																				className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center" // Responsive width, centered text/icon
-																				disabled={
-																					isProcessingAction
+															return (
+																<Card
+																	key={
+																		appointment.id
+																	}
+																	className="hover-scale flex flex-col"
+																>
+																	<CardContent className="p-3 flex-grow">
+																		{/* Top section: Time Badge */}
+																		<div className="flex items-center justify-between mb-2">
+																			<Badge className="bg-blue-500">
+																				{
+																					appointmentTime
 																				}
-																				title="Supprimer cette séance"
+																			</Badge>
+																			{appointment.status ===
+																				"COMPLETED" && (
+																				<Badge className="bg-amber-500">
+																					Terminé
+																				</Badge>
+																			)}
+																		</div>
+																		{/* Middle section: Link to patient/reason */}
+																		<Link
+																			to={`/appointments/${appointment.id}/edit`}
+																			className="block group mb-3"
+																		>
+																			<h3 className="font-medium group-hover:text-primary truncate">
+																				{patient
+																					? `${patient.firstName} ${patient.lastName}`
+																					: `Patient #${appointment.patientId}`}
+																			</h3>
+																			<p className="text-sm text-muted-foreground truncate">
+																				{
+																					appointment.reason
+																				}
+																			</p>
+																		</Link>
+																	</CardContent>
+																	{/* Bottom section: Action Buttons */}
+																	<div className="flex flex-col sm:flex-row items-center justify-end gap-2 p-2 border-t bg-muted/30">
+																		{/* Cancel Button */}
+																		<Button
+																			variant="ghost"
+																			size="sm"
+																			className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center space-x-1"
+																			onClick={() =>
+																				handleCancelAppointment(
+																					appointment.id
+																				)
+																			}
+																			disabled={
+																				isProcessingAction ||
+																				appointment.status ===
+																					"COMPLETED"
+																			}
+																			title="Annuler cette séance"
+																		>
+																			{actionInProgress?.id ===
+																				appointment.id &&
+																				actionInProgress.action ===
+																					"cancel" && (
+																					<span className="animate-spin text-base">
+																						⏳
+																					</span>
+																				)}
+																			<X className="w-4 h-4" />
+																			<span className="hidden sm:inline">
+																				Annuler
+																			</span>
+																		</Button>
+
+																		{/* Delete Button Trigger */}
+																		<AlertDialog>
+																			<AlertDialogTrigger
+																				asChild
 																			>
-																				<Trash2 className="h-4 w-4 sm:mr-1" />
-																			</Button>
-																		</AlertDialogTrigger>
-																		<AlertDialogContent>
-																			<AlertDialogHeader>
-																				<AlertDialogTitle>
-																					Supprimer
-																					le
-																					Séance
-																				</AlertDialogTitle>
-																				<AlertDialogDescription>
-																					Êtes-vous
-																					sûr
-																					de
-																					vouloir
-																					supprimer
-																					définitivement
-																					cette
-																					séance
-																					?
-																				</AlertDialogDescription>
-																			</AlertDialogHeader>
-																			<AlertDialogFooter>
-																				<AlertDialogCancel>
-																					Annuler
-																				</AlertDialogCancel>
-																				<AlertDialogAction
-																					onClick={() =>
-																						handleDeleteAppointment(
-																							appointment.id
-																						)
+																				<Button
+																					variant="ghost"
+																					size="sm"
+																					className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center"
+																					disabled={
+																						isProcessingAction
 																					}
-																					className="bg-destructive hover:bg-destructive/90" // Adjusted hover color
+																					title="Supprimer cette séance"
 																				>
-																					{actionInProgress?.id ===
-																						appointment.id &&
-																					actionInProgress.action ===
-																						"delete" ? (
-																						<span className="animate-spin mr-2">
-																							⏳
-																						</span>
-																					) : null}
-																					Supprimer
-																				</AlertDialogAction>
-																			</AlertDialogFooter>
-																		</AlertDialogContent>
-																	</AlertDialog>
-																</div>
-															</Card>
-														);
-													})}
-												</div>
-											)}
-										</div>
-									))}
+																					<Trash2 className="h-4 w-4 sm:mr-1" />
+																				</Button>
+																			</AlertDialogTrigger>
+																			<AlertDialogContent>
+																				<AlertDialogHeader>
+																					<AlertDialogTitle>
+																						Supprimer
+																						le
+																						Séance
+																					</AlertDialogTitle>
+																					<AlertDialogDescription>
+																						Êtes-vous
+																						sûr
+																						de
+																						vouloir
+																						supprimer
+																						définitivement
+																						cette
+																						séance
+																						?
+																					</AlertDialogDescription>
+																				</AlertDialogHeader>
+																				<AlertDialogFooter>
+																					<AlertDialogCancel>
+																						Annuler
+																					</AlertDialogCancel>
+																					<AlertDialogAction
+																						onClick={() =>
+																							handleDeleteAppointment(
+																								appointment.id
+																							)
+																						}
+																						className="bg-destructive hover:bg-destructive/90"
+																					>
+																						{actionInProgress?.id ===
+																							appointment.id &&
+																						actionInProgress.action ===
+																							"delete" ? (
+																							<span className="animate-spin mr-2">
+																								⏳
+																							</span>
+																						) : null}
+																						Supprimer
+																					</AlertDialogAction>
+																				</AlertDialogFooter>
+																			</AlertDialogContent>
+																		</AlertDialog>
+																	</div>
+																</Card>
+															);
+														})}
+													</div>
+												)}
+											</div>
+										);
+									})}
 								</div>
 							</div>
 						</TabsContent>
@@ -644,10 +642,11 @@ const SchedulePage = () => {
 	);
 };
 
-// DaySchedule Component (Check responsiveness of its buttons too)
+// DaySchedule Component
 interface DayScheduleProps {
 	date: Date;
 	appointments: Appointment[];
+	googleEvents: any[];
 	getPatientById: (id: number) => Patient | undefined;
 	onCancelAppointment: (id: number) => void;
 	onDeleteAppointment: (id: number) => void;
@@ -656,9 +655,11 @@ interface DayScheduleProps {
 		action: "cancel" | "delete";
 	} | null;
 }
+
 const DaySchedule = ({
 	date,
 	appointments,
+	googleEvents,
 	getPatientById,
 	onCancelAppointment,
 	onDeleteAppointment,
@@ -680,22 +681,33 @@ const DaySchedule = ({
 	const displayTimeSlots = timeSlots.filter(
 		(slot) => parseInt(slot.split(":")[0]) < 20
 	);
+
 	const getAppointmentForTimeSlot = (timeSlot: string) => {
 		return appointments.find(
 			(appointment) =>
 				format(parseISO(appointment.date), "HH:mm") === timeSlot
 		);
 	};
+
+	const getGoogleEventForTimeSlot = (timeSlot: string) => {
+		return googleEvents.find(
+			(event) =>
+				format(parseISO(event.start_time), "HH:mm") === timeSlot
+		);
+	};
+
 	return (
 		<div className="rounded-md border">
 			{displayTimeSlots.map((timeSlot) => {
 				const appointment = getAppointmentForTimeSlot(timeSlot);
+				const googleEvent = getGoogleEventForTimeSlot(timeSlot);
 				const isCurrentTime =
 					format(new Date(), "HH:mm") === timeSlot &&
 					isSameDay(date, new Date());
 				const isProcessingAction =
 					appointment && actionInProgress?.id === appointment.id;
 				const isCompleted = appointment?.status === "COMPLETED";
+
 				return (
 					<div
 						key={timeSlot}
@@ -706,8 +718,6 @@ const DaySchedule = ({
 					>
 						{/* Time slot display */}
 						<div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center shrink-0">
-							{" "}
-							{/* Added shrink-0 */}
 							<span
 								className={cn(
 									"text-sm font-medium",
@@ -722,21 +732,36 @@ const DaySchedule = ({
 
 						{/* Appointment details or link */}
 						<div className="flex-1 p-3 min-w-0">
-							{" "}
-							{/* Added min-w-0 to prevent overflow */}
-							{appointment ? (
+							{googleEvent ? (
+								<div className="flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 border-l-blue-500 bg-blue-50/50 p-3 rounded">
+									<div className="flex-grow min-w-0">
+										<div className="flex items-center gap-2 mb-1">
+											<Badge className="bg-blue-500 text-white text-xs">
+												Google
+											</Badge>
+											<h3 className="font-medium text-blue-900 truncate">
+												{googleEvent.summary}
+											</h3>
+										</div>
+										{googleEvent.location && (
+											<p className="text-sm text-blue-700 ml-2 truncate">
+												📍 {googleEvent.location}
+											</p>
+										)}
+										<p className="text-xs text-blue-600 mt-1">
+											Événement externe (lecture seule)
+										</p>
+									</div>
+								</div>
+							) : appointment ? (
 								<div className="flex flex-col lg:flex-row items-start justify-between gap-2">
-									{" "}
-									{/* Responsive layout for content vs actions */}
 									{/* Appointment Info */}
 									<div className="flex-grow min-w-0">
-										{" "}
-										{/* Added min-w-0 */}
 										<div className="flex items-center gap-2 mb-1">
 											<User className="h-4 w-4 text-primary shrink-0" />
 											<Link
 												to={`/patients/${appointment.patientId}`}
-												className="font-medium hover:text-primary truncate" // Added truncate
+												className="font-medium hover:text-primary truncate"
 											>
 												{getPatientById(
 													appointment.patientId
@@ -753,15 +778,11 @@ const DaySchedule = ({
 											)}
 										</div>
 										<p className="text-sm text-muted-foreground ml-6 truncate">
-											{" "}
-											{/* Added truncate */}
 											{appointment.reason}
 										</p>
 									</div>
 									{/* Action Buttons - Made responsive */}
 									<div className="flex flex-wrap gap-2 justify-end w-full lg:w-auto shrink-0">
-										{" "}
-										{/* flex-wrap, responsive width */}
 										{/* Link Buttons */}
 										<Button
 											variant="outline"
@@ -794,7 +815,7 @@ const DaySchedule = ({
 										<Button
 											variant="ghost"
 											size="sm"
-											className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0" // Responsive grow
+											className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
 											onClick={() =>
 												onCancelAppointment(
 													appointment.id
@@ -818,11 +839,10 @@ const DaySchedule = ({
 													</span>
 												) : (
 													<>
-														{" "}
 														<X className="h-4 w-4 mr-1" />{" "}
 														Annuler{" "}
 													</>
-												) // Added Icon
+												)
 											}
 										</Button>
 										<AlertDialog>
@@ -830,7 +850,7 @@ const DaySchedule = ({
 												<Button
 													variant="ghost"
 													size="sm"
-													className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0" // Responsive grow
+													className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
 													disabled={
 														isProcessingAction
 													}
@@ -903,4 +923,5 @@ const DaySchedule = ({
 		</div>
 	);
 };
+
 export default SchedulePage;
