@@ -49,6 +49,8 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+
 const SchedulePage = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [patients, setPatients] = useState<Patient[]>([]);
@@ -61,6 +63,7 @@ const SchedulePage = () => {
 		action: "cancel" | "delete";
 	} | null>(null);
 	const navigate = useNavigate();
+	const { events: googleEvents, isConnected: isGoogleConnected } = useGoogleCalendar();
 
 	// Utiliser le hook pour la mise à jour automatique des statuts
 	useAppointmentStatusUpdate({
@@ -124,6 +127,21 @@ const SchedulePage = () => {
 			.sort((a, b) => {
 				const timeA = parseISO(a.date);
 				const timeB = parseISO(b.date);
+				return timeA.getTime() - timeB.getTime();
+			});
+	};
+
+	const getDayGoogleEvents = (date: Date) => {
+		if (!isGoogleConnected || !googleEvents) return [];
+		
+		return googleEvents
+			.filter((event) => {
+				const eventDate = parseISO(event.start_time);
+				return isSameDay(eventDate, date);
+			})
+			.sort((a, b) => {
+				const timeA = parseISO(a.start_time);
+				const timeB = parseISO(b.start_time);
 				return timeA.getTime() - timeB.getTime();
 			});
 	};
@@ -219,6 +237,12 @@ const SchedulePage = () => {
 						Planning
 					</h1>
 					<div className="flex items-center gap-2">
+						{isGoogleConnected && (
+							<div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
+								<div className="w-2 h-2 bg-green-500 rounded-full"></div>
+								Google Calendar
+							</div>
+						)}
 						<Tabs
 							value={view}
 							onValueChange={(v) => setView(v as "day" | "week")}
@@ -364,81 +388,104 @@ const SchedulePage = () => {
 
 								{/* Grid for the week */}
 								<div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-									{currentWeek.map((day) => (
-										<div
-											key={day.toString()}
-											className="flex flex-col"
-										>
-											{/* Day header button remains the same */}
-											<button
-												type="button"
-												className={cn(
-													"p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full",
-													isSameDay(day, new Date())
-														? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900"
-														: "bg-muted dark:bg-muted"
-												)}
-												onClick={() =>
-													handleDayHeaderClick(day)
-												}
-												tabIndex={0}
-												title={`Ajouter un Séance le ${format(
-													day,
-													"d MMMM yyyy",
-													{
-														locale: fr,
-													}
-												)}`}
-												aria-label={`Ajouter un Séance le ${format(
-													day,
-													"d MMMM yyyy",
-													{
-														locale: fr,
-													}
-												)}`}
-											>
-												<div className="font-medium">
-													{format(day, "EEEE", {
-														locale: fr,
-													})}
-												</div>
-												<div className="text-sm">
-													{format(day, "d MMM", {
-														locale: fr,
-													})}
-												</div>
-												<span className="sr-only">
-													Ajouter un Séance
-												</span>
-											</button>
+									{currentWeek.map((day) => {
+										const dayAppointments = getDayAppointments(day);
+										const dayGoogleEvents = getDayGoogleEvents(day);
+										const hasAnyEvents = dayAppointments.length > 0 || dayGoogleEvents.length > 0;
 
-											{/* Appointments list or empty state */}
-											{getDayAppointments(day).length ===
-											0 ? (
-												<div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
-													<p className="text-sm text-muted-foreground">
-														Aucune séance
-													</p>
-												</div>
-											) : (
-												<div className="space-y-2">
-													{getDayAppointments(
-														day
-													).map((appointment) => {
-														const patient =
-															getPatientById(
-																appointment.patientId
+										return (
+											<div key={day.toString()} className="flex flex-col">
+												{/* Day header button remains the same */}
+												<button
+													type="button"
+													className={cn(
+														"p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full",
+														isSameDay(day, new Date())
+															? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900"
+															: "bg-muted dark:bg-muted"
+													)}
+													onClick={() =>
+														handleDayHeaderClick(day)
+													}
+													tabIndex={0}
+													title={`Ajouter un Séance le ${format(
+														day,
+														"d MMMM yyyy",
+														{
+															locale: fr,
+														}
+													)}`}
+													aria-label={`Ajouter un Séance le ${format(
+														day,
+														"d MMMM yyyy",
+														{
+															locale: fr,
+														}
+													)}`}
+												>
+													<div className="font-medium">
+														{format(day, "EEEE", {
+															locale: fr,
+														})}
+													</div>
+													<div className="text-sm">
+														{format(day, "d MMM", {
+															locale: fr,
+														})}
+													</div>
+													<span className="sr-only">
+														Ajouter un Séance
+													</span>
+												</button>
+
+												{/* Events list or empty state */}
+												{!hasAnyEvents ? (
+													<div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
+														<p className="text-sm text-muted-foreground">
+															Aucune séance
+														</p>
+													</div>
+												) : (
+													<div className="space-y-2">
+														{/* Google Calendar Events */}
+														{dayGoogleEvents.map((event) => {
+															const eventStartTime = format(parseISO(event.start_time), "HH:mm");
+															return (
+																<Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-50/50">
+																	<CardContent className="p-3 flex-grow">
+																		<div className="flex items-center justify-between mb-2">
+																			<Badge className="bg-blue-500 text-xs">
+																				{eventStartTime}
+																			</Badge>
+																			<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
+																				Google
+																			</Badge>
+																		</div>
+																		<div className="mb-2">
+																			<h3 className="font-medium text-blue-900 truncate text-sm">
+																				{event.summary}
+																			</h3>
+																			{event.location && (
+																				<p className="text-xs text-blue-700 truncate">
+																					📍 {event.location}
+																				</p>
+																			)}
+																		</div>
+																	</CardContent>
+																	<div className="px-3 pb-2">
+																		<p className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+																			Événement externe (lecture seule)
+																		</p>
+																	</div>
+																</Card>
 															);
-														const appointmentTime =
-															format(
-																parseISO(
-																	appointment.date
-																),
-																"HH:mm"
-															);
-														const isProcessingAction =
-															actionInProgress?.id ===
-															appointment.id;
+														})}
+
+														{/* Internal Appointments - keep existing code */}
+														{dayAppointments.map((appointment) => {
+															const patient = getPatientById(appointment.patientId);
+															const appointmentTime = format(parseISO(appointment.date), "HH:mm");
+															const isProcessingAction = actionInProgress?.id === appointment.id;
 														return (
 															<Card
 																key={
