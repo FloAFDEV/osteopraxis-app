@@ -14,6 +14,12 @@ export interface GoogleCalendarEvent {
   end_time: string;
   location?: string;
   status: string;
+  patient_id?: number;
+  patient?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export interface GoogleCalendarIntegration {
@@ -113,7 +119,9 @@ export function useGoogleCalendar(): GoogleCalendarIntegration {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['google-calendar-events'] });
-      toast.success(`${data?.eventsProcessed || 0} événements synchronisés`);
+      const patientsMatched = data?.patientsMatched || 0;
+      const total = data?.eventsProcessed || 0;
+      toast.success(`${total} événements synchronisés${patientsMatched > 0 ? ` (${patientsMatched} patients identifiés)` : ''}`);
     },
     onError: (error) => {
       console.error('Error syncing calendar:', error);

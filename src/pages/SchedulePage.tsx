@@ -1,4 +1,3 @@
-
 import ScheduleHeader from "@/components/schedule/ScheduleHeader";
 import {
 	AlertDialog,
@@ -132,6 +131,7 @@ const SchedulePage = () => {
 			});
 	};
 
+	// Updated to show patient info and facturation link
 	const getDayGoogleEvents = (date: Date) => {
 		if (!isGoogleConnected || !googleEvents) return [];
 		
@@ -208,7 +208,6 @@ const SchedulePage = () => {
 		navigate(`/appointments/new?date=${dateStr}`);
 	};
 
-	// --- JSX Structure ---
 	return (
 		<Layout>
 			{/* Bouton de retour */}
@@ -356,7 +355,6 @@ const SchedulePage = () => {
 							</div>
 						</TabsContent>
 
-						{/* --- MODIFIED TabsContent value="week" --- */}
 						<TabsContent value="week">
 							<div className="space-y-4">
 								{/* Week navigation remains the same */}
@@ -450,24 +448,39 @@ const SchedulePage = () => {
 													</div>
 												) : (
 													<div className="space-y-2">
-														{/* Google Calendar Events */}
+														{/* Google Calendar Events - Enhanced */}
 														{dayGoogleEvents.map((event) => {
 															const eventStartTime = format(parseISO(event.start_time), "HH:mm");
+															const eventEndTime = format(parseISO(event.end_time), "HH:mm");
+															const hasPatient = event.patient_id && event.patient;
+															
 															return (
 																<Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-50/50">
 																	<CardContent className="p-3 flex-grow">
 																		<div className="flex items-center justify-between mb-2">
 																			<Badge className="bg-blue-500 text-xs">
-																				{eventStartTime}
+																				{eventStartTime} - {eventEndTime}
 																			</Badge>
-																			<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
-																				Google
-																			</Badge>
+																			<div className="flex gap-1">
+																				<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
+																					Google
+																				</Badge>
+																				{hasPatient && (
+																					<Badge className="bg-green-500 text-xs">
+																						Patient identifié
+																					</Badge>
+																				)}
+																			</div>
 																		</div>
 																		<div className="mb-2">
 																			<h3 className="font-medium text-blue-900 truncate text-sm">
 																				{event.summary}
 																			</h3>
+																			{hasPatient && (
+																				<p className="text-sm text-green-700 font-medium">
+																					👤 {event.patient.firstName} {event.patient.lastName}
+																				</p>
+																			)}
 																			{event.location && (
 																				<p className="text-xs text-blue-700 truncate">
 																					📍 {event.location}
@@ -476,9 +489,23 @@ const SchedulePage = () => {
 																		</div>
 																	</CardContent>
 																	<div className="px-3 pb-2">
-																		<p className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
-																			Événement externe (lecture seule)
-																		</p>
+																		<div className="flex items-center justify-between">
+																			<p className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+																				Événement externe (lecture seule)
+																			</p>
+																			{hasPatient && (
+																				<Button
+																					size="sm"
+																					variant="outline"
+																					className="text-xs h-6 px-2 bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
+																					asChild
+																				>
+																					<Link to={`/invoices/new?patientId=${event.patient_id}&date=${format(day, 'yyyy-MM-dd')}&time=${eventStartTime}&source=google_calendar`}>
+																						💳 Facturer
+																					</Link>
+																				</Button>
+																			)}
+																		</div>
 																	</div>
 																</Card>
 															);
@@ -642,7 +669,7 @@ const SchedulePage = () => {
 	);
 };
 
-// DaySchedule Component
+// DaySchedule Component - Enhanced for Google events
 interface DayScheduleProps {
 	date: Date;
 	appointments: Appointment[];
@@ -742,15 +769,39 @@ const DaySchedule = ({
 											<h3 className="font-medium text-blue-900 truncate">
 												{googleEvent.summary}
 											</h3>
+											{googleEvent.patient_id && googleEvent.patient && (
+												<Badge className="bg-green-500 text-white text-xs">
+													Patient identifié
+												</Badge>
+											)}
 										</div>
+										{googleEvent.patient_id && googleEvent.patient && (
+											<p className="text-sm text-green-700 font-medium ml-2">
+												👤 {googleEvent.patient.firstName} {googleEvent.patient.lastName}
+											</p>
+										)}
 										{googleEvent.location && (
 											<p className="text-sm text-blue-700 ml-2 truncate">
 												📍 {googleEvent.location}
 											</p>
 										)}
-										<p className="text-xs text-blue-600 mt-1">
-											Événement externe (lecture seule)
-										</p>
+										<div className="flex items-center gap-2 mt-2">
+											<p className="text-xs text-blue-600">
+												Événement externe (lecture seule)
+											</p>
+											{googleEvent.patient_id && (
+												<Button
+													size="sm"
+													variant="outline"
+													className="text-xs h-6 px-2 bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
+													asChild
+												>
+													<Link to={`/invoices/new?patientId=${googleEvent.patient_id}&date=${format(date, 'yyyy-MM-dd')}&time=${timeSlot}&source=google_calendar`}>
+														💳 Créer facture
+													</Link>
+												</Button>
+											)}
+										</div>
 									</div>
 								</div>
 							) : appointment ? (
