@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,11 +84,11 @@ const PatientForm: React.FC<PatientFormProps> = ({
       behavior: patient?.behavior || null,
       childCareContext: patient?.childCareContext || null,
       allergies: patient?.allergies || null,
+      osteopathId: typeof patient?.osteopathId === 'string' ? parseInt(patient.osteopathId) : patient?.osteopathId || null,
       ...patient
     }
   });
 
-  // Calculer si c'est un enfant basé sur la date de naissance
   const isChild = React.useMemo(() => {
     const birthDate = form.watch("birthDate");
     if (!birthDate) return false;
@@ -97,7 +96,6 @@ const PatientForm: React.FC<PatientFormProps> = ({
     return age < 18;
   }, [form.watch("birthDate")]);
 
-  // Gérer les âges des enfants
   useEffect(() => {
     if (patient?.childrenAges) {
       setChildrenAgesInput(patient.childrenAges.join(", "));
@@ -106,7 +104,6 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
   const handleSubmit = async (data: PatientFormValues) => {
     try {
-      // Traiter les âges des enfants
       let processedChildrenAges = null;
       if (data.hasChildren === "true" && childrenAgesInput.trim()) {
         processedChildrenAges = childrenAgesInput
@@ -141,7 +138,6 @@ const PatientForm: React.FC<PatientFormProps> = ({
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              {/* Responsive tabs list */}
               <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 mb-6 h-auto p-1 gap-1">
                 <TabsTrigger 
                   value="general" 

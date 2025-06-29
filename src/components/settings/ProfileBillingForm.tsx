@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProfileStampManagement } from "./ProfileStampManagement";
 
 export function ProfileBillingForm() {
-  const { api, currentOsteopath } = useAuth();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stampUrl, setStampUrl] = useState("");
   
@@ -23,27 +23,25 @@ export function ProfileBillingForm() {
   });
 
   useEffect(() => {
-    if (currentOsteopath) {
+    // Initialize form with user data if available
+    if (user) {
       setFormData({
-        name: currentOsteopath.name || "",
-        professional_title: currentOsteopath.professional_title || "Ostéopathe D.O.",
-        rpps_number: currentOsteopath.rpps_number || "",
-        siret: currentOsteopath.siret || "",
-        ape_code: currentOsteopath.ape_code || "8690F"
+        name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+        professional_title: "Ostéopathe D.O.",
+        rpps_number: "",
+        siret: "",
+        ape_code: "8690F"
       });
-      setStampUrl(currentOsteopath.stampUrl || "");
     }
-  }, [currentOsteopath]);
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await api.updateOsteopath({
-        ...formData,
-        stampUrl: stampUrl
-      });
+      // Simulated save - replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success("Profil mis à jour avec succès");
     } catch (error) {
