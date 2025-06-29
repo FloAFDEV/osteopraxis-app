@@ -1,49 +1,20 @@
 
 import React from "react";
-import { Patient } from "@/types";
-import { PatientFormValues } from "@/components/patient-form/types";
 import { ClipboardList, Stethoscope, Syringe, CheckCircle2, StickyNote } from "lucide-react";
 
-interface ClinicalSectionsProps {
-  patient: Patient;
-  onPatientUpdated: (updatedData: PatientFormValues) => Promise<void>;
-  isLoading?: boolean;
+interface Section {
+  field: string | null | undefined;
+  title: string;
+  icon: React.ReactNode;
 }
-
-export const ClinicalSections: React.FC<ClinicalSectionsProps> = ({
-  patient,
-  onPatientUpdated,
-  isLoading = false
-}) => {
-  const sections = [
-    {
-      field: patient.diagnosis,
-      title: "Diagnostic",
-      icon: <ClipboardList className="h-4 w-4" />
-    },
-    {
-      field: patient.medical_examination,
-      title: "Examen médical",
-      icon: <Stethoscope className="h-4 w-4" />
-    },
-    {
-      field: patient.treatment_plan,
-      title: "Plan de traitement",
-      icon: <Syringe className="h-4 w-4" />
-    },
-    {
-      field: patient.consultation_conclusion,
-      title: "Conclusion de consultation",
-      icon: <CheckCircle2 className="h-4 w-4" />
-    }
-  ];
-
+interface ClinicalSectionsProps {
+  sections: Section[];
+}
+export function ClinicalSections({ sections }: ClinicalSectionsProps) {
   const filtered = sections.filter(
     section => section.field && section.field.trim() !== ""
   );
-  
   if (filtered.length === 0) return null;
-  
   return (
     <div className="border border-blue-200 dark:border-blue-700 rounded-lg p-4 bg-blue-50/70 dark:bg-blue-950/30 mb-4 space-y-4">
       <h4 className="font-semibold mb-2 flex items-center gap-2 text-blue-900 dark:text-blue-100">
@@ -63,4 +34,4 @@ export const ClinicalSections: React.FC<ClinicalSectionsProps> = ({
       </div>
     </div>
   );
-};
+}

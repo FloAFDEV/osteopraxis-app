@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProfileBillingForm } from "@/components/settings/ProfileBillingForm";
 import { GoogleCalendarIntegration } from "@/components/settings/GoogleCalendarIntegration";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { BackButton } from "@/components/ui/back-button";
 import { HelpButton } from "@/components/ui/help-button";
@@ -18,6 +18,7 @@ const OsteopathSettingsPage = () => {
   const [osteopath, setOsteopath] = useState(null);
   const [cabinetLogo, setCabinetLogo] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadOsteopathData = async () => {
@@ -35,7 +36,9 @@ const OsteopathSettingsPage = () => {
           }
         } catch (error) {
           console.error("Error fetching osteopath data:", error);
-          toast.error("Impossible de charger les données du profil.");
+          toast.error("Erreur", {
+            description: "Impossible de charger les données du profil."
+          });
         } finally {
           setLoading(false);
         }
@@ -44,10 +47,12 @@ const OsteopathSettingsPage = () => {
       }
     };
     loadOsteopathData();
-  }, [user]);
+  }, [user, toast]);
 
   const handleSuccess = () => {
-    toast.success("Profil mis à jour avec succès");
+    toast.success("Succès", {
+      description: "Profil mis à jour avec succès"
+    });
     // Pas de redirection automatique - rester sur la page
   };
 
@@ -101,7 +106,14 @@ const OsteopathSettingsPage = () => {
           <GoogleCalendarIntegration />
 
           {/* Profile & Billing Form */}
-          <ProfileBillingForm />
+          <ProfileBillingForm 
+            defaultValues={osteopath || {
+              name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
+            }}
+            osteopathId={osteopath?.id} 
+            isEditing={!!osteopath} 
+            onSuccess={handleSuccess} 
+          />
           
           <div className="flex justify-end">
             <button 

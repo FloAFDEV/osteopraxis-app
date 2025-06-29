@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { Calendar, Clock, Plus, Users, RefreshCw, ExternalLink } from "lucide-react";
 import { Layout } from "@/components/ui/layout";
@@ -11,7 +10,7 @@ import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { format, parseISO, startOfWeek, endOfWeek, addWeeks, subWeeks, isSameDay, isToday, isBefore, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
-import ScheduleHeader from "@/components/schedule/ScheduleHeader";
+import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { cn } from "@/lib/utils";
 
@@ -25,22 +24,15 @@ const SchedulePage = () => {
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
 
-  const { data: appointmentsData = [], isLoading: isLoadingAppointments } = useQuery({
-    queryKey: ['appointments', weekStart.toISOString(), weekEnd.toISOString()],
-    queryFn: () => api.getAppointments(),
-    enabled: !!user?.osteopathId
-  });
-
-  // Fetch patients for name lookup
-  const { data: patientsData = [] } = useQuery({
-    queryKey: ['patients'],
-    queryFn: () => api.getPatients(),
-    enabled: !!user?.osteopathId
-  });
+  const { data: appointmentsData, isLoading: isLoadingAppointments } = useQuery(
+    ['appointments', weekStart.toISOString(), weekEnd.toISOString()],
+    () => api.getAppointmentsByDateRange(weekStart.toISOString(), weekEnd.toISOString()),
+    { enabled: !!user?.osteopathId }
+  );
 
   // Combine appointments with Google events
   const combinedAppointments = useMemo(() => {
-    const appointments = Array.isArray(appointmentsData) ? appointmentsData : [];
+    if (!appointmentsData) return [];
 
     // Map Google events to appointment-like objects
     const mappedGoogleEvents = googleEvents.map(event => ({
@@ -53,24 +45,21 @@ const SchedulePage = () => {
       reason: event.description || null,
     }));
 
-    // Map regular appointments and add patient info
-    const mappedAppointments = appointments.map(apt => {
-      const patient = patientsData.find(p => p.id === apt.patientId);
-      return {
-        id: apt.id,
-        date: apt.date,
-        status: apt.status,
-        isGoogleEvent: false,
-        patient: patient || null,
-        reason: apt.reason,
-      };
-    });
+    // Map regular appointments
+    const mappedAppointments = appointmentsData.map(apt => ({
+      id: apt.id,
+      date: apt.date,
+      status: apt.status,
+      isGoogleEvent: false,
+      patient: apt.patient,
+      reason: apt.reason,
+    }));
 
     // Combine and sort by date
     return [...mappedAppointments, ...mappedGoogleEvents].sort((a, b) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
-  }, [appointmentsData, googleEvents, patientsData]);
+  }, [appointmentsData, googleEvents]);
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(weekStart);
@@ -130,7 +119,7 @@ const SchedulePage = () => {
         {appointment.isGoogleEvent ? (
           appointment.summary || 'Événement Google'
         ) : (
-          appointment.patient ? `${appointment.patient.firstName} ${appointment.patient.lastName}` : 'Patient inconnu'
+          `${appointment.patient?.firstName} ${appointment.patient?.lastName}`
         )}
       </div>
       
@@ -165,45 +154,14 @@ const SchedulePage = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <ScheduleHeader />
-
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}
-            >
-              ← Semaine précédente
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentWeek(new Date())}
-            >
-              Aujourd'hui
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-            >
-              Semaine suivante →
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {isGoogleConnected && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <ExternalLink className="h-3 w-3" />
-                {googleEvents.length} événements Google
-              </Badge>
-            )}
-            <Badge variant="outline">
-              Semaine du {format(weekStart, "d MMM", { locale: fr })} au {format(weekEnd, "d MMM yyyy", { locale: fr })}
-            </Badge>
-          </div>
-        </div>
+        <ScheduleHeader 
+          currentWeek={currentWeek}
+          onPreviousWeek={() => setCurrentWeek(subWeeks(currentWeek, 1))}
+          onNextWeek={() => setCurrentWeek(addWeeks(currentWeek, 1))}
+          onToday={() => setCurrentWeek(new Date())}
+          isGoogleConnected={isGoogleConnected}
+          googleEventsCount={googleEvents.length}
+        />
 
         {/* Desktop view */}
         <div className="hidden lg:block">

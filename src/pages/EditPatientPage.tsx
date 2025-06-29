@@ -1,5 +1,5 @@
 import ConfirmDeletePatientModal from "@/components/modals/ConfirmDeletePatientModal";
-import PatientForm from "@/components/patient-form";
+import { PatientForm } from "@/components/patient-form";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { patientService } from "@/services/api/patient-service";
@@ -289,9 +289,9 @@ const EditPatientPage = () => {
 				{patient && (
 					<PatientForm
 						patient={patient}
-						onSubmit={handleSave}
-						onCancel={() => navigate("/patients")}
+						onSave={handleSave}
 						isLoading={isSaving}
+						selectedCabinetId={selectedCabinetId}
 					/>
 				)}
 			</div>

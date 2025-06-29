@@ -1,28 +1,12 @@
 
 import React from "react";
-import { Patient } from "@/types";
-import { PatientFormValues } from "@/components/patient-form/types";
 
 interface SpecializedSphereSectionsProps {
-  patient: Patient;
-  onPatientUpdated: (updatedData: PatientFormValues) => Promise<void>;
-  isLoading?: boolean;
+  sections: Array<{ title: string; value: string | null | undefined }>;
 }
 
-export const SpecializedSphereSections: React.FC<SpecializedSphereSectionsProps> = ({
-  patient,
-  onPatientUpdated,
-  isLoading = false
-}) => {
-  const sections = [
-    { title: "Historique cardiaque", value: patient.cardiac_history },
-    { title: "Historique pulmonaire", value: patient.pulmonary_history },
-    { title: "Historique pelvien", value: patient.pelvic_history },
-    { title: "Historique neurologique", value: patient.neurological_history },
-  ];
-
+export function SpecializedSphereSections({ sections }: SpecializedSphereSectionsProps) {
   if (!sections.some(s => s.value && String(s.value).trim() !== "")) return null;
-  
   return (
     <div className="border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-900/20 rounded-lg mb-6">
       <div className="px-6 py-4 border-b border-orange-200 dark:border-orange-700">
@@ -52,4 +36,4 @@ export const SpecializedSphereSections: React.FC<SpecializedSphereSectionsProps>
       </div>
     </div>
   );
-};
+}

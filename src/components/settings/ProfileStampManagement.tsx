@@ -1,152 +1,269 @@
-
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FileImage, RefreshCw, Trash2, Upload } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast"
+import { api } from "@/services/api";
 import { useDropzone } from 'react-dropzone';
-import { Upload, Trash2, Eye } from "lucide-react";
-import { toast } from "sonner";
+import { HelpButton } from '../ui/help-button';
 
 interface ProfileStampManagementProps {
-  stampUrl?: string;
-  onStampUrlChange?: (url: string) => void;
-  isSubmitting?: boolean;
+  osteopathId: number | undefined;
+  isEditing: boolean;
 }
 
-export function ProfileStampManagement({ 
-  stampUrl, 
-  onStampUrlChange, 
-  isSubmitting 
-}: ProfileStampManagementProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(stampUrl || null);
-
+function DragDropStampUpload({ onFileSelect, isUploading }: { onFileSelect: (file: File) => void, isUploading: boolean }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+      'image/*': ['.png', '.jpg', '.jpeg']
     },
     maxFiles: 1,
-    onDrop: async (acceptedFiles) => {
-      if (acceptedFiles.length === 0) return;
-
-      const file = acceptedFiles[0];
-      setIsUploading(true);
-
-      try {
-        // Créer un aperçu local
-        const localPreview = URL.createObjectURL(file);
-        setPreviewUrl(localPreview);
-
-        // Pour l'instant, on simule l'upload
-        // Plus tard, cela sera remplacé par un vrai service d'upload
-        const uploadedUrl = localPreview;
-        
-        if (onStampUrlChange) {
-          onStampUrlChange(uploadedUrl);
-        }
-
-        toast.success("Tampon téléchargé avec succès");
-      } catch (error) {
-        console.error("Erreur upload tampon:", error);
-        toast.error("Erreur lors du téléchargement du tampon");
-        setPreviewUrl(stampUrl || null);
-      } finally {
-        setIsUploading(false);
+    onDrop: acceptedFiles => {
+      if (acceptedFiles && acceptedFiles.length > 0) {
+        onFileSelect(acceptedFiles[0]);
       }
-    }
+    },
+    disabled: isUploading,
   });
 
-  const handleDeleteStamp = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce tampon ?")) return;
+  return (
+    <div
+      {...getRootProps()}
+      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-muted-foreground'
+        }`}
+    >
+      <input {...getInputProps()} />
+      {isDragActive ? (
+        <p className="text-blue-500">Déposez l'image ici...</p>
+      ) : (
+        <>
+          <FileImage className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+          <p className="text-sm text-muted-foreground">
+            Cliquez ou glissez-déposez votre tampon ici (PNG, JPG, max 2MB)
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
 
-    try {
-      setPreviewUrl(null);
-      if (onStampUrlChange) {
-        onStampUrlChange("");
+export function ProfileStampManagement({ osteopathId, isEditing }: ProfileStampManagementProps) {
+  const [stampUrl, setStampUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const { toast } = useToast();
+
+  // Load stamp on mount if editing
+  useState(() => {
+    const loadStamp = async () => {
+      if (osteopathId) {
+        try {
+          const data = await api.getOsteopathById(osteopathId);
+          setStampUrl(data?.stampUrl || null);
+        } catch (error) {
+          console.error("Error fetching stamp:", error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de charger le tampon."
+          });
+        }
       }
-      toast.success("Tampon supprimé avec succès");
+    };
+    loadStamp();
+  }, [osteopathId, toast]);
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+  };
+
+  const handleUploadStamp = async () => {
+    if (!selectedFile || !osteopathId) return;
+
+    setIsUploading(true);
+    try {
+      const url = await api.uploadStamp(osteopathId, selectedFile);
+      setStampUrl(url);
+      setShowUpload(false);
+      setSelectedFile(null);
+      toast({
+        title: "Succès",
+        description: "Tampon mis à jour avec succès."
+      });
     } catch (error) {
-      console.error("Erreur suppression tampon:", error);
-      toast.error("Erreur lors de la suppression du tampon");
+      console.error("Error uploading stamp:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le tampon."
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteStamp = async () => {
+    if (!osteopathId) return;
+
+    setIsDeleting(true);
+    try {
+      await api.deleteStamp(osteopathId);
+      setStampUrl(null);
+      toast({
+        title: "Succès",
+        description: "Tampon supprimé avec succès."
+      });
+    } catch (error) {
+      console.error("Error deleting stamp:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer le tampon."
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Tampon numérique</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <FileImage className="h-5 w-5" />
+          Tampon professionnel
+          <HelpButton 
+            content="Uploadez votre tampon professionnel pour l'ajouter automatiquement sur vos factures et documents officiels. Format recommandé : PNG avec fond transparent."
+          />
+        </CardTitle>
         <CardDescription>
-          Téléchargez votre tampon pour l'ajouter automatiquement à vos factures
+          Gérez votre tampon professionnel pour les factures et documents
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Zone de drag & drop */}
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-            isDragActive 
-              ? 'border-primary bg-primary/5' 
-              : 'border-gray-300 hover:border-gray-400'
-          }`}
-        >
-          <input {...getInputProps()} />
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <p className="text-sm text-gray-600 mb-2">
-            Glissez-déposez votre tampon ici, ou cliquez pour sélectionner
-          </p>
-          <p className="text-xs text-gray-500">
-            PNG, JPG, JPEG, GIF ou WEBP - Max 5MB
-          </p>
-        </div>
-
-        {/* Aperçu du tampon */}
-        {previewUrl && (
-          <div className="space-y-3">
-            <Label>Aperçu du tampon</Label>
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <img 
-                src={previewUrl} 
-                alt="Aperçu du tampon" 
-                className="max-w-full max-h-32 mx-auto object-contain"
-              />
+        {stampUrl ? (
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-green-50">
+              <div className="flex-shrink-0">
+                <img 
+                  src={stampUrl} 
+                  alt="Tampon professionnel" 
+                  className="h-16 w-16 object-contain border rounded bg-white p-1"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-green-800 mb-1">
+                  Tampon configuré
+                </p>
+                <p className="text-xs text-green-600 break-all">
+                  {stampUrl.split('/').pop()}
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowUpload(true)}
+                  className="w-full sm:w-auto"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Modifier</span>
+                  <span className="sm:hidden">Changer</span>
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteStamp}
+                  disabled={isDeleting}
+                  className="w-full sm:w-auto"
+                >
+                  {isDeleting ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                  <span className="ml-2 hidden sm:inline">
+                    {isDeleting ? 'Suppression...' : 'Supprimer'}
+                  </span>
+                  <span className="ml-2 sm:hidden">
+                    {isDeleting ? '...' : 'Suppr.'}
+                  </span>
+                </Button>
+              </div>
             </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 border-2 border-dashed rounded-lg">
+            <FileImage className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-sm text-muted-foreground mb-4">
+              Aucun tampon configuré
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => setShowUpload(true)}
+              className="w-full sm:w-auto"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Ajouter un tampon
+            </Button>
+          </div>
+        )}
+
+        {/* Upload Dialog - responsive */}
+        <Dialog open={showUpload} onOpenChange={setShowUpload}>
+          <DialogContent className="max-w-md mx-4 sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>
+                {stampUrl ? 'Modifier le tampon' : 'Ajouter un tampon'}
+              </DialogTitle>
+              <DialogDescription>
+                Uploadez votre tampon professionnel (PNG recommandé, max 2MB)
+              </DialogDescription>
+            </DialogHeader>
             
-            {/* Actions sur le tampon */}
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(previewUrl, '_blank')}
-                className="w-full sm:w-auto flex items-center gap-2"
-              >
-                <Eye className="h-4 w-4" />
-                <span className="hidden sm:inline">Voir en grand</span>
-                <span className="sm:hidden">Voir</span>
-              </Button>
+            <div className="space-y-4">
+              <DragDropStampUpload
+                onFileSelect={handleFileSelect}
+                isUploading={isUploading}
+              />
               
-              <Button
-                type="button"
-                variant="destructive" 
-                size="sm"
-                onClick={handleDeleteStamp}
-                disabled={isUploading || isSubmitting}
-                className="w-full sm:w-auto flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Supprimer le tampon</span>
-                <span className="sm:hidden">Supprimer</span>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUpload(false)}
+                  className="w-full sm:w-auto"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleUploadStamp}
+                  disabled={!selectedFile || isUploading}
+                  className="w-full sm:w-auto"
+                >
+                  {isUploading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Upload...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      {stampUrl ? 'Modifier' : 'Ajouter'}
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          </DialogContent>
+        </Dialog>
 
-        {isUploading && (
-          <div className="text-center text-sm text-gray-600">
-            Téléchargement en cours...
-          </div>
-        )}
+        <div className="text-xs text-muted-foreground space-y-1">
+          <p>• Format recommandé: PNG avec fond transparent</p>
+          <p>• Taille maximale: 2MB</p>
+          <p>• Le tampon sera ajouté automatiquement sur vos factures</p>
+        </div>
       </CardContent>
     </Card>
   );
