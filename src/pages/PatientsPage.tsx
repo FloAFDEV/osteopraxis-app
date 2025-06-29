@@ -3,14 +3,14 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Plus, UserPlus } from "lucide-react";
-import { PatientSearch } from "@/components/patients/PatientSearch";
-import { PatientHeader } from "@/components/patients/PatientHeader";
-import { PatientPagination } from "@/components/patients/PatientPagination";
-import { PatientResultsSummary } from "@/components/patients/PatientResultsSummary";
-import { PatientLoadingState } from "@/components/patients/PatientLoadingState";
-import { EmptyPatientState } from "@/components/patients/EmptyPatientState";
-import { CabinetFilter } from "@/components/patients/CabinetFilter";
-import { AlphabetFilter } from "@/components/patients/AlphabetFilter";
+import PatientSearch from "@/components/patients/PatientSearch";
+import PatientHeader from "@/components/patients/PatientHeader";
+import PatientPagination from "@/components/patients/PatientPagination";
+import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
+import PatientLoadingState from "@/components/patients/PatientLoadingState";
+import EmptyPatientState from "@/components/patients/EmptyPatientState";
+import CabinetFilter from "@/components/patients/CabinetFilter";
+import AlphabetFilter from "@/components/patients/AlphabetFilter";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +27,7 @@ const PatientsPage = () => {
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedLetter, setSelectedLetter] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
-	const { cachePatients, getCachedPatient } = usePatientCache();
+	const { patients, loading, error, loadPatients, updatePatientInCache } = usePatientCache();
 
 	// Récupérer le cabinet sélectionné depuis le localStorage au démarrage
 	useEffect(() => {
@@ -38,13 +38,13 @@ const PatientsPage = () => {
 	}, []);
 
 	// Fetch patients with search and filtering
-	const { data: patientsData, isLoading, error } = useQuery({
+	const { data: patientsData, isLoading, error: queryError } = useQuery({
 		queryKey: ['patients', searchQuery, selectedCabinetId, selectedLetter],
 		queryFn: async () => {
 			let patients = await patientService.getPatients();
 			
-			// Mettre en cache les patients
-			cachePatients(patients);
+			// Update cache
+			patients.forEach(patient => updatePatientInCache(patient));
 			
 			// Filtrer par cabinet si sélectionné
 			if (selectedCabinetId) {
@@ -98,8 +98,8 @@ const PatientsPage = () => {
 		setCurrentPage(1);
 	}, [searchQuery, selectedCabinetId, selectedLetter]);
 
-	if (error) {
-		console.error("Error loading patients:", error);
+	if (queryError) {
+		console.error("Error loading patients:", queryError);
 		toast.error("Erreur lors du chargement des patients");
 	}
 
@@ -129,6 +129,7 @@ const PatientsPage = () => {
 					</div>
 					<div className="flex flex-col sm:flex-row gap-2">
 						<CabinetFilter 
+							cabinets={[]}
 							selectedCabinetId={selectedCabinetId}
 							onCabinetChange={setSelectedCabinetId}
 						/>
@@ -136,28 +137,35 @@ const PatientsPage = () => {
 				</div>
 
 				<AlphabetFilter 
-					selectedLetter={selectedLetter}
+					activeLetter={selectedLetter}
 					onLetterChange={setSelectedLetter}
 				/>
 
 				{/* Résumé des résultats */}
 				<PatientResultsSummary 
-					total={patientsData?.length || 0}
-					filtered={paginatedData.patients.length}
-					searchQuery={searchQuery}
-					selectedCabinetId={selectedCabinetId}
-					selectedLetter={selectedLetter}
+					patientCount={paginatedData.patients.length}
+					currentPage={currentPage}
+					totalPages={paginatedData.totalPages}
 				/>
 
 				{/* Liste des patients */}
 				<Card>
 					<CardContent className="p-0">
 						{isLoading ? (
-							<PatientLoadingState />
+							<PatientLoadingState 
+								isLoading={true}
+								error={null}
+								onRetry={() => {}}
+							/>
 						) : paginatedData.patients.length === 0 ? (
 							<EmptyPatientState 
 								searchQuery={searchQuery}
-								onNewPatient={handleNewPatient}
+								activeLetter={selectedLetter}
+								onClearFilter={() => {
+									setSearchQuery("");
+									setSelectedLetter("");
+								}}
+								onCreateTestPatient={() => {}}
 							/>
 						) : (
 							<div className="divide-y">
@@ -165,7 +173,6 @@ const PatientsPage = () => {
 									<PatientListItem 
 										key={patient.id}
 										patient={patient}
-										onClick={() => handlePatientClick(patient.id)}
 									/>
 								))}
 							</div>

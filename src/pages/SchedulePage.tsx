@@ -31,6 +31,13 @@ const SchedulePage = () => {
     enabled: !!user?.osteopathId
   });
 
+  // Fetch patients for name lookup
+  const { data: patientsData = [] } = useQuery({
+    queryKey: ['patients'],
+    queryFn: () => api.getPatients(),
+    enabled: !!user?.osteopathId
+  });
+
   // Combine appointments with Google events
   const combinedAppointments = useMemo(() => {
     const appointments = Array.isArray(appointmentsData) ? appointmentsData : [];
@@ -46,21 +53,24 @@ const SchedulePage = () => {
       reason: event.description || null,
     }));
 
-    // Map regular appointments
-    const mappedAppointments = appointments.map(apt => ({
-      id: apt.id,
-      date: apt.date,
-      status: apt.status,
-      isGoogleEvent: false,
-      patient: apt.patient,
-      reason: apt.reason,
-    }));
+    // Map regular appointments and add patient info
+    const mappedAppointments = appointments.map(apt => {
+      const patient = patientsData.find(p => p.id === apt.patientId);
+      return {
+        id: apt.id,
+        date: apt.date,
+        status: apt.status,
+        isGoogleEvent: false,
+        patient: patient || null,
+        reason: apt.reason,
+      };
+    });
 
     // Combine and sort by date
     return [...mappedAppointments, ...mappedGoogleEvents].sort((a, b) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
-  }, [appointmentsData, googleEvents]);
+  }, [appointmentsData, googleEvents, patientsData]);
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(weekStart);
@@ -120,7 +130,7 @@ const SchedulePage = () => {
         {appointment.isGoogleEvent ? (
           appointment.summary || 'Événement Google'
         ) : (
-          `${appointment.patient?.firstName} ${appointment.patient?.lastName}`
+          appointment.patient ? `${appointment.patient.firstName} ${appointment.patient.lastName}` : 'Patient inconnu'
         )}
       </div>
       

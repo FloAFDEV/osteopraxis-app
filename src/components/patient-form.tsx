@@ -85,7 +85,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
       behavior: patient?.behavior || null,
       childCareContext: patient?.childCareContext || null,
       allergies: patient?.allergies || null,
-      osteopathId: typeof patient?.osteopathId === 'string' ? Number(patient.osteopathId) : patient?.osteopathId || null,
+      osteopathId: patient?.osteopathId ? Number(patient.osteopathId) : null,
       ...patient
     }
   });

@@ -40,6 +40,9 @@ const NewPatientPage = () => {
 
 			const processedData = {
 				...data,
+				// Ensure required fields are present
+				email: data.email || null,
+				phone: data.phone || null,
 				// Utiliser le cabinetId du formulaire ou celui de la navbar ou 1 par défaut
 				cabinetId: data.cabinetId || selectedCabinetId || 1,
 				createdAt: new Date().toISOString(),
