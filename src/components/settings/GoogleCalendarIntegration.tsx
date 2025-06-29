@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Calendar, 
@@ -55,19 +55,22 @@ export function GoogleCalendarIntegration() {
 
       if (!osteopath) return;
 
-      const { data, error } = await supabase.rpc('check_google_api_keys', {
-        p_osteopath_id: osteopath.id
-      });
+      // Utiliser une requête directe plutôt que RPC pour l'instant
+      const { data, error } = await supabase
+        .from('google_api_keys')
+        .select('client_id, client_secret')
+        .eq('osteopath_id', osteopath.id)
+        .single();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Erreur lors de la vérification des clés API:', error);
         return;
       }
 
       if (data) {
         setExistingClientId(data.client_id || "");
-        setHasExistingSecret(data.has_secret || false);
-        setIsConnected(data.client_id && data.has_secret);
+        setHasExistingSecret(!!data.client_secret);
+        setIsConnected(!!(data.client_id && data.client_secret));
       }
     } catch (error) {
       console.error('Erreur:', error);
@@ -98,11 +101,19 @@ export function GoogleCalendarIntegration() {
 
       if (!osteopath) throw new Error("Profil ostéopathe non trouvé");
 
-      const { data, error } = await supabase.rpc('save_google_api_keys', {
-        p_osteopath_id: osteopath.id,
-        p_client_id: clientId,
-        p_client_secret: clientSecret || ''
-      });
+      // Insertion ou mise à jour directe
+      const updateData: any = {
+        osteopath_id: osteopath.id,
+        client_id: clientId,
+      };
+
+      if (clientSecret) {
+        updateData.client_secret = clientSecret;
+      }
+
+      const { error } = await supabase
+        .from('google_api_keys')
+        .upsert(updateData);
 
       if (error) throw error;
 
@@ -136,9 +147,10 @@ export function GoogleCalendarIntegration() {
 
       if (!osteopath) throw new Error("Profil ostéopathe non trouvé");
 
-      const { error } = await supabase.rpc('delete_google_api_keys', {
-        p_osteopath_id: osteopath.id
-      });
+      const { error } = await supabase
+        .from('google_api_keys')
+        .delete()
+        .eq('osteopath_id', osteopath.id);
 
       if (error) throw error;
 
@@ -408,9 +420,9 @@ export function GoogleCalendarIntegration() {
                     disabled={isLoading}
                     variant="destructive"
                     size="sm"
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto flex items-center gap-2"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4" />
                     <span className="hidden sm:inline">Supprimer la configuration</span>
                     <span className="sm:hidden">Supprimer</span>
                   </Button>

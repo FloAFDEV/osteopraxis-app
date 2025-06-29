@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Patient } from "@/types";
 import { GeneralTab } from "./patient-form/GeneralTab";
 import { ContactTab } from "./patient-form/ContactTab";
@@ -71,52 +71,52 @@ const PatientForm: React.FC<PatientFormProps> = ({
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             {/* Responsive tabs list */}
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 mb-6 h-auto p-1">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 mb-6 h-auto p-1 gap-1">
               <TabsTrigger 
                 value="general" 
-                className="text-xs sm:text-sm px-1 sm:px-3 py-2"
+                className="text-xs px-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <span className="hidden sm:inline">Général</span>
                 <span className="sm:hidden">Info</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="contact" 
-                className="text-xs sm:text-sm px-1 sm:px-3 py-2"
+                className="text-xs px-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <span className="hidden sm:inline">Contact</span>
                 <span className="sm:hidden">Tel</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="medical" 
-                className="text-xs sm:text-sm px-1 sm:px-3 py-2"
+                className="text-xs px-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <span className="hidden sm:inline">Médical</span>
                 <span className="sm:hidden">Méd</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="pediatric" 
-                className="text-xs sm:text-sm px-1 sm:px-3 py-2"
+                className="text-xs px-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <span className="hidden sm:inline">Pédiatrie</span>
                 <span className="sm:hidden">Péd</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="examinations" 
-                className="text-xs sm:text-sm px-1 sm:px-3 py-2"
+                className="text-xs px-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <span className="hidden sm:inline">Examens</span>
                 <span className="sm:hidden">Ex</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="additional" 
-                className="text-xs sm:text-sm px-1 sm:px-3 py-2"
+                className="text-xs px-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <span className="hidden sm:inline">Additionnel</span>
-                <span className="sm:hidden">+</span>
+                <span className="sm:hidden">Add</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="specialized" 
-                className="text-xs sm:text-sm px-1 sm:px-3 py-2"
+                className="text-xs px-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <span className="hidden sm:inline">Spécialisé</span>
                 <span className="sm:hidden">Sp</span>
@@ -124,31 +124,31 @@ const PatientForm: React.FC<PatientFormProps> = ({
             </TabsList>
 
             <TabsContent value="general">
-              <GeneralTab formData={formData} updateFormData={updateFormData} />
+              <GeneralTab patient={formData} updateFormData={updateFormData} />
             </TabsContent>
 
             <TabsContent value="contact">
-              <ContactTab formData={formData} updateFormData={updateFormData} />
+              <ContactTab patient={formData} updateFormData={updateFormData} />
             </TabsContent>
 
             <TabsContent value="medical">
-              <MedicalTab formData={formData} updateFormData={updateFormData} />
+              <MedicalTab patient={formData} updateFormData={updateFormData} />
             </TabsContent>
 
             <TabsContent value="pediatric">
-              <PediatricTab formData={formData} updateFormData={updateFormData} />
+              <PediatricTab patient={formData} updateFormData={updateFormData} />
             </TabsContent>
 
             <TabsContent value="examinations">
-              <ExaminationsTab formData={formData} updateFormData={updateFormData} />
+              <ExaminationsTab patient={formData} updateFormData={updateFormData} />
             </TabsContent>
 
             <TabsContent value="additional">
-              <AdditionalFieldsTab formData={formData} updateFormData={updateFormData} />
+              <AdditionalFieldsTab patient={formData} updateFormData={updateFormData} />
             </TabsContent>
 
             <TabsContent value="specialized">
-              <SpecializedFieldsTab formData={formData} updateFormData={updateFormData} />
+              <SpecializedFieldsTab patient={formData} updateFormData={updateFormData} />
             </TabsContent>
           </Tabs>
 
