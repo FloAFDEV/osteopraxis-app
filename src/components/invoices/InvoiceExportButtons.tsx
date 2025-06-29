@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Download, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { jsPDF } from 'jspdf';
@@ -5,17 +6,28 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useState } from "react";
-import { Invoice } from "@/services/api";
+
+// Interface simplifiée pour les factures
+interface SimpleInvoice {
+  id: number;
+  date: Date | string | null;
+  amount: number;
+  status: string;
+  patient?: {
+    firstName?: string;
+    lastName?: string;
+  };
+}
 
 interface InvoiceExportButtonsProps {
-  invoices: Invoice[];
+  invoices: SimpleInvoice[];
   selectedPeriod: { from: Date | null; to: Date | null } | null;
 }
 
 export function InvoiceExportButtons({ invoices, selectedPeriod }: InvoiceExportButtonsProps) {
   const [isExporting, setIsExporting] = useState(false);
 
-  const formatDate = (date: Date | null): string => {
+  const formatDate = (date: Date | string | null): string => {
     if (!date) return '';
     return new Date(date).toLocaleDateString('fr-FR');
   };
@@ -25,12 +37,12 @@ export function InvoiceExportButtons({ invoices, selectedPeriod }: InvoiceExport
     try {
       const doc = new jsPDF();
       const tableColumn = ["Date", "Patient", "Montant (€)", "Statut"];
-      const tableRows = [];
+      const tableRows: string[][] = [];
 
       invoices.forEach(invoice => {
         tableRows.push([
           formatDate(invoice.date),
-          `${invoice.patient?.firstName} ${invoice.patient?.lastName}`,
+          `${invoice.patient?.firstName || ''} ${invoice.patient?.lastName || ''}`.trim() || 'N/A',
           invoice.amount.toString(),
           invoice.status
         ]);
@@ -56,7 +68,7 @@ export function InvoiceExportButtons({ invoices, selectedPeriod }: InvoiceExport
     try {
       const data = invoices.map(invoice => ({
         Date: formatDate(invoice.date),
-        Patient: `${invoice.patient?.firstName} ${invoice.patient?.lastName}`,
+        Patient: `${invoice.patient?.firstName || ''} ${invoice.patient?.lastName || ''}`.trim() || 'N/A',
         Montant: invoice.amount,
         Statut: invoice.status,
       }));
