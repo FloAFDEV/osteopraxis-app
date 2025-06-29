@@ -1,4 +1,3 @@
-
 import PatientForm from "@/components/patient-form";
 import { Layout } from "@/components/ui/layout";
 import { patientService } from "@/services/api/patient-service";
@@ -44,13 +43,14 @@ const NewPatientPage = () => {
 				email: data.email || "",
 				phone: data.phone || "",
 				birthDate: data.birthDate || null,
-				behavior: data.behavior || null,
-				feeding: data.feeding || null,
-				sleepingPattern: data.sleepingPattern || null,
-				childCareContext: data.childCareContext || null,
-				birthDetails: data.birthDetails || null,
-				developmentMilestones: data.developmentMilestones || null,
-				pregnancyHistory: data.pregnancyHistory || null,
+				address: data.address || "",
+				behavior: data.behavior || "",
+				feeding: data.feeding || "",
+				sleepingPattern: data.sleepingPattern || "",
+				childCareContext: data.childCareContext || "",
+				birthDetails: data.birthDetails || "",
+				developmentMilestones: data.developmentMilestones || "",
+				pregnancyHistory: data.pregnancyHistory || "",
 				// Utiliser le cabinetId du formulaire ou celui de la navbar ou 1 par défaut
 				cabinetId: data.cabinetId || selectedCabinetId || 1,
 				createdAt: new Date().toISOString(),

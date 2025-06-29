@@ -21,14 +21,17 @@ import { patientService } from "@/services/api/patient-service";
 
 const PATIENTS_PER_PAGE = 20;
 
+type SortOption = "name" | "date" | "age";
+type ViewMode = "list" | "cards";
+
 const PatientsPage = () => {
 	const navigate = useNavigate();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedLetter, setSelectedLetter] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
-	const [sortBy, setSortBy] = useState<string>("name");
-	const [viewMode, setViewMode] = useState<string>("list");
+	const [sortBy, setSortBy] = useState<SortOption>("name");
+	const [viewMode, setViewMode] = useState<ViewMode>("list");
 	const { patients, loading, error, loadPatients, updatePatientInCache } = usePatientCache();
 
 	// Récupérer le cabinet sélectionné depuis le localStorage au démarrage
@@ -116,7 +119,11 @@ const PatientsPage = () => {
 	return (
 		<Layout>
 			<div className="space-y-6">
-				<PatientHeader />
+				<PatientHeader 
+					patientCount={patientsData?.length || 0}
+					isRefreshing={isLoading}
+					onRefresh={() => loadPatients(true)}
+				/>
 
 				{/* Filtres et recherche */}
 				<div className="flex flex-col lg:flex-row gap-4">

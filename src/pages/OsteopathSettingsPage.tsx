@@ -36,8 +36,10 @@ const OsteopathSettingsPage = () => {
           }
         } catch (error) {
           console.error("Error fetching osteopath data:", error);
-          toast.error("Erreur", {
-            description: "Impossible de charger les données du profil."
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les données du profil.",
+            variant: "destructive"
           });
         } finally {
           setLoading(false);
@@ -50,7 +52,8 @@ const OsteopathSettingsPage = () => {
   }, [user, toast]);
 
   const handleSuccess = () => {
-    toast.success("Succès", {
+    toast({
+      title: "Succès",
       description: "Profil mis à jour avec succès"
     });
     // Pas de redirection automatique - rester sur la page
@@ -106,14 +109,7 @@ const OsteopathSettingsPage = () => {
           <GoogleCalendarIntegration />
 
           {/* Profile & Billing Form */}
-          <ProfileBillingForm 
-            defaultValues={osteopath || {
-              name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
-            }}
-            osteopathId={osteopath?.id} 
-            isEditing={!!osteopath} 
-            onSuccess={handleSuccess} 
-          />
+          <ProfileBillingForm />
           
           <div className="flex justify-end">
             <button 

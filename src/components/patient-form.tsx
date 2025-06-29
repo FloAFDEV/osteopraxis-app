@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,7 +84,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
       behavior: patient?.behavior || null,
       childCareContext: patient?.childCareContext || null,
       allergies: patient?.allergies || null,
-      osteopathId: patient?.osteopathId ? Number(patient.osteopathId) : null,
+      osteopathId: patient?.osteopathId || null,
       ...patient
     }
   });
