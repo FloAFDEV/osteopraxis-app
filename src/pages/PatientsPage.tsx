@@ -115,7 +115,6 @@ const PatientsPage = () => {
 		<Layout>
 			<div className="space-y-6">
 				<PatientHeader 
-					onNewPatient={handleNewPatient}
 					totalPatients={patientsData?.length || 0}
 				/>
 
@@ -124,7 +123,7 @@ const PatientsPage = () => {
 					<div className="flex-1">
 						<PatientSearch 
 							searchQuery={searchQuery}
-							onSearchChange={setSearchQuery}
+							onSearchChange={(e) => setSearchQuery(e.target.value)}
 						/>
 					</div>
 					<div className="flex flex-col sm:flex-row gap-2">

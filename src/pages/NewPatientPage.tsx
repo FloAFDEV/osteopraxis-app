@@ -40,9 +40,16 @@ const NewPatientPage = () => {
 
 			const processedData = {
 				...data,
-				// Ensure required fields are present
-				email: data.email || null,
-				phone: data.phone || null,
+				// Ensure required fields are present - set default values for required fields
+				email: data.email || "",
+				phone: data.phone || "",
+				behavior: data.behavior || null,
+				feeding: data.feeding || null,
+				sleepingPattern: data.sleepingPattern || null,
+				childCareContext: data.childCareContext || null,
+				birthDetails: data.birthDetails || null,
+				developmentMilestones: data.developmentMilestones || null,
+				pregnancyHistory: data.pregnancyHistory || null,
 				// Utiliser le cabinetId du formulaire ou celui de la navbar ou 1 par défaut
 				cabinetId: data.cabinetId || selectedCabinetId || 1,
 				createdAt: new Date().toISOString(),
