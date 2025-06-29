@@ -1,3 +1,4 @@
+
 import PatientForm from "@/components/patient-form";
 import { Layout } from "@/components/ui/layout";
 import { patientService } from "@/services/api/patient-service";
@@ -44,6 +45,7 @@ const NewPatientPage = () => {
 				phone: data.phone || "",
 				birthDate: data.birthDate || null,
 				address: data.address || "",
+				gender: data.gender || null,
 				behavior: data.behavior || "",
 				feeding: data.feeding || "",
 				sleepingPattern: data.sleepingPattern || "",

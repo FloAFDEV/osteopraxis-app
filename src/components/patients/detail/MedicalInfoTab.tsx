@@ -1,21 +1,53 @@
 
-import React from 'react';
-import PatientForm from "@/components/patient-form";
+import React from "react";
 import { Patient } from "@/types";
+import { PatientFormValues } from "@/components/patient-form/types";
+import { MedicalAccordion } from "./MedicalAccordion";
+import { GroupedMedicalSections } from "./GroupedMedicalSections";
+import { ClinicalSections } from "./ClinicalSections";
+import { SpecializedSphereSections } from "./SpecializedSphereSections";
 
-interface MedicalInfoTabProps {
+export interface MedicalInfoTabProps {
   patient: Patient;
-  onSave: (data: Partial<Patient>) => Promise<void>;
+  onPatientUpdated: (updatedData: PatientFormValues) => Promise<void>;
+  selectedCabinetId?: number | null;
   isLoading?: boolean;
 }
 
-export const MedicalInfoTab = ({ patient, onSave, isLoading }: MedicalInfoTabProps) => {
+export const MedicalInfoTab: React.FC<MedicalInfoTabProps> = ({
+  patient,
+  onPatientUpdated,
+  selectedCabinetId,
+  isLoading = false
+}) => {
   return (
     <div className="space-y-6">
-      <PatientForm
+      {/* Antécédents médicaux groupés */}
+      <GroupedMedicalSections 
         patient={patient}
-        onSubmit={onSave}
-        onCancel={() => {}}
+        onPatientUpdated={onPatientUpdated}
+        isLoading={isLoading}
+      />
+
+      {/* Sections cliniques */}
+      <ClinicalSections 
+        patient={patient}
+        onPatientUpdated={onPatientUpdated}
+        isLoading={isLoading}
+      />
+
+      {/* Sphères spécialisées */}
+      <SpecializedSphereSections 
+        patient={patient}
+        onPatientUpdated={onPatientUpdated}
+        isLoading={isLoading}
+      />
+
+      {/* Accordion médical détaillé */}
+      <MedicalAccordion 
+        patient={patient}
+        onPatientUpdated={onPatientUpdated}
+        selectedCabinetId={selectedCabinetId}
         isLoading={isLoading}
       />
     </div>

@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProfileBillingForm } from "@/components/settings/ProfileBillingForm";
 import { GoogleCalendarIntegration } from "@/components/settings/GoogleCalendarIntegration";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { BackButton } from "@/components/ui/back-button";
 import { HelpButton } from "@/components/ui/help-button";
@@ -18,7 +18,6 @@ const OsteopathSettingsPage = () => {
   const [osteopath, setOsteopath] = useState(null);
   const [cabinetLogo, setCabinetLogo] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     const loadOsteopathData = async () => {
@@ -36,11 +35,7 @@ const OsteopathSettingsPage = () => {
           }
         } catch (error) {
           console.error("Error fetching osteopath data:", error);
-          toast({
-            title: "Erreur",
-            description: "Impossible de charger les données du profil.",
-            variant: "destructive"
-          });
+          toast.error("Impossible de charger les données du profil.");
         } finally {
           setLoading(false);
         }
@@ -49,13 +44,10 @@ const OsteopathSettingsPage = () => {
       }
     };
     loadOsteopathData();
-  }, [user, toast]);
+  }, [user]);
 
   const handleSuccess = () => {
-    toast({
-      title: "Succès",
-      description: "Profil mis à jour avec succès"
-    });
+    toast.success("Profil mis à jour avec succès");
     // Pas de redirection automatique - rester sur la page
   };
 

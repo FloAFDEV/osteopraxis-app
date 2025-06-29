@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from "react";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -21,17 +20,14 @@ import { patientService } from "@/services/api/patient-service";
 
 const PATIENTS_PER_PAGE = 20;
 
-type SortOption = "name" | "date" | "age";
-type ViewMode = "list" | "cards";
-
 const PatientsPage = () => {
 	const navigate = useNavigate();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedLetter, setSelectedLetter] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
-	const [sortBy, setSortBy] = useState<SortOption>("name");
-	const [viewMode, setViewMode] = useState<ViewMode>("list");
+	const [sortBy, setSortBy] = useState<"name" | "date" | "age">("name");
+	const [viewMode, setViewMode] = useState<"list" | "cards">("list");
 	const { patients, loading, error, loadPatients, updatePatientInCache } = usePatientCache();
 
 	// Récupérer le cabinet sélectionné depuis le localStorage au démarrage
