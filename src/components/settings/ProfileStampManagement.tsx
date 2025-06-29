@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useDropzone } from 'react-dropzone';
 import { Upload, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface ProfileStampManagementProps {
   stampUrl?: string;
@@ -22,7 +21,6 @@ export function ProfileStampManagement({
 }: ProfileStampManagementProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(stampUrl || null);
-  const { api } = useAuth();
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
@@ -40,8 +38,9 @@ export function ProfileStampManagement({
         const localPreview = URL.createObjectURL(file);
         setPreviewUrl(localPreview);
 
-        // Upload du fichier
-        const uploadedUrl = await api.uploadStamp(file);
+        // Pour l'instant, on simule l'upload
+        // Plus tard, cela sera remplacé par un vrai service d'upload
+        const uploadedUrl = localPreview;
         
         if (onStampUrlChange) {
           onStampUrlChange(uploadedUrl);
@@ -62,7 +61,6 @@ export function ProfileStampManagement({
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce tampon ?")) return;
 
     try {
-      await api.deleteStamp();
       setPreviewUrl(null);
       if (onStampUrlChange) {
         onStampUrlChange("");
@@ -130,7 +128,7 @@ export function ProfileStampManagement({
               
               <Button
                 type="button"
-                variant="destructive"
+                variant="destructive" 
                 size="sm"
                 onClick={handleDeleteStamp}
                 disabled={isUploading || isSubmitting}

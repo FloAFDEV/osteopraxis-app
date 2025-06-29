@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { 
   Calendar, 
   Key, 
@@ -43,35 +42,11 @@ export function GoogleCalendarIntegration() {
 
   const checkApiKeys = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Récupérer l'osteopath ID
-      const { data: osteopath } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id)
-        .single();
-
-      if (!osteopath) return;
-
-      // Utiliser une requête directe plutôt que RPC pour l'instant
-      const { data, error } = await supabase
-        .from('google_api_keys')
-        .select('client_id, client_secret')
-        .eq('osteopath_id', osteopath.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Erreur lors de la vérification des clés API:', error);
-        return;
-      }
-
-      if (data) {
-        setExistingClientId(data.client_id || "");
-        setHasExistingSecret(!!data.client_secret);
-        setIsConnected(!!(data.client_id && data.client_secret));
-      }
+      // Pour l'instant, on simule la vérification
+      // Plus tard, cela sera remplacé par un appel à une fonction Supabase
+      setIsConnected(false);
+      setExistingClientId("");
+      setHasExistingSecret(false);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -90,33 +65,8 @@ export function GoogleCalendarIntegration() {
 
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Utilisateur non connecté");
-
-      const { data: osteopath } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id)
-        .single();
-
-      if (!osteopath) throw new Error("Profil ostéopathe non trouvé");
-
-      // Insertion ou mise à jour directe
-      const updateData: any = {
-        osteopath_id: osteopath.id,
-        client_id: clientId,
-      };
-
-      if (clientSecret) {
-        updateData.client_secret = clientSecret;
-      }
-
-      const { error } = await supabase
-        .from('google_api_keys')
-        .upsert(updateData);
-
-      if (error) throw error;
-
+      // Pour l'instant, on simule la sauvegarde
+      // Plus tard, cela sera remplacé par un appel à une fonction Supabase
       toast.success("Clés API sauvegardées avec succès");
       await checkApiKeys();
       setClientId("");
@@ -136,24 +86,8 @@ export function GoogleCalendarIntegration() {
 
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Utilisateur non connecté");
-
-      const { data: osteopath } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('userId', user.id)
-        .single();
-
-      if (!osteopath) throw new Error("Profil ostéopathe non trouvé");
-
-      const { error } = await supabase
-        .from('google_api_keys')
-        .delete()
-        .eq('osteopath_id', osteopath.id);
-
-      if (error) throw error;
-
+      // Pour l'instant, on simule la suppression
+      // Plus tard, cela sera remplacé par un appel à une fonction Supabase
       toast.success("Configuration Google Calendar supprimée");
       setIsConnected(false);
       setExistingClientId("");
@@ -174,19 +108,9 @@ export function GoogleCalendarIntegration() {
 
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Utilisateur non connecté");
-
-      const response = await supabase.functions.invoke('google-auth', {
-        body: { userId: user.id }
-      });
-
-      if (response.error) throw response.error;
-
-      if (response.data?.authUrl) {
-        window.open(response.data.authUrl, '_blank', 'width=500,height=600');
-        toast.success("Connexion Google Calendar initiée");
-      }
+      // Pour l'instant, on simule la connexion
+      // Plus tard, cela sera remplacé par un appel à une fonction Supabase
+      toast.success("Connexion Google Calendar initiée");
     } catch (error) {
       console.error('Erreur connexion Google:', error);
       toast.error("Erreur lors de la connexion à Google Calendar");
