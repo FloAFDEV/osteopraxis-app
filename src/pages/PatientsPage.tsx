@@ -27,6 +27,8 @@ const PatientsPage = () => {
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedLetter, setSelectedLetter] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
+	const [sortBy, setSortBy] = useState<string>("name");
+	const [viewMode, setViewMode] = useState<string>("list");
 	const { patients, loading, error, loadPatients, updatePatientInCache } = usePatientCache();
 
 	// Récupérer le cabinet sélectionné depuis le localStorage au démarrage
@@ -114,9 +116,7 @@ const PatientsPage = () => {
 	return (
 		<Layout>
 			<div className="space-y-6">
-				<PatientHeader 
-					totalPatients={patientsData?.length || 0}
-				/>
+				<PatientHeader />
 
 				{/* Filtres et recherche */}
 				<div className="flex flex-col lg:flex-row gap-4">
@@ -124,6 +124,10 @@ const PatientsPage = () => {
 						<PatientSearch 
 							searchQuery={searchQuery}
 							onSearchChange={(e) => setSearchQuery(e.target.value)}
+							sortBy={sortBy}
+							onSortChange={setSortBy}
+							viewMode={viewMode}
+							onViewModeChange={setViewMode}
 						/>
 					</div>
 					<div className="flex flex-col sm:flex-row gap-2">

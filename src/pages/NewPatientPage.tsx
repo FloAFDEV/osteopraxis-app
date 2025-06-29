@@ -43,6 +43,7 @@ const NewPatientPage = () => {
 				// Ensure required fields are present - set default values for required fields
 				email: data.email || "",
 				phone: data.phone || "",
+				birthDate: data.birthDate || null,
 				behavior: data.behavior || null,
 				feeding: data.feeding || null,
 				sleepingPattern: data.sleepingPattern || null,
