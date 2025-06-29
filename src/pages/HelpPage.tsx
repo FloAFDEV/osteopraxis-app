@@ -1,436 +1,141 @@
-
+import React, { useState } from "react";
 import { Layout } from "@/components/ui/layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { HelpButton } from "@/components/ui/help-button";
-import { 
-  Building, 
-  Users, 
-  UserCheck, 
-  FileText, 
-  Calendar, 
-  HelpCircle,
-  ArrowRight,
-  CheckCircle,
-  AlertTriangle
+import {
+	Play,
+	Users,
+	Calendar,
+	FileText,
+	Settings,
+	HelpCircle,
 } from "lucide-react";
-import { BackButton } from "@/components/ui/back-button";
 
 const HelpPage = () => {
+  const [activeTab, setActiveTab] = useState("getting-started");
+
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-8">
-        <BackButton to="/dashboard" />
-        
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="mb-6">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <HelpCircle className="h-8 w-8 text-blue-500" />
-              Guide d'utilisation
-            </h1>
-            <HelpButton 
-              content="Ce guide complet vous explique comment utiliser toutes les fonctionnalités de l'application : gestion des cabinets, remplacements, patients et facturation. Parcourez les onglets pour découvrir chaque section."
-            />
-          </div>
+          <h1 className="text-3xl font-bold">Aide & Support</h1>
           <p className="text-muted-foreground mt-1">
-            Découvrez comment utiliser efficacement votre application de gestion
+            Trouvez des réponses à vos questions et apprenez à utiliser PatientHub
           </p>
         </div>
 
-        <Tabs defaultValue="cabinets" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="cabinets">Cabinets</TabsTrigger>
-            <TabsTrigger value="remplacements">Remplacements</TabsTrigger>
-            <TabsTrigger value="patients">Patients</TabsTrigger>
-            <TabsTrigger value="facturation">Facturation</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {/* Responsive tabs list */}
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 mb-6 h-auto p-1">
+            <TabsTrigger 
+              value="getting-started" 
+              className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+            >
+              <Play className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Démarrer</span>
+              <span className="sm:hidden">Start</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="patients" 
+              className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-pink-500 data-[state=active]:text-white"
+            >
+              <Users className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Patients</span>
+              <span className="sm:hidden">Pat</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="appointments" 
+              className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-purple-500 data-[state=active]:text-white"
+            >
+              <Calendar className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Séances</span>
+              <span className="sm:hidden">RDV</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="invoicing" 
+              className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-amber-500 data-[state=active]:text-white"
+            >
+              <FileText className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Facturation</span>
+              <span className="sm:hidden">Fact</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings" 
+              className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+            >
+              <Settings className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Paramètres</span>
+              <span className="sm:hidden">Param</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="faq" 
+              className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-indigo-500 data-[state=active]:text-white"
+            >
+              <HelpCircle className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">FAQ</span>
+              <span className="sm:hidden">?</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="cabinets" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5 text-blue-500" />
-                  Gestion des Cabinets
-                  <HelpButton 
-                    content="Les cabinets permettent de structurer votre pratique et de collaborer avec d'autres ostéopathes. Vous pouvez créer votre propre cabinet ou rejoindre un cabinet existant."
-                  />
-                </CardTitle>
-                <CardDescription>
-                  Comment créer et gérer vos cabinets avec plusieurs ostéopathes
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Scénario 1: Cabinet avec plusieurs ostéopathes
-                    <HelpButton 
-                      content="Configuration recommandée pour les cabinets de groupe où plusieurs ostéopathes travaillent ensemble et partagent une patientèle."
-                    />
-                  </h3>
-                  <div className="space-y-3 pl-6">
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">1</Badge>
-                      <div>
-                        <p className="font-medium">Premier ostéopathe</p>
-                        <p className="text-sm text-muted-foreground">
-                          Crée le cabinet avec toutes les informations (nom, adresse, etc.)
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">2</Badge>
-                      <div>
-                        <p className="font-medium">Autres ostéopathes</p>
-                        <p className="text-sm text-muted-foreground">
-                          S'associent au cabinet via "Paramètres" → "Collaborations" → "Associations Cabinet"
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">3</Badge>
-                      <div>
-                        <p className="font-medium">Partage des patients</p>
-                        <p className="text-sm text-muted-foreground">
-                          Tous les ostéopathes du cabinet peuvent voir et gérer les patients du cabinet
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Important :</strong> Seul le créateur du cabinet peut modifier les informations du cabinet (nom, adresse, etc.). 
-                    Les autres ostéopathes peuvent seulement s'associer ou se dissocier.
-                  </AlertDescription>
-                </Alert>
-
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Scénario 2: Ostéopathe en exercice libéral seul
-                    <HelpButton 
-                      content="Configuration pour les praticiens en exercice individuel qui gèrent leur cabinet de manière autonome."
-                    />
-                  </h3>
-                  <div className="space-y-3 pl-6">
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">1</Badge>
-                      <div>
-                        <p className="font-medium">Création simple</p>
-                        <p className="text-sm text-muted-foreground">
-                          Créez votre cabinet personnel avec vos informations
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">2</Badge>
-                      <div>
-                        <p className="font-medium">Gestion autonome</p>
-                        <p className="text-sm text-muted-foreground">
-                          Vous gérez seul vos patients et votre facturation
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="getting-started" className="space-y-4">
+            <h2 className="text-2xl font-semibold">Premiers pas</h2>
+            <p>Bienvenue sur PatientHub ! Voici quelques conseils pour démarrer :</p>
+            <ul className="list-disc list-inside">
+              <li>Créez votre premier patient</li>
+              <li>Ajoutez une séance à votre planning</li>
+              <li>Explorez les paramètres pour personnaliser votre expérience</li>
+            </ul>
           </TabsContent>
 
-          <TabsContent value="remplacements" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserCheck className="h-5 w-5 text-green-500" />
-                  Système de Remplacements
-                  <HelpButton 
-                    content="Le système de remplacements vous permet de déléguer temporairement vos patients à un collègue. Très utile pour les congés, formations ou absences."
-                  />
-                </CardTitle>
-                <CardDescription>
-                  Comment configurer et gérer vos remplacements
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Configuration d'un remplacement
-                    <HelpButton 
-                      content="Processus simple en 3 étapes pour mettre en place un remplacement temporaire avec un collègue."
-                    />
-                  </h3>
-                  <div className="space-y-3 pl-6">
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">1</Badge>
-                      <div>
-                        <p className="font-medium">Ostéopathe titulaire</p>
-                        <p className="text-sm text-muted-foreground">
-                          Va dans "Paramètres" → "Collaborations" → "Gestion des Remplacements"
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">2</Badge>
-                      <div>
-                        <p className="font-medium">Ajouter un remplaçant</p>
-                        <p className="text-sm text-muted-foreground">
-                          Sélectionne l'ostéopathe remplaçant (collègue du même cabinet ou autre ostéopathe autorisé)
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">3</Badge>
-                      <div>
-                        <p className="font-medium">Définir la période</p>
-                        <p className="text-sm text-muted-foreground">
-                          Optionnel : dates de début et fin, notes explicatives
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Pendant le remplacement
-                    <HelpButton 
-                      content="Droits et responsabilités du remplaçant pendant la période de remplacement active."
-                    />
-                  </h3>
-                  <div className="space-y-3 pl-6">
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">✓</Badge>
-                      <div>
-                        <p className="font-medium">Accès aux patients</p>
-                        <p className="text-sm text-muted-foreground">
-                          Le remplaçant peut voir et consulter les patients du titulaire
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">✓</Badge>
-                      <div>
-                        <p className="font-medium">Facturation</p>
-                        <p className="text-sm text-muted-foreground">
-                          Le remplaçant crée des factures au nom du titulaire (avec ses informations RPPS/SIRET)
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline">✓</Badge>
-                      <div>
-                        <p className="font-medium">Rendez-vous</p>
-                        <p className="text-sm text-muted-foreground">
-                          Le remplaçant peut créer et gérer les rendez-vous
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Important :</strong> Le remplaçant doit aussi avoir un profil complet dans l'application. 
-                    Les remplacements ne fonctionnent qu'entre ostéopathes du même cabinet ou ayant une autorisation spécifique.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
+          <TabsContent value="patients" className="space-y-4">
+            <h2 className="text-2xl font-semibold">Gestion des patients</h2>
+            <p>Apprenez à gérer efficacement vos patients :</p>
+            <ul className="list-disc list-inside">
+              <li>Ajouter, modifier et supprimer un patient</li>
+              <li>Consulter l'historique des séances</li>
+              <li>Gérer les informations médicales</li>
+            </ul>
           </TabsContent>
 
-          <TabsContent value="patients" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-purple-500" />
-                  Gestion des Patients
-                  <HelpButton 
-                    content="Système complet de gestion des dossiers patients avec historique médical, rendez-vous et facturation intégrés."
-                  />
-                </CardTitle>
-                <CardDescription>
-                  Comment ajouter et gérer vos patients efficacement
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    Création d'une fiche patient
-                    <HelpButton 
-                      content="Guide pour créer un nouveau dossier patient avec toutes les informations nécessaires."
-                    />
-                  </h3>
-                  <div className="space-y-2 pl-4">
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      L'email est <strong>facultatif</strong> - vous pouvez créer un patient sans adresse email
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Remplissez au minimum le nom, prénom et les informations pertinentes
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Les onglets pédiatriques apparaissent automatiquement pour les patients de moins de 18 ans
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    Partage des patients
-                    <HelpButton 
-                      content="Règles de visibilité et d'accès aux dossiers patients selon votre organisation (cabinet, remplacement, etc.)."
-                    />
-                  </h3>
-                  <div className="space-y-2 pl-4">
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Les patients sont rattachés soit à un ostéopathe personnel, soit à un cabinet
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Si rattachés au cabinet, tous les ostéopathes du cabinet peuvent les voir
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Les remplaçants peuvent accéder aux patients pendant leur période de remplacement
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="appointments" className="space-y-4">
+            <h2 className="text-2xl font-semibold">Gestion des séances</h2>
+            <p>Optimisez votre planning de séances :</p>
+            <ul className="list-disc list-inside">
+              <li>Ajouter, modifier et supprimer une séance</li>
+              <li>Gérer les rappels de séances</li>
+              <li>Visualiser votre planning hebdomadaire</li>
+            </ul>
           </TabsContent>
 
-          <TabsContent value="facturation" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-amber-500" />
-                  Facturation
-                  <HelpButton 
-                    content="Système de facturation conforme à la réglementation avec génération automatique de PDF et exports comptables."
-                  />
-                </CardTitle>
-                <CardDescription>
-                  Comprendre le système de facturation et les informations légales
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    Informations requises
-                    <HelpButton 
-                      content="Données obligatoires pour émettre des factures conformes à la réglementation française des professionnels de santé."
-                    />
-                  </h3>
-                  <div className="space-y-2 pl-4">
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      <strong>Numéro RPPS :</strong> Obligatoire pour la facturation professionnelle
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      <strong>SIRET :</strong> Numéro d'identification de votre activité
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      <strong>Code APE :</strong> Par défaut 8690F pour les ostéopathes
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      <strong>Tampon :</strong> Image de votre tampon professionnel pour les factures
-                    </p>
-                  </div>
-                </div>
+          <TabsContent value="invoicing" className="space-y-4">
+            <h2 className="text-2xl font-semibold">Facturation</h2>
+            <p>Gérez facilement vos factures :</p>
+            <ul className="list-disc list-inside">
+              <li>Créer et envoyer une facture</li>
+              <li>Suivre les paiements</li>
+              <li>Exporter vos données comptables</li>
+            </ul>
+          </TabsContent>
 
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    Génération PDF et exports
-                    <HelpButton 
-                      content="Fonctionnalités d'export pour vos factures : PDF individuels, exports comptables mensuels ou annuels au format Excel."
-                    />
-                  </h3>
-                  <div className="space-y-2 pl-4">
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      <strong>PDF facture :</strong> Génération automatique avec tampon et informations légales
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      <strong>Export comptable :</strong> Fichier Excel avec récapitulatif mensuel ou annuel
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      <strong>Filtres avancés :</strong> Par période, cabinet, ostéopathe ou statut de paiement
-                    </p>
-                  </div>
-                </div>
+          <TabsContent value="settings" className="space-y-4">
+            <h2 className="text-2xl font-semibold">Paramètres</h2>
+            <p>Personnalisez PatientHub selon vos besoins :</p>
+            <ul className="list-disc list-inside">
+              <li>Modifier votre profil</li>
+              <li>Gérer les paramètres de votre cabinet</li>
+              <li>Configurer les notifications</li>
+            </ul>
+          </TabsContent>
 
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    Facturation en remplacement
-                    <HelpButton 
-                      content="Spécificités de la facturation lors des remplacements : mentions légales automatiques et informations du titulaire."
-                    />
-                  </h3>
-                  <div className="space-y-2 pl-4">
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Les factures sont émises au nom du titulaire (ses RPPS/SIRET)
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Le remplaçant peut créer les factures mais elles portent l'identité du titulaire
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <ArrowRight className="h-3 w-3" />
-                      Mention légale du remplacement automatiquement ajoutée
-                    </p>
-                  </div>
-                </div>
-
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Rappel légal :</strong> Assurez-vous que vos informations RPPS et SIRET sont correctes. 
-                    Ces informations sont utilisées pour la facturation officielle et doivent être conformes à votre statut professionnel.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
+          <TabsContent value="faq" className="space-y-4">
+            <h2 className="text-2xl font-semibold">FAQ</h2>
+            <p>Réponses aux questions fréquemment posées :</p>
+            <ul className="list-disc list-inside">
+              <li>Comment créer un patient ?</li>
+              <li>Comment ajouter une séance ?</li>
+              <li>Comment exporter mes données comptables ?</li>
+            </ul>
           </TabsContent>
         </Tabs>
-
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800">
-          <CardHeader>
-            <CardTitle className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
-              Besoin d'aide supplémentaire ?
-              <HelpButton 
-                content="Cette section récapitule les différentes façons d'obtenir de l'aide dans l'application et les ressources disponibles."
-              />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-blue-700 dark:text-blue-300">
-            <p className="mb-4">
-              Si vous avez des questions spécifiques ou rencontrez des difficultés, n'hésitez pas à consulter 
-              les différentes sections de paramètres ou à contacter le support.
-            </p>
-            <div className="flex gap-4">
-              <Badge variant="outline" className="text-blue-600 border-blue-300">
-                💡 Astuce : Utilisez les boutons "?" dans l'interface pour des aides contextuelles
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   );

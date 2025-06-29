@@ -1,315 +1,715 @@
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import getPatientSchema from "@/utils/patient-form-helpers";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { AdditionalFieldsTab } from "./patient-form/AdditionalFieldsTab";
-import { ContactTab } from "./patient-form/ContactTab";
-import { ExaminationsTab } from "./patient-form/ExaminationsTab";
-import { GeneralTab } from "./patient-form/GeneralTab";
-import { MedicalTab } from "./patient-form/MedicalTab";
-import { PediatricTab } from "./patient-form/PediatricTab";
-import { SpecializedFieldsTab } from "./patient-form/SpecializedFieldsTab";
-import { PatientFormProps, PatientFormValues } from "./patient-form/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { api } from "@/services/api";
+import { Layout } from "@/components/ui/layout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  User,
+  Phone,
+  Heart,
+  Baby,
+  Stethoscope,
+  FileText,
+  ArrowLeft,
+  Save,
+  RefreshCw,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BackButton } from "@/components/ui/back-button";
+import { FancyLoader } from "@/components/ui/fancy-loader";
 
-export function PatientForm({
-	patient,
-	onSubmit,
-	onSave,
-	emailRequired = false, // Par défaut, email n'est pas obligatoire
-	selectedCabinetId,
-	isLoading = false,
-}: PatientFormProps) {
-	const [activeTab, setActiveTab] = useState("general");
-	const [childrenAgesInput, setChildrenAgesInput] = useState(
-		patient?.childrenAges ? patient.childrenAges.join(", ") : ""
-	);
-	const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
-		selectedCabinetId ? selectedCabinetId.toString() : null
-	);
+const patientSchema = z.object({
+  firstName: z.string().min(2, {
+    message: "Le prénom doit contenir au moins 2 caractères.",
+  }),
+  lastName: z.string().min(2, {
+    message: "Le nom doit contenir au moins 2 caractères.",
+  }),
+  email: z.string().email({
+    message: "Veuillez entrer une adresse email valide.",
+  }),
+  phone: z.string().min(10, {
+    message: "Le numéro de téléphone doit contenir au moins 10 chiffres.",
+  }),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  postalCode: z.string().optional(),
+  country: z.string().optional(),
+  birthDate: z.string().optional(),
+  birthPlace: z.string().optional(),
+  gender: z.string().optional(),
+  height: z.string().optional(),
+  weight: z.string().optional(),
+  bloodType: z.string().optional(),
+  medicalHistory: z.string().optional(),
+  allergies: z.string().optional(),
+  medications: z.string().optional(),
+  familyHistory: z.string().optional(),
+  notes: z.string().optional(),
+  occupation: z.string().optional(),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+  emergencyContactRelationship: z.string().optional(),
+  motherName: z.string().optional(),
+  fatherName: z.string().optional(),
+  siblings: z.string().optional(),
+  childhoodDiseases: z.string().optional(),
+  vaccinations: z.string().optional(),
+  delivery: z.string().optional(),
+  feeding: z.string().optional(),
+  motorSkills: z.string().optional(),
+  languageSkills: z.string().optional(),
+  socialSkills: z.string().optional(),
+  cognitiveSkills: z.string().optional(),
+  otherNotes: z.string().optional(),
+  reasonForConsultation: z.string().optional(),
+  examinationResults: z.string().optional(),
+  diagnosis: z.string().optional(),
+  treatmentPlan: z.string().optional(),
+  recommendations: z.string().optional(),
+  followUp: z.string().optional(),
+  additionalNotes: z.string().optional(),
+});
 
-	// Calcul de l'âge pour déterminer si c'est un enfant
-	const calculateAge = (birthDate: string | null) => {
-		if (!birthDate) return null;
-		const today = new Date();
-		const birth = new Date(birthDate);
-		let age = today.getFullYear() - birth.getFullYear();
-		const monthDiff = today.getMonth() - birth.getMonth();
-		if (
-			monthDiff < 0 ||
-			(monthDiff === 0 && today.getDate() < birth.getDate())
-		) {
-			age--;
-		}
-		return age;
-	};
+type PatientFormValues = z.infer<typeof patientSchema>;
 
-	const isChild = patient
-		? calculateAge(patient.birthDate) !== null &&
-		  calculateAge(patient.birthDate)! < 18
-		: false;
+interface PatientFormProps {
+  patient?: any;
+  isEditing?: boolean;
+}
 
-	const form = useForm<PatientFormValues>({
-		resolver: zodResolver(getPatientSchema(emailRequired)),
-		defaultValues: {
-			// Informations de base
-			firstName: patient?.firstName || "",
-			lastName: patient?.lastName || "",
-			email: patient?.email || "",
-			phone: patient?.phone || "",
-			// Convertir la date en string pour le formulaire
-			birthDate: patient?.birthDate
-				? new Date(patient.birthDate).toISOString().split("T")[0]
-				: null,
-			address: patient?.address || "",
+export default function PatientForm({ patient, isEditing = false }: PatientFormProps) {
+  const [activeTab, setActiveTab] = useState("general");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-			// Informations personnelles
-			gender: patient?.gender || null,
-			height: patient?.height || null,
-			weight: patient?.weight || null,
-			bmi: patient?.bmi || null,
-			cabinetId: patient?.cabinetId || selectedCabinetId || null,
-			maritalStatus: patient?.maritalStatus || null,
-			occupation: patient?.occupation || null,
-			hasChildren: patient?.hasChildren || null,
-			childrenAges: patient?.childrenAges || null,
+  const form = useForm<PatientFormValues>({
+    resolver: zodResolver(patientSchema),
+    defaultValues: {
+      firstName: patient?.firstName || "",
+      lastName: patient?.lastName || "",
+      email: patient?.email || "",
+      phone: patient?.phone || "",
+      address: patient?.address || "",
+      city: patient?.city || "",
+      postalCode: patient?.postalCode || "",
+      country: patient?.country || "",
+      birthDate: patient?.birthDate || "",
+      birthPlace: patient?.birthPlace || "",
+      gender: patient?.gender || "",
+      height: patient?.height || "",
+      weight: patient?.weight || "",
+      bloodType: patient?.bloodType || "",
+      medicalHistory: patient?.medicalHistory || "",
+      allergies: patient?.allergies || "",
+      medications: patient?.medications || "",
+      familyHistory: patient?.familyHistory || "",
+      notes: patient?.notes || "",
+      occupation: patient?.occupation || "",
+      emergencyContactName: patient?.emergencyContactName || "",
+      emergencyContactPhone: patient?.emergencyContactPhone || "",
+      emergencyContactRelationship: patient?.emergencyContactRelationship || "",
+      motherName: patient?.motherName || "",
+      fatherName: patient?.fatherName || "",
+      siblings: patient?.siblings || "",
+      childhoodDiseases: patient?.childhoodDiseases || "",
+      vaccinations: patient?.vaccinations || "",
+      delivery: patient?.delivery || "",
+      feeding: patient?.feeding || "",
+      motorSkills: patient?.motorSkills || "",
+      languageSkills: patient?.languageSkills || "",
+      socialSkills: patient?.socialSkills || "",
+      cognitiveSkills: patient?.cognitiveSkills || "",
+      otherNotes: patient?.otherNotes || "",
+      reasonForConsultation: patient?.reasonForConsultation || "",
+      examinationResults: patient?.examinationResults || "",
+      diagnosis: patient?.diagnosis || "",
+      treatmentPlan: patient?.treatmentPlan || "",
+      recommendations: patient?.recommendations || "",
+      followUp: patient?.followUp || "",
+      additionalNotes: patient?.additionalNotes || "",
+    },
+  });
 
-			// Médecins et santé
-			generalPractitioner: patient?.generalPractitioner || null,
-			surgicalHistory: patient?.surgicalHistory || null,
-			traumaHistory: patient?.traumaHistory || null,
-			rheumatologicalHistory: patient?.rheumatologicalHistory || null,
-			currentTreatment: patient?.currentTreatment || null,
-			handedness: patient?.handedness || null,
-			hasVisionCorrection: patient?.hasVisionCorrection || false,
-			ophtalmologistName: patient?.ophtalmologistName || null,
-			entProblems: patient?.entProblems || null,
-			entDoctorName: patient?.entDoctorName || null,
-			digestiveProblems: patient?.digestiveProblems || null,
-			digestiveDoctorName: patient?.digestiveDoctorName || null,
-			physicalActivity: patient?.physicalActivity || null,
+  useEffect(() => {
+    if (patient) {
+      form.reset(patient);
+    }
+  }, [patient, form]);
 
-			// Tabagisme - utiliser les bonnes propriétés
-			isSmoker: patient?.isSmoker || false,
-			isExSmoker: patient?.isExSmoker || false,
-			smokingSince: patient?.smokingSince || null,
-			smokingAmount: patient?.smokingAmount || null,
-			quitSmokingDate: patient?.quitSmokingDate || null,
+  const { handleSubmit } = form;
 
-			// Contraception et statut familial
-			contraception: patient?.contraception || null,
-			familyStatus: patient?.familyStatus || null,
+  async function onSubmit(values: PatientFormValues) {
+    setLoading(true);
+    try {
+      if (isEditing) {
+        if (!id) {
+          toast({
+            title: "Erreur",
+            description: "Impossible de mettre à jour le patient.",
+          });
+          return;
+        }
+        await api.updatePatient(id, values);
+        toast({
+          title: "Succès",
+          description: "Patient mis à jour avec succès.",
+        });
+      } else {
+        await api.createPatient(values);
+        toast({
+          title: "Succès",
+          description: "Patient créé avec succès.",
+        });
+        navigate("/patients");
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la sauvegarde.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
 
-			// Examens et symptômes
-			complementaryExams: patient?.complementaryExams || null,
-			generalSymptoms: patient?.generalSymptoms || null,
-			allergies:
-				patient?.allergies && patient.allergies !== "NULL"
-					? patient.allergies
-					: "",
+  if (loading) {
+    return <FancyLoader message="Sauvegarde en cours..." />;
+  }
 
-			// Historique de grossesse et développement (enfants)
-			pregnancyHistory: patient?.pregnancyHistory || null,
-			birthDetails: patient?.birthDetails || null,
-			developmentMilestones: patient?.developmentMilestones || null,
-			sleepingPattern: patient?.sleepingPattern || null,
-			feeding: patient?.feeding || null,
-			behavior: patient?.behavior || null,
-			childCareContext: patient?.childCareContext || null,
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">
+              {isEditing ? "Modifier le patient" : "Nouveau patient"}
+            </h1>
+            <p className="text-muted-foreground">
+              {isEditing
+                ? "Modifiez les informations du patient."
+                : "Ajoutez un nouveau patient à votre liste."}
+            </p>
+          </div>
+          <BackButton to="/patients" />
+        </div>
 
-			// Nouveaux champs généraux
-			ent_followup: patient?.ent_followup || null,
-			intestinal_transit: patient?.intestinal_transit || null,
-			sleep_quality: patient?.sleep_quality || null,
-			fracture_history: patient?.fracture_history || null,
-			dental_health: patient?.dental_health || null,
-			sport_frequency: patient?.sport_frequency || null,
-			gynecological_history: patient?.gynecological_history || null,
-			other_comments_adult: patient?.other_comments_adult || null,
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-6 h-auto">
+                  <TabsTrigger 
+                    value="general" 
+                    className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+                  >
+                    <User className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Général</span>
+                    <span className="sm:hidden">Info</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="contact" 
+                    className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                  >
+                    <Phone className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Contact</span>
+                    <span className="sm:hidden">Tel</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="medical" 
+                    className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-red-500 data-[state=active]:text-white"
+                  >
+                    <Heart className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Médical</span>
+                    <span className="sm:hidden">Med</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="pediatric" 
+                    className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-purple-500 data-[state=active]:text-white"
+                  >
+                    <Baby className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Pédiatrie</span>
+                    <span className="sm:hidden">Péd</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="examinations" 
+                    className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-amber-500 data-[state=active]:text-white"
+                  >
+                    <Stethoscope className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Examens</span>
+                    <span className="sm:hidden">Exam</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="additional" 
+                    className="text-xs sm:text-sm px-2 py-2 data-[state=active]:bg-indigo-500 data-[state=active]:text-white"
+                  >
+                    <FileText className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Autre</span>
+                    <span className="sm:hidden">+</span>
+                  </TabsTrigger>
+                </TabsList>
 
-			// Nouveaux champs spécifiques aux enfants
-			fine_motor_skills: patient?.fine_motor_skills || null,
-			gross_motor_skills: patient?.gross_motor_skills || null,
-			weight_at_birth: patient?.weight_at_birth || null,
-			height_at_birth: patient?.height_at_birth || null,
-			head_circumference: patient?.head_circumference || null,
-			apgar_score: patient?.apgar_score || null,
-			childcare_type: patient?.childcare_type || null,
-			school_grade: patient?.school_grade || null,
-			pediatrician_name: patient?.pediatrician_name || null,
-			paramedical_followup: patient?.paramedical_followup || null,
-			other_comments_child: patient?.other_comments_child || null,
+                <TabsContent value="general" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">Prénom</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="Prénom"
+                        {...form.register("firstName")}
+                      />
+                      {form.formState.errors.firstName && (
+                        <p className="text-red-500 text-sm">
+                          {form.formState.errors.firstName.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Nom</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder="Nom"
+                        {...form.register("lastName")}
+                      />
+                      {form.formState.errors.lastName && (
+                        <p className="text-red-500 text-sm">
+                          {form.formState.errors.lastName.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="birthDate">Date de naissance</Label>
+                      <Input
+                        id="birthDate"
+                        type="date"
+                        {...form.register("birthDate")}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="birthPlace">Lieu de naissance</Label>
+                      <Input
+                        id="birthPlace"
+                        type="text"
+                        placeholder="Lieu de naissance"
+                        {...form.register("birthPlace")}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="gender">Genre</Label>
+                      <Select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sélectionner un genre" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Homme</SelectItem>
+                          <SelectItem value="female">Femme</SelectItem>
+                          <SelectItem value="other">Autre</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </TabsContent>
 
-			// Champs cliniques
-			diagnosis: patient?.diagnosis || null,
-			medical_examination: patient?.medical_examination || null,
-			treatment_plan: patient?.treatment_plan || null,
-			consultation_conclusion: patient?.consultation_conclusion || null,
-			cardiac_history: patient?.cardiac_history || null,
-			pulmonary_history: patient?.pulmonary_history || null,
-			pelvic_history: patient?.pelvic_history || null,
-			neurological_history: patient?.neurological_history || null,
-			neurodevelopmental_history:
-				patient?.neurodevelopmental_history || null,
-			cranial_nerve_exam: patient?.cranial_nerve_exam || null,
-			dental_exam: patient?.dental_exam || null,
-			cranial_exam: patient?.cranial_exam || null,
-			lmo_tests: patient?.lmo_tests || null,
-			cranial_membrane_exam: patient?.cranial_membrane_exam || null,
-			musculoskeletal_history: patient?.musculoskeletal_history || null,
-			lower_limb_exam: patient?.lower_limb_exam || null,
-			upper_limb_exam: patient?.upper_limb_exam || null,
-			shoulder_exam: patient?.shoulder_exam || null,
-			scoliosis: patient?.scoliosis || null,
-			facial_mask_exam: patient?.facial_mask_exam || null,
-			fascia_exam: patient?.fascia_exam || null,
-			vascular_exam: patient?.vascular_exam || null,
-		},
-	});
+                <TabsContent value="contact" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Email"
+                        {...form.register("email")}
+                      />
+                      {form.formState.errors.email && (
+                        <p className="text-red-500 text-sm">
+                          {form.formState.errors.email.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Téléphone</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Téléphone"
+                        {...form.register("phone")}
+                      />
+                      {form.formState.errors.phone && (
+                        <p className="text-red-500 text-sm">
+                          {form.formState.errors.phone.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="address">Adresse</Label>
+                    <Input
+                      id="address"
+                      type="text"
+                      placeholder="Adresse"
+                      {...form.register("address")}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="city">Ville</Label>
+                      <Input
+                        id="city"
+                        type="text"
+                        placeholder="Ville"
+                        {...form.register("city")}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="postalCode">Code postal</Label>
+                      <Input
+                        id="postalCode"
+                        type="text"
+                        placeholder="Code postal"
+                        {...form.register("postalCode")}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="country">Pays</Label>
+                      <Input
+                        id="country"
+                        type="text"
+                        placeholder="Pays"
+                        {...form.register("country")}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
 
-	const handleSubmit = async (data: PatientFormValues) => {
-		try {
-			console.log("Form data being submitted:", data);
+                <TabsContent value="medical" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="height">Taille (cm)</Label>
+                      <Input
+                        id="height"
+                        type="number"
+                        placeholder="Taille (cm)"
+                        {...form.register("height")}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="weight">Poids (kg)</Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        placeholder="Poids (kg)"
+                        {...form.register("weight")}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="bloodType">Groupe sanguin</Label>
+                    <Input
+                      id="bloodType"
+                      type="text"
+                      placeholder="Groupe sanguin"
+                      {...form.register("bloodType")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="medicalHistory">Antécédents médicaux</Label>
+                    <Textarea
+                      id="medicalHistory"
+                      placeholder="Antécédents médicaux"
+                      {...form.register("medicalHistory")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="allergies">Allergies</Label>
+                    <Textarea
+                      id="allergies"
+                      placeholder="Allergies"
+                      {...form.register("allergies")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="medications">Médicaments</Label>
+                    <Textarea
+                      id="medications"
+                      placeholder="Médicaments"
+                      {...form.register("medications")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="familyHistory">Antécédents familiaux</Label>
+                    <Textarea
+                      id="familyHistory"
+                      placeholder="Antécédents familiaux"
+                      {...form.register("familyHistory")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="notes">Notes</Label>
+                    <Textarea
+                      id="notes"
+                      placeholder="Notes"
+                      {...form.register("notes")}
+                    />
+                  </div>
+                </TabsContent>
 
-			// Traiter les âges des enfants depuis l'input
-			if (data.hasChildren === "true" && childrenAgesInput.trim()) {
-				const ages = childrenAgesInput
-					.split(",")
-					.map((age) => parseInt(age.trim()))
-					.filter((age) => !isNaN(age));
-				data.childrenAges = ages.length > 0 ? ages : null;
-			} else {
-				data.childrenAges = null;
-			}
+                <TabsContent value="pediatric" className="space-y-4">
+                  <div>
+                    <Label htmlFor="motherName">Nom de la mère</Label>
+                    <Input
+                      id="motherName"
+                      type="text"
+                      placeholder="Nom de la mère"
+                      {...form.register("motherName")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fatherName">Nom du père</Label>
+                    <Input
+                      id="fatherName"
+                      type="text"
+                      placeholder="Nom du père"
+                      {...form.register("fatherName")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="siblings">Frères et sœurs</Label>
+                    <Input
+                      id="siblings"
+                      type="text"
+                      placeholder="Frères et sœurs"
+                      {...form.register("siblings")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="childhoodDiseases">Maladies infantiles</Label>
+                    <Textarea
+                      id="childhoodDiseases"
+                      placeholder="Maladies infantiles"
+                      {...form.register("childhoodDiseases")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="vaccinations">Vaccinations</Label>
+                    <Textarea
+                      id="vaccinations"
+                      placeholder="Vaccinations"
+                      {...form.register("vaccinations")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="delivery">Accouchement</Label>
+                    <Textarea
+                      id="delivery"
+                      placeholder="Accouchement"
+                      {...form.register("delivery")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="feeding">Alimentation</Label>
+                    <Textarea
+                      id="feeding"
+                      placeholder="Alimentation"
+                      {...form.register("feeding")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="motorSkills">Motricité</Label>
+                    <Textarea
+                      id="motorSkills"
+                      placeholder="Motricité"
+                      {...form.register("motorSkills")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="languageSkills">Langage</Label>
+                    <Textarea
+                      id="languageSkills"
+                      placeholder="Langage"
+                      {...form.register("languageSkills")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="socialSkills">Sociabilité</Label>
+                    <Textarea
+                      id="socialSkills"
+                      placeholder="Sociabilité"
+                      {...form.register("socialSkills")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cognitiveSkills">Cognition</Label>
+                    <Textarea
+                      id="cognitiveSkills"
+                      placeholder="Cognition"
+                      {...form.register("cognitiveSkills")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="otherNotes">Autres notes</Label>
+                    <Textarea
+                      id="otherNotes"
+                      placeholder="Autres notes"
+                      {...form.register("otherNotes")}
+                    />
+                  </div>
+                </TabsContent>
 
-			if (onSubmit) {
-				await onSubmit(data);
-			} else if (onSave) {
-				await onSave(data);
-			}
-		} catch (error) {
-			console.error("Error submitting form:", error);
-		}
-	};
+                <TabsContent value="examinations" className="space-y-4">
+                  <div>
+                    <Label htmlFor="reasonForConsultation">Motif de consultation</Label>
+                    <Textarea
+                      id="reasonForConsultation"
+                      placeholder="Motif de consultation"
+                      {...form.register("reasonForConsultation")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="examinationResults">Résultats de l'examen</Label>
+                    <Textarea
+                      id="examinationResults"
+                      placeholder="Résultats de l'examen"
+                      {...form.register("examinationResults")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="diagnosis">Diagnostique</Label>
+                    <Textarea
+                      id="diagnosis"
+                      placeholder="Diagnostique"
+                      {...form.register("diagnosis")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="treatmentPlan">Plan de traitement</Label>
+                    <Textarea
+                      id="treatmentPlan"
+                      placeholder="Plan de traitement"
+                      {...form.register("treatmentPlan")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="recommendations">Recommandations</Label>
+                    <Textarea
+                      id="recommendations"
+                      placeholder="Recommandations"
+                      {...form.register("recommendations")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="followUp">Suivi</Label>
+                    <Textarea
+                      id="followUp"
+                      placeholder="Suivi"
+                      {...form.register("followUp")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="additionalNotes">Notes supplémentaires</Label>
+                    <Textarea
+                      id="additionalNotes"
+                      placeholder="Notes supplémentaires"
+                      {...form.register("additionalNotes")}
+                    />
+                  </div>
+                </TabsContent>
 
-	const tabs = [
-		{ id: "general", label: "Général", icon: "👤" },
-		{ id: "contact", label: "Contact", icon: "📞" },
-		{ id: "medical", label: "Médical", icon: "🏥" },
-		{ id: "examinations", label: "Examens", icon: "🔬" },
-		...(isChild
-			? [{ id: "pediatric", label: "Pédiatrie", icon: "👶" }]
-			: []),
-		{ id: "additional", label: "Supplémentaire", icon: "📋" },
-		{ id: "specialized", label: "Sphères spéc.", icon: "🩺" },
-	];
+                <TabsContent value="additional" className="space-y-4">
+                  <div>
+                    <Label htmlFor="occupation">Profession</Label>
+                    <Input
+                      id="occupation"
+                      type="text"
+                      placeholder="Profession"
+                      {...form.register("occupation")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="emergencyContactName">Nom du contact d'urgence</Label>
+                    <Input
+                      id="emergencyContactName"
+                      type="text"
+                      placeholder="Nom du contact d'urgence"
+                      {...form.register("emergencyContactName")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="emergencyContactPhone">Téléphone du contact d'urgence</Label>
+                    <Input
+                      id="emergencyContactPhone"
+                      type="tel"
+                      placeholder="Téléphone du contact d'urgence"
+                      {...form.register("emergencyContactPhone")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="emergencyContactRelationship">
+                      Relation avec le contact d'urgence
+                    </Label>
+                    <Input
+                      id="emergencyContactRelationship"
+                      type="text"
+                      placeholder="Relation avec le contact d'urgence"
+                      {...form.register("emergencyContactRelationship")}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
 
-	return (
-		<Card className="w-full">
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
-					{patient ? "Modifier" : "Ajouter"} un patient
-					{isChild && (
-						<span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-							Enfant
-						</span>
-					)}
-				</CardTitle>
-				<CardDescription>
-					{patient
-						? `Modification des informations de ${patient.firstName} ${patient.lastName}`
-						: "Saisissez les informations du nouveau patient"}
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(handleSubmit)}
-						className="space-y-6"
-					>
-						<Tabs value={activeTab} onValueChange={setActiveTab}>
-							<TabsList className="grid w-full grid-cols-6 lg:grid-cols-6">
-								{tabs.map((tab) => (
-									<TabsTrigger
-										key={tab.id}
-										value={tab.id}
-										className="text-xs"
-									>
-										<span className="hidden sm:inline">
-											{tab.icon}
-										</span>
-										<span className="ml-1">
-											{tab.label}
-										</span>
-									</TabsTrigger>
-								))}
-							</TabsList>
-
-							<TabsContent value="general">
-								<GeneralTab
-									form={form}
-									childrenAgesInput={childrenAgesInput}
-									setChildrenAgesInput={setChildrenAgesInput}
-									currentCabinetId={currentCabinetId}
-									setCurrentCabinetId={setCurrentCabinetId}
-								/>
-							</TabsContent>
-
-							<TabsContent value="contact">
-								<ContactTab form={form} emailRequired={false} />
-							</TabsContent>
-
-							<TabsContent value="medical">
-								<MedicalTab form={form} isChild={isChild} />
-							</TabsContent>
-
-							<TabsContent value="examinations">
-								<ExaminationsTab form={form} />
-							</TabsContent>
-
-							{isChild && (
-								<TabsContent value="pediatric">
-									<PediatricTab form={form} />
-								</TabsContent>
-							)}
-
-							<TabsContent value="additional">
-								<AdditionalFieldsTab
-									form={form}
-									isChild={isChild}
-								/>
-							</TabsContent>
-
-							<TabsContent value="specialized">
-								<SpecializedFieldsTab form={form} />
-							</TabsContent>
-						</Tabs>
-
-						<div className="flex justify-end gap-2 pt-6 border-t">
-							<Button
-								type="submit"
-								disabled={isLoading}
-								className="min-w-[120px]"
-							>
-								{isLoading
-									? "Enregistrement..."
-									: patient
-									? "Mettre à jour"
-									: "Enregistrer"}
-							</Button>
-						</div>
-					</form>
-				</Form>
-			</CardContent>
-		</Card>
-	);
+          <div className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/patients")}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Annuler
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isEditing ? "Mettre à jour" : "Enregistrer"}
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </Layout>
+  );
 }
