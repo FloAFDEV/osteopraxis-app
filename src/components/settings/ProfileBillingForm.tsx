@@ -26,7 +26,7 @@ export function ProfileBillingForm() {
     // Initialize form with user data if available
     if (user) {
       setFormData({
-        name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
         professional_title: "Ostéopathe D.O.",
         rpps_number: "",
         siret: "",

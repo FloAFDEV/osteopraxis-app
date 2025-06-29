@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,7 +85,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
       behavior: patient?.behavior || null,
       childCareContext: patient?.childCareContext || null,
       allergies: patient?.allergies || null,
-      osteopathId: typeof patient?.osteopathId === 'string' ? parseInt(patient.osteopathId) : patient?.osteopathId || null,
+      osteopathId: typeof patient?.osteopathId === 'string' ? Number(patient.osteopathId) : patient?.osteopathId || null,
       ...patient
     }
   });
@@ -115,7 +116,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
       const processedData = {
         ...data,
         childrenAges: processedChildrenAges,
-        cabinetId: currentCabinetId ? parseInt(currentCabinetId) : null,
+        cabinetId: currentCabinetId ? Number(currentCabinetId) : null,
+        osteopathId: data.osteopathId ? Number(data.osteopathId) : null,
       };
 
       await onSubmit(processedData);
