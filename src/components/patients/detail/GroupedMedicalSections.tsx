@@ -1,14 +1,33 @@
 
 import React from "react";
+import { Patient } from "@/types";
+import { PatientFormValues } from "@/components/patient-form/types";
 
 interface GroupedMedicalSectionsProps {
-  groupedSections: Array<{
-    group: string;
-    icon: React.ReactNode;
-    items: { label: string; value: string | null | undefined }[];
-  }>;
+  patient: Patient;
+  onPatientUpdated: (updatedData: PatientFormValues) => Promise<void>;
+  isLoading?: boolean;
 }
-export function GroupedMedicalSections({ groupedSections }: GroupedMedicalSectionsProps) {
+
+export const GroupedMedicalSections: React.FC<GroupedMedicalSectionsProps> = ({
+  patient,
+  onPatientUpdated,
+  isLoading = false
+}) => {
+  const groupedSections = [
+    {
+      group: "Antécédents médicaux",
+      icon: <span>🏥</span>,
+      items: [
+        { label: "Médecin traitant", value: patient.generalPractitioner },
+        { label: "Antécédents chirurgicaux", value: patient.surgicalHistory },
+        { label: "Antécédents traumatiques", value: patient.traumaHistory },
+        { label: "Antécédents rhumatologiques", value: patient.rheumatologicalHistory },
+        { label: "Traitement en cours", value: patient.currentTreatment },
+      ]
+    }
+  ];
+
   return (
     <>
       {groupedSections.map(g =>
@@ -40,4 +59,4 @@ export function GroupedMedicalSections({ groupedSections }: GroupedMedicalSectio
       )}
     </>
   );
-}
+};

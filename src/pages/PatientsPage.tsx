@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from "react";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -20,13 +21,15 @@ import { patientService } from "@/services/api/patient-service";
 
 const PATIENTS_PER_PAGE = 20;
 
+type SortBy = "name" | "date" | "age";
+
 const PatientsPage = () => {
 	const navigate = useNavigate();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedLetter, setSelectedLetter] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
-	const [sortBy, setSortBy] = useState<"name" | "date" | "age">("name");
+	const [sortBy, setSortBy] = useState<SortBy>("name");
 	const [viewMode, setViewMode] = useState<"list" | "cards">("list");
 	const { patients, loading, error, loadPatients, updatePatientInCache } = usePatientCache();
 
