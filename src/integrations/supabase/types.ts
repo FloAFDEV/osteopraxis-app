@@ -235,100 +235,6 @@ export type Database = {
           },
         ]
       }
-      google_calendar_events: {
-        Row: {
-          created_at: string
-          description: string | null
-          end_time: string
-          google_event_id: string
-          id: string
-          last_modified: string | null
-          location: string | null
-          osteopath_id: number
-          start_time: string
-          status: string | null
-          summary: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          end_time: string
-          google_event_id: string
-          id?: string
-          last_modified?: string | null
-          location?: string | null
-          osteopath_id: number
-          start_time: string
-          status?: string | null
-          summary?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          end_time?: string
-          google_event_id?: string
-          id?: string
-          last_modified?: string | null
-          location?: string | null
-          osteopath_id?: number
-          start_time?: string
-          status?: string | null
-          summary?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "google_calendar_events_osteopath_id_fkey"
-            columns: ["osteopath_id"]
-            isOneToOne: false
-            referencedRelation: "Osteopath"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      google_calendar_tokens: {
-        Row: {
-          access_token: string
-          created_at: string
-          expires_at: string
-          id: string
-          osteopath_id: number
-          refresh_token: string
-          scope: string
-          updated_at: string
-        }
-        Insert: {
-          access_token: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          osteopath_id: number
-          refresh_token: string
-          scope: string
-          updated_at?: string
-        }
-        Update: {
-          access_token?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          osteopath_id?: number
-          refresh_token?: string
-          scope?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "google_calendar_tokens_osteopath_id_fkey"
-            columns: ["osteopath_id"]
-            isOneToOne: true
-            referencedRelation: "Osteopath"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       Invoice: {
         Row: {
           amount: number
@@ -1065,84 +971,6 @@ export type Database = {
           },
         ]
       }
-      subscribers: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          stripe_customer_id: string | null
-          subscribed: boolean
-          subscription_end: string | null
-          subscription_tier: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_tier?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_tier?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      subscription_plans: {
-        Row: {
-          created_at: string
-          features: Json | null
-          id: string
-          is_active: boolean | null
-          max_cabinets: number | null
-          max_patients: number | null
-          name: string
-          price_monthly: number
-          price_yearly: number | null
-          stripe_price_id_monthly: string | null
-          stripe_price_id_yearly: string | null
-        }
-        Insert: {
-          created_at?: string
-          features?: Json | null
-          id?: string
-          is_active?: boolean | null
-          max_cabinets?: number | null
-          max_patients?: number | null
-          name: string
-          price_monthly: number
-          price_yearly?: number | null
-          stripe_price_id_monthly?: string | null
-          stripe_price_id_yearly?: string | null
-        }
-        Update: {
-          created_at?: string
-          features?: Json | null
-          id?: string
-          is_active?: boolean | null
-          max_cabinets?: number | null
-          max_patients?: number | null
-          name?: string
-          price_monthly?: number
-          price_yearly?: number | null
-          stripe_price_id_monthly?: string | null
-          stripe_price_id_yearly?: string | null
-        }
-        Relationships: []
-      }
       TreatmentHistory: {
         Row: {
           consultationId: number
@@ -1171,36 +999,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      usage_tracking: {
-        Row: {
-          created_at: string
-          id: string
-          metric_name: string
-          metric_value: number
-          period_end: string
-          period_start: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          metric_name: string
-          metric_value?: number
-          period_end: string
-          period_start: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          metric_name?: string
-          metric_value?: number
-          period_end?: string
-          period_start?: string
-          user_id?: string | null
-        }
-        Relationships: []
       }
       User: {
         Row: {
@@ -1251,21 +1049,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      are_google_tokens_expired: {
-        Args: { p_osteopath_id: number }
-        Returns: boolean
-      }
       can_osteopath_access_patient: {
         Args: { osteopath_auth_id: string; patient_id: number }
         Returns: boolean
-      }
-      can_perform_action: {
-        Args: { user_uuid: string; action_type: string }
-        Returns: boolean
-      }
-      cleanup_old_google_calendar_events: {
-        Args: Record<PropertyKey, never>
-        Returns: number
       }
       generate_invitation_code: {
         Args: Record<PropertyKey, never>
@@ -1290,15 +1076,6 @@ export type Database = {
         Args: { osteopath_auth_id: string }
         Returns: {
           cabinet_id: number
-        }[]
-      }
-      get_subscription_limits: {
-        Args: { user_uuid: string }
-        Returns: {
-          max_patients: number
-          max_cabinets: number
-          features: Json
-          subscription_tier: string
         }[]
       }
       is_admin: {
