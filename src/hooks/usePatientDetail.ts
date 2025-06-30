@@ -1,8 +1,8 @@
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { Appointment, AppointmentStatus, Patient, Invoice } from '@/types';
 import { invoiceService } from '@/services/api/invoice-service';
-import { PatientFormValues } from '@/components/patient-form/types';
 
 export function usePatientDetail(patientId: number) {
   const queryClient = useQueryClient();
@@ -87,59 +87,6 @@ export function usePatientDetail(patientId: number) {
     }, 100);
   };
 
-  // New function to update patient data optimistically
-  const updatePatientOptimistically = async (updatedData: PatientFormValues) => {
-    if (!patient) return;
-
-    // Helper function to convert values to nullable numbers
-    const toNullableNumber = (val: any) => {
-      if (val === undefined || val === "" || val === null) return null;
-      const num = Number(val);
-      return isNaN(num) ? null : num;
-    };
-
-    // Process the data first
-    const processedData = {
-      ...updatedData,
-      height: toNullableNumber(updatedData.height),
-      weight: toNullableNumber(updatedData.weight),
-      bmi: toNullableNumber(updatedData.bmi),
-      weight_at_birth: toNullableNumber(updatedData.weight_at_birth),
-      height_at_birth: toNullableNumber(updatedData.height_at_birth),
-      head_circumference: toNullableNumber(updatedData.head_circumference),
-    };
-
-    const patientUpdate = {
-      ...patient,
-      ...processedData,
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Immediately update the UI
-    queryClient.setQueryData(['patient', patientId], patientUpdate);
-
-    try {
-      // Make the actual API call
-      const updatedPatient = await api.updatePatient(patientUpdate);
-      
-      // Update with the real data from server
-      queryClient.setQueryData(['patient', patientId], updatedPatient);
-      
-      // Also invalidate the patients list to keep it in sync
-      queryClient.invalidateQueries({
-        queryKey: ['patients']
-      });
-
-      return updatedPatient;
-    } catch (error) {
-      // Revert on error by invalidating the query
-      queryClient.invalidateQueries({
-        queryKey: ['patient', patientId]
-      });
-      throw error;
-    }
-  };
-
   return {
     patient,
     appointments,
@@ -148,6 +95,5 @@ export function usePatientDetail(patientId: number) {
     error: patientError,
     updateAppointmentStatusOptimistically,
     addAppointmentOptimistically,
-    updatePatientOptimistically,
   };
 }

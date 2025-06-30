@@ -1,3 +1,4 @@
+
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
 import { QuotesTab } from "@/components/patients/detail/QuotesTab";
@@ -28,6 +29,7 @@ import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
 import { PatientFormValues } from "@/components/patient-form/types";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
+import { api } from "@/services/api";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -77,8 +79,7 @@ const PatientDetailPage = () => {
 		isLoading,
 		error,
 		updateAppointmentStatusOptimistically,
-		addAppointmentOptimistically,
-		updatePatientOptimistically
+		addAppointmentOptimistically
 	} = usePatientDetail(patientId);
 
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
@@ -87,6 +88,13 @@ const PatientDetailPage = () => {
 	// Sticky swap for cards (must also be before return)
 	const patientInfoRef = useRef<HTMLDivElement>(null);
 	const [showStickyAntecedents, setShowStickyAntecedents] = useState(false);
+
+	// Helper function to convert values to nullable numbers
+	const toNullableNumber = (val: any) => {
+		if (val === undefined || val === "" || val === null) return null;
+		const num = Number(val);
+		return isNaN(num) ? null : num;
+	};
 
 	// Memoized appointment filtering and sorting
 	const upcomingAppointments = useMemo(() => 
@@ -192,12 +200,31 @@ const PatientDetailPage = () => {
 	};
 
 	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
+		if (!patient) return;
+		
 		try {
-			await updatePatientOptimistically(updatedData);
+			// Convertir les champs numériques correctement avec le helper
+			const processedData = {
+				...updatedData,
+				height: toNullableNumber(updatedData.height),
+				weight: toNullableNumber(updatedData.weight),
+				bmi: toNullableNumber(updatedData.bmi),
+				weight_at_birth: toNullableNumber(updatedData.weight_at_birth),
+				height_at_birth: toNullableNumber(updatedData.height_at_birth),
+				head_circumference: toNullableNumber(updatedData.head_circumference),
+			};
+
+			const patientUpdate = {
+				...patient,
+				...processedData,
+				updatedAt: new Date().toISOString(),
+			};
+
+			await api.updatePatient(patientUpdate);
+			toast.success("Patient mis à jour avec succès!");
 		} catch (error: any) {
 			console.error("Error updating patient:", error);
-			// Error toast will be handled in the MedicalInfoTab component
-			throw error;
+			toast.error("Impossible de mettre à jour le patient");
 		}
 	};
 

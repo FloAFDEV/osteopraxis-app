@@ -9,12 +9,10 @@ import { Trash, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 
 const EditPatientPage = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
 	const [patient, setPatient] = useState<Patient | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
@@ -157,19 +155,7 @@ const EditPatientPage = () => {
 			);
 
 			// Use the patientService updatePatient method
-			const updatedPatient = await patientService.updatePatient(patientUpdate);
-			
-			// Update local state immediately
-			setPatient(updatedPatient);
-			
-			// Invalidate all patient-related queries to refresh data everywhere
-			queryClient.invalidateQueries({
-				queryKey: ['patients']
-			});
-			queryClient.invalidateQueries({
-				queryKey: ['patient', patient.id]
-			});
-			
+			await patientService.updatePatient(patientUpdate);
 			toast.success("Patient mis à jour avec succès!");
 
 			// Attendre un peu avant de naviguer pour laisser le toast s'afficher
@@ -189,15 +175,6 @@ const EditPatientPage = () => {
 		if (!patient) return;
 		try {
 			await patientService.deletePatient(patient.id);
-			
-			// Invalidate queries after deletion
-			queryClient.invalidateQueries({
-				queryKey: ['patients']
-			});
-			queryClient.removeQueries({
-				queryKey: ['patient', patient.id]
-			});
-			
 			toast.success("Patient supprimé avec succès !");
 			setTimeout(() => {
 				navigate("/patients");

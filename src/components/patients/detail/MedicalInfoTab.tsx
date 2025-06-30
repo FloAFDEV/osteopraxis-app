@@ -23,7 +23,6 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { AppointmentStatusBadge } from "./AppointmentStatusBadge";
 import { getMedicalBadge, isCardiac } from "./medical-badge-utils";
@@ -38,7 +37,7 @@ interface MedicalInfoTabProps {
 	) => Promise<void>;
 	onNavigateToHistory: () => void;
 	onAppointmentCreated?: () => void;
-	onPatientUpdated?: (updatedData: PatientFormValues) => Promise<void>;
+	onPatientUpdated?: (updatedData: PatientFormValues) => void;
 	selectedCabinetId?: number | null;
 }
 
@@ -52,7 +51,6 @@ export function MedicalInfoTab({
 	const [isChild, setIsChild] = useState<boolean>(false);
 	const [showNewAppointmentForm, setShowNewAppointmentForm] = useState(false);
 	const [showEditPatientForm, setShowEditPatientForm] = useState(false);
-	const [isUpdating, setIsUpdating] = useState(false);
 
 	const lastAppointment =
 		pastAppointments && pastAppointments.length > 0
@@ -871,17 +869,8 @@ export function MedicalInfoTab({
 
 	const handlePatientUpdate = async (updatedData: PatientFormValues) => {
 		if (onPatientUpdated) {
-			try {
-				setIsUpdating(true);
-				await onPatientUpdated(updatedData);
-				setShowEditPatientForm(false);
-				toast.success("Informations mises à jour avec succès !");
-			} catch (error) {
-				console.error("Error updating patient:", error);
-				toast.error("Erreur lors de la mise à jour");
-			} finally {
-				setIsUpdating(false);
-			}
+			await onPatientUpdated(updatedData);
+			setShowEditPatientForm(false);
 		}
 	};
 
@@ -935,7 +924,6 @@ export function MedicalInfoTab({
 						onClick={handleEditClick}
 						variant={showEditPatientForm ? "outline" : "default"}
 						className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 hover:text-white text-white dark:bg-white dark:text-slate-900 dark:hover:bg-white/80 text-sm md:text-base px-3 md:px-4 py-2"
-						disabled={isUpdating}
 					>
 						{showEditPatientForm ? (
 							<>
@@ -945,7 +933,7 @@ export function MedicalInfoTab({
 						) : (
 							<>
 								<Edit className="h-4 w-4" />
-								{isUpdating ? "Mise à jour..." : "Modifier"}
+								Modifier
 							</>
 						)}
 					</Button>
@@ -986,7 +974,6 @@ export function MedicalInfoTab({
 							patient={patient}
 							onSave={handlePatientUpdate}
 							selectedCabinetId={selectedCabinetId}
-							isLoading={isUpdating}
 						/>
 					</CardContent>
 				</Card>
