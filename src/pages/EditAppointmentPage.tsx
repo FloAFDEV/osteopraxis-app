@@ -15,18 +15,23 @@ const EditAppointmentPage = () => {
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadAppointment = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
         if (!id) {
+          setError("ID de séance manquant");
           toast.error("ID de séance manquant");
           return navigate("/appointments");
         }
 
         const appointmentId = parseInt(id, 10);
         if (isNaN(appointmentId)) {
+          setError("ID de séance invalide");
           toast.error("ID de séance invalide");
           return navigate("/appointments");
         }
@@ -40,18 +45,22 @@ const EditAppointmentPage = () => {
         ]);
 
         console.log("Données du rendez-vous récupérées:", appointmentData);
+        console.log("Nombre de patients récupérés:", patientsData.length);
 
         if (appointmentData) {
           setAppointment(appointmentData);
           setPatients(patientsData);
         } else {
+          setError("Séance non trouvée");
           toast.error("Séance non trouvée");
           navigate("/appointments");
           return;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erreur lors du chargement de la séance:", error);
-        toast.error("Erreur lors du chargement de la séance");
+        const errorMessage = error.message || "Erreur lors du chargement de la séance";
+        setError(errorMessage);
+        toast.error(errorMessage);
         navigate("/appointments");
       } finally {
         setIsLoading(false);
@@ -76,6 +85,21 @@ const EditAppointmentPage = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Chargement de la séance...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={() => navigate("/appointments")}>
+              Retour aux rendez-vous
+            </Button>
           </div>
         </div>
       </Layout>

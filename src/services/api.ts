@@ -36,11 +36,16 @@ const api = {
 
   getAppointmentById: async (id: number): Promise<any> => {
     try {
+      console.log(`Récupération du rendez-vous avec ID: ${id}`);
       const response = await axios.get(`${API_BASE_URL}/appointments/${id}`);
+      console.log(`Rendez-vous récupéré:`, response.data);
       return response.data;
     } catch (error: any) {
-      console.error("Error fetching appointment:", error);
-      throw error.response?.data || error.message || "Failed to fetch appointment";
+      console.error("Erreur lors de la récupération du rendez-vous:", error);
+      if (error.response?.status === 404) {
+        throw new Error("Rendez-vous non trouvé");
+      }
+      throw error.response?.data || error.message || "Impossible de récupérer le rendez-vous";
     }
   },
 
@@ -56,7 +61,9 @@ const api = {
 
   updateAppointment: async (id: number, appointment: any): Promise<any> => {
     try {
+      console.log(`Mise à jour du rendez-vous ${id} avec:`, appointment);
       const response = await axios.put(`${API_BASE_URL}/appointments/${id}`, appointment);
+      console.log(`Rendez-vous ${id} mis à jour:`, response.data);
       return response.data;
     } catch (error: any) {
       console.error("Error updating appointment:", error);
@@ -121,4 +128,5 @@ export interface Invoice {
   appointmentId?: number;
 }
 
+export { api };
 export default api;
