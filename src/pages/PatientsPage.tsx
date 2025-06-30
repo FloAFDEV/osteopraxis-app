@@ -187,7 +187,7 @@ const PatientsPage = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/patients/${patient.id}`)}
-                          className="flex-1 sm:flex-none text-xs px-2 py-1"
+                          className="flex-1 sm:flex-none text-xs px-3 py-2"
                         >
                           <Eye className="h-3 w-3 mr-1" />
                           <span className="hidden sm:inline">Voir</span>
@@ -197,7 +197,7 @@ const PatientsPage = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/patients/${patient.id}/edit`)}
-                          className="flex-1 sm:flex-none text-xs px-2 py-1"
+                          className="flex-1 sm:flex-none text-xs px-3 py-2"
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           <span className="hidden sm:inline">Modifier</span>
