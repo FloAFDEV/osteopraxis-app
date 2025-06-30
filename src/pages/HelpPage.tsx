@@ -22,7 +22,7 @@ const HelpPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
-        <BackButton to="/dashboard" />
+        <BackButton/>
         
         <div className="mb-6">
           <div className="flex items-center gap-2">
