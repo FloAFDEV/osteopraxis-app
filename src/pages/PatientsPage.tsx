@@ -1,26 +1,22 @@
-
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { UserPlus } from "lucide-react";
-import { api } from "@/services/api";
-import { Patient, Cabinet } from "@/types";
-import { Layout } from "@/components/ui/layout";
 import { PatientCard } from "@/components/patient-card";
-import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/services/api";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
-import PatientListItem from "@/components/patients/PatientListItem";
-import EmptyPatientState from "@/components/patients/EmptyPatientState";
-import PatientSearch from "@/components/patients/PatientSearch";
-import PatientLoadingState from "@/components/patients/PatientLoadingState";
-import PatientHeader from "@/components/patients/PatientHeader";
-import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
-import PatientPagination from "@/components/patients/PatientPagination";
 import CabinetFilter from "@/components/patients/CabinetFilter";
+import EmptyPatientState from "@/components/patients/EmptyPatientState";
+import PatientHeader from "@/components/patients/PatientHeader";
+import PatientListItem from "@/components/patients/PatientListItem";
+import PatientLoadingState from "@/components/patients/PatientLoadingState";
+import PatientPagination from "@/components/patients/PatientPagination";
+import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
+import PatientSearch from "@/components/patients/PatientSearch";
 
 type SortOption = "name" | "date" | "email" | "gender";
 
@@ -31,7 +27,9 @@ const PatientsPage = () => {
 	const [sortBy, setSortBy] = useState<SortOption>("name");
 	const [activeLetter, setActiveLetter] = useState("");
 	const [viewMode, setViewMode] = useState<"cards" | "list">("list");
-	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
+	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(
+		null
+	);
 
 	// Pagination - updated to 25 patients per page
 	const [currentPage, setCurrentPage] = useState(1);
@@ -71,10 +69,11 @@ const PatientsPage = () => {
 	});
 
 	// Filtrer les patients par cabinet sélectionné
-	const patients = allPatients?.filter(patient => {
-		if (!selectedCabinetId) return true;
-		return patient.cabinetId === selectedCabinetId;
-	}) || [];
+	const patients =
+		allPatients?.filter((patient) => {
+			if (!selectedCabinetId) return true;
+			return patient.cabinetId === selectedCabinetId;
+		}) || [];
 
 	// Handler for forcing data reload with animation
 	const handleRetry = async () => {
