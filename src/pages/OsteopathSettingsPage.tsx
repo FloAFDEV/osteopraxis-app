@@ -5,6 +5,7 @@ import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileBillingForm } from "@/components/settings/ProfileBillingForm";
+import { GoogleCalendarIntegration } from "@/components/settings/GoogleCalendarIntegration";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { FancyLoader } from "@/components/ui/fancy-loader";
@@ -100,8 +101,11 @@ const OsteopathSettingsPage = () => {
           </div>
         </div>
 
-        {/* Toujours afficher le formulaire, qu'il y ait un profil existant ou non */}
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Google Calendar Integration */}
+          <GoogleCalendarIntegration />
+
+          {/* Profile & Billing Form */}
           <ProfileBillingForm 
             defaultValues={osteopath || {
               name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
@@ -110,6 +114,7 @@ const OsteopathSettingsPage = () => {
             isEditing={!!osteopath} 
             onSuccess={handleSuccess} 
           />
+          
           <div className="flex justify-end">
             <button 
               onClick={handleBackToSettings}
