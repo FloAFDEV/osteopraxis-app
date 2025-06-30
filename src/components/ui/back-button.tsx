@@ -11,7 +11,7 @@ interface BackButtonProps {
 }
 
 export const BackButton: React.FC<BackButtonProps> = ({ 
-  to = "/settings", 
+  to, 
   label = "Retour", 
   className = "" 
 }) => {
