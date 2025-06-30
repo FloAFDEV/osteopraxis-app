@@ -5,7 +5,7 @@ import { api } from "@/services/api";
 import { Appointment, Patient } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft, Calendar, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AppointmentForm } from "@/components/appointment-form";
 
@@ -15,40 +15,58 @@ const EditAppointmentPage = () => {
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadAppointment = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
-        if (!id) return;
-
-        const appointmentId = parseInt(id, 10);
-        if (isNaN(appointmentId)) {
-          toast.error("ID de séance invalide");
-          return navigate("/appointments");
-        }
-
-        const appointmentData = await api.getAppointmentById(appointmentId);
-        if (appointmentData) {
-          setAppointment(appointmentData);
-        } else {
-          toast.error("Séance non trouvée");
-          navigate("/appointments");
+        if (!id) {
+          setError("ID de séance manquant");
           return;
         }
 
-        const patientsData = await api.getPatients();
+        const appointmentId = parseInt(id, 10);
+        if (isNaN(appointmentId)) {
+          setError("ID de séance invalide");
+          toast.error("ID de séance invalide");
+          return;
+        }
+
+        console.log(`EditAppointmentPage: Loading appointment ${appointmentId}`);
+
+        // Charger les données en parallèle
+        const [appointmentData, patientsData] = await Promise.all([
+          api.getAppointmentById(appointmentId),
+          api.getPatients()
+        ]);
+
+        console.log(`EditAppointmentPage: Appointment data:`, appointmentData);
+        console.log(`EditAppointmentPage: Patients data:`, patientsData);
+
+        if (appointmentData) {
+          setAppointment(appointmentData);
+        } else {
+          setError("Séance non trouvée");
+          toast.error("Séance non trouvée");
+          return;
+        }
+
         setPatients(patientsData);
-      } catch (error) {
-        console.error("Erreur lors du chargement de la séance:", error);
-        toast.error("Erreur lors du chargement de la séance");
+      } catch (error: any) {
+        console.error("EditAppointmentPage: Error loading data:", error);
+        const errorMessage = error.message || "Erreur lors du chargement de la séance";
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadAppointment();
-  }, [id, navigate]);
+  }, [id]);
 
   const getTimeFromDate = (dateString: string | undefined): string => {
     if (!dateString) return "09:00";
@@ -71,12 +89,40 @@ const EditAppointmentPage = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <AlertCircle className="h-10 w-10 text-red-500 mb-4 mx-auto" />
+            <p className="text-xl font-semibold text-red-600">{error}</p>
+            <Button 
+              onClick={() => navigate("/appointments")} 
+              className="mt-4"
+              variant="outline"
+            >
+              Retour aux séances
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!appointment) {
     return (
       <Layout>
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
+            <AlertCircle className="h-10 w-10 text-orange-500 mb-4 mx-auto" />
             <p className="text-muted-foreground">Séance non trouvée.</p>
+            <Button 
+              onClick={() => navigate("/appointments")} 
+              className="mt-4"
+              variant="outline"
+            >
+              Retour aux séances
+            </Button>
           </div>
         </div>
       </Layout>
@@ -104,7 +150,6 @@ const EditAppointmentPage = () => {
         </header>
 
         <section className="rounded-lg border border-gray-200 shadow-sm p-6">
-          
           <AppointmentForm
             patients={patients}
             defaultValues={{
