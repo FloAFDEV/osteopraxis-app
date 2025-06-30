@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo } from "react";
-import { Calendar, Clock, Plus, Users, RefreshCw, ExternalLink } from "lucide-react";
+import { Calendar, Clock, Plus, Users, RefreshCw, ExternalLink, Eye, Trash, X } from "lucide-react";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -92,7 +93,7 @@ const SchedulePage = () => {
     <div
       key={appointment.id}
       className={cn(
-        "p-2 mb-1 border-l-4 rounded text-xs cursor-pointer hover:shadow-sm transition-shadow",
+        "p-2 mb-1 border-l-4 rounded text-xs cursor-pointer hover:shadow-sm transition-shadow relative group",
         getEventStyle(appointment)
       )}
       onClick={() => {
@@ -102,20 +103,50 @@ const SchedulePage = () => {
       }}
     >
       <div className="flex items-center justify-between mb-1">
-        <span className="font-medium">
+        <span className="font-medium text-xs sm:text-sm">
           {format(parseISO(appointment.date), "HH:mm", { locale: fr })}
         </span>
-        {appointment.isGoogleEvent && (
-          <div className="flex items-center gap-1">
-            <ExternalLink className="h-3 w-3" />
-            <Badge variant="outline" className="text-xs px-1 py-0">
-              Google
-            </Badge>
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          {appointment.isGoogleEvent && (
+            <>
+              <div className="flex items-center gap-1">
+                <ExternalLink className="h-2 w-2 sm:h-3 sm:w-3" />
+                <Badge variant="outline" className="text-xs px-1 py-0 hidden sm:inline-block">
+                  Google
+                </Badge>
+              </div>
+            </>
+          )}
+          {!appointment.isGoogleEvent && (
+            <div className="hidden group-hover:flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-5 w-5 p-0 hover:bg-white/50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/appointments/${appointment.id}/edit`);
+                }}
+              >
+                <Eye className="h-3 w-3" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-5 w-5 p-0 hover:bg-red-100 text-red-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Handle delete appointment
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
       
-      <div className="font-medium text-sm mb-1">
+      <div className="font-medium text-xs sm:text-sm mb-1">
         {appointment.isGoogleEvent ? (
           appointment.summary || 'Événement Google'
         ) : (
@@ -138,7 +169,7 @@ const SchedulePage = () => {
           <Button
             size="sm"
             variant="outline"
-            className="h-6 px-2 text-xs"
+            className="h-5 px-2 text-xs"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/invoices/new?patientId=${appointment.patient.id}&date=${appointment.date}`);
@@ -225,13 +256,13 @@ const SchedulePage = () => {
                   isToday(day) && "bg-blue-50"
                 )}>
                   <CardTitle className={cn(
-                    "text-lg flex items-center justify-between",
+                    "text-base sm:text-lg flex items-center justify-between",
                     isToday(day) && "text-blue-700"
                   )}>
-                    <span>
+                    <span className="text-sm sm:text-base">
                       {format(day, "EEEE d MMMM", { locale: fr })}
                     </span>
-                    <Badge variant="outline" className="ml-2">
+                    <Badge variant="outline" className="ml-2 text-xs">
                       {dayAppointments.length}
                     </Badge>
                   </CardTitle>
@@ -240,7 +271,7 @@ const SchedulePage = () => {
                   {dayAppointments.length > 0 ? (
                     dayAppointments.map(renderAppointmentCard)
                   ) : (
-                    <p className="text-muted-foreground text-center py-4">
+                    <p className="text-muted-foreground text-center py-4 text-sm">
                       Aucun rendez-vous
                     </p>
                   )}
@@ -253,9 +284,9 @@ const SchedulePage = () => {
         {/* Floating action button - responsive */}
         <Button
           onClick={() => navigate("/appointments/new")}
-          className="fixed bottom-6 right-6 rounded-full w-14 h-14 md:w-16 md:h-16 shadow-lg hover:shadow-xl transition-shadow z-50"
+          className="fixed bottom-6 right-6 rounded-full w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shadow-lg hover:shadow-xl transition-shadow z-50"
         >
-          <Plus className="h-6 w-6 md:h-8 md:w-8" />
+          <Plus className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
         </Button>
       </div>
     </Layout>

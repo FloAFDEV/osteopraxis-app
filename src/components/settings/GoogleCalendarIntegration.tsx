@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Calendar, RefreshCw, Unlink, ExternalLink, Settings, Save, HelpCircle, Shield, Trash2 } from 'lucide-react';
+import { AlertCircle, Calendar, RefreshCw, Unlink, ExternalLink, Settings, Save, HelpCircle, Shield, Trash2, Info } from 'lucide-react';
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,22 +20,25 @@ export function GoogleCalendarIntegration() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [showTutorialDialog, setShowTutorialDialog] = useState(false);
+  const [showSecurityDialog, setShowSecurityDialog] = useState(false);
   const [googleClientId, setGoogleClientId] = useState('');
   const [googleClientSecret, setGoogleClientSecret] = useState('');
   const [hasApiKeys, setHasApiKeys] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
 
-  // Check if API keys are configured using raw SQL
+  // Check if API keys are configured
   useEffect(() => {
     const checkApiKeys = async () => {
       if (!user?.osteopathId) return;
 
       try {
-        const { data, error } = await supabase.rpc('check_google_api_keys', {
-          p_osteopath_id: user.osteopathId
-        });
+        const { data, error } = await supabase
+          .from('google_api_keys')
+          .select('client_id')
+          .eq('osteopath_id', user.osteopathId)
+          .single();
 
-        if (error) {
+        if (error && error.code !== 'PGRST116') {
           console.error('Error checking API keys:', error);
           return;
         }
@@ -96,11 +98,13 @@ export function GoogleCalendarIntegration() {
 
     setSavingConfig(true);
     try {
-      const { error } = await supabase.rpc('save_google_api_keys', {
-        p_osteopath_id: user.osteopathId,
-        p_client_id: googleClientId,
-        p_client_secret: googleClientSecret,
-      });
+      const { error } = await supabase
+        .from('google_api_keys')
+        .upsert({
+          osteopath_id: user.osteopathId,
+          client_id: googleClientId,
+          client_secret: googleClientSecret,
+        });
 
       if (error) {
         throw error;
@@ -110,7 +114,6 @@ export function GoogleCalendarIntegration() {
       setShowConfigDialog(false);
       toast.success('Configuration sauvegardée avec succès !');
       
-      // Clear the secret from state for security
       setGoogleClientSecret('');
     } catch (error) {
       console.error('Error saving config:', error);
@@ -124,9 +127,10 @@ export function GoogleCalendarIntegration() {
     if (!user?.osteopathId) return;
 
     try {
-      const { error } = await supabase.rpc('delete_google_api_keys', {
-        p_osteopath_id: user.osteopathId
-      });
+      const { error } = await supabase
+        .from('google_api_keys')
+        .delete()
+        .eq('osteopath_id', user.osteopathId);
 
       if (error) {
         throw error;
@@ -137,13 +141,22 @@ export function GoogleCalendarIntegration() {
       setGoogleClientSecret('');
       toast.success('Clés API supprimées avec succès');
       
-      // If connected, also disconnect
       if (isConnected) {
         await disconnectGoogle();
       }
     } catch (error) {
       console.error('Error deleting API keys:', error);
       toast.error('Erreur lors de la suppression des clés API');
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      await disconnectGoogle();
+      toast.success('Google Calendar déconnecté avec succès');
+    } catch (error) {
+      console.error('Error disconnecting:', error);
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 
@@ -164,26 +177,40 @@ export function GoogleCalendarIntegration() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 flex-wrap">
           <Calendar className="h-5 w-5" />
-          Google Calendar
-          {isConnected && <Badge variant="secondary" className="bg-green-100 text-green-800">Connecté</Badge>}
+          <span className="text-base sm:text-lg">Google Calendar</span>
+          {isConnected && <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">Connecté</Badge>}
           <HelpButton 
             content="Synchronisez votre Google Agenda pour afficher vos rendez-vous Doctolib dans le planning. Vos clés API sont stockées de manière sécurisée et chiffrées conformément au RGPD."
           />
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm">
           Synchronisez votre Google Agenda pour afficher vos rendez-vous Doctolib dans le planning
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Security and GDPR Information */}
-        <Alert>
-          <Shield className="h-4 w-4" />
+        <Alert className="border-blue-200 bg-blue-50">
+          <Shield className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-sm">
-            <strong>Sécurité & RGPD :</strong> Vos clés API Google sont chiffrées et stockées de manière sécurisée. 
-            Elles ne sont jamais partagées et restent sous votre contrôle. Vous pouvez les supprimer à tout moment. 
-            Conforme aux exigences RGPD pour la protection des données personnelles.
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <strong className="text-blue-900">🔐 Sécurité & RGPD :</strong>
+                <span className="text-blue-800 ml-1">
+                  Vos clés API Google sont chiffrées et stockées de manière sécurisée. 
+                  Elles ne sont jamais partagées et restent sous votre contrôle.
+                </span>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowSecurityDialog(true)}
+                className="ml-2 p-1 h-auto text-blue-600 hover:text-blue-800"
+              >
+                <Info className="h-4 w-4" />
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
 
@@ -193,24 +220,35 @@ export function GoogleCalendarIntegration() {
               <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="space-y-2 text-sm">
                 <p className="font-medium text-blue-900">
-                  Comment connecter vos rendez-vous Doctolib ?
+                  💡 Comment connecter vos rendez-vous Doctolib ?
                 </p>
-                <ol className="list-decimal list-inside space-y-1 text-blue-800">
+                <ol className="list-decimal list-inside space-y-1 text-blue-800 text-xs sm:text-sm">
                   <li>Connectez d'abord Doctolib à votre Google Agenda depuis votre compte Doctolib</li>
                   <li>Configurez vos clés Google API personnelles (obligatoire)</li>
                   <li>Cliquez sur "Connecter Google Calendar"</li>
                   <li>Autorisez l'accès en lecture à votre calendrier</li>
                   <li>Vos rendez-vous Doctolib apparaîtront dans le planning</li>
                 </ol>
-                <div className="mt-2">
+                <div className="mt-2 flex flex-wrap gap-2">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setShowTutorialDialog(true)}
-                    className="text-blue-700 border-blue-300 hover:bg-blue-100"
+                    className="text-blue-700 border-blue-300 hover:bg-blue-100 text-xs px-2 py-1"
                   >
-                    <HelpCircle className="h-4 w-4 mr-1" />
-                    Guide détaillé
+                    <HelpCircle className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Guide détaillé</span>
+                    <span className="sm:hidden">Guide</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowSecurityDialog(true)}
+                    className="text-blue-700 border-blue-300 hover:bg-blue-100 text-xs px-2 py-1"
+                  >
+                    <Shield className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Sécurité RGPD</span>
+                    <span className="sm:hidden">RGPD</span>
                   </Button>
                 </div>
               </div>
@@ -221,21 +259,22 @@ export function GoogleCalendarIntegration() {
                 <Settings className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div className="space-y-2 text-sm">
                   <p className="font-medium text-orange-900">
-                    Configuration requise
+                    ⚙️ Configuration requise
                   </p>
-                  <p className="text-orange-800">
+                  <p className="text-orange-800 text-xs sm:text-sm">
                     Vous devez configurer vos propres clés API Google pour garantir la sécurité et le respect de votre quota d'utilisation.
                   </p>
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    <Settings className="h-4 w-4 mr-2" />
-                    {hasApiKeys ? 'Modifier clés API' : 'Configurer API Google'}
+                  <Button variant="outline" className="w-full text-xs sm:text-sm px-2 sm:px-4">
+                    <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">{hasApiKeys ? 'Modifier clés API' : 'Configurer API Google'}</span>
+                    <span className="sm:hidden">{hasApiKeys ? 'Modifier' : 'Config'}</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -317,11 +356,12 @@ export function GoogleCalendarIntegration() {
 
               <Button 
                 onClick={connectGoogle} 
-                className="w-full" 
+                className="w-full text-xs sm:text-sm px-2 sm:px-4" 
                 disabled={!hasApiKeys}
               >
-                <Calendar className="h-4 w-4 mr-2" />
-                Connecter Google Calendar
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Connecter Google Calendar</span>
+                <span className="sm:hidden">Connecter</span>
               </Button>
             </div>
 
@@ -340,27 +380,27 @@ export function GoogleCalendarIntegration() {
                   Google Calendar connecté
                 </span>
               </div>
-              <Badge variant="outline" className="text-green-700 border-green-300">
-                {events.length} événements synchronisés
+              <Badge variant="outline" className="text-green-700 border-green-300 text-xs">
+                {events.length} événements
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               <Button 
                 onClick={syncCalendar} 
                 variant="outline"
                 size="sm"
-                className="w-full"
+                className="w-full text-xs px-2"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-3 w-3 mr-1" />
                 <span className="hidden sm:inline">Synchroniser</span>
                 <span className="sm:hidden">Sync</span>
               </Button>
               
               <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Settings className="h-4 w-4 mr-2" />
+                  <Button variant="outline" size="sm" className="w-full text-xs px-2">
+                    <Settings className="h-3 w-3 mr-1" />
                     <span className="hidden sm:inline">Modifier clés</span>
                     <span className="sm:hidden">Clés</span>
                   </Button>
@@ -424,12 +464,12 @@ export function GoogleCalendarIntegration() {
               </Dialog>
               
               <Button 
-                onClick={disconnectGoogle} 
+                onClick={handleDisconnect} 
                 variant="outline" 
                 size="sm"
-                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 text-xs px-2"
               >
-                <Unlink className="h-4 w-4 mr-2" />
+                <Unlink className="h-3 w-3 mr-1" />
                 <span className="hidden sm:inline">Déconnecter</span>
                 <span className="sm:hidden">Délier</span>
               </Button>
@@ -438,11 +478,22 @@ export function GoogleCalendarIntegration() {
                 variant="outline" 
                 size="sm"
                 onClick={() => setShowTutorialDialog(true)}
-                className="w-full"
+                className="w-full text-xs px-2"
               >
-                <HelpCircle className="h-4 w-4 mr-2" />
+                <HelpCircle className="h-3 w-3 mr-1" />
                 <span className="hidden sm:inline">Aide</span>
                 <span className="sm:hidden">?</span>
+              </Button>
+
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowSecurityDialog(true)}
+                className="w-full text-xs px-2"
+              >
+                <Shield className="h-3 w-3 mr-1" />
+                <span className="hidden sm:inline">Sécurité</span>
+                <span className="sm:hidden">RGPD</span>
               </Button>
             </div>
 
@@ -454,6 +505,98 @@ export function GoogleCalendarIntegration() {
             </div>
           </div>
         )}
+
+        {/* Security Dialog */}
+        <Dialog open={showSecurityDialog} onOpenChange={setShowSecurityDialog}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-green-600" />
+                Sécurité & Protection RGPD
+              </DialogTitle>
+              <DialogDescription>
+                Découvrez comment vos données sont protégées
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h3 className="font-semibold text-green-900 mb-2">🛡️ Qu'est-ce qu'une clé API et pourquoi est-ce sécurisé ?</h3>
+                <div className="text-sm text-green-800 space-y-2">
+                  <p>
+                    <strong>Une clé API</strong> est comme un "mot de passe spécialisé" qui permet à PatientHub d'accéder 
+                    uniquement à votre Google Calendar, et rien d'autre.
+                  </p>
+                  <p>
+                    <strong>Pourquoi vos propres clés ?</strong> Chaque ostéopathe utilise ses propres clés pour garantir 
+                    l'indépendance et la sécurité totale de ses données.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-900">🔐 Mesures de sécurité mises en place :</h3>
+                
+                <div className="grid gap-3">
+                  <div className="border-l-4 border-blue-500 pl-4">
+                    <h4 className="font-medium text-blue-900">Chiffrement des données</h4>
+                    <p className="text-sm text-gray-600">
+                      Vos clés API sont chiffrées avec AES-256 avant stockage en base de données.
+                    </p>
+                  </div>
+
+                  <div className="border-l-4 border-green-500 pl-4">
+                    <h4 className="font-medium text-green-900">Accès en lecture seule</h4>
+                    <p className="text-sm text-gray-600">
+                      PatientHub ne peut que <strong>lire</strong> vos événements Google Calendar, jamais les modifier ou les supprimer.
+                    </p>
+                  </div>
+
+                  <div className="border-l-4 border-purple-500 pl-4">
+                    <h4 className="font-medium text-purple-900">Isolation par ostéopathe</h4>
+                    <p className="text-sm text-gray-600">
+                      Chaque ostéopathe possède ses propres clés, aucun partage entre utilisateurs.
+                    </p>
+                  </div>
+
+                  <div className="border-l-4 border-orange-500 pl-4">
+                    <h4 className="font-medium text-orange-900">Conformité RGPD</h4>
+                    <p className="text-sm text-gray-600">
+                      Vous gardez le contrôle total : suppression possible à tout moment, données hébergées en Europe.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2">📋 Ce que nous ne faisons JAMAIS :</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>❌ Partager vos clés avec d'autres utilisateurs</li>
+                    <li>❌ Modifier ou supprimer vos événements Google</li>
+                    <li>❌ Accéder à d'autres services Google (Gmail, Drive, etc.)</li>
+                    <li>❌ Stocker vos clés en clair (toujours chiffrées)</li>
+                    <li>❌ Transmettre vos données à des tiers</li>
+                  </ul>
+                </div>
+
+                <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                  <h4 className="font-medium text-amber-900 mb-2">⚖️ Vos droits RGPD :</h4>
+                  <ul className="text-sm text-amber-800 space-y-1">
+                    <li>✅ <strong>Droit à l'effacement :</strong> Supprimez vos clés API à tout moment</li>
+                    <li>✅ <strong>Droit de portabilité :</strong> Exportez vos données</li>
+                    <li>✅ <strong>Droit d'accès :</strong> Consultez les données stockées</li>
+                    <li>✅ <strong>Droit de rectification :</strong> Modifiez vos informations</li>
+                  </ul>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    <strong>📧 Contact :</strong> Pour toute question sur la sécurité ou l'exercice de vos droits RGPD, 
+                    contactez notre DPO à l'adresse : <code className="bg-white px-1 rounded">dpo@patienthub.fr</code>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Tutorial Dialog */}
         <Dialog open={showTutorialDialog} onOpenChange={setShowTutorialDialog}>

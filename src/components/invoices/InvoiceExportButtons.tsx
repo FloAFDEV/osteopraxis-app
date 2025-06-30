@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Download, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { jsPDF } from 'jspdf';
@@ -75,18 +76,18 @@ export function InvoiceExportButtons({ invoices, selectedPeriod }: InvoiceExport
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
       <Button
         onClick={handleExportPDF}
         disabled={isExporting}
         variant="outline"
         size="sm"
-        className="w-full sm:w-auto justify-center"
+        className="w-full sm:w-auto justify-center text-xs sm:text-sm px-2 sm:px-4"
       >
         {isExporting ? (
-          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+          <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
         ) : (
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
         )}
         <span className="hidden sm:inline">Télécharger PDF</span>
         <span className="sm:hidden">PDF</span>
@@ -97,12 +98,12 @@ export function InvoiceExportButtons({ invoices, selectedPeriod }: InvoiceExport
         disabled={isExporting}
         variant="default"
         size="sm"
-        className="w-full sm:w-auto justify-center"
+        className="w-full sm:w-auto justify-center text-xs sm:text-sm px-2 sm:px-4"
       >
         {isExporting ? (
-          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+          <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
         ) : (
-          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          <FileSpreadsheet className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
         )}
         <span className="hidden sm:inline">Export comptable</span>
         <span className="sm:hidden">Excel</span>
