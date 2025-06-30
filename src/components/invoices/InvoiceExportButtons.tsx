@@ -16,7 +16,7 @@ interface InvoiceExportButtonsProps {
 export function InvoiceExportButtons({ invoices, selectedPeriod }: InvoiceExportButtonsProps) {
   const [isExporting, setIsExporting] = useState(false);
 
-  const formatDate = (date: Date | null): string => {
+  const formatDate = (date: Date | string | null): string => {
     if (!date) return '';
     return new Date(date).toLocaleDateString('fr-FR');
   };

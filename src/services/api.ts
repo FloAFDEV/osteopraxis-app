@@ -94,8 +94,38 @@ const api = {
     return response.data;
   },
 
+  getOsteopaths: async (): Promise<any[]> => {
+    const response = await axios.get(`${API_BASE_URL}/osteopaths`);
+    return response.data;
+  },
+
+  getOsteopathByUserId: async (userId: string): Promise<any> => {
+    const response = await axios.get(`${API_BASE_URL}/osteopaths?userId=${userId}`);
+    return response.data[0];
+  },
+
+  createOsteopath: async (osteopathData: any): Promise<any> => {
+    const response = await axios.post(`${API_BASE_URL}/osteopaths`, osteopathData);
+    return response.data;
+  },
+
   updateOsteopath: async (id: number, osteopathData: any): Promise<any> => {
     const response = await axios.put(`${API_BASE_URL}/osteopaths/${id}`, osteopathData);
+    return response.data;
+  },
+
+  getCabinets: async (): Promise<any[]> => {
+    const response = await axios.get(`${API_BASE_URL}/cabinets`);
+    return response.data;
+  },
+
+  getCabinetById: async (id: number): Promise<any> => {
+    const response = await axios.get(`${API_BASE_URL}/cabinets/${id}`);
+    return response.data;
+  },
+
+  createCabinet: async (cabinetData: any): Promise<any> => {
+    const response = await axios.post(`${API_BASE_URL}/cabinets`, cabinetData);
     return response.data;
   },
 
@@ -104,9 +134,48 @@ const api = {
     return response.data;
   },
 
+  getCabinetsByOsteopathId: async (osteopathId: number): Promise<any[]> => {
+    const response = await axios.get(`${API_BASE_URL}/cabinets?osteopathId=${osteopathId}`);
+    return response.data;
+  },
+
   updateCabinet: async (id: number, cabinetData: any): Promise<any> => {
     const response = await axios.put(`${API_BASE_URL}/cabinets/${id}`, cabinetData);
     return response.data;
+  },
+
+  getInvoices: async (): Promise<Invoice[]> => {
+    const response = await axios.get(`${API_BASE_URL}/invoices`);
+    return response.data;
+  },
+
+  getInvoiceById: async (id: number): Promise<Invoice> => {
+    const response = await axios.get(`${API_BASE_URL}/invoices/${id}`);
+    return response.data;
+  },
+
+  getInvoicesByPatientId: async (patientId: number): Promise<Invoice[]> => {
+    const response = await axios.get(`${API_BASE_URL}/invoices?patientId=${patientId}`);
+    return response.data;
+  },
+
+  getInvoicesByAppointmentId: async (appointmentId: number): Promise<Invoice[]> => {
+    const response = await axios.get(`${API_BASE_URL}/invoices?appointmentId=${appointmentId}`);
+    return response.data;
+  },
+
+  createInvoice: async (invoiceData: any): Promise<Invoice> => {
+    const response = await axios.post(`${API_BASE_URL}/invoices`, invoiceData);
+    return response.data;
+  },
+
+  updateInvoice: async (id: number, invoiceData: any): Promise<Invoice> => {
+    const response = await axios.put(`${API_BASE_URL}/invoices/${id}`, invoiceData);
+    return response.data;
+  },
+
+  deleteInvoice: async (id: number): Promise<void> => {
+    await axios.delete(`${API_BASE_URL}/invoices/${id}`);
   },
 };
 
