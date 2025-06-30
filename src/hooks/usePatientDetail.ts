@@ -1,4 +1,3 @@
-
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { Appointment, AppointmentStatus, Patient, Invoice } from '@/types';
@@ -8,8 +7,6 @@ import { PatientFormValues } from '@/components/patient-form/types';
 export function usePatientDetail(patientId: number) {
   const queryClient = useQueryClient();
 
-  console.log(`usePatientDetail: Loading data for patient ${patientId}`);
-
   // Patient data with longer stale time since it changes less frequently
   const { 
     data: patient, 
@@ -17,71 +14,38 @@ export function usePatientDetail(patientId: number) {
     error: patientError 
   } = useQuery({
     queryKey: ['patient', patientId],
-    queryFn: async () => {
-      console.log(`usePatientDetail: Fetching patient ${patientId}`);
-      const result = await api.getPatientById(patientId);
-      console.log(`usePatientDetail: Patient ${patientId} fetched:`, result);
-      return result;
-    },
+    queryFn: () => api.getPatientById(patientId),
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
-    retry: 3,
   });
 
   // Appointments with moderate stale time
   const { 
     data: appointments = [], 
-    isLoading: appointmentsLoading,
-    error: appointmentsError
+    isLoading: appointmentsLoading 
   } = useQuery({
     queryKey: ['appointments', 'patient', patientId],
-    queryFn: async () => {
-      console.log(`usePatientDetail: Fetching appointments for patient ${patientId}`);
-      const result = await api.getAppointmentsByPatientId(patientId);
-      console.log(`usePatientDetail: ${result.length} appointments fetched for patient ${patientId}:`, result);
-      return result;
-    },
+    queryFn: () => api.getAppointmentsByPatientId(patientId),
     staleTime: 2 * 60 * 1000, // 2 minutes
     enabled: !!patient,
-    retry: 3,
   });
 
   // Invoices with longer stale time
   const { 
     data: invoices = [], 
-    isLoading: invoicesLoading,
-    error: invoicesError
+    isLoading: invoicesLoading 
   } = useQuery({
     queryKey: ['invoices', 'patient', patientId],
-    queryFn: async () => {
-      console.log(`usePatientDetail: Fetching invoices for patient ${patientId}`);
-      const result = await invoiceService.getInvoicesByPatientId(patientId);
-      console.log(`usePatientDetail: ${result.length} invoices fetched for patient ${patientId}:`, result);
-      return result;
-    },
+    queryFn: () => invoiceService.getInvoicesByPatientId(patientId),
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!patient,
-    retry: 3,
   });
-
-  // Log any errors
-  if (patientError) {
-    console.error(`usePatientDetail: Error loading patient ${patientId}:`, patientError);
-  }
-  if (appointmentsError) {
-    console.error(`usePatientDetail: Error loading appointments for patient ${patientId}:`, appointmentsError);
-  }
-  if (invoicesError) {
-    console.error(`usePatientDetail: Error loading invoices for patient ${patientId}:`, invoicesError);
-  }
 
   // Optimistic update for appointment status
   const updateAppointmentStatusOptimistically = async (
     appointmentId: number, 
     newStatus: AppointmentStatus
   ) => {
-    console.log(`usePatientDetail: Updating appointment ${appointmentId} status to ${newStatus}`);
-    
     // Immediately update the UI
     queryClient.setQueryData(
       ['appointments', 'patient', patientId],
@@ -100,7 +64,6 @@ export function usePatientDetail(patientId: number) {
         queryKey: ['appointments', 'patient', patientId]
       });
     } catch (error) {
-      console.error(`usePatientDetail: Error updating appointment ${appointmentId}:`, error);
       // Revert on error
       queryClient.invalidateQueries({
         queryKey: ['appointments', 'patient', patientId]
@@ -111,7 +74,6 @@ export function usePatientDetail(patientId: number) {
 
   // Optimistic update for new appointments
   const addAppointmentOptimistically = (newAppointment: Appointment) => {
-    console.log(`usePatientDetail: Adding appointment optimistically:`, newAppointment);
     queryClient.setQueryData(
       ['appointments', 'patient', patientId],
       (oldAppointments: Appointment[] = []) => [...oldAppointments, newAppointment]
@@ -128,8 +90,6 @@ export function usePatientDetail(patientId: number) {
   // New function to update patient data optimistically
   const updatePatientOptimistically = async (updatedData: PatientFormValues) => {
     if (!patient) return;
-
-    console.log(`usePatientDetail: Updating patient ${patientId} optimistically:`, updatedData);
 
     // Helper function to convert values to nullable numbers
     const toNullableNumber = (val: any) => {
@@ -170,10 +130,8 @@ export function usePatientDetail(patientId: number) {
         queryKey: ['patients']
       });
 
-      console.log(`usePatientDetail: Patient ${patientId} updated successfully`);
       return updatedPatient;
     } catch (error) {
-      console.error(`usePatientDetail: Error updating patient ${patientId}:`, error);
       // Revert on error by invalidating the query
       queryClient.invalidateQueries({
         queryKey: ['patient', patientId]
@@ -187,7 +145,7 @@ export function usePatientDetail(patientId: number) {
     appointments,
     invoices,
     isLoading: patientLoading || appointmentsLoading || invoicesLoading,
-    error: patientError || appointmentsError || invoicesError,
+    error: patientError,
     updateAppointmentStatusOptimistically,
     addAppointmentOptimistically,
     updatePatientOptimistically,

@@ -1,4 +1,3 @@
-
 import ScheduleHeader from "@/components/schedule/ScheduleHeader";
 import {
 	AlertDialog,
@@ -50,8 +49,6 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-
 const SchedulePage = () => {
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [patients, setPatients] = useState<Patient[]>([]);
@@ -64,7 +61,6 @@ const SchedulePage = () => {
 		action: "cancel" | "delete";
 	} | null>(null);
 	const navigate = useNavigate();
-	const { events: googleEvents, isConnected: isGoogleConnected } = useGoogleCalendar();
 
 	// Utiliser le hook pour la mise à jour automatique des statuts
 	useAppointmentStatusUpdate({
@@ -132,21 +128,6 @@ const SchedulePage = () => {
 			});
 	};
 
-	const getDayGoogleEvents = (date: Date) => {
-		if (!isGoogleConnected || !googleEvents) return [];
-		
-		return googleEvents
-			.filter((event) => {
-				const eventDate = parseISO(event.start_time);
-				return isSameDay(eventDate, date);
-			})
-			.sort((a, b) => {
-				const timeA = parseISO(a.start_time);
-				const timeB = parseISO(b.start_time);
-				return timeA.getTime() - timeB.getTime();
-			});
-	};
-
 	// Action handlers (handleCancelAppointment, handleDeleteAppointment) remain the same
 	const handleCancelAppointment = async (appointmentId: number) => {
 		try {
@@ -172,7 +153,6 @@ const SchedulePage = () => {
 			setActionInProgress(null);
 		}
 	};
-
 	const handleDeleteAppointment = async (appointmentId: number) => {
 		try {
 			setActionInProgress({
@@ -239,12 +219,6 @@ const SchedulePage = () => {
 						Planning
 					</h1>
 					<div className="flex items-center gap-2">
-						{isGoogleConnected && (
-							<div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
-								<div className="w-2 h-2 bg-green-500 rounded-full"></div>
-								Google Calendar
-							</div>
-						)}
 						<Tabs
 							value={view}
 							onValueChange={(v) => setView(v as "day" | "week")}
@@ -293,12 +267,14 @@ const SchedulePage = () => {
 				{/* Loading state remains the same */}
 				{loading ? (
 					<div className="flex justify-center items-center py-12">
-						<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+						{/* ... loading indicator ... */}
 					</div>
 				) : (
 					<Tabs value={view} defaultValue={view}>
 						{/* TabsContent value="day" remains the same */}
 						<TabsContent value="day">
+							{/* ... Day view content ... */}
+							{/* Note: DaySchedule component below also needs its buttons checked if they need responsiveness */}
 							<div className="space-y-4">
 								<div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
 									<div className="flex gap-2">
@@ -339,9 +315,6 @@ const SchedulePage = () => {
 								<DaySchedule
 									date={selectedDate}
 									appointments={getDayAppointments(
-										selectedDate
-									)}
-									googleEvents={getDayGoogleEvents(
 										selectedDate
 									)}
 									getPatientById={getPatientById}
@@ -391,247 +364,229 @@ const SchedulePage = () => {
 
 								{/* Grid for the week */}
 								<div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-									{currentWeek.map((day) => {
-										const dayAppointments = getDayAppointments(day);
-										const dayGoogleEvents = getDayGoogleEvents(day);
-										const hasAnyEvents = dayAppointments.length > 0 || dayGoogleEvents.length > 0;
-
-										return (
-											<div key={day.toString()} className="flex flex-col">
-												{/* Day header button remains the same */}
-												<button
-													type="button"
-													className={cn(
-														"p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full",
-														isSameDay(day, new Date())
-															? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900"
-															: "bg-muted dark:bg-muted"
-													)}
-													onClick={() =>
-														handleDayHeaderClick(day)
-													}
-													tabIndex={0}
-													title={`Ajouter un Séance le ${format(
-														day,
-														"d MMMM yyyy",
-														{
-															locale: fr,
-														}
-													)}`}
-													aria-label={`Ajouter un Séance le ${format(
-														day,
-														"d MMMM yyyy",
-														{
-															locale: fr,
-														}
-													)}`}
-												>
-													<div className="font-medium">
-														{format(day, "EEEE", {
-															locale: fr,
-														})}
-													</div>
-													<div className="text-sm">
-														{format(day, "d MMM", {
-															locale: fr,
-														})}
-													</div>
-													<span className="sr-only">
-														Ajouter un Séance
-													</span>
-												</button>
-
-												{/* Events list or empty state */}
-												{!hasAnyEvents ? (
-													<div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
-														<p className="text-sm text-muted-foreground">
-															Aucune séance
-														</p>
-													</div>
-												) : (
-													<div className="space-y-2">
-														{/* Google Calendar Events */}
-														{dayGoogleEvents.map((event) => {
-															const eventStartTime = format(parseISO(event.start_time), "HH:mm");
-															return (
-																<Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-50/50">
-																	<CardContent className="p-3 flex-grow">
-																		<div className="flex items-center justify-between mb-2">
-																			<Badge className="bg-blue-500 text-xs">
-																				{eventStartTime}
-																			</Badge>
-																			<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
-																				Google
-																			</Badge>
-																		</div>
-																		<div className="mb-2">
-																			<h3 className="font-medium text-blue-900 truncate text-sm">
-																				{event.summary}
-																			</h3>
-																			{event.location && (
-																				<p className="text-xs text-blue-700 truncate">
-																					📍 {event.location}
-																				</p>
-																			)}
-																		</div>
-																	</CardContent>
-																	<div className="px-3 pb-2">
-																		<p className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
-																			Événement externe (lecture seule)
-																		</p>
-																	</div>
-																</Card>
-															);
-														})}
-
-														{/* Internal Appointments - keep existing code */}
-														{dayAppointments.map((appointment) => {
-															const patient = getPatientById(appointment.patientId);
-															const appointmentTime = format(parseISO(appointment.date), "HH:mm");
-															const isProcessingAction = actionInProgress?.id === appointment.id;
-
-															return (
-																<Card
-																	key={
-																		appointment.id
-																	}
-																	className="hover-scale flex flex-col"
-																>
-																	<CardContent className="p-3 flex-grow">
-																		{/* Top section: Time Badge */}
-																		<div className="flex items-center justify-between mb-2">
-																			<Badge className="bg-blue-500">
-																				{
-																					appointmentTime
-																				}
-																			</Badge>
-																			{appointment.status ===
-																				"COMPLETED" && (
-																				<Badge className="bg-amber-500">
-																					Terminé
-																				</Badge>
-																			)}
-																		</div>
-																		{/* Middle section: Link to patient/reason */}
-																		<Link
-																			to={`/appointments/${appointment.id}/edit`}
-																			className="block group mb-3"
-																		>
-																			<h3 className="font-medium group-hover:text-primary truncate">
-																				{patient
-																					? `${patient.firstName} ${patient.lastName}`
-																					: `Patient #${appointment.patientId}`}
-																			</h3>
-																			<p className="text-sm text-muted-foreground truncate">
-																				{
-																					appointment.reason
-																				}
-																			</p>
-																		</Link>
-																	</CardContent>
-																	{/* Bottom section: Action Buttons */}
-																	<div className="flex flex-col sm:flex-row items-center justify-end gap-2 p-2 border-t bg-muted/30">
-																		{/* Cancel Button */}
-																		<Button
-																			variant="ghost"
-																			size="sm"
-																			className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center space-x-1"
-																			onClick={() =>
-																				handleCancelAppointment(
-																					appointment.id
-																				)
-																			}
-																			disabled={
-																				isProcessingAction ||
-																				appointment.status ===
-																					"COMPLETED"
-																			}
-																			title="Annuler cette séance"
-																		>
-																			{actionInProgress?.id ===
-																				appointment.id &&
-																				actionInProgress.action ===
-																					"cancel" && (
-																					<span className="animate-spin text-base">
-																						⏳
-																					</span>
-																				)}
-																			<X className="w-4 h-4" />
-																			<span className="hidden sm:inline">
-																				Annuler
-																			</span>
-																		</Button>
-
-																		{/* Delete Button Trigger */}
-																		<AlertDialog>
-																			<AlertDialogTrigger
-																				asChild
-																			>
-																				<Button
-																					variant="ghost"
-																					size="sm"
-																					className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center"
-																					disabled={
-																						isProcessingAction
-																					}
-																					title="Supprimer cette séance"
-																				>
-																					<Trash2 className="h-4 w-4 sm:mr-1" />
-																				</Button>
-																			</AlertDialogTrigger>
-																			<AlertDialogContent>
-																				<AlertDialogHeader>
-																					<AlertDialogTitle>
-																						Supprimer
-																						le
-																						Séance
-																					</AlertDialogTitle>
-																					<AlertDialogDescription>
-																						Êtes-vous
-																						sûr
-																						de
-																						vouloir
-																						supprimer
-																						définitivement
-																						cette
-																						séance
-																						?
-																					</AlertDialogDescription>
-																				</AlertDialogHeader>
-																				<AlertDialogFooter>
-																					<AlertDialogCancel>
-																						Annuler
-																					</AlertDialogCancel>
-																					<AlertDialogAction
-																						onClick={() =>
-																							handleDeleteAppointment(
-																								appointment.id
-																							)
-																						}
-																						className="bg-destructive hover:bg-destructive/90"
-																					>
-																						{actionInProgress?.id ===
-																							appointment.id &&
-																						actionInProgress.action ===
-																							"delete" ? (
-																							<span className="animate-spin mr-2">
-																								⏳
-																							</span>
-																						) : null}
-																						Supprimer
-																					</AlertDialogAction>
-																				</AlertDialogFooter>
-																			</AlertDialogContent>
-																		</AlertDialog>
-																	</div>
-																</Card>
-															);
-														})}
-													</div>
+									{currentWeek.map((day) => (
+										<div
+											key={day.toString()}
+											className="flex flex-col"
+										>
+											{/* Day header button remains the same */}
+											<button
+												type="button"
+												className={cn(
+													"p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full",
+													isSameDay(day, new Date())
+														? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900"
+														: "bg-muted dark:bg-muted"
 												)}
-											</div>
-										);
-									})}
+												onClick={() =>
+													handleDayHeaderClick(day)
+												}
+												tabIndex={0}
+												title={`Ajouter un Séance le ${format(
+													day,
+													"d MMMM yyyy",
+													{
+														locale: fr,
+													}
+												)}`}
+												aria-label={`Ajouter un Séance le ${format(
+													day,
+													"d MMMM yyyy",
+													{
+														locale: fr,
+													}
+												)}`}
+											>
+												<div className="font-medium">
+													{format(day, "EEEE", {
+														locale: fr,
+													})}
+												</div>
+												<div className="text-sm">
+													{format(day, "d MMM", {
+														locale: fr,
+													})}
+												</div>
+												<span className="sr-only">
+													Ajouter un Séance
+												</span>
+											</button>
+
+											{/* Appointments list or empty state */}
+											{getDayAppointments(day).length ===
+											0 ? (
+												<div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
+													<p className="text-sm text-muted-foreground">
+														Aucune séance
+													</p>
+												</div>
+											) : (
+												<div className="space-y-2">
+													{getDayAppointments(
+														day
+													).map((appointment) => {
+														const patient =
+															getPatientById(
+																appointment.patientId
+															);
+														const appointmentTime =
+															format(
+																parseISO(
+																	appointment.date
+																),
+																"HH:mm"
+															);
+														const isProcessingAction =
+															actionInProgress?.id ===
+															appointment.id;
+														return (
+															<Card
+																key={
+																	appointment.id
+																}
+																className="hover-scale flex flex-col"
+															>
+																{" "}
+																{/* Added flex flex-col */}
+																<CardContent className="p-3 flex-grow">
+																	{" "}
+																	{/* Added flex-grow */}
+																	{/* Top section: Time Badge */}
+																	<div className="flex items-center justify-between mb-2">
+																		{" "}
+																		{/* Adjusted margin */}
+																		<Badge className="bg-blue-500">
+																			{
+																				appointmentTime
+																			}
+																		</Badge>
+																		{appointment.status ===
+																			"COMPLETED" && (
+																			<Badge className="bg-amber-500">
+																				Terminé
+																			</Badge>
+																		)}
+																		{/* Buttons removed from here */}
+																	</div>
+																	{/* Middle section: Link to patient/reason */}
+																	<Link
+																		to={`/appointments/${appointment.id}/edit`}
+																		className="block group mb-3" // Added bottom margin
+																	>
+																		<h3 className="font-medium group-hover:text-primary truncate">
+																			{patient
+																				? `${patient.firstName} ${patient.lastName}`
+																				: `Patient #${appointment.patientId}`}
+																		</h3>
+																		<p className="text-sm text-muted-foreground truncate">
+																			{
+																				appointment.reason
+																			}
+																		</p>
+																	</Link>
+																</CardContent>
+																{/* --- Bottom section: Action Buttons --- */}
+																<div className="flex flex-col sm:flex-row items-center justify-end gap-2 p-2 border-t bg-muted/30">
+																	{/* Cancel Button */}
+																	<Button
+																		variant="ghost"
+																		size="sm"
+																		className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center space-x-1"
+																		onClick={() =>
+																			handleCancelAppointment(
+																				appointment.id
+																			)
+																		}
+																		disabled={
+																			isProcessingAction ||
+																			appointment.status ===
+																				"COMPLETED"
+																		}
+																		title="Annuler cette séance"
+																	>
+																		{actionInProgress?.id ===
+																			appointment.id &&
+																			actionInProgress.action ===
+																				"cancel" && (
+																				<span className="animate-spin text-base">
+																					⏳
+																				</span>
+																			)}
+																		<X className="w-4 h-4" />
+																		<span className="hidden sm:inline">
+																			Annuler
+																		</span>
+																	</Button>
+
+																	{/* Delete Button Trigger */}
+																	<AlertDialog>
+																		<AlertDialogTrigger
+																			asChild
+																		>
+																			<Button
+																				variant="ghost"
+																				size="sm"
+																				className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center" // Responsive width, centered text/icon
+																				disabled={
+																					isProcessingAction
+																				}
+																				title="Supprimer cette séance"
+																			>
+																				<Trash2 className="h-4 w-4 sm:mr-1" />
+																			</Button>
+																		</AlertDialogTrigger>
+																		<AlertDialogContent>
+																			<AlertDialogHeader>
+																				<AlertDialogTitle>
+																					Supprimer
+																					le
+																					Séance
+																				</AlertDialogTitle>
+																				<AlertDialogDescription>
+																					Êtes-vous
+																					sûr
+																					de
+																					vouloir
+																					supprimer
+																					définitivement
+																					cette
+																					séance
+																					?
+																				</AlertDialogDescription>
+																			</AlertDialogHeader>
+																			<AlertDialogFooter>
+																				<AlertDialogCancel>
+																					Annuler
+																				</AlertDialogCancel>
+																				<AlertDialogAction
+																					onClick={() =>
+																						handleDeleteAppointment(
+																							appointment.id
+																						)
+																					}
+																					className="bg-destructive hover:bg-destructive/90" // Adjusted hover color
+																				>
+																					{actionInProgress?.id ===
+																						appointment.id &&
+																					actionInProgress.action ===
+																						"delete" ? (
+																						<span className="animate-spin mr-2">
+																							⏳
+																						</span>
+																					) : null}
+																					Supprimer
+																				</AlertDialogAction>
+																			</AlertDialogFooter>
+																		</AlertDialogContent>
+																	</AlertDialog>
+																</div>
+															</Card>
+														);
+													})}
+												</div>
+											)}
+										</div>
+									))}
 								</div>
 							</div>
 						</TabsContent>
@@ -642,11 +597,10 @@ const SchedulePage = () => {
 	);
 };
 
-// DaySchedule Component
+// DaySchedule Component (Check responsiveness of its buttons too)
 interface DayScheduleProps {
 	date: Date;
 	appointments: Appointment[];
-	googleEvents: any[];
 	getPatientById: (id: number) => Patient | undefined;
 	onCancelAppointment: (id: number) => void;
 	onDeleteAppointment: (id: number) => void;
@@ -655,11 +609,9 @@ interface DayScheduleProps {
 		action: "cancel" | "delete";
 	} | null;
 }
-
 const DaySchedule = ({
 	date,
 	appointments,
-	googleEvents,
 	getPatientById,
 	onCancelAppointment,
 	onDeleteAppointment,
@@ -681,33 +633,22 @@ const DaySchedule = ({
 	const displayTimeSlots = timeSlots.filter(
 		(slot) => parseInt(slot.split(":")[0]) < 20
 	);
-
 	const getAppointmentForTimeSlot = (timeSlot: string) => {
 		return appointments.find(
 			(appointment) =>
 				format(parseISO(appointment.date), "HH:mm") === timeSlot
 		);
 	};
-
-	const getGoogleEventForTimeSlot = (timeSlot: string) => {
-		return googleEvents.find(
-			(event) =>
-				format(parseISO(event.start_time), "HH:mm") === timeSlot
-		);
-	};
-
 	return (
 		<div className="rounded-md border">
 			{displayTimeSlots.map((timeSlot) => {
 				const appointment = getAppointmentForTimeSlot(timeSlot);
-				const googleEvent = getGoogleEventForTimeSlot(timeSlot);
 				const isCurrentTime =
 					format(new Date(), "HH:mm") === timeSlot &&
 					isSameDay(date, new Date());
 				const isProcessingAction =
 					appointment && actionInProgress?.id === appointment.id;
 				const isCompleted = appointment?.status === "COMPLETED";
-
 				return (
 					<div
 						key={timeSlot}
@@ -718,6 +659,8 @@ const DaySchedule = ({
 					>
 						{/* Time slot display */}
 						<div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center shrink-0">
+							{" "}
+							{/* Added shrink-0 */}
 							<span
 								className={cn(
 									"text-sm font-medium",
@@ -732,36 +675,21 @@ const DaySchedule = ({
 
 						{/* Appointment details or link */}
 						<div className="flex-1 p-3 min-w-0">
-							{googleEvent ? (
-								<div className="flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 border-l-blue-500 bg-blue-50/50 p-3 rounded">
-									<div className="flex-grow min-w-0">
-										<div className="flex items-center gap-2 mb-1">
-											<Badge className="bg-blue-500 text-white text-xs">
-												Google
-											</Badge>
-											<h3 className="font-medium text-blue-900 truncate">
-												{googleEvent.summary}
-											</h3>
-										</div>
-										{googleEvent.location && (
-											<p className="text-sm text-blue-700 ml-2 truncate">
-												📍 {googleEvent.location}
-											</p>
-										)}
-										<p className="text-xs text-blue-600 mt-1">
-											Événement externe (lecture seule)
-										</p>
-									</div>
-								</div>
-							) : appointment ? (
+							{" "}
+							{/* Added min-w-0 to prevent overflow */}
+							{appointment ? (
 								<div className="flex flex-col lg:flex-row items-start justify-between gap-2">
+									{" "}
+									{/* Responsive layout for content vs actions */}
 									{/* Appointment Info */}
 									<div className="flex-grow min-w-0">
+										{" "}
+										{/* Added min-w-0 */}
 										<div className="flex items-center gap-2 mb-1">
 											<User className="h-4 w-4 text-primary shrink-0" />
 											<Link
 												to={`/patients/${appointment.patientId}`}
-												className="font-medium hover:text-primary truncate"
+												className="font-medium hover:text-primary truncate" // Added truncate
 											>
 												{getPatientById(
 													appointment.patientId
@@ -778,11 +706,15 @@ const DaySchedule = ({
 											)}
 										</div>
 										<p className="text-sm text-muted-foreground ml-6 truncate">
+											{" "}
+											{/* Added truncate */}
 											{appointment.reason}
 										</p>
 									</div>
 									{/* Action Buttons - Made responsive */}
 									<div className="flex flex-wrap gap-2 justify-end w-full lg:w-auto shrink-0">
+										{" "}
+										{/* flex-wrap, responsive width */}
 										{/* Link Buttons */}
 										<Button
 											variant="outline"
@@ -815,7 +747,7 @@ const DaySchedule = ({
 										<Button
 											variant="ghost"
 											size="sm"
-											className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
+											className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0" // Responsive grow
 											onClick={() =>
 												onCancelAppointment(
 													appointment.id
@@ -839,10 +771,11 @@ const DaySchedule = ({
 													</span>
 												) : (
 													<>
+														{" "}
 														<X className="h-4 w-4 mr-1" />{" "}
 														Annuler{" "}
 													</>
-												)
+												) // Added Icon
 											}
 										</Button>
 										<AlertDialog>
@@ -850,7 +783,7 @@ const DaySchedule = ({
 												<Button
 													variant="ghost"
 													size="sm"
-													className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
+													className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0" // Responsive grow
 													disabled={
 														isProcessingAction
 													}
@@ -923,5 +856,4 @@ const DaySchedule = ({
 		</div>
 	);
 };
-
 export default SchedulePage;
