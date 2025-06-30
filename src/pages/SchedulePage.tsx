@@ -1,296 +1,927 @@
 
-import React, { useState, useMemo } from "react";
-import { Calendar, Clock, Plus, Users, RefreshCw, ExternalLink, Eye, Trash, X } from "lucide-react";
-import { Layout } from "@/components/ui/layout";
-import { Button } from "@/components/ui/button";
+import ScheduleHeader from "@/components/schedule/ScheduleHeader";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/services/api";
-import { useAuth } from "@/contexts/AuthContext";
-import { format, parseISO, startOfWeek, endOfWeek, addWeeks, subWeeks, isSameDay, isToday, isBefore, startOfDay } from "date-fns";
-import { fr } from "date-fns/locale";
-import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Layout } from "@/components/ui/layout";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 import { cn } from "@/lib/utils";
+import { api } from "@/services/api";
+import { Appointment, AppointmentStatus, Patient } from "@/types";
+import {
+	addDays,
+	eachDayOfInterval,
+	endOfWeek,
+	format,
+	isSameDay,
+	parseISO,
+	startOfWeek,
+} from "date-fns";
+import { fr } from "date-fns/locale";
+import {
+	ArrowLeft,
+	Calendar as CalendarIcon,
+	ChevronLeft,
+	ChevronRight,
+	Clock,
+	FileText,
+	Trash2,
+	User,
+	X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 
 const SchedulePage = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [currentWeek, setCurrentWeek] = useState(new Date());
-  const { events: googleEvents, isConnected: isGoogleConnected } = useGoogleCalendar();
+	const [appointments, setAppointments] = useState<Appointment[]>([]);
+	const [patients, setPatients] = useState<Patient[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+	const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
+	const [view, setView] = useState<"day" | "week">("week");
+	const [actionInProgress, setActionInProgress] = useState<{
+		id: number;
+		action: "cancel" | "delete";
+	} | null>(null);
+	const navigate = useNavigate();
+	const { events: googleEvents, isConnected: isGoogleConnected } = useGoogleCalendar();
 
-  // Fetch appointments for the current week
-  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
+	// Utiliser le hook pour la mise à jour automatique des statuts
+	useAppointmentStatusUpdate({
+		appointments,
+		onAppointmentsUpdate: setAppointments,
+	});
 
-  const { data: appointmentsData, isLoading: isLoadingAppointments } = useQuery(
-    ['appointments', weekStart.toISOString(), weekEnd.toISOString()],
-    () => api.getAppointmentsByDateRange(weekStart.toISOString(), weekEnd.toISOString()),
-    { enabled: !!user?.osteopathId }
-  );
+	// useEffect for fetching data remains the same
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const [appointmentsData, patientsData] = await Promise.all([
+					api.getAppointments(),
+					api.getPatients(),
+				]);
+				setAppointments(appointmentsData);
+				setPatients(patientsData);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+				toast.error(
+					"Impossible de charger les données. Veuillez réessayer."
+				);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchData();
+	}, []);
 
-  // Combine appointments with Google events
-  const combinedAppointments = useMemo(() => {
-    if (!appointmentsData) return [];
+	// useEffect for calculating week remains the same
+	useEffect(() => {
+		const start = startOfWeek(selectedDate, {
+			weekStartsOn: 1,
+		});
+		const end = endOfWeek(selectedDate, {
+			weekStartsOn: 1,
+		});
+		const days = eachDayOfInterval({
+			start,
+			end,
+		});
+		setCurrentWeek(days);
+	}, [selectedDate]);
 
-    // Map Google events to appointment-like objects
-    const mappedGoogleEvents = googleEvents.map(event => ({
-      id: event.id,
-      date: event.start_time,
-      status: event.status,
-      isGoogleEvent: true,
-      summary: event.summary,
-      patient: event.patient || null,
-      reason: event.description || null,
-    }));
+	// Helper functions (getPatientById, getDayAppointments) remain the same
+	const getPatientById = (patientId: number) => {
+		return patients.find((patient) => patient.id === patientId);
+	};
 
-    // Map regular appointments
-    const mappedAppointments = appointmentsData.map(apt => ({
-      id: apt.id,
-      date: apt.date,
-      status: apt.status,
-      isGoogleEvent: false,
-      patient: apt.patient,
-      reason: apt.reason,
-    }));
+	// Mise à jour pour inclure les séances avec statut COMPLETED
+	const getDayAppointments = (date: Date) => {
+		return appointments
+			.filter((appointment) => {
+				const appointmentDate = parseISO(appointment.date);
+				return (
+					isSameDay(appointmentDate, date) &&
+					(appointment.status === "SCHEDULED" ||
+						appointment.status === "COMPLETED")
+				);
+			})
+			.sort((a, b) => {
+				const timeA = parseISO(a.date);
+				const timeB = parseISO(b.date);
+				return timeA.getTime() - timeB.getTime();
+			});
+	};
 
-    // Combine and sort by date
-    return [...mappedAppointments, ...mappedGoogleEvents].sort((a, b) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
-    });
-  }, [appointmentsData, googleEvents]);
+	const getDayGoogleEvents = (date: Date) => {
+		if (!isGoogleConnected || !googleEvents) return [];
+		
+		return googleEvents
+			.filter((event) => {
+				const eventDate = parseISO(event.start_time);
+				return isSameDay(eventDate, date);
+			})
+			.sort((a, b) => {
+				const timeA = parseISO(a.start_time);
+				const timeB = parseISO(b.start_time);
+				return timeA.getTime() - timeB.getTime();
+			});
+	};
 
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(weekStart);
-    date.setDate(date.getDate() + i);
-    return date;
-  });
+	// Action handlers (handleCancelAppointment, handleDeleteAppointment) remain the same
+	const handleCancelAppointment = async (appointmentId: number) => {
+		try {
+			setActionInProgress({
+				id: appointmentId,
+				action: "cancel",
+			});
+			await api.cancelAppointment(appointmentId);
+			toast.success("Séance annulée avec succès");
+			const updatedAppointments = appointments.map((appointment) =>
+				appointment.id === appointmentId
+					? {
+							...appointment,
+							status: "CANCELED" as AppointmentStatus,
+					  }
+					: appointment
+			);
+			setAppointments(updatedAppointments);
+		} catch (error) {
+			console.error("Error cancelling appointment:", error);
+			toast.error("Impossible d'annuler la séance");
+		} finally {
+			setActionInProgress(null);
+		}
+	};
 
-  const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8);
+	const handleDeleteAppointment = async (appointmentId: number) => {
+		try {
+			setActionInProgress({
+				id: appointmentId,
+				action: "delete",
+			});
+			await api.deleteAppointment(appointmentId);
+			toast.success("Séance supprimé avec succès");
+			const updatedAppointments = appointments.filter(
+				(appointment) => appointment.id !== appointmentId
+			);
+			setAppointments(updatedAppointments);
+		} catch (error) {
+			console.error("Error deleting appointment:", error);
+			toast.error("Impossible de supprimer le Séance");
+		} finally {
+			setActionInProgress(null);
+		}
+	};
 
-  const getEventStyle = (appointment: any) => {
-    if (appointment.isGoogleEvent) {
-      return "bg-blue-100 border-blue-300 text-blue-800";
-    }
-    
-    switch (appointment.status) {
-      case 'SCHEDULED':
-        return "bg-green-100 border-green-300 text-green-800";
-      case 'COMPLETED':
-        return "bg-gray-100 border-gray-300 text-gray-800";
-      case 'CANCELED':
-        return "bg-red-100 border-red-300 text-red-800";
-      case 'RESCHEDULED':
-        return "bg-yellow-100 border-yellow-300 text-yellow-800";
-      default:
-        return "bg-blue-100 border-blue-300 text-blue-800";
-    }
-  };
+	// Navigation functions remain the same
+	const navigateToPreviousWeek = () =>
+		setSelectedDate((prevDate) => addDays(prevDate, -7));
+	const navigateToNextWeek = () =>
+		setSelectedDate((prevDate) => addDays(prevDate, 7));
+	const navigateToPreviousDay = () =>
+		setSelectedDate((prevDate) => addDays(prevDate, -1));
+	const navigateToNextDay = () =>
+		setSelectedDate((prevDate) => addDays(prevDate, 1));
+	const navigateToToday = () => setSelectedDate(new Date());
+	const handleDayHeaderClick = (date: Date) => {
+		const dateStr = format(date, "yyyy-MM-dd");
+		navigate(`/appointments/new?date=${dateStr}`);
+	};
 
-  const renderAppointmentCard = (appointment: any) => (
-    <div
-      key={appointment.id}
-      className={cn(
-        "p-2 mb-1 border-l-4 rounded text-xs cursor-pointer hover:shadow-sm transition-shadow relative group",
-        getEventStyle(appointment)
-      )}
-      onClick={() => {
-        if (!appointment.isGoogleEvent) {
-          navigate(`/appointments/${appointment.id}/edit`);
-        }
-      }}
-    >
-      <div className="flex items-center justify-between mb-1">
-        <span className="font-medium text-xs sm:text-sm">
-          {format(parseISO(appointment.date), "HH:mm", { locale: fr })}
-        </span>
-        <div className="flex items-center gap-1">
-          {appointment.isGoogleEvent && (
-            <>
-              <div className="flex items-center gap-1">
-                <ExternalLink className="h-2 w-2 sm:h-3 sm:w-3" />
-                <Badge variant="outline" className="text-xs px-1 py-0 hidden sm:inline-block">
-                  Google
-                </Badge>
-              </div>
-            </>
-          )}
-          {!appointment.isGoogleEvent && (
-            <div className="hidden group-hover:flex items-center gap-1">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-5 w-5 p-0 hover:bg-white/50"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/appointments/${appointment.id}/edit`);
-                }}
-              >
-                <Eye className="h-3 w-3" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-5 w-5 p-0 hover:bg-red-100 text-red-600"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Handle delete appointment
-                }}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="font-medium text-xs sm:text-sm mb-1">
-        {appointment.isGoogleEvent ? (
-          appointment.summary || 'Événement Google'
-        ) : (
-          `${appointment.patient?.firstName} ${appointment.patient?.lastName}`
-        )}
-      </div>
-      
-      {appointment.reason && (
-        <div className="text-xs opacity-75 mb-1">{appointment.reason}</div>
-      )}
-      
-      {appointment.patient && (
-        <div className="text-xs opacity-75">
-          Patient identifié: {appointment.patient.firstName} {appointment.patient.lastName}
-        </div>
-      )}
-      
-      {appointment.isGoogleEvent && appointment.patient && (
-        <div className="mt-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-5 px-2 text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/invoices/new?patientId=${appointment.patient.id}&date=${appointment.date}`);
-            }}
-          >
-            Facturer
-          </Button>
-        </div>
-      )}
-    </div>
-  );
+	// --- JSX Structure ---
+	return (
+		<Layout>
+			{/* Bouton de retour */}
+			<div className="relative z-10">
+				<div className="flex items-center gap-2 mb-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => navigate(-1)}
+						className="flex items-center gap-1"
+					>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Retour
+					</Button>
+				</div>
+			</div>
 
-  return (
-    <Layout>
-      <div className="space-y-6">
-        <ScheduleHeader 
-          currentWeek={currentWeek}
-          onPreviousWeek={() => setCurrentWeek(subWeeks(currentWeek, 1))}
-          onNextWeek={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-          onToday={() => setCurrentWeek(new Date())}
-          isGoogleConnected={isGoogleConnected}
-          googleEventsCount={googleEvents.length}
-        />
+			{/* Contenu principal */}
+			<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8">
+				{/* Header type Appointment */}
+				<ScheduleHeader />
+			</div>
+			<div className="flex flex-col p-4 sm:p-6 lg:p-8 mt-4">
+				{/* Header remains the same */}
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+					<h1 className="text-3xl font-bold flex items-center gap-2">
+						<Clock className="h-8 w-8 text-amber-500" />
+						Planning
+					</h1>
+					<div className="flex items-center gap-2">
+						{isGoogleConnected && (
+							<div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
+								<div className="w-2 h-2 bg-green-500 rounded-full"></div>
+								Google Calendar
+							</div>
+						)}
+						<Tabs
+							value={view}
+							onValueChange={(v) => setView(v as "day" | "week")}
+							className="mr-2"
+						>
+							<TabsList>
+								<TabsTrigger value="day">Jour</TabsTrigger>
+								<TabsTrigger value="week">Semaine</TabsTrigger>
+							</TabsList>
+						</Tabs>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={navigateToToday}
+						>
+							Aujourd'hui
+						</Button>
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button
+									variant="outline"
+									size="sm"
+									className="ml-auto"
+								>
+									<CalendarIcon className="mr-2 h-4 w-4" />
+									{format(selectedDate, "MMMM yyyy", {
+										locale: fr,
+									})}
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-auto p-0" align="end">
+								<Calendar
+									mode="single"
+									selected={selectedDate}
+									onSelect={(date) =>
+										date && setSelectedDate(date)
+									}
+									initialFocus
+									className={cn("p-3 pointer-events-auto")}
+								/>
+							</PopoverContent>
+						</Popover>
+					</div>
+				</div>
 
-        {/* Desktop view */}
-        <div className="hidden lg:block">
-          <Card>
-            <CardContent className="p-0">
-              <div className="grid grid-cols-8 gap-0 border-b">
-                <div className="p-3 bg-muted font-medium text-sm">Heure</div>
-                {weekDays.map((day) => (
-                  <div
-                    key={day.toISOString()}
-                    className={cn(
-                      "p-3 text-center border-l font-medium text-sm",
-                      isToday(day) && "bg-blue-50 text-blue-700"
-                    )}
-                  >
-                    <div>{format(day, "EEE", { locale: fr })}</div>
-                    <div className={cn(
-                      "text-lg",
-                      isToday(day) && "font-bold"
-                    )}>
-                      {format(day, "d")}
-                    </div>
-                  </div>
-                ))}
-              </div>
+				{/* Loading state remains the same */}
+				{loading ? (
+					<div className="flex justify-center items-center py-12">
+						<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+					</div>
+				) : (
+					<Tabs value={view} defaultValue={view}>
+						{/* TabsContent value="day" remains the same */}
+						<TabsContent value="day">
+							<div className="space-y-4">
+								<div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
+									<div className="flex gap-2">
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={navigateToPreviousDay}
+										>
+											<ChevronLeft className="h-4 w-4" />{" "}
+											Jour précédent
+										</Button>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={navigateToToday}
+										>
+											Aujourd'hui
+										</Button>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={navigateToNextDay}
+										>
+											Jour suivant{" "}
+											<ChevronRight className="h-4 w-4 ml-1" />
+										</Button>
+									</div>
+									<h2 className="text-xl font-medium capitalize mt-2 sm:mt-0">
+										{format(
+											selectedDate,
+											"EEEE d MMMM yyyy",
+											{
+												locale: fr,
+											}
+										)}
+									</h2>
+								</div>
+								<DaySchedule
+									date={selectedDate}
+									appointments={getDayAppointments(
+										selectedDate
+									)}
+									googleEvents={getDayGoogleEvents(
+										selectedDate
+									)}
+									getPatientById={getPatientById}
+									onCancelAppointment={
+										handleCancelAppointment
+									}
+									onDeleteAppointment={
+										handleDeleteAppointment
+									}
+									actionInProgress={actionInProgress}
+								/>
+							</div>
+						</TabsContent>
 
-              {timeSlots.map((hour) => (
-                <div key={hour} className="grid grid-cols-8 gap-0 border-b min-h-[80px]">
-                  <div className="p-2 bg-muted text-sm font-medium text-center">
-                    {hour}:00
-                  </div>
-                  {weekDays.map((day) => {
-                    const dayAppointments = combinedAppointments.filter(apt => {
-                      const aptDate = parseISO(apt.date);
-                      return isSameDay(aptDate, day) && aptDate.getHours() === hour;
-                    });
+						{/* --- MODIFIED TabsContent value="week" --- */}
+						<TabsContent value="week">
+							<div className="space-y-4">
+								{/* Week navigation remains the same */}
+								<div className="flex items-center justify-between mb-4">
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={navigateToPreviousWeek}
+									>
+										<ChevronLeft className="h-4 w-4" />{" "}
+										Semaine précédente
+									</Button>
+									<h2 className="text-xl font-medium">
+										Semaine du{" "}
+										{format(currentWeek[0], "d MMMM", {
+											locale: fr,
+										})}{" "}
+										au{" "}
+										{format(currentWeek[6], "d MMMM yyyy", {
+											locale: fr,
+										})}
+									</h2>
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={navigateToNextWeek}
+									>
+										Semaine suivante{" "}
+										<ChevronRight className="h-4 w-4 ml-1" />
+									</Button>
+								</div>
 
-                    return (
-                      <div key={`${day.toISOString()}-${hour}`} className="p-1 border-l min-h-[80px]">
-                        {dayAppointments.map(renderAppointmentCard)}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+								{/* Grid for the week */}
+								<div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+									{currentWeek.map((day) => {
+										const dayAppointments = getDayAppointments(day);
+										const dayGoogleEvents = getDayGoogleEvents(day);
+										const hasAnyEvents = dayAppointments.length > 0 || dayGoogleEvents.length > 0;
 
-        {/* Mobile/Tablet view */}
-        <div className="lg:hidden space-y-4">
-          {weekDays.map((day) => {
-            const dayAppointments = combinedAppointments.filter(apt => {
-              return isSameDay(parseISO(apt.date), day);
-            });
+										return (
+											<div key={day.toString()} className="flex flex-col">
+												{/* Day header button remains the same */}
+												<button
+													type="button"
+													className={cn(
+														"p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full",
+														isSameDay(day, new Date())
+															? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900"
+															: "bg-muted dark:bg-muted"
+													)}
+													onClick={() =>
+														handleDayHeaderClick(day)
+													}
+													tabIndex={0}
+													title={`Ajouter un Séance le ${format(
+														day,
+														"d MMMM yyyy",
+														{
+															locale: fr,
+														}
+													)}`}
+													aria-label={`Ajouter un Séance le ${format(
+														day,
+														"d MMMM yyyy",
+														{
+															locale: fr,
+														}
+													)}`}
+												>
+													<div className="font-medium">
+														{format(day, "EEEE", {
+															locale: fr,
+														})}
+													</div>
+													<div className="text-sm">
+														{format(day, "d MMM", {
+															locale: fr,
+														})}
+													</div>
+													<span className="sr-only">
+														Ajouter un Séance
+													</span>
+												</button>
 
-            return (
-              <Card key={day.toISOString()}>
-                <CardHeader className={cn(
-                  "pb-3",
-                  isToday(day) && "bg-blue-50"
-                )}>
-                  <CardTitle className={cn(
-                    "text-base sm:text-lg flex items-center justify-between",
-                    isToday(day) && "text-blue-700"
-                  )}>
-                    <span className="text-sm sm:text-base">
-                      {format(day, "EEEE d MMMM", { locale: fr })}
-                    </span>
-                    <Badge variant="outline" className="ml-2 text-xs">
-                      {dayAppointments.length}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {dayAppointments.length > 0 ? (
-                    dayAppointments.map(renderAppointmentCard)
-                  ) : (
-                    <p className="text-muted-foreground text-center py-4 text-sm">
-                      Aucun rendez-vous
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+												{/* Events list or empty state */}
+												{!hasAnyEvents ? (
+													<div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
+														<p className="text-sm text-muted-foreground">
+															Aucune séance
+														</p>
+													</div>
+												) : (
+													<div className="space-y-2">
+														{/* Google Calendar Events */}
+														{dayGoogleEvents.map((event) => {
+															const eventStartTime = format(parseISO(event.start_time), "HH:mm");
+															return (
+																<Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-50/50">
+																	<CardContent className="p-3 flex-grow">
+																		<div className="flex items-center justify-between mb-2">
+																			<Badge className="bg-blue-500 text-xs">
+																				{eventStartTime}
+																			</Badge>
+																			<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
+																				Google
+																			</Badge>
+																		</div>
+																		<div className="mb-2">
+																			<h3 className="font-medium text-blue-900 truncate text-sm">
+																				{event.summary}
+																			</h3>
+																			{event.location && (
+																				<p className="text-xs text-blue-700 truncate">
+																					📍 {event.location}
+																				</p>
+																			)}
+																		</div>
+																	</CardContent>
+																	<div className="px-3 pb-2">
+																		<p className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+																			Événement externe (lecture seule)
+																		</p>
+																	</div>
+																</Card>
+															);
+														})}
 
-        {/* Floating action button - responsive */}
-        <Button
-          onClick={() => navigate("/appointments/new")}
-          className="fixed bottom-6 right-6 rounded-full w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shadow-lg hover:shadow-xl transition-shadow z-50"
-        >
-          <Plus className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-        </Button>
-      </div>
-    </Layout>
-  );
+														{/* Internal Appointments - keep existing code */}
+														{dayAppointments.map((appointment) => {
+															const patient = getPatientById(appointment.patientId);
+															const appointmentTime = format(parseISO(appointment.date), "HH:mm");
+															const isProcessingAction = actionInProgress?.id === appointment.id;
+
+															return (
+																<Card
+																	key={
+																		appointment.id
+																	}
+																	className="hover-scale flex flex-col"
+																>
+																	<CardContent className="p-3 flex-grow">
+																		{/* Top section: Time Badge */}
+																		<div className="flex items-center justify-between mb-2">
+																			<Badge className="bg-blue-500">
+																				{
+																					appointmentTime
+																				}
+																			</Badge>
+																			{appointment.status ===
+																				"COMPLETED" && (
+																				<Badge className="bg-amber-500">
+																					Terminé
+																				</Badge>
+																			)}
+																		</div>
+																		{/* Middle section: Link to patient/reason */}
+																		<Link
+																			to={`/appointments/${appointment.id}/edit`}
+																			className="block group mb-3"
+																		>
+																			<h3 className="font-medium group-hover:text-primary truncate">
+																				{patient
+																					? `${patient.firstName} ${patient.lastName}`
+																					: `Patient #${appointment.patientId}`}
+																			</h3>
+																			<p className="text-sm text-muted-foreground truncate">
+																				{
+																					appointment.reason
+																				}
+																			</p>
+																		</Link>
+																	</CardContent>
+																	{/* Bottom section: Action Buttons */}
+																	<div className="flex flex-col sm:flex-row items-center justify-end gap-2 p-2 border-t bg-muted/30">
+																		{/* Cancel Button */}
+																		<Button
+																			variant="ghost"
+																			size="sm"
+																			className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center space-x-1"
+																			onClick={() =>
+																				handleCancelAppointment(
+																					appointment.id
+																				)
+																			}
+																			disabled={
+																				isProcessingAction ||
+																				appointment.status ===
+																					"COMPLETED"
+																			}
+																			title="Annuler cette séance"
+																		>
+																			{actionInProgress?.id ===
+																				appointment.id &&
+																				actionInProgress.action ===
+																					"cancel" && (
+																					<span className="animate-spin text-base">
+																						⏳
+																					</span>
+																				)}
+																			<X className="w-4 h-4" />
+																			<span className="hidden sm:inline">
+																				Annuler
+																			</span>
+																		</Button>
+
+																		{/* Delete Button Trigger */}
+																		<AlertDialog>
+																			<AlertDialogTrigger
+																				asChild
+																			>
+																				<Button
+																					variant="ghost"
+																					size="sm"
+																					className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center"
+																					disabled={
+																						isProcessingAction
+																					}
+																					title="Supprimer cette séance"
+																				>
+																					<Trash2 className="h-4 w-4 sm:mr-1" />
+																				</Button>
+																			</AlertDialogTrigger>
+																			<AlertDialogContent>
+																				<AlertDialogHeader>
+																					<AlertDialogTitle>
+																						Supprimer
+																						le
+																						Séance
+																					</AlertDialogTitle>
+																					<AlertDialogDescription>
+																						Êtes-vous
+																						sûr
+																						de
+																						vouloir
+																						supprimer
+																						définitivement
+																						cette
+																						séance
+																						?
+																					</AlertDialogDescription>
+																				</AlertDialogHeader>
+																				<AlertDialogFooter>
+																					<AlertDialogCancel>
+																						Annuler
+																					</AlertDialogCancel>
+																					<AlertDialogAction
+																						onClick={() =>
+																							handleDeleteAppointment(
+																								appointment.id
+																							)
+																						}
+																						className="bg-destructive hover:bg-destructive/90"
+																					>
+																						{actionInProgress?.id ===
+																							appointment.id &&
+																						actionInProgress.action ===
+																							"delete" ? (
+																							<span className="animate-spin mr-2">
+																								⏳
+																							</span>
+																						) : null}
+																						Supprimer
+																					</AlertDialogAction>
+																				</AlertDialogFooter>
+																			</AlertDialogContent>
+																		</AlertDialog>
+																	</div>
+																</Card>
+															);
+														})}
+													</div>
+												)}
+											</div>
+										);
+									})}
+								</div>
+							</div>
+						</TabsContent>
+					</Tabs>
+				)}
+			</div>
+		</Layout>
+	);
+};
+
+// DaySchedule Component
+interface DayScheduleProps {
+	date: Date;
+	appointments: Appointment[];
+	googleEvents: any[];
+	getPatientById: (id: number) => Patient | undefined;
+	onCancelAppointment: (id: number) => void;
+	onDeleteAppointment: (id: number) => void;
+	actionInProgress: {
+		id: number;
+		action: "cancel" | "delete";
+	} | null;
+}
+
+const DaySchedule = ({
+	date,
+	appointments,
+	googleEvents,
+	getPatientById,
+	onCancelAppointment,
+	onDeleteAppointment,
+	actionInProgress,
+}: DayScheduleProps) => {
+	// Time slot generation logic remains the same
+	const timeSlots = Array.from(
+		{
+			length: 25,
+		},
+		(_, i) => {
+			const hour = Math.floor(i / 2) + 8;
+			const minute = (i % 2) * 30;
+			return `${hour.toString().padStart(2, "0")}:${minute
+				.toString()
+				.padStart(2, "0")}`;
+		}
+	);
+	const displayTimeSlots = timeSlots.filter(
+		(slot) => parseInt(slot.split(":")[0]) < 20
+	);
+
+	const getAppointmentForTimeSlot = (timeSlot: string) => {
+		return appointments.find(
+			(appointment) =>
+				format(parseISO(appointment.date), "HH:mm") === timeSlot
+		);
+	};
+
+	const getGoogleEventForTimeSlot = (timeSlot: string) => {
+		return googleEvents.find(
+			(event) =>
+				format(parseISO(event.start_time), "HH:mm") === timeSlot
+		);
+	};
+
+	return (
+		<div className="rounded-md border">
+			{displayTimeSlots.map((timeSlot) => {
+				const appointment = getAppointmentForTimeSlot(timeSlot);
+				const googleEvent = getGoogleEventForTimeSlot(timeSlot);
+				const isCurrentTime =
+					format(new Date(), "HH:mm") === timeSlot &&
+					isSameDay(date, new Date());
+				const isProcessingAction =
+					appointment && actionInProgress?.id === appointment.id;
+				const isCompleted = appointment?.status === "COMPLETED";
+
+				return (
+					<div
+						key={timeSlot}
+						className={cn(
+							"flex border-b last:border-b-0 transition-colors",
+							isCurrentTime ? "bg-primary/5" : "hover:bg-muted/50"
+						)}
+					>
+						{/* Time slot display */}
+						<div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center shrink-0">
+							<span
+								className={cn(
+									"text-sm font-medium",
+									isCurrentTime
+										? "text-primary"
+										: "text-muted-foreground"
+								)}
+							>
+								{timeSlot}
+							</span>
+						</div>
+
+						{/* Appointment details or link */}
+						<div className="flex-1 p-3 min-w-0">
+							{googleEvent ? (
+								<div className="flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 border-l-blue-500 bg-blue-50/50 p-3 rounded">
+									<div className="flex-grow min-w-0">
+										<div className="flex items-center gap-2 mb-1">
+											<Badge className="bg-blue-500 text-white text-xs">
+												Google
+											</Badge>
+											<h3 className="font-medium text-blue-900 truncate">
+												{googleEvent.summary}
+											</h3>
+										</div>
+										{googleEvent.location && (
+											<p className="text-sm text-blue-700 ml-2 truncate">
+												📍 {googleEvent.location}
+											</p>
+										)}
+										<p className="text-xs text-blue-600 mt-1">
+											Événement externe (lecture seule)
+										</p>
+									</div>
+								</div>
+							) : appointment ? (
+								<div className="flex flex-col lg:flex-row items-start justify-between gap-2">
+									{/* Appointment Info */}
+									<div className="flex-grow min-w-0">
+										<div className="flex items-center gap-2 mb-1">
+											<User className="h-4 w-4 text-primary shrink-0" />
+											<Link
+												to={`/patients/${appointment.patientId}`}
+												className="font-medium hover:text-primary truncate"
+											>
+												{getPatientById(
+													appointment.patientId
+												)?.firstName || ""}{" "}
+												{getPatientById(
+													appointment.patientId
+												)?.lastName ||
+													`Patient #${appointment.patientId}`}
+											</Link>
+											{isCompleted && (
+												<Badge className="bg-amber-500 text-white">
+													Terminé
+												</Badge>
+											)}
+										</div>
+										<p className="text-sm text-muted-foreground ml-6 truncate">
+											{appointment.reason}
+										</p>
+									</div>
+									{/* Action Buttons - Made responsive */}
+									<div className="flex flex-wrap gap-2 justify-end w-full lg:w-auto shrink-0">
+										{/* Link Buttons */}
+										<Button
+											variant="outline"
+											size="sm"
+											asChild
+											className="flex-grow lg:flex-grow-0"
+										>
+											<Link
+												to={`/invoices/new?appointmentId=${appointment.id}`}
+												aria-label="Créer une Note d'honoraire pour ce Séance"
+											>
+												<FileText className="h-4 w-4 mr-1" />{" "}
+												Note d'honoraire
+											</Link>
+										</Button>
+										<Button
+											variant="outline"
+											size="sm"
+											asChild
+											className="flex-grow lg:flex-grow-0"
+										>
+											<Link
+												to={`/appointments/${appointment.id}/edit`}
+												aria-label="Voir les détails de la séance"
+											>
+												Détails
+											</Link>
+										</Button>
+										{/* Destructive Buttons */}
+										<Button
+											variant="ghost"
+											size="sm"
+											className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
+											onClick={() =>
+												onCancelAppointment(
+													appointment.id
+												)
+											}
+											disabled={
+												isProcessingAction ||
+												isCompleted
+											}
+											aria-label="Annuler cette séance"
+										>
+											{
+												isProcessingAction &&
+												actionInProgress?.action ===
+													"cancel" ? (
+													<span className="flex items-center">
+														<span className="animate-spin mr-1">
+															⏳
+														</span>
+														Annulation...
+													</span>
+												) : (
+													<>
+														<X className="h-4 w-4 mr-1" />{" "}
+														Annuler{" "}
+													</>
+												)
+											}
+										</Button>
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<Button
+													variant="ghost"
+													size="sm"
+													className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
+													disabled={
+														isProcessingAction
+													}
+												>
+													<Trash2 className="h-4 w-4 mr-1" />{" "}
+													Supprimer
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>
+														Supprimer le Séance
+													</AlertDialogTitle>
+													<AlertDialogDescription>
+														Êtes-vous sûr de vouloir
+														supprimer définitivement
+														ce Séance ?
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>
+														Annuler
+													</AlertDialogCancel>
+													<AlertDialogAction
+														onClick={() =>
+															onDeleteAppointment(
+																appointment.id
+															)
+														}
+														className="bg-destructive hover:bg-destructive/90"
+													>
+														{isProcessingAction &&
+														actionInProgress?.action ===
+															"delete" ? (
+															<span className="animate-spin mr-2">
+																⏳
+															</span>
+														) : null}
+														Supprimer
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+									</div>
+								</div>
+							) : (
+								<Link
+									to={`/appointments/new?date=${format(
+										date,
+										"yyyy-MM-dd"
+									)}&time=${timeSlot}`}
+									className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary"
+									aria-label={`Créer un Séance le ${format(
+										date,
+										"d MMMM yyyy",
+										{
+											locale: fr,
+										}
+									)} à ${timeSlot}`}
+								>
+									<span className="text-center">
+										Disponible
+									</span>
+								</Link>
+							)}
+						</div>
+					</div>
+				);
+			})}
+		</div>
+	);
 };
 
 export default SchedulePage;

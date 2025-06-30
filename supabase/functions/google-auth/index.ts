@@ -37,45 +37,17 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Get current osteopath
-    const { data: osteopath } = await supabaseClient
-      .from('Osteopath')
-      .select('id')
-      .eq('authId', user.id)
-      .single()
-
-    if (!osteopath) {
-      return new Response(JSON.stringify({ error: 'Profil ostéopathe non trouvé' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    // Get osteopath's API keys
-    const { data: apiKeys } = await supabaseClient
-      .from('google_api_keys')
-      .select('client_id, client_secret')
-      .eq('osteopath_id', osteopath.id)
-      .single()
-
-    if (!apiKeys) {
-      return new Response(JSON.stringify({ error: 'Clés API Google non configurées' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
     if (req.method === 'POST') {
       const { code, state } = await req.json()
 
-      // Exchange authorization code for tokens using osteopath's keys
+      // Exchange authorization code for tokens
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           code,
-          client_id: apiKeys.client_id,
-          client_secret: apiKeys.client_secret,
+          client_id: Deno.env.get('GOOGLE_CLIENT_ID')!,
+          client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET')!,
           redirect_uri: `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-auth/callback`,
           grant_type: 'authorization_code',
         }),
@@ -91,6 +63,20 @@ Deno.serve(async (req) => {
       }
 
       const tokens: GoogleTokenResponse = await tokenResponse.json()
+
+      // Get current osteopath
+      const { data: osteopath } = await supabaseClient
+        .from('Osteopath')
+        .select('id')
+        .eq('authId', user.id)
+        .single()
+
+      if (!osteopath) {
+        return new Response(JSON.stringify({ error: 'Profil ostéopathe non trouvé' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
 
       // Store tokens
       const expiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString()
@@ -143,9 +129,9 @@ Deno.serve(async (req) => {
       }
 
       if (url.pathname.endsWith('/url')) {
-        // Generate OAuth URL using osteopath's client ID
+        // Generate OAuth URL
         const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
-        authUrl.searchParams.set('client_id', apiKeys.client_id)
+        authUrl.searchParams.set('client_id', Deno.env.get('GOOGLE_CLIENT_ID')!)
         authUrl.searchParams.set('redirect_uri', `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-auth/callback`)
         authUrl.searchParams.set('response_type', 'code')
         authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/calendar.readonly')

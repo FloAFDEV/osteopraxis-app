@@ -1,240 +1,295 @@
 
-import React, { useState, useMemo } from "react";
-import { Layout } from "@/components/ui/layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Users, Eye, Edit, UserCheck, Baby } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { UserPlus } from "lucide-react";
 import { api } from "@/services/api";
-import { differenceInYears, parseISO } from "date-fns";
-import { PatientSearch } from "@/components/patients/PatientSearch";
+import { Patient, Cabinet } from "@/types";
+import { Layout } from "@/components/ui/layout";
+import { PatientCard } from "@/components/patient-card";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 
-type SortBy = "name" | "date" | "age" | "email";
+// Import refactored components
+import AlphabetFilter from "@/components/patients/AlphabetFilter";
+import PatientListItem from "@/components/patients/PatientListItem";
+import EmptyPatientState from "@/components/patients/EmptyPatientState";
+import PatientSearch from "@/components/patients/PatientSearch";
+import PatientLoadingState from "@/components/patients/PatientLoadingState";
+import PatientHeader from "@/components/patients/PatientHeader";
+import PatientResultsSummary from "@/components/patients/PatientResultsSummary";
+import PatientPagination from "@/components/patients/PatientPagination";
+import CabinetFilter from "@/components/patients/CabinetFilter";
+
+type SortOption = "name" | "date" | "email" | "gender";
 
 const PatientsPage = () => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<SortBy>("name");
+	const { user } = useAuth();
+	const [searchQuery, setSearchQuery] = useState("");
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [sortBy, setSortBy] = useState<SortOption>("name");
+	const [activeLetter, setActiveLetter] = useState("");
+	const [viewMode, setViewMode] = useState<"cards" | "list">("list");
+	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 
-  const { data: patients = [], isLoading } = useQuery({
-    queryKey: ['patients'],
-    queryFn: api.getPatients,
-  });
+	// Pagination - updated to 25 patients per page
+	const [currentPage, setCurrentPage] = useState(1);
+	const patientsPerPage = 25;
 
-  const filteredAndSortedPatients = useMemo(() => {
-    let filtered = patients.filter((patient) =>
-      `${patient.firstName} ${patient.lastName}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      patient.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+	// Récupérer les cabinets de l'utilisateur
+	const { data: cabinets = [], isLoading: cabinetsLoading } = useQuery({
+		queryKey: ["cabinets", user?.osteopathId],
+		queryFn: async () => {
+			if (!user?.osteopathId) return [];
+			return await api.getCabinetsByOsteopathId(user.osteopathId);
+		},
+		enabled: !!user?.osteopathId,
+		refetchOnWindowFocus: false,
+	});
 
-    return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`);
-        case "date":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case "age":
-          const ageA = a.birthDate ? differenceInYears(new Date(), parseISO(a.birthDate)) : 0;
-          const ageB = b.birthDate ? differenceInYears(new Date(), parseISO(b.birthDate)) : 0;
-          return ageB - ageA;
-        case "email":
-          return (a.email || "").localeCompare(b.email || "");
-        default:
-          return 0;
-      }
-    });
-  }, [patients, searchTerm, sortBy]);
+	// Use useQuery for better state and cache management
+	const {
+		data: allPatients,
+		isLoading,
+		error,
+		refetch,
+	} = useQuery({
+		queryKey: ["patients"],
+		queryFn: async () => {
+			try {
+				return await api.getPatients();
+			} catch (err) {
+				console.error("Error fetching patients:", err);
+				throw err;
+			}
+		},
+		retry: 2,
+		retryDelay: 1000,
+		refetchOnWindowFocus: false,
+		staleTime: 1000 * 60 * 5, // 5 minutes
+	});
 
-  const getPatientAge = (birthDate: string | null) => {
-    if (!birthDate) return null;
-    return differenceInYears(new Date(), parseISO(birthDate));
-  };
+	// Filtrer les patients par cabinet sélectionné
+	const patients = allPatients?.filter(patient => {
+		if (!selectedCabinetId) return true;
+		return patient.cabinetId === selectedCabinetId;
+	}) || [];
 
-  const getPatientIcon = (patient: any) => {
-    const age = getPatientAge(patient.birthDate);
-    const isChild = age !== null && age < 12;
-    
-    if (isChild) {
-      return <Baby className="h-4 w-4 text-amber-500" />;
-    }
-    
-    switch (patient.gender) {
-      case "Homme":
-        return <UserCheck className="h-4 w-4 text-blue-500" />;
-      case "Femme":
-        return <UserCheck className="h-4 w-4 text-pink-500" />;
-      default:
-        return <Users className="h-4 w-4 text-gray-500" />;
-    }
-  };
+	// Handler for forcing data reload with animation
+	const handleRetry = async () => {
+		setIsRefreshing(true);
+		toast.info("Chargement des patients en cours...");
+		try {
+			await refetch();
+			if (patients && patients.length > 0) {
+				toast.success(
+					`${patients.length} patients chargés avec succès`
+				);
+			} else {
+				toast.warning("Aucun patient trouvé dans la base de données");
+			}
+		} catch (err) {
+			toast.error("Impossible de charger les patients");
+			console.error("Erreur lors du chargement des patients:", err);
+		} finally {
+			setIsRefreshing(false);
+		}
+	};
 
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement des patients...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+	// Force reload on component mount
+	useEffect(() => {
+		refetch();
+	}, [refetch]);
 
-  return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
-              Patients
-            </h1>
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-              Gérez vos patients et leurs informations médicales
-            </p>
-          </div>
-          <Button onClick={() => navigate("/patients/new")} className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouveau patient
-          </Button>
-        </div>
+	const handleLetterChange = (letter: string) => {
+		setActiveLetter(letter);
+		setSearchQuery("");
+		setCurrentPage(1); // Reset to first page when filter changes
+	};
 
-        {/* Search and filters */}
-        <PatientSearch
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-        />
+	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setSearchQuery(e.target.value);
+		setCurrentPage(1); // Reset to first page when search changes
+	};
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total patients</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{patients.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Résultats affichés</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{filteredAndSortedPatients.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Enfants (&lt; 12 ans)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {patients.filter(p => {
-                  const age = getPatientAge(p.birthDate);
-                  return age !== null && age < 12;
-                }).length}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+	const handleClearFilter = () => {
+		setActiveLetter("");
+		setSearchQuery("");
+		setSelectedCabinetId(null);
+	};
 
-        {/* Patients List */}
-        <div className="grid gap-4">
-          {filteredAndSortedPatients.length > 0 ? (
-            filteredAndSortedPatients.map((patient) => {
-              const age = getPatientAge(patient.birthDate);
-              
-              return (
-                <Card key={patient.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div className="flex items-center space-x-3 flex-1">
-                        {getPatientIcon(patient)}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-gray-100 truncate">
-                            {patient.lastName} {patient.firstName}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2 mt-1">
-                            {age !== null && (
-                              <Badge variant="outline" className="text-xs">
-                                {age} ans
-                              </Badge>
-                            )}
-                            {patient.gender && (
-                              <Badge variant="outline" className="text-xs">
-                                {patient.gender}
-                              </Badge>
-                            )}
-                            {patient.email && (
-                              <span className="text-xs text-muted-foreground truncate max-w-48">
-                                {patient.email}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/patients/${patient.id}`)}
-                          className="flex-1 sm:flex-none text-xs px-3 py-2"
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">Voir</span>
-                          <span className="sm:hidden">Détails</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/patients/${patient.id}/edit`)}
-                          className="flex-1 sm:flex-none text-xs px-3 py-2"
-                        >
-                          <Edit className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">Modifier</span>
-                          <span className="sm:hidden">Edit</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-          ) : (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                  Aucun patient trouvé
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">
-                  {searchTerm 
-                    ? "Aucun patient ne correspond à votre recherche."
-                    : "Commencez par ajouter votre premier patient."
-                  }
-                </p>
-                {!searchTerm && (
-                  <Button onClick={() => navigate("/patients/new")} className="mt-4">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Ajouter un patient
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
-    </Layout>
-  );
+	const getSortedPatients = () => {
+		if (!patients) return [];
+
+		// First filter the patients
+		let filtered = patients.filter((patient) => {
+			const fullName = `${patient.firstName || ""} ${
+				patient.lastName || ""
+			}`.toLowerCase();
+			const searchLower = searchQuery.toLowerCase();
+
+			// If a letter is selected, filter by the first letter of the name
+			if (activeLetter && !searchQuery) {
+				const firstLetter = (patient.lastName || "")
+					.charAt(0)
+					.toUpperCase();
+				return firstLetter === activeLetter;
+			}
+
+			// Otherwise, filter by search
+			return (
+				searchQuery === "" ||
+				fullName.includes(searchLower) ||
+				(patient.email &&
+					patient.email.toLowerCase().includes(searchLower)) ||
+				(patient.phone && patient.phone.includes(searchLower)) ||
+				(patient.occupation &&
+					patient.occupation.toLowerCase().includes(searchLower))
+			);
+		});
+
+		// Then sort the patients by the chosen criterion
+		return [...filtered].sort((a, b) => {
+			switch (sortBy) {
+				case "name":
+					return (a.lastName || "").localeCompare(b.lastName || "");
+				case "date":
+					// Sort by creation date, newest first
+					return (
+						new Date(b.createdAt || "").getTime() -
+						new Date(a.createdAt || "").getTime()
+					);
+				case "email":
+					return (a.email || "").localeCompare(b.email || "");
+				case "gender":
+					return (a.gender || "").localeCompare(b.gender || "");
+				default:
+					return (a.lastName || "").localeCompare(b.lastName || "");
+			}
+		});
+	};
+
+	const filteredPatients = getSortedPatients();
+
+	// Pagination logic
+	const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
+	const paginatedPatients = filteredPatients.slice(
+		(currentPage - 1) * patientsPerPage,
+		currentPage * patientsPerPage
+	);
+
+	// Page navigation
+	const goToPage = (page: number) => {
+		if (page > 0 && page <= totalPages) {
+			setCurrentPage(page);
+			window.scrollTo(0, 0);
+		}
+	};
+
+	return (
+		<Layout>
+			<div className="flex flex-col min-h-full">
+				{/* Header section */}
+				<PatientHeader
+					patientCount={allPatients?.length || 0}
+					isRefreshing={isRefreshing}
+					onRefresh={handleRetry}
+				/>
+
+				{/* Search and filter section */}
+				<div className="mb-4 space-y-4">
+					<PatientSearch
+						searchQuery={searchQuery}
+						onSearchChange={handleSearchChange}
+						sortBy={sortBy}
+						onSortChange={(option) => setSortBy(option)}
+						viewMode={viewMode}
+						onViewModeChange={(mode) => setViewMode(mode)}
+					/>
+
+					{/* Filtre par cabinet */}
+					<CabinetFilter
+						cabinets={cabinets}
+						selectedCabinetId={selectedCabinetId}
+						onCabinetChange={setSelectedCabinetId}
+						loading={cabinetsLoading}
+					/>
+				</div>
+
+				{/* Alphabet filter */}
+				<AlphabetFilter
+					activeLetter={activeLetter}
+					onLetterChange={handleLetterChange}
+				/>
+
+				{/* Loading and error states */}
+				<PatientLoadingState
+					isLoading={isLoading}
+					error={error}
+					onRetry={handleRetry}
+				/>
+
+				{/* Main content - patient list or empty state */}
+				{!isLoading && !error && (
+					<>
+						{filteredPatients.length === 0 ? (
+							<EmptyPatientState
+								searchQuery={searchQuery}
+								activeLetter={activeLetter}
+								onClearFilter={handleClearFilter}
+								onCreateTestPatient={() => {
+									toast.info(
+										"Création de patient de test non implémentée"
+									);
+								}}
+							/>
+						) : (
+							<>
+								<PatientResultsSummary
+									patientCount={filteredPatients.length}
+									currentPage={currentPage}
+									totalPages={totalPages}
+								/>
+
+								{viewMode === "cards" ? (
+									<div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+										{paginatedPatients.map((patient) => (
+											<PatientCard
+												key={patient.id}
+												patient={patient}
+												compact={false}
+											/>
+										))}
+									</div>
+								) : (
+									<Card className="overflow-hidden">
+										<div className="divide-y">
+											{paginatedPatients.map(
+												(patient) => (
+													<PatientListItem
+														key={patient.id}
+														patient={patient}
+													/>
+												)
+											)}
+										</div>
+									</Card>
+								)}
+
+								{/* Pagination */}
+								<PatientPagination
+									currentPage={currentPage}
+									totalPages={totalPages}
+									onPageChange={goToPage}
+								/>
+							</>
+						)}
+					</>
+				)}
+			</div>
+		</Layout>
+	);
 };
 
 export default PatientsPage;

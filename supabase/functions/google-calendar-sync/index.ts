@@ -35,24 +35,13 @@ async function refreshTokenIfNeeded(supabaseClient: any, osteopathId: number) {
   if (expiresAt.getTime() - now.getTime() < 5 * 60 * 1000) {
     console.log('Refreshing expired token')
     
-    // Get API keys for this osteopath
-    const { data: apiKeys } = await supabaseClient
-      .from('google_api_keys')
-      .select('client_id, client_secret')
-      .eq('osteopath_id', osteopathId)
-      .single()
-
-    if (!apiKeys) {
-      throw new Error('Clés API Google non trouvées')
-    }
-    
     const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         refresh_token: tokenData.refresh_token,
-        client_id: apiKeys.client_id,
-        client_secret: apiKeys.client_secret,
+        client_id: Deno.env.get('GOOGLE_CLIENT_ID')!,
+        client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET')!,
         grant_type: 'refresh_token',
       }),
     })
@@ -76,36 +65,6 @@ async function refreshTokenIfNeeded(supabaseClient: any, osteopathId: number) {
   }
 
   return tokenData.access_token
-}
-
-// Helper function to match Google events with patients
-async function matchEventWithPatient(supabaseClient: any, osteopathId: number, event: GoogleCalendarEvent) {
-  if (!event.summary) return null;
-
-  // Try to extract patient name from event summary
-  // Common patterns in Doctolib: "Nom Prénom - Consultation", "Prénom Nom", etc.
-  const summary = event.summary.toLowerCase();
-  
-  // Get all patients for this osteopath
-  const { data: patients } = await supabaseClient
-    .from('Patient')
-    .select('id, firstName, lastName')
-    .eq('osteopathId', osteopathId);
-
-  if (!patients) return null;
-
-  // Try to match patient by name in the event summary
-  for (const patient of patients) {
-    const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
-    const reversedName = `${patient.lastName} ${patient.firstName}`.toLowerCase();
-    
-    if (summary.includes(fullName) || summary.includes(reversedName) ||
-        (summary.includes(patient.firstName.toLowerCase()) && summary.includes(patient.lastName.toLowerCase()))) {
-      return patient.id;
-    }
-  }
-
-  return null;
 }
 
 Deno.serve(async (req) => {
@@ -175,19 +134,15 @@ Deno.serve(async (req) => {
       const calendarData = await calendarResponse.json()
       const events: GoogleCalendarEvent[] = calendarData.items || []
 
-      // Process and store events with patient matching
-      const processedEvents = []
-      
-      for (const event of events) {
-        if (!event.start || !(event.start.dateTime || event.start.date) ||
-            !event.end || !(event.end.dateTime || event.end.date)) {
-          continue;
-        }
-
-        // Try to match with a patient
-        const patientId = await matchEventWithPatient(supabaseClient, osteopath.id, event);
-
-        processedEvents.push({
+      // Process and store events
+      const processedEvents = events
+        .filter(event => 
+          event.start && 
+          (event.start.dateTime || event.start.date) &&
+          event.end &&
+          (event.end.dateTime || event.end.date)
+        )
+        .map(event => ({
           osteopath_id: osteopath.id,
           google_event_id: event.id,
           summary: event.summary || 'Événement sans titre',
@@ -197,9 +152,7 @@ Deno.serve(async (req) => {
           location: event.location || null,
           status: event.status,
           last_modified: event.updated,
-          patient_id: patientId,
-        });
-      }
+        }))
 
       // Upsert events (insert or update if exists)
       if (processedEvents.length > 0) {
@@ -220,8 +173,7 @@ Deno.serve(async (req) => {
 
       return new Response(JSON.stringify({ 
         success: true, 
-        eventsProcessed: processedEvents.length,
-        patientsMatched: processedEvents.filter(e => e.patient_id).length
+        eventsProcessed: processedEvents.length 
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -235,10 +187,7 @@ Deno.serve(async (req) => {
 
       let query = supabaseClient
         .from('google_calendar_events')
-        .select(`
-          *,
-          patient:Patient(id, firstName, lastName)
-        `)
+        .select('*')
         .eq('osteopath_id', osteopath.id)
         .eq('status', 'confirmed')
 
