@@ -4,9 +4,11 @@ import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
-  const { user, redirectToSetupIfNeeded } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   
   // Vérifier si l'utilisateur a besoin de configurer son profil
   useEffect(() => {
@@ -15,11 +17,11 @@ const DashboardPage = () => {
     // Ne rediriger que si l'utilisateur est connecté mais n'a pas d'osteopathId
     if (user && !user.osteopathId) {
       console.log("Utilisateur sans profil ostéopathe détecté, redirection vers la configuration");
-      redirectToSetupIfNeeded("/dashboard");
+      navigate("/osteopath-profile");
     } else {
       console.log("Utilisateur avec profil ostéopathe ou non connecté:", user?.osteopathId);
     }
-  }, [user, redirectToSetupIfNeeded]);
+  }, [user, navigate]);
 
   return (
     <Layout>

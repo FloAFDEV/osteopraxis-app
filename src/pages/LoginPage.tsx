@@ -55,13 +55,9 @@ const LoginPage = () => {
 
 	const onLoginSubmit = async (data: LoginFormValues) => {
 		try {
-			const success = await login(data.email, data.password);
-			if (success) {
-				toast.success("Connexion réussie !");
-				navigate("/");
-			} else {
-				toast.error("Identifiants incorrects");
-			}
+			await login(data.email, data.password);
+			toast.success("Connexion réussie !");
+			navigate("/");
 		} catch (error) {
 			console.error("Erreur de connexion:", error);
 			toast.error("Une erreur est survenue lors de la connexion");

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { UserCog } from "lucide-react";
 import { api } from "@/services/api";
@@ -107,9 +106,7 @@ const OsteopathSettingsPage = () => {
 
           {/* Profile & Billing Form */}
           <ProfileBillingForm 
-            defaultValues={osteopath || {
-              name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : ""
-            }}
+            currentOsteopath={osteopath}
             osteopathId={osteopath?.id} 
             isEditing={!!osteopath} 
             onSuccess={handleSuccess} 

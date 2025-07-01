@@ -23,8 +23,8 @@ const OsteopathProfilePage = () => {
   const [showAuthSheet, setShowAuthSheet] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
-  const [setupFlow, setSetupFlow] = useState<'profile' | 'cabinet'>('profile');
-  const [setupProgress, setSetupProgress] = useState(0);
+  const [setupFlow, setSetupFlow<'profile' | 'cabinet'>>('profile');
+  const [setupProgress, setSetupProgress(0);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
@@ -262,9 +262,7 @@ const OsteopathProfilePage = () => {
             </div>
 
             <OsteopathProfileForm 
-              defaultValues={osteopath || {
-                name: getDefaultName()
-              }}
+              currentOsteopath={osteopath}
               osteopathId={osteopath?.id} 
               isEditing={!!osteopath} 
               onSuccess={handleOsteopathSuccess} 

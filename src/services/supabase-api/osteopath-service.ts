@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import {
   supabase,
@@ -137,6 +136,24 @@ export const supabaseOsteopathService = {
     } catch (error) {
       console.error("Erreur lors de la vérification des champs obligatoires:", error);
       return false;
+    }
+  },
+
+  async deleteOsteopath(id: number): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("Osteopath")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'ostéopathe:", error);
+      throw error;
     }
   },
 };
