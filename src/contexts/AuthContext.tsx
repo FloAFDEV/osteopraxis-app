@@ -1,3 +1,4 @@
+
 import React, {
 	createContext,
 	useState,
@@ -14,6 +15,7 @@ interface AuthContextProps {
 	user: User | null;
 	isAuthenticated: boolean;
 	loading: boolean;
+	isLoading: boolean; // Alias pour loading
 	error: string | null;
 	login: (email: string, password: string) => Promise<void>;
 	register: (userData: any) => Promise<void>;
@@ -21,6 +23,10 @@ interface AuthContextProps {
 	checkAuth: () => Promise<void>;
 	loginWithMagicLink: (email: string) => Promise<void>;
 	promoteToAdmin: (userId: string) => Promise<boolean>;
+	updateUser?: (userData: any) => Promise<void>;
+	loadStoredToken?: () => Promise<void>;
+	redirectToSetupIfNeeded?: () => void;
+	isAdmin?: boolean;
 }
 
 interface AuthContextProviderProps {
@@ -31,6 +37,7 @@ const AuthContext = createContext<AuthContextProps>({
 	user: null,
 	isAuthenticated: false,
 	loading: false,
+	isLoading: false,
 	error: null,
 	login: async () => {},
 	register: async () => {},
@@ -161,6 +168,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		user,
 		isAuthenticated,
 		loading,
+		isLoading: loading, // Alias
 		error,
 		login,
 		register,
@@ -168,6 +176,19 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		checkAuth,
 		loginWithMagicLink,
 		promoteToAdmin,
+		isAdmin: user?.role === "ADMIN",
+		updateUser: async (userData: any) => {
+			// Stub implementation
+			console.log("updateUser called with:", userData);
+		},
+		loadStoredToken: async () => {
+			// Stub implementation
+			console.log("loadStoredToken called");
+		},
+		redirectToSetupIfNeeded: () => {
+			// Stub implementation
+			console.log("redirectToSetupIfNeeded called");
+		},
 	};
 
 	return (
@@ -176,3 +197,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		</AuthContext.Provider>
 	);
 };
+
+// Export AuthProvider as alias for AuthContextProvider
+export const AuthProvider = AuthContextProvider;

@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -38,9 +39,19 @@ interface OsteopathProfileFormProps {
   onProfileCreated?: (osteopath: any) => void;
   currentOsteopath?: any;
   setCurrentOsteopath?: any;
+  osteopathId?: number;
+  isEditing?: boolean;
+  onSuccess?: (updatedOsteopath: any) => Promise<void>;
 }
 
-export function OsteopathProfileForm({ onProfileCreated, currentOsteopath, setCurrentOsteopath }: OsteopathProfileFormProps) {
+export function OsteopathProfileForm({ 
+  onProfileCreated, 
+  currentOsteopath, 
+  setCurrentOsteopath,
+  osteopathId,
+  isEditing = false,
+  onSuccess 
+}: OsteopathProfileFormProps) {
   const { user } = useAuth();
 
   const form = useForm<z.infer<typeof osteopathSchema>>({
@@ -68,7 +79,7 @@ export function OsteopathProfileForm({ onProfileCreated, currentOsteopath, setCu
   }, [currentOsteopath, form]);
 
   const onSubmit = async (data: z.infer<typeof osteopathSchema>) => {
-    if (currentOsteopath) {
+    if (currentOsteopath || isEditing) {
       await updateOsteopathProfile(data);
     } else {
       await createOsteopathProfile(data);
@@ -89,9 +100,15 @@ export function OsteopathProfileForm({ onProfileCreated, currentOsteopath, setCu
         authId: user?.id || "",
       };
 
-      const updatedOsteopath = await api.updateOsteopath(currentOsteopath.id, osteopathData);
+      const updatedOsteopath = await api.updateOsteopath(osteopathId || currentOsteopath?.id, osteopathData);
 
-      setCurrentOsteopath(updatedOsteopath);
+      if (setCurrentOsteopath) {
+        setCurrentOsteopath(updatedOsteopath);
+      }
+
+      if (onSuccess) {
+        await onSuccess(updatedOsteopath);
+      }
 
       toast.success("Profil ostéopathe mis à jour avec succès !");
     } catch (error) {
@@ -116,7 +133,9 @@ export function OsteopathProfileForm({ onProfileCreated, currentOsteopath, setCu
 
       const newOsteopath = await api.createOsteopath(osteopathData);
       
-      setCurrentOsteopath(newOsteopath);
+      if (setCurrentOsteopath) {
+        setCurrentOsteopath(newOsteopath);
+      }
       
       toast.success("Profil ostéopathe créé avec succès !");
       
@@ -199,7 +218,7 @@ export function OsteopathProfileForm({ onProfileCreated, currentOsteopath, setCu
           )}
         />
         <Button type="submit">
-          {currentOsteopath ? "Mettre à jour" : "Créer"}
+          {currentOsteopath || isEditing ? "Mettre à jour" : "Créer"}
         </Button>
       </form>
     </Form>

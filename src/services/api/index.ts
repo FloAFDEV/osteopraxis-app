@@ -69,8 +69,11 @@ export const api = {
   // Utility functions
   getCurrentOsteopath: async () => {
     try {
-      const { getCurrentOsteopath } = await import("../index");
-      return await getCurrentOsteopath();
+      const user = await authService.getCurrentUser();
+      if (user && user.osteopathId) {
+        return await osteopathService.getOsteopathById(user.osteopathId);
+      }
+      return null;
     } catch (error) {
       console.error("Error getting current osteopath:", error);
       return null;

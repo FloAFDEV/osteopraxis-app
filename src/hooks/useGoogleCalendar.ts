@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { api } from '@/services/api';
 
 export interface GoogleCalendarEvent {
   id: string;
@@ -14,6 +15,10 @@ export interface GoogleCalendarEvent {
   end_time: string;
   location?: string;
   status: string;
+  // Nouveaux champs pour la correspondance patient
+  matched_patient_id?: number;
+  matched_patient_name?: string;
+  is_doctolib?: boolean;
 }
 
 export interface GoogleCalendarIntegration {
@@ -23,6 +28,7 @@ export interface GoogleCalendarIntegration {
   connectGoogle: () => Promise<void>;
   syncCalendar: () => Promise<void>;
   disconnectGoogle: () => Promise<void>;
+  matchPatients: (events: GoogleCalendarEvent[]) => Promise<GoogleCalendarEvent[]>;
 }
 
 export function useGoogleCalendar(): GoogleCalendarIntegration {
@@ -56,7 +62,59 @@ export function useGoogleCalendar(): GoogleCalendarIntegration {
     setIsConnected(!!tokenData);
   }, [tokenData]);
 
-  // Get Google Calendar events
+  // Match Google Calendar events with patients
+  const matchPatients = async (events: GoogleCalendarEvent[]): Promise<GoogleCalendarEvent[]> => {
+    try {
+      const patients = await api.getPatients();
+      
+      return events.map(event => {
+        // Recherche par nom dans le titre ou la description
+        const searchText = `${event.summary} ${event.description || ''}`.toLowerCase();
+        
+        // Patterns pour identifier les RDV Doctolib
+        const doctolibPatterns = [
+          /doctolib/i,
+          /rdv/i,
+          /consultation/i,
+          /séance/i
+        ];
+        
+        const isDoctolib = doctolibPatterns.some(pattern => pattern.test(searchText));
+        
+        // Recherche de correspondance patient
+        let matchedPatient = null;
+        
+        for (const patient of patients) {
+          const patientFullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+          const patientReverseName = `${patient.lastName} ${patient.firstName}`.toLowerCase();
+          
+          // Recherche exacte du nom complet
+          if (searchText.includes(patientFullName) || searchText.includes(patientReverseName)) {
+            matchedPatient = patient;
+            break;
+          }
+          
+          // Recherche par nom de famille seul
+          if (searchText.includes(patient.lastName.toLowerCase()) && patient.lastName.length > 2) {
+            matchedPatient = patient;
+            break;
+          }
+        }
+        
+        return {
+          ...event,
+          matched_patient_id: matchedPatient?.id,
+          matched_patient_name: matchedPatient ? `${matchedPatient.firstName} ${matchedPatient.lastName}` : undefined,
+          is_doctolib: isDoctolib
+        };
+      });
+    } catch (error) {
+      console.error('Error matching patients:', error);
+      return events;
+    }
+  };
+
+  // Get Google Calendar events with patient matching
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['google-calendar-events', user?.osteopathId],
     queryFn: async () => {
@@ -71,7 +129,8 @@ export function useGoogleCalendar(): GoogleCalendarIntegration {
         return [];
       }
 
-      return data?.events || [];
+      const rawEvents = data?.events || [];
+      return await matchPatients(rawEvents);
     },
     enabled: isConnected && !!user?.osteopathId,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -154,5 +213,6 @@ export function useGoogleCalendar(): GoogleCalendarIntegration {
     connectGoogle: connectMutation.mutateAsync,
     syncCalendar: syncMutation.mutateAsync,
     disconnectGoogle: disconnectMutation.mutateAsync,
+    matchPatients,
   };
 }

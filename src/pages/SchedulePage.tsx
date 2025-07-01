@@ -1,4 +1,3 @@
-
 import ScheduleHeader from "@/components/schedule/ScheduleHeader";
 import {
 	AlertDialog,
@@ -46,6 +45,8 @@ import {
 	Trash2,
 	User,
 	X,
+	ExternalLink,
+	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -59,6 +60,7 @@ const SchedulePage = () => {
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 	const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
 	const [view, setView] = useState<"day" | "week">("week");
+	const [showGoogleEvents, setShowGoogleEvents] = useState(true);
 	const [actionInProgress, setActionInProgress] = useState<{
 		id: number;
 		action: "cancel" | "delete";
@@ -133,7 +135,7 @@ const SchedulePage = () => {
 	};
 
 	const getDayGoogleEvents = (date: Date) => {
-		if (!isGoogleConnected || !googleEvents) return [];
+		if (!isGoogleConnected || !googleEvents || !showGoogleEvents) return [];
 		
 		return googleEvents
 			.filter((event) => {
@@ -232,17 +234,30 @@ const SchedulePage = () => {
 				<ScheduleHeader />
 			</div>
 			<div className="flex flex-col p-4 sm:p-6 lg:p-8 mt-4">
-				{/* Header remains the same */}
+				{/* Header avec contrôles Google Calendar */}
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
 						<Clock className="h-8 w-8 text-amber-500" />
 						Planning
 					</h1>
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-2 flex-wrap">
 						{isGoogleConnected && (
-							<div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
-								<div className="w-2 h-2 bg-green-500 rounded-full"></div>
-								Google Calendar
+							<div className="flex items-center gap-2">
+								<div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
+									<div className="w-2 h-2 bg-green-500 rounded-full"></div>
+									Google Calendar
+								</div>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setShowGoogleEvents(!showGoogleEvents)}
+									className={cn(
+										"text-xs",
+										showGoogleEvents ? "bg-blue-50 text-blue-700" : "text-gray-500"
+									)}
+								>
+									{showGoogleEvents ? "Masquer Google" : "Afficher Google"}
+								</Button>
 							</div>
 						)}
 						<Tabs
@@ -297,7 +312,7 @@ const SchedulePage = () => {
 					</div>
 				) : (
 					<Tabs value={view} defaultValue={view}>
-						{/* TabsContent value="day" remains the same */}
+						{/* TabsContent value="day" avec Google Events */}
 						<TabsContent value="day">
 							<div className="space-y-4">
 								<div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
@@ -356,7 +371,7 @@ const SchedulePage = () => {
 							</div>
 						</TabsContent>
 
-						{/* --- MODIFIED TabsContent value="week" --- */}
+						{/* TabsContent value="week" avec Google Events améliorés */}
 						<TabsContent value="week">
 							<div className="space-y-4">
 								{/* Week navigation remains the same */}
@@ -450,7 +465,7 @@ const SchedulePage = () => {
 													</div>
 												) : (
 													<div className="space-y-2">
-														{/* Google Calendar Events */}
+														{/* Google Calendar Events avec correspondance patient */}
 														{dayGoogleEvents.map((event) => {
 															const eventStartTime = format(parseISO(event.start_time), "HH:mm");
 															return (
@@ -460,9 +475,16 @@ const SchedulePage = () => {
 																			<Badge className="bg-blue-500 text-xs">
 																				{eventStartTime}
 																			</Badge>
-																			<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
-																				Google
-																			</Badge>
+																			<div className="flex gap-1">
+																				{event.is_doctolib && (
+																					<Badge variant="outline" className="text-green-700 border-green-300 text-xs">
+																						Doctolib
+																					</Badge>
+																				)}
+																				<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
+																					Google
+																				</Badge>
+																			</div>
 																		</div>
 																		<div className="mb-2">
 																			<h3 className="font-medium text-blue-900 truncate text-sm">
@@ -473,12 +495,29 @@ const SchedulePage = () => {
 																					📍 {event.location}
 																				</p>
 																			)}
+																			{event.matched_patient_name && (
+																				<div className="flex items-center gap-1 mt-1">
+																					<Users className="h-3 w-3 text-green-600" />
+																					<span className="text-xs text-green-700 font-medium">
+																						{event.matched_patient_name}
+																					</span>
+																				</div>
+																			)}
 																		</div>
 																	</CardContent>
-																	<div className="px-3 pb-2">
+																	<div className="px-3 pb-2 flex justify-between items-center">
 																		<p className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
 																			Événement externe (lecture seule)
 																		</p>
+																		{event.matched_patient_id && (
+																			<Link
+																				to={`/patients/${event.matched_patient_id}`}
+																				className="text-xs text-green-600 hover:text-green-800 flex items-center gap-1"
+																			>
+																				<ExternalLink className="h-3 w-3" />
+																				Fiche patient
+																			</Link>
+																		)}
 																	</div>
 																</Card>
 															);
@@ -642,7 +681,7 @@ const SchedulePage = () => {
 	);
 };
 
-// DaySchedule Component
+// DaySchedule Component avec Google Events
 interface DayScheduleProps {
 	date: Date;
 	appointments: Appointment[];
@@ -730,7 +769,7 @@ const DaySchedule = ({
 							</span>
 						</div>
 
-						{/* Appointment details or link */}
+						{/* Appointment details or Google event or link */}
 						<div className="flex-1 p-3 min-w-0">
 							{googleEvent ? (
 								<div className="flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 border-l-blue-500 bg-blue-50/50 p-3 rounded">
@@ -739,6 +778,11 @@ const DaySchedule = ({
 											<Badge className="bg-blue-500 text-white text-xs">
 												Google
 											</Badge>
+											{googleEvent.is_doctolib && (
+												<Badge className="bg-green-500 text-white text-xs">
+													Doctolib
+												</Badge>
+											)}
 											<h3 className="font-medium text-blue-900 truncate">
 												{googleEvent.summary}
 											</h3>
@@ -747,6 +791,23 @@ const DaySchedule = ({
 											<p className="text-sm text-blue-700 ml-2 truncate">
 												📍 {googleEvent.location}
 											</p>
+										)}
+										{googleEvent.matched_patient_name && (
+											<div className="flex items-center gap-1 mt-1 ml-2">
+												<Users className="h-4 w-4 text-green-600" />
+												<span className="text-sm text-green-700 font-medium">
+													{googleEvent.matched_patient_name}
+												</span>
+												{googleEvent.matched_patient_id && (
+													<Link
+														to={`/patients/${googleEvent.matched_patient_id}`}
+														className="text-sm text-green-600 hover:text-green-800 flex items-center gap-1 ml-2"
+													>
+														<ExternalLink className="h-4 w-4" />
+														Voir la fiche
+													</Link>
+												)}
+											</div>
 										)}
 										<p className="text-xs text-blue-600 mt-1">
 											Événement externe (lecture seule)

@@ -1,3 +1,4 @@
+
 import { Osteopath } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
@@ -183,7 +184,8 @@ export const osteopathService = {
   async deleteOsteopath(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        return await supabaseOsteopathService.deleteOsteopath?.(id) || false;
+        await supabaseOsteopathService.deleteOsteopath?.(id);
+        return true;
       } catch (error) {
         console.error("Erreur Supabase deleteOsteopath:", error);
         throw error;
