@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -15,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { api } from "@/services/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ProfileStampManagement } from "./ProfileStampManagement";
 
 const profileSchema = z.object({
@@ -50,6 +49,8 @@ export function ProfileBillingForm({
   onSuccess 
 }: ProfileBillingFormProps) {
   const { user } = useAuth();
+  const [stampUrl, setStampUrl] = useState<string | null>(currentOsteopath?.stampUrl || null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -72,11 +73,13 @@ export function ProfileBillingForm({
         siret: currentOsteopath.siret || "",
         ape_code: currentOsteopath.ape_code || "8690F",
       });
+      setStampUrl(currentOsteopath.stampUrl || null);
     }
   }, [currentOsteopath, form]);
 
   const onSubmit = async (data: z.infer<typeof profileSchema>) => {
     try {
+      setIsSubmitting(true);
       console.log("Mise à jour du profil ostéopathe avec les données:", data);
 
       const osteopathData = {
@@ -85,6 +88,7 @@ export function ProfileBillingForm({
         rpps_number: data.rpps_number,
         siret: data.siret,
         ape_code: data.ape_code,
+        stampUrl: stampUrl,
         userId: user?.id || "",
         authId: user?.id || "",
       };
@@ -99,6 +103,8 @@ export function ProfileBillingForm({
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil:", error);
       toast.error("Erreur lors de la mise à jour du profil ostéopathe");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -106,6 +112,7 @@ export function ProfileBillingForm({
     <div className="space-y-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          
           <FormField
             control={form.control}
             name="name"
@@ -176,7 +183,7 @@ export function ProfileBillingForm({
             )}
           />
           
-          <Button type="submit">
+          <Button type="submit" disabled={isSubmitting}>
             {isEditing ? "Mettre à jour" : "Créer"}
           </Button>
         </form>
@@ -184,7 +191,11 @@ export function ProfileBillingForm({
 
       {/* Gestion du tampon professionnel */}
       {osteopathId && (
-        <ProfileStampManagement osteopathId={osteopathId} />
+        <ProfileStampManagement 
+          currentStampUrl={stampUrl}
+          onStampUrlChange={setStampUrl}
+          isSubmitting={isSubmitting}
+        />
       )}
     </div>
   );
