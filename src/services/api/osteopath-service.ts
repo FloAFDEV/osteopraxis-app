@@ -1,4 +1,3 @@
-
 import { Osteopath } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
@@ -179,5 +178,19 @@ export const osteopathService = {
       console.error("Erreur globale createOsteopath:", error);
       throw error;
     }
+  },
+
+  async deleteOsteopath(id: number): Promise<boolean> {
+    if (USE_SUPABASE) {
+      try {
+        return await supabaseOsteopathService.deleteOsteopath?.(id) || false;
+      } catch (error) {
+        console.error("Erreur Supabase deleteOsteopath:", error);
+        throw error;
+      }
+    }
+    
+    await delay(300);
+    return true;
   }
 };

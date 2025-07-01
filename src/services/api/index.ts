@@ -32,13 +32,21 @@ export const api = {
   createCabinet: cabinetService.createCabinet,
   updateCabinet: cabinetService.updateCabinet,
   deleteCabinet: cabinetService.deleteCabinet,
+  getCabinetsByUserId: cabinetService.getCabinetsByUserId || (() => Promise.resolve([])),
+  getCabinetsByOsteopathId: cabinetService.getCabinetsByOsteopathId || (() => Promise.resolve([])),
+  
+  // Cabinet associations
+  associateOsteopathToCabinet: cabinetService.associateOsteopathToCabinet || (() => Promise.resolve()),
+  dissociateOsteopathFromCabinet: cabinetService.dissociateOsteopathFromCabinet || (() => Promise.resolve()),
+  getOsteopathCabinets: cabinetService.getOsteopathCabinets || (() => Promise.resolve([])),
 
   // Osteopaths
   getOsteopaths: osteopathService.getOsteopaths,
   getOsteopathById: osteopathService.getOsteopathById,
+  getOsteopathByUserId: osteopathService.getOsteopathByUserId,
   createOsteopath: osteopathService.createOsteopath,
   updateOsteopath: osteopathService.updateOsteopath,
-  deleteOsteopath: osteopathService.deleteOsteopath,
+  deleteOsteopath: osteopathService.deleteOsteopath || (() => Promise.resolve(true)),
 
   // Invoices
   getInvoices: invoiceService.getInvoices,
@@ -53,7 +61,21 @@ export const api = {
   login: authService.login,
   register: authService.register,
   logout: authService.logout,
-  getCurrentUser: authService.getCurrentUser,
+  checkAuth: authService.checkAuth,
+  getCurrentUser: authService.getCurrentUser || (() => Promise.resolve(null)),
+  loginWithMagicLink: authService.loginWithMagicLink || (() => Promise.resolve()),
+  promoteToAdmin: authService.promoteToAdmin || (() => Promise.resolve(false)),
+
+  // Utility functions
+  getCurrentOsteopath: async () => {
+    try {
+      const { getCurrentOsteopath } = await import("../index");
+      return await getCurrentOsteopath();
+    } catch (error) {
+      console.error("Error getting current osteopath:", error);
+      return null;
+    }
+  }
 };
 
 export default api;

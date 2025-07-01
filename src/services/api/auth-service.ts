@@ -1,4 +1,3 @@
-
 import { User, AuthState } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { toast } from "sonner";
@@ -209,5 +208,33 @@ export const authService = {
     // Fallback: code simulé
     await delay(300);
     return true;
+  },
+
+  async getCurrentUser(): Promise<any> {
+    if (USE_SUPABASE) {
+      try {
+        const authState = await supabaseAuthService.checkAuth();
+        return authState.user;
+      } catch (error) {
+        console.error("Erreur Supabase getCurrentUser:", error);
+        return null;
+      }
+    }
+    
+    // Fallback: code simulé
+    await delay(100);
+    const storedAuth = localStorage.getItem("authState");
+    
+    if (storedAuth) {
+      try {
+        const authState = JSON.parse(storedAuth);
+        return authState.user;
+      } catch (e) {
+        console.error("Failed to parse stored auth state", e);
+        return null;
+      }
+    }
+    
+    return null;
   }
 };
