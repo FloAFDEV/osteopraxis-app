@@ -39,6 +39,7 @@ import { AppointmentConflictDialog } from "@/components/appointment-conflict-dia
 import { ConflictResolutionDialog } from "@/components/conflict-resolution-dialog";
 import { EnhancedDatePicker } from "@/components/ui/enhanced-date-picker";
 import { CalendarAppointment } from "@/types/calendar";
+import { PatientCombobox } from "@/components/patients/PatientCombobox";
 
 const appointmentFormSchema = z.object({
 	patientId: z.number().min(1, {
@@ -389,58 +390,15 @@ export function AppointmentForm({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Patient</FormLabel>
-									<Select
-										onValueChange={(value) =>
-											field.onChange(Number(value))
-										}
-										defaultValue={String(field.value)}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Sélectionner un patient" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{[...patients]
-												.sort((a, b) =>
-													a.lastName.localeCompare(b.lastName)
-												)
-												.map((patient) => {
-													const age = patient.birthDate
-														? differenceInYears(
-																new Date(),
-																parseISO(
-																	patient.birthDate
-																)
-														  )
-														: null;
-													const isChild =
-														age !== null && age < 12;
-													const iconColor = isChild
-														? "text-amber-500"
-														: patient.gender === "Homme"
-														? "text-blue-500"
-														: patient.gender === "Femme"
-														? "text-pink-500"
-														: "text-gray-500";
-													const Icon = isChild ? Baby : User;
-													return (
-														<SelectItem
-															key={patient.id}
-															value={String(patient.id)}
-														>
-															<span className="flex items-center gap-2">
-																<Icon
-																	className={`w-4 h-4 ${iconColor}`}
-																/>
-																{patient.lastName}{" "}
-																{patient.firstName}
-															</span>
-														</SelectItem>
-													);
-												})}
-										</SelectContent>
-									</Select>
+									<FormControl>
+										<PatientCombobox
+											patients={patients}
+											value={field.value}
+											onChange={field.onChange}
+											placeholder="Rechercher un patient..."
+											className="w-full"
+										/>
+									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
