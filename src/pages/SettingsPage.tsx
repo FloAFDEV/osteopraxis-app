@@ -26,7 +26,7 @@ const SettingsPage = () => {
 			description:
 				"Gérez vos informations professionnelles et de facturation",
 			icon: UserCog,
-			path: "/settings/profile",
+			path: "/settings/osteopath",
 			color: "text-blue-500",
 		},
 		{
