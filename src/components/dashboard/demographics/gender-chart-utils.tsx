@@ -32,16 +32,11 @@ export const calculateGenderData = (
 	patientsList: Patient[],
 	totalPatients: number
 ): GenderChartData[] => {
-	console.log(
-		`calculateGenderData - Input data: Patients list length: ${
-			patientsList?.length || 0
-		}, Total patients: ${totalPatients}`
-	);
 
 	const result: GenderChartData[] = [];
 
 	if ((!patientsList || patientsList.length === 0) && totalPatients > 0) {
-		console.log("Using default values for chart data as patient list is empty");
+		
 		return [
 			{
 				name: "Homme",
@@ -68,10 +63,6 @@ export const calculateGenderData = (
 	const minorPatients = patients.filter(isMinor);
 	const adultPatients = patients.filter((patient) => !isMinor(patient));
 
-	console.log(
-		`Chart data calculation: ${minorPatients.length} mineurs and ${adultPatients.length} adults`
-	);
-
 	const adultMales = adultPatients.filter((p) => p.gender === "Homme").length;
 	const adultFemales = adultPatients.filter((p) => p.gender === "Femme").length;
 	const otherOrUndefined = adultPatients.filter(
@@ -87,13 +78,6 @@ export const calculateGenderData = (
 	const otherPercentage = calculatePercentage(
 		otherOrUndefined,
 		totalPatients
-	);
-
-	console.log(
-		`Percentages - Male: ${malePercentage}%, Female: ${femalePercentage}%, Mineurs: ${minorsPercentage}%, Other: ${otherPercentage}%`
-	);
-	console.log(
-		`Raw counts - Male: ${adultMales}, Female: ${adultFemales}, Mineurs: ${minorPatients.length}, Other: ${otherOrUndefined}`
 	);
 
 	const addToResult = (
@@ -133,9 +117,6 @@ export const calculateGenderData = (
 	);
 
 	if (result.length === 0 && totalPatients > 0) {
-		console.warn(
-			"Generated fallback data because no valid data categories were found"
-		);
 		result.push({
 			name: "Patients",
 			value: totalPatients,
@@ -144,7 +125,7 @@ export const calculateGenderData = (
 		});
 	}
 
-	console.log("Final chart data:", result);
+	
 	return result;
 };
 

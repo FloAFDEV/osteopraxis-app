@@ -36,7 +36,7 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
       try {
         const id = await getCurrentOsteopathId();
         setOsteopathId(id);
-        console.log("CabinetSelector - OsteopathId connecté:", id);
+        
       } catch (error) {
         console.error("Erreur lors de la récupération de l'osteopathId:", error);
       }
@@ -50,14 +50,6 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
       try {
         setLoading(true);
         const userCabinets = await api.getCabinets();
-        console.log(`CabinetSelector - ${userCabinets.length} cabinets chargés pour l'ostéopathe ${osteopathId}`);
-        
-        // Log pour debug
-        if (userCabinets.length > 0) {
-          userCabinets.forEach(cab => {
-            console.log(`Cabinet ${cab.id}: ${cab.name} (osteopathId: ${cab.osteopathId})`);
-          });
-        }
         
         setCabinets(userCabinets);
         

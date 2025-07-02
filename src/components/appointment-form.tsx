@@ -6,7 +6,7 @@ import { Baby, CalendarIcon, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -276,17 +276,13 @@ export function AppointmentForm({
 					requestedDate: new Date(data.date).toISOString()
 				});
 				
-				toast.warning(`⚠️ Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`, {
-					duration: 6000,
-				});
+				toast.warning(`⚠️ Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`);
 			} else if (error.message?.includes("créneau horaire")) {
 				// Cas d'erreur de conflit sans détails
 				const selectedPatient = patients.find(p => p.id === data.patientId);
 				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'ce patient';
 				
-				toast.error(`⛔ Impossible de programmer le rendez-vous pour ${patientName}. Ce créneau horaire est déjà occupé par un autre rendez-vous.`, {
-					duration: 8000,
-				});
+				toast.error(`⛔ Impossible de programmer le rendez-vous pour ${patientName}. Ce créneau horaire est déjà occupé par un autre rendez-vous.`);
 			} else if (error.message?.includes("Patient introuvable")) {
 				toast.error("⛔ Patient introuvable. Veuillez actualiser la page et réessayer.");
 			} else if (error.message?.includes("non autorisé")) {
@@ -296,9 +292,7 @@ export function AppointmentForm({
 				const selectedPatient = patients.find(p => p.id === data.patientId);
 				const patientName = selectedPatient ? ` pour ${selectedPatient.firstName} ${selectedPatient.lastName}` : '';
 				
-				toast.error(`⛔ Impossible de ${appointmentId ? 'modifier' : 'créer'} le rendez-vous${patientName}. ${error.message || 'Veuillez réessayer dans quelques instants.'}`, {
-					duration: 8000,
-				});
+				toast.error(`⛔ Impossible de ${appointmentId ? 'modifier' : 'créer'} le rendez-vous${patientName}. ${error.message || 'Veuillez réessayer dans quelques instants.'}`);
 			}
 		} finally {
 			setIsSubmitting(false);

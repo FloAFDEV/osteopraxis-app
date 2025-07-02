@@ -61,21 +61,14 @@ export function Dashboard() {
 
 	useEffect(() => {
 		const loadDashboardData = async () => {
-			console.log("Dashboard: Début du chargement des données");
 			setLoading(true);
 			setError(null);
 			try {
 				// Récupération des données réelles
-				console.log("Dashboard: Récupération des patients et rendez-vous");
 				const [patientsData, appointmentsData] = await Promise.all([
 					api.getPatients(),
 					api.getAppointments(),
 				]);
-
-				console.log("Dashboard: Données récupérées", {
-					patientsCount: patientsData?.length || 0,
-					appointmentsCount: appointmentsData?.length || 0
-				});
 
 				setAllPatients(patientsData || []); // Stocker tous les patients pour DemographicsCard
 
@@ -84,7 +77,6 @@ export function Dashboard() {
 				const currentMonth = today.getMonth();
 
 				// Calculer les différentes métriques
-				console.log("Dashboard: Calcul des métriques");
 				const demographics = calculateDemographics(
 					patientsData || [],
 					currentYear
@@ -137,7 +129,6 @@ export function Dashboard() {
 					...consultationMetrics,
 				};
 
-				console.log("Dashboard: Données finales calculées", finalDashboardData);
 				setDashboardData(finalDashboardData);
 			} catch (err) {
 				console.error(
@@ -149,14 +140,13 @@ export function Dashboard() {
 				);
 			} finally {
 				setLoading(false);
-				console.log("Dashboard: Chargement terminé");
 			}
 		};
 
 		loadDashboardData();
 	}, []);
 
-	console.log("Dashboard: Rendu avec", { loading, error, hasData: !!dashboardData });
+	
 
 	if (loading) {
 		return <LoadingState />;

@@ -13,23 +13,16 @@ const Toaster = ({ ...props }: ToasterProps) => {
 			className="toaster group"
 			toastOptions={{
 				classNames: {
-					toast: "group toast group-[.toaster]:bg-green-50 group-[.toaster]:text-green-900 group-[.toaster]:border-green-200 group-[.toaster]:shadow-lg dark:group-[.toaster]:bg-green-950 dark:group-[.toaster]:text-green-100 dark:group-[.toaster]:border-green-800",
-					description:
-						"group-[.toast]:text-green-700 dark:group-[.toast]:text-green-300",
-					actionButton:
-						"group-[.toast]:bg-green-600 group-[.toast]:text-white hover:group-[.toast]:bg-green-700 dark:group-[.toast]:bg-green-500 dark:hover:group-[.toast]:bg-green-600",
-					cancelButton:
-						"group-[.toast]:bg-green-100 group-[.toast]:text-green-600 hover:group-[.toast]:bg-green-200 dark:group-[.toast]:bg-green-800 dark:group-[.toast]:text-green-100 dark:hover:group-[.toast]:bg-green-700",
-					closeButton:
-						"group-[.toast]:bg-green-100 group-[.toast]:text-green-600 hover:group-[.toast]:bg-green-200 group-[.toast]:border-green-300 dark:group-[.toast]:bg-green-800 dark:group-[.toast]:text-green-100 dark:hover:group-[.toast]:bg-green-700 dark:group-[.toast]:border-green-600",
+					toast: "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+					description: "group-[.toast]:text-muted-foreground",
+					actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground hover:group-[.toast]:bg-primary/90",
+					cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground hover:group-[.toast]:bg-muted/80",
+					closeButton: "group-[.toast]:bg-background group-[.toast]:text-foreground hover:group-[.toast]:bg-accent group-[.toast]:border-border",
+					success: "group-[.toaster]:bg-green-50 group-[.toaster]:text-green-900 group-[.toaster]:border-green-200 dark:group-[.toaster]:bg-green-950 dark:group-[.toaster]:text-green-100 dark:group-[.toaster]:border-green-800",
+					error: "group-[.toaster]:bg-red-50 group-[.toaster]:text-red-900 group-[.toaster]:border-red-200 dark:group-[.toaster]:bg-red-950 dark:group-[.toaster]:text-red-100 dark:group-[.toaster]:border-red-800",
+					warning: "group-[.toaster]:bg-yellow-50 group-[.toaster]:text-yellow-900 group-[.toaster]:border-yellow-200 dark:group-[.toaster]:bg-yellow-950 dark:group-[.toaster]:text-yellow-100 dark:group-[.toaster]:border-yellow-800",
 				},
 			}}
-			style={{
-				"--normal-bg": "#f0fdf4",
-				"--normal-border": "#bbf7d0",
-				"--normal-text": "#166534",
-				"--close-button": "#f0fdf4"
-			} as React.CSSProperties}
 			{...props}
 		/>
 	);

@@ -17,9 +17,6 @@ export const ChildrenStats: React.FC<ChildrenStatsProps> = ({
 			? Math.round((childrenCount / totalPatients) * 100)
 			: 0;
 
-	console.log(
-		`ChildrenStats - mineursCount: ${childrenCount}, totalPatients: ${totalPatients}, percentage: ${childrenPercentage}`
-	);
 
 	return (
 		<div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex justify-center">

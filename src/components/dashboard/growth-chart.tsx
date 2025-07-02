@@ -61,7 +61,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
 		if (!data || !data.monthlyGrowth) return;
 
 		const formattedData = processGrowthData(data);
-		console.log("Données du graphique:", formattedData);
+		
 
 		setChartData(formattedData);
 		setIsLoading(false);
