@@ -19,43 +19,24 @@ interface FlipDigitProps {
 }
 
 const FlipDigit: React.FC<FlipDigitProps> = ({ value, label }) => {
-  const [displayValue, setDisplayValue] = useState(value);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    if (value !== displayValue) {
-      setIsAnimating(true);
-      // Délai pour l'animation flip
-      const timer = setTimeout(() => {
-        setDisplayValue(value);
-        setIsAnimating(false);
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [value, displayValue]);
-
   return (
     <div className="relative inline-block" aria-label={`${label}: ${value}`}>
-      <div className="relative overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={displayValue}
-            initial={{ rotateX: isAnimating ? -90 : 0, opacity: isAnimating ? 0 : 1 }}
-            animate={{ rotateX: 0, opacity: 1 }}
-            exit={{ rotateX: 90, opacity: 0 }}
-            transition={{ 
-              duration: 0.3, 
-              ease: "easeInOut",
-              type: "spring",
-              stiffness: 200
-            }}
-            className="inline-block font-mono text-lg font-bold"
-            style={{ transformOrigin: "center center" }}
-          >
-            {displayValue}
-          </motion.span>
-        </AnimatePresence>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={value}
+          initial={{ rotateX: -90, opacity: 0 }}
+          animate={{ rotateX: 0, opacity: 1 }}
+          exit={{ rotateX: 90, opacity: 0 }}
+          transition={{ 
+            duration: 0.2, 
+            ease: "easeInOut"
+          }}
+          className="inline-block font-mono text-lg"
+          style={{ transformOrigin: "center center" }}
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
     </div>
   );
 };
@@ -68,7 +49,7 @@ interface TimeSegmentProps {
 
 const TimeSegment: React.FC<TimeSegmentProps> = ({ hours, minutes, seconds }) => {
   return (
-    <div className="flex items-center gap-1 font-mono text-lg font-bold" role="timer" aria-live="polite">
+    <div className="flex items-center gap-1 font-mono text-lg" role="timer" aria-live="polite">
       <FlipDigit value={hours} label="heures" />
       <span className="animate-pulse text-muted-foreground">:</span>
       <FlipDigit value={minutes} label="minutes" />
