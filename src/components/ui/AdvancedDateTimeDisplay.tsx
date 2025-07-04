@@ -32,9 +32,9 @@ const FlipDigit: React.FC<FlipDigitProps> = ({
       }} transition={{
         duration: 0.2,
         ease: "easeInOut"
-      }} className="inline-block font-mono text-lg" style={{
+      }} style={{
         transformOrigin: "center center"
-      }}>
+      }} className="inline-block text-lg">
           {value}
         </motion.span>
       </AnimatePresence>
