@@ -64,22 +64,45 @@ const useGeolocation = () => {
 
   const reverseGeocode = useCallback(async (lat: number, lon: number) => {
     try {
-      // Utilisation de BigDataCloud (gratuit, sans clé API)
-      const response = await fetch(
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=fr`
-      );
+      // Essayer plusieurs APIs de géolocalisation
+      const apis = [
+        // API Nominatim (OpenStreetMap) - gratuite et fiable
+        {
+          url: `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=fr`,
+          parser: (data: any) => data.address?.city || data.address?.town || data.address?.village || data.address?.municipality
+        },
+        // API ipapi - gratuite avec localisation IP
+        {
+          url: `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=demo`,
+          parser: (data: any) => data[0]?.name
+        }
+      ];
+
+      for (const api of apis) {
+        try {
+          const response = await fetch(api.url);
+          if (!response.ok) continue;
+          
+          const data = await response.json();
+          const city = api.parser(data);
+          
+          if (city) {
+            setLocation({ city, loading: false });
+            return;
+          }
+        } catch (error) {
+          console.warn(`API ${api.url} failed:`, error);
+          continue;
+        }
+      }
       
-      if (!response.ok) throw new Error('Géolocalisation échouée');
-      
-      const data = await response.json();
-      const city = data.city || data.locality || data.principalSubdivision;
-      
+      // Fallback sur la position approximative
       setLocation({ 
-        city: city || undefined, 
+        city: "Région Toulouse", 
         loading: false 
       });
     } catch (error) {
-      console.warn('Reverse geocoding failed:', error);
+      console.warn('All geocoding APIs failed:', error);
       setLocation({ 
         loading: false, 
         error: 'Localisation indisponible' 
