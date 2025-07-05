@@ -9,8 +9,11 @@ import { NewAppointmentTab } from "@/components/patients/detail/NewAppointmentTa
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { AppointmentStatus } from "@/types";
 import { format } from "date-fns";
+import { exportPatientToPDF } from "@/services/export/patient-pdf-exporter";
+import { api } from "@/services/api";
 import {
 	Activity,
 	AlertCircle,
@@ -21,6 +24,7 @@ import {
 	Stethoscope,
 	FileText,
 	Plus,
+	Download,
 } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -28,6 +32,7 @@ import { toast } from "sonner";
 import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
 import { PatientFormValues } from "@/components/patient-form/types";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -70,6 +75,7 @@ const PatientDetailPage = () => {
 	}
 
 	// ----- ALL HOOKS MUST BE AFTER GUARDS -----
+	const { user } = useAuth();
 	const {
 		patient,
 		appointments,
@@ -82,6 +88,7 @@ const PatientDetailPage = () => {
 	} = usePatientDetail(patientId);
 
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+	const [isExporting, setIsExporting] = useState(false);
 	const historyTabRef = useRef<HTMLElement | null>(null);
 
 	// Sticky swap for cards (must also be before return)
@@ -201,6 +208,49 @@ const PatientDetailPage = () => {
 		}
 	};
 
+	// Fonction d'export PDF
+	const handleExportToPDF = async () => {
+		if (!patient) return;
+		
+		setIsExporting(true);
+		try {
+			// Récupérer les données complémentaires si nécessaire
+			let osteopath = null;
+			let cabinet = null;
+			
+			if (user?.osteopathId) {
+				try {
+					osteopath = await api.getOsteopathById(user.osteopathId);
+				} catch (err) {
+					console.warn("Could not load osteopath data:", err);
+				}
+			}
+			
+			if (patient.cabinetId) {
+				try {
+					cabinet = await api.getCabinetById(patient.cabinetId);
+				} catch (err) {
+					console.warn("Could not load cabinet data:", err);
+				}
+			}
+
+			await exportPatientToPDF(
+				patient as any, // Type assertion pour compatibilité
+				appointments,
+				invoices,
+				osteopath,
+				cabinet
+			);
+			
+			toast.success("Dossier patient exporté avec succès");
+		} catch (error) {
+			console.error("Error exporting patient file:", error);
+			toast.error("Erreur lors de l'export du dossier patient");
+		} finally {
+			setIsExporting(false);
+		}
+	};
+
 	if (isLoading) {
 		return (
 			<Layout>
@@ -228,8 +278,24 @@ const PatientDetailPage = () => {
 	return (
 		<Layout>
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
-				{/* Header section */}
-				<PatientHeader patientId={patient.id} />
+				{/* Header section avec bouton export */}
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+					<PatientHeader patientId={patient.id} />
+					<Button
+						onClick={handleExportToPDF}
+						disabled={isExporting}
+						variant="outline"
+						size="sm"
+						className="flex items-center gap-2 whitespace-nowrap"
+					>
+						{isExporting ? (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						) : (
+							<Download className="h-4 w-4" />
+						)}
+						{isExporting ? "Export..." : "Export PDF"}
+					</Button>
+				</div>
 
 				{/* Stats section */}
 				<section className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">

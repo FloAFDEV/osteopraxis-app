@@ -3,8 +3,17 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Appointment, Invoice, Cabinet, Osteopath } from "@/types";
 
 type Patient = Tables<"Patient">;
+
+interface PatientExportData {
+  patient: Patient;
+  appointments?: Appointment[];
+  invoices?: Invoice[];
+  osteopath?: Osteopath;
+  cabinet?: Cabinet;
+}
 
 interface ExportOptions {
   includePersonalInfo?: boolean;
@@ -39,6 +48,54 @@ export class PatientPDFExporter {
     this.pdf.text(`Généré le ${format(new Date(), "PPPP", { locale: fr })}`, this.margin, this.currentY);
     
     this.currentY += 15;
+    this.addLine();
+  }
+
+  private addHeaderComplete(patientName: string, osteopath?: Osteopath, cabinet?: Cabinet) {
+    // Informations du cabinet en haut à droite
+    if (cabinet) {
+      this.pdf.setFontSize(12);
+      this.pdf.setFont("helvetica", "bold");
+      this.pdf.text(cabinet.name, 105, this.currentY);
+      
+      this.pdf.setFontSize(9);
+      this.pdf.setFont("helvetica", "normal");
+      this.pdf.text(cabinet.address, 105, this.currentY + 5);
+      
+      if (cabinet.phone) {
+        this.pdf.text(`Tél: ${cabinet.phone}`, 105, this.currentY + 10);
+      }
+      if (cabinet.email) {
+        this.pdf.text(`Email: ${cabinet.email}`, 105, this.currentY + 15);
+      }
+    }
+
+    // Titre principal
+    this.pdf.setFontSize(20);
+    this.pdf.setFont("helvetica", "bold");
+    this.pdf.text("DOSSIER MÉDICAL OSTÉOPATHIQUE", this.margin, this.currentY);
+    
+    this.currentY += 12;
+    this.pdf.setFontSize(16);
+    this.pdf.text(patientName, this.margin, this.currentY);
+    
+    this.currentY += 8;
+    this.pdf.setFontSize(10);
+    this.pdf.setFont("helvetica", "normal");
+    this.pdf.text(`Document généré le ${format(new Date(), "PPPP", { locale: fr })}`, this.margin, this.currentY);
+    
+    if (osteopath) {
+      this.currentY += 5;
+      this.pdf.text(`Praticien: ${osteopath.name}`, this.margin, this.currentY);
+      if (osteopath.rpps_number) {
+        this.pdf.text(`RPPS: ${osteopath.rpps_number}`, this.margin + 100, this.currentY);
+      }
+    }
+    
+    this.currentY += 10;
+    this.pdf.text("Document confidentiel - Usage professionnel uniquement", this.margin, this.currentY);
+    
+    this.currentY += 10;
     this.addLine();
   }
 
@@ -145,12 +202,11 @@ export class PatientPDFExporter {
     this.addField("Notes générales", patient.notes);
   }
 
-  async exportPatient(
-    patient: Patient, 
-    options: ExportOptions = {},
-    appointments?: any[],
-    invoices?: any[]
+  async exportPatientComplete(
+    data: PatientExportData,
+    options: ExportOptions = {}
   ): Promise<void> {
+    const { patient, appointments = [], invoices = [], osteopath, cabinet } = data;
     const {
       includePersonalInfo = true,
       includeMedicalHistory = true,
@@ -158,8 +214,8 @@ export class PatientPDFExporter {
       includeInvoices = true,
     } = options;
 
-    // Header
-    this.addHeader(`${patient.firstName} ${patient.lastName}`);
+    // Header avec informations cabinet/praticien
+    this.addHeaderComplete(`${patient.firstName} ${patient.lastName}`, osteopath, cabinet);
 
     // Sections conditionnelles
     if (includePersonalInfo) {
@@ -246,4 +302,36 @@ export class PatientPDFExporter {
 
     pdf.save(filename);
   }
+
+  // Fonction d'export simplifiée pour usage externe
+  async exportPatient(
+    patient: Patient, 
+    options: ExportOptions = {},
+    appointments?: any[],
+    invoices?: any[]
+  ): Promise<void> {
+    return this.exportPatientComplete({
+      patient,
+      appointments,
+      invoices
+    }, options);
+  }
 }
+
+// Export simple pour l'utilisation dans les composants
+export const exportPatientToPDF = async (
+  patient: Patient,
+  appointments?: Appointment[],
+  invoices?: Invoice[],
+  osteopath?: Osteopath,
+  cabinet?: Cabinet
+) => {
+  const exporter = new PatientPDFExporter();
+  await exporter.exportPatientComplete({
+    patient,
+    appointments,
+    invoices,
+    osteopath,
+    cabinet
+  });
+};
