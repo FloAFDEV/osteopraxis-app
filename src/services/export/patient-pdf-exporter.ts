@@ -8,330 +8,395 @@ import { Appointment, Invoice, Cabinet, Osteopath } from "@/types";
 type Patient = Tables<"Patient">;
 
 interface PatientExportData {
-  patient: Patient;
-  appointments?: Appointment[];
-  invoices?: Invoice[];
-  osteopath?: Osteopath;
-  cabinet?: Cabinet;
+	patient: Patient;
+	appointments?: Appointment[];
+	invoices?: Invoice[];
+	osteopath?: Osteopath;
+	cabinet?: Cabinet;
 }
 
 interface ExportOptions {
-  includePersonalInfo?: boolean;
-  includeMedicalHistory?: boolean;
-  includeAppointments?: boolean;
-  includeInvoices?: boolean;
-  includePhotos?: boolean;
+	includePersonalInfo?: boolean;
+	includeMedicalHistory?: boolean;
+	includeAppointments?: boolean;
+	includeInvoices?: boolean;
+	includePhotos?: boolean;
 }
 
 export class PatientPDFExporter {
-  private pdf: jsPDF;
-  private currentY: number = 20;
-  private pageHeight: number = 297; // A4 height in mm
-  private margin: number = 20;
+	private pdf: jsPDF;
+	private currentY: number = 20;
+	private pageHeight: number = 297;
+	private margin: number = 20;
 
-  constructor() {
-    this.pdf = new jsPDF();
-  }
+	constructor() {
+		this.pdf = new jsPDF();
+	}
 
-  private addHeader(patientName: string) {
-    this.pdf.setFontSize(20);
-    this.pdf.setFont("helvetica", "bold");
-    this.pdf.text("DOSSIER PATIENT", this.margin, this.currentY);
-    
-    this.currentY += 10;
-    this.pdf.setFontSize(16);
-    this.pdf.text(patientName, this.margin, this.currentY);
-    
-    this.currentY += 10;
-    this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "normal");
-    this.pdf.text(`Généré le ${format(new Date(), "PPPP", { locale: fr })}`, this.margin, this.currentY);
-    
-    this.currentY += 15;
-    this.addLine();
-  }
+	private addFooter() {
+		this.pdf.setFontSize(8);
+		this.pdf.setTextColor(150);
+		this.pdf.text(
+			`Page ${this.pdf.getCurrentPageInfo().pageNumber}`,
+			this.pdf.internal.pageSize.getWidth() - this.margin,
+			this.pdf.internal.pageSize.getHeight() - 10,
+			{ align: "right" }
+		);
+		this.pdf.setTextColor(0); // reset color
+	}
 
-  private addHeaderComplete(patientName: string, osteopath?: Osteopath, cabinet?: Cabinet) {
-    // Informations du cabinet en haut à droite
-    if (cabinet) {
-      this.pdf.setFontSize(12);
-      this.pdf.setFont("helvetica", "bold");
-      this.pdf.text(cabinet.name, 105, this.currentY);
-      
-      this.pdf.setFontSize(9);
-      this.pdf.setFont("helvetica", "normal");
-      this.pdf.text(cabinet.address, 105, this.currentY + 5);
-      
-      if (cabinet.phone) {
-        this.pdf.text(`Tél: ${cabinet.phone}`, 105, this.currentY + 10);
-      }
-      if (cabinet.email) {
-        this.pdf.text(`Email: ${cabinet.email}`, 105, this.currentY + 15);
-      }
-    }
+	private checkPageBreak(spaceNeeded: number) {
+		if (this.currentY + spaceNeeded > this.pageHeight - this.margin) {
+			this.addFooter();
+			this.pdf.addPage();
+			this.currentY = this.margin;
+		}
+	}
 
-    // Titre principal
-    this.pdf.setFontSize(20);
-    this.pdf.setFont("helvetica", "bold");
-    this.pdf.text("DOSSIER MÉDICAL OSTÉOPATHIQUE", this.margin, this.currentY);
-    
-    this.currentY += 12;
-    this.pdf.setFontSize(16);
-    this.pdf.text(patientName, this.margin, this.currentY);
-    
-    this.currentY += 8;
-    this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "normal");
-    this.pdf.text(`Document généré le ${format(new Date(), "PPPP", { locale: fr })}`, this.margin, this.currentY);
-    
-    if (osteopath) {
-      this.currentY += 5;
-      this.pdf.text(`Praticien: ${osteopath.name}`, this.margin, this.currentY);
-      if (osteopath.rpps_number) {
-        this.pdf.text(`RPPS: ${osteopath.rpps_number}`, this.margin + 100, this.currentY);
-      }
-    }
-    
-    this.currentY += 10;
-    this.pdf.text("Document confidentiel - Usage professionnel uniquement", this.margin, this.currentY);
-    
-    this.currentY += 10;
-    this.addLine();
-  }
+	private addHeaderComplete(
+		patientName: string,
+		osteopath?: Osteopath,
+		cabinet?: Cabinet
+	) {
+		if (cabinet) {
+			this.pdf.setFontSize(12);
+			this.pdf.setFont("helvetica", "bold");
+			this.pdf.text(cabinet.name, 190, this.currentY, { align: "right" });
 
-  private addLine() {
-    this.pdf.line(this.margin, this.currentY, 190, this.currentY);
-    this.currentY += 10;
-  }
+			this.pdf.setFontSize(9);
+			this.pdf.setFont("helvetica", "normal");
+			this.pdf.text(cabinet.address, 190, this.currentY + 5, {
+				align: "right",
+			});
+			if (cabinet.phone)
+				this.pdf.text(
+					`Tél: ${cabinet.phone}`,
+					190,
+					this.currentY + 10,
+					{ align: "right" }
+				);
+			if (cabinet.email)
+				this.pdf.text(
+					`Email: ${cabinet.email}`,
+					190,
+					this.currentY + 15,
+					{ align: "right" }
+				);
 
-  private addSection(title: string) {
-    this.checkPageBreak(20);
-    this.pdf.setFontSize(14);
-    this.pdf.setFont("helvetica", "bold");
-    this.pdf.text(title, this.margin, this.currentY);
-    this.currentY += 8;
-    this.addLine();
-  }
+			this.currentY += 25;
+		}
 
-  private addField(label: string, value: string | null | undefined) {
-    if (!value || value === "NULL") return;
-    
-    this.checkPageBreak(10);
-    this.pdf.setFontSize(10);
-    this.pdf.setFont("helvetica", "bold");
-    this.pdf.text(`${label}:`, this.margin, this.currentY);
-    
-    this.pdf.setFont("helvetica", "normal");
-    const lines = this.pdf.splitTextToSize(value, 120);
-    this.pdf.text(lines, this.margin + 50, this.currentY);
-    
-    this.currentY += lines.length * 5 + 3;
-  }
+		this.pdf.setFontSize(20);
+		this.pdf.setFont("helvetica", "bold");
+		this.pdf.text(
+			"DOSSIER MÉDICAL OSTÉOPATHIQUE",
+			this.margin,
+			this.currentY
+		);
 
-  private checkPageBreak(spaceNeeded: number) {
-    if (this.currentY + spaceNeeded > this.pageHeight - this.margin) {
-      this.pdf.addPage();
-      this.currentY = this.margin;
-    }
-  }
+		this.currentY += 12;
+		this.pdf.setFontSize(16);
+		this.pdf.text(patientName, this.margin, this.currentY);
 
-  private addPersonalInfo(patient: Patient) {
-    this.addSection("INFORMATIONS PERSONNELLES");
-    
-    this.addField("Nom", patient.lastName);
-    this.addField("Prénom", patient.firstName);
-    this.addField("Date de naissance", patient.birthDate ? format(new Date(patient.birthDate), "dd/MM/yyyy") : null);
-    this.addField("Genre", patient.gender);
-    this.addField("Adresse", patient.address);
-    this.addField("Ville", patient.city);
-    this.addField("Code postal", patient.postalCode);
-    this.addField("Téléphone", patient.phone);
-    this.addField("Email", patient.email);
-    this.addField("Profession", patient.occupation || patient.job);
-    this.addField("Statut marital", patient.maritalStatus);
-  }
+		this.currentY += 8;
+		this.pdf.setFontSize(10);
+		this.pdf.setFont("helvetica", "normal");
+		this.pdf.text(
+			`Document généré le ${format(new Date(), "PPPP", { locale: fr })}`,
+			this.margin,
+			this.currentY
+		);
 
-  private addMedicalHistory(patient: Patient) {
-    this.addSection("ANTÉCÉDENTS MÉDICAUX");
-    
-    this.addField("Historique médical", patient.medicalHistory);
-    this.addField("Historique chirurgical", patient.surgicalHistory);
-    this.addField("Historique traumatique", patient.traumaHistory);
-    this.addField("Allergies", patient.allergies);
-    this.addField("Médication actuelle", patient.currentMedication);
-    this.addField("Traitement actuel", patient.currentTreatment);
-    this.addField("Médecin traitant", patient.generalPractitioner);
-    
-    // Données biométriques
-    this.addSection("DONNÉES BIOMÉTRIQUES");
-    this.addField("Taille", patient.height ? `${patient.height} cm` : null);
-    this.addField("Poids", patient.weight ? `${patient.weight} kg` : null);
-    this.addField("IMC", patient.bmi ? patient.bmi.toString() : null);
-    
-    // Habitudes de vie
-    this.addSection("HABITUDES DE VIE");
-    this.addField("Fumeur", patient.isSmoker ? "Oui" : "Non");
-    if (patient.isSmoker && patient.smokingSince) {
-      this.addField("Fume depuis", patient.smokingSince);
-    }
-    this.addField("Activité physique", patient.physicalActivity);
-    this.addField("Consommation d'alcool", patient.alcoholConsumption);
-  }
+		if (osteopath) {
+			this.currentY += 5;
+			this.pdf.text(
+				`Praticien: ${osteopath.name}`,
+				this.margin,
+				this.currentY
+			);
+			if (osteopath.rpps_number) {
+				this.pdf.text(
+					`RPPS: ${osteopath.rpps_number}`,
+					this.margin + 100,
+					this.currentY
+				);
+			}
+		}
 
-  private addExaminations(patient: Patient) {
-    this.addSection("EXAMENS CLINIQUES");
-    
-    // Examens généraux
-    this.addField("Examen médical", patient.medical_examination);
-    this.addField("Examen crânien", patient.cranial_exam);
-    this.addField("Examen dentaire", patient.dental_exam);
-    this.addField("Examen facial", patient.facial_mask_exam);
-    this.addField("Examen fascia", patient.fascia_exam);
-    this.addField("Examen vasculaire", patient.vascular_exam);
-    this.addField("Membre supérieur", patient.upper_limb_exam);
-    this.addField("Membre inférieur", patient.lower_limb_exam);
-    this.addField("Épaule", patient.shoulder_exam);
-    this.addField("Scoliose", patient.scoliosis);
-    
-    // Plan de traitement
-    this.addSection("DIAGNOSTIC ET TRAITEMENT");
-    this.addField("Diagnostic", patient.diagnosis);
-    this.addField("Plan de traitement", patient.treatment_plan);
-    this.addField("Conclusion consultation", patient.consultation_conclusion);
-    this.addField("Examens complémentaires", patient.complementaryExams);
-    this.addField("Notes générales", patient.notes);
-  }
+		this.currentY += 10;
+		this.pdf.text(
+			"Document confidentiel - Usage professionnel uniquement",
+			this.margin,
+			this.currentY
+		);
+		this.currentY += 10;
+		this.addLine();
+	}
 
-  async exportPatientComplete(
-    data: PatientExportData,
-    options: ExportOptions = {}
-  ): Promise<void> {
-    const { patient, appointments = [], invoices = [], osteopath, cabinet } = data;
-    const {
-      includePersonalInfo = true,
-      includeMedicalHistory = true,
-      includeAppointments = true,
-      includeInvoices = true,
-    } = options;
+	private addLine() {
+		this.pdf.line(this.margin, this.currentY, 190, this.currentY);
+		this.currentY += 10;
+	}
 
-    // Header avec informations cabinet/praticien
-    this.addHeaderComplete(`${patient.firstName} ${patient.lastName}`, osteopath, cabinet);
+	private addSection(title: string) {
+		this.checkPageBreak(20);
+		this.currentY += 4;
+		this.pdf.setFontSize(14);
+		this.pdf.setFont("helvetica", "bold");
+		this.pdf.setTextColor(0);
+		this.pdf.text(title, this.margin, this.currentY);
+		this.currentY += 8;
+		this.addLine();
+	}
 
-    // Sections conditionnelles
-    if (includePersonalInfo) {
-      this.addPersonalInfo(patient);
-    }
+	private addField(label: string, value: string | null | undefined) {
+		if (!value || value === "NULL") return;
+		this.checkPageBreak(10);
+		this.pdf.setFontSize(10);
+		this.pdf.setFont("helvetica", "bold");
+		this.pdf.text(`${label}:`, this.margin, this.currentY);
 
-    if (includeMedicalHistory) {
-      this.addMedicalHistory(patient);
-      this.addExaminations(patient);
-    }
+		this.pdf.setFont("helvetica", "normal");
+		const lines = this.pdf.splitTextToSize(value, 120);
+		this.pdf.text(lines, this.margin + 50, this.currentY);
 
-    if (includeAppointments && appointments?.length) {
-      this.addSection("HISTORIQUE DES RENDEZ-VOUS");
-      appointments.forEach((appointment, index) => {
-        this.checkPageBreak(15);
-        this.pdf.setFontSize(12);
-        this.pdf.setFont("helvetica", "bold");
-        this.pdf.text(`RDV ${index + 1}`, this.margin, this.currentY);
-        this.currentY += 6;
-        
-        this.addField("Date", format(new Date(appointment.date), "PPPP 'à' HH:mm", { locale: fr }));
-        this.addField("Motif", appointment.reason);
-        this.addField("Statut", appointment.status);
-        this.addField("Notes", appointment.notes);
-        this.currentY += 5;
-      });
-    }
+		this.currentY += lines.length * 4.5 + 2;
+	}
 
-    if (includeInvoices && invoices?.length) {
-      this.addSection("HISTORIQUE DE FACTURATION");
-      let totalAmount = 0;
-      
-      invoices.forEach((invoice, index) => {
-        this.checkPageBreak(15);
-        this.pdf.setFontSize(12);
-        this.pdf.setFont("helvetica", "bold");
-        this.pdf.text(`Facture ${index + 1}`, this.margin, this.currentY);
-        this.currentY += 6;
-        
-        this.addField("Date", format(new Date(invoice.date), "dd/MM/yyyy"));
-        this.addField("Montant", `${invoice.amount} €`);
-        this.addField("Statut", invoice.paymentStatus);
-        this.addField("Mode de paiement", invoice.paymentMethod);
-        totalAmount += invoice.amount;
-        this.currentY += 5;
-      });
-      
-      this.checkPageBreak(10);
-      this.pdf.setFont("helvetica", "bold");
-      this.pdf.text(`Total facturé: ${totalAmount} €`, this.margin, this.currentY);
-    }
+	private addTwoFields(
+		label1: string,
+		value1: string,
+		label2: string,
+		value2: string
+	) {
+		if (!value1 && !value2) return;
+		this.checkPageBreak(10);
+		this.pdf.setFontSize(10);
+		this.pdf.setFont("helvetica", "bold");
+		this.pdf.text(`${label1}:`, this.margin, this.currentY);
+		this.pdf.text(`${label2}:`, this.margin + 80, this.currentY);
 
-    // Télécharger le PDF
-    const fileName = `dossier_${patient.firstName}_${patient.lastName}_${format(new Date(), "yyyy-MM-dd")}.pdf`;
-    this.pdf.save(fileName);
-  }
+		this.pdf.setFont("helvetica", "normal");
+		this.pdf.text(value1 || "-", this.margin + 30, this.currentY);
+		this.pdf.text(value2 || "-", this.margin + 110, this.currentY);
 
-  // Méthode pour exporter via HTML (pour des layouts complexes)
-  async exportFromHTML(element: HTMLElement, filename: string): Promise<void> {
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true
-    });
+		this.currentY += 6;
+	}
 
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF();
-    const imgWidth = 210;
-    const pageHeight = 295;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
+	private addPersonalInfo(patient: Patient) {
+		this.addSection("INFORMATIONS PERSONNELLES");
+		this.addField("Nom", patient.lastName);
+		this.addField("Prénom", patient.firstName);
+		this.addField(
+			"Date de naissance",
+			patient.birthDate
+				? format(new Date(patient.birthDate), "dd/MM/yyyy")
+				: null
+		);
+		this.addField("Genre", patient.gender);
+		this.addField("Adresse", patient.address);
+		this.addTwoFields(
+			"Ville",
+			patient.city,
+			"Code postal",
+			patient.postalCode
+		);
+		this.addTwoFields("Téléphone", patient.phone, "Email", patient.email);
+		this.addTwoFields(
+			"Profession",
+			patient.occupation || patient.job || "-",
+			"Statut marital",
+			patient.maritalStatus || "-"
+		);
+	}
 
-    let position = 0;
+	private addMedicalHistory(patient: Patient) {
+		this.addSection("ANTÉCÉDENTS MÉDICAUX");
+		this.addField("Historique médical", patient.medicalHistory);
+		this.addField("Historique chirurgical", patient.surgicalHistory);
+		this.addField("Historique traumatique", patient.traumaHistory);
+		this.addField("Allergies", patient.allergies);
+		this.addField("Médication actuelle", patient.currentMedication);
+		this.addField("Traitement actuel", patient.currentTreatment);
+		this.addField("Médecin traitant", patient.generalPractitioner);
 
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+		this.addSection("DONNÉES BIOMÉTRIQUES");
+		this.addTwoFields(
+			"Taille",
+			`${patient.height || "-"} cm`,
+			"Poids",
+			`${patient.weight || "-"} kg`
+		);
+		this.addField("IMC", patient.bmi ? patient.bmi.toString() : null);
 
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
+		this.addSection("HABITUDES DE VIE");
+		this.addField("Fumeur", patient.isSmoker ? "Oui" : "Non");
+		if (patient.isSmoker && patient.smokingSince)
+			this.addField("Fume depuis", patient.smokingSince);
+		this.addField("Activité physique", patient.physicalActivity);
+		this.addField("Consommation d'alcool", patient.alcoholConsumption);
+	}
 
-    pdf.save(filename);
-  }
+	private addExaminations(patient: Patient) {
+		this.addSection("EXAMENS CLINIQUES");
+		this.addField("Examen médical", patient.medical_examination);
+		this.addField("Examen crânien", patient.cranial_exam);
+		this.addField("Examen dentaire", patient.dental_exam);
+		this.addField("Examen facial", patient.facial_mask_exam);
+		this.addField("Examen fascia", patient.fascia_exam);
+		this.addField("Examen vasculaire", patient.vascular_exam);
+		this.addField("Membre supérieur", patient.upper_limb_exam);
+		this.addField("Membre inférieur", patient.lower_limb_exam);
+		this.addField("Épaule", patient.shoulder_exam);
+		this.addField("Scoliose", patient.scoliosis);
 
-  // Fonction d'export simplifiée pour usage externe
-  async exportPatient(
-    patient: Patient, 
-    options: ExportOptions = {},
-    appointments?: any[],
-    invoices?: any[]
-  ): Promise<void> {
-    return this.exportPatientComplete({
-      patient,
-      appointments,
-      invoices
-    }, options);
-  }
+		this.addSection("DIAGNOSTIC ET TRAITEMENT");
+		this.addField("Diagnostic", patient.diagnosis);
+		this.addField("Plan de traitement", patient.treatment_plan);
+		this.addField(
+			"Conclusion consultation",
+			patient.consultation_conclusion
+		);
+		this.addField("Examens complémentaires", patient.complementaryExams);
+		this.addField("Notes générales", patient.notes);
+	}
+
+	async exportPatientComplete(
+		data: PatientExportData,
+		options: ExportOptions = {}
+	): Promise<void> {
+		const {
+			patient,
+			appointments = [],
+			invoices = [],
+			osteopath,
+			cabinet,
+		} = data;
+		const {
+			includePersonalInfo = true,
+			includeMedicalHistory = true,
+			includeAppointments = true,
+			includeInvoices = true,
+		} = options;
+
+		this.addHeaderComplete(
+			`${patient.firstName} ${patient.lastName}`,
+			osteopath,
+			cabinet
+		);
+
+		if (includePersonalInfo) this.addPersonalInfo(patient);
+		if (includeMedicalHistory) {
+			this.addMedicalHistory(patient);
+			this.addExaminations(patient);
+		}
+
+		if (includeAppointments && appointments.length) {
+			this.addSection("HISTORIQUE DES RENDEZ-VOUS");
+			appointments.forEach((a, i) => {
+				this.checkPageBreak(15);
+				this.pdf.setFontSize(12);
+				this.pdf.setFont("helvetica", "bold");
+				this.pdf.text(`RDV ${i + 1}`, this.margin, this.currentY);
+				this.currentY += 6;
+				this.addField(
+					"Date",
+					format(new Date(a.date), "PPPP 'à' HH:mm", { locale: fr })
+				);
+				this.addField("Motif", a.reason);
+				this.addField("Statut", a.status);
+				this.addField("Notes", a.notes);
+				this.currentY += 5;
+			});
+		}
+
+		if (includeInvoices && invoices.length) {
+			this.addSection("HISTORIQUE DE FACTURATION");
+			let total = 0;
+			invoices.forEach((inv, i) => {
+				this.checkPageBreak(15);
+				this.pdf.setFontSize(12);
+				this.pdf.setFont("helvetica", "bold");
+				this.pdf.text(`Facture ${i + 1}`, this.margin, this.currentY);
+				this.currentY += 6;
+				this.addField("Date", format(new Date(inv.date), "dd/MM/yyyy"));
+				this.addField("Montant", `${inv.amount} €`);
+				this.addField("Statut", inv.paymentStatus);
+				this.addField("Mode de paiement", inv.paymentMethod);
+				total += inv.amount;
+				this.currentY += 5;
+			});
+			this.checkPageBreak(10);
+			this.pdf.setFont("helvetica", "bold");
+			this.pdf.text(
+				`Total facturé: ${total} €`,
+				this.margin,
+				this.currentY
+			);
+		}
+
+		this.addFooter();
+
+		const fileName = `dossier_${patient.firstName}_${
+			patient.lastName
+		}_${format(new Date(), "yyyy-MM-dd")}.pdf`;
+		this.pdf.save(fileName);
+	}
+
+	async exportFromHTML(
+		element: HTMLElement,
+		filename: string
+	): Promise<void> {
+		const canvas = await html2canvas(element, {
+			scale: 2,
+			useCORS: true,
+			allowTaint: true,
+		});
+		const imgData = canvas.toDataURL("image/png");
+		const pdf = new jsPDF();
+		const imgWidth = 210;
+		const pageHeight = 295;
+		const imgHeight = (canvas.height * imgWidth) / canvas.width;
+		let heightLeft = imgHeight;
+		let position = 0;
+
+		pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+		heightLeft -= pageHeight;
+		while (heightLeft >= 0) {
+			position = heightLeft - imgHeight;
+			pdf.addPage();
+			pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+			heightLeft -= pageHeight;
+		}
+		pdf.save(filename);
+	}
+
+	async exportPatient(
+		patient: Patient,
+		options: ExportOptions = {},
+		appointments?: Appointment[],
+		invoices?: Invoice[]
+	): Promise<void> {
+		return this.exportPatientComplete(
+			{ patient, appointments, invoices },
+			options
+		);
+	}
 }
 
-// Export simple pour l'utilisation dans les composants
 export const exportPatientToPDF = async (
-  patient: Patient,
-  appointments?: Appointment[],
-  invoices?: Invoice[],
-  osteopath?: Osteopath,
-  cabinet?: Cabinet
+	patient: Patient,
+	appointments?: Appointment[],
+	invoices?: Invoice[],
+	osteopath?: Osteopath,
+	cabinet?: Cabinet
 ) => {
-  const exporter = new PatientPDFExporter();
-  await exporter.exportPatientComplete({
-    patient,
-    appointments,
-    invoices,
-    osteopath,
-    cabinet
-  });
+	const exporter = new PatientPDFExporter();
+	await exporter.exportPatientComplete({
+		patient,
+		appointments,
+		invoices,
+		osteopath,
+		cabinet,
+	});
 };
