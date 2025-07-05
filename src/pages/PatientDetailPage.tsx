@@ -1,45 +1,48 @@
+import { PatientFormValues } from "@/components/patient-form/types";
 import { AppointmentHistoryTab } from "@/components/patients/detail/AppointmentHistoryTab";
 import { InvoicesTab } from "@/components/patients/detail/InvoicesTab";
-import { QuotesTab } from "@/components/patients/detail/QuotesTab";
 import { MedicalInfoTab } from "@/components/patients/detail/MedicalInfoTab";
+import { NewAppointmentTab } from "@/components/patients/detail/NewAppointmentTab";
 import { PatientHeader } from "@/components/patients/detail/PatientHeader";
 import { PatientInfo } from "@/components/patients/detail/PatientInfo";
+import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
+import { QuotesTab } from "@/components/patients/detail/QuotesTab";
 import { UpcomingAppointmentsTab } from "@/components/patients/detail/UpcomingAppointmentsTab";
-import { NewAppointmentTab } from "@/components/patients/detail/NewAppointmentTab";
+import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { PatientStat } from "@/components/ui/patient-stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePatientDetail } from "@/hooks/usePatientDetail";
+import { api } from "@/services/api";
+import { exportPatientToPDF } from "@/services/export/patient-pdf-exporter";
 import { AppointmentStatus } from "@/types";
 import { format } from "date-fns";
-import { exportPatientToPDF } from "@/services/export/patient-pdf-exporter";
-import { api } from "@/services/api";
 import {
 	Activity,
 	AlertCircle,
 	Calendar,
 	ClipboardList,
+	Download,
+	FileText,
 	History,
 	Loader2,
-	Stethoscope,
-	FileText,
 	Plus,
-	Download,
+	Stethoscope,
 } from "lucide-react";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { PersonalInfoCard } from "@/components/patients/detail/PersonalInfoCard";
-import { PatientFormValues } from "@/components/patient-form/types";
-import { usePatientDetail } from "@/hooks/usePatientDetail";
-import { useAuth } from "@/contexts/AuthContext";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
 
 	// Guard: Vérifier si l'ID est "new" ou invalide
 	if (!id || id === "new") {
-		console.warn("PatientDetailPage: ID de patient invalide ou route 'new':", id);
+		console.warn(
+			"PatientDetailPage: ID de patient invalide ou route 'new':",
+			id
+		);
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">
@@ -48,7 +51,8 @@ const PatientDetailPage = () => {
 						Accès non autorisé
 					</p>
 					<p className="text-muted-foreground mt-2">
-						Cette page est réservée aux détails des patients existants
+						Cette page est réservée aux détails des patients
+						existants
 					</p>
 				</div>
 			</Layout>
@@ -58,7 +62,10 @@ const PatientDetailPage = () => {
 	const patientId = parseInt(id, 10);
 
 	if (isNaN(patientId) || patientId <= 0) {
-		console.warn("PatientDetailPage: ID de patient non numérique ou invalide:", id);
+		console.warn(
+			"PatientDetailPage: ID de patient non numérique ou invalide:",
+			id
+		);
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">
@@ -84,7 +91,7 @@ const PatientDetailPage = () => {
 		error,
 		updateAppointmentStatusOptimistically,
 		addAppointmentOptimistically,
-		updatePatientOptimistically
+		updatePatientOptimistically,
 	} = usePatientDetail(patientId);
 
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
@@ -96,17 +103,29 @@ const PatientDetailPage = () => {
 	const [showStickyAntecedents, setShowStickyAntecedents] = useState(false);
 
 	// Memoized appointment filtering and sorting
-	const upcomingAppointments = useMemo(() => 
-		appointments
-			.filter((appointment) => new Date(appointment.date) >= new Date())
-			.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+	const upcomingAppointments = useMemo(
+		() =>
+			appointments
+				.filter(
+					(appointment) => new Date(appointment.date) >= new Date()
+				)
+				.sort(
+					(a, b) =>
+						new Date(a.date).getTime() - new Date(b.date).getTime()
+				),
 		[appointments]
 	);
 
-	const pastAppointments = useMemo(() => 
-		appointments
-			.filter((appointment) => new Date(appointment.date) < new Date())
-			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+	const pastAppointments = useMemo(
+		() =>
+			appointments
+				.filter(
+					(appointment) => new Date(appointment.date) < new Date()
+				)
+				.sort(
+					(a, b) =>
+						new Date(b.date).getTime() - new Date(a.date).getTime()
+				),
 		[appointments]
 	);
 
@@ -123,7 +142,10 @@ const PatientDetailPage = () => {
 		// Crée un observer pour suivre si PatientInfo sort de la vue (top)
 		const handleIntersection = (entries: IntersectionObserverEntry[]) => {
 			entries.forEach((entry) => {
-				if (entry.boundingClientRect.top <= 20 && !entry.isIntersecting) {
+				if (
+					entry.boundingClientRect.top <= 20 &&
+					!entry.isIntersecting
+				) {
 					// la carte n'est plus visible dans le conteneur principal, show sticky PersoInfoCard
 					setShowStickyAntecedents(true);
 				} else if (entry.isIntersecting) {
@@ -149,7 +171,10 @@ const PatientDetailPage = () => {
 
 	const handleCancelAppointment = async (appointmentId: number) => {
 		try {
-			await updateAppointmentStatusOptimistically(appointmentId, "CANCELED");
+			await updateAppointmentStatusOptimistically(
+				appointmentId,
+				"CANCELED"
+			);
 			toast.success("La séance a été annulée avec succès");
 		} catch (error) {
 			console.error("Error canceling appointment:", error);
@@ -187,7 +212,9 @@ const PatientDetailPage = () => {
 			})
 			.join(nb === 2 ? " " : ", ");
 
-		return `${nb === 1 ? "Un enfant de" : `${nb} enfants de`} ${agesText} ans`;
+		return `${
+			nb === 1 ? "Un enfant de" : `${nb} enfants de`
+		} ${agesText} ans`;
 	}
 
 	const handleAppointmentCreated = (newAppointment?: any) => {
@@ -211,13 +238,13 @@ const PatientDetailPage = () => {
 	// Fonction d'export PDF
 	const handleExportToPDF = async () => {
 		if (!patient) return;
-		
+
 		setIsExporting(true);
 		try {
 			// Récupérer les données complémentaires si nécessaire
 			let osteopath = null;
 			let cabinet = null;
-			
+
 			if (user?.osteopathId) {
 				try {
 					osteopath = await api.getOsteopathById(user.osteopathId);
@@ -225,7 +252,7 @@ const PatientDetailPage = () => {
 					console.warn("Could not load osteopath data:", err);
 				}
 			}
-			
+
 			if (patient.cabinetId) {
 				try {
 					cabinet = await api.getCabinetById(patient.cabinetId);
@@ -241,7 +268,7 @@ const PatientDetailPage = () => {
 				osteopath,
 				cabinet
 			);
-			
+
 			toast.success("Dossier patient exporté avec succès");
 		} catch (error) {
 			console.error("Error exporting patient file:", error);
@@ -262,7 +289,10 @@ const PatientDetailPage = () => {
 	}
 
 	if (error || !patient) {
-		const errorMessage = error instanceof Error ? error.message : String(error || "Patient non trouvé");
+		const errorMessage =
+			error instanceof Error
+				? error.message
+				: String(error || "Patient non trouvé");
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">
@@ -279,21 +309,21 @@ const PatientDetailPage = () => {
 		<Layout>
 			<div className="flex flex-col space-y-6 max-w-full mx-auto px-4">
 				{/* Header section avec bouton export */}
-				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+				<div className="flex flex-col">
 					<PatientHeader patientId={patient.id} />
 					<Button
 						onClick={handleExportToPDF}
 						disabled={isExporting}
-						variant="outline"
+						variant="secondary"
 						size="sm"
-						className="flex items-center gap-2 whitespace-nowrap"
+						className="self-start px-2 py-1 text-xs rounded-full flex items-center gap-1"
 					>
 						{isExporting ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
+							<Loader2 className="h-3 w-3 animate-spin" />
 						) : (
-							<Download className="h-4 w-4" />
+							<Download className="h-3 w-3" />
 						)}
-						{isExporting ? "Export..." : "Export PDF"}
+						<span>{isExporting ? "Export..." : "PDF"}</span>
 					</Button>
 				</div>
 
@@ -408,18 +438,28 @@ const PatientDetailPage = () => {
 								<MedicalInfoTab
 									patient={patient}
 									pastAppointments={pastAppointments}
-									onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
+									onUpdateAppointmentStatus={
+										handleUpdateAppointmentStatus
+									}
 									onNavigateToHistory={navigateToHistoryTab}
-									onAppointmentCreated={handleAppointmentCreated}
+									onAppointmentCreated={
+										handleAppointmentCreated
+									}
 									onPatientUpdated={handlePatientUpdated}
-									selectedCabinetId={parseInt(localStorage.getItem("selectedCabinetId") || "1")}
+									selectedCabinetId={parseInt(
+										localStorage.getItem(
+											"selectedCabinetId"
+										) || "1"
+									)}
 								/>
 							</TabsContent>
 
 							<TabsContent value="new-appointment">
 								<NewAppointmentTab
 									patient={patient}
-									onAppointmentCreated={handleAppointmentCreated}
+									onAppointmentCreated={
+										handleAppointmentCreated
+									}
 								/>
 							</TabsContent>
 
@@ -427,15 +467,21 @@ const PatientDetailPage = () => {
 								<UpcomingAppointmentsTab
 									patient={patient}
 									appointments={upcomingAppointments}
-									onCancelAppointment={handleCancelAppointment}
-									onStatusChange={handleUpdateAppointmentStatus}
+									onCancelAppointment={
+										handleCancelAppointment
+									}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
 								/>
 							</TabsContent>
 
 							<TabsContent value="history">
 								<AppointmentHistoryTab
 									appointments={pastAppointments}
-									onStatusChange={handleUpdateAppointmentStatus}
+									onStatusChange={
+										handleUpdateAppointmentStatus
+									}
 									viewMode={viewMode}
 									setViewMode={setViewMode}
 									invoices={invoices}
