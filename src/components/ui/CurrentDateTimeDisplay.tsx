@@ -1,3 +1,3 @@
 
 // Export du nouveau composant avancé pour compatibilité
-export { AdvancedDateTimeDisplay as CurrentDateTimeDisplay } from './AdvancedDateTimeDisplay';
+export { CompactAdvancedDateTime as CurrentDateTimeDisplay } from './AdvancedDateTimeDisplay';
