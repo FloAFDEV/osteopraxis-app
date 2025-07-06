@@ -77,7 +77,7 @@ export function AdvancedAnalyticsPanel() {
     <div className="space-y-6">
       {/* Section Revenue */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/50 dark:to-emerald-900/30">
+        <Card className="border-l-4 border-l-emerald-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Revenus ce mois</CardTitle>
             <div className="p-2 bg-emerald-500/10 rounded-full">
@@ -99,7 +99,7 @@ export function AdvancedAnalyticsPanel() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30">
+        <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Revenus annuels</CardTitle>
             <div className="p-2 bg-blue-500/10 rounded-full">
@@ -121,7 +121,7 @@ export function AdvancedAnalyticsPanel() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/50 dark:to-purple-900/30">
+        <Card className="border-l-4 border-l-purple-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Revenu moyen/RDV</CardTitle>
             <div className="p-2 bg-purple-500/10 rounded-full">
@@ -137,7 +137,7 @@ export function AdvancedAnalyticsPanel() {
 
       {/* Section No-Show */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-l-4 border-l-red-500 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/30">
+        <Card className="border-l-4 border-l-red-500">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
               <div className="p-2 bg-red-500/10 rounded-full">
@@ -173,7 +173,7 @@ export function AdvancedAnalyticsPanel() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/50 dark:to-amber-900/30">
+        <Card className="border-l-4 border-l-amber-500">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
               <div className="p-2 bg-amber-500/10 rounded-full">
@@ -204,7 +204,7 @@ export function AdvancedAnalyticsPanel() {
       </div>
 
       {/* Section Top Patients */}
-      <Card className="border-l-4 border-l-indigo-500 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-950/50 dark:to-indigo-900/30">
+      <Card className="border-l-4 border-l-indigo-500">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
             <div className="p-2 bg-indigo-500/10 rounded-full">

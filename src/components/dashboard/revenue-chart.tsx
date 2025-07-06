@@ -14,7 +14,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   }));
 
   return (
-    <Card className="border-l-4 border-l-green-500 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/30">
+    <Card className="border-l-4 border-l-green-500">
       <CardHeader>
         <CardTitle className="text-green-700 dark:text-green-300">Évolution des Revenus (12 derniers mois)</CardTitle>
       </CardHeader>
