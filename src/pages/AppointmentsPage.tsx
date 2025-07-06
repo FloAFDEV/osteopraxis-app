@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/ui/layout";
+import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
 import {
 	Select,
 	SelectContent,

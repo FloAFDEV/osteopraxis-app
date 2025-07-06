@@ -1,4 +1,5 @@
 import ScheduleHeader from "@/components/schedule/ScheduleHeader";
+import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -348,9 +349,7 @@ const SchedulePage = () => {
 
 				{/* Loading state avec cache */}
 				{isLoading && !appointments.length ? (
-					<div className="flex justify-center items-center py-12">
-						<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-					</div>
+					<SmartSkeleton type="schedule" />
 				) : (
 					<Tabs value={view} defaultValue={view}>
 						{/* TabsContent value="day" avec Google Events */}
