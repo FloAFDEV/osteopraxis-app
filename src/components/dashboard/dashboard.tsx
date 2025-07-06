@@ -10,6 +10,7 @@ import { DashboardHeader } from "./dashboard-header";
 import { DashboardStats } from "./dashboard-stats";
 import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
+import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
 import {
 	calculateAppointmentStats,
 	calculateConsultationMetrics,
@@ -178,6 +179,11 @@ export function Dashboard() {
 						data={dashboardData}
 					/>
 				</div>
+			</div>
+
+			{/* Analytics Avancées */}
+			<div className="animate-fade-in animate-delay-400">
+				<AdvancedAnalyticsPanel />
 			</div>
 
 			<DashboardContent dashboardData={dashboardData} />
