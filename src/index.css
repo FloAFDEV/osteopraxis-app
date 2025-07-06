@@ -133,8 +133,27 @@
 		size: A4;
 	}
 
-					.currency-amount {
-						font-size: 1.2rem;
-						font-weight: bold;
-						color: hsl(var(--primary));
-					}
+	/* Ensure proper scaling */
+	html,
+	body {
+		width: 210mm;
+		height: 297mm;
+	}
+}
+
+/* Privacy blur effects */
+.privacy-blur {
+	filter: blur(4px);
+	transition: filter 0.2s ease-in-out;
+}
+
+.privacy-blur:hover {
+	filter: blur(0px);
+}
+
+/* Currency amount styling */
+.currency-amount {
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: hsl(var(--primary));
+}
