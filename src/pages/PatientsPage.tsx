@@ -31,9 +31,9 @@ const PatientsPage = () => {
 		null
 	);
 
-	// Pagination - updated to 25 patients per page
+	// Pagination - updated to 30 patients per page
 	const [currentPage, setCurrentPage] = useState(1);
-	const patientsPerPage = 25;
+	const patientsPerPage = 30;
 
 	// Récupérer les cabinets de l'utilisateur
 	const { data: cabinets = [], isLoading: cabinetsLoading } = useQuery({

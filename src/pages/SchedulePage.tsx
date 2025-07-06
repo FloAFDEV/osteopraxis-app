@@ -133,21 +133,29 @@ const SchedulePage = () => {
 		return patients.find((patient) => patient.id === patientId);
 	};
 
-	// Mise à jour pour inclure les séances avec statut COMPLETED
 	const getDayAppointments = (date: Date) => {
 		return appointments
 			.filter((appointment) => {
-				const appointmentDate = parseISO(appointment.date);
-				return (
-					isSameDay(appointmentDate, date) &&
-					(appointment.status === "SCHEDULED" ||
-						appointment.status === "COMPLETED")
-				);
+				if (!appointment?.date) return false;
+				try {
+					const appointmentDate = parseISO(appointment.date);
+					return (
+						isSameDay(appointmentDate, date) &&
+						(appointment.status === "SCHEDULED" ||
+							appointment.status === "COMPLETED")
+					);
+				} catch {
+					return false;
+				}
 			})
 			.sort((a, b) => {
-				const timeA = parseISO(a.date);
-				const timeB = parseISO(b.date);
-				return timeA.getTime() - timeB.getTime();
+				try {
+					const timeA = parseISO(a.date);
+					const timeB = parseISO(b.date);
+					return timeA.getTime() - timeB.getTime();
+				} catch {
+					return 0;
+				}
 			});
 	};
 
@@ -156,13 +164,22 @@ const SchedulePage = () => {
 		
 		return googleEvents
 			.filter((event) => {
-				const eventDate = parseISO(event.start_time);
-				return isSameDay(eventDate, date);
+				if (!event?.start_time) return false;
+				try {
+					const eventDate = parseISO(event.start_time);
+					return isSameDay(eventDate, date);
+				} catch {
+					return false;
+				}
 			})
 			.sort((a, b) => {
-				const timeA = parseISO(a.start_time);
-				const timeB = parseISO(b.start_time);
-				return timeA.getTime() - timeB.getTime();
+				try {
+					const timeA = parseISO(a.start_time);
+					const timeB = parseISO(b.start_time);
+					return timeA.getTime() - timeB.getTime();
+				} catch {
+					return 0;
+				}
 			});
 	};
 
@@ -491,7 +508,14 @@ const SchedulePage = () => {
 													<div className="space-y-2">
 														{/* Google Calendar Events avec correspondance patient */}
 														{dayGoogleEvents.map((event) => {
-															const eventStartTime = format(parseISO(event.start_time), "HH:mm");
+															let eventStartTime = "??:??";
+															try {
+																if (event?.start_time) {
+																	eventStartTime = format(parseISO(event.start_time), "HH:mm");
+																}
+															} catch {
+																eventStartTime = "??:??";
+															}
 															return (
 																<Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-50/50">
 																	<CardContent className="p-3 flex-grow">
@@ -550,7 +574,14 @@ const SchedulePage = () => {
 														{/* Internal Appointments - keep existing code */}
 														{dayAppointments.map((appointment) => {
 															const patient = getPatientById(appointment.patientId);
-															const appointmentTime = format(parseISO(appointment.date), "HH:mm");
+															let appointmentTime = "??:??";
+															try {
+																if (appointment?.date) {
+																	appointmentTime = format(parseISO(appointment.date), "HH:mm");
+																}
+															} catch {
+																appointmentTime = "??:??";
+															}
 															const isProcessingAction = actionInProgress?.id === appointment.id;
 
 															return (
@@ -756,17 +787,25 @@ const DaySchedule = ({
 	);
 
 	const getAppointmentForTimeSlot = (timeSlot: string) => {
-		return appointments.find(
-			(appointment) =>
-				format(parseISO(appointment.date), "HH:mm") === timeSlot
-		);
+		return appointments.find((appointment) => {
+			try {
+				if (!appointment?.date) return false;
+				return format(parseISO(appointment.date), "HH:mm") === timeSlot;
+			} catch {
+				return false;
+			}
+		});
 	};
 
 	const getGoogleEventForTimeSlot = (timeSlot: string) => {
-		return googleEvents.find(
-			(event) =>
-				format(parseISO(event.start_time), "HH:mm") === timeSlot
-		);
+		return googleEvents.find((event) => {
+			try {
+				if (!event?.start_time) return false;
+				return format(parseISO(event.start_time), "HH:mm") === timeSlot;
+			} catch {
+				return false;
+			}
+		});
 	};
 
 	return (

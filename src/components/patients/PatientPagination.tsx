@@ -55,6 +55,7 @@ const PatientPagination: React.FC<PatientPaginationProps> = ({
                 <PaginationLink
                   onClick={() => onPageChange(pageNum)}
                   isActive={currentPage === pageNum}
+                  className="cursor-pointer"
                 >
                   {pageNum}
                 </PaginationLink>
@@ -71,6 +72,7 @@ const PatientPagination: React.FC<PatientPaginationProps> = ({
                 <PaginationLink 
                   onClick={() => onPageChange(totalPages)}
                   isActive={false}
+                  className="cursor-pointer"
                 >
                   {totalPages}
                 </PaginationLink>
