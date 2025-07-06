@@ -77,110 +77,124 @@ export function AdvancedAnalyticsPanel() {
     <div className="space-y-6">
       {/* Section Revenue */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/50 dark:to-emerald-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenus ce mois</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Revenus ce mois</CardTitle>
+            <div className="p-2 bg-emerald-500/10 rounded-full">
+              <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.revenue.thisMonth.toFixed(2)} €</div>
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">{stats.revenue.thisMonth.toFixed(2)} €</div>
+            <div className="flex items-center text-xs">
               {stats.revenue.monthlyTrend >= 0 ? (
-                <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                <TrendingUp className="h-3 w-3 mr-1 text-emerald-600 dark:text-emerald-400" />
               ) : (
                 <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
               )}
-              {stats.revenue.monthlyTrend.toFixed(1)}% vs mois dernier
+              <span className={stats.revenue.monthlyTrend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}>
+                {stats.revenue.monthlyTrend.toFixed(1)}% vs mois dernier
+              </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenus annuels</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Revenus annuels</CardTitle>
+            <div className="p-2 bg-blue-500/10 rounded-full">
+              <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.revenue.thisYear.toFixed(2)} €</div>
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{stats.revenue.thisYear.toFixed(2)} €</div>
+            <div className="flex items-center text-xs">
               {stats.revenue.yearlyTrend >= 0 ? (
-                <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                <TrendingUp className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
               ) : (
                 <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
               )}
-              {stats.revenue.yearlyTrend.toFixed(1)}% vs année dernière
+              <span className={stats.revenue.yearlyTrend >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-500"}>
+                {stats.revenue.yearlyTrend.toFixed(1)}% vs année dernière
+              </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/50 dark:to-purple-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenu moyen/RDV</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Revenu moyen/RDV</CardTitle>
+            <div className="p-2 bg-purple-500/10 rounded-full">
+              <DollarSign className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.revenue.averagePerAppointment.toFixed(2)} €</div>
-            <p className="text-xs text-muted-foreground">Par consultation</p>
+            <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{stats.revenue.averagePerAppointment.toFixed(2)} €</div>
+            <p className="text-xs text-purple-600 dark:text-purple-400">Par consultation</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Section No-Show */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+        <Card className="border-l-4 border-l-red-500 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/30">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileX className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
+              <div className="p-2 bg-red-500/10 rounded-full">
+                <FileX className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
               Taux de No-Show
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">Taux global</span>
-                <span className="text-sm text-muted-foreground">{stats.noShow.rate.toFixed(1)}%</span>
+                <span className="text-sm font-medium text-red-700 dark:text-red-300">Taux global</span>
+                <span className="text-sm text-red-600 dark:text-red-400 font-semibold">{stats.noShow.rate.toFixed(1)}%</span>
               </div>
-              <Progress value={stats.noShow.rate} className="h-2" />
+              <Progress value={stats.noShow.rate} className="h-3" />
             </div>
             
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Ce mois</p>
-                <p className="text-2xl font-bold">{stats.noShow.thisMonth}</p>
+              <div className="p-3 bg-red-500/5 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-red-600 dark:text-red-400 text-xs">Ce mois</p>
+                <p className="text-2xl font-bold text-red-700 dark:text-red-300">{stats.noShow.thisMonth}</p>
               </div>
-              <div>
-                <p className="text-muted-foreground">Mois dernier</p>
-                <p className="text-2xl font-bold">{stats.noShow.lastMonth}</p>
+              <div className="p-3 bg-red-500/5 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-red-600 dark:text-red-400 text-xs">Mois dernier</p>
+                <p className="text-2xl font-bold text-red-700 dark:text-red-300">{stats.noShow.lastMonth}</p>
               </div>
             </div>
 
-            <div className="pt-2 border-t">
-              <p className="text-sm text-muted-foreground">Revenu perdu estimé</p>
-              <p className="text-lg font-semibold text-red-600">{stats.noShow.totalLost.toFixed(2)} €</p>
+            <div className="pt-2 border-t border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-600 dark:text-red-400">Revenu perdu estimé</p>
+              <p className="text-lg font-semibold text-red-700 dark:text-red-300">{stats.noShow.totalLost.toFixed(2)} €</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/50 dark:to-amber-900/30">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+              <div className="p-2 bg-amber-500/10 rounded-full">
+                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
               Heures de Pointe
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {stats.activity.busyHours.slice(0, 5).map(({ hour, count }) => (
-                <div key={hour} className="flex justify-between items-center">
-                  <span className="text-sm">{hour}h - {hour + 1}h</span>
+            <div className="space-y-3">
+              {stats.activity.busyHours.slice(0, 5).map(({ hour, count }, index) => (
+                <div key={hour} className="flex justify-between items-center p-2 bg-amber-500/5 rounded-lg">
+                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{hour}h - {hour + 1}h</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-20 bg-secondary rounded-full h-2">
+                    <div className="w-20 bg-amber-200 dark:bg-amber-800 rounded-full h-2">
                       <div 
-                        className="bg-primary h-2 rounded-full" 
+                        className="bg-amber-500 h-2 rounded-full transition-all duration-300" 
                         style={{ width: `${(count / stats.activity.busyHours[0]?.count || 1) * 100}%` }}
                       />
                     </div>
-                    <span className="text-sm font-medium w-8">{count}</span>
+                    <span className="text-sm font-bold w-8 text-amber-700 dark:text-amber-300">{count}</span>
                   </div>
                 </div>
               ))}
@@ -190,51 +204,42 @@ export function AdvancedAnalyticsPanel() {
       </div>
 
       {/* Section Top Patients */}
-      <Card>
+      <Card className="border-l-4 border-l-indigo-500 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-950/50 dark:to-indigo-900/30">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+            <div className="p-2 bg-indigo-500/10 rounded-full">
+              <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
             Top Patients (Revenus)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {stats.patients.topPatients.slice(0, 5).map((patient, index) => (
-              <div key={patient.patientId} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
-                    {index + 1}
+            {stats.patients.topPatients.slice(0, 5).map((patient, index) => {
+              const colors = [
+                'bg-yellow-500 text-yellow-50',
+                'bg-gray-400 text-gray-50', 
+                'bg-amber-600 text-amber-50',
+                'bg-indigo-500 text-indigo-50',
+                'bg-purple-500 text-purple-50'
+              ];
+              return (
+                <div key={patient.patientId} className="flex items-center justify-between py-3 px-4 bg-indigo-500/5 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-500/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${colors[index] || 'bg-indigo-500 text-indigo-50'}`}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-indigo-900 dark:text-indigo-100">{patient.name}</p>
+                      <p className="text-sm text-indigo-600 dark:text-indigo-400">{patient.count} consultations</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">{patient.count} consultations</p>
+                  <div className="text-right">
+                    <p className="font-bold text-indigo-700 dark:text-indigo-300">{patient.totalSpent.toFixed(2)} €</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold">{patient.totalSpent.toFixed(2)} €</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Section Jours de la Semaine */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Répartition par Jour
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-7 gap-2">
-            {stats.activity.busyDays.map(({ day, count }) => (
-              <div key={day} className="text-center p-3 bg-secondary/50 rounded">
-                <p className="text-xs font-medium uppercase">{day.slice(0, 3)}</p>
-                <p className="text-lg font-bold">{count}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

@@ -14,22 +14,24 @@ export function RevenueChart({ data }: RevenueChartProps) {
   }));
 
   return (
-    <Card>
+    <Card className="border-l-4 border-l-green-500 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/30">
       <CardHeader>
-        <CardTitle>Évolution des Revenus (12 derniers mois)</CardTitle>
+        <CardTitle className="text-green-700 dark:text-green-300">Évolution des Revenus (12 derniers mois)</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
             <XAxis 
               dataKey="month" 
               fontSize={12}
               tickMargin={10}
+              stroke="hsl(var(--muted-foreground))"
             />
             <YAxis 
               fontSize={12}
               tickFormatter={(value) => `${value}€`}
+              stroke="hsl(var(--muted-foreground))"
             />
             <Tooltip 
               formatter={(value: number, name: string) => [
@@ -40,16 +42,17 @@ export function RevenueChart({ data }: RevenueChartProps) {
               contentStyle={{ 
                 backgroundColor: 'hsl(var(--background))',
                 border: '1px solid hsl(var(--border))',
-                borderRadius: '6px'
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
               }}
             />
             <Line 
               type="monotone" 
               dataKey="revenus" 
-              stroke="hsl(var(--primary))" 
-              strokeWidth={2}
-              dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
+              stroke="#10b981" 
+              strokeWidth={3}
+              dot={{ fill: '#10b981', strokeWidth: 2, r: 5 }}
+              activeDot={{ r: 7, stroke: '#10b981', strokeWidth: 3, fill: '#ffffff' }}
             />
           </LineChart>
         </ResponsiveContainer>
