@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdvancedStatsService, AdvancedStats } from "@/services/stats/advanced-stats-service";
 import { api } from "@/services/api";
-import { AlertCircle, TrendingUp, TrendingDown, Clock, Calendar, Users, DollarSign, FileX } from "lucide-react";
+import { AlertCircle, TrendingUp, TrendingDown, Clock, Calendar, Users, Euro, FileX } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { RevenueChart } from "./revenue-chart";
+import { BlurredAmount, BlurredNumber } from "@/components/ui/blurred-amount";
 
 export function AdvancedAnalyticsPanel() {
   const [stats, setStats] = useState<AdvancedStats | null>(null);
@@ -81,11 +82,13 @@ export function AdvancedAnalyticsPanel() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Revenus ce mois</CardTitle>
             <div className="p-2 bg-emerald-500/10 rounded-full">
-              <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <Euro className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">{stats.revenue.thisMonth.toFixed(2)} €</div>
+            <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
+              <BlurredAmount amount={stats.revenue.thisMonth} />
+            </div>
             <div className="flex items-center text-xs">
               {stats.revenue.monthlyTrend >= 0 ? (
                 <TrendingUp className="h-3 w-3 mr-1 text-emerald-600 dark:text-emerald-400" />
@@ -107,7 +110,9 @@ export function AdvancedAnalyticsPanel() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{stats.revenue.thisYear.toFixed(2)} €</div>
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+              <BlurredAmount amount={stats.revenue.thisYear} />
+            </div>
             <div className="flex items-center text-xs">
               {stats.revenue.yearlyTrend >= 0 ? (
                 <TrendingUp className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
@@ -125,11 +130,13 @@ export function AdvancedAnalyticsPanel() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Revenu moyen/RDV</CardTitle>
             <div className="p-2 bg-purple-500/10 rounded-full">
-              <DollarSign className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <Euro className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{stats.revenue.averagePerAppointment.toFixed(2)} €</div>
+            <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+              <BlurredAmount amount={stats.revenue.averagePerAppointment} />
+            </div>
             <p className="text-xs text-purple-600 dark:text-purple-400">Par consultation</p>
           </CardContent>
         </Card>
@@ -168,7 +175,9 @@ export function AdvancedAnalyticsPanel() {
 
             <div className="pt-2 border-t border-red-200 dark:border-red-800">
               <p className="text-sm text-red-600 dark:text-red-400">Revenu perdu estimé</p>
-              <p className="text-lg font-semibold text-red-700 dark:text-red-300">{stats.noShow.totalLost.toFixed(2)} €</p>
+              <p className="text-lg font-semibold text-red-700 dark:text-red-300">
+                <BlurredAmount amount={stats.noShow.totalLost} />
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -235,7 +244,9 @@ export function AdvancedAnalyticsPanel() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-indigo-700 dark:text-indigo-300">{patient.totalSpent.toFixed(2)} €</p>
+                    <p className="font-bold text-indigo-700 dark:text-indigo-300">
+                      <BlurredAmount amount={patient.totalSpent} />
+                    </p>
                   </div>
                 </div>
               );

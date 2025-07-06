@@ -133,10 +133,8 @@
 		size: A4;
 	}
 
-	/* Ensure proper scaling */
-	html,
-	body {
-		width: 210mm;
-		height: 297mm;
-	}
-}
+					.currency-amount {
+						font-size: 1.2rem;
+						font-weight: bold;
+						color: hsl(var(--primary));
+					}

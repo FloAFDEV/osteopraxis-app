@@ -2,7 +2,11 @@
 import React from 'react' 
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './contexts/theme-context'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { OptimizationProvider } from '@/contexts/OptimizationContext'
+import { PrivacyProvider } from '@/contexts/PrivacyContext'
 
 import App from './App.tsx'
 import './index.css'
@@ -32,7 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       root.render(
         <React.StrictMode>
-          <App />
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <AuthProvider>
+                <OptimizationProvider>
+                  <PrivacyProvider>
+                    <BrowserRouter>
+                      <App />
+                    </BrowserRouter>
+                  </PrivacyProvider>
+                </OptimizationProvider>
+              </AuthProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
         </React.StrictMode>
       );
     } catch (error) {

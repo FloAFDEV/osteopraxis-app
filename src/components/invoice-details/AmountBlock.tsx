@@ -1,3 +1,4 @@
+import { BlurredAmount } from "@/components/ui/blurred-amount";
 
 export const AmountBlock = ({
   amount,
@@ -6,19 +7,13 @@ export const AmountBlock = ({
   amount: number;
   tvaMotif?: string | null;
 }) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-    }).format(amount);
-  };
   return (
     <div>
       <div className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">
         Montant
       </div>
       <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-        {formatCurrency(amount)}
+        <BlurredAmount amount={amount} />
       </div>
       <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
         {tvaMotif ||

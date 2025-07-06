@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { PrivacyToggle } from '@/components/ui/privacy-toggle';
 
 export const DashboardHeader: React.FC = () => {
   return (
@@ -21,6 +22,9 @@ export const DashboardHeader: React.FC = () => {
             réel.
           </p>
         </div>
+      </div>
+      <div className="absolute top-4 right-4">
+        <PrivacyToggle className="bg-white/10 hover:bg-white/20 text-white border-white/20" />
       </div>
     </div>
   );
