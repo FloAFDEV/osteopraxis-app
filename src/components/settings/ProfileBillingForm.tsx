@@ -80,7 +80,7 @@ export function ProfileBillingForm({
   const onSubmit = async (data: z.infer<typeof profileSchema>) => {
     try {
       setIsSubmitting(true);
-      console.log("Mise à jour du profil ostéopathe avec les données:", data);
+      // ✅ Profil billing mis à jour
 
       const osteopathData = {
         name: data.name,

@@ -55,7 +55,7 @@ const OsteopathProfilePage = () => {
     if (!user) return;
     
     try {
-      console.log("Vérification des données existantes pour l'utilisateur:", user.id);
+      // ✅ Vérification données existantes
       setLoading(true);
       
       // Vérifions d'abord si un ostéopathe existe

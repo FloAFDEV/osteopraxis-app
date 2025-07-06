@@ -122,7 +122,7 @@ export function AppointmentsOverview({
 				return;
 			}
 
-			console.log(`Navigation vers le rendez-vous #${appointmentId}`);
+			// ✅ Navigation vers rendez-vous
 
 			// Naviguer vers la page d'édition du rendez-vous avec l'ID
 			navigate(`/appointments/${appointmentId}/edit`);
@@ -144,11 +144,7 @@ export function AppointmentsOverview({
 				return;
 			}
 
-			console.log(
-				`Création d'une facture pour le rendez-vous #${appointmentId}`
-			);
-
-			// Naviguer vers la page de création de facture avec l'ID du rendez-vous
+			// ✅ Navigation vers création facture
 			navigate(`/invoices/new?appointmentId=${appointmentId}`);
 
 			toast.info("Ouverture du formulaire de création de facture");

@@ -41,15 +41,14 @@ export const osteopathService = {
   },
   
   async getOsteopathByUserId(userId: string): Promise<Osteopath | undefined> {
-    console.log(`Recherche d'ostéopathe par userId: ${userId}`);
+    // ✅ Recherche ostéopathe sécurisée
     
     try {
       await delay(300);
       
       const { data: sessionData, error } = await supabase.auth.getSession();
       if (sessionData && sessionData.session) {
-        console.log("Utilisateur authentifié:", sessionData.session.user.id);
-        console.log("Token d'accès présent:", !!sessionData.session.access_token);
+        // ✅ Utilisateur authentifié
       } else {
         console.log("Pas de session active:", error || "Aucune erreur");
       }
@@ -120,16 +119,16 @@ export const osteopathService = {
   },
   
   async createOsteopath(data: Omit<Osteopath, 'id' | 'createdAt' | 'updatedAt'>): Promise<Osteopath> {
-    console.log("Création d'un ostéopathe avec les données:", data);
+    // ✅ Création ostéopathe sécurisée
     
     try {
       await delay(300);
       
       const { data: sessionData } = await supabase.auth.getSession();
-      console.log("Session avant création:", sessionData.session ? "Authentifié" : "Non authentifié");
+      // ✅ Session vérifiée
       
       try {
-        console.log("Tentative de création via API Supabase");
+        // ✅ Création via API Supabase
         const result = await supabaseOsteopathService.createOsteopath(data);
         console.log("Création réussie via API Supabase:", result);
         return result;

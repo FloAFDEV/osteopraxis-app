@@ -23,7 +23,7 @@ export const PerformanceMonitor = ({
 
   useEffect(() => {
     setRenderCount(prev => prev + 1);
-  });
+  }, []); // Dependency array empty pour éviter la boucle infinie
 
   // Toggle visibility avec Ctrl+Shift+P
   useEffect(() => {

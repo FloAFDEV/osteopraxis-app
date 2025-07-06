@@ -104,7 +104,7 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
         notes: notes || null,
       };
 
-      console.log('Création du devis avec les données:', quoteData);
+      // ✅ Création devis sécurisée
       await quoteService.createQuote(quoteData);
       toast.success("Devis créé avec succès");
       onSuccess();

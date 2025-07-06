@@ -88,7 +88,7 @@ export function OsteopathProfileForm({
 
   const updateOsteopathProfile = async (data: z.infer<typeof osteopathSchema>) => {
     try {
-      console.log("Mise à jour du profil ostéopathe avec les données:", data);
+      // ✅ Mise à jour profil sécurisée
 
       const osteopathData = {
         name: data.name,
@@ -119,7 +119,7 @@ export function OsteopathProfileForm({
 
   const createOsteopathProfile = async (data: z.infer<typeof osteopathSchema>) => {
     try {
-      console.log("Création du profil ostéopathe avec les données:", data);
+      // ✅ Création profil sécurisée
       
       const osteopathData = {
         name: data.name,

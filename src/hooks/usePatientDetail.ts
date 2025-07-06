@@ -8,7 +8,7 @@ import { PatientFormValues } from '@/components/patient-form/types';
 export function usePatientDetail(patientId: number) {
   const queryClient = useQueryClient();
 
-  console.log(`usePatientDetail: Loading data for patient ${patientId}`);
+  // Patient detail - logs sécurisés
 
   // Patient data with longer stale time since it changes less frequently
   const { 
@@ -18,9 +18,7 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['patient', patientId],
     queryFn: async () => {
-      console.log(`usePatientDetail: Fetching patient ${patientId}`);
-      const result = await api.getPatientById(patientId);
-      console.log(`usePatientDetail: Patient ${patientId} fetched:`, result);
+    const result = await api.getPatientById(patientId);
       return result;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -36,9 +34,7 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['appointments', 'patient', patientId],
     queryFn: async () => {
-      console.log(`usePatientDetail: Fetching appointments for patient ${patientId}`);
       const result = await api.getAppointmentsByPatientId(patientId);
-      console.log(`usePatientDetail: ${result.length} appointments fetched for patient ${patientId}:`, result);
       return result;
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -54,9 +50,8 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['invoices', 'patient', patientId],
     queryFn: async () => {
-      console.log(`usePatientDetail: Fetching invoices for patient ${patientId}`);
+      // ✅ Factures patient récupérées
       const result = await invoiceService.getInvoicesByPatientId(patientId);
-      console.log(`usePatientDetail: ${result.length} invoices fetched for patient ${patientId}:`, result);
       return result;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -80,7 +75,7 @@ export function usePatientDetail(patientId: number) {
     appointmentId: number, 
     newStatus: AppointmentStatus
   ) => {
-    console.log(`usePatientDetail: Updating appointment ${appointmentId} status to ${newStatus}`);
+    // ✅ Statut RDV mis à jour
     
     // Immediately update the UI
     queryClient.setQueryData(
@@ -111,7 +106,7 @@ export function usePatientDetail(patientId: number) {
 
   // Optimistic update for new appointments
   const addAppointmentOptimistically = (newAppointment: Appointment) => {
-    console.log(`usePatientDetail: Adding appointment optimistically:`, newAppointment);
+    // ✅ RDV ajouté
     queryClient.setQueryData(
       ['appointments', 'patient', patientId],
       (oldAppointments: Appointment[] = []) => [...oldAppointments, newAppointment]
@@ -129,7 +124,7 @@ export function usePatientDetail(patientId: number) {
   const updatePatientOptimistically = async (updatedData: PatientFormValues) => {
     if (!patient) return;
 
-    console.log(`usePatientDetail: Updating patient ${patientId} optimistically:`, updatedData);
+    // ✅ Patient mis à jour
 
     // Helper function to convert values to nullable numbers
     const toNullableNumber = (val: any) => {
@@ -170,7 +165,7 @@ export function usePatientDetail(patientId: number) {
         queryKey: ['patients']
       });
 
-      console.log(`usePatientDetail: Patient ${patientId} updated successfully`);
+      // ✅ Patient sauvegardé
       return updatedPatient;
     } catch (error) {
       console.error(`usePatientDetail: Error updating patient ${patientId}:`, error);

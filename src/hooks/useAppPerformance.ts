@@ -125,7 +125,7 @@ export const useAppPerformance = () => {
     
     // Log des recommandations
     if (process.env.NODE_ENV === 'development') {
-      console.log('🚀 Performance optimizations:', optimizations);
+      // Performance logs désactivés en production
     }
   }, [metrics, applyOptimizations]);
 

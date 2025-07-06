@@ -39,7 +39,7 @@ export function CabinetAssociationManagement() {
   });
 
   useEffect(() => {
-    console.log("CabinetAssociationManagement: Composant monté avec user:", user);
+    // ✅ Composant CabinetAssociation chargé
     loadCabinets();
   }, [user]);
 
@@ -52,7 +52,7 @@ export function CabinetAssociationManagement() {
     
     try {
       setLoading(true);
-      console.log("CabinetAssociationManagement: Chargement des cabinets pour ostéopathe", user.osteopathId);
+      // ✅ Chargement cabinets ostéopathe
       
       // Charger les cabinets associés à l'ostéopathe
       const associatedCabinetIds = await api.getOsteopathCabinets(user.osteopathId);
@@ -77,7 +77,7 @@ export function CabinetAssociationManagement() {
     if (!user?.osteopathId) return;
 
     try {
-      console.log("CabinetAssociationManagement: Dissociation cabinet", cabinetId, "de ostéopathe", user.osteopathId);
+      // ✅ Dissociation cabinet ostéopathe
       await api.dissociateOsteopathFromCabinet(user.osteopathId, cabinetId);
       toast.success("Cabinet dissocié avec succès", {
         description: "Vous n'avez plus accès aux patients de ce cabinet."

@@ -35,8 +35,7 @@ export const ensureOsteopathProfile = async (
     
     // Dans la nouvelle logique, nous ne créons plus automatiquement de profil
     // L'utilisateur doit le faire lui-même via le formulaire de configuration
-    console.log("Aucun profil ostéopathe trouvé pour userId:", userId);
-    console.log("L'utilisateur doit créer son profil via le formulaire dédié");
+    // ✅ Profil ostéopathe à créer via formulaire
     
     return null;
   } catch (error) {

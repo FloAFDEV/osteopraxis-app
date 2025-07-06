@@ -103,7 +103,7 @@ export function CabinetForm({
     try {
       setIsSubmitting(true);
       
-      console.log('🔍 Données du formulaire avant envoi:', data);
+      // ✅ Envoi des données - logs supprimés pour sécurité
       
       const cabinetData = {
         name: data.name,
@@ -115,7 +115,7 @@ export function CabinetForm({
         osteopathId: data.osteopathId,
       };
       
-      console.log('🔍 Données cabinet à envoyer:', cabinetData);
+      // ✅ Données cabinet préparées
       
       if (isEditing && cabinetId) {
         // Update existing cabinet
@@ -130,8 +130,7 @@ export function CabinetForm({
             stampUrl: data.stampUrl || null
           };
           
-          console.log('🔍 Données ostéopathe à envoyer (incluant stampUrl):', osteopathUpdateData);
-          console.log('🎯 StampUrl dans les données:', data.stampUrl);
+          // ✅ Mise à jour ostéopathe existant
           
           // Utilisation de la fonction Edge pour éviter les problèmes CORS
           await api.updateOsteopath(osteopathId, osteopathUpdateData);
@@ -151,7 +150,7 @@ export function CabinetForm({
             stampUrl: data.stampUrl || null
           };
           
-          console.log('🔍 Données ostéopathe à envoyer pour nouveau cabinet (incluant stampUrl):', osteopathUpdateData);
+          // ✅ Nouveau cabinet avec mise à jour ostéopathe
           
           await api.updateOsteopath(newCabinet.osteopathId, osteopathUpdateData);
         }

@@ -36,7 +36,7 @@ const CabinetSettingsPage = () => {
       }
 
       try {
-        console.log("Chargement des cabinets pour l'utilisateur:", user.id);
+        // ✅ Chargement cabinets utilisateur
         
         const cabinets = await api.getCabinetsByUserId(user.id);
         console.log("Cabinets récupérés:", cabinets);

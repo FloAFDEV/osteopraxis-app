@@ -229,7 +229,7 @@ const AppointmentsPage = () => {
 	// Nouveau handler pour la mise à jour de statut via badge
 	const handleStatusChange = async (appointmentId: number, status: AppointmentStatus) => {
 		try {
-			console.log(`Mise à jour du statut du rendez-vous ${appointmentId} vers ${status}`);
+			// ✅ Statut RDV mis à jour
 			
 			// Optimistic UI update
 			setAppointments((prevAppointments) =>

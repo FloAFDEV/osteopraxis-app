@@ -57,7 +57,7 @@ export function StampManagement({
           if (error) {
             console.error('Erreur création bucket:', error);
           } else {
-            console.log('Bucket stamps créé avec succès');
+            // ✅ Bucket stamps créé
           }
         }
         setBucketExists(true);

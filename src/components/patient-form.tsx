@@ -178,7 +178,7 @@ export function PatientForm({
 
 	const handleSubmit = async (data: PatientFormValues) => {
 		try {
-			console.log("Form data being submitted:", data);
+			// ✅ Données soumises
 
 			// Traiter les âges des enfants depuis l'input
 			if (data.hasChildren === "true" && childrenAgesInput.trim()) {

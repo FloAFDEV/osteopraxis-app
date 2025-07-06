@@ -33,7 +33,7 @@ export function useAuthorizedOsteopaths() {
         return;
       }
 
-      console.log("Chargement des ostéopathes autorisés pour l'utilisateur:", user.id);
+      // ✅ Chargement ostéopathes autorisés
 
       // Utiliser la fonction de base de données pour récupérer les ostéopathes autorisés
       const { data, error } = await supabase.rpc('get_authorized_osteopaths', {
@@ -45,7 +45,7 @@ export function useAuthorizedOsteopaths() {
         throw error;
       }
 
-      console.log("Ostéopathes autorisés récupérés:", data);
+      // ✅ Ostéopathes autorisés chargés
       
       // Transformer les données pour s'assurer que le type access_type est correct
       const transformedData: AuthorizedOsteopath[] = (data || []).map((item: any) => ({

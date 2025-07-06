@@ -76,7 +76,7 @@ export const authService = {
   },
   
   async login(email: string, password: string): Promise<AuthState> {
-    console.log("authService.login appelé pour:", email);
+    // ✅ Connexion utilisateur sécurisée
     
     if (USE_SUPABASE) {
       try {
@@ -137,7 +137,7 @@ export const authService = {
     
     // Fallback: code simulé
     await delay(500);
-    console.log(`Magic link envoyé à ${email} (simulation)`);
+    // ✅ Magic link envoyé (simulation)
   },
   
   async logout(): Promise<void> {

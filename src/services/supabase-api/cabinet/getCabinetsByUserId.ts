@@ -4,10 +4,10 @@ import { getCabinets } from "./getCabinets";
 
 export async function getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
   try {
-    console.log("Searching for cabinets for userId:", userId);
+    // ✅ Recherche cabinets utilisateur
     
     if (!userId) {
-      console.log("Invalid userId provided to getCabinetsByUserId");
+      // ✅ UserId invalide
       return [];
     }
     

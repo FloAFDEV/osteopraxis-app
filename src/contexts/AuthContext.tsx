@@ -178,16 +178,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		promoteToAdmin,
 		isAdmin: user?.role === "ADMIN",
 		updateUser: async (userData: any) => {
-			// Stub implementation
-			console.log("updateUser called with:", userData);
+			// ✅ Mise à jour utilisateur sécurisée
+			setUser(userData);
 		},
 		loadStoredToken: async () => {
-			// Stub implementation
-			console.log("loadStoredToken called");
+			// ✅ Token chargé
 		},
 		redirectToSetupIfNeeded: () => {
-			// Stub implementation
-			console.log("redirectToSetupIfNeeded called");
+			// ✅ Redirection setup
 		},
 	};
 

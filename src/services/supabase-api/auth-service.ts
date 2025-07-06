@@ -34,7 +34,7 @@ export const supabaseAuthService = {
   },
   
   async login(email: string, password: string): Promise<AuthState> {
-    console.log("Connexion avec Supabase:", email);
+    // ✅ Connexion Supabase sécurisée
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -76,7 +76,7 @@ export const supabaseAuthService = {
           osteopathId = osteopathData.id;
           console.log("Profil ostéopathe trouvé directement:", osteopathId);
         } else {
-          console.log("Pas de profil ostéopathe trouvé pour userId:", data.user.id);
+          // ✅ Pas de profil ostéopathe trouvé
         }
       }
     } catch (osteoError) {
@@ -157,7 +157,7 @@ export const supabaseAuthService = {
       };
     }
     
-    console.log("Session Supabase trouvée pour:", data.session.user.email);
+    // ✅ Session Supabase trouvée
         
     const user: User = {
       id: data.session.user.id,
@@ -181,7 +181,7 @@ export const supabaseAuthService = {
             
       if (userData && userData.osteopathId) {
         osteopathId = userData.osteopathId;
-        console.log("Profil ostéopathe trouvé via User lors du checkAuth:", osteopathId);
+        // ✅ Profil ostéopathe trouvé via User
       } else {
         // Fallback: chercher directement dans Osteopath
         const { data: osteopathData } = await supabase
@@ -204,13 +204,13 @@ export const supabaseAuthService = {
             if (userUpdateError) {
               console.error("Erreur lors de la mise à jour du User avec osteopathId:", userUpdateError);
             } else {
-              console.log("User mis à jour avec osteopathId trouvé dans Osteopath");
+              // ✅ User mis à jour avec osteopathId
             }
           } catch (updateError) {
             console.error("Exception lors de la mise à jour du User:", updateError);
           }
         } else {
-          console.log("Pas de profil ostéopathe trouvé pour userId:", data.session.user.id);
+          // ✅ Pas de profil ostéopathe trouvé
         }
       }
             

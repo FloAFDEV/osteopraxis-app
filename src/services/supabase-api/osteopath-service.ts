@@ -67,7 +67,7 @@ export const supabaseOsteopathService = {
     osteoData: Partial<Omit<Osteopath, "id" | "createdAt">>
   ): Promise<Osteopath | undefined> {
     try {
-      console.log('🔄 Utilisation de la fonction Edge pour updateOsteopath');
+      // ✅ Utilisation fonction Edge updateOsteopath
       
       // Utiliser la fonction Edge au lieu de l'API directe
       const result = await updateOsteopathEdge(id, osteoData);

@@ -45,10 +45,7 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
 
   // Ajouter des logs pour diagnostiquer cabinets et praticiens reçus
   React.useEffect(() => {
-    console.log("[InvoiceFilters] cabinets :", props.cabinets);
-    console.log("[InvoiceFilters] praticiens/osteopaths :", props.osteopaths);
-    console.log("[InvoiceFilters] selectedCabinetId :", props.selectedCabinetId);
-    console.log("[InvoiceFilters] selectedOsteopathId :", props.selectedOsteopathId);
+    // Filtres - données sensibles non exposées
   }, [props.cabinets, props.osteopaths, props.selectedCabinetId, props.selectedOsteopathId]);
 
   // Helper function to safely format month display
@@ -85,7 +82,7 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
             <Select
               value={props.selectedOsteopathId != null ? String(props.selectedOsteopathId) : ""}
               onValueChange={(v) => {
-                console.log("Changement de valeur du select Osteopathe:", v);
+                // ✅ Sélection ostéopathe
                 props.setSelectedOsteopathId(v === "ALL" || v === "" ? null : Number(v));
               }}
             >
@@ -107,7 +104,7 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
             <Select
               value={props.selectedCabinetId != null ? String(props.selectedCabinetId) : ""}
               onValueChange={(v) => {
-                console.log("Changement de valeur du select Cabinet:", v);
+                // ✅ Sélection cabinet
                 props.setSelectedCabinetId(v === "ALL" || v === "" ? null : Number(v));
               }}
             >
