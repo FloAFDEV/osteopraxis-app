@@ -85,7 +85,7 @@ export const useOptimizedPatientMutation = () => {
   return useMutation({
     mutationFn: async (data: Partial<Patient> & { id?: number }) => {
       if (data.id) {
-        return await api.updatePatient(data.id, data as Partial<Patient>);
+        return await api.updatePatient(data as Patient);
       } else {
         return await api.createPatient(data as Omit<Patient, 'id'>);
       }
