@@ -1,7 +1,6 @@
 import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { BlurredAmount } from "@/components/ui/blurred-amount";
 
 interface InvoicePrintViewProps {
 	invoice: Invoice;
@@ -230,7 +229,7 @@ export const InvoicePrintView = ({
 									Consultation d'ostéopathie
 								</td>
 								<td className="py-4 px-4 text-right text-amber-700 font-bold">
-									<BlurredAmount amount={invoice.amount} />
+									{formatAmount(invoice.amount)}
 								</td>
 							</tr>
 						</tbody>
@@ -240,7 +239,7 @@ export const InvoicePrintView = ({
 									Total
 								</td>
 								<td className="py-2 px-2 text-right text-amber-700 font-bold">
-									<BlurredAmount amount={invoice.amount} />
+									{formatAmount(invoice.amount)}
 								</td>
 							</tr>
 						</tfoot>

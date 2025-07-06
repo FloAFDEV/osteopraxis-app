@@ -499,6 +499,17 @@ const HelpPage = () => {
 							différentes sections de paramètres ou à contacter le
 							support.
 						</p>
+						
+						<div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+							<h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+								🔒 Sécurité et déconnexion automatique
+							</h4>
+							<p className="text-sm text-blue-700 dark:text-blue-300">
+								Pour votre sécurité, l'application vous déconnecte automatiquement après <strong>30 minutes d'inactivité</strong>. 
+								Un avertissement apparaît 1 minute avant la déconnexion pour vous permettre de prolonger votre session si nécessaire.
+							</p>
+						</div>
+
 						<div className="flex gap-4">
 							<Badge
 								variant="outline"

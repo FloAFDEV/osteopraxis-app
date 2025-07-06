@@ -110,7 +110,6 @@ export function Dashboard() {
 						  )
 						: "Aucune séance prévue";
 
-				// Assembler toutes les données pour le tableau de bord
 				const finalDashboardData = {
 					totalPatients: (patientsData || []).length,
 					...demographics,
@@ -129,6 +128,19 @@ export function Dashboard() {
 					// Nouvelles métriques de consultation
 					...consultationMetrics,
 				};
+
+				// Debug: Log des calculs pour vérifier les données
+				console.log("🔍 DEBUG Dashboard - Calculs patients:", {
+					totalPatients: (patientsData || []).length,
+					newPatientsThisYear: growthMetrics.newPatientsThisYear,
+					newPatientsThisMonth: growthMetrics.newPatientsThisMonth,
+					monthlyGrowthData: monthlyGrowthData.map(m => ({ 
+						month: m.month, 
+						patients: m.patients,
+						total: m.patients 
+					})),
+					totalFromGrowthCalculation: monthlyGrowthData.reduce((sum, m) => sum + m.patients, 0)
+				});
 
 				setDashboardData(finalDashboardData);
 			} catch (err) {

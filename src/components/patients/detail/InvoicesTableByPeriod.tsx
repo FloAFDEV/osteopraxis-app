@@ -9,7 +9,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { BlurredAmount } from "@/components/ui/blurred-amount";
+
 import { CreditCard } from "lucide-react";
 import { formatAppointmentDate } from "@/utils/date-utils";
 
@@ -22,6 +22,13 @@ export function InvoicesTableByPeriod({
 	invoices,
 	onDetail,
 }: InvoicesTableByPeriodProps) {
+	const formatAmount = (amount: number) => {
+		return new Intl.NumberFormat('fr-FR', {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		}).format(amount) + ' €';
+	};
+
 	return (
 		<Table>
 			<TableHeader>
@@ -40,7 +47,7 @@ export function InvoicesTableByPeriod({
 							{formatAppointmentDate(invoice.date, "dd MMMM yyyy")}
 						</TableCell>
 						<TableCell>
-							<BlurredAmount amount={invoice.amount} />
+							{formatAmount(invoice.amount)}
 						</TableCell>
 						<TableCell className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
 							<CreditCard className="h-4 w-4 text-gray-400" />
