@@ -6,6 +6,8 @@ import { api } from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useGlobalOptimization } from "@/hooks/useGlobalOptimization";
+import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -35,6 +37,9 @@ const PatientsPage = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const patientsPerPage = 30;
 
+	// Utilisation du système d'optimisation global
+	const { data: globalData, loading: globalLoading, optimize } = useGlobalOptimization();
+
 	// Récupérer les cabinets de l'utilisateur
 	const { data: cabinets = [], isLoading: cabinetsLoading } = useQuery({
 		queryKey: ["cabinets", user?.osteopathId],
@@ -46,7 +51,7 @@ const PatientsPage = () => {
 		refetchOnWindowFocus: false,
 	});
 
-	// Use useQuery for better state and cache management
+	// Utilisation du cache global optimisé ou fallback sur useQuery
 	const {
 		data: allPatients,
 		isLoading,
@@ -56,6 +61,10 @@ const PatientsPage = () => {
 		queryKey: ["patients"],
 		queryFn: async () => {
 			try {
+				// Utiliser les données du cache global si disponibles
+				if (globalData.patients.length > 0) {
+					return globalData.patients;
+				}
 				return await api.getPatients();
 			} catch (err) {
 				console.error("Error fetching patients:", err);
@@ -66,6 +75,7 @@ const PatientsPage = () => {
 		retryDelay: 1000,
 		refetchOnWindowFocus: false,
 		staleTime: 1000 * 60 * 5, // 5 minutes
+		initialData: globalData.patients.length > 0 ? globalData.patients : undefined,
 	});
 
 	// Filtrer les patients par cabinet sélectionné
@@ -75,11 +85,13 @@ const PatientsPage = () => {
 			return patient.cabinetId === selectedCabinetId;
 		}) || [];
 
-	// Handler for forcing data reload with animation
+	// Amélioration du handler avec cache global
 	const handleRetry = async () => {
 		setIsRefreshing(true);
 		toast.info("Chargement des patients en cours...");
 		try {
+			// Invalider le cache global et refetch
+			optimize.invalidateRelated('patient');
 			await refetch();
 			if (patients && patients.length > 0) {
 				toast.success(
@@ -222,15 +234,19 @@ const PatientsPage = () => {
 					onLetterChange={handleLetterChange}
 				/>
 
-				{/* Loading and error states */}
-				<PatientLoadingState
-					isLoading={isLoading}
-					error={error}
-					onRetry={handleRetry}
-				/>
+				{/* Loading and error states optimisées */}
+				{(isLoading || globalLoading.initializing) ? (
+					<SmartSkeleton type="patient-list" count={10} />
+				) : (
+					<PatientLoadingState
+						isLoading={isLoading}
+						error={error}
+						onRetry={handleRetry}
+					/>
+				)}
 
 				{/* Main content - patient list or empty state */}
-				{!isLoading && !error && (
+				{!isLoading && !globalLoading.initializing && !error && (
 					<>
 						{filteredPatients.length === 0 ? (
 							<EmptyPatientState

@@ -9,6 +9,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { PerformanceMonitor } from "@/components/ui/performance-monitor";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import {
@@ -381,6 +382,9 @@ export function Layout({ children }: LayoutProps) {
 					</div>
 				</div>
 			</footer>
+
+			{/* Performance Monitor - visible uniquement en développement */}
+			<PerformanceMonitor />
 		</div>
 	);
 }
