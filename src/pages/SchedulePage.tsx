@@ -326,9 +326,9 @@ const SchedulePage = () => {
 									className="ml-auto"
 								>
 									<CalendarIcon className="mr-2 h-4 w-4" />
-									{format(selectedDate, "MMMM yyyy", {
+									{selectedDate ? format(selectedDate, "MMMM yyyy", {
 										locale: fr,
-									})}
+									}) : "Date invalide"}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0" align="end">
@@ -383,13 +383,13 @@ const SchedulePage = () => {
 										</Button>
 									</div>
 									<h2 className="text-xl font-medium capitalize mt-2 sm:mt-0">
-										{format(
+										{selectedDate ? format(
 											selectedDate,
 											"EEEE d MMMM yyyy",
 											{
 												locale: fr,
 											}
-										)}
+										) : "Date invalide"}
 									</h2>
 								</div>
 								<DaySchedule
@@ -427,13 +427,13 @@ const SchedulePage = () => {
 									</Button>
 									<h2 className="text-xl font-medium">
 										Semaine du{" "}
-										{format(currentWeek[0], "d MMMM", {
+										{currentWeek[0] ? format(currentWeek[0], "d MMMM", {
 											locale: fr,
-										})}{" "}
+										}) : "..."}{" "}
 										au{" "}
-										{format(currentWeek[6], "d MMMM yyyy", {
+										{currentWeek[6] ? format(currentWeek[6], "d MMMM yyyy", {
 											locale: fr,
-										})}
+										}) : "..."}
 									</h2>
 									<Button
 										variant="ghost"
@@ -813,9 +813,14 @@ const DaySchedule = ({
 			{displayTimeSlots.map((timeSlot) => {
 				const appointment = getAppointmentForTimeSlot(timeSlot);
 				const googleEvent = getGoogleEventForTimeSlot(timeSlot);
-				const isCurrentTime =
-					format(new Date(), "HH:mm") === timeSlot &&
-					isSameDay(date, new Date());
+				const isCurrentTime = (() => {
+					try {
+						const now = new Date();
+						return format(now, "HH:mm") === timeSlot && isSameDay(date, now);
+					} catch {
+						return false;
+					}
+				})();
 				const isProcessingAction =
 					appointment && actionInProgress?.id === appointment.id;
 				const isCompleted = appointment?.status === "COMPLETED";
