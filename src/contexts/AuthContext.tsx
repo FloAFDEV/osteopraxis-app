@@ -1,4 +1,3 @@
-
 import React, {
 	createContext,
 	useState,
@@ -52,13 +51,9 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-	const [loading, setLoading] = useState<boolean>(true);
+	const [loading, setLoading] = useState<boolean>(false); // Start with false to avoid immediate loading
 	const [error, setError] = useState<string | null>(null);
 	const navigate = useNavigate();
-
-	useEffect(() => {
-		checkAuth();
-	}, []);
 
 	const login = useCallback(async (email: string, password: string) => {
 		setLoading(true);
@@ -113,17 +108,20 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	}, [navigate]);
 
 	const checkAuth = useCallback(async () => {
-		setLoading(true);
-		setError(null);
 		try {
+			setLoading(true);
 			const authResult = await api.checkAuth();
-			if (authResult.isAuthenticated) {
+			if (authResult && authResult.isAuthenticated) {
 				setUser(authResult.user);
 				setIsAuthenticated(true);
+			} else {
+				setUser(null);
+				setIsAuthenticated(false);
 			}
 		} catch (err: any) {
-			setError(err.message || "Erreur lors de la vérification de l'authentification");
 			console.error("Check auth failed", err);
+			setUser(null);
+			setIsAuthenticated(false);
 		} finally {
 			setLoading(false);
 		}
@@ -164,6 +162,21 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
     }
   }, [user]);
 
+	// Initialize auth state on mount - with error handling
+	useEffect(() => {
+		const initAuth = async () => {
+			try {
+				await checkAuth();
+			} catch (error) {
+				console.error("Failed to initialize auth:", error);
+			}
+		};
+		
+		// Use timeout to avoid blocking the initial render
+		const timer = setTimeout(initAuth, 100);
+		return () => clearTimeout(timer);
+	}, [checkAuth]);
+
 	const value = {
 		user,
 		isAuthenticated,
@@ -178,14 +191,13 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		promoteToAdmin,
 		isAdmin: user?.role === "ADMIN",
 		updateUser: async (userData: any) => {
-			// ✅ Mise à jour utilisateur sécurisée
 			setUser(userData);
 		},
 		loadStoredToken: async () => {
-			// ✅ Token chargé
+			// Token management would go here
 		},
 		redirectToSetupIfNeeded: () => {
-			// ✅ Redirection setup
+			// Setup redirection logic would go here
 		},
 	};
 
