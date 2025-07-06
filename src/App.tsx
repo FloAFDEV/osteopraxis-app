@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { OptimizationProvider } from "@/contexts/OptimizationContext";
+import { PrivacyProvider } from "@/contexts/PrivacyContext";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -46,10 +47,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <OptimizationProvider>
-          <TooltipProvider>
-            <Toaster />
-            <BrowserRouter>
-              <AuthProvider>
+          <PrivacyProvider>
+            <TooltipProvider>
+              <Toaster />
+              <BrowserRouter>
+                <AuthProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<LoginPage />} />
@@ -267,15 +269,16 @@ function App() {
                   }
                 />
                 
-                {/* Route catch-all pour les 404 */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AuthProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </OptimizationProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+                 {/* Route catch-all pour les 404 */}
+                 <Route path="*" element={<NotFound />} />
+               </Routes>
+             </AuthProvider>
+           </BrowserRouter>
+         </TooltipProvider>
+       </PrivacyProvider>
+     </OptimizationProvider>
+   </ThemeProvider>
+ </QueryClientProvider>
 );
 }
 
