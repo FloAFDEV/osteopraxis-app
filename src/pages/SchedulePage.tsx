@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
+import { useOptimizedCache } from "@/hooks/useOptimizedCache";
+import { MonthlyScheduleView } from "@/components/schedule/MonthlyScheduleView";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
@@ -59,7 +61,7 @@ const SchedulePage = () => {
 	const [loading, setLoading] = useState(true);
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 	const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
-	const [view, setView] = useState<"day" | "week">("week");
+	const [view, setView] = useState<"day" | "week" | "month">("week");
 	const [showGoogleEvents, setShowGoogleEvents] = useState(true);
 	const [actionInProgress, setActionInProgress] = useState<{
 		id: number;
@@ -74,27 +76,42 @@ const SchedulePage = () => {
 		onAppointmentsUpdate: setAppointments,
 	});
 
-	// useEffect for fetching data remains the same
+	// Utiliser le cache optimisé pour les données
+	const {
+		data: cachedAppointments,
+		loading: appointmentsLoading,
+		invalidate: invalidateAppointments
+	} = useOptimizedCache(
+		'appointments',
+		() => api.getAppointments(),
+		{ ttl: 2 * 60 * 1000 } // 2 minutes pour les rendez-vous
+	);
+
+	const {
+		data: cachedPatients,
+		loading: patientsLoading,
+		invalidate: invalidatePatients
+	} = useOptimizedCache(
+		'patients',
+		() => api.getPatients(),
+		{ ttl: 10 * 60 * 1000 } // 10 minutes pour les patients (changent moins souvent)
+	);
+
+	// États locaux mis à jour depuis le cache
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const [appointmentsData, patientsData] = await Promise.all([
-					api.getAppointments(),
-					api.getPatients(),
-				]);
-				setAppointments(appointmentsData);
-				setPatients(patientsData);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-				toast.error(
-					"Impossible de charger les données. Veuillez réessayer."
-				);
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchData();
-	}, []);
+		if (cachedAppointments) {
+			setAppointments(cachedAppointments);
+		}
+	}, [cachedAppointments]);
+
+	useEffect(() => {
+		if (cachedPatients) {
+			setPatients(cachedPatients);
+		}
+	}, [cachedPatients]);
+
+	// Loading state basé sur le cache
+	const isLoading = appointmentsLoading || patientsLoading;
 
 	// useEffect for calculating week remains the same
 	useEffect(() => {
@@ -149,7 +166,7 @@ const SchedulePage = () => {
 			});
 	};
 
-	// Action handlers (handleCancelAppointment, handleDeleteAppointment) remain the same
+	// Action handlers avec invalidation du cache
 	const handleCancelAppointment = async (appointmentId: number) => {
 		try {
 			setActionInProgress({
@@ -158,6 +175,8 @@ const SchedulePage = () => {
 			});
 			await api.cancelAppointment(appointmentId);
 			toast.success("Séance annulée avec succès");
+			
+			// Mettre à jour localement et invalider le cache
 			const updatedAppointments = appointments.map((appointment) =>
 				appointment.id === appointmentId
 					? {
@@ -167,6 +186,7 @@ const SchedulePage = () => {
 					: appointment
 			);
 			setAppointments(updatedAppointments);
+			invalidateAppointments();
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
 			toast.error("Impossible d'annuler la séance");
@@ -183,10 +203,13 @@ const SchedulePage = () => {
 			});
 			await api.deleteAppointment(appointmentId);
 			toast.success("Séance supprimé avec succès");
+			
+			// Mettre à jour localement et invalider le cache
 			const updatedAppointments = appointments.filter(
 				(appointment) => appointment.id !== appointmentId
 			);
 			setAppointments(updatedAppointments);
+			invalidateAppointments();
 		} catch (error) {
 			console.error("Error deleting appointment:", error);
 			toast.error("Impossible de supprimer le Séance");
@@ -262,12 +285,13 @@ const SchedulePage = () => {
 						)}
 						<Tabs
 							value={view}
-							onValueChange={(v) => setView(v as "day" | "week")}
+							onValueChange={(v) => setView(v as "day" | "week" | "month")}
 							className="mr-2"
 						>
 							<TabsList>
 								<TabsTrigger value="day">Jour</TabsTrigger>
 								<TabsTrigger value="week">Semaine</TabsTrigger>
+								<TabsTrigger value="month">Mois</TabsTrigger>
 							</TabsList>
 						</Tabs>
 						<Button
@@ -305,8 +329,8 @@ const SchedulePage = () => {
 					</div>
 				</div>
 
-				{/* Loading state remains the same */}
-				{loading ? (
+				{/* Loading state avec cache */}
+				{isLoading && !appointments.length ? (
 					<div className="flex justify-center items-center py-12">
 						<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
 					</div>
@@ -673,6 +697,16 @@ const SchedulePage = () => {
 									})}
 								</div>
 							</div>
+						</TabsContent>
+
+						{/* Vue mensuelle */}
+						<TabsContent value="month">
+							<MonthlyScheduleView
+								appointments={appointments}
+								patients={patients}
+								selectedDate={selectedDate}
+								onDateChange={setSelectedDate}
+							/>
 						</TabsContent>
 					</Tabs>
 				)}
