@@ -1271,6 +1271,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_recurring_appointments: {
+        Args: { p_recurring_id: number; p_limit?: number }
+        Returns: number
+      }
       get_authorized_osteopaths: {
         Args: { current_osteopath_auth_id: string }
         Returns: {
