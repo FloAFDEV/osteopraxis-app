@@ -10,7 +10,7 @@ import { Form } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import getPatientSchema from "@/utils/patient-form-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { AdditionalFieldsTab } from "./patient-form/AdditionalFieldsTab";
 import { ContactTab } from "./patient-form/ContactTab";
@@ -19,7 +19,10 @@ import { GeneralTab } from "./patient-form/GeneralTab";
 import { MedicalTab } from "./patient-form/MedicalTab";
 import { PediatricTab } from "./patient-form/PediatricTab";
 import { SpecializedFieldsTab } from "./patient-form/SpecializedFieldsTab";
+import { PatientRelationshipsTab } from "./patient-form/PatientRelationshipsTab";
 import { PatientFormProps, PatientFormValues } from "./patient-form/types";
+import { api } from "@/services/api";
+import { Patient } from "@/types";
 
 export function PatientForm({
 	patient,
@@ -36,6 +39,20 @@ export function PatientForm({
 	const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
 		selectedCabinetId ? selectedCabinetId.toString() : null
 	);
+	const [availablePatients, setAvailablePatients] = useState<Patient[]>([]);
+
+	// Charger la liste des patients pour les relations familiales
+	useEffect(() => {
+		const loadPatients = async () => {
+			try {
+				const patients = await api.getPatients();
+				setAvailablePatients(patients);
+			} catch (error) {
+				console.error("Erreur lors du chargement des patients:", error);
+			}
+		};
+		loadPatients();
+	}, []);
 
 	// Calcul de l'âge pour déterminer si c'est un enfant
 	const calculateAge = (birthDate: string | null) => {
@@ -214,6 +231,7 @@ export function PatientForm({
 			: []),
 		{ id: "additional", label: "Supplémentaire", icon: "📋" },
 		{ id: "specialized", label: "Sphères spéc.", icon: "🩺" },
+		{ id: "relationships", label: "Famille", icon: "👪" },
 	];
 
 	return (
@@ -240,8 +258,8 @@ export function PatientForm({
 						className="space-y-6"
 					>
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
-							<TabsList className="grid w-full grid-cols-6 lg:grid-cols-6">
-								{tabs.map((tab) => (
+					<TabsList className="grid w-full grid-cols-7 lg:grid-cols-7">
+						{tabs.map((tab) => (
 									<TabsTrigger
 										key={tab.id}
 										value={tab.id}
@@ -294,6 +312,14 @@ export function PatientForm({
 
 							<TabsContent value="specialized">
 								<SpecializedFieldsTab form={form} />
+							</TabsContent>
+
+							<TabsContent value="relationships">
+								<PatientRelationshipsTab 
+									form={form} 
+									patientId={patient?.id}
+									availablePatients={availablePatients}
+								/>
 							</TabsContent>
 						</Tabs>
 

@@ -30,29 +30,6 @@ export function MedicalTab({ form, isChild }: MedicalTabProps) {
           <Input id="allergies" {...form.register("allergies")} placeholder="Allergies connues" />
         </div>
         <div className="flex flex-col gap-4">
-          <Label htmlFor="relationship_type">Lien de parenté</Label>
-          <select id="relationship_type" {...form.register("relationship_type")} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-            <option value="">Sélectionnez</option>
-            <option value="Père">Père</option>
-            <option value="Mère">Mère</option>
-            <option value="Frère">Frère</option>
-            <option value="Sœur">Sœur</option>
-            <option value="Fils">Fils</option>
-            <option value="Fille">Fille</option>
-            <option value="Conjoint(e)">Conjoint(e)</option>
-            <option value="Grand-parent">Grand-parent</option>
-            <option value="Oncle/Tante">Oncle/Tante</option>
-            <option value="Cousin(e)">Cousin(e)</option>
-            <option value="Autre">Autre</option>
-          </select>
-        </div>
-        {form.watch("relationship_type") === "Autre" && (
-          <div className="flex flex-col gap-4">
-            <Label htmlFor="relationship_other">Précisez le lien de parenté</Label>
-            <Input id="relationship_other" {...form.register("relationship_other")} placeholder="Précisez le lien de parenté" />
-          </div>
-        )}
-        <div className="flex flex-col gap-4">
           <Label htmlFor="familyStatus">Antécédents médicaux familiaux</Label>
           <Textarea id="familyStatus" {...form.register("familyStatus")} placeholder="Antécédents familiaux" />
         </div>

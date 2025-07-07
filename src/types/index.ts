@@ -354,3 +354,6 @@ export interface CreateQuotePayload {
 	items?: Omit<QuoteItem, 'id' | 'quoteId'>[];
 }
 
+// Export des types de relation patient pour faciliter l'import
+export * from "./patient-relationship";
+

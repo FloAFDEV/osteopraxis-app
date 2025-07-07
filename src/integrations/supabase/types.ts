@@ -938,6 +938,51 @@ export type Database = {
           },
         ]
       }
+      patient_relationships: {
+        Row: {
+          created_at: string | null
+          id: number
+          patient_id: number
+          related_patient_id: number
+          relationship_notes: string | null
+          relationship_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          patient_id: number
+          related_patient_id: number
+          relationship_notes?: string | null
+          relationship_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          patient_id?: number
+          related_patient_id?: number
+          relationship_notes?: string | null
+          relationship_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_relationships_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_relationships_related_patient_id_fkey"
+            columns: ["related_patient_id"]
+            isOneToOne: false
+            referencedRelation: "Patient"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ProfessionalProfile: {
         Row: {
           adeli_number: string | null
