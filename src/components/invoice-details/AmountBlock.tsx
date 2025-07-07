@@ -1,3 +1,5 @@
+import { BlurredAmount } from "@/components/ui/blurred-amount";
+
 export const AmountBlock = ({
   amount,
   tvaMotif,
@@ -18,7 +20,7 @@ export const AmountBlock = ({
         Montant
       </div>
       <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-        {formatAmount(amount)} €
+        <BlurredAmount amount={amount} currency="€" />
       </div>
       <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
         {tvaMotif ||

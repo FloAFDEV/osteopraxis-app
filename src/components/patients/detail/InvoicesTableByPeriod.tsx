@@ -12,6 +12,7 @@ import {
 
 import { CreditCard } from "lucide-react";
 import { formatAppointmentDate } from "@/utils/date-utils";
+import { BlurredAmount } from "@/components/ui/blurred-amount";
 
 interface InvoicesTableByPeriodProps {
 	invoices: Invoice[];
@@ -47,7 +48,7 @@ export function InvoicesTableByPeriod({
 							{formatAppointmentDate(invoice.date, "dd MMMM yyyy")}
 						</TableCell>
 						<TableCell>
-							{formatAmount(invoice.amount)}
+							<BlurredAmount amount={invoice.amount} currency="€" />
 						</TableCell>
 						<TableCell className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
 							<CreditCard className="h-4 w-4 text-gray-400" />
