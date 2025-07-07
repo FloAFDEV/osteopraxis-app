@@ -15,12 +15,15 @@ import {
 	Weight,
 } from "lucide-react";
 import { InfoBubble } from "./InfoBubble";
+import { PatientRelationships } from "./PatientRelationships";
+import { usePatientRelationships } from "@/hooks/usePatientRelationships";
 
 interface PatientInfoProps {
 	patient: Patient;
 }
 
 export function PatientInfo({ patient }: PatientInfoProps) {
+	const { relationships, loading: relationshipsLoading } = usePatientRelationships(patient.id);
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 
@@ -193,6 +196,14 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							)}
 						</div>
 					)}
+				</div>
+
+				{/* Relations familiales */}
+				<div className="mt-3 md:mt-4">
+					<PatientRelationships 
+						relationships={relationships} 
+						loading={relationshipsLoading}
+					/>
 				</div>
 			</CardContent>
 		</Card>
