@@ -8,13 +8,9 @@ import { differenceInYears } from "date-fns";
 interface PatientRelationshipsProps {
   relationships: PatientRelationship[];
   loading?: boolean;
-  currentPatient?: {
-    id: number;
-    gender?: string | null;
-  };
 }
 
-export function PatientRelationships({ relationships, loading, currentPatient }: PatientRelationshipsProps) {
+export function PatientRelationships({ relationships, loading }: PatientRelationshipsProps) {
   const navigate = useNavigate();
   if (loading) {
     return (
@@ -34,53 +30,9 @@ export function PatientRelationships({ relationships, loading, currentPatient }:
     return differenceInYears(new Date(), new Date(birthDate));
   };
 
-  // Fonction pour déduire la relation inverse basée sur le genre
-  const getInverseRelationship = (originalRelation: string, currentPatientGender?: string | null) => {
-    const gender = currentPatientGender?.toLowerCase();
-    const isMale = gender === "homme" || gender === "male";
-    const isFemale = gender === "femme" || gender === "female";
-
-    switch (originalRelation.toLowerCase()) {
-      case "père":
-        return isMale ? "Fils" : isFemale ? "Fille" : "Enfant";
-      case "mère":
-        return isMale ? "Fils" : isFemale ? "Fille" : "Enfant";
-      case "fils":
-        return isMale ? "Père" : isFemale ? "Mère" : "Parent";
-      case "fille":
-        return isMale ? "Père" : isFemale ? "Mère" : "Parent";
-      case "frère":
-        return isMale ? "Frère" : isFemale ? "Sœur" : "Frère/Sœur";
-      case "sœur":
-        return isMale ? "Frère" : isFemale ? "Sœur" : "Frère/Sœur";
-      case "grand-père":
-        return isMale ? "Petit-fils" : isFemale ? "Petite-fille" : "Petit-enfant";
-      case "grand-mère":
-        return isMale ? "Petit-fils" : isFemale ? "Petite-fille" : "Petit-enfant";
-      case "petit-fils":
-        return isMale ? "Grand-père" : isFemale ? "Grand-mère" : "Grand-parent";
-      case "petite-fille":
-        return isMale ? "Grand-père" : isFemale ? "Grand-mère" : "Grand-parent";
-      case "oncle":
-        return isMale ? "Neveu" : isFemale ? "Nièce" : "Neveu/Nièce";
-      case "tante":
-        return isMale ? "Neveu" : isFemale ? "Nièce" : "Neveu/Nièce";
-      case "neveu":
-        return isMale ? "Oncle" : isFemale ? "Tante" : "Oncle/Tante";
-      case "nièce":
-        return isMale ? "Oncle" : isFemale ? "Tante" : "Oncle/Tante";
-      case "cousin":
-        return isMale ? "Cousin" : isFemale ? "Cousine" : "Cousin(e)";
-      case "cousine":
-        return isMale ? "Cousin" : isFemale ? "Cousine" : "Cousin(e)";
-      case "conjoint(e)":
-      case "conjoint":
-      case "conjointe":
-        return "Conjoint(e)";
-      default:
-        return originalRelation; // Si on ne peut pas déduire, on garde l'original
-    }
-  };
+  // La relation stockée représente ce que le related_patient EST pour le patient principal
+  // Donc si on affiche dans la fiche du patient actuel, on affiche directement la relation
+  // Pas besoin de logique complexe d'inversion
 
   const handlePatientClick = (patientId: number) => {
     navigate(`/patients/${patientId}`);
@@ -101,14 +53,14 @@ export function PatientRelationships({ relationships, loading, currentPatient }:
             ? `${displayText} - ${relationship.relationship_notes}`
             : displayText;
           
-          // Déduire la relation correcte du point de vue du patient actuel
-          const displayedRelation = getInverseRelationship(relationship.relationship_type, currentPatient?.gender);
+          // On affiche directement la relation telle qu'elle est stockée
+          // car elle représente déjà ce que le related_patient EST pour le patient actuel
           
           return (
             <InfoBubble
               key={relationship.id}
               icon={ExternalLink}
-              label={displayedRelation}
+              label={relationship.relationship_type}
               value={fullValue}
               variant="default"
               size="sm"

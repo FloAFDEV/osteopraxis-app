@@ -203,10 +203,6 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					<PatientRelationships 
 						relationships={relationships} 
 						loading={relationshipsLoading}
-						currentPatient={{
-							id: patient.id,
-							gender: patient.gender
-						}}
 					/>
 				</div>
 			</CardContent>
