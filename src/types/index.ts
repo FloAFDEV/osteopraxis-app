@@ -114,6 +114,9 @@ export interface Patient {
 	rheumatologicalHistory?: string | null;
 	handedness?: string | null;
 	contraception?: string | null;
+	contraception_notes?: string | null;
+	relationship_type?: string | null;
+	relationship_other?: string | null;
 	familyStatus?: string | null;
 
 	// Nouveaux champs généraux

@@ -107,6 +107,9 @@ export function PatientForm({
 
 			// Contraception et statut familial
 			contraception: patient?.contraception || null,
+			contraception_notes: patient?.contraception_notes || null,
+			relationship_type: patient?.relationship_type || null,
+			relationship_other: patient?.relationship_other || null,
 			familyStatus: patient?.familyStatus || null,
 
 			// Examens et symptômes

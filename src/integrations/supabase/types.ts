@@ -600,6 +600,7 @@ export type Database = {
           complementaryExams: string | null
           consultation_conclusion: string | null
           contraception: Database["public"]["Enums"]["Contraception"] | null
+          contraception_notes: string | null
           country: string | null
           cranial_exam: string | null
           cranial_membrane_exam: string | null
@@ -667,6 +668,8 @@ export type Database = {
           pregnancyHistory: string | null
           pulmonary_history: string | null
           quitSmokingDate: string | null
+          relationship_other: string | null
+          relationship_type: string | null
           rheumatologicalHistory: string | null
           school_grade: string | null
           scoliosis: string | null
@@ -708,6 +711,7 @@ export type Database = {
           complementaryExams?: string | null
           consultation_conclusion?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
+          contraception_notes?: string | null
           country?: string | null
           cranial_exam?: string | null
           cranial_membrane_exam?: string | null
@@ -775,6 +779,8 @@ export type Database = {
           pregnancyHistory?: string | null
           pulmonary_history?: string | null
           quitSmokingDate?: string | null
+          relationship_other?: string | null
+          relationship_type?: string | null
           rheumatologicalHistory?: string | null
           school_grade?: string | null
           scoliosis?: string | null
@@ -816,6 +822,7 @@ export type Database = {
           complementaryExams?: string | null
           consultation_conclusion?: string | null
           contraception?: Database["public"]["Enums"]["Contraception"] | null
+          contraception_notes?: string | null
           country?: string | null
           cranial_exam?: string | null
           cranial_membrane_exam?: string | null
@@ -883,6 +890,8 @@ export type Database = {
           pregnancyHistory?: string | null
           pulmonary_history?: string | null
           quitSmokingDate?: string | null
+          relationship_other?: string | null
+          relationship_type?: string | null
           rheumatologicalHistory?: string | null
           school_grade?: string | null
           scoliosis?: string | null

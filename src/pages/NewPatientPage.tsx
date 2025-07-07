@@ -122,6 +122,11 @@ const NewPatientPage = () => {
 				gynecological_history:
 					patientData.gynecological_history || null,
 				other_comments_adult: patientData.other_comments_adult || null,
+				
+				// Nouveaux champs contraception et parenté
+				contraception_notes: patientData.contraception_notes || null,
+				relationship_type: patientData.relationship_type || null,
+				relationship_other: patientData.relationship_other || null,
 
 				// Nouveaux champs spécifiques aux enfants
 				fine_motor_skills: patientData.fine_motor_skills || null,

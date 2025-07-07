@@ -92,6 +92,11 @@ const EditPatientPage = () => {
 				contraception:
 					updatedData.contraception || patient.contraception,
 				childrenAges: updatedData.childrenAges || patient.childrenAges || null,
+				// Nouveaux champs
+				contraception_notes: updatedData.contraception_notes || patient.contraception_notes || null,
+				relationship_type: updatedData.relationship_type || patient.relationship_type || null,
+				relationship_other: updatedData.relationship_other || patient.relationship_other || null,
+				
 				// Champs existants
 				complementaryExams:
 					updatedData.complementaryExams ||

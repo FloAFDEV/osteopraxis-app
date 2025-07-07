@@ -35,6 +35,9 @@ export interface PatientFormValues {
   smokingAmount?: string | null;
   quitSmokingDate?: string | null;
   contraception?: string | null;
+  contraception_notes?: string | null;
+  relationship_type?: string | null;
+  relationship_other?: string | null;
   familyStatus?: string | null;
   complementaryExams?: string | null;
   generalSymptoms?: string | null;
