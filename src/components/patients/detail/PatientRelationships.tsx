@@ -107,8 +107,8 @@ export function PatientRelationships({ relationships, loading, currentPatientId,
             // Relation directe : on affiche la relation telle qu'elle est stockée
             displayedRelation = relationship.relationship_type;
           } else {
-            // Relation inverse : on affiche la relation inverse selon le genre du patient actuel
-            displayedRelation = getInverseRelationship(relationship.relationship_type, currentPatientGender);
+            // Relation inverse : on affiche la relation inverse selon le genre du patient lié
+            displayedRelation = getInverseRelationship(relationship.relationship_type, relationship.related_patient?.gender);
           }
           
           return (

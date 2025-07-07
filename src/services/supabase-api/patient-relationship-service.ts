@@ -29,7 +29,7 @@ export const patientRelationshipService = {
       for (const relation of data) {
         const { data: patientData, error: patientError } = await supabase
           .from('Patient')
-          .select('id, firstName, lastName, birthDate')
+          .select('id, firstName, lastName, birthDate, gender')
           .eq('id', relation.related_patient_id)
           .single();
 
@@ -61,7 +61,7 @@ export const patientRelationshipService = {
     // Récupérer les informations du patient lié
     const { data: patientData, error: patientError } = await supabase
       .from('Patient')
-      .select('id, firstName, lastName, birthDate')
+      .select('id, firstName, lastName, birthDate, gender')
       .eq('id', data.related_patient_id)
       .single();
 
@@ -96,7 +96,7 @@ export const patientRelationshipService = {
     // Récupérer les informations du patient lié
     const { data: patientData, error: patientError } = await supabase
       .from('Patient')
-      .select('id, firstName, lastName, birthDate')
+      .select('id, firstName, lastName, birthDate, gender')
       .eq('id', data.related_patient_id)
       .single();
 
@@ -154,7 +154,7 @@ export const patientRelationshipService = {
       for (const relation of inverseData) {
         const { data: patientData, error: patientError } = await supabase
           .from('Patient')
-          .select('id, firstName, lastName, birthDate')
+          .select('id, firstName, lastName, birthDate, gender')
           .eq('id', relation.patient_id)
           .single();
 

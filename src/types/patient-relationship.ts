@@ -12,6 +12,7 @@ export interface PatientRelationship {
     firstName: string;
     lastName: string;
     birthDate?: string | null;
+    gender?: string | null;
   };
 }
 
