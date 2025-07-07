@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { DashboardData } from "@/types";
 import { Calendar, TrendingDown, TrendingUp } from "lucide-react";
+import { BlurredNumber } from "@/components/ui/blurred-amount";
 
 interface WeeklyTrendCardProps {
 	data: DashboardData;
@@ -68,7 +69,9 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<div className="flex items-center justify-between">
-					<div className="text-2xl font-bold">{currentWeekTotal}</div>
+					<div className="text-2xl font-bold">
+						<BlurredNumber number={currentWeekTotal} />
+					</div>
 					<div className="flex items-center gap-1 text-sm font-semibold">
 						<TrendIcon className={cn("h-4 w-4", trendColor)} />
 						<span className={trendColor}>
@@ -79,7 +82,7 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 				</div>
 
 				<p className="text-xs text-orange-500">
-					Moyenne: {weeklyAverage.toFixed(1)} consultations/jour
+					Moyenne: <BlurredNumber number={weeklyAverage.toFixed(1)} /> consultations/jour
 				</p>
 			</CardContent>
 		</Card>

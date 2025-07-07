@@ -16,6 +16,7 @@ import {
 	isMinor,
 } from "./demographics/gender-chart-utils";
 import { GenderPieChart } from "./demographics/gender-pie-chart";
+import { BlurredNumber } from "@/components/ui/blurred-amount";
 
 interface DemographicsCardProps {
 	patients?: Patient[];
@@ -76,7 +77,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 				</CardTitle>
 
 				<CardDescription className="text-gray-600 dark:text-gray-400">
-					Répartition par genre sur un total de {totalPatients}{" "}
+					Répartition par genre sur un total de <BlurredNumber number={totalPatients} />{" "}
 					patients
 				</CardDescription>
 			</CardHeader>
