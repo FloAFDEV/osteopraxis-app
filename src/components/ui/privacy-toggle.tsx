@@ -17,5 +17,23 @@ export const PrivacyToggle: React.FC<PrivacyToggleProps> = ({
     isNumbersBlurred,
     toggleNumbersBlur
   } = usePrivacy();
-  return;
+  return (
+    <Button
+      variant={variant}
+      size={size}
+      onClick={toggleNumbersBlur}
+      className={cn(
+        "flex items-center gap-2",
+        className
+      )}
+      title={isNumbersBlurred ? "Afficher les montants" : "Masquer les montants"}
+    >
+      {isNumbersBlurred ? (
+        <Eye className="h-4 w-4" />
+      ) : (
+        <EyeOff className="h-4 w-4" />
+      )}
+      {isNumbersBlurred ? "Afficher" : "Masquer"}
+    </Button>
+  );
 };
