@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { RevenueChart } from "./revenue-chart";
 import { BlurredAmount, BlurredNumber } from "@/components/ui/blurred-amount";
+import { PrivacyToggle } from "@/components/ui/privacy-toggle";
 
 export function AdvancedAnalyticsPanel() {
   const [stats, setStats] = useState<AdvancedStats | null>(null);
@@ -77,7 +78,12 @@ export function AdvancedAnalyticsPanel() {
   return (
     <div className="space-y-6">
       {/* Section Revenue */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Revenus & Analytics</h3>
+          <PrivacyToggle />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-l-4 border-l-emerald-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Revenus ce mois</CardTitle>
@@ -140,6 +146,7 @@ export function AdvancedAnalyticsPanel() {
             <p className="text-xs text-purple-600 dark:text-purple-400">Par consultation</p>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Section No-Show */}
