@@ -69,9 +69,7 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<div className="flex items-center justify-between">
-					<div className="text-2xl font-bold">
-						<BlurredNumber number={currentWeekTotal} />
-					</div>
+					<div className="text-2xl font-bold">{currentWeekTotal}</div>
 					<div className="flex items-center gap-1 text-sm font-semibold">
 						<TrendIcon className={cn("h-4 w-4", trendColor)} />
 						<span className={trendColor}>
@@ -82,7 +80,7 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 				</div>
 
 				<p className="text-xs text-orange-500">
-					Moyenne: <BlurredNumber number={weeklyAverage.toFixed(1)} /> consultations/jour
+					Moyenne: {weeklyAverage.toFixed(1)} consultations/jour
 				</p>
 			</CardContent>
 		</Card>

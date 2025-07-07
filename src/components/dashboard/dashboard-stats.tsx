@@ -69,66 +69,59 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 	}
 
 	return (
-		<div className="space-y-4">
-			{/* Contrôle de confidentialité */}
-			<div className="flex justify-end">
-				<PrivacyToggle />
-			</div>
-			
-			<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-				<StatCard
-					title="Patients totaux"
-					value={<BlurredNumber number={data.totalPatients} />}
-					description={
-						data.thirtyDayGrowthPercentage > 0
-							? `+${data.thirtyDayGrowthPercentage}% ce mois-ci`
-							: `${data.thirtyDayGrowthPercentage}% ce mois-ci`
-					}
-					color="text-blue-500"
-					icon={<Users />}
-				/>
+		<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+			<StatCard
+				title="Patients totaux"
+				value={data.totalPatients}
+				description={
+					data.thirtyDayGrowthPercentage > 0
+						? `+${data.thirtyDayGrowthPercentage}% ce mois-ci`
+						: `${data.thirtyDayGrowthPercentage}% ce mois-ci`
+				}
+				color="text-blue-500"
+				icon={<Users />}
+			/>
 
-				<StatCard
-					title="Nouveaux patients (mois)"
-					value={<BlurredNumber number={data.newPatientsThisMonth} />}
-					description={`+${data.newPatientsLast30Days} ces 30 derniers jours`}
-					color="text-purple-500"
-					icon={<UserPlus />}
-				/>
+			<StatCard
+				title="Nouveaux patients (mois)"
+				value={data.newPatientsThisMonth}
+				description={`+${data.newPatientsLast30Days} ces 30 derniers jours`}
+				color="text-purple-500"
+				icon={<UserPlus />}
+			/>
 
-				<StatCard
-					title="Consultations ce mois"
-					value={<BlurredNumber number={data.consultationsThisMonth} />}
-					description={
-						data.consultationsTrend > 0
-							? `+${data.consultationsTrend}% vs mois dernier`
-							: data.consultationsTrend < 0
-							? `${data.consultationsTrend}% vs mois dernier`
-							: `${data.averageConsultationsPerDay} consultations/jour`
-					}
-					color="text-indigo-500"
-					icon={<Stethoscope />}
-				/>
+			<StatCard
+				title="Consultations ce mois"
+				value={data.consultationsThisMonth}
+				description={
+					data.consultationsTrend > 0
+						? `+${data.consultationsTrend}% vs mois dernier`
+						: data.consultationsTrend < 0
+						? `${data.consultationsTrend}% vs mois dernier`
+						: `${data.averageConsultationsPerDay} consultations/jour`
+				}
+				color="text-indigo-500"
+				icon={<Stethoscope />}
+			/>
 
-				<StatCard
-					title="Séance aujourd'hui"
-					subtitle={formattedToday}
-					value={<BlurredNumber number={data.appointmentsToday} />}
-					description={nextAppointmentText}
-					color="text-green-500"
-					icon={<Calendar />}
-				/>
+			<StatCard
+				title="Séance aujourd'hui"
+				subtitle={formattedToday}
+				value={data.appointmentsToday}
+				description={nextAppointmentText}
+				color="text-green-500"
+				icon={<Calendar />}
+			/>
 
-				<StatCard
-					title="Croissance annuelle"
-					value={`${data.annualGrowthPercentage}%`}
-					description={`${data.newPatientsThisYear} nouveaux patients cette année`}
-					color="text-amber-500"
-					icon={<TrendingUp />}
-				/>
+			<StatCard
+				title="Croissance annuelle"
+				value={`${data.annualGrowthPercentage}%`}
+				description={`${data.newPatientsThisYear} nouveaux patients cette année`}
+				color="text-amber-500"
+				icon={<TrendingUp />}
+			/>
 
-				<WeeklyTrendCard data={data} />
-			</div>
+			<WeeklyTrendCard data={data} />
 		</div>
 	);
 }

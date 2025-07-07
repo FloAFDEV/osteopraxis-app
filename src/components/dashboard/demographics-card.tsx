@@ -77,7 +77,7 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 				</CardTitle>
 
 				<CardDescription className="text-gray-600 dark:text-gray-400">
-					Répartition par genre sur un total de <BlurredNumber number={totalPatients} />{" "}
+					Répartition par genre sur un total de {totalPatients}{" "}
 					patients
 				</CardDescription>
 			</CardHeader>
