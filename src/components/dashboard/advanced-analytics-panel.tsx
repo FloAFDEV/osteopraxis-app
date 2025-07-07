@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { RevenueChart } from "./revenue-chart";
 import { BlurredAmount, BlurredNumber } from "@/components/ui/blurred-amount";
-import { PrivacyToggle } from "@/components/ui/privacy-toggle";
 
 export function AdvancedAnalyticsPanel() {
   const [stats, setStats] = useState<AdvancedStats | null>(null);
@@ -78,78 +77,69 @@ export function AdvancedAnalyticsPanel() {
   return (
     <div className="space-y-6">
       {/* Section Revenue */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
-            Revenus & Analytics
-          </h3>
-          <PrivacyToggle />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-l-4 border-l-emerald-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Revenus ce mois</CardTitle>
-              <div className="p-2 bg-emerald-500/10 rounded-full">
-                <Euro className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
-                <BlurredAmount amount={stats.revenue.thisMonth} />
-              </div>
-              <div className="flex items-center text-xs">
-                {stats.revenue.monthlyTrend >= 0 ? (
-                  <TrendingUp className="h-3 w-3 mr-1 text-emerald-600 dark:text-emerald-400" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
-                )}
-                <span className={stats.revenue.monthlyTrend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}>
-                  {stats.revenue.monthlyTrend.toFixed(1)}% vs mois dernier
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-l-4 border-l-emerald-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Revenus ce mois</CardTitle>
+            <div className="p-2 bg-emerald-500/10 rounded-full">
+              <Euro className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
+              <BlurredAmount amount={stats.revenue.thisMonth} />
+            </div>
+            <div className="flex items-center text-xs">
+              {stats.revenue.monthlyTrend >= 0 ? (
+                <TrendingUp className="h-3 w-3 mr-1 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
+              )}
+              <span className={stats.revenue.monthlyTrend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}>
+                {stats.revenue.monthlyTrend.toFixed(1)}% vs mois dernier
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Revenus annuels</CardTitle>
-              <div className="p-2 bg-blue-500/10 rounded-full">
-                <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                <BlurredAmount amount={stats.revenue.thisYear} />
-              </div>
-              <div className="flex items-center text-xs">
-                {stats.revenue.yearlyTrend >= 0 ? (
-                  <TrendingUp className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
-                )}
-                <span className={stats.revenue.yearlyTrend >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-500"}>
-                  {stats.revenue.yearlyTrend.toFixed(1)}% vs année dernière
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Revenus annuels</CardTitle>
+            <div className="p-2 bg-blue-500/10 rounded-full">
+              <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+              <BlurredAmount amount={stats.revenue.thisYear} />
+            </div>
+            <div className="flex items-center text-xs">
+              {stats.revenue.yearlyTrend >= 0 ? (
+                <TrendingUp className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
+              )}
+              <span className={stats.revenue.yearlyTrend >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-500"}>
+                {stats.revenue.yearlyTrend.toFixed(1)}% vs année dernière
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="border-l-4 border-l-purple-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Revenu moyen/RDV</CardTitle>
-              <div className="p-2 bg-purple-500/10 rounded-full">
-                <Euro className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                <BlurredAmount amount={stats.revenue.averagePerAppointment} />
-              </div>
-              <p className="text-xs text-purple-600 dark:text-purple-400">Par consultation</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="border-l-4 border-l-purple-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Revenu moyen/RDV</CardTitle>
+            <div className="p-2 bg-purple-500/10 rounded-full">
+              <Euro className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+              <BlurredAmount amount={stats.revenue.averagePerAppointment} />
+            </div>
+            <p className="text-xs text-purple-600 dark:text-purple-400">Par consultation</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Section No-Show */}
@@ -158,7 +148,7 @@ export function AdvancedAnalyticsPanel() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
               <div className="p-2 bg-red-500/10 rounded-full">
-                <FileX className="h-5 w-5 text-red-600 dark:text-red-400" />
+                <FileX className="h-4 w-4 text-red-600 dark:text-red-400" />
               </div>
               Taux de No-Show
             </CardTitle>
@@ -196,7 +186,7 @@ export function AdvancedAnalyticsPanel() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
               <div className="p-2 bg-amber-500/10 rounded-full">
-                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
               Heures de Pointe
             </CardTitle>
