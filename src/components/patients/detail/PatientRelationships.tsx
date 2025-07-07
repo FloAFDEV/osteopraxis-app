@@ -1,7 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { PatientRelationship } from "@/types/patient-relationship";
 import { InfoBubble } from "./InfoBubble";
-import { Users, Calendar } from "lucide-react";
+import { Users, ExternalLink } from "lucide-react";
 import { differenceInYears } from "date-fns";
 
 interface PatientRelationshipsProps {
@@ -10,6 +11,7 @@ interface PatientRelationshipsProps {
 }
 
 export function PatientRelationships({ relationships, loading }: PatientRelationshipsProps) {
+  const navigate = useNavigate();
   if (loading) {
     return (
       <div className="animate-pulse">
@@ -26,6 +28,10 @@ export function PatientRelationships({ relationships, loading }: PatientRelation
   const getAge = (birthDate?: string | null) => {
     if (!birthDate) return null;
     return differenceInYears(new Date(), new Date(birthDate));
+  };
+
+  const handlePatientClick = (patientId: number) => {
+    navigate(`/patients/${patientId}`);
   };
 
   return (
@@ -46,12 +52,13 @@ export function PatientRelationships({ relationships, loading }: PatientRelation
           return (
             <InfoBubble
               key={relationship.id}
-              icon={Calendar}
+              icon={ExternalLink}
               label={relationship.relationship_type}
               value={fullValue}
               variant="default"
               size="sm"
               showTooltip={true}
+              onClick={() => handlePatientClick(relationship.related_patient_id)}
             />
           );
         })}
