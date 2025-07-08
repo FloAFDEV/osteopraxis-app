@@ -19,6 +19,8 @@ export type Database = {
           cabinetId: number | null
           createdAt: string
           date: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: number
           notes: string | null
           notificationSent: boolean
@@ -33,6 +35,8 @@ export type Database = {
           cabinetId?: number | null
           createdAt?: string
           date: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: number
           notes?: string | null
           notificationSent?: boolean
@@ -47,6 +51,8 @@ export type Database = {
           cabinetId?: number | null
           createdAt?: string
           date?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: number
           notes?: string | null
           notificationSent?: boolean
@@ -73,6 +79,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id: string
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       Cabinet: {
         Row: {
@@ -341,6 +386,8 @@ export type Database = {
           cabinetId: number | null
           createdAt: string | null
           date: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: number
           notes: string | null
           osteopathId: number | null
@@ -357,6 +404,8 @@ export type Database = {
           cabinetId?: number | null
           createdAt?: string | null
           date?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: number
           notes?: string | null
           osteopathId?: number | null
@@ -373,6 +422,8 @@ export type Database = {
           cabinetId?: number | null
           createdAt?: string | null
           date?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: number
           notes?: string | null
           osteopathId?: number | null
@@ -608,6 +659,8 @@ export type Database = {
           createdAt: string
           currentMedication: string | null
           currentTreatment: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           dental_exam: string | null
           dental_health: string | null
           developmentMilestones: string | null
@@ -719,6 +772,8 @@ export type Database = {
           createdAt?: string
           currentMedication?: string | null
           currentTreatment?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dental_exam?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
@@ -830,6 +885,8 @@ export type Database = {
           createdAt?: string
           currentMedication?: string | null
           currentTreatment?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dental_exam?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
@@ -1265,9 +1322,12 @@ export type Database = {
         Row: {
           auth_id: string | null
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           email: string
           first_name: string | null
           id: string
+          is_active: boolean | null
           last_name: string | null
           osteopathId: number | null
           role: Database["public"]["Enums"]["Role"]
@@ -1276,9 +1336,12 @@ export type Database = {
         Insert: {
           auth_id?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           email: string
           first_name?: string | null
           id?: string
+          is_active?: boolean | null
           last_name?: string | null
           osteopathId?: number | null
           role?: Database["public"]["Enums"]["Role"]
@@ -1287,9 +1350,12 @@ export type Database = {
         Update: {
           auth_id?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           email?: string
           first_name?: string | null
           id?: string
+          is_active?: boolean | null
           last_name?: string | null
           osteopathId?: number | null
           role?: Database["public"]["Enums"]["Role"]
@@ -1370,6 +1436,24 @@ export type Database = {
       }
       is_admin_user: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      log_audit_action: {
+        Args: {
+          p_action: string
+          p_table_name: string
+          p_record_id: string
+          p_old_values?: Json
+          p_new_values?: Json
+        }
+        Returns: undefined
+      }
+      restore_record: {
+        Args: { p_table_name: string; p_record_id: string }
+        Returns: boolean
+      }
+      soft_delete_record: {
+        Args: { p_table_name: string; p_record_id: string }
         Returns: boolean
       }
       use_cabinet_invitation: {
