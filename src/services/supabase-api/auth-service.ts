@@ -83,12 +83,29 @@ export const supabaseAuthService = {
       console.error("Erreur lors de la recherche du profil ostéopathe:", osteoError);
     }
       
+    // Récupérer les informations utilisateur depuis la base de données  
+    let userFromDb = null;
+    try {
+      const { data: userData } = await supabase
+        .from("User")
+        .select("*")
+        .eq("auth_id", data.user.id)
+        .maybeSingle();
+      
+      if (userData) {
+        userFromDb = userData;
+        osteopathId = userData.osteopathId; // Utiliser l'osteopathId de la DB
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données utilisateur:", error);
+    }
+      
     const user: User = {
       id: data.user.id,
       email: data.user.email || "",
-      firstName: data.user.user_metadata.firstName,
-      lastName: data.user.user_metadata.lastName,
-      role: (data.user.user_metadata.role || "OSTEOPATH") as any,
+      firstName: userFromDb?.first_name || data.user.user_metadata.firstName,
+      lastName: userFromDb?.last_name || data.user.user_metadata.lastName,
+      role: (userFromDb?.role || data.user.user_metadata.role || "OSTEOPATH") as any,
       created_at: data.user.created_at,
       updated_at: new Date().toISOString(),
       osteopathId: osteopathId
@@ -159,15 +176,31 @@ export const supabaseAuthService = {
     
     // ✅ Session Supabase trouvée
         
+    // Récupérer les informations utilisateur depuis la base de données
+    let userFromDb = null;
+    try {
+      const { data: userData } = await supabase
+        .from("User")
+        .select("*")
+        .eq("auth_id", data.session.user.id)
+        .maybeSingle();
+      
+      if (userData) {
+        userFromDb = userData;
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données utilisateur:", error);
+    }
+    
     const user: User = {
       id: data.session.user.id,
       email: data.session.user.email || "",
-      firstName: data.session.user.user_metadata.firstName,
-      lastName: data.session.user.user_metadata.lastName,
-      role: (data.session.user.user_metadata.role || "OSTEOPATH") as any,
+      firstName: userFromDb?.first_name || data.session.user.user_metadata.firstName,
+      lastName: userFromDb?.last_name || data.session.user.user_metadata.lastName,
+      role: (userFromDb?.role || data.session.user.user_metadata.role || "OSTEOPATH") as any,
       created_at: data.session.user.created_at,
       updated_at: new Date().toISOString(),
-      osteopathId: data.session.user.user_metadata.osteopathId
+      osteopathId: userFromDb?.osteopathId || data.session.user.user_metadata.osteopathId
     };
         
     // Vérifier si l'utilisateur a déjà un profil d'ostéopathe via User (avec auth_id)
