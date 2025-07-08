@@ -62,7 +62,12 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			const authResult = await api.login(email, password);
 			setUser(authResult.user);
 			setIsAuthenticated(authResult.isAuthenticated);
-			navigate("/patients");
+			// Redirection basée sur le rôle
+			if (authResult.user?.role === "ADMIN") {
+				navigate("/admin");
+			} else {
+				navigate("/patients");
+			}
 			toast.success("Connexion réussie !");
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de la connexion");

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
-import { Layout } from "@/components/ui/layout";
+import { AdminLayout } from "@/components/ui/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FancyLoader } from "@/components/ui/fancy-loader";
@@ -59,7 +59,7 @@ export function AdminDashboard() {
   
   if (!user || user.role !== "ADMIN") {
     return (
-      <Layout>
+      <AdminLayout>
         <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
           <ShieldCheck className="text-red-500 h-16 w-16 mb-4" />
           <h1 className="text-2xl font-bold mb-2">Accès refusé</h1>
@@ -67,7 +67,7 @@ export function AdminDashboard() {
             Vous n'avez pas les droits d'administration nécessaires pour accéder à cette page.
           </p>
         </div>
-      </Layout>
+      </AdminLayout>
     );
   }
   
@@ -76,7 +76,7 @@ export function AdminDashboard() {
   }
 
   return (
-    <Layout>
+    <AdminLayout>
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -223,6 +223,6 @@ export function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 }

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Layout } from "@/components/ui/layout";
+import { AdminLayout } from "@/components/ui/admin-layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,11 +88,11 @@ const AdminPage = () => {
 
   if (authLoading) {
     return (
-      <Layout>
+      <AdminLayout>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-      </Layout>
+      </AdminLayout>
     );
   }
 
@@ -101,7 +101,7 @@ const AdminPage = () => {
   }
 
   return (
-    <Layout>
+    <AdminLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-6">
           <Shield className="h-8 w-8 text-pink-500 mr-3" />
@@ -237,7 +237,7 @@ const AdminPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 
