@@ -22,6 +22,7 @@ import {
 	LogOut,
 	Menu,
 	Settings,
+	Shield,
 	User,
 	UserPlus,
 	X,
@@ -36,7 +37,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-	const { user, logout } = useAuth();
+	const { user, logout, isAdmin } = useAuth();
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -199,6 +200,32 @@ export function Layout({ children }: LayoutProps) {
 										<span>Paramètres du cabinet</span>
 									</NavLink>
 								</DropdownMenuItem>
+								
+								{/* Liens admin - uniquement pour les administrateurs */}
+								{isAdmin && (
+									<>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem asChild>
+											<NavLink
+												to="/admin"
+												className="flex items-center cursor-pointer"
+											>
+												<Shield className="mr-2 h-4 w-4 text-red-500" />
+												<span>Administration</span>
+											</NavLink>
+										</DropdownMenuItem>
+										<DropdownMenuItem asChild>
+											<NavLink
+												to="/admin/dashboard"
+												className="flex items-center cursor-pointer"
+											>
+												<Shield className="mr-2 h-4 w-4 text-red-500" />
+												<span>Dashboard Admin</span>
+											</NavLink>
+										</DropdownMenuItem>
+									</>
+								)}
+								
 								<DropdownMenuItem asChild>
 									{/* Placeholder for future menu item */}
 								</DropdownMenuItem>
@@ -339,6 +366,42 @@ export function Layout({ children }: LayoutProps) {
 							<Building className="h-5 w-5 text-purple-500" />
 							Paramètres du cabinet
 						</NavLink>
+
+						{/* Liens admin - uniquement pour les administrateurs */}
+						{isAdmin && (
+							<>
+								<NavLink
+									to="/admin"
+									className={({ isActive }) =>
+										cn(
+											"p-2 rounded-md transition-colors flex items-center gap-2",
+											isActive
+												? "bg-red-500/10 text-foreground"
+												: "text-foreground"
+										)
+									}
+									onClick={() => setIsMenuOpen(false)}
+								>
+									<Shield className="h-5 w-5 text-red-500" />
+									Administration
+								</NavLink>
+								<NavLink
+									to="/admin/dashboard"
+									className={({ isActive }) =>
+										cn(
+											"p-2 rounded-md transition-colors flex items-center gap-2",
+											isActive
+												? "bg-red-500/10 text-foreground"
+												: "text-foreground"
+										)
+									}
+									onClick={() => setIsMenuOpen(false)}
+								>
+									<Shield className="h-5 w-5 text-red-500" />
+									Dashboard Admin
+								</NavLink>
+							</>
+						)}
 
 						<div className="p-2 flex items-center justify-between">
 							<span className="font-light">Thème</span>
