@@ -32,8 +32,8 @@ export function PatientRelationships({ relationships, loading, currentPatientId,
     return differenceInYears(new Date(), new Date(birthDate));
   };
 
-  // Fonction pour obtenir la relation inverse selon le genre
-  const getInverseRelationship = (originalRelation: string, targetGender?: string | null) => {
+  // Fonction pour obtenir la relation réciproque selon le genre et le statut
+  const getReciprocalRelationship = (originalRelation: string, targetGender?: string | null, targetIsDeceased?: boolean) => {
     const gender = targetGender?.toLowerCase();
     const isMale = gender === "homme" || gender === "male";
     const isFemale = gender === "femme" || gender === "female";
@@ -74,7 +74,22 @@ export function PatientRelationships({ relationships, loading, currentPatientId,
       case "conjoint(e)":
       case "conjoint":
       case "conjointe":
+        // Si le conjoint est décédé, on devient veuf/veuve
+        if (targetIsDeceased) {
+          return isMale ? "Veuf" : isFemale ? "Veuve" : "Veuf/Veuve";
+        }
         return "Conjoint(e)";
+      case "mari":
+        if (targetIsDeceased) return "Veuve";
+        return "Épouse";
+      case "femme":
+      case "épouse":
+        if (targetIsDeceased) return "Veuf";
+        return "Mari";
+      case "veuf":
+        return "Épouse décédée";
+      case "veuve":
+        return "Mari décédé";
       default:
         return originalRelation;
     }
@@ -104,11 +119,14 @@ export function PatientRelationships({ relationships, loading, currentPatientId,
           
           let displayedRelation: string;
           if (isDirectRelation) {
-            // Relation directe : on affiche la relation telle qu'elle est stockée
-            displayedRelation = relationship.relationship_type;
+            // Relation directe : on affiche la relation réciproque (si je suis sœur, tu es frère)
+            displayedRelation = getReciprocalRelationship(
+              relationship.relationship_type, 
+              relationship.related_patient?.gender
+            );
           } else {
-            // Relation inverse : on affiche la relation inverse selon le genre du patient actuel
-            displayedRelation = getInverseRelationship(relationship.relationship_type, currentPatientGender);
+            // Relation inverse : on affiche la relation originale (si tu es sœur, je t'affiche comme sœur)
+            displayedRelation = relationship.relationship_type;
           }
           
           return (
