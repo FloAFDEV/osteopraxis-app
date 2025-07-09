@@ -6,6 +6,10 @@ import { AdminLayout } from "@/components/ui/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FancyLoader } from "@/components/ui/fancy-loader";
+import { UsersManagement } from "./users-management";
+import { CabinetsManagement } from "./cabinets-management";
+import { PatientsManagement } from "./patients-management";
+import { AuditLogsPanel } from "./audit-logs";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck 
 } from "lucide-react";
@@ -148,11 +152,12 @@ export function AdminDashboard() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="osteopaths">Ostéopathes</TabsTrigger>
+            <TabsTrigger value="users">Utilisateurs</TabsTrigger>
             <TabsTrigger value="cabinets">Cabinets</TabsTrigger>
             <TabsTrigger value="patients">Patients</TabsTrigger>
+            <TabsTrigger value="audit">Audit</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview">
@@ -177,49 +182,20 @@ export function AdminDashboard() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="osteopaths">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestion des ostéopathes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    Interface de gestion des ostéopathes à implémenter
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="users">
+            <UsersManagement />
           </TabsContent>
           
           <TabsContent value="cabinets">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestion des cabinets</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    Interface de gestion des cabinets à implémenter
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <CabinetsManagement />
           </TabsContent>
           
           <TabsContent value="patients">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestion des patients</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    Interface de gestion des patients à implémenter
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <PatientsManagement />
+          </TabsContent>
+          
+          <TabsContent value="audit">
+            <AuditLogsPanel />
           </TabsContent>
         </Tabs>
       </div>

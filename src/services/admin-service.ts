@@ -243,3 +243,163 @@ class AdminService {
 }
 
 export const adminService = new AdminService();
+
+// === Phase 2: Gestion des cabinets et patients ===
+
+// Types pour la gestion des cabinets
+export interface AdminCabinetWithStats {
+  id: number;
+  name: string;
+  address: string;
+  email: string | null;
+  phone: string | null;
+  owner_osteopath_id: number;
+  owner_name: string;
+  associated_osteopaths_count: number;
+  patients_count: number;
+  active_patients_count: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+// Types pour la recherche de patients
+export interface AdminPatientSearchResult {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  osteopath_id: number;
+  osteopath_name: string;
+  cabinet_id: number | null;
+  cabinet_name: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+// Types pour les doublons de patients
+export interface PatientDuplicate {
+  group_id: number;
+  patient_id: number;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  birth_date: string;
+  similarity_score: number;
+}
+
+// Types pour les patients orphelins
+export interface OrphanPatient {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  osteopath_id: number | null;
+  cabinet_id: number | null;
+  cabinet_name: string | null;
+  created_at: string;
+  issue_type: 'no_osteopath' | 'osteopath_not_found';
+}
+
+// Gestion des cabinets
+export const getCabinetsWithStats = async (): Promise<AdminCabinetWithStats[]> => {
+  try {
+    const { data, error } = await supabase.rpc('admin_get_cabinets_with_stats');
+    
+    if (error) {
+      console.error('Erreur lors de la récupération des cabinets:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Erreur dans getCabinetsWithStats:', error);
+    throw error;
+  }
+};
+
+export const deactivateCabinet = async (cabinetId: number): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.rpc('admin_deactivate_cabinet', {
+      cabinet_id: cabinetId
+    });
+    
+    if (error) {
+      console.error('Erreur lors de la désactivation du cabinet:', error);
+      throw error;
+    }
+    
+    return data === true;
+  } catch (error) {
+    console.error('Erreur dans deactivateCabinet:', error);
+    throw error;
+  }
+};
+
+// Recherche globale de patients
+export const searchPatients = async (
+  searchTerm?: string,
+  osteopathFilter?: number,
+  cabinetFilter?: number,
+  limitCount: number = 50
+): Promise<AdminPatientSearchResult[]> => {
+  try {
+    const { data, error } = await supabase.rpc('admin_search_patients', {
+      search_term: searchTerm || null,
+      osteopath_filter: osteopathFilter || null,
+      cabinet_filter: cabinetFilter || null,
+      limit_count: limitCount
+    });
+    
+    if (error) {
+      console.error('Erreur lors de la recherche de patients:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Erreur dans searchPatients:', error);
+    throw error;
+  }
+};
+
+// Détection des doublons
+export const findPatientDuplicates = async (): Promise<PatientDuplicate[]> => {
+  try {
+    const { data, error } = await supabase.rpc('admin_find_patient_duplicates');
+    
+    if (error) {
+      console.error('Erreur lors de la recherche de doublons:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Erreur dans findPatientDuplicates:', error);
+    throw error;
+  }
+};
+
+// Patients orphelins
+export const getOrphanPatients = async (): Promise<OrphanPatient[]> => {
+  try {
+    const { data, error } = await supabase.rpc('admin_get_orphan_patients');
+    
+    if (error) {
+      console.error('Erreur lors de la récupération des patients orphelins:', error);
+      throw error;
+    }
+    
+    return (data || []).map((item: any) => ({
+      ...item,
+      issue_type: item.issue_type as 'no_osteopath' | 'osteopath_not_found'
+    }));
+  } catch (error) {
+    console.error('Erreur dans getOrphanPatients:', error);
+    throw error;
+  }
+};
