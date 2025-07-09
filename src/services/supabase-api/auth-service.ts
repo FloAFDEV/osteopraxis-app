@@ -227,21 +227,9 @@ export const supabaseAuthService = {
           osteopathId = osteopathData.id;
           console.log("Profil ostéopathe trouvé directement lors du checkAuth:", osteopathId);
               
-          // Mettre à jour la table User si nous avons trouvé un ostéopathId mais qu'il n'était pas dans User
-          try {
-            const { error: userUpdateError } = await supabase
-              .from("User")
-              .update({ osteopathId })
-              .eq("auth_id", data.session.user.id);
-                  
-            if (userUpdateError) {
-              console.error("Erreur lors de la mise à jour du User avec osteopathId:", userUpdateError);
-            } else {
-              // ✅ User mis à jour avec osteopathId
-            }
-          } catch (updateError) {
-            console.error("Exception lors de la mise à jour du User:", updateError);
-          }
+          // Ne pas mettre à jour la table User automatiquement pour éviter les erreurs CORS
+          // L'osteopathId sera géré via l'interface utilisateur si nécessaire
+          console.log("OsteopathId trouvé:", osteopathId, "mais pas de mise à jour automatique du User");
         } else {
           // ✅ Pas de profil ostéopathe trouvé
         }

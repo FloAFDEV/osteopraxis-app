@@ -119,6 +119,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			if (authResult && authResult.isAuthenticated) {
 				setUser(authResult.user);
 				setIsAuthenticated(true);
+				
+				// Redirection automatique pour les admins si on est sur une page non-admin
+				if (authResult.user?.role === "ADMIN" && !window.location.pathname.startsWith("/admin")) {
+					navigate("/admin");
+				}
 			} else {
 				setUser(null);
 				setIsAuthenticated(false);
@@ -130,7 +135,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [navigate]);
 
 	const loginWithMagicLink = useCallback(async (email: string) => {
     try {
