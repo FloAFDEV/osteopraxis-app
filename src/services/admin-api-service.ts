@@ -45,6 +45,26 @@ class AdminApiService {
     }
   }
   
+  // Récupération des ostéopathes
+  async getOsteopaths() {
+    try {
+      const { data, error } = await supabase
+        .from('Osteopath')
+        .select('id, name')
+        .order('name');
+      
+      if (error) {
+        console.error('Erreur admin getOsteopaths:', error);
+        throw new Error(`Erreur lors de la récupération des ostéopathes: ${error.message}`);
+      }
+      
+      return { data: data || [] };
+    } catch (error) {
+      console.error('Exception admin getOsteopaths:', error);
+      throw error;
+    }
+  }
+  
   // Récupération des rendez-vous directement via Supabase
   async getAppointments() {
     try {

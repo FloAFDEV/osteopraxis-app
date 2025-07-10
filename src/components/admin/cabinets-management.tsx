@@ -204,10 +204,10 @@ export function CabinetsManagement() {
 
       {/* Modal détails cabinet */}
       {selectedCabinet && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedCabinet(null)}>
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <CardHeader className="relative">
+              <CardTitle className="flex items-center gap-2 pr-10">
                 <Building className="h-5 w-5 text-blue-500" />
                 Détails du cabinet: {selectedCabinet.name}
               </CardTitle>

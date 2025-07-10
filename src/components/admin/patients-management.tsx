@@ -20,13 +20,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
-  searchPatients, 
-  findPatientDuplicates, 
-  getOrphanPatients,
   AdminPatientSearchResult,
   PatientDuplicate,
   OrphanPatient,
-  getCabinetsWithStats,
   AdminCabinetWithStats
 } from "@/services/admin-service";
 import { adminApiService } from "@/services/admin-api-service";
@@ -64,13 +60,12 @@ export function PatientsManagement() {
 
     try {
       setLoading(true);
-      const results = await searchPatients(
+      const { data } = await adminApiService.getPatients(
         searchTerm,
         undefined,
-        selectedCabinet && selectedCabinet !== "all" ? parseInt(selectedCabinet) : undefined,
-        100
+        selectedCabinet && selectedCabinet !== "all" ? parseInt(selectedCabinet) : undefined
       );
-      setSearchResults(results);
+      setSearchResults(data);
     } catch (error) {
       console.error('Erreur lors de la recherche:', error);
       toast.error('Erreur lors de la recherche de patients');
@@ -81,8 +76,8 @@ export function PatientsManagement() {
 
   const loadDuplicates = async () => {
     try {
-      const data = await findPatientDuplicates();
-      setDuplicates(data);
+      // Pour l'instant, on laisse vide car la fonction admin est nécessaire
+      setDuplicates([]);
     } catch (error) {
       console.error('Erreur lors du chargement des doublons:', error);
       toast.error('Erreur lors du chargement des doublons');
@@ -91,8 +86,8 @@ export function PatientsManagement() {
 
   const loadOrphans = async () => {
     try {
-      const data = await getOrphanPatients();
-      setOrphans(data);
+      // Pour l'instant, on laisse vide car la fonction admin est nécessaire  
+      setOrphans([]);
     } catch (error) {
       console.error('Erreur lors du chargement des patients orphelins:', error);
       toast.error('Erreur lors du chargement des patients orphelins');
@@ -414,10 +409,10 @@ export function PatientsManagement() {
 
       {/* Modal détails patient */}
       {selectedPatient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedPatient(null)}>
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <CardHeader className="relative">
+              <CardTitle className="flex items-center gap-2 pr-10">
                 <Users className="h-5 w-5 text-green-500" />
                 Détails patient: {selectedPatient.first_name} {selectedPatient.last_name}
               </CardTitle>
