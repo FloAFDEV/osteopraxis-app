@@ -1415,6 +1415,26 @@ export type Database = {
           deleted_at: string
         }[]
       }
+      admin_get_detailed_stats: {
+        Args: { period_type?: string; periods_count?: number }
+        Returns: {
+          period_label: string
+          period_start: string
+          period_end: string
+          new_users: number
+          new_osteopaths: number
+          new_patients: number
+          new_cabinets: number
+          total_appointments: number
+          completed_appointments: number
+          canceled_appointments: number
+          total_invoices: number
+          paid_invoices: number
+          total_revenue: number
+          active_users: number
+          error_count: number
+        }[]
+      }
       admin_get_error_logs: {
         Args: { limit_count?: number }
         Returns: {
@@ -1468,6 +1488,39 @@ export type Database = {
           total_revenue: number
           avg_revenue_per_appointment: number
           last_activity_date: string
+        }[]
+      }
+      admin_get_system_health: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          metric_name: string
+          metric_value: string
+          metric_type: string
+          status: string
+          last_updated: string
+        }[]
+      }
+      admin_get_system_logs: {
+        Args: {
+          limit_count?: number
+          log_level?: string
+          date_from?: string
+          date_to?: string
+        }
+        Returns: {
+          log_id: string
+          log_timestamp: string
+          level: string
+          action: string
+          table_name: string
+          user_id: string
+          user_email: string
+          record_id: string
+          old_values: Json
+          new_values: Json
+          ip_address: unknown
+          user_agent: string
+          success: boolean
         }[]
       }
       admin_get_system_stats: {

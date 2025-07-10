@@ -11,6 +11,9 @@ import { UsersManagement } from "./users-management";
 import { CabinetsManagement } from "./cabinets-management";
 import { PatientsManagement } from "./patients-management";
 import { AuditLogsPanel } from "./audit-logs";
+import { AdminLogsPanel } from "./admin-logs";
+import { SystemHealthPanel } from "./system-health";
+import { DetailedStatsPanel } from "./detailed-stats";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck 
 } from "lucide-react";
@@ -146,54 +149,26 @@ export function AdminDashboard() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-7">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="stats">Statistiques</TabsTrigger>
+            <TabsTrigger value="health">Santé</TabsTrigger>
             <TabsTrigger value="users">Utilisateurs</TabsTrigger>
             <TabsTrigger value="cabinets">Cabinets</TabsTrigger>
             <TabsTrigger value="patients">Patients</TabsTrigger>
-            <TabsTrigger value="audit">Audit</TabsTrigger>
+            <TabsTrigger value="logs">Logs</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview">
-            <Card>
-              <CardHeader>
-                <CardTitle>Vue d'ensemble</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-6">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <ShieldCheck className="h-5 w-5 text-blue-600" />
-                      Interface d'Administration Système
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Panneau de contrôle complet avec accès privilégié à toutes les données de la plateforme.
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>• Gestion des utilisateurs et rôles</div>
-                      <div>• Supervision des cabinets</div>
-                      <div>• Analyse des données patients</div>
-                      <div>• Logs d'audit et sécurité</div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 border rounded-lg">
-                      <h4 className="font-medium mb-2">Statistiques Temps Réel</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Données mises à jour automatiquement depuis la base de données
-                      </p>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <h4 className="font-medium mb-2">Contrôles Avancés</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Outils de gestion et supervision globale de la plateforme
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <SystemHealthPanel />
+          </TabsContent>
+          
+          <TabsContent value="stats">
+            <DetailedStatsPanel />
+          </TabsContent>
+          
+          <TabsContent value="health">
+            <SystemHealthPanel />
           </TabsContent>
           
           <TabsContent value="users">
@@ -208,8 +183,8 @@ export function AdminDashboard() {
             <PatientsManagement />
           </TabsContent>
           
-          <TabsContent value="audit">
-            <AuditLogsPanel />
+          <TabsContent value="logs">
+            <AdminLogsPanel />
           </TabsContent>
         </Tabs>
       </div>
