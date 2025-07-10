@@ -220,7 +220,7 @@ export function PatientsManagement() {
                     <SelectValue placeholder="Filtrer par cabinet" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tous les cabinets</SelectItem>
+                    <SelectItem value="all">Tous les cabinets</SelectItem>
                     {cabinets.map((cabinet) => (
                       <SelectItem key={cabinet.id} value={cabinet.id.toString()}>
                         {cabinet.name}
