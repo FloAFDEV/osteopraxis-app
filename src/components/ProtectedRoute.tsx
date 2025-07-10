@@ -24,6 +24,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Rediriger les administrateurs vers l'interface d'administration
+  // sauf s'ils sont déjà sur une route admin
+  if (user.role === "ADMIN" && !window.location.pathname.startsWith('/admin')) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
   return <>{children}</>;
 };
 

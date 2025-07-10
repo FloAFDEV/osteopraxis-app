@@ -69,6 +69,12 @@ export function Dashboard() {
 			return;
 		}
 
+		// Rediriger les administrateurs vers l'interface d'administration
+		if (user.role === "ADMIN") {
+			window.location.href = "/admin/dashboard";
+			return;
+		}
+
 		const loadDashboardData = async () => {
 			setLoading(true);
 			setError(null);
