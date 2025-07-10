@@ -66,7 +66,7 @@ export function PatientsManagement() {
       const results = await searchPatients(
         searchTerm,
         undefined,
-        selectedCabinet ? parseInt(selectedCabinet) : undefined,
+        selectedCabinet && selectedCabinet !== "all" ? parseInt(selectedCabinet) : undefined,
         100
       );
       setSearchResults(results);
