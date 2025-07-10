@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCabinetsWithStats, deactivateCabinet, AdminCabinetWithStats } from "@/services/admin-service";
+import { adminApiService } from "@/services/admin-api-service";
 
 export function CabinetsManagement() {
   const [cabinets, setCabinets] = useState<AdminCabinetWithStats[]>([]);
@@ -48,7 +49,7 @@ export function CabinetsManagement() {
   const loadCabinets = async () => {
     try {
       setLoading(true);
-      const data = await getCabinetsWithStats();
+      const { data } = await adminApiService.getCabinets();
       setCabinets(data);
       setFilteredCabinets(data);
     } catch (error) {

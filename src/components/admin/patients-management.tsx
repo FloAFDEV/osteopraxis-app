@@ -29,6 +29,7 @@ import {
   getCabinetsWithStats,
   AdminCabinetWithStats
 } from "@/services/admin-service";
+import { adminApiService } from "@/services/admin-api-service";
 
 export function PatientsManagement() {
   const [searchResults, setSearchResults] = useState<AdminPatientSearchResult[]>([]);
@@ -48,7 +49,7 @@ export function PatientsManagement() {
 
   const loadCabinets = async () => {
     try {
-      const data = await getCabinetsWithStats();
+      const { data } = await adminApiService.getCabinets();
       setCabinets(data);
     } catch (error) {
       console.error('Erreur lors du chargement des cabinets:', error);

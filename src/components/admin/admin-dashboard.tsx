@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { adminService } from "@/services/admin-service";
+import { adminApiService } from "@/services/admin-api-service";
 import { AdminLayout } from "@/components/ui/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,8 +33,8 @@ export function AdminDashboard() {
       try {
         setLoading(true);
         
-        // Utilisation des fonctions admin spécialisées
-        const systemStats = await adminService.getSystemStats();
+        // Utilisation du service API admin spécialisé
+        const systemStats = await adminApiService.getSystemStats();
         
         setStats({
           totalUsers: systemStats.total_users || 0,

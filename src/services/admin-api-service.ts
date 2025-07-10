@@ -1,0 +1,132 @@
+import { supabase } from "@/integrations/supabase/client";
+
+/**
+ * Service API spécialement conçu pour les administrateurs
+ * N'utilise pas les fonctions nécessitant un profil ostéopathe
+ */
+class AdminApiService {
+  
+  // Récupération directe des cabinets via la fonction admin
+  async getCabinets() {
+    try {
+      const { data, error } = await supabase.rpc('admin_get_cabinets_with_stats');
+      
+      if (error) {
+        console.error('Erreur admin getCabinets:', error);
+        throw new Error(`Erreur lors de la récupération des cabinets: ${error.message}`);
+      }
+      
+      return { data: data || [] };
+    } catch (error) {
+      console.error('Exception admin getCabinets:', error);
+      throw error;
+    }
+  }
+  
+  // Récupération des patients via la fonction admin
+  async getPatients(searchTerm?: string, osteopathFilter?: number, cabinetFilter?: number) {
+    try {
+      const { data, error } = await supabase.rpc('admin_search_patients', {
+        search_term: searchTerm || null,
+        osteopath_filter: osteopathFilter || null,
+        cabinet_filter: cabinetFilter || null,
+        limit_count: 100
+      });
+      
+      if (error) {
+        console.error('Erreur admin getPatients:', error);
+        throw new Error(`Erreur lors de la récupération des patients: ${error.message}`);
+      }
+      
+      return { data: data || [] };
+    } catch (error) {
+      console.error('Exception admin getPatients:', error);
+      throw error;
+    }
+  }
+  
+  // Récupération des rendez-vous directement via Supabase
+  async getAppointments() {
+    try {
+      const { data, error } = await supabase
+        .from('Appointment')
+        .select(`
+          *,
+          Patient!inner(firstName, lastName, email, phone),
+          Osteopath!inner(name)
+        `)
+        .is('deleted_at', null)
+        .order('date', { ascending: false })
+        .limit(100);
+      
+      if (error) {
+        console.error('Erreur admin getAppointments:', error);
+        throw new Error(`Erreur lors de la récupération des rendez-vous: ${error.message}`);
+      }
+      
+      return { data: data || [] };
+    } catch (error) {
+      console.error('Exception admin getAppointments:', error);
+      throw error;
+    }
+  }
+  
+  // Récupération des factures directement via Supabase
+  async getInvoices() {
+    try {
+      const { data, error } = await supabase
+        .from('Invoice')
+        .select(`
+          *,
+          Patient!inner(firstName, lastName, email),
+          Osteopath!inner(name)
+        `)
+        .is('deleted_at', null)
+        .order('date', { ascending: false })
+        .limit(100);
+      
+      if (error) {
+        console.error('Erreur admin getInvoices:', error);
+        throw new Error(`Erreur lors de la récupération des factures: ${error.message}`);
+      }
+      
+      return { data: data || [] };
+    } catch (error) {
+      console.error('Exception admin getInvoices:', error);
+      throw error;
+    }
+  }
+  
+  // Statistiques système
+  async getSystemStats() {
+    try {
+      const { data, error } = await supabase.rpc('admin_get_system_stats');
+      
+      if (error) {
+        console.error('Erreur admin getSystemStats:', error);
+        throw new Error(`Erreur lors de la récupération des statistiques: ${error.message}`);
+      }
+      
+      return data[0] || {
+        total_users: 0,
+        active_users: 0,
+        total_osteopaths: 0,
+        total_cabinets: 0,
+        total_patients: 0,
+        active_patients: 0,
+        total_appointments: 0,
+        appointments_this_month: 0,
+        total_invoices: 0,
+        paid_invoices: 0,
+        system_revenue: 0,
+        avg_appointments_per_osteopath: 0,
+        database_size: 'N/A'
+      };
+    } catch (error) {
+      console.error('Exception admin getSystemStats:', error);
+      throw error;
+    }
+  }
+}
+
+export const adminApiService = new AdminApiService();
