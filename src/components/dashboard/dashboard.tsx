@@ -2,6 +2,7 @@
 import { api } from "@/services/api";
 import { DashboardData, Patient } from "@/types";
 import { formatAppointmentDate } from "@/utils/date-utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { AppointmentsOverview } from "./appointments-overview";
 import { ConsultationsChart } from "./consultations-chart";
@@ -54,6 +55,7 @@ const initialDashboardData: DashboardData = {
 };
 
 export function Dashboard() {
+	const { user, isAuthenticated, loading: authLoading } = useAuth();
 	const [dashboardData, setDashboardData] =
 		useState<DashboardData>(initialDashboardData);
 	const [loading, setLoading] = useState(true);
@@ -61,6 +63,12 @@ export function Dashboard() {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
+		// Ne pas charger les données si l'utilisateur n'est pas authentifié
+		if (!isAuthenticated || !user) {
+			setLoading(false);
+			return;
+		}
+
 		const loadDashboardData = async () => {
 			setLoading(true);
 			setError(null);
@@ -145,12 +153,21 @@ export function Dashboard() {
 		};
 
 		loadDashboardData();
-	}, []);
+	}, [isAuthenticated, user]);
 
-	
-
-	if (loading) {
+	// Afficher un état de chargement si l'auth est en cours ou si les données se chargent
+	if (authLoading || loading) {
 		return <LoadingState />;
+	}
+
+	// Si pas authentifié, afficher un message approprié
+	if (!isAuthenticated || !user) {
+		return (
+			<div className="flex flex-col items-center justify-center p-8 text-center">
+				<h2 className="text-xl font-semibold mb-2">Authentification requise</h2>
+				<p className="text-muted-foreground">Veuillez vous connecter pour accéder au tableau de bord.</p>
+			</div>
+		);
 	}
 
 	if (error) {

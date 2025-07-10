@@ -8,9 +8,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, isLoading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
 
-  if (isLoading) {
+  // Afficher un loader pendant la vérification d'authentification
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -18,7 +19,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user) {
+  // Rediriger vers login si pas authentifié
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 

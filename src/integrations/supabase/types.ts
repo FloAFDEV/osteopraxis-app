@@ -1376,6 +1376,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_cleanup_old_logs: {
+        Args: { retention_days?: number }
+        Returns: number
+      }
       admin_deactivate_cabinet: {
         Args: { cabinet_id: number }
         Returns: boolean
@@ -1411,6 +1415,32 @@ export type Database = {
           deleted_at: string
         }[]
       }
+      admin_get_error_logs: {
+        Args: { limit_count?: number }
+        Returns: {
+          log_id: string
+          log_timestamp: string
+          level: string
+          message: string
+          user_id: string
+          table_name: string
+          action: string
+          error_details: Json
+        }[]
+      }
+      admin_get_monthly_stats: {
+        Args: { year_filter?: number; month_filter?: number }
+        Returns: {
+          month_year: string
+          total_appointments: number
+          completed_appointments: number
+          canceled_appointments: number
+          total_revenue: number
+          active_patients: number
+          new_patients: number
+          active_osteopaths: number
+        }[]
+      }
       admin_get_orphan_patients: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1424,6 +1454,38 @@ export type Database = {
           cabinet_name: string
           created_at: string
           issue_type: string
+        }[]
+      }
+      admin_get_osteopath_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          osteopath_id: number
+          osteopath_name: string
+          total_patients: number
+          active_patients: number
+          total_appointments: number
+          completed_appointments: number
+          total_revenue: number
+          avg_revenue_per_appointment: number
+          last_activity_date: string
+        }[]
+      }
+      admin_get_system_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_users: number
+          active_users: number
+          total_osteopaths: number
+          total_cabinets: number
+          total_patients: number
+          active_patients: number
+          total_appointments: number
+          appointments_this_month: number
+          total_invoices: number
+          paid_invoices: number
+          system_revenue: number
+          avg_appointments_per_osteopath: number
+          database_size: string
         }[]
       }
       admin_search_patients: {
