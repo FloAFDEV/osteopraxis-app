@@ -79,10 +79,10 @@ export function AdminDashboard() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <ShieldCheck className="h-8 w-8 text-amber-500" />
-              Panneau d'Administration
+              Interface d'Administration
             </h1>
             <p className="text-muted-foreground">
-              Gestion globale de la plateforme - Vue administrateur avec accès complet aux données système
+              Console d'administration système - Supervision complète des données et utilisateurs
             </p>
           </div>
           <button 
