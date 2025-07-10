@@ -135,6 +135,66 @@ class AdminService {
     }
   }
 
+  // Statistiques globales avec fonctions admin spécialisées
+  async getSystemStats(): Promise<{
+    total_users: number;
+    active_users: number;
+    total_osteopaths: number;
+    total_cabinets: number;
+    total_patients: number;
+    active_patients: number;
+    total_appointments: number;
+    appointments_this_month: number;
+    total_invoices: number;
+    paid_invoices: number;
+    system_revenue: number;
+    avg_appointments_per_osteopath: number;
+    database_size: string;
+  }> {
+    try {
+      const { data, error } = await supabase.rpc('admin_get_system_stats');
+      
+      if (error) {
+        console.error('Erreur lors de la récupération des statistiques système:', error);
+        throw error;
+      }
+      
+      return data[0] || {
+        total_users: 0,
+        active_users: 0,
+        total_osteopaths: 0,
+        total_cabinets: 0,
+        total_patients: 0,
+        active_patients: 0,
+        total_appointments: 0,
+        appointments_this_month: 0,
+        total_invoices: 0,
+        paid_invoices: 0,
+        system_revenue: 0,
+        avg_appointments_per_osteopath: 0,
+        database_size: 'N/A'
+      };
+    } catch (error) {
+      console.error('Erreur dans getSystemStats:', error);
+      // Fallback vers l'ancienne méthode
+      return this.getAdminStats().then(stats => ({
+        total_users: stats.totalUsers,
+        active_users: stats.activeUsers,
+        total_osteopaths: stats.totalOsteopaths,
+        total_cabinets: stats.totalCabinets,
+        total_patients: stats.totalPatients,
+        active_patients: stats.totalPatients,
+        total_appointments: stats.totalAppointments,
+        appointments_this_month: 0,
+        total_invoices: 0,
+        paid_invoices: 0,
+        system_revenue: 0,
+        avg_appointments_per_osteopath: 0,
+        database_size: 'N/A'
+      }));
+    }
+  }
+
   // Statistiques globales
   async getAdminStats(): Promise<AdminStats> {
     const [usersResult, osteopathsResult, cabinetsResult, patientsResult, appointmentsResult] = 

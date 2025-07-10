@@ -64,9 +64,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			setIsAuthenticated(authResult.isAuthenticated);
 			// Redirection basée sur le rôle
 			if (authResult.user?.role === "ADMIN") {
-				navigate("/admin");
+				navigate("/admin/dashboard");
 			} else {
-				navigate("/patients");
+				navigate("/dashboard");
 			}
 			toast.success("Connexion réussie !");
 		} catch (err: any) {

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/services/api";
+import { adminService } from "@/services/admin-service";
 import { AdminLayout } from "@/components/ui/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,22 +32,15 @@ export function AdminDashboard() {
       try {
         setLoading(true);
         
-        // Dans un environnement réel, vous auriez une API dédiée pour les statistiques d'admin
-        // Pour l'instant, nous utilisons des appels API existants pour simuler
-        const [users, osteopaths, cabinets, patients, appointments] = await Promise.all([
-          api.getOsteopaths(), // Utilisé comme proxy pour les utilisateurs
-          api.getOsteopaths(),
-          api.getCabinets(),
-          api.getPatients(),
-          api.getAppointments()
-        ]);
+        // Utilisation des fonctions admin spécialisées
+        const systemStats = await adminService.getSystemStats();
         
         setStats({
-          totalUsers: osteopaths.length || 0,
-          totalOsteopaths: osteopaths.length || 0,
-          totalCabinets: cabinets.length || 0,
-          totalPatients: patients.length || 0,
-          totalAppointments: appointments.length || 0
+          totalUsers: systemStats.total_users || 0,
+          totalOsteopaths: systemStats.total_osteopaths || 0,
+          totalCabinets: systemStats.total_cabinets || 0,
+          totalPatients: systemStats.total_patients || 0,
+          totalAppointments: systemStats.total_appointments || 0
         });
       } catch (error) {
         console.error("Erreur lors du chargement des statistiques admin:", error);
@@ -86,10 +79,10 @@ export function AdminDashboard() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <ShieldCheck className="h-8 w-8 text-amber-500" />
-              Administration
+              Panneau d'Administration
             </h1>
             <p className="text-muted-foreground">
-              Interface d'administration pour gérer l'ensemble des utilisateurs, ostéopathes et cabinets
+              Gestion globale de la plateforme - Vue administrateur avec accès complet aux données système
             </p>
           </div>
           <button 
@@ -166,16 +159,36 @@ export function AdminDashboard() {
                 <CardTitle>Vue d'ensemble</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Cette interface vous permet d'administrer l'ensemble de l'application. Vous pouvez y voir et gérer tous les ostéopathes, cabinets et patients.</p>
-                <div className="mt-4 grid gap-4">
-                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-                    <h3 className="font-medium mb-1 flex items-center gap-1.5">
-                      <ShieldCheck className="h-4 w-4" />
-                      Accès administrateur
+                <div className="grid gap-6">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                      <ShieldCheck className="h-5 w-5 text-blue-600" />
+                      Interface d'Administration Système
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      En tant qu'administrateur, vous avez un accès complet à toutes les données de la plateforme.
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Panneau de contrôle complet avec accès privilégié à toutes les données de la plateforme.
                     </p>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>• Gestion des utilisateurs et rôles</div>
+                      <div>• Supervision des cabinets</div>
+                      <div>• Analyse des données patients</div>
+                      <div>• Logs d'audit et sécurité</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <h4 className="font-medium mb-2">Statistiques Temps Réel</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Données mises à jour automatiquement depuis la base de données
+                      </p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <h4 className="font-medium mb-2">Contrôles Avancés</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Outils de gestion et supervision globale de la plateforme
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>

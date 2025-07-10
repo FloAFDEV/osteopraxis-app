@@ -75,7 +75,7 @@ export const TranslatedSelect = ({
         <SelectValue placeholder={loading ? "Chargement..." : placeholder} />
       </SelectTrigger>
       <SelectContent>
-        {options.map((option) => (
+        {options.filter(option => option.value && option.value.trim() !== '').map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}
           </SelectItem>
