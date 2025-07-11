@@ -56,8 +56,8 @@ const LoginPage = () => {
 	const onLoginSubmit = async (data: LoginFormValues) => {
 		try {
 			await login(data.email, data.password);
-			toast.success("Connexion réussie !");
-			navigate("/");
+			// Ne pas faire de navigation ici car le contexte d'authentification
+			// gère déjà la redirection basée sur le rôle
 		} catch (error) {
 			console.error("Erreur de connexion:", error);
 			toast.error("Une erreur est survenue lors de la connexion");
