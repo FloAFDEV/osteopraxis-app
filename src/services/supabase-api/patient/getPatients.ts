@@ -19,11 +19,17 @@ export async function getPatients(): Promise<Patient[]> {
 		
 		console.log("Filtrage des patients par osteopathId:", osteopathId);
 
-		// Appliquer le filtre par osteopathId - CRUCIAL pour la sécurité multi-tenant
-		const { data, error } = await supabase
-			.from("Patient")
-			.select("*")
-			.eq("osteopathId", osteopathId);
+		// Pour les admins (osteopathId = -1), récupérer tous les patients
+		// Pour les ostéopathes, appliquer le filtre par osteopathId
+		let query = supabase.from("Patient").select("*");
+		
+		if (osteopathId !== -1) {
+			query = query.eq("osteopathId", osteopathId);
+		} else {
+			console.log("Accès admin - récupération de tous les patients");
+		}
+
+		const { data, error } = await query;
 
 		if (error) {
 			console.error("Error fetching patients:", error);

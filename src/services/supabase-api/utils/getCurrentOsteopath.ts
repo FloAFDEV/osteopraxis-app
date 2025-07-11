@@ -17,10 +17,10 @@ export const getCurrentOsteopathId = async (): Promise<number | null> => {
     const authId = sessionData.session.user.id;
     console.log("Auth ID de l'utilisateur connecté:", authId);
 
-    // Récupérer l'utilisateur avec auth_id pour obtenir osteopathId
+    // Récupérer l'utilisateur avec auth_id pour obtenir osteopathId et role
     const { data: users, error: userError } = await supabase
       .from("User")
-      .select("osteopathId")
+      .select("osteopathId, role")
       .eq("auth_id", authId);
 
     if (userError) {
@@ -33,7 +33,15 @@ export const getCurrentOsteopathId = async (): Promise<number | null> => {
       return null;
     }
 
-    const osteopathId = users[0].osteopathId;
+    const user = users[0];
+    
+    // Pour les admins, on retourne un ID spécial pour indiquer un accès admin
+    if (user.role === 'ADMIN') {
+      console.log("Utilisateur admin détecté - accès total autorisé");
+      return -1; // ID spécial pour les admins
+    }
+
+    const osteopathId = user.osteopathId;
     console.log("ID de l'ostéopathe récupéré:", osteopathId);
 
     return osteopathId;
