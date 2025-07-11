@@ -19,6 +19,7 @@ import {
   Eye
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   AdminPatientSearchResult,
   PatientDuplicate,
@@ -76,8 +77,10 @@ export function PatientsManagement() {
 
   const loadDuplicates = async () => {
     try {
-      // Pour l'instant, on laisse vide car la fonction admin est nécessaire
-      setDuplicates([]);
+      const { data, error } = await supabase.rpc('admin_find_patient_duplicates');
+      
+      if (error) throw error;
+      setDuplicates(data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des doublons:', error);
       toast.error('Erreur lors du chargement des doublons');
@@ -86,8 +89,13 @@ export function PatientsManagement() {
 
   const loadOrphans = async () => {
     try {
-      // Pour l'instant, on laisse vide car la fonction admin est nécessaire  
-      setOrphans([]);
+      const { data, error } = await supabase.rpc('admin_get_orphan_patients');
+      
+      if (error) throw error;
+      setOrphans((data || []).map((item: any) => ({
+        ...item,
+        issue_type: item.issue_type as 'no_osteopath' | 'osteopath_not_found'
+      })));
     } catch (error) {
       console.error('Erreur lors du chargement des patients orphelins:', error);
       toast.error('Erreur lors du chargement des patients orphelins');

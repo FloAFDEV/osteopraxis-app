@@ -1376,6 +1376,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_deactivate_cabinet: {
+        Args: { cabinet_id: number }
+        Returns: boolean
+      }
+      admin_find_patient_duplicates: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          group_id: number
+          patient_id: number
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          birth_date: string
+          similarity_score: number
+        }[]
+      }
       admin_get_cabinets_with_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1518,6 +1535,28 @@ export type Database = {
           system_revenue: number
           avg_appointments_per_osteopath: number
           database_size: string
+        }[]
+      }
+      admin_search_patients: {
+        Args: {
+          search_term?: string
+          osteopath_filter?: number
+          cabinet_filter?: number
+          limit_count?: number
+        }
+        Returns: {
+          id: number
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          osteopath_id: number
+          osteopath_name: string
+          cabinet_id: number
+          cabinet_name: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
         }[]
       }
       are_google_tokens_expired: {
