@@ -29,14 +29,36 @@ async function verifyUserAndGetIdentity(req: Request): Promise<{ identity: any; 
     return { identity: null, supabaseClient: null, message: "Token invalide" };
   }
 
-  // Récupérer l'osteopathId
+  // Récupérer les données utilisateur
   const { data: userData, error: userDataError } = await supabaseClient
     .from("User")
-    .select("id, osteopathId")
+    .select("id, osteopathId, role")
     .eq("auth_id", user.id)
     .maybeSingle();
 
-  if (userDataError || !userData?.osteopathId) {
+  if (userDataError) {
+    return { identity: null, supabaseClient: null, message: "Erreur lors de la récupération du profil utilisateur" };
+  }
+
+  if (!userData) {
+    return { identity: null, supabaseClient: null, message: "Profil utilisateur non trouvé" };
+  }
+
+  // Pour les admins, pas besoin d'osteopathId
+  if (userData.role === 'ADMIN') {
+    return {
+      identity: {
+        authId: user.id,
+        userId: userData.id,
+        role: userData.role,
+        isAdmin: true
+      },
+      supabaseClient
+    };
+  }
+
+  // Pour les ostéopathes, vérifier l'osteopathId
+  if (!userData.osteopathId) {
     return { identity: null, supabaseClient: null, message: "Profil ostéopathe non trouvé" };
   }
 
@@ -44,7 +66,9 @@ async function verifyUserAndGetIdentity(req: Request): Promise<{ identity: any; 
     identity: {
       authId: user.id,
       userId: userData.id,
-      osteopathId: userData.osteopathId
+      osteopathId: userData.osteopathId,
+      role: userData.role,
+      isAdmin: false
     },
     supabaseClient
   };
@@ -73,12 +97,17 @@ serve(async (req: Request) => {
       case "GET":
         if (cabinetId) {
           // Récupérer un cabinet spécifique
-          const { data: cabinet, error } = await supabaseClient
+          let query = supabaseClient
             .from("Cabinet")
             .select("*")
-            .eq("id", cabinetId)
-            .eq("osteopathId", identity.osteopathId)
-            .maybeSingle();
+            .eq("id", cabinetId);
+          
+          // Pour les ostéopathes, filtrer par osteopathId
+          if (!identity.isAdmin) {
+            query = query.eq("osteopathId", identity.osteopathId);
+          }
+          
+          const { data: cabinet, error } = await query.maybeSingle();
 
           if (error) throw error;
           
@@ -94,11 +123,15 @@ serve(async (req: Request) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else {
-          // Récupérer tous les cabinets de l'ostéopathe
-          const { data: cabinets, error } = await supabaseClient
-            .from("Cabinet")
-            .select("*")
-            .eq("osteopathId", identity.osteopathId);
+          // Pour les admins, récupérer tous les cabinets
+          // Pour les ostéopathes, récupérer uniquement leurs cabinets
+          let query = supabaseClient.from("Cabinet").select("*");
+          
+          if (!identity.isAdmin) {
+            query = query.eq("osteopathId", identity.osteopathId);
+          }
+          
+          const { data: cabinets, error } = await query;
 
           if (error) throw error;
 
