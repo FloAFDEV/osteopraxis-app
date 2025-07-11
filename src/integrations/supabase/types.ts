@@ -1225,11 +1225,14 @@ export type Database = {
           is_active: boolean | null
           max_cabinets: number | null
           max_patients: number | null
+          max_practitioners: number | null
           name: string
+          plan_code: string | null
           price_monthly: number
           price_yearly: number | null
           stripe_price_id_monthly: string | null
           stripe_price_id_yearly: string | null
+          trial_days: number | null
         }
         Insert: {
           created_at?: string
@@ -1238,11 +1241,14 @@ export type Database = {
           is_active?: boolean | null
           max_cabinets?: number | null
           max_patients?: number | null
+          max_practitioners?: number | null
           name: string
+          plan_code?: string | null
           price_monthly: number
           price_yearly?: number | null
           stripe_price_id_monthly?: string | null
           stripe_price_id_yearly?: string | null
+          trial_days?: number | null
         }
         Update: {
           created_at?: string
@@ -1251,11 +1257,14 @@ export type Database = {
           is_active?: boolean | null
           max_cabinets?: number | null
           max_patients?: number | null
+          max_practitioners?: number | null
           name?: string
+          plan_code?: string | null
           price_monthly?: number
           price_yearly?: number | null
           stripe_price_id_monthly?: string | null
           stripe_price_id_yearly?: string | null
+          trial_days?: number | null
         }
         Relationships: []
       }
