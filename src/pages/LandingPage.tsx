@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -108,12 +108,14 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
-  // Redirection uniquement si l'utilisateur est connecté ET que le loading est terminé
-  if (user && !loading) {
-    window.location.href = '/dashboard';
-    return null;
-  }
+  // Redirection avec useNavigate au lieu de window.location.href
+  useEffect(() => {
+    if (user && !loading) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
 
   // Ne pas afficher la landing page pendant le loading
   if (loading) {
