@@ -584,7 +584,7 @@ export default function LandingPage() {
             Prêt à transformer votre pratique ?
           </h2>
           <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Rejoignez des centaines d'ostéopathes qui ont déjà choisi OsteoManager
+            Rejoignez des centaines de professionnels de santé qui ont déjà choisi PatientHub
           </p>
           <Button size="lg" variant="secondary" asChild className="text-lg px-8">
             <Link to="/register">Commencer maintenant</Link>
@@ -601,13 +601,13 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">O</span>
+                <div className="w-8 h-8 bg-gradient-to-br from-primary via-primary to-accent rounded-lg flex items-center justify-center shadow-md">
+                  <Heart className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span className="text-xl font-bold">OsteoManager</span>
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">PatientHub</span>
               </div>
               <p className="text-muted-foreground">
-                La solution complète pour gérer votre cabinet d'ostéopathie.
+                La solution complète pour gérer vos patients et votre pratique médicale.
               </p>
             </div>
             <div>
@@ -634,7 +634,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-border/40 mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 OsteoManager. Tous droits réservés.</p>
+            <p>&copy; 2024 PatientHub. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
