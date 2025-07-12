@@ -40,6 +40,8 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PricingPage from "./pages/PricingPage";
 import ContactPage from "./pages/ContactPage";
+import LandingPage from "./pages/LandingPage";
+import DemoPage from "./pages/DemoPage";
 
 function App() {
   return (
@@ -51,13 +53,16 @@ function App() {
             <BrowserRouter>
               <AuthProvider>
                 <Routes>
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/demo" element={<DemoPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                   <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="/terms" element={<TermsOfServicePage />} />
                   
                   {/* Routes protégées */}
                   <Route
