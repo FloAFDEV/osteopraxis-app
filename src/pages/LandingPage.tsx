@@ -78,7 +78,7 @@ const testimonials = [
 
 const faqs = [
   {
-    question: "Comment commencer avec OsteoManager ?",
+    question: "Comment commencer avec PatientHub ?",
     answer: "Il suffit de créer votre compte gratuit, configurer votre profil d'ostéopathe et commencer à ajouter vos patients. Notre interface intuitive vous guide pas à pas."
   },
   {
@@ -120,8 +120,8 @@ export default function LandingPage() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">O</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                OsteoManager
+                 <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                PatientHub
               </span>
             </div>
 
@@ -246,20 +246,20 @@ export default function LandingPage() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Plan Starter */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {/* Plan Gratuit */}
             <Card className="relative">
               <CardContent className="p-6">
-                <h3 className="text-2xl font-bold mb-2">Starter</h3>
-                <p className="text-muted-foreground mb-4">Parfait pour débuter</p>
+                <h3 className="text-2xl font-bold mb-2">Gratuit</h3>
+                <p className="text-muted-foreground mb-4">Pour débuter</p>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">29€</span>
+                  <span className="text-4xl font-bold">0€</span>
                   <span className="text-muted-foreground">/mois</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Jusqu'à 100 patients</span>
+                    <span>Jusqu'à 50 patients</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
@@ -267,11 +267,15 @@ export default function LandingPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
+                    <span>1 praticien</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
                     <span>Gestion des RDV</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Facturation de base</span>
+                    <span>Dossier médical basique</span>
                   </li>
                 </ul>
                 <Button className="w-full" asChild>
@@ -280,30 +284,67 @@ export default function LandingPage() {
               </CardContent>
             </Card>
 
-            {/* Plan Professional */}
-            <Card className="relative border-primary">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground">Populaire</Badge>
-              </div>
+            {/* Plan Essentiel */}
+            <Card className="relative">
               <CardContent className="p-6">
-                <h3 className="text-2xl font-bold mb-2">Professional</h3>
-                <p className="text-muted-foreground mb-4">Pour la plupart des praticiens</p>
+                <h3 className="text-2xl font-bold mb-2">Essentiel</h3>
+                <p className="text-muted-foreground mb-4">Pour les praticiens indépendants</p>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">59€</span>
+                  <span className="text-4xl font-bold">9€</span>
                   <span className="text-muted-foreground">/mois</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Patients illimités</span>
+                    <span>Jusqu'à 500 patients</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>3 cabinets</span>
+                    <span>1 cabinet</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Toutes les fonctionnalités</span>
+                    <span>1 praticien</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span>Facturation</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span>Export comptable PDF</span>
+                  </li>
+                </ul>
+                <Button className="w-full" asChild>
+                  <Link to="/register">Essai gratuit</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Plan Pro */}
+            <Card className="relative border-primary">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground">Populaire</Badge>
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold mb-2">Pro</h3>
+                <p className="text-muted-foreground mb-4">Le plus populaire</p>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">16€</span>
+                  <span className="text-muted-foreground">/mois</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span>Jusqu'à 1000 patients</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span>2 cabinets</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span>2 praticiens</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
@@ -315,44 +356,47 @@ export default function LandingPage() {
                   </li>
                 </ul>
                 <Button className="w-full" asChild>
-                  <Link to="/register">Commencer</Link>
+                  <Link to="/register">Essai gratuit</Link>
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Plan Clinic */}
+            {/* Plan Premium */}
             <Card className="relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge variant="secondary">Enterprise</Badge>
+              </div>
               <CardContent className="p-6">
-                <h3 className="text-2xl font-bold mb-2">Clinic</h3>
+                <h3 className="text-2xl font-bold mb-2">Premium</h3>
                 <p className="text-muted-foreground mb-4">Pour les gros cabinets</p>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">99€</span>
+                  <span className="text-4xl font-bold">34€</span>
                   <span className="text-muted-foreground">/mois</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Tout illimité</span>
+                    <span>Jusqu'à 3000 patients</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Jusqu'à 10 praticiens</span>
+                    <span>5 cabinets</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Gestion multi-praticiens</span>
+                    <span>Praticiens illimités</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Formation personnalisée</span>
+                    <span>Partage multi-praticiens</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-primary" />
-                    <span>Account manager dédié</span>
+                    <span>Accès API</span>
                   </li>
                 </ul>
                 <Button className="w-full" asChild>
-                  <Link to="/register">Commencer</Link>
+                  <Link to="/register">Essai gratuit</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -409,7 +453,7 @@ export default function LandingPage() {
               Questions fréquentes
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Tout ce que vous devez savoir sur OsteoManager
+              Tout ce que vous devez savoir sur PatientHub
             </p>
           </div>
           <div className="max-w-3xl mx-auto">
