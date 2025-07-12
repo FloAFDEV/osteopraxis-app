@@ -194,10 +194,14 @@ export default function LandingPage() {
                 <Stethoscope className="w-3 h-3 mr-1" />
                 Solution tout-en-un pour professionnels de santé
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-                Gérez vos patients avec 
-                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent"> PatientHub</span>
-              </h1>
+              <div className="mb-6">
+                <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
+                  PatientHub
+                </h1>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-6">
+                Gérez vos patients avec simplicité
+              </h2>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
                 Dossiers patients, rendez-vous, facturation, statistiques... Tout ce dont vous avez besoin 
                 pour développer votre pratique et gagner du temps au quotidien.
