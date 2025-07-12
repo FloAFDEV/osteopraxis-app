@@ -107,12 +107,21 @@ const faqs = [
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  // Si l'utilisateur est connecté, on le redirige vers le dashboard
-  if (user) {
+  // Redirection uniquement si l'utilisateur est connecté ET que le loading est terminé
+  if (user && !loading) {
     window.location.href = '/dashboard';
     return null;
+  }
+
+  // Ne pas afficher la landing page pendant le loading
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
