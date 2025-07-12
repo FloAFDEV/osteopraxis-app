@@ -16,7 +16,7 @@ export default function DemoPage() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">O</span>
               </div>
-              <span className="text-xl font-bold">OsteoManager</span>
+              <span className="text-xl font-bold">PatientHub</span>
             </div>
           </div>
         </div>
