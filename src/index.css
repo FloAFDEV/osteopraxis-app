@@ -5,69 +5,115 @@
 
 @layer base {
 	:root {
-		--background: 0 0% 100%;
-		--foreground: 222.2 47.4% 11.2%;
+		/* Background & Surface Colors */
+		--background: 240 17% 98%;
+		--foreground: 240 10% 8%;
 
-		--muted: 210 40% 96.1%;
-		--muted-foreground: 215.4 16.3% 46.9%;
+		/* Muted Colors */
+		--muted: 240 8% 95%;
+		--muted-foreground: 240 6% 45%;
 
-		--popover: 0 0% 100%;
-		--popover-foreground: 222.2 47.4% 11.2%;
+		/* Popover Colors */
+		--popover: 240 17% 98%;
+		--popover-foreground: 240 10% 8%;
 
-		--card: 0 0% 100%;
-		--card-foreground: 222.2 47.4% 11.2%;
+		/* Card Colors */
+		--card: 240 17% 98%;
+		--card-foreground: 240 10% 8%;
 
-		--border: 214.3 31.8% 91.4%;
-		--input: 214.3 31.8% 91.4%;
+		/* Border & Input */
+		--border: 240 8% 90%;
+		--input: 240 8% 90%;
 
-		--primary: 222.2 47.4% 11.2%;
-		--primary-foreground: 210 40% 98%;
+		/* Primary Colors - Modern Blue/Purple */
+		--primary: 247 85% 60%;
+		--primary-foreground: 240 17% 98%;
+		--primary-variant: 257 75% 65%;
 
-		--secondary: 210 40% 96.1%;
-		--secondary-foreground: 222.2 47.4% 11.2%;
+		/* Secondary Colors */
+		--secondary: 247 20% 95%;
+		--secondary-foreground: 247 85% 35%;
 
-		--accent: 210 40% 96.1%;
-		--accent-foreground: 222.2 47.4% 11.2%;
+		/* Accent Colors */
+		--accent: 257 75% 65%;
+		--accent-foreground: 240 17% 98%;
 
-		--destructive: 0 84.2% 60.2%;
-		--destructive-foreground: 210 40% 98%;
+		/* Destructive Colors */
+		--destructive: 0 84% 60%;
+		--destructive-foreground: 240 17% 98%;
 
-		--ring: 222.2 84% 4.9%;
+		/* Success Colors */
+		--success: 142 71% 45%;
+		--success-foreground: 240 17% 98%;
 
-		--radius: 0.5rem;
+		/* Warning Colors */
+		--warning: 38 92% 50%;
+		--warning-foreground: 240 17% 98%;
+
+		/* Ring & Focus */
+		--ring: 247 85% 60%;
+
+		/* Gradients */
+		--gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-variant)));
+		--gradient-background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+
+		/* Shadows */
+		--shadow-primary: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+		--shadow-card: 0 4px 20px -4px hsl(var(--primary) / 0.1);
+
+		--radius: 0.75rem;
 	}
 
 	.dark {
-		--background: 222.2 84% 7%;
-		--foreground: 210 40% 98%;
+		/* Dark Background & Surface Colors */
+		--background: 240 10% 8%;
+		--foreground: 240 17% 98%;
 
-		--muted: 217.2 32.6% 17.5%;
-		--muted-foreground: 215 20.2% 65.1%;
+		/* Dark Muted Colors */
+		--muted: 240 8% 15%;
+		--muted-foreground: 240 6% 65%;
 
-		--popover: 222.2 84% 4.9%;
-		--popover-foreground: 210 40% 98%;
+		/* Dark Popover Colors */
+		--popover: 240 10% 8%;
+		--popover-foreground: 240 17% 98%;
 
-		--card: 222.2 84% 4.9%;
-		--card-foreground: 210 40% 98%;
+		/* Dark Card Colors */
+		--card: 240 8% 12%;
+		--card-foreground: 240 17% 98%;
 
-		--border: 216 34% 17%;
-		--input: 216 34% 17%;
+		/* Dark Border & Input */
+		--border: 240 8% 20%;
+		--input: 240 8% 20%;
 
-		--primary: 210 40% 98%;
-		--primary-foreground: 222.2 47.4% 11.2%;
+		/* Dark Primary Colors */
+		--primary: 247 85% 65%;
+		--primary-foreground: 240 10% 8%;
+		--primary-variant: 257 75% 70%;
 
-		--secondary: 217.2 32.6% 17.5%;
-		--secondary-foreground: 210 40% 98%;
+		/* Dark Secondary Colors */
+		--secondary: 240 8% 15%;
+		--secondary-foreground: 247 85% 65%;
 
-		--accent: 217.2 32.6% 17.5%;
-		--accent-foreground: 210 40% 98%;
+		/* Dark Accent Colors */
+		--accent: 257 75% 70%;
+		--accent-foreground: 240 10% 8%;
 
-		--destructive: 0 72.8% 40.6%;
-		--destructive-foreground: 210 40% 98%;
+		/* Dark Destructive Colors */
+		--destructive: 0 84% 65%;
+		--destructive-foreground: 240 10% 8%;
 
-		--ring: 217.2 32.6% 17.5%;
+		/* Dark Success Colors */
+		--success: 142 71% 50%;
+		--success-foreground: 240 10% 8%;
 
-		--radius: 0.5rem;
+		/* Dark Warning Colors */
+		--warning: 38 92% 55%;
+		--warning-foreground: 240 10% 8%;
+
+		/* Dark Ring & Focus */
+		--ring: 247 85% 65%;
+
+		--radius: 0.75rem;
 	}
 }
 

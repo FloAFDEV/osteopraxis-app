@@ -15,9 +15,14 @@ import {
   ChevronDown,
   ChevronUp,
   Menu,
-  X
+  X,
+  Heart,
+  Stethoscope
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import dashboardHero from "@/assets/dashboard-hero.jpg";
+import medicalTeam from "@/assets/medical-team.jpg";
+import calendarFeature from "@/assets/calendar-feature.jpg";
 
 const features = [
   {
@@ -117,10 +122,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">O</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-primary via-primary to-accent rounded-lg flex items-center justify-center shadow-md">
+                <Heart className="w-4 h-4 text-primary-foreground" />
               </div>
-                 <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
                 PatientHub
               </span>
             </div>
@@ -180,49 +185,134 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center max-w-4xl mx-auto">
-            <Badge variant="outline" className="mb-4">
-              Solution tout-en-un pour ostéopathes
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Gérez votre cabinet d'ostéopathie en toute 
-              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"> simplicité</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Patients, rendez-vous, facturation, statistiques... Tout ce dont vous avez besoin 
-              pour développer votre pratique et gagner du temps au quotidien.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild className="text-lg px-8">
-                <Link to="/register">Commencer gratuitement</Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild className="text-lg px-8">
-                <Link to="/demo">Voir la démo</Link>
-              </Button>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="text-left">
+              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">
+                <Stethoscope className="w-3 h-3 mr-1" />
+                Solution tout-en-un pour professionnels de santé
+              </Badge>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+                Gérez vos patients avec 
+                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent"> PatientHub</span>
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
+                Dossiers patients, rendez-vous, facturation, statistiques... Tout ce dont vous avez besoin 
+                pour développer votre pratique et gagner du temps au quotidien.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" className="text-lg px-8 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg shadow-primary/25" asChild>
+                  <Link to="/register">Commencer gratuitement</Link>
+                </Button>
+                <Button variant="outline" size="lg" className="text-lg px-8 border-primary/30 hover:bg-primary/5" asChild>
+                  <Link to="/demo">Voir la démo</Link>
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-4">
+                ✨ Essai gratuit 14 jours • Sans engagement • Support francophone
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground mt-4">
-              Essai gratuit 14 jours • Sans engagement • Support francophone
-            </p>
+
+            {/* Right Image */}
+            <div className="relative">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-primary/20">
+                <img 
+                  src={dashboardHero} 
+                  alt="Interface PatientHub - Tableau de bord"
+                  className="w-full h-auto object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
+              </div>
+              {/* Floating Elements */}
+              <div className="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-3 animate-pulse">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  <span className="text-xs font-medium">En ligne</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-muted/30">
+      <section id="features" className="py-20 bg-gradient-to-b from-muted/30 to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Tout ce dont vous avez besoin
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Une solution complète conçue spécialement pour les ostéopathes français
+              Une solution complète conçue pour les professionnels de santé modernes
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          
+          {/* Feature Grid with Images */}
+          <div className="grid lg:grid-cols-2 gap-16 mb-16">
+            {/* Calendar Feature */}
+            <div className="flex flex-col lg:flex-row items-center gap-8">
+              <div className="lg:w-1/2">
+                <img 
+                  src={calendarFeature} 
+                  alt="Calendrier PatientHub"
+                  className="rounded-xl shadow-lg shadow-primary/10"
+                />
+              </div>
+              <div className="lg:w-1/2">
+                <Calendar className="h-12 w-12 text-primary mb-4" />
+                <h3 className="text-2xl font-semibold mb-3">Calendrier intelligent</h3>
+                <p className="text-muted-foreground mb-4">
+                  Planifiez et gérez vos consultations avec un calendrier moderne et intuitif. 
+                  Synchronisation automatique et rappels inclus.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-sm">Synchronisation multi-appareils</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-sm">Rappels automatiques SMS/Email</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Team Feature */}
+            <div className="flex flex-col lg:flex-row-reverse items-center gap-8">
+              <div className="lg:w-1/2">
+                <img 
+                  src={medicalTeam} 
+                  alt="Équipe médicale PatientHub"
+                  className="rounded-xl shadow-lg shadow-primary/10"
+                />
+              </div>
+              <div className="lg:w-1/2">
+                <Users className="h-12 w-12 text-primary mb-4" />
+                <h3 className="text-2xl font-semibold mb-3">Collaboration d'équipe</h3>
+                <p className="text-muted-foreground mb-4">
+                  Travaillez en équipe avec vos collègues. Partagez les dossiers patients 
+                  et collaborez efficacement.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-sm">Gestion multi-praticiens</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-sm">Partage sécurisé des données</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          {/* Additional Features Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="h-full hover:shadow-lg transition-shadow">
+              <Card key={index} className="h-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
                 <CardContent className="p-6">
                   <feature.icon className="h-12 w-12 text-primary mb-4" />
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
@@ -235,23 +325,23 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20">
+      <section id="pricing" className="py-20 bg-gradient-to-b from-background to-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Des tarifs transparents
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Choisissez l'offre qui correspond à vos besoins
+              Choisissez l'offre qui correspond à vos besoins. Évolutif selon votre croissance.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* Plan Gratuit */}
-            <Card className="relative">
+            <Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
               <CardContent className="p-6">
                 <h3 className="text-2xl font-bold mb-2">Gratuit</h3>
-                <p className="text-muted-foreground mb-4">Pour débuter</p>
+                <p className="text-muted-foreground mb-4">Pour découvrir</p>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">0€</span>
                   <span className="text-muted-foreground">/mois</span>
@@ -285,7 +375,7 @@ export default function LandingPage() {
             </Card>
 
             {/* Plan Essentiel */}
-            <Card className="relative">
+            <Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
               <CardContent className="p-6">
                 <h3 className="text-2xl font-bold mb-2">Essentiel</h3>
                 <p className="text-muted-foreground mb-4">Pour les praticiens indépendants</p>
@@ -322,9 +412,9 @@ export default function LandingPage() {
             </Card>
 
             {/* Plan Pro */}
-            <Card className="relative border-primary">
+            <Card className="relative border-primary scale-105 shadow-lg shadow-primary/20">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground">Populaire</Badge>
+                <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md">Populaire</Badge>
               </div>
               <CardContent className="p-6">
                 <h3 className="text-2xl font-bold mb-2">Pro</h3>
@@ -362,9 +452,9 @@ export default function LandingPage() {
             </Card>
 
             {/* Plan Premium */}
-            <Card className="relative">
+            <Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge variant="secondary">Enterprise</Badge>
+                <Badge variant="secondary" className="bg-accent/20 text-accent border-accent/30">Enterprise</Badge>
               </div>
               <CardContent className="p-6">
                 <h3 className="text-2xl font-bold mb-2">Premium</h3>
@@ -405,7 +495,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 bg-muted/30">
+      <section id="testimonials" className="py-20 bg-gradient-to-b from-muted/30 to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -417,7 +507,7 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="h-full">
+              <Card key={index} className="h-full border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -428,7 +518,7 @@ export default function LandingPage() {
                     "{testimonial.content}"
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center border border-primary/20">
                       <span className="text-primary font-semibold text-sm">
                         {testimonial.avatar}
                       </span>
