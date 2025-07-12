@@ -195,59 +195,45 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5" />
-          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-          <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-500" />
-        </div>
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <section className="relative py-20 lg:py-32 bg-gradient-to-br from-blue-50 to-slate-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="outline" className="mb-8 border-blue-600/30 bg-blue-600/5 text-blue-700 dark:text-blue-300">
-              <Stethoscope className="w-3 h-3 mr-1" />
-              Solution tout-en-un pour professionnels de santé
+            <Badge variant="outline" className="mb-8 bg-white/50 border-blue-200 text-blue-700 dark:bg-slate-800/50 dark:border-blue-700 dark:text-blue-300">
+              <Stethoscope className="w-4 h-4 mr-2" />
+              Solution complète pour ostéopathes
             </Badge>
             
-            <div className="mb-8">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 leading-tight">
-                PatientHub
-              </h1>
-              <div className="w-32 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mx-auto rounded-full mb-6"></div>
-            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-slate-900 dark:text-white leading-tight">
+              PatientHub
+            </h1>
             
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-8 text-slate-800 dark:text-slate-200">
-              Gérez vos patients avec simplicité
-            </h2>
-            
-            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Dossiers patients, rendez-vous, facturation, statistiques... Tout ce dont vous avez besoin 
-              pour développer votre pratique et gagner du temps au quotidien.
+            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+              La plateforme tout-en-un pour gérer votre cabinet : dossiers patients, 
+              rendez-vous, facturation et statistiques en un seul endroit.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
-              <Button size="lg" className="text-xl px-12 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-2xl shadow-blue-500/25 transition-all duration-300 transform hover:scale-105" asChild>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button size="lg" className="text-lg px-8 py-4" asChild>
                 <Link to="/register">Commencer gratuitement</Link>
               </Button>
-              <Button variant="outline" size="lg" className="text-xl px-12 py-4 border-2 border-blue-600/30 hover:bg-blue-600/10 hover:border-blue-600/50 transition-all duration-300" asChild>
+              <Button variant="outline" size="lg" className="text-lg px-8 py-4" asChild>
                 <Link to="/demo">Voir la démo</Link>
               </Button>
             </div>
             
-            <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600 dark:text-slate-400 mb-12">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>✨ Essai gratuit 14 jours</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                <span>🚀 Sans engagement</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                <span>🇫🇷 Support francophone</span>
-              </div>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                Essai gratuit 14 jours
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                Sans engagement
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                Support francophone
+              </span>
             </div>
             
             {/* Features Icons */}
