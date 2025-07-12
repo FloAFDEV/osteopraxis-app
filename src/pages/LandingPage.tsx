@@ -195,57 +195,78 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+      <section className="relative py-20 lg:py-32 overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5" />
+          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-500" />
+        </div>
+        
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="text-left">
-              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">
-                <Stethoscope className="w-3 h-3 mr-1" />
-                Solution tout-en-un pour professionnels de santé
-              </Badge>
-              <div className="mb-6">
-                <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
-                  PatientHub
-                </h1>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-6">
-                Gérez vos patients avec simplicité
-              </h2>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
-                Dossiers patients, rendez-vous, facturation, statistiques... Tout ce dont vous avez besoin 
-                pour développer votre pratique et gagner du temps au quotidien.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="text-lg px-8 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg shadow-primary/25" asChild>
-                  <Link to="/register">Commencer gratuitement</Link>
-                </Button>
-                <Button variant="outline" size="lg" className="text-lg px-8 border-primary/30 hover:bg-primary/5" asChild>
-                  <Link to="/demo">Voir la démo</Link>
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                ✨ Essai gratuit 14 jours • Sans engagement • Support francophone
-              </p>
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge variant="outline" className="mb-8 border-blue-600/30 bg-blue-600/5 text-blue-700 dark:text-blue-300">
+              <Stethoscope className="w-3 h-3 mr-1" />
+              Solution tout-en-un pour professionnels de santé
+            </Badge>
+            
+            <div className="mb-8">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 leading-tight">
+                PatientHub
+              </h1>
+              <div className="w-32 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mx-auto rounded-full mb-6"></div>
             </div>
-
-            {/* Right Image */}
-            <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-primary/20">
-                <img 
-                  src={dashboardHero} 
-                  alt="Interface PatientHub - Tableau de bord"
-                  className="w-full h-auto object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
+            
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-8 text-slate-800 dark:text-slate-200">
+              Gérez vos patients avec simplicité
+            </h2>
+            
+            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Dossiers patients, rendez-vous, facturation, statistiques... Tout ce dont vous avez besoin 
+              pour développer votre pratique et gagner du temps au quotidien.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
+              <Button size="lg" className="text-xl px-12 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-2xl shadow-blue-500/25 transition-all duration-300 transform hover:scale-105" asChild>
+                <Link to="/register">Commencer gratuitement</Link>
+              </Button>
+              <Button variant="outline" size="lg" className="text-xl px-12 py-4 border-2 border-blue-600/30 hover:bg-blue-600/10 hover:border-blue-600/50 transition-all duration-300" asChild>
+                <Link to="/demo">Voir la démo</Link>
+              </Button>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600 dark:text-slate-400 mb-12">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>✨ Essai gratuit 14 jours</span>
               </div>
-              {/* Floating Elements */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-3 animate-pulse">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  <span className="text-xs font-medium">En ligne</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span>🚀 Sans engagement</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                <span>🇫🇷 Support francophone</span>
+              </div>
+            </div>
+            
+            {/* Features Icons */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+              <div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
+                <Calendar className="h-8 w-8 text-blue-600 mb-2" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Rendez-vous</span>
+              </div>
+              <div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
+                <Users className="h-8 w-8 text-purple-600 mb-2" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Patients</span>
+              </div>
+              <div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
+                <FileText className="h-8 w-8 text-pink-600 mb-2" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Facturation</span>
+              </div>
+              <div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
+                <BarChart3 className="h-8 w-8 text-indigo-600 mb-2" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Statistiques</span>
               </div>
             </div>
           </div>
