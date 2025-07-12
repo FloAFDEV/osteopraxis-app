@@ -2,10 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar, Users, FileText, BarChart3 } from "lucide-react";
-
 export default function DemoPage() {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/40 bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,9 +25,7 @@ export default function DemoPage() {
       {/* Demo Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Découvrez OsteoManager en action
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Découvrez PatientHub en action</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Explorez toutes les fonctionnalités de notre solution à travers cette démonstration interactive
           </p>
@@ -128,6 +124,5 @@ export default function DemoPage() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
