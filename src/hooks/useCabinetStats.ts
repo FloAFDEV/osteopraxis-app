@@ -7,6 +7,7 @@ import {
   calculateDemographics,
   calculateGrowthMetrics,
   calculateMonthlyBreakdown,
+  calculateRevenueMetrics,
 } from "@/components/dashboard/utils/dashboard-calculations";
 import { formatAppointmentDate } from "@/utils/date-utils";
 
@@ -55,14 +56,16 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       
       try {
         // Récupération des données réelles
-        const [patientsData, appointmentsData] = await Promise.all([
+        const [patientsData, appointmentsData, invoicesData] = await Promise.all([
           api.getPatients(),
           api.getAppointments(),
+          api.getInvoices(),
         ]);
 
         // Filtrer les données par cabinet si sélectionné
         let filteredPatients = patientsData || [];
         let filteredAppointments = appointmentsData || [];
+        let filteredInvoices = invoicesData || [];
 
         if (selectedCabinetId !== null) {
           // Filtrer les patients par cabinet
@@ -74,6 +77,11 @@ export function useCabinetStats(selectedCabinetId: number | null) {
           const patientIds = filteredPatients.map(p => p.id);
           filteredAppointments = (appointmentsData || []).filter(
             appointment => patientIds.includes(appointment.patientId)
+          );
+
+          // Filtrer les factures par patients du cabinet sélectionné
+          filteredInvoices = (invoicesData || []).filter(
+            invoice => patientIds.includes(invoice.patientId)
           );
         }
 
@@ -100,6 +108,11 @@ export function useCabinetStats(selectedCabinetId: number | null) {
           filteredPatients,
           currentYear
         );
+        const revenueMetrics = calculateRevenueMetrics(
+          filteredInvoices,
+          currentYear,
+          currentMonth
+        );
 
         // Formatter le prochain rendez-vous pour l'affichage
         const formattedNextAppointment =
@@ -118,10 +131,8 @@ export function useCabinetStats(selectedCabinetId: number | null) {
           appointmentsToday: appointmentStats.appointmentsToday,
           nextAppointment: formattedNextAppointment,
           monthlyGrowth: monthlyGrowthData,
-          revenueThisMonth: 0,
-          pendingInvoices: 0,
+          ...revenueMetrics,
           weeklyAppointments: [0, 0, 0, 0, 0, 0, 0],
-          monthlyRevenue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
           completedAppointments: filteredAppointments.filter(
             (a) => a.status === "COMPLETED"
           ).length,

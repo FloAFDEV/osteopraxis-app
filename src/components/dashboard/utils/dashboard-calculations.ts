@@ -1,4 +1,4 @@
-import { Appointment, DashboardData, Patient } from "@/types";
+import { Appointment, DashboardData, Patient, Invoice } from "@/types";
 import { FRENCH_MONTHS } from "./constants";
 import { isMinor } from "../demographics/gender-chart-utils";
 
@@ -302,4 +302,84 @@ export function calculateMonthlyBreakdown(
       enfants: mineurs, // clé legacy pour la compatibilité typage
     };
   });
+}
+
+/**
+ * Calcule les métriques de revenus
+ */
+export function calculateRevenueMetrics(invoices: Invoice[], currentYear: number, currentMonth: number) {
+  const currentMonthStart = new Date(currentYear, currentMonth, 1);
+  const currentMonthEnd = new Date(currentYear, currentMonth + 1, 0);
+  const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
+  const lastMonthEnd = new Date(currentYear, currentMonth, 0);
+
+  // Revenus de ce mois (factures payées)
+  const revenueThisMonth = invoices
+    .filter((invoice) => {
+      const invoiceDate = new Date(invoice.date);
+      return (
+        invoice.paymentStatus === "PAID" &&
+        invoiceDate >= currentMonthStart &&
+        invoiceDate <= currentMonthEnd
+      );
+    })
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+  // Revenus du mois dernier
+  const revenueLastMonth = invoices
+    .filter((invoice) => {
+      const invoiceDate = new Date(invoice.date);
+      return (
+        invoice.paymentStatus === "PAID" &&
+        invoiceDate >= lastMonthStart &&
+        invoiceDate <= lastMonthEnd
+      );
+    })
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+  // Factures en attente (non payées)
+  const pendingInvoices = invoices.filter(
+    (invoice) => invoice.paymentStatus === "PENDING"
+  ).length;
+
+  // Montant total en attente
+  const pendingAmount = invoices
+    .filter((invoice) => invoice.paymentStatus === "PENDING")
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+  // Revenus des 12 derniers mois pour graphique
+  const monthlyRevenue = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    const monthRevenue = invoices
+      .filter((invoice) => {
+        const invoiceDate = new Date(invoice.date);
+        return (
+          invoice.paymentStatus === "PAID" &&
+          invoiceDate.getMonth() === month &&
+          invoiceDate.getFullYear() === year
+        );
+      })
+      .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+    monthlyRevenue.push(monthRevenue);
+  }
+
+  // Tendance de revenus (comparaison avec le mois dernier)
+  const revenueTrend = revenueLastMonth > 0
+    ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100)
+    : revenueThisMonth > 0 ? 100 : 0;
+
+  return {
+    revenueThisMonth,
+    revenueLastMonth,
+    revenueTrend,
+    pendingInvoices,
+    pendingAmount,
+    monthlyRevenue,
+  };
 }

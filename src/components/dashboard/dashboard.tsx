@@ -8,7 +8,6 @@ import { DashboardStats } from "./dashboard-stats";
 import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
-import { CabinetSelector } from "./cabinet-selector";
 import { useCabinetStats } from "@/hooks/useCabinetStats";
 
 export function Dashboard() {
@@ -54,19 +53,13 @@ export function Dashboard() {
 			{/* Header Image Banner */}
 			<DashboardHeader />
 
-			{/* Cabinet Selector */}
-			<div className="animate-fade-in">
-				<CabinetSelector 
-					onCabinetChange={handleCabinetChange}
-					selectedCabinetId={selectedCabinetId}
-				/>
-			</div>
-
-			{/* Main content */}
+			{/* Main content with integrated cabinet selector */}
 			<div className="animate-fade-in">
 				<DashboardStats 
 					data={dashboardData} 
 					selectedCabinetName={selectedCabinetName}
+					onCabinetChange={handleCabinetChange}
+					selectedCabinetId={selectedCabinetId}
 				/>
 			</div>
 			<div className="animate-fade-in animate-delay-100 lg:col-span-3">
