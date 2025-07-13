@@ -22,9 +22,10 @@ import { PrivacyToggle } from "@/components/ui/privacy-toggle";
 
 interface DashboardStatsProps {
 	data: DashboardData;
+	selectedCabinetName?: string;
 }
 
-export function DashboardStats({ data }: DashboardStatsProps) {
+export function DashboardStats({ data, selectedCabinetName }: DashboardStatsProps) {
 	const today = new Date();
 	const formattedToday = format(today, "EEEE d MMMM yyyy", { locale: fr });
 
@@ -69,6 +70,14 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 	}
 
 	return (
+		<div className="space-y-4">
+			{selectedCabinetName && (
+				<div className="flex items-center justify-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+					<p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+						Statistiques pour le cabinet : <span className="font-semibold">{selectedCabinetName}</span>
+					</p>
+				</div>
+			)}
 		<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 			<StatCard
 				title="Patients totaux"
@@ -122,6 +131,7 @@ export function DashboardStats({ data }: DashboardStatsProps) {
 			/>
 
 			<WeeklyTrendCard data={data} />
+		</div>
 		</div>
 	);
 }
