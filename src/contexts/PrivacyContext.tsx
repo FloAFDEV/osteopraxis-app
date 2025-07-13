@@ -20,7 +20,7 @@ interface PrivacyProviderProps {
 }
 
 export const PrivacyProvider: React.FC<PrivacyProviderProps> = ({ children }) => {
-  const [isNumbersBlurred, setIsNumbersBlurred] = useState(false);
+  const [isNumbersBlurred, setIsNumbersBlurred] = useState(true);
 
   const toggleNumbersBlur = useCallback(() => {
     setIsNumbersBlurred(prev => !prev);
