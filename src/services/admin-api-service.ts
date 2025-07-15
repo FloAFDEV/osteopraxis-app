@@ -65,17 +65,23 @@ class AdminApiService {
     }
   }
   
-  // Récupération des rendez-vous directement via Supabase
-  async getAppointments() {
+  // Récupération des rendez-vous directement via Supabase (incluant supprimés pour admin)
+  async getAppointments(includeDeleted: boolean = true) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('Appointment')
         .select(`
           *,
           Patient!inner(firstName, lastName, email, phone),
           Osteopath!inner(name)
-        `)
-        .is('deleted_at', null)
+        `);
+      
+      // Les admins peuvent voir les données supprimées
+      if (!includeDeleted) {
+        query = query.is('deleted_at', null);
+      }
+      
+      const { data, error } = await query
         .order('date', { ascending: false })
         .limit(100);
       
@@ -91,17 +97,23 @@ class AdminApiService {
     }
   }
   
-  // Récupération des factures directement via Supabase
-  async getInvoices() {
+  // Récupération des factures directement via Supabase (incluant supprimés pour admin)
+  async getInvoices(includeDeleted: boolean = true) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('Invoice')
         .select(`
           *,
           Patient!inner(firstName, lastName, email),
           Osteopath!inner(name)
-        `)
-        .is('deleted_at', null)
+        `);
+      
+      // Les admins peuvent voir les données supprimées
+      if (!includeDeleted) {
+        query = query.is('deleted_at', null);
+      }
+      
+      const { data, error } = await query
         .order('date', { ascending: false })
         .limit(100);
       
@@ -113,6 +125,46 @@ class AdminApiService {
       return { data: data || [] };
     } catch (error) {
       console.error('Exception admin getInvoices:', error);
+      throw error;
+    }
+  }
+  
+  // Restauration de données supprimées
+  async restoreRecord(tableName: string, recordId: string) {
+    try {
+      const { data, error } = await supabase.rpc('restore_record', {
+        p_table_name: tableName,
+        p_record_id: recordId
+      });
+      
+      if (error) {
+        console.error('Erreur admin restoreRecord:', error);
+        throw new Error(`Erreur lors de la restauration: ${error.message}`);
+      }
+      
+      return { success: data };
+    } catch (error) {
+      console.error('Exception admin restoreRecord:', error);
+      throw error;
+    }
+  }
+  
+  // Suppression définitive (soft delete)
+  async softDeleteRecord(tableName: string, recordId: string) {
+    try {
+      const { data, error } = await supabase.rpc('soft_delete_record', {
+        p_table_name: tableName,
+        p_record_id: recordId
+      });
+      
+      if (error) {
+        console.error('Erreur admin softDeleteRecord:', error);
+        throw new Error(`Erreur lors de la suppression: ${error.message}`);
+      }
+      
+      return { success: data };
+    } catch (error) {
+      console.error('Exception admin softDeleteRecord:', error);
       throw error;
     }
   }

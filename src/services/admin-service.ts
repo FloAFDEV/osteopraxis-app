@@ -245,13 +245,13 @@ class AdminService {
         .from("Patient")
         .select("*")
         .or(`firstName.ilike.${searchTerm},lastName.ilike.${searchTerm},email.ilike.${searchTerm}`)
-        .is("deleted_at", null)
+        // Les admins peuvent voir les données supprimées dans la recherche globale
         .limit(10),
       supabase
         .from("Appointment")
         .select("*, Patient!inner(firstName, lastName)")
         .or(`reason.ilike.${searchTerm},notes.ilike.${searchTerm}`)
-        .is("deleted_at", null)
+        // Les admins peuvent voir les données supprimées dans la recherche globale
         .limit(10)
     ]);
 
@@ -262,6 +262,67 @@ class AdminService {
     };
   }
 
+  // Récupération des données supprimées pour admin
+  async getDeletedPatients(limit: number = 50): Promise<any[]> {
+    const { data, error } = await supabase
+      .from("Patient")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false })
+      .limit(limit);
+    
+    if (error) throw error;
+    return data || [];
+  }
+  
+  async getDeletedAppointments(limit: number = 50): Promise<any[]> {
+    const { data, error } = await supabase
+      .from("Appointment")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false })
+      .limit(limit);
+    
+    if (error) throw error;
+    return data || [];
+  }
+  
+  async getDeletedInvoices(limit: number = 50): Promise<any[]> {
+    const { data, error } = await supabase
+      .from("Invoice")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false })
+      .limit(limit);
+    
+    if (error) throw error;
+    return data || [];
+  }
+  
+  // Restauration de données supprimées
+  async restoreRecord(tableName: string, recordId: string): Promise<boolean> {
+    const { data, error } = await supabase.rpc('restore_record', {
+      p_table_name: tableName,
+      p_record_id: recordId
+    });
+    
+    if (error) throw error;
+    toast.success("Données restaurées avec succès");
+    return data || false;
+  }
+  
+  // Suppression définitive (soft delete)
+  async softDeleteRecord(tableName: string, recordId: string): Promise<boolean> {
+    const { data, error } = await supabase.rpc('soft_delete_record', {
+      p_table_name: tableName,
+      p_record_id: recordId
+    });
+    
+    if (error) throw error;
+    toast.success("Données supprimées (récupérables)");
+    return data || false;
+  }
+  
   // Détection de doublons
   async findDuplicatePatients(): Promise<any[]> {
     const { data, error } = await supabase
@@ -288,7 +349,7 @@ class AdminService {
     
     return duplicates;
   }
-
+  
   // Patients orphelins (sans ostéopathe)
   async findOrphanPatients(): Promise<any[]> {
     const { data, error } = await supabase

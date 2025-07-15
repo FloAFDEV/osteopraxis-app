@@ -14,6 +14,7 @@ import { AuditLogsPanel } from "./audit-logs";
 import { AdminLogsPanel } from "./admin-logs";
 import { SystemHealthPanel } from "./system-health";
 import { DetailedStatsPanel } from "./detailed-stats";
+import { DeletedRecordsManager } from "./deleted-records-manager";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck 
 } from "lucide-react";
@@ -149,13 +150,14 @@ export function AdminDashboard() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-8">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="stats">Statistiques</TabsTrigger>
             <TabsTrigger value="health">Santé</TabsTrigger>
             <TabsTrigger value="users">Utilisateurs</TabsTrigger>
             <TabsTrigger value="cabinets">Cabinets</TabsTrigger>
             <TabsTrigger value="patients">Patients</TabsTrigger>
+            <TabsTrigger value="deleted">Supprimés</TabsTrigger>
             <TabsTrigger value="logs">Logs</TabsTrigger>
           </TabsList>
           
@@ -181,6 +183,10 @@ export function AdminDashboard() {
           
           <TabsContent value="patients">
             <PatientsManagement />
+          </TabsContent>
+          
+          <TabsContent value="deleted">
+            <DeletedRecordsManager />
           </TabsContent>
           
           <TabsContent value="logs">
