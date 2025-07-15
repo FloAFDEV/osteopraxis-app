@@ -19,14 +19,14 @@ export async function getPatients(): Promise<Patient[]> {
 		
 		console.log("Filtrage des patients par osteopathId:", osteopathId);
 
-		// Pour les admins (osteopathId = -1), récupérer tous les patients
-		// Pour les ostéopathes, appliquer le filtre par osteopathId
+		// Pour les admins (osteopathId = -1), récupérer tous les patients (y compris supprimés)
+		// Pour les ostéopathes, appliquer le filtre par osteopathId et exclure les supprimés
 		let query = supabase.from("Patient").select("*");
 		
 		if (osteopathId !== -1) {
-			query = query.eq("osteopathId", osteopathId);
+			query = query.eq("osteopathId", osteopathId).is("deleted_at", null);
 		} else {
-			console.log("Accès admin - récupération de tous les patients");
+			console.log("Accès admin - récupération de tous les patients (y compris supprimés)");
 		}
 
 		const { data, error } = await query;

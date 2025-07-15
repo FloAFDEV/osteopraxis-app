@@ -98,7 +98,8 @@ export class AdvancedStatsService {
     const { data, error } = await supabase
       .from("Appointment")
       .select("*")
-      .eq("osteopathId", osteopathId);
+      .eq("osteopathId", osteopathId)
+      .is("deleted_at", null);
     
     if (error) throw error;
     return data || [];
@@ -108,7 +109,8 @@ export class AdvancedStatsService {
     const { data, error } = await supabase
       .from("Invoice")
       .select("*")
-      .eq("osteopathId", osteopathId);
+      .eq("osteopathId", osteopathId)
+      .is("deleted_at", null);
     
     if (error) throw error;
     return data || [];
@@ -118,7 +120,8 @@ export class AdvancedStatsService {
     const { data, error } = await supabase
       .from("Patient")
       .select("*")
-      .eq("osteopathId", osteopathId);
+      .eq("osteopathId", osteopathId)
+      .is("deleted_at", null);
     
     if (error) throw error;
     return data || [];
