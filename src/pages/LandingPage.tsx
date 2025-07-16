@@ -113,7 +113,12 @@ export default function LandingPage() {
   // Redirection avec useNavigate au lieu de window.location.href
   useEffect(() => {
     if (user && !loading) {
-      navigate('/dashboard');
+      // Rediriger les admins vers leur dashboard spécifique
+      if (user.role === "ADMIN") {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [user, loading, navigate]);
 
