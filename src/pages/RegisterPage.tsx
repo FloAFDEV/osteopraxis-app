@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { Mail, Lock, Activity, User, UserPlus, Info } from "lucide-react";
+import { Mail, Lock, Activity, User, UserPlus, Info, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -156,10 +156,19 @@ const RegisterPage = () => {
     <div className="min-h-screen flex">
       {/* Left section - Register form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
-				<div className="mb-6">
+				<div className="mb-6 flex items-center justify-between">
 					<h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-500 dark:to-purple-500">
 						PatientHub
 					</h1>
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => navigate('/')}
+						className="text-gray-400 hover:text-white hover:bg-gray-800/50 transition-colors"
+					>
+						<ArrowLeft className="h-4 w-4 mr-2" />
+						Retour
+					</Button>
 				</div>
         
         <div className="flex-grow flex items-center justify-center">
