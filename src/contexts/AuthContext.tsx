@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { User } from "@/types";
 import { api } from "@/services/api";
 import { toast } from "sonner";
+import { useAutoLogout } from "@/hooks/use-auto-logout";
 
 interface AuthContextProps {
 	user: User | null;
@@ -54,6 +55,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	const [loading, setLoading] = useState<boolean>(false); // Start with false to avoid immediate loading
 	const [error, setError] = useState<string | null>(null);
 	const navigate = useNavigate();
+	
+	// Activer la déconnexion automatique si l'utilisateur est connecté
+	useAutoLogout();
 
 	const login = useCallback(async (email: string, password: string) => {
 		setLoading(true);

@@ -20,6 +20,7 @@ import {
   Stethoscope
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import dashboardHero from "@/assets/dashboard-hero.jpg";
 import medicalTeam from "@/assets/medical-team.jpg";
 import calendarFeature from "@/assets/calendar-feature.jpg";
@@ -160,6 +161,7 @@ export default function LandingPage() {
               <Link to="/login" className="text-muted-foreground hover:text-foreground transition-colors">
                 Connexion
               </Link>
+              <ThemeToggle />
               <Button asChild>
                 <Link to="/register">Essai gratuit</Link>
               </Button>
@@ -190,9 +192,12 @@ export default function LandingPage() {
                 <Link to="/login" className="text-muted-foreground hover:text-foreground transition-colors">
                   Connexion
                 </Link>
-                <Button asChild className="w-fit">
-                  <Link to="/register">Essai gratuit</Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                  <Button asChild className="w-fit">
+                    <Link to="/register">Essai gratuit</Link>
+                  </Button>
+                </div>
               </nav>
             </div>
           )}
