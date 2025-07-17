@@ -52,21 +52,21 @@ export function SystemHealthPanel() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />;
       case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+        return <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />;
       case 'critical':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+        return <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />;
       default:
-        return <Activity className="h-4 w-4 text-gray-500" />;
+        return <Activity className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
     const colors = {
-      healthy: "bg-green-500/10 text-green-500 border-green-500/20",
-      warning: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-      critical: "bg-red-500/10 text-red-500 border-red-500/20"
+      healthy: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800",
+      warning: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800",
+      critical: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800"
     };
     
     const labels = {
@@ -85,19 +85,19 @@ export function SystemHealthPanel() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'storage':
-        return <HardDrive className="h-5 w-5" />;
+        return <HardDrive className="h-5 w-5 text-foreground" />;
       case 'database':
-        return <Database className="h-5 w-5" />;
+        return <Database className="h-5 w-5 text-foreground" />;
       case 'users':
-        return <Users className="h-5 w-5" />;
+        return <Users className="h-5 w-5 text-foreground" />;
       case 'performance':
-        return <Zap className="h-5 w-5" />;
+        return <Zap className="h-5 w-5 text-foreground" />;
       case 'backup':
-        return <Shield className="h-5 w-5" />;
+        return <Shield className="h-5 w-5 text-foreground" />;
       case 'errors':
-        return <AlertTriangle className="h-5 w-5" />;
+        return <AlertTriangle className="h-5 w-5 text-foreground" />;
       default:
-        return <Server className="h-5 w-5" />;
+        return <Server className="h-5 w-5 text-foreground" />;
     }
   };
 
@@ -145,14 +145,14 @@ export function SystemHealthPanel() {
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeDasharray={`${healthScore}, 100`}
-                  className="text-green-500"
+                  className="text-green-600 dark:text-green-400"
                 />
                 <path
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-gray-200"
+                  className="text-muted-foreground/20"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
@@ -186,11 +186,11 @@ export function SystemHealthPanel() {
         <CardContent>
           <div className="space-y-4">
             {metrics.map((metric, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors">
                 <div className="flex items-center gap-3">
                   {getTypeIcon(metric.metric_type)}
                   <div>
-                    <h4 className="font-medium">{metric.metric_name}</h4>
+                    <h4 className="font-medium text-foreground">{metric.metric_name}</h4>
                     <p className="text-sm text-muted-foreground">
                       Dernière mise à jour: {new Date(metric.last_updated).toLocaleString()}
                     </p>
@@ -198,7 +198,7 @@ export function SystemHealthPanel() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <span className="font-mono font-semibold">
+                  <span className="font-mono font-semibold text-foreground">
                     {metric.metric_value}
                   </span>
                   <div className="flex items-center gap-2">
@@ -226,40 +226,40 @@ export function SystemHealthPanel() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="h-auto p-4 justify-start">
-              <Database className="h-5 w-5 mr-3" />
+            <Button variant="outline" className="h-auto p-4 justify-start hover:bg-accent/50 transition-colors">
+              <Database className="h-5 w-5 mr-3 text-foreground" />
               <div className="text-left">
-                <div className="font-medium">Nettoyer les logs anciens</div>
+                <div className="font-medium text-foreground">Nettoyer les logs anciens</div>
                 <div className="text-sm text-muted-foreground">
                   Supprimer les logs de plus de 30 jours
                 </div>
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 justify-start">
-              <Shield className="h-5 w-5 mr-3" />
+            <Button variant="outline" className="h-auto p-4 justify-start hover:bg-accent/50 transition-colors">
+              <Shield className="h-5 w-5 mr-3 text-foreground" />
               <div className="text-left">
-                <div className="font-medium">Vérifier la sécurité</div>
+                <div className="font-medium text-foreground">Vérifier la sécurité</div>
                 <div className="text-sm text-muted-foreground">
                   Audit de sécurité et permissions
                 </div>
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 justify-start">
-              <Zap className="h-5 w-5 mr-3" />
+            <Button variant="outline" className="h-auto p-4 justify-start hover:bg-accent/50 transition-colors">
+              <Zap className="h-5 w-5 mr-3 text-foreground" />
               <div className="text-left">
-                <div className="font-medium">Optimiser performances</div>
+                <div className="font-medium text-foreground">Optimiser performances</div>
                 <div className="text-sm text-muted-foreground">
                   Analyser et optimiser les requêtes
                 </div>
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 justify-start">
-              <HardDrive className="h-5 w-5 mr-3" />
+            <Button variant="outline" className="h-auto p-4 justify-start hover:bg-accent/50 transition-colors">
+              <HardDrive className="h-5 w-5 mr-3 text-foreground" />
               <div className="text-left">
-                <div className="font-medium">Rapport d'utilisation</div>
+                <div className="font-medium text-foreground">Rapport d'utilisation</div>
                 <div className="text-sm text-muted-foreground">
                   Générer un rapport détaillé
                 </div>

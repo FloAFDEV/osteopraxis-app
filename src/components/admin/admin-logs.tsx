@@ -72,22 +72,22 @@ export function AdminLogsPanel() {
   const getLevelIcon = (level: string) => {
     switch (level) {
       case 'ERROR':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+        return <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />;
       case 'WARNING':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+        return <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />;
       case 'ADMIN':
-        return <Shield className="h-4 w-4 text-purple-500" />;
+        return <Shield className="h-4 w-4 text-violet-600 dark:text-violet-400" />;
       default:
-        return <Info className="h-4 w-4 text-blue-500" />;
+        return <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
     }
   };
 
   const getLevelBadge = (level: string, success: boolean) => {
     const colors = {
-      ERROR: "bg-red-500/10 text-red-500 border-red-500/20",
-      WARNING: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-      ADMIN: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-      INFO: success ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-gray-500/10 text-gray-500 border-gray-500/20"
+      ERROR: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800",
+      WARNING: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800",
+      ADMIN: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-800",
+      INFO: success ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800" : "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800"
     };
     
     return (
