@@ -54,7 +54,7 @@ export function AppointmentModal({
       <DialogTrigger asChild>
         {triggerButton || defaultTrigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             Nouveau rendez-vous
@@ -65,7 +65,7 @@ export function AppointmentModal({
             )}
           </DialogTitle>
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-4 max-h-[60vh] overflow-y-auto">
           <AppointmentForm
             patients={patients}
             defaultValues={{

@@ -279,11 +279,13 @@ const SchedulePage = () => {
 			</div>
 
 			{/* Contenu principal */}
-			<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8">
+			<div className="flex flex-col min-h-screen">
 				{/* Header type Appointment */}
-				<ScheduleHeader />
-			</div>
-			<div className="flex flex-col p-4 sm:p-6 lg:p-8 mt-4">
+				<div className="flex-shrink-0 p-4 sm:p-6 lg:p-8">
+					<ScheduleHeader />
+				</div>
+				
+				<div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
 				{/* Header avec contrôles Google Calendar */}
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
 					<h1 className="text-3xl font-bold flex items-center gap-2">
@@ -760,8 +762,18 @@ const SchedulePage = () => {
 							/>
 						</TabsContent>
 					</Tabs>
-				)}
+					)}
+				</div>
 			</div>
+
+			{/* Modal pour nouveau rendez-vous */}
+			<AppointmentModal
+				patients={patients}
+				selectedDate={appointmentModalDate}
+				isOpen={appointmentModalOpen}
+				onOpenChange={setAppointmentModalOpen}
+				onSuccess={handleAppointmentSuccess}
+			/>
 		</Layout>
 	);
 };
