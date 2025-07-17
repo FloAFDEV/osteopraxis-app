@@ -177,7 +177,7 @@ export function MonthlyScheduleView({
                         </span>
                         {isCurrentMonth && (
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Plus className="h-3 w-3 text-muted-foreground hover:text-primary" />
+                            <Plus className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                           </div>
                         )}
                       </div>
@@ -192,10 +192,10 @@ export function MonthlyScheduleView({
                             <div
                               key={appointment.id}
                               className={cn(
-                                "p-1 rounded text-xs truncate transition-colors hover:bg-primary/10 cursor-pointer",
+                                "p-1 rounded text-xs truncate transition-colors cursor-pointer",
                                 appointment.status === "COMPLETED" 
-                                  ? "bg-green-100 text-green-800 border-l-2 border-l-green-500" 
-                                  : "bg-blue-100 text-blue-800 border-l-2 border-l-blue-500"
+                                  ? "bg-green-100 text-green-800 border-l-2 border-l-green-500 hover:bg-green-200 hover:text-green-900" 
+                                  : "bg-blue-100 text-blue-800 border-l-2 border-l-blue-500 hover:bg-blue-200 hover:text-blue-900"
                               )}
                               onClick={(e) => {
                                 e.stopPropagation();
