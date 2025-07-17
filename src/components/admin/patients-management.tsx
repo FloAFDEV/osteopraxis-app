@@ -42,7 +42,21 @@ export function PatientsManagement() {
     loadCabinets();
     loadOrphans();
     loadDuplicates();
+    loadAllPatients(); // Charger tous les patients au démarrage
   }, []);
+
+  const loadAllPatients = async () => {
+    try {
+      setLoading(true);
+      const { data } = await adminApiService.getPatients();
+      setSearchResults(data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des patients:', error);
+      toast.error('Erreur lors du chargement des patients');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadCabinets = async () => {
     try {
@@ -54,15 +68,10 @@ export function PatientsManagement() {
   };
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      toast.error('Veuillez entrer un terme de recherche');
-      return;
-    }
-
     try {
       setLoading(true);
       const { data } = await adminApiService.getPatients(
-        searchTerm,
+        searchTerm.trim() || undefined,
         undefined,
         selectedCabinet && selectedCabinet !== "all" ? parseInt(selectedCabinet) : undefined
       );
@@ -73,6 +82,15 @@ export function PatientsManagement() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fonction pour filtrer par cabinet
+  const handleCabinetChange = (value: string) => {
+    setSelectedCabinet(value);
+    // Déclencher automatiquement la recherche quand le cabinet change
+    setTimeout(() => {
+      handleSearch();
+    }, 100);
   };
 
   const loadDuplicates = async () => {
@@ -219,7 +237,7 @@ export function PatientsManagement() {
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   />
                 </div>
-                <Select value={selectedCabinet} onValueChange={setSelectedCabinet}>
+                <Select value={selectedCabinet} onValueChange={handleCabinetChange}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filtrer par cabinet" />
                   </SelectTrigger>
@@ -256,12 +274,12 @@ export function PatientsManagement() {
                 ))}
               </div>
 
-              {searchResults.length === 0 && searchTerm && !loading && (
+              {searchResults.length === 0 && !loading && (
                 <div className="text-center py-8">
                   <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">Aucun résultat</h3>
                   <p className="text-muted-foreground">
-                    Aucun patient ne correspond à votre recherche.
+                    {searchTerm ? 'Aucun patient ne correspond à votre recherche.' : 'Aucun patient trouvé.'}
                   </p>
                 </div>
               )}
