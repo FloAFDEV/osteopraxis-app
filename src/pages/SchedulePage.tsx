@@ -766,14 +766,6 @@ const SchedulePage = () => {
 				</div>
 			</div>
 
-			{/* Modal pour nouveau rendez-vous */}
-			<AppointmentModal
-				patients={patients}
-				selectedDate={appointmentModalDate}
-				isOpen={appointmentModalOpen}
-				onOpenChange={setAppointmentModalOpen}
-				onSuccess={handleAppointmentSuccess}
-			/>
 		</Layout>
 	);
 };
