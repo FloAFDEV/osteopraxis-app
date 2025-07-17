@@ -64,7 +64,7 @@ const features = [
 
 const testimonials = [
 	{
-		name: "Dr. Sophie Martin",
+		name: "Franck Blanchet D.E",
 		role: "Ostéopathe à Paris",
 		content:
 			"Cette solution a révolutionné ma pratique. Je gagne 2h par jour sur l'administratif !",
@@ -72,7 +72,7 @@ const testimonials = [
 		avatar: "SM",
 	},
 	{
-		name: "Jean-Pierre Dubois",
+		name: "Florent PEREZ D.E",
 		role: "Cabinet multi-praticiens Lyon",
 		content:
 			"Parfait pour gérer notre cabinet à plusieurs. L'interface est intuitive et moderne.",
@@ -80,7 +80,7 @@ const testimonials = [
 		avatar: "JPD",
 	},
 	{
-		name: "Dr. Marie Lefevre",
+		name: "Julia Rozier D.E",
 		role: "Ostéopathe libérale",
 		content:
 			"Le rapport qualité-prix est excellent. Je recommande vivement !",
