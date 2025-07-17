@@ -24,6 +24,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import dashboardHero from "@/assets/dashboard-hero.jpg";
 import medicalTeam from "@/assets/medical-team.jpg";
 import calendarFeature from "@/assets/calendar-feature.jpg";
+import osteopathTreatment from "@/assets/osteopath-treatment.jpg";
 
 const features = [
 	{
@@ -348,79 +349,61 @@ export default function LandingPage() {
 						</p>
 					</div>
 
-					{/* Feature Grid with Images */}
+					{/* Feature Highlights - Text Only */}
 					<div className="grid lg:grid-cols-2 gap-16 mb-16">
 						{/* Calendar Feature */}
-						<div className="flex flex-col lg:flex-row items-center gap-8">
-							<div className="lg:w-1/2">
-								<img
-									src={calendarFeature}
-									alt="Calendrier PatientHub"
-									className="rounded-xl shadow-lg shadow-primary/10"
-								/>
-							</div>
-							<div className="lg:w-1/2">
-								<Calendar className="h-12 w-12 text-primary mb-4" />
-								<h3 className="text-2xl font-semibold mb-3">
-									Calendrier intelligent
-								</h3>
-								<p className="text-muted-foreground mb-4">
-									Planifiez et gérez vos consultations avec un
-									calendrier moderne et intuitif.
-									Synchronisation automatique et rappels
-									inclus.
-								</p>
-								<ul className="space-y-2">
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span className="text-sm">
-											Synchronisation multi-appareils
-										</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span className="text-sm">
-											Rappels automatiques SMS/Email
-										</span>
-									</li>
-								</ul>
-							</div>
+						<div className="text-center lg:text-left">
+							<Calendar className="h-12 w-12 text-primary mb-4 mx-auto lg:mx-0" />
+							<h3 className="text-2xl font-semibold mb-3">
+								Calendrier intelligent
+							</h3>
+							<p className="text-muted-foreground mb-4">
+								Planifiez et gérez vos consultations avec un
+								calendrier moderne et intuitif.
+								Synchronisation automatique et rappels
+								inclus.
+							</p>
+							<ul className="space-y-2">
+								<li className="flex items-center gap-2 justify-center lg:justify-start">
+									<Check className="h-4 w-4 text-primary" />
+									<span className="text-sm">
+										Synchronisation multi-appareils
+									</span>
+								</li>
+								<li className="flex items-center gap-2 justify-center lg:justify-start">
+									<Check className="h-4 w-4 text-primary" />
+									<span className="text-sm">
+										Rappels automatiques SMS/Email
+									</span>
+								</li>
+							</ul>
 						</div>
 
 						{/* Team Feature */}
-						<div className="flex flex-col lg:flex-row-reverse items-center gap-8">
-							<div className="lg:w-1/2">
-								<img
-									src={medicalTeam}
-									alt="Équipe médicale PatientHub"
-									className="rounded-xl shadow-lg shadow-primary/10"
-								/>
-							</div>
-							<div className="lg:w-1/2">
-								<Users className="h-12 w-12 text-primary mb-4" />
-								<h3 className="text-2xl font-semibold mb-3">
-									Collaboration d'équipe
-								</h3>
-								<p className="text-muted-foreground mb-4">
-									Travaillez en équipe avec vos collègues.
-									Partagez les dossiers patients et collaborez
-									efficacement.
-								</p>
-								<ul className="space-y-2">
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span className="text-sm">
-											Gestion multi-praticiens
-										</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span className="text-sm">
-											Partage sécurisé des données
-										</span>
-									</li>
-								</ul>
-							</div>
+						<div className="text-center lg:text-left">
+							<Users className="h-12 w-12 text-primary mb-4 mx-auto lg:mx-0" />
+							<h3 className="text-2xl font-semibold mb-3">
+								Collaboration d'équipe
+							</h3>
+							<p className="text-muted-foreground mb-4">
+								Travaillez en équipe avec vos collègues.
+								Partagez les dossiers patients et collaborez
+								efficacement.
+							</p>
+							<ul className="space-y-2">
+								<li className="flex items-center gap-2 justify-center lg:justify-start">
+									<Check className="h-4 w-4 text-primary" />
+									<span className="text-sm">
+										Gestion multi-praticiens
+									</span>
+								</li>
+								<li className="flex items-center gap-2 justify-center lg:justify-start">
+									<Check className="h-4 w-4 text-primary" />
+									<span className="text-sm">
+										Partage sécurisé des données
+									</span>
+								</li>
+							</ul>
 						</div>
 					</div>
 					{/* Additional Features Grid */}
@@ -782,6 +765,34 @@ export default function LandingPage() {
 				</div>
 			</section>
 
+			{/* Images Section */}
+			<section className="py-12 bg-muted/30">
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
+					<div className="grid md:grid-cols-2 gap-8">
+						<div className="text-center">
+							<img
+								src={calendarFeature}
+								alt="Interface de calendrier PatientHub"
+								className="rounded-xl shadow-lg shadow-primary/10 mx-auto mb-4"
+							/>
+							<p className="text-sm text-muted-foreground">
+								Interface intuitive de gestion des rendez-vous
+							</p>
+						</div>
+						<div className="text-center">
+							<img
+								src={osteopathTreatment}
+								alt="Ostéopathe en consultation"
+								className="rounded-xl shadow-lg shadow-primary/10 mx-auto mb-4"
+							/>
+							<p className="text-sm text-muted-foreground">
+								Suivi professionnel des traitements ostéopathiques
+							</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
 			{/* Footer */}
 			<footer className="bg-background border-t border-border/40 py-12">
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -795,7 +806,7 @@ export default function LandingPage() {
 							</h1>
 							<p className="text-muted-foreground">
 								La solution complète pour gérer vos patients et
-								votre pratique médicale.
+								votre pratique ostéopathique.
 							</p>
 						</div>
 						<div>
