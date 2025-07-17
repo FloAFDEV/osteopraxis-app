@@ -10,6 +10,7 @@ import { FancyLoader } from "@/components/ui/fancy-loader";
 import { UsersManagement } from "./users-management";
 import { CabinetsManagement } from "./cabinets-management";
 import { PatientsManagement } from "./patients-management";
+import { AdminSettingsPanel } from "./admin-settings";
 import { AuditLogsPanel } from "./audit-logs";
 import { AdminLogsPanel } from "./admin-logs";
 import { SystemHealthPanel } from "./system-health";
@@ -150,7 +151,7 @@ export function AdminDashboard() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="stats">Statistiques</TabsTrigger>
             <TabsTrigger value="health">Santé</TabsTrigger>
@@ -159,6 +160,7 @@ export function AdminDashboard() {
             <TabsTrigger value="patients">Patients</TabsTrigger>
             <TabsTrigger value="deleted">Supprimés</TabsTrigger>
             <TabsTrigger value="logs">Logs</TabsTrigger>
+            <TabsTrigger value="settings">Paramètres</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview">
@@ -191,6 +193,10 @@ export function AdminDashboard() {
           
           <TabsContent value="logs">
             <AdminLogsPanel />
+          </TabsContent>
+          
+          <TabsContent value="settings">
+            <AdminSettingsPanel />
           </TabsContent>
         </Tabs>
       </div>
