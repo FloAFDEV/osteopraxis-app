@@ -1,30 +1,27 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import calendarFeature from "@/assets/calendar-feature.jpg";
+import osteopathTreatment from "@/assets/osteopath-treatment.jpg";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/contexts/AuthContext";
 import {
-	Calendar,
-	Users,
-	FileText,
 	BarChart3,
-	Clock,
-	Shield,
-	Star,
+	Calendar,
 	Check,
 	ChevronDown,
 	ChevronUp,
+	Clock,
+	FileText,
 	Menu,
-	X,
-	Heart,
+	Shield,
+	Star,
 	Stethoscope,
+	Users,
+	X,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import dashboardHero from "@/assets/dashboard-hero.jpg";
-import medicalTeam from "@/assets/medical-team.jpg";
-import calendarFeature from "@/assets/calendar-feature.jpg";
-import osteopathTreatment from "@/assets/osteopath-treatment.jpg";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const features = [
 	{
@@ -243,12 +240,12 @@ export default function LandingPage() {
 			</header>
 
 			{/* Hero Section */}
-			<section className="relative py-20 lg:py-32 bg-gradient-to-br from-blue-50 to-slate-50 dark:from-slate-900 dark:to-slate-800">
+			<section className="relative py-20 lg:py-32 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="max-w-4xl mx-auto text-center">
 						<Badge
 							variant="outline"
-							className="mb-8 bg-white/50 border-blue-200 text-blue-700 dark:bg-slate-800/50 dark:border-blue-700 dark:text-blue-300"
+							className="mb-8 bg-white/60 border-blue-300 text-blue-800 dark:bg-slate-800/60 dark:border-blue-600 dark:text-blue-300"
 						>
 							<Stethoscope className="w-4 h-4 mr-2" />
 							Solution complète pour ostéopathes
@@ -304,30 +301,38 @@ export default function LandingPage() {
 
 						{/* Features Icons */}
 						<div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
-							<div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
-								<Calendar className="h-8 w-8 text-blue-600 mb-2" />
-								<span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-									Rendez-vous
-								</span>
-							</div>
-							<div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
-								<Users className="h-8 w-8 text-purple-600 mb-2" />
-								<span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-									Patients
-								</span>
-							</div>
-							<div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
-								<FileText className="h-8 w-8 text-pink-600 mb-2" />
-								<span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-									Facturation
-								</span>
-							</div>
-							<div className="flex flex-col items-center p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 hover:scale-105 transition-transform duration-300">
-								<BarChart3 className="h-8 w-8 text-indigo-600 mb-2" />
-								<span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-									Statistiques
-								</span>
-							</div>
+							{[
+								{
+									icon: Calendar,
+									label: "Rendez-vous",
+									color: "text-blue-600",
+								},
+								{
+									icon: Users,
+									label: "Patients",
+									color: "text-purple-600",
+								},
+								{
+									icon: FileText,
+									label: "Facturation",
+									color: "text-pink-600",
+								},
+								{
+									icon: BarChart3,
+									label: "Statistiques",
+									color: "text-indigo-600",
+								},
+							].map(({ icon: Icon, label, color }, i) => (
+								<div
+									key={i}
+									className="flex flex-col items-center p-6 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 hover:scale-105 transition-transform duration-300"
+								>
+									<Icon className={`h-8 w-8 mb-2 ${color}`} />
+									<span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+										{label}
+									</span>
+								</div>
+							))}
 						</div>
 					</div>
 				</div>
@@ -363,24 +368,35 @@ export default function LandingPage() {
 							<div className="order-1 lg:order-2 space-y-6">
 								<div className="inline-flex items-center gap-3 bg-primary/10 rounded-full px-6 py-3">
 									<Calendar className="h-6 w-6 text-primary" />
-									<span className="text-primary font-semibold">Gestion Intelligente</span>
+									<span className="text-primary font-semibold">
+										Gestion Intelligente
+									</span>
 								</div>
 								<h3 className="text-3xl md:text-4xl font-bold leading-tight">
 									Calendrier moderne et intuitif
 								</h3>
 								<p className="text-lg text-muted-foreground leading-relaxed">
-									Planifiez et gérez vos consultations avec une interface élégante. 
-									Synchronisation automatique, rappels intelligents et vue d'ensemble 
-									de votre planning en temps réel.
+									Planifiez et gérez vos consultations avec
+									une interface élégante. Synchronisation
+									automatique, rappels intelligents et vue
+									d'ensemble de votre planning en temps réel.
 								</p>
 								<div className="grid sm:grid-cols-2 gap-4">
 									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50">
 										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium">Synchronisation multi-appareils</span>
+										<span className="text-sm font-medium">
+											Synchronisation multi-appareils
+										</span>
 									</div>
 									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50">
 										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium">Rappels automatiques SMS/Email</span>
+										<span className="text-sm font-medium">
+											Rappels automatiques SMS/Email
+											<br />
+											<span className="text-xs text-muted-foreground">
+												(En cours)
+											</span>
+										</span>
 									</div>
 								</div>
 							</div>
@@ -389,26 +405,40 @@ export default function LandingPage() {
 						{/* Osteopath Treatment Feature - Image Right */}
 						<div className="grid lg:grid-cols-2 gap-12 items-center">
 							<div className="space-y-6">
-								<div className="inline-flex items-center gap-3 bg-primary/10 rounded-full px-6 py-3">
+								{/* Badge */}
+								<div className="inline-flex items-center gap-3 bg-primary/20 dark:bg-primary/30 rounded-full px-6 py-3">
 									<Users className="h-6 w-6 text-primary" />
-									<span className="text-primary font-semibold">Collaboration Pro</span>
+									<span className="text-primary font-semibold">
+										Collaboration Pro
+									</span>
 								</div>
-								<h3 className="text-3xl md:text-4xl font-bold leading-tight">
+
+								{/* Titre */}
+								<h3 className="text-3xl md:text-4xl font-bold leading-tight text-slate-900 dark:text-white">
 									Suivi professionnel des traitements
 								</h3>
+
+								{/* Texte */}
 								<p className="text-lg text-muted-foreground leading-relaxed">
-									Documentez vos séances d'ostéopathie avec précision. 
-									Partagez les dossiers avec vos collègues et assurez 
-									un suivi optimal de vos patients.
+									Documentez vos séances d'ostéopathie avec
+									précision. Partagez les dossiers avec vos
+									collègues et assurez un suivi optimal de vos
+									patients.
 								</p>
+
+								{/* Bullet points */}
 								<div className="grid sm:grid-cols-2 gap-4">
-									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50">
+									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50 hover:bg-muted/30 transition-colors">
 										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium">Gestion multi-praticiens</span>
+										<span className="text-sm font-medium text-foreground">
+											Gestion multi-praticiens
+										</span>
 									</div>
-									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50">
+									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50 hover:bg-muted/30 transition-colors">
 										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium">Partage sécurisé des données</span>
+										<span className="text-sm font-medium text-foreground">
+											Partage sécurisé des données
+										</span>
 									</div>
 								</div>
 							</div>
@@ -422,15 +452,15 @@ export default function LandingPage() {
 						</div>
 					</div>
 					{/* Additional Features Grid */}
-					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-16">
 						{features.map((feature, index) => (
 							<Card
 								key={index}
-								className="h-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30"
+								className="h-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-border/50 hover:border-primary/30"
 							>
 								<CardContent className="p-6">
 									<feature.icon className="h-12 w-12 text-primary mb-4" />
-									<h3 className="text-xl font-semibold mb-2">
+									<h3 className="text-xl font-semibold mb-2 text-foreground">
 										{feature.title}
 									</h3>
 									<p className="text-muted-foreground">
@@ -605,7 +635,7 @@ export default function LandingPage() {
 									variant="secondary"
 									className="bg-accent/20 text-accent border-accent/30"
 								>
-									Enterprise
+									Entreprise
 								</Badge>
 							</div>
 							<CardContent className="p-6">
@@ -757,14 +787,17 @@ export default function LandingPage() {
 			</section>
 
 			{/* CTA Section */}
-			<section className="py-20 bg-gradient-to-r from-primary to-primary/80">
+			<section className="py-20 relative lg:py-32 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-					<h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
+					<h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
 						Prêt à transformer votre pratique ?
 					</h2>
-					<p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
+					<p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
 						Rejoignez des centaines de professionnels de santé qui
-						ont déjà choisi PatientHub
+						ont déjà choisi{" "}
+						<span className="font-semibold text-blue-600 dark:text-blue-400">
+							PatientHub
+						</span>
 					</p>
 					<Button
 						size="lg"
@@ -774,12 +807,11 @@ export default function LandingPage() {
 					>
 						<Link to="/register">Commencer maintenant</Link>
 					</Button>
-					<p className="text-primary-foreground/80 mt-4">
+					<p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
 						Essai gratuit 14 jours • Configuration en 5 minutes
 					</p>
 				</div>
 			</section>
-
 
 			{/* Footer */}
 			<footer className="bg-background border-t border-border/40 py-12">
