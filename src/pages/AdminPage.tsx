@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, User, UserCheck, Users, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminLogsPanel } from "@/components/admin/admin-logs";
+import { AdminSettingsPanel } from "@/components/admin/admin-settings";
 
 // Type pour les utilisateurs à afficher dans l'interface admin
 interface AdminUser {
@@ -209,31 +211,11 @@ const AdminPage = () => {
           </TabsContent>
           
           <TabsContent value="logs">
-            <Card>
-              <CardHeader>
-                <CardTitle>Logs du système</CardTitle>
-                <CardDescription>
-                  Historique des événements et actions effectuées sur la plateforme.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Fonctionnalité à venir...</p>
-              </CardContent>
-            </Card>
+            <AdminLogsPanel />
           </TabsContent>
           
           <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Paramètres généraux</CardTitle>
-                <CardDescription>
-                  Configuration générale de la plateforme.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Fonctionnalité à venir...</p>
-              </CardContent>
-            </Card>
+            <AdminSettingsPanel />
           </TabsContent>
         </Tabs>
       </div>
