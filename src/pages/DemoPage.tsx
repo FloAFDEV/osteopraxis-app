@@ -12,12 +12,12 @@ export default function DemoPage() {
               <ArrowLeft className="h-5 w-5" />
               <span>Retour à l'accueil</span>
             </Link>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">O</span>
-              </div>
-              <span className="text-xl font-bold">PatientHub</span>
-            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              <span className="text-foreground">Patient</span>
+              <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+                Hub
+              </span>
+            </h1>
           </div>
         </div>
       </header>

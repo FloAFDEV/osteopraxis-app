@@ -67,9 +67,12 @@ export function Layout({ children }: LayoutProps) {
 							className="flex items-center gap-2 font-semibold text-3xl"
 						>
 							<Activity className="h-5 w-5 text-blue-500" />
-							<span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 font-bold">
-								PatientHub
-							</span>
+							<h1 className="text-2xl font-extrabold tracking-tight">
+								<span className="text-foreground">Patient</span>
+								<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+									Hub
+								</span>
+							</h1>
 						</NavLink>
 					</div>
 

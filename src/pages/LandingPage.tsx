@@ -138,14 +138,12 @@ export default function LandingPage() {
       <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-lg flex items-center justify-center shadow-md">
-                <Heart className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                PatientHub
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              <span className="text-foreground">Patient</span>
+              <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+                Hub
               </span>
-            </div>
+            </h1>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
@@ -628,12 +626,12 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary via-primary to-accent rounded-lg flex items-center justify-center shadow-md">
-                  <Heart className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">PatientHub</span>
-              </div>
+              <h1 className="text-xl font-extrabold tracking-tight mb-4">
+                <span className="text-foreground">Patient</span>
+                <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+                  Hub
+                </span>
+              </h1>
               <p className="text-muted-foreground">
                 La solution complète pour gérer vos patients et votre pratique médicale.
               </p>
