@@ -19,7 +19,6 @@ import {
 } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface MonthlyScheduleViewProps {
@@ -27,13 +26,15 @@ interface MonthlyScheduleViewProps {
   patients: Patient[];
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  onDayClick?: (date: Date) => void;
 }
 
 export function MonthlyScheduleView({
   appointments,
   patients,
   selectedDate,
-  onDateChange
+  onDateChange,
+  onDayClick
 }: MonthlyScheduleViewProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate);
 
@@ -158,14 +159,15 @@ export function MonthlyScheduleView({
                     <div
                       key={day.toISOString()}
                       className={cn(
-                        "min-h-[100px] p-2 border rounded-lg transition-colors",
+                        "min-h-[100px] p-2 border rounded-lg transition-colors group cursor-pointer",
                         isCurrentMonth 
                           ? "bg-background hover:bg-muted/50" 
                           : "bg-muted/30 text-muted-foreground",
                         isDayToday && "ring-2 ring-primary"
                       )}
+                      onClick={() => onDayClick?.(day)}
                     >
-                      {/* Numéro du jour avec bouton d'ajout */}
+                      {/* Numéro du jour */}
                       <div className="flex items-center justify-between mb-2">
                         <span className={cn(
                           "text-sm font-medium",
@@ -174,12 +176,9 @@ export function MonthlyScheduleView({
                           {format(day, "d")}
                         </span>
                         {isCurrentMonth && (
-                          <Link
-                            to={`/appointments/new?date=${format(day, "yyyy-MM-dd")}`}
-                            className="opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
-                          >
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                             <Plus className="h-3 w-3 text-muted-foreground hover:text-primary" />
-                          </Link>
+                          </div>
                         )}
                       </div>
 
@@ -190,28 +189,30 @@ export function MonthlyScheduleView({
                           const appointmentTime = format(parseISO(appointment.date), "HH:mm");
                           
                           return (
-                            <Link
+                            <div
                               key={appointment.id}
-                              to={`/appointments/${appointment.id}/edit`}
-                              className="block"
-                            >
-                              <div className={cn(
-                                "p-1 rounded text-xs truncate transition-colors hover:bg-primary/10",
+                              className={cn(
+                                "p-1 rounded text-xs truncate transition-colors hover:bg-primary/10 cursor-pointer",
                                 appointment.status === "COMPLETED" 
                                   ? "bg-green-100 text-green-800 border-l-2 border-l-green-500" 
                                   : "bg-blue-100 text-blue-800 border-l-2 border-l-blue-500"
-                              )}>
-                                <div className="font-medium">
-                                  {appointmentTime}
-                                </div>
-                                <div className="truncate">
-                                  {patient 
-                                    ? `${patient.firstName} ${patient.lastName}`
-                                    : `Patient #${appointment.patientId}`
-                                  }
-                                </div>
+                              )}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Optionnel : naviguer vers l'édition du rendez-vous
+                                // navigate(`/appointments/${appointment.id}/edit`);
+                              }}
+                            >
+                              <div className="font-medium">
+                                {appointmentTime}
                               </div>
-                            </Link>
+                              <div className="truncate">
+                                {patient 
+                                  ? `${patient.firstName} ${patient.lastName}`
+                                  : `Patient #${appointment.patientId}`
+                                }
+                              </div>
+                            </div>
                           );
                         })}
 
@@ -224,12 +225,9 @@ export function MonthlyScheduleView({
 
                         {/* État vide pour les jours sans rendez-vous */}
                         {dayAppointments.length === 0 && isCurrentMonth && (
-                          <Link
-                            to={`/appointments/new?date=${format(day, "yyyy-MM-dd")}`}
-                            className="block text-center py-2 text-xs text-muted-foreground hover:text-primary transition-colors"
-                          >
+                          <div className="text-center py-2 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                             Cliquer pour ajouter
-                          </Link>
+                          </div>
                         )}
                       </div>
                     </div>

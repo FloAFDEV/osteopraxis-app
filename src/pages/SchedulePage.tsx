@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 import { useOptimizedCache } from "@/hooks/useOptimizedCache";
 import { MonthlyScheduleView } from "@/components/schedule/MonthlyScheduleView";
+import { AppointmentModal } from "@/components/appointment-modal";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
@@ -62,8 +63,10 @@ const SchedulePage = () => {
 	const [loading, setLoading] = useState(true);
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 	const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
-	const [view, setView] = useState<"day" | "week" | "month">("week");
+	const [view, setView] = useState<"day" | "week" | "month">("month");
 	const [showGoogleEvents, setShowGoogleEvents] = useState(true);
+	const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+	const [appointmentModalDate, setAppointmentModalDate] = useState<Date | undefined>();
 	const [actionInProgress, setActionInProgress] = useState<{
 		id: number;
 		action: "cancel" | "delete";
@@ -247,8 +250,14 @@ const SchedulePage = () => {
 		setSelectedDate((prevDate) => addDays(prevDate, 1));
 	const navigateToToday = () => setSelectedDate(new Date());
 	const handleDayHeaderClick = (date: Date) => {
-		const dateStr = format(date, "yyyy-MM-dd");
-		navigate(`/appointments/new?date=${dateStr}`);
+		setAppointmentModalDate(date);
+		setAppointmentModalOpen(true);
+	};
+
+	const handleAppointmentSuccess = () => {
+		// Invalider le cache pour recharger les données
+		invalidateAppointments();
+		invalidatePatients();
 	};
 
 	// --- JSX Structure ---
@@ -731,11 +740,23 @@ const SchedulePage = () => {
 
 						{/* Vue mensuelle */}
 						<TabsContent value="month">
+							<div className="flex items-center justify-between mb-4">
+								<div className="flex items-center gap-2">
+									<AppointmentModal
+										patients={patients}
+										selectedDate={appointmentModalDate}
+										isOpen={appointmentModalOpen}
+										onOpenChange={setAppointmentModalOpen}
+										onSuccess={handleAppointmentSuccess}
+									/>
+								</div>
+							</div>
 							<MonthlyScheduleView
 								appointments={appointments}
 								patients={patients}
 								selectedDate={selectedDate}
 								onDateChange={setSelectedDate}
+								onDayClick={handleDayHeaderClick}
 							/>
 						</TabsContent>
 					</Tabs>
