@@ -141,127 +141,144 @@ export default function LandingPage() {
 
 	return (
 		<div className="min-h-screen bg-background">
-		{/* Header Marketing */}
-		<header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-			<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-				<div className="flex justify-between items-center py-3 md:py-4 min-h-[60px]">
-					<h1 className="text-xl sm:text-2xl font-extrabold tracking-tight flex-shrink-0">
-						<span className="text-foreground">Patient</span>
-						<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-							Hub
-						</span>
-					</h1>
+			{/* Header Marketing */}
+			<header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+					<div className="flex justify-between items-center py-3 md:py-4 min-h-[60px]">
+						<h1 className="text-xl sm:text-3xl font-extrabold tracking-tight flex-shrink-0">
+							<span className="text-foreground">Patient</span>
+							<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+								Hub
+							</span>
+						</h1>
 
-					{/* Desktop Navigation */}
-					<nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-						<a
-							href="#features"
-							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
-						>
-							Fonctionnalités
-						</a>
-						<a
-							href="#pricing"
-							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
-						>
-							Tarifs
-						</a>
-						<a
-							href="#testimonials"
-							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
-						>
-							Témoignages
-						</a>
-						<Link
-							to="/login"
-							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
-						>
-							Connexion
-						</Link>
-						<ThemeToggle />
-						<Button asChild size="sm" className="whitespace-nowrap">
-							<Link to="/register">Essai gratuit</Link>
-						</Button>
-					</nav>
-
-					{/* Tablet Navigation */}
-					<nav className="hidden md:flex lg:hidden items-center space-x-4">
-						<ThemeToggle />
-						<Button asChild size="sm" className="whitespace-nowrap">
-							<Link to="/register">Essai gratuit</Link>
-						</Button>
-						<button
-							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-							className="p-2 hover:bg-muted rounded-md transition-colors"
-						>
-							{mobileMenuOpen ? (
-								<X className="h-5 w-5" />
-							) : (
-								<Menu className="h-5 w-5" />
-							)}
-						</button>
-					</nav>
-
-					{/* Mobile Menu Button */}
-					<div className="md:hidden flex items-center space-x-2">
-						<ThemeToggle />
-						<button
-							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-							className="p-2 hover:bg-muted rounded-md transition-colors"
-						>
-							{mobileMenuOpen ? (
-								<X className="h-5 w-5" />
-							) : (
-								<Menu className="h-5 w-5" />
-							)}
-						</button>
-					</div>
-				</div>
-
-				{/* Mobile & Tablet Navigation Dropdown */}
-				{mobileMenuOpen && (
-					<div className="lg:hidden border-t border-border/40 py-4 bg-background/95 backdrop-blur">
-						<nav className="flex flex-col space-y-3">
+						{/* Desktop Navigation */}
+						<nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
 							<a
 								href="#features"
-								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
-								onClick={() => setMobileMenuOpen(false)}
+								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
 							>
 								Fonctionnalités
 							</a>
 							<a
 								href="#pricing"
-								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
-								onClick={() => setMobileMenuOpen(false)}
+								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
 							>
 								Tarifs
 							</a>
 							<a
 								href="#testimonials"
-								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
-								onClick={() => setMobileMenuOpen(false)}
+								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
 							>
 								Témoignages
 							</a>
 							<Link
 								to="/login"
-								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
-								onClick={() => setMobileMenuOpen(false)}
+								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
 							>
 								Connexion
 							</Link>
-							<div className="pt-2 md:hidden">
-								<Button asChild className="w-full">
-									<Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-										Essai gratuit
-									</Link>
-								</Button>
-							</div>
+							<ThemeToggle />
+							<Button
+								asChild
+								size="sm"
+								className="whitespace-nowrap"
+							>
+								<Link to="/register">Essai gratuit</Link>
+							</Button>
 						</nav>
+
+						{/* Tablet Navigation */}
+						<nav className="hidden md:flex lg:hidden items-center space-x-4">
+							<ThemeToggle />
+							<Button
+								asChild
+								size="sm"
+								className="whitespace-nowrap"
+							>
+								<Link to="/register">Essai gratuit</Link>
+							</Button>
+							<button
+								onClick={() =>
+									setMobileMenuOpen(!mobileMenuOpen)
+								}
+								className="p-2 hover:bg-muted rounded-md transition-colors"
+							>
+								{mobileMenuOpen ? (
+									<X className="h-5 w-5" />
+								) : (
+									<Menu className="h-5 w-5" />
+								)}
+							</button>
+						</nav>
+
+						{/* Mobile Menu Button */}
+						<div className="md:hidden flex items-center space-x-2">
+							<ThemeToggle />
+							<button
+								onClick={() =>
+									setMobileMenuOpen(!mobileMenuOpen)
+								}
+								className="p-2 hover:bg-muted rounded-md transition-colors"
+							>
+								{mobileMenuOpen ? (
+									<X className="h-5 w-5" />
+								) : (
+									<Menu className="h-5 w-5" />
+								)}
+							</button>
+						</div>
 					</div>
-				)}
-			</div>
-		</header>
+
+					{/* Mobile & Tablet Navigation Dropdown */}
+					{mobileMenuOpen && (
+						<div className="lg:hidden border-t border-border/40 py-4 bg-background/95 backdrop-blur">
+							<nav className="flex flex-col space-y-3">
+								<a
+									href="#features"
+									className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+									onClick={() => setMobileMenuOpen(false)}
+								>
+									Fonctionnalités
+								</a>
+								<a
+									href="#pricing"
+									className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+									onClick={() => setMobileMenuOpen(false)}
+								>
+									Tarifs
+								</a>
+								<a
+									href="#testimonials"
+									className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+									onClick={() => setMobileMenuOpen(false)}
+								>
+									Témoignages
+								</a>
+								<Link
+									to="/login"
+									className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+									onClick={() => setMobileMenuOpen(false)}
+								>
+									Connexion
+								</Link>
+								<div className="pt-2 md:hidden">
+									<Button asChild className="w-full">
+										<Link
+											to="/register"
+											onClick={() =>
+												setMobileMenuOpen(false)
+											}
+										>
+											Essai gratuit
+										</Link>
+									</Button>
+								</div>
+							</nav>
+						</div>
+					)}
+				</div>
+			</header>
 
 			{/* Hero Section */}
 			<section className="relative py-16 sm:py-20 lg:py-32 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
@@ -351,7 +368,9 @@ export default function LandingPage() {
 									key={i}
 									className="flex flex-col items-center p-4 sm:p-6 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 hover:scale-105 transition-transform duration-300"
 								>
-									<Icon className={`h-6 w-6 sm:h-8 sm:w-8 mb-2 ${color}`} />
+									<Icon
+										className={`h-6 w-6 sm:h-8 sm:w-8 mb-2 ${color}`}
+									/>
 									<span className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 text-center">
 										{label}
 									</span>
