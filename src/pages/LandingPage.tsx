@@ -141,133 +141,157 @@ export default function LandingPage() {
 
 	return (
 		<div className="min-h-screen bg-background">
-			{/* Header Marketing */}
-			<header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="flex justify-between items-center py-4">
-						<h1 className="text-2xl font-extrabold tracking-tight">
-							<span className="text-foreground">Patient</span>
-							<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-								Hub
-							</span>
-						</h1>
+		{/* Header Marketing */}
+		<header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+			<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+				<div className="flex justify-between items-center py-3 md:py-4 min-h-[60px]">
+					<h1 className="text-xl sm:text-2xl font-extrabold tracking-tight flex-shrink-0">
+						<span className="text-foreground">Patient</span>
+						<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+							Hub
+						</span>
+					</h1>
 
-						{/* Desktop Navigation */}
-						<nav className="hidden md:flex items-center space-x-8">
+					{/* Desktop Navigation */}
+					<nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+						<a
+							href="#features"
+							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
+						>
+							Fonctionnalités
+						</a>
+						<a
+							href="#pricing"
+							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
+						>
+							Tarifs
+						</a>
+						<a
+							href="#testimonials"
+							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
+						>
+							Témoignages
+						</a>
+						<Link
+							to="/login"
+							className="text-muted-foreground hover:text-foreground transition-colors text-sm whitespace-nowrap"
+						>
+							Connexion
+						</Link>
+						<ThemeToggle />
+						<Button asChild size="sm" className="whitespace-nowrap">
+							<Link to="/register">Essai gratuit</Link>
+						</Button>
+					</nav>
+
+					{/* Tablet Navigation */}
+					<nav className="hidden md:flex lg:hidden items-center space-x-4">
+						<ThemeToggle />
+						<Button asChild size="sm" className="whitespace-nowrap">
+							<Link to="/register">Essai gratuit</Link>
+						</Button>
+						<button
+							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+							className="p-2 hover:bg-muted rounded-md transition-colors"
+						>
+							{mobileMenuOpen ? (
+								<X className="h-5 w-5" />
+							) : (
+								<Menu className="h-5 w-5" />
+							)}
+						</button>
+					</nav>
+
+					{/* Mobile Menu Button */}
+					<div className="md:hidden flex items-center space-x-2">
+						<ThemeToggle />
+						<button
+							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+							className="p-2 hover:bg-muted rounded-md transition-colors"
+						>
+							{mobileMenuOpen ? (
+								<X className="h-5 w-5" />
+							) : (
+								<Menu className="h-5 w-5" />
+							)}
+						</button>
+					</div>
+				</div>
+
+				{/* Mobile & Tablet Navigation Dropdown */}
+				{mobileMenuOpen && (
+					<div className="lg:hidden border-t border-border/40 py-4 bg-background/95 backdrop-blur">
+						<nav className="flex flex-col space-y-3">
 							<a
 								href="#features"
-								className="text-muted-foreground hover:text-foreground transition-colors"
+								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+								onClick={() => setMobileMenuOpen(false)}
 							>
 								Fonctionnalités
 							</a>
 							<a
 								href="#pricing"
-								className="text-muted-foreground hover:text-foreground transition-colors"
+								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+								onClick={() => setMobileMenuOpen(false)}
 							>
 								Tarifs
 							</a>
 							<a
 								href="#testimonials"
-								className="text-muted-foreground hover:text-foreground transition-colors"
+								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+								onClick={() => setMobileMenuOpen(false)}
 							>
 								Témoignages
 							</a>
 							<Link
 								to="/login"
-								className="text-muted-foreground hover:text-foreground transition-colors"
+								className="text-muted-foreground hover:text-foreground transition-colors py-2 px-2 rounded-md hover:bg-muted"
+								onClick={() => setMobileMenuOpen(false)}
 							>
 								Connexion
 							</Link>
-							<ThemeToggle />
-							<Button asChild>
-								<Link to="/register">Essai gratuit</Link>
-							</Button>
+							<div className="pt-2 md:hidden">
+								<Button asChild className="w-full">
+									<Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+										Essai gratuit
+									</Link>
+								</Button>
+							</div>
 						</nav>
-
-						{/* Mobile Menu Button */}
-						<button
-							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-							className="md:hidden p-2"
-						>
-							{mobileMenuOpen ? (
-								<X className="h-6 w-6" />
-							) : (
-								<Menu className="h-6 w-6" />
-							)}
-						</button>
 					</div>
-
-					{/* Mobile Navigation */}
-					{mobileMenuOpen && (
-						<div className="md:hidden border-t border-border/40 py-4">
-							<nav className="flex flex-col space-y-4">
-								<a
-									href="#features"
-									className="text-muted-foreground hover:text-foreground transition-colors"
-								>
-									Fonctionnalités
-								</a>
-								<a
-									href="#pricing"
-									className="text-muted-foreground hover:text-foreground transition-colors"
-								>
-									Tarifs
-								</a>
-								<a
-									href="#testimonials"
-									className="text-muted-foreground hover:text-foreground transition-colors"
-								>
-									Témoignages
-								</a>
-								<Link
-									to="/login"
-									className="text-muted-foreground hover:text-foreground transition-colors"
-								>
-									Connexion
-								</Link>
-								<div className="flex items-center gap-2">
-									<ThemeToggle />
-									<Button asChild className="w-fit">
-										<Link to="/register">
-											Essai gratuit
-										</Link>
-									</Button>
-								</div>
-							</nav>
-						</div>
-					)}
-				</div>
-			</header>
+				)}
+			</div>
+		</header>
 
 			{/* Hero Section */}
-			<section className="relative py-20 lg:py-32 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
-				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="max-w-4xl mx-auto text-center">
+			<section className="relative py-16 sm:py-20 lg:py-32 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+					<div className="max-w-5xl mx-auto text-center">
 						<Badge
 							variant="outline"
-							className="mb-8 bg-white/60 border-blue-300 text-blue-800 dark:bg-slate-800/60 dark:border-blue-600 dark:text-blue-300"
+							className="mb-6 sm:mb-8 bg-white/60 border-blue-300 text-blue-800 dark:bg-slate-800/60 dark:border-blue-600 dark:text-blue-300 text-sm sm:text-base"
 						>
-							<Stethoscope className="w-4 h-4 mr-2" />
+							<Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
 							Solution complète pour ostéopathes
 						</Badge>
 
-						<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-slate-900 dark:text-white leading-tight">
+						<h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 text-slate-900 dark:text-white leading-tight">
 							<span className="text-foreground">Patient</span>
 							<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
 								Hub
 							</span>
 						</h1>
 
-						<p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+						<p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
 							La plateforme tout-en-un pour gérer votre cabinet :
 							dossiers patients, rendez-vous, facturation et
 							statistiques en un seul endroit.
 						</p>
 
-						<div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+						<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
 							<Button
 								size="lg"
-								className="text-lg px-8 py-4"
+								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
 								asChild
 							>
 								<Link to="/register">
@@ -277,14 +301,14 @@ export default function LandingPage() {
 							<Button
 								variant="outline"
 								size="lg"
-								className="text-lg px-8 py-4"
+								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
 								asChild
 							>
 								<Link to="/demo">Voir la démo</Link>
 							</Button>
 						</div>
 
-						<div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+						<div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-500 dark:text-slate-400 px-4">
 							<span className="flex items-center gap-2">
 								<span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
 								Essai gratuit 14 jours
@@ -300,7 +324,7 @@ export default function LandingPage() {
 						</div>
 
 						{/* Features Icons */}
-						<div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+						<div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mt-12 sm:mt-16 px-4">
 							{[
 								{
 									icon: Calendar,
@@ -325,10 +349,10 @@ export default function LandingPage() {
 							].map(({ icon: Icon, label, color }, i) => (
 								<div
 									key={i}
-									className="flex flex-col items-center p-6 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 hover:scale-105 transition-transform duration-300"
+									className="flex flex-col items-center p-4 sm:p-6 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 hover:scale-105 transition-transform duration-300"
 								>
-									<Icon className={`h-8 w-8 mb-2 ${color}`} />
-									<span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+									<Icon className={`h-6 w-6 sm:h-8 sm:w-8 mb-2 ${color}`} />
+									<span className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 text-center">
 										{label}
 									</span>
 								</div>
@@ -355,9 +379,9 @@ export default function LandingPage() {
 					</div>
 
 					{/* Featured Highlights with Images */}
-					<div className="space-y-24 mb-16">
+					<div className="space-y-16 sm:space-y-20 lg:space-y-24 mb-16">
 						{/* Calendar Feature - Image Left */}
-						<div className="grid lg:grid-cols-2 gap-12 items-center">
+						<div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 							<div className="order-2 lg:order-1">
 								<img
 									src={calendarFeature}
@@ -365,32 +389,32 @@ export default function LandingPage() {
 									className="rounded-2xl shadow-2xl shadow-primary/20 w-full max-w-lg mx-auto"
 								/>
 							</div>
-							<div className="order-1 lg:order-2 space-y-6">
-								<div className="inline-flex items-center gap-3 bg-primary/10 rounded-full px-6 py-3">
-									<Calendar className="h-6 w-6 text-primary" />
-									<span className="text-primary font-semibold">
+							<div className="order-1 lg:order-2 space-y-4 sm:space-y-6 px-4 lg:px-0">
+								<div className="inline-flex items-center gap-2 sm:gap-3 bg-primary/10 rounded-full px-4 sm:px-6 py-2 sm:py-3">
+									<Calendar className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
+									<span className="text-primary font-semibold text-sm sm:text-base">
 										Gestion Intelligente
 									</span>
 								</div>
-								<h3 className="text-3xl md:text-4xl font-bold leading-tight">
+								<h3 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
 									Calendrier moderne et intuitif
 								</h3>
-								<p className="text-lg text-muted-foreground leading-relaxed">
+								<p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
 									Planifiez et gérez vos consultations avec
 									une interface élégante. Synchronisation
 									automatique, rappels intelligents et vue
 									d'ensemble de votre planning en temps réel.
 								</p>
-								<div className="grid sm:grid-cols-2 gap-4">
-									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50">
-										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium">
+								<div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+									<div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-background border border-border/50">
+										<div className="h-2 w-2 bg-primary rounded-full flex-shrink-0"></div>
+										<span className="text-xs sm:text-sm font-medium">
 											Synchronisation multi-appareils
 										</span>
 									</div>
-									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50">
-										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium">
+									<div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-background border border-border/50">
+										<div className="h-2 w-2 bg-primary rounded-full flex-shrink-0"></div>
+										<span className="text-xs sm:text-sm font-medium">
 											Rappels automatiques SMS/Email
 											<br />
 											<span className="text-xs text-muted-foreground">
@@ -403,23 +427,23 @@ export default function LandingPage() {
 						</div>
 
 						{/* Osteopath Treatment Feature - Image Right */}
-						<div className="grid lg:grid-cols-2 gap-12 items-center">
-							<div className="space-y-6">
+						<div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+							<div className="space-y-4 sm:space-y-6 px-4 lg:px-0">
 								{/* Badge */}
-								<div className="inline-flex items-center gap-3 bg-primary/20 dark:bg-primary/30 rounded-full px-6 py-3">
-									<Users className="h-6 w-6 text-primary" />
-									<span className="text-primary font-semibold">
+								<div className="inline-flex items-center gap-2 sm:gap-3 bg-primary/20 dark:bg-primary/30 rounded-full px-4 sm:px-6 py-2 sm:py-3">
+									<Users className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
+									<span className="text-primary font-semibold text-sm sm:text-base">
 										Collaboration Pro
 									</span>
 								</div>
 
 								{/* Titre */}
-								<h3 className="text-3xl md:text-4xl font-bold leading-tight text-slate-900 dark:text-white">
+								<h3 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-slate-900 dark:text-white">
 									Suivi professionnel des traitements
 								</h3>
 
 								{/* Texte */}
-								<p className="text-lg text-muted-foreground leading-relaxed">
+								<p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
 									Documentez vos séances d'ostéopathie avec
 									précision. Partagez les dossiers avec vos
 									collègues et assurez un suivi optimal de vos
@@ -427,16 +451,16 @@ export default function LandingPage() {
 								</p>
 
 								{/* Bullet points */}
-								<div className="grid sm:grid-cols-2 gap-4">
-									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50 hover:bg-muted/30 transition-colors">
-										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium text-foreground">
+								<div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+									<div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-background border border-border/50 hover:bg-muted/30 transition-colors">
+										<div className="h-2 w-2 bg-primary rounded-full flex-shrink-0"></div>
+										<span className="text-xs sm:text-sm font-medium text-foreground">
 											Gestion multi-praticiens
 										</span>
 									</div>
-									<div className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50 hover:bg-muted/30 transition-colors">
-										<div className="h-2 w-2 bg-primary rounded-full"></div>
-										<span className="text-sm font-medium text-foreground">
+									<div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-background border border-border/50 hover:bg-muted/30 transition-colors">
+										<div className="h-2 w-2 bg-primary rounded-full flex-shrink-0"></div>
+										<span className="text-xs sm:text-sm font-medium text-foreground">
 											Partage sécurisé des données
 										</span>
 									</div>
