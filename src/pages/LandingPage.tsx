@@ -65,27 +65,27 @@ const features = [
 const testimonials = [
 	{
 		name: "Franck Blanchet D.E",
-		role: "Ostéopathe à Paris",
+		role: "Ostéopathe à Gratentour",
 		content:
 			"Cette solution a révolutionné ma pratique. Je gagne 2h par jour sur l'administratif !",
 		rating: 5,
-		avatar: "SM",
+		avatar: "FB",
 	},
 	{
-		name: "Florent PEREZ D.E",
-		role: "Cabinet multi-praticiens Lyon",
+		name: "Anaïs Quintoli D.E",
+		role: "Cabinet multi-praticiens Cépet",
 		content:
 			"Parfait pour gérer notre cabinet à plusieurs. L'interface est intuitive et moderne.",
 		rating: 5,
-		avatar: "JPD",
+		avatar: "AQ",
 	},
 	{
 		name: "Julia Rozier D.E",
-		role: "Ostéopathe libérale",
+		role: "Ostéopathe à Bruguières",
 		content:
 			"Le rapport qualité-prix est excellent. Je recommande vivement !",
 		rating: 5,
-		avatar: "ML",
+		avatar: "JR",
 	},
 ];
 
@@ -100,7 +100,7 @@ const faqs = [
 	},
 	{
 		question: "Puis-je importer mes données existantes ?",
-		answer: "Cette fonctionnalité est actuellement en cours de développement et sera bientôt disponible. Vous pourrez alors importer facilement vos données depuis d'autres logiciels ou fichiers Excel/CSV.",
+		answer: "Oui, nous proposons des outils d'import pour migrer facilement vos données depuis d'autres logiciels ou fichiers Excel.",
 	},
 	{
 		question: "Y a-t-il une période d'essai ?",
