@@ -32,73 +32,73 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-      <AuthProvider>
         <Router>
-          <div className="min-h-screen bg-background">
-            <Routes>
-              {/* Routes publiques */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+          <AuthProvider>
+            <div className="min-h-screen bg-background">
+              <Routes>
+                {/* Routes publiques */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
 
-              {/* Routes protégées */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/patients" element={
-                <ProtectedRoute>
-                  <PatientsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/patients/:id" element={
-                <ProtectedRoute>
-                  <PatientDetailPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/appointments" element={
-                <ProtectedRoute>
-                  <AppointmentsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/invoices" element={
-                <ProtectedRoute>
-                  <InvoicesPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <SettingsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/settings/import" element={
-                <ProtectedRoute>
-                  <DataImportPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/settings/osteopath" element={
-                <ProtectedRoute>
-                  <OsteopathSettingsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/settings/cabinet" element={
-                <ProtectedRoute>
-                  <CabinetSettingsPage />
-                </ProtectedRoute>
-              } />
-              {/* Routes admin */}
-              <Route path="/admin/dashboard" element={
-                <ProtectedRoute>
-                  <AdminDashboardPage />
-                </ProtectedRoute>
-              } />
-            </Routes>
-            <Toaster />
-          </div>
+                {/* Routes protégées */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/patients" element={
+                  <ProtectedRoute>
+                    <PatientsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/patients/:id" element={
+                  <ProtectedRoute>
+                    <PatientDetailPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/appointments" element={
+                  <ProtectedRoute>
+                    <AppointmentsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/invoices" element={
+                  <ProtectedRoute>
+                    <InvoicesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings/import" element={
+                  <ProtectedRoute>
+                    <DataImportPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings/osteopath" element={
+                  <ProtectedRoute>
+                    <OsteopathSettingsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings/cabinet" element={
+                  <ProtectedRoute>
+                    <CabinetSettingsPage />
+                  </ProtectedRoute>
+                } />
+                {/* Routes admin */}
+                <Route path="/admin/dashboard" element={
+                  <ProtectedRoute>
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+              <Toaster />
+            </div>
+          </AuthProvider>
         </Router>
-      </AuthProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }
