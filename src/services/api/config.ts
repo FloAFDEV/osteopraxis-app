@@ -8,7 +8,7 @@ export const DELAY = 300;
 export const delay = (ms: number = DELAY) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Active l'utilisation de Supabase au lieu de l'API simulée
-export const USE_SUPABASE = false;
+export const USE_SUPABASE = true;
 
 // Les headers par défaut pour les appels API
 export const DEFAULT_HEADERS = {
