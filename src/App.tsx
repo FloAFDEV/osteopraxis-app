@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/theme-context";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
@@ -32,9 +33,10 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <Router>
-          <AuthProvider>
-            <div className="min-h-screen bg-background">
+        <ThemeProvider>
+          <Router>
+            <AuthProvider>
+              <div className="min-h-screen bg-background">
               <Routes>
                 {/* Routes publiques */}
                 <Route path="/" element={<LandingPage />} />
@@ -98,6 +100,7 @@ function App() {
             </div>
           </AuthProvider>
         </Router>
+      </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
