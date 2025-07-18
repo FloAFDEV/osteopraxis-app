@@ -96,7 +96,7 @@ const faqs = [
 	},
 	{
 		question: "Mes données sont-elles sécurisées ?",
-		answer: "Absolument. Nous utilisons un chiffrement de niveau bancaire et sommes conformes au RGPD. Vos données sont hébergées sur des serveurs européens sécurisés.",
+		answer: "Absolument. Nous utilisons un chiffrement de niveau bancaire et sommes conformes au RGPD Certifications ISO 27001&HDS. Vos données sont hébergées sur des serveurs européens sécurisés.",
 	},
 	{
 		question: "Puis-je importer mes données existantes ?",
