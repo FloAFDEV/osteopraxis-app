@@ -100,7 +100,7 @@ const faqs = [
 	},
 	{
 		question: "Puis-je importer mes données existantes ?",
-		answer: "Oui, nous proposons des outils d'import pour migrer facilement vos données depuis d'autres logiciels ou fichiers Excel.",
+		answer: "Cette fonctionnalité est actuellement en cours de développement et sera bientôt disponible. Vous pourrez alors importer facilement vos données depuis d'autres logiciels ou fichiers Excel/CSV.",
 	},
 	{
 		question: "Y a-t-il une période d'essai ?",

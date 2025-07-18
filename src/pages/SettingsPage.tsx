@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/ui/layout";
 import {
 	Card,
@@ -13,6 +14,7 @@ import {
 	Users,
 	HelpCircle,
 	ChevronRight,
+	Upload,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -30,12 +32,21 @@ const SettingsPage = () => {
 			color: "text-blue-500",
 		},
 		{
+			id: "import",
+			title: "Import de données",
+			description:
+				"Importez vos patients depuis Excel/CSV ou autres logiciels",
+			icon: Upload,
+			path: "/settings/import",
+			color: "text-green-500",
+		},
+		{
 			id: "collaborations",
 			title: "Collaborations",
 			description: "Gérez vos associations de cabinet et remplacements",
 			icon: Users,
 			path: "/settings/collaborations",
-			color: "text-green-500",
+			color: "text-purple-500",
 		},
 		{
 			id: "help",
@@ -44,7 +55,7 @@ const SettingsPage = () => {
 				"Consultez la documentation et les guides d'utilisation",
 			icon: HelpCircle,
 			path: "/help",
-			color: "text-purple-500",
+			color: "text-orange-500",
 		},
 	];
 
@@ -101,10 +112,11 @@ const SettingsPage = () => {
 						<CardContent className="text-amber-700 dark:text-amber-300">
 							<p>
 								Commencez par configurer votre profil
-								professionnel, puis gérez vos collaborations si
-								vous travaillez avec d'autres ostéopathes.
-								Consultez le guide d'utilisation pour comprendre
-								tous les workflows disponibles.
+								professionnel, puis utilisez l'import de données
+								pour migrer vos patients existants. Gérez ensuite
+								vos collaborations si vous travaillez avec d'autres
+								ostéopathes. Consultez le guide d'utilisation pour
+								comprendre tous les workflows disponibles.
 							</p>
 						</CardContent>
 					</Card>

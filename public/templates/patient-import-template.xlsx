@@ -1,0 +1,21 @@
+
+L'écriture de fichiers binaires comme Excel n'est pas possible via cette interface. Vous devrez créer manuellement ce fichier template avec les colonnes suivantes dans Excel :
+
+- Prénom (obligatoire)
+- Nom (obligatoire) 
+- Email
+- Téléphone
+- Date de naissance (format DD/MM/YYYY)
+- Genre
+- Adresse
+- Ville
+- Code postal
+- Profession
+- Antécédents médicaux
+- Allergies
+- Traitement actuel
+- Taille (cm)
+- Poids (kg)
+- Notes
+
+Puis placez ce fichier dans le dossier public/templates/ de votre projet.
