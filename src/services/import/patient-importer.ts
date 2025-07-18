@@ -49,8 +49,31 @@ export const importPatients = async (
 					continue;
 				}
 
-				// Créer le patient
-				await api.createPatient(patientData);
+				// Créer le patient avec seulement les champs disponibles
+				const fullPatientData: any = {
+					// Champs obligatoires
+					firstName: patientData.firstName,
+					lastName: patientData.lastName,
+					hasVisionCorrection: false,
+					isDeceased: false,
+					isSmoker: false,
+					osteopathId: 0, // Sera défini par le service
+					
+					// Champs optionnels - seulement ceux qui existent dans PatientImportData
+					...(patientData.email && { email: patientData.email }),
+					...(patientData.phone && { phone: patientData.phone }),
+					...(patientData.address && { address: patientData.address }),
+					...(patientData.city && { city: patientData.city }),
+					...(patientData.postalCode && { postalCode: patientData.postalCode }),
+					...(patientData.occupation && { occupation: patientData.occupation }),
+					...(patientData.medicalHistory && { medicalHistory: patientData.medicalHistory }),
+					...(patientData.allergies && { allergies: patientData.allergies }),
+					...(patientData.currentTreatment && { currentTreatment: patientData.currentTreatment }),
+					...(patientData.notes && { notes: patientData.notes }),
+					...(patientData.birthDate && { birthDate: formatDateForDatabase(patientData.birthDate) }),
+					...(patientData.gender && { gender: patientData.gender as any })
+				};
+				await api.createPatient(fullPatientData);
 				result.successful++;
 
 			} catch (error) {
@@ -218,6 +241,24 @@ const isValidDate = (dateString: string): boolean => {
 		   date.getMonth() === month - 1 && 
 		   date.getFullYear() === year &&
 		   year >= 1900 && year <= new Date().getFullYear();
+};
+
+const formatDateForDatabase = (dateString: string): string => {
+	let day: number, month: number, year: number;
+
+	if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+		// Format YYYY-MM-DD
+		return dateString;
+	} else {
+		// Format DD/MM/YYYY ou DD-MM-YYYY
+		const separator = dateString.includes('/') ? '/' : '-';
+		const [dayStr, monthStr, yearStr] = dateString.split(separator);
+		day = parseInt(dayStr);
+		month = parseInt(monthStr);
+		year = parseInt(yearStr);
+		
+		return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+	}
 };
 
 const checkForDuplicate = async (patientData: PatientImportData): Promise<boolean> => {

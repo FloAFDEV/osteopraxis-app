@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -14,11 +14,9 @@ import SettingsPage from "@/pages/SettingsPage";
 import DataImportPage from "@/pages/DataImportPage";
 import OsteopathSettingsPage from "@/pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "@/pages/CabinetSettingsPage";
-import CollaborationsPage from "@/pages/CollaborationsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminRoute } from "@/components/auth/AdminRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,17 +85,11 @@ function App() {
                   <CabinetSettingsPage />
                 </ProtectedRoute>
               } />
-              <Route path="/settings/collaborations" element={
-                <ProtectedRoute>
-                  <CollaborationsPage />
-                </ProtectedRoute>
-              } />
-
               {/* Routes admin */}
               <Route path="/admin/dashboard" element={
-                <AdminRoute>
+                <ProtectedRoute>
                   <AdminDashboardPage />
-                </AdminRoute>
+                </ProtectedRoute>
               } />
             </Routes>
             <Toaster />
