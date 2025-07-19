@@ -20,6 +20,7 @@ import OsteopathSettingsPage from "@/pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "@/pages/CabinetSettingsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import DemoPage from "@/pages/DemoPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient({
@@ -44,6 +45,7 @@ function App() {
               <Routes>
                 {/* Routes publiques */}
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/demo" element={<DemoPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
 
