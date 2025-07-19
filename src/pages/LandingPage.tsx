@@ -19,6 +19,7 @@ import {
 	Stethoscope,
 	Users,
 	X,
+	Play,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -184,7 +185,7 @@ export default function LandingPage() {
 								size="sm"
 								className="whitespace-nowrap"
 							>
-								<Link to="/register">Essai gratuit</Link>
+								<Link to="/demo">Essayer la démo</Link>
 							</Button>
 						</nav>
 
@@ -196,7 +197,7 @@ export default function LandingPage() {
 								size="sm"
 								className="whitespace-nowrap"
 							>
-								<Link to="/register">Essai gratuit</Link>
+								<Link to="/demo">Essayer la démo</Link>
 							</Button>
 							<button
 								onClick={() =>
@@ -265,12 +266,12 @@ export default function LandingPage() {
 								<div className="pt-2 md:hidden">
 									<Button asChild className="w-full">
 										<Link
-											to="/register"
+											to="/demo"
 											onClick={() =>
 												setMobileMenuOpen(false)
 											}
 										>
-											Essai gratuit
+											Essayer la démo
 										</Link>
 									</Button>
 								</div>
@@ -311,8 +312,9 @@ export default function LandingPage() {
 								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
 								asChild
 							>
-								<Link to="/register">
-									Commencer gratuitement
+								<Link to="/demo" className="flex items-center gap-2">
+									<Play className="h-4 w-4" />
+									Essayer la démo interactive
 								</Link>
 							</Button>
 							<Button
@@ -321,14 +323,14 @@ export default function LandingPage() {
 								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
 								asChild
 							>
-								<Link to="/demo">Voir la démo</Link>
+								<Link to="/register">Créer mon compte</Link>
 							</Button>
 						</div>
 
 						<div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-500 dark:text-slate-400 px-4">
 							<span className="flex items-center gap-2">
 								<span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-								Essai gratuit 14 jours
+								Démo interactive gratuite
 							</span>
 							<span className="flex items-center gap-2">
 								<span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
@@ -836,22 +838,34 @@ export default function LandingPage() {
 						Prêt à transformer votre pratique ?
 					</h2>
 					<p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
-						Rejoignez des centaines de professionnels de santé qui
-						ont déjà choisi{" "}
+						Découvrez{" "}
 						<span className="font-semibold text-blue-600 dark:text-blue-400">
 							PatientHub
-						</span>
+						</span>{" "}
+						avec notre démo interactive, puis créez votre compte
 					</p>
-					<Button
-						size="lg"
-						variant="secondary"
-						asChild
-						className="text-lg px-8"
-					>
-						<Link to="/register">Commencer maintenant</Link>
-					</Button>
+					<div className="flex flex-col sm:flex-row gap-4 justify-center">
+						<Button
+							size="lg"
+							asChild
+							className="text-lg px-8"
+						>
+							<Link to="/demo" className="flex items-center gap-2">
+								<Play className="h-4 w-4" />
+								Essayer la démo
+							</Link>
+						</Button>
+						<Button
+							size="lg"
+							variant="outline"
+							asChild
+							className="text-lg px-8"
+						>
+							<Link to="/register">Créer mon compte</Link>
+						</Button>
+					</div>
 					<p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-						Essai gratuit 14 jours • Configuration en 5 minutes
+						Démo interactive gratuite • Configuration en 5 minutes
 					</p>
 				</div>
 			</section>
