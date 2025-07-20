@@ -11,13 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, Mail, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
-import { DemoLoginButton } from "@/components/demo/DemoLoginButton";
 
 const loginSchema = z.object({
 	email: z.string().email("Email invalide"),
@@ -83,7 +82,7 @@ const LoginPage = () => {
 	return (
 		<div className="min-h-screen flex">
 			{/* Left section - Login form */}
-			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
+			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-gradient-to-br from-slate-950 to-slate-900">
 				<div className="mb-6 flex items-center justify-between">
 					<h1 className="text-4xl font-extrabold tracking-tight">
 						<span className="text-white">Patient</span>
@@ -335,27 +334,9 @@ const LoginPage = () => {
 							</p>
 						</div>
 
-					{/* Bouton de démonstration */}
-					<div className="text-center">
-						<div className="relative">
-							<div className="absolute inset-0 flex items-center">
-								<div className="w-full border-t border-gray-700"></div>
-							</div>
-							<div className="relative flex justify-center text-sm">
-								<span className="px-2 bg-[#0d1117] text-gray-400">ou</span>
-							</div>
-						</div>
-						
-						<div className="mt-4">
-							<DemoLoginButton
-								variant="outline"
-								className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
-								showIcon={true}
-							/>
-						</div>
+						<div className="text-center text-sm text-gray-400 mt-6"></div>
 					</div>
 				</div>
-			</div>
 
 				<div className="mt-8 text-center text-sm text-gray-500">
 					<p>
