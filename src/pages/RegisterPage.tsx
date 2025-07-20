@@ -155,10 +155,10 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left section - Register form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
+      <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
 				<div className="mb-6 flex items-center justify-between">
 					<h1 className="text-4xl font-extrabold tracking-tight">
-						<span className="text-foreground">Patient</span>
+						<span className="text-white">Patient</span>
 						<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
 							Hub
 						</span>
@@ -167,20 +167,20 @@ const RegisterPage = () => {
 						variant="ghost"
 						size="sm"
 						onClick={() => navigate('/')}
-						className="text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+						className="text-gray-400 hover:text-white hover:bg-gray-800/50 transition-colors"
 					>
 						<ArrowLeft className="h-4 w-4 mr-2" />
 						Retour
 					</Button>
 				</div>
-
+        
         <div className="flex-grow flex items-center justify-center">
           <div className="w-full max-w-md space-y-8">
             <div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
                 Créez votre compte
               </h2>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-gray-400 text-lg">
                 Rejoignez PatientHub pour gérer vos patients efficacement.
               </p>
             </div>

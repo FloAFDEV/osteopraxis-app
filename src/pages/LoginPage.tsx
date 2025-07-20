@@ -82,10 +82,10 @@ const LoginPage = () => {
 	return (
 		<div className="min-h-screen flex">
 			{/* Left section - Login form */}
-			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
+			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
 				<div className="mb-6 flex items-center justify-between">
 					<h1 className="text-4xl font-extrabold tracking-tight">
-						<span className="text-foreground">Patient</span>
+						<span className="text-white">Patient</span>
 						<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
 							Hub
 						</span>
@@ -93,7 +93,7 @@ const LoginPage = () => {
 					<Button
 						variant="ghost"
 						size="sm"
-						className="text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+						className="text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
 						asChild
 					>
 						<Link to="/" className="flex items-center gap-2">
@@ -106,10 +106,10 @@ const LoginPage = () => {
 				<div className="flex-grow flex items-center justify-center">
 					<div className="w-full max-w-md space-y-8">
 						<div>
-							<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
+							<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
 								Votre espace dédié aux ostéopathes
 							</h2>
-							<p className="text-muted-foreground text-lg">
+							<p className="text-gray-400 text-lg">
 								Connectez-vous pour consulter vos dossiers.
 							</p>
 						</div>
@@ -119,11 +119,17 @@ const LoginPage = () => {
 							onValueChange={setActiveTab}
 							className="w-full"
 						>
-							<TabsList className="grid grid-cols-2 mb-6">
-								<TabsTrigger value="password">
+							<TabsList className="grid grid-cols-2 mb-6 bg-gray-900">
+								<TabsTrigger
+									value="password"
+									className="bg-gray-600 hover:bg-gray-500 text-zinc-100"
+								>
 									Mot de passe
 								</TabsTrigger>
-								<TabsTrigger value="magiclink">
+								<TabsTrigger
+									value="magiclink"
+									className="bg-gray-600 hover:bg-gray-500 text-zinc-100"
+								>
 									Magic Link
 								</TabsTrigger>
 							</TabsList>
@@ -131,10 +137,10 @@ const LoginPage = () => {
 							<TabsContent value="password">
 								<div className="relative">
 									<div className="absolute inset-0 flex items-center">
-										<div className="w-full border-t"></div>
+										<div className="w-full border-t border-gray-700"></div>
 									</div>
 									<div className="relative flex justify-center text-sm">
-										<span className="px-2 bg-background text-primary">
+										<span className="px-2 bg-[#0d1117] text-blue-400">
 											Connexion par mot de passe
 										</span>
 									</div>
@@ -152,14 +158,14 @@ const LoginPage = () => {
 											name="email"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>
+													<FormLabel className="text-gray-300">
 														Email :
 													</FormLabel>
 													<FormControl>
 														<div className="relative">
-															<Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+															<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
 															<Input
-																className="pl-10"
+																className="pl-10 bg-[#161b22] border-gray-700 text-white"
 																placeholder="votre@email.com"
 																autoComplete="email"
 																{...field}
@@ -176,19 +182,19 @@ const LoginPage = () => {
 											name="password"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>
+													<FormLabel className="text-gray-300">
 														Mot de passe :
 													</FormLabel>
 													<FormControl>
 														<div className="relative">
-															<Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+															<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
 															<Input
 																type={
 																	showPassword
 																		? "text"
 																		: "password"
 																}
-																className="pl-10 pr-10"
+																className="pl-10 pr-10 bg-[#161b22] border-gray-700 text-white"
 																placeholder="Votre mot de passe"
 																autoComplete="current-password"
 																{...field}
@@ -200,7 +206,7 @@ const LoginPage = () => {
 																		!showPassword
 																	)
 																}
-																className="absolute right-3 top-2.5 h-6 w-6 text-muted-foreground hover:text-foreground transition"
+																className="absolute right-3 top-2.5 h-6 w-6 text-gray-400 hover:text-gray-200 transition"
 																tabIndex={-1}
 																aria-label={
 																	showPassword
@@ -250,10 +256,10 @@ const LoginPage = () => {
 							<TabsContent value="magiclink">
 								<div className="relative">
 									<div className="absolute inset-0 flex items-center">
-										<div className="w-full border-t"></div>
+										<div className="w-full border-t border-gray-700"></div>
 									</div>
 									<div className="relative flex justify-center text-sm">
-										<span className="px-2 bg-background text-primary">
+										<span className="px-2 bg-[#0d1117] text-blue-400">
 											Connexion par Magic Link
 										</span>
 									</div>
@@ -271,14 +277,14 @@ const LoginPage = () => {
 											name="email"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>
+													<FormLabel className="text-gray-300">
 														Email :
 													</FormLabel>
 													<FormControl>
 														<div className="relative">
-															<Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+															<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
 															<Input
-																className="pl-10"
+																className="pl-10 bg-[#161b22] border-gray-700 text-white"
 																placeholder="votre@email.com"
 																autoComplete="email"
 																{...field}
@@ -307,7 +313,7 @@ const LoginPage = () => {
 									</form>
 								</Form>
 
-								<div className="text-center text-sm text-muted-foreground mt-4">
+								<div className="text-center text-sm text-gray-400 mt-4">
 									<p>
 										Un lien de connexion sécurisé sera
 										envoyé à votre adresse email.
@@ -317,22 +323,22 @@ const LoginPage = () => {
 						</Tabs>
 
 						<div className="text-center">
-							<p className="text-muted-foreground">
+							<p className="text-gray-400">
 								Pas encore de compte ?{" "}
 								<Link
 									to="/register"
-									className="text-primary hover:underline"
+									className="text-blue-400 hover:underline"
 								>
 									S'inscrire
 								</Link>
 							</p>
 						</div>
 
-						<div className="text-center text-sm text-muted-foreground mt-6"></div>
+						<div className="text-center text-sm text-gray-400 mt-6"></div>
 					</div>
 				</div>
 
-				<div className="mt-8 text-center text-sm text-muted-foreground">
+				<div className="mt-8 text-center text-sm text-gray-500">
 					<p>
 						La plateforme conçue pour faciliter la gestion des
 						données médicales.
