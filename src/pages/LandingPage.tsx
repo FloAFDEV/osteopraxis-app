@@ -420,12 +420,11 @@ export default function LandingPage() {
 								<h3 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
 									Calendrier moderne et intuitif
 								</h3>
-								<p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-									Planifiez et gérez vos consultations avec
-									une interface élégante. Synchronisation
-									automatique, rappels intelligents et vue
-									d'ensemble de votre planning en temps réel.
-								</p>
+							<p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+	Planifiez et gérez vos consultations avec une interface élégante. Synchronisation automatique, rappels intelligents et vue d'ensemble de votre planning en temps réel.
+	Il est également possible d'importer vos rendez-vous Doctolib grâce à la synchronisation Google Calendar.
+</p>
+
 								<div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
 									<div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-background border border-border/50">
 										<div className="h-2 w-2 bg-primary rounded-full flex-shrink-0"></div>
