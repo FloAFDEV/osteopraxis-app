@@ -82,10 +82,10 @@ const LoginPage = () => {
 	return (
 		<div className="min-h-screen flex">
 			{/* Left section - Login form */}
-			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#0d1117]">
+			<div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
 				<div className="mb-6 flex items-center justify-between">
 					<h1 className="text-4xl font-extrabold tracking-tight">
-						<span className="text-white">Patient</span>
+						<span className="text-foreground">Patient</span>
 						<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
 							Hub
 						</span>
@@ -93,7 +93,7 @@ const LoginPage = () => {
 					<Button
 						variant="ghost"
 						size="sm"
-						className="text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+						className="text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
 						asChild
 					>
 						<Link to="/" className="flex items-center gap-2">
@@ -106,10 +106,10 @@ const LoginPage = () => {
 				<div className="flex-grow flex items-center justify-center">
 					<div className="w-full max-w-md space-y-8">
 						<div>
-							<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
+							<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
 								Votre espace dédié aux ostéopathes
 							</h2>
-							<p className="text-gray-400 text-lg">
+							<p className="text-muted-foreground text-lg">
 								Connectez-vous pour consulter vos dossiers.
 							</p>
 						</div>
