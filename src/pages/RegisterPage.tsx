@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InvitationCodeInput } from "@/components/cabinet/InvitationCodeInput";
 import { Separator } from "@/components/ui/separator";
+import { DemoLoginButton } from "@/components/demo/DemoLoginButton";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),
@@ -385,6 +386,24 @@ const RegisterPage = () => {
                   <p className="text-gray-400">
                     Déjà inscrit ? <Link to="/login" className="text-blue-400 hover:underline">Se connecter</Link>
                   </p>
+                </div>
+
+                {/* Séparator et bouton de démo */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-700"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-[#0d1117] text-gray-400">ou</span>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <DemoLoginButton
+                    variant="outline"
+                    className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                    showIcon={true}
+                  />
                 </div>
               </form>
             </Form>
