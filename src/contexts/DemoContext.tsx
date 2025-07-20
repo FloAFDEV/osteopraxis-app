@@ -28,7 +28,6 @@ const mockOsteopath: Osteopath = {
   rpps_number: "10003123456",
   siret: "12345678901234",
   ape_code: "8690F",
-  authId: "demo-auth-id",
   userId: "demo-user-id",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString()
@@ -38,12 +37,18 @@ const mockCabinets: Cabinet[] = [
   {
     id: 1,
     name: "Cabinet Ostéopathique du Centre",
-    address: "15 rue de la Paix, 31000 Toulouse",
+    address: "15 rue de la Paix",
+    city: "Toulouse",
+    postalCode: "31000",
     phone: "05 61 23 45 67",
     email: "contact@osteo-centre.fr",
+    country: "France",
     osteopathId: 1,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    siret: null,
+    iban: null,
+    bic: null
   }
 ];
 
@@ -54,18 +59,56 @@ const mockPatients: Patient[] = [
     lastName: "Martin",
     email: "jean.martin@email.com",
     phone: "06 12 34 56 78",
-    birthDate: new Date("1985-03-15"),
+    birthDate: "1985-03-15",
     address: "123 rue de la République, 31000 Toulouse",
     osteopathId: 1,
     cabinetId: 1,
     gender: "MALE",
+    height: null,
+    weight: null,
+    bmi: null,
+    userId: null,
+    avatarUrl: null,
+    childrenAges: null,
+    complementaryExams: null,
+    generalSymptoms: null,
+    pregnancyHistory: null,
+    birthDetails: null,
+    developmentMilestones: null,
+    sleepingPattern: null,
+    feeding: null,
+    behavior: null,
+    childCareContext: null,
+    isExSmoker: null,
+    smokingSince: null,
+    smokingAmount: null,
+    quitSmokingDate: null,
+    allergies: null,
     occupation: "Développeur informatique",
-    medicalHistory: "Mal de dos chronique, stress",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     hasVisionCorrection: false,
     isDeceased: false,
-    isSmoker: false
+    isSmoker: false,
+    ent_followup: null,
+    intestinal_transit: null,
+    sleep_quality: null,
+    fracture_history: null,
+    dental_health: null,
+    sport_frequency: null,
+    gynecological_history: null,
+    other_comments_adult: null,
+    fine_motor_skills: null,
+    gross_motor_skills: null,
+    weight_at_birth: null,
+    height_at_birth: null,
+    head_circumference: null,
+    apgar_score: null,
+    childcare_type: null,
+    school_grade: null,
+    pediatrician_name: null,
+    paramedical_followup: null,
+    other_comments_child: null
   },
   {
     id: 2,
@@ -73,18 +116,56 @@ const mockPatients: Patient[] = [
     lastName: "Durand",
     email: "sophie.durand@email.com",
     phone: "06 98 76 54 32",
-    birthDate: new Date("1992-07-22"),
+    birthDate: "1992-07-22",
     address: "456 avenue Jean Jaurès, 31000 Toulouse",
     osteopathId: 1,
     cabinetId: 1,
     gender: "FEMALE",
+    height: null,
+    weight: null,
+    bmi: null,
+    userId: null,
+    avatarUrl: null,
+    childrenAges: null,
+    complementaryExams: null,
+    generalSymptoms: null,
+    pregnancyHistory: null,
+    birthDetails: null,
+    developmentMilestones: null,
+    sleepingPattern: null,
+    feeding: null,
+    behavior: null,
+    childCareContext: null,
+    isExSmoker: null,
+    smokingSince: null,
+    smokingAmount: null,
+    quitSmokingDate: null,
+    allergies: null,
     occupation: "Professeure",
-    medicalHistory: "Migraines fréquentes, tensions cervicales",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     hasVisionCorrection: true,
     isDeceased: false,
-    isSmoker: false
+    isSmoker: false,
+    ent_followup: null,
+    intestinal_transit: null,
+    sleep_quality: null,
+    fracture_history: null,
+    dental_health: null,
+    sport_frequency: null,
+    gynecological_history: null,
+    other_comments_adult: null,
+    fine_motor_skills: null,
+    gross_motor_skills: null,
+    weight_at_birth: null,
+    height_at_birth: null,
+    head_circumference: null,
+    apgar_score: null,
+    childcare_type: null,
+    school_grade: null,
+    pediatrician_name: null,
+    paramedical_followup: null,
+    other_comments_child: null
   },
   {
     id: 3,
@@ -92,18 +173,56 @@ const mockPatients: Patient[] = [
     lastName: "Leblanc",
     email: "pierre.leblanc@email.com",
     phone: "06 45 67 89 12",
-    birthDate: new Date("1978-11-08"),
+    birthDate: "1978-11-08",
     address: "789 boulevard de Strasbourg, 31000 Toulouse",
     osteopathId: 1,
     cabinetId: 1,
     gender: "MALE",
+    height: null,
+    weight: null,
+    bmi: null,
+    userId: null,
+    avatarUrl: null,
+    childrenAges: null,
+    complementaryExams: null,
+    generalSymptoms: null,
+    pregnancyHistory: null,
+    birthDetails: null,
+    developmentMilestones: null,
+    sleepingPattern: null,
+    feeding: null,
+    behavior: null,
+    childCareContext: null,
+    isExSmoker: null,
+    smokingSince: null,
+    smokingAmount: null,
+    quitSmokingDate: null,
+    allergies: null,
     occupation: "Chef de cuisine",
-    medicalHistory: "Tendinite épaule droite, lombalgie",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     hasVisionCorrection: false,
     isDeceased: false,
-    isSmoker: true
+    isSmoker: true,
+    ent_followup: null,
+    intestinal_transit: null,
+    sleep_quality: null,
+    fracture_history: null,
+    dental_health: null,
+    sport_frequency: null,
+    gynecological_history: null,
+    other_comments_adult: null,
+    fine_motor_skills: null,
+    gross_motor_skills: null,
+    weight_at_birth: null,
+    height_at_birth: null,
+    head_circumference: null,
+    apgar_score: null,
+    childcare_type: null,
+    school_grade: null,
+    pediatrician_name: null,
+    paramedical_followup: null,
+    other_comments_child: null
   }
 ];
 
@@ -113,39 +232,45 @@ const mockAppointments: Appointment[] = [
     patientId: 1,
     osteopathId: 1,
     cabinetId: 1,
-    date: new Date("2024-07-22T09:00:00"),
+    start: "2024-07-22T09:00:00",
+    end: "2024-07-22T09:45:00",
+    date: "2024-07-22T09:00:00",
     reason: "Consultation lombalgie",
     status: "SCHEDULED",
     notes: "Patient se plaint de douleurs lombaires depuis 2 semaines",
     notificationSent: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: 2,
     patientId: 2,
     osteopathId: 1,
     cabinetId: 1,
-    date: new Date("2024-07-22T10:30:00"),
+    start: "2024-07-22T10:30:00",
+    end: "2024-07-22T11:15:00",
+    date: "2024-07-22T10:30:00",
     reason: "Suivi migraines",
     status: "COMPLETED",
     notes: "Séance axée sur les tensions cervicales, amélioration notable",
     notificationSent: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: 3,
     patientId: 3,
     osteopathId: 1,
     cabinetId: 1,
-    date: new Date("2024-07-23T14:00:00"),
+    start: "2024-07-23T14:00:00",
+    end: "2024-07-23T14:45:00",
+    date: "2024-07-23T14:00:00",
     reason: "Tendinite épaule",
     status: "SCHEDULED",
     notes: "Première consultation pour tendinite épaule droite",
     notificationSent: false,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 
@@ -157,12 +282,12 @@ const mockInvoices: Invoice[] = [
     cabinetId: 1,
     appointmentId: 2,
     amount: 60,
-    date: new Date("2024-07-22"),
+    date: "2024-07-22",
     paymentStatus: "PAID",
     paymentMethod: "Carte bancaire",
     notes: "Consultation suivi migraines",
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: 2,
@@ -170,11 +295,11 @@ const mockInvoices: Invoice[] = [
     osteopathId: 1,
     cabinetId: 1,
     amount: 65,
-    date: new Date("2024-07-15"),
+    date: "2024-07-15",
     paymentStatus: "PENDING",
     notes: "Consultation lombalgie - première séance",
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 
@@ -188,15 +313,15 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const newPatient: Patient = {
       ...patientData,
       id: Math.max(...patients.map(p => p.id)) + 1,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     setPatients(prev => [...prev, newPatient]);
   };
 
   const updateDemoPatient = (id: number, updates: Partial<Patient>) => {
     setPatients(prev => prev.map(p => 
-      p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p
+      p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
     ));
   };
 
@@ -204,15 +329,15 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const newAppointment: Appointment = {
       ...appointmentData,
       id: Math.max(...appointments.map(a => a.id)) + 1,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     setAppointments(prev => [...prev, newAppointment]);
   };
 
   const updateDemoAppointment = (id: number, updates: Partial<Appointment>) => {
     setAppointments(prev => prev.map(a => 
-      a.id === id ? { ...a, ...updates, updatedAt: new Date() } : a
+      a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
     ));
   };
 
