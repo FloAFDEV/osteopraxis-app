@@ -12,53 +12,63 @@ export class DemoService {
   private static readonly DEMO_EMAIL = 'demo@patienthub.com';
   private static readonly DEMO_PASSWORD = 'demo123456';
 
-  // Créer un compte démo automatiquement
+  // Créer ou obtenir le compte démo
   static async createDemoAccount(): Promise<{ email: string; password: string }> {
     try {
-      // Vérifier si le compte démo existe déjà
-      const { data: existingUser } = await supabase.auth.signInWithPassword({
+      // Vérifier si le compte existe déjà
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: this.DEMO_EMAIL,
         password: this.DEMO_PASSWORD,
       });
 
-      if (existingUser.user) {
-        // Le compte existe déjà, se déconnecter
+      if (signInData.user) {
+        // Le compte existe, vérifier s'il a un profil ostéopathe
+        const { data: osteopath } = await supabase
+          .from('Osteopath')
+          .select('id')
+          .eq('authId', signInData.user.id)
+          .single();
+
+        if (!osteopath) {
+          // Créer le profil ostéopathe manquant
+          await this.seedDemoData(signInData.user.id);
+        }
+
         await supabase.auth.signOut();
-        return {
-          email: this.DEMO_EMAIL,
-          password: this.DEMO_PASSWORD,
-        };
+        return { email: this.DEMO_EMAIL, password: this.DEMO_PASSWORD };
       }
+
+      // Créer le compte s'il n'existe pas
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: this.DEMO_EMAIL,
+        password: this.DEMO_PASSWORD,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            first_name: 'Dr. Marie',
+            last_name: 'Dubois',
+            role: 'OSTEOPATH',
+            is_demo: true,
+          }
+        }
+      });
+
+      if (signUpError) {
+        console.error('Erreur création compte démo:', signUpError);
+        throw signUpError;
+      }
+
+      if (signUpData.user) {
+        // Créer le profil ostéopathe
+        await this.seedDemoData(signUpData.user.id);
+        await supabase.auth.signOut();
+      }
+
+      return { email: this.DEMO_EMAIL, password: this.DEMO_PASSWORD };
     } catch (error) {
-      // Le compte n'existe pas, le créer
-    }
-
-    // Créer le compte démo
-    const { data, error } = await supabase.auth.signUp({
-      email: this.DEMO_EMAIL,
-      password: this.DEMO_PASSWORD,
-      options: {
-        data: {
-          first_name: 'Démo',
-          last_name: 'Utilisateur',
-          role: 'OSTEOPATH',
-          is_demo: true,
-        },
-      },
-    });
-
-    if (error) {
-      console.error('Erreur création compte démo:', error);
+      console.error('Erreur lors de la création du compte démo:', error);
       throw error;
     }
-
-    // Se déconnecter après la création
-    await supabase.auth.signOut();
-
-    return {
-      email: this.DEMO_EMAIL,
-      password: this.DEMO_PASSWORD,
-    };
   }
 
   // Réinitialiser les données démo (à appeler quotidiennement)
@@ -118,8 +128,55 @@ export class DemoService {
     try {
       console.log('Création des données démo pour:', userId);
       
-      // Les données seront créées via la migration SQL déjà exécutée
-      // Cette méthode peut être étendue pour des données supplémentaires
+      // Vérifier si l'ostéopathe existe déjà
+      const { data: existingOsteopath } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('authId', userId)
+        .single();
+
+      if (!existingOsteopath) {
+        // Créer d'abord un utilisateur dans la table User
+        const { data: user, error: userError } = await supabase
+          .from('User')
+          .insert({
+            auth_id: userId,
+            first_name: 'Dr. Marie',
+            last_name: 'Dubois',
+            email: this.DEMO_EMAIL,
+            role: 'OSTEOPATH',
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (userError) {
+          console.error('Erreur création utilisateur:', userError);
+          return;
+        }
+
+        // Créer le profil ostéopathe démo
+        const { data: osteopath, error: osteopathError } = await supabase
+          .from('Osteopath')
+          .insert({
+            authId: userId,
+            userId: user.id,
+            name: 'Dr. Marie Dubois',
+            professional_title: 'Ostéopathe D.O.',
+            rpps_number: '10003123456',
+            siret: '12345678901234',
+            ape_code: '8690F'
+          })
+          .select()
+          .single();
+
+        if (osteopathError) {
+          console.error('Erreur création ostéopathe:', osteopathError);
+          return;
+        }
+
+        console.log('Profil ostéopathe démo créé avec succès:', osteopath.id);
+      }
     } catch (error) {
       console.error('Erreur lors de la création des données:', error);
     }
