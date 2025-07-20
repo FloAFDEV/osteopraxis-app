@@ -173,7 +173,7 @@ const RegisterPage = () => {
 						Retour
 					</Button>
 				</div>
-        
+
         <div className="flex-grow flex items-center justify-center">
           <div className="w-full max-w-md space-y-8">
             <div>

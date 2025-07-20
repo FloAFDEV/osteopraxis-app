@@ -119,17 +119,11 @@ const LoginPage = () => {
 							onValueChange={setActiveTab}
 							className="w-full"
 						>
-							<TabsList className="grid grid-cols-2 mb-6 bg-gray-900">
-								<TabsTrigger
-									value="password"
-									className="bg-gray-600 hover:bg-gray-500 text-zinc-100"
-								>
+							<TabsList className="grid grid-cols-2 mb-6">
+								<TabsTrigger value="password">
 									Mot de passe
 								</TabsTrigger>
-								<TabsTrigger
-									value="magiclink"
-									className="bg-gray-600 hover:bg-gray-500 text-zinc-100"
-								>
+								<TabsTrigger value="magiclink">
 									Magic Link
 								</TabsTrigger>
 							</TabsList>
@@ -137,10 +131,10 @@ const LoginPage = () => {
 							<TabsContent value="password">
 								<div className="relative">
 									<div className="absolute inset-0 flex items-center">
-										<div className="w-full border-t border-gray-700"></div>
+										<div className="w-full border-t"></div>
 									</div>
 									<div className="relative flex justify-center text-sm">
-										<span className="px-2 bg-[#0d1117] text-blue-400">
+										<span className="px-2 bg-background text-primary">
 											Connexion par mot de passe
 										</span>
 									</div>
@@ -158,14 +152,14 @@ const LoginPage = () => {
 											name="email"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel className="text-gray-300">
+													<FormLabel>
 														Email :
 													</FormLabel>
 													<FormControl>
 														<div className="relative">
-															<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+															<Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 															<Input
-																className="pl-10 bg-[#161b22] border-gray-700 text-white"
+																className="pl-10"
 																placeholder="votre@email.com"
 																autoComplete="email"
 																{...field}
@@ -182,19 +176,19 @@ const LoginPage = () => {
 											name="password"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel className="text-gray-300">
+													<FormLabel>
 														Mot de passe :
 													</FormLabel>
 													<FormControl>
 														<div className="relative">
-															<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+															<Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 															<Input
 																type={
 																	showPassword
 																		? "text"
 																		: "password"
 																}
-																className="pl-10 pr-10 bg-[#161b22] border-gray-700 text-white"
+																className="pl-10 pr-10"
 																placeholder="Votre mot de passe"
 																autoComplete="current-password"
 																{...field}
@@ -206,7 +200,7 @@ const LoginPage = () => {
 																		!showPassword
 																	)
 																}
-																className="absolute right-3 top-2.5 h-6 w-6 text-gray-400 hover:text-gray-200 transition"
+																className="absolute right-3 top-2.5 h-6 w-6 text-muted-foreground hover:text-foreground transition"
 																tabIndex={-1}
 																aria-label={
 																	showPassword
@@ -256,10 +250,10 @@ const LoginPage = () => {
 							<TabsContent value="magiclink">
 								<div className="relative">
 									<div className="absolute inset-0 flex items-center">
-										<div className="w-full border-t border-gray-700"></div>
+										<div className="w-full border-t"></div>
 									</div>
 									<div className="relative flex justify-center text-sm">
-										<span className="px-2 bg-[#0d1117] text-blue-400">
+										<span className="px-2 bg-background text-primary">
 											Connexion par Magic Link
 										</span>
 									</div>
@@ -277,14 +271,14 @@ const LoginPage = () => {
 											name="email"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel className="text-gray-300">
+													<FormLabel>
 														Email :
 													</FormLabel>
 													<FormControl>
 														<div className="relative">
-															<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+															<Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 															<Input
-																className="pl-10 bg-[#161b22] border-gray-700 text-white"
+																className="pl-10"
 																placeholder="votre@email.com"
 																autoComplete="email"
 																{...field}
@@ -313,7 +307,7 @@ const LoginPage = () => {
 									</form>
 								</Form>
 
-								<div className="text-center text-sm text-gray-400 mt-4">
+								<div className="text-center text-sm text-muted-foreground mt-4">
 									<p>
 										Un lien de connexion sécurisé sera
 										envoyé à votre adresse email.
@@ -323,22 +317,22 @@ const LoginPage = () => {
 						</Tabs>
 
 						<div className="text-center">
-							<p className="text-gray-400">
+							<p className="text-muted-foreground">
 								Pas encore de compte ?{" "}
 								<Link
 									to="/register"
-									className="text-blue-400 hover:underline"
+									className="text-primary hover:underline"
 								>
 									S'inscrire
 								</Link>
 							</p>
 						</div>
 
-						<div className="text-center text-sm text-gray-400 mt-6"></div>
+						<div className="text-center text-sm text-muted-foreground mt-6"></div>
 					</div>
 				</div>
 
-				<div className="mt-8 text-center text-sm text-gray-500">
+				<div className="mt-8 text-center text-sm text-muted-foreground">
 					<p>
 						La plateforme conçue pour faciliter la gestion des
 						données médicales.
