@@ -183,7 +183,7 @@ export default function LandingPage() {
 							<Button
 								asChild
 								size="sm"
-								className="whitespace-nowrap"
+								className="whitespace-nowrap text-white"
 							>
 								<Link to="/demo">Essayer la démo</Link>
 							</Button>
