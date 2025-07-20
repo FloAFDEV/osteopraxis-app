@@ -21,6 +21,9 @@ import OsteopathSettingsPage from "@/pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "@/pages/CabinetSettingsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsOfServicePage from "@/pages/TermsOfServicePage";
+import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -47,6 +50,9 @@ function App() {
                       <Routes>
                         {/* Routes publiques */}
                         <Route path="/" element={<LandingPage />} />
+                        <Route path="/demo" element={<InteractiveDemoPage />} />
+                        <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
+                        <Route path="/cgu" element={<TermsOfServicePage />} />
                         
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />

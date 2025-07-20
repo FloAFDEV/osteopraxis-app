@@ -138,3 +138,30 @@ export class DemoService {
     };
   }
 }
+
+// Hook pour la gestion de l'authentification démo
+export function useDemoAuth() {
+  const loginDemo = async () => {
+    const credentials = DemoService.getDemoCredentials();
+    
+    // Créer le compte s'il n'existe pas
+    await DemoService.createDemoAccount();
+    
+    // Se connecter
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };
+
+  return {
+    loginDemo,
+    isLoading: false, // Peut être étendu avec un state de loading
+  };
+}
