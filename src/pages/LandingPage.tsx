@@ -442,6 +442,13 @@ export default function LandingPage() {
 											</span>
 										</span>
 									</div>
+									<div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-background border border-border/50">
+										<div className="h-2 w-2 bg-primary rounded-full flex-shrink-0"></div>
+										<span className="text-xs sm:text-sm font-medium">
+											Import automatique Doctolib via
+											Google Calendar
+										</span>
+									</div>
 								</div>
 							</div>
 						</div>
