@@ -429,6 +429,7 @@ export function Layout({ children }: LayoutProps) {
 			)}
 
 			<main className="flex-1 container px-4 md:px-6 py-6 print:p-0 print:m-0">
+				{isDemoMode && <DemoIndicator />}
 				{children}
 			</main>
 

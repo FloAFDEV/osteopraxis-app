@@ -92,14 +92,37 @@ export class DemoService {
 
   // Supprimer les données existantes
   private static async clearDemoData(userId: string): Promise<void> {
-    // Note: Cette méthode peut nécessiter des ajustements selon le schéma exact
-    console.log('Nettoyage des données démo pour:', userId);
+    try {
+      console.log('Nettoyage des données démo pour:', userId);
+      
+      // Supprimer les données de test créées
+      const { data: osteopath } = await supabase
+        .from('Osteopath')
+        .select('id')
+        .eq('authId', userId)
+        .single();
+
+      if (osteopath) {
+        // Supprimer les données dans l'ordre des dépendances
+        await supabase.from('Invoice').delete().eq('osteopathId', osteopath.id);
+        await supabase.from('Appointment').delete().eq('osteopathId', osteopath.id);
+        await supabase.from('Patient').delete().eq('osteopathId', osteopath.id);
+      }
+    } catch (error) {
+      console.error('Erreur lors du nettoyage:', error);
+    }
   }
 
   // Créer les données démo réalistes
   private static async seedDemoData(userId: string): Promise<void> {
-    console.log('Création des données démo pour:', userId);
-    // Cette méthode sera implémentée selon le schéma exact de la base de données
+    try {
+      console.log('Création des données démo pour:', userId);
+      
+      // Les données seront créées via la migration SQL déjà exécutée
+      // Cette méthode peut être étendue pour des données supplémentaires
+    } catch (error) {
+      console.error('Erreur lors de la création des données:', error);
+    }
   }
 
   // Vérifier si l'utilisateur actuel est en mode démo
