@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useDemo } from "@/contexts/DemoContext";
 import { useDemoAuth } from "@/services/demo-service";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,23 +11,27 @@ import { toast } from "sonner";
 
 export default function InteractiveDemoPage() {
   const { isDemoMode } = useDemo();
+  const { isAuthenticated, user } = useAuth();
   const { loginDemo, isLoading } = useDemoAuth();
+  const navigate = useNavigate();
 
   const handleStartDemo = async () => {
     try {
       await loginDemo();
       toast.success("Connexion en mode démo réussie !");
+      // Rediriger vers le dashboard après succès
+      navigate("/dashboard");
     } catch (error) {
       toast.error("Erreur lors de la connexion en mode démo");
     }
   };
 
   useEffect(() => {
-    if (isDemoMode) {
-      // Rediriger vers le dashboard si déjà en mode démo
-      window.location.href = "/dashboard";
+    // Rediriger si déjà connecté (notamment en mode démo)
+    if (isAuthenticated && user) {
+      navigate("/dashboard");
     }
-  }, [isDemoMode]);
+  }, [isAuthenticated, user, navigate]);
 
   return (
     <Layout>
