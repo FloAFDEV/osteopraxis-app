@@ -34,6 +34,15 @@ export class DemoService {
           await this.seedDemoData(signInData.user.id);
         }
 
+        // Toujours mettre à jour l'utilisateur avec l'auth_id correct
+        await supabase
+          .from('User')
+          .update({ 
+            auth_id: signInData.user.id,
+            updated_at: new Date().toISOString()
+          })
+          .eq('email', this.DEMO_EMAIL);
+
         await supabase.auth.signOut();
         return { email: this.DEMO_EMAIL, password: this.DEMO_PASSWORD };
       }
