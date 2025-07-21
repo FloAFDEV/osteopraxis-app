@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDemo } from "@/contexts/DemoContext";
-import { useDemoAuth } from "@/services/demo-service";
+import { DemoService } from "@/services/demo-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
@@ -11,18 +11,25 @@ import { toast } from "sonner";
 
 export default function InteractiveDemoPage() {
   const { isDemoMode } = useDemo();
-  const { isAuthenticated, user } = useAuth();
-  const { loginDemo, isLoading } = useDemoAuth();
+  const { isAuthenticated, user, login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleStartDemo = async () => {
+    setIsLoading(true);
     try {
-      await loginDemo();
+      // Créer/préparer le compte démo
+      const credentials = await DemoService.createDemoAccount();
+      
+      // Utiliser la méthode login du contexte AuthContext
+      await login(credentials.email, credentials.password);
+      
       toast.success("Connexion en mode démo réussie !");
-      // Rediriger vers le dashboard après succès
-      navigate("/dashboard");
     } catch (error) {
+      console.error("Erreur connexion démo:", error);
       toast.error("Erreur lors de la connexion en mode démo");
+    } finally {
+      setIsLoading(false);
     }
   };
 

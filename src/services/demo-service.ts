@@ -136,23 +136,35 @@ export class DemoService {
         .single();
 
       if (!existingOsteopath) {
-        // Créer d'abord un utilisateur dans la table User
-        const { data: user, error: userError } = await supabase
+        // Vérifier si l'utilisateur existe déjà dans la table User
+        const { data: existingUser } = await supabase
           .from('User')
-          .insert({
-            auth_id: userId,
-            first_name: 'Dr. Marie',
-            last_name: 'Dubois',
-            email: this.DEMO_EMAIL,
-            role: 'OSTEOPATH',
-            updated_at: new Date().toISOString()
-          })
-          .select()
+          .select('id')
+          .eq('auth_id', userId)
           .single();
 
-        if (userError) {
-          console.error('Erreur création utilisateur:', userError);
-          return;
+        let user = existingUser;
+        
+        if (!existingUser) {
+          // Créer l'utilisateur seulement s'il n'existe pas
+          const { data: newUser, error: userError } = await supabase
+            .from('User')
+            .insert({
+              auth_id: userId,
+              first_name: 'Dr. Marie',
+              last_name: 'Dubois',
+              email: this.DEMO_EMAIL,
+              role: 'OSTEOPATH',
+              updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+          if (userError) {
+            console.error('Erreur création utilisateur:', userError);
+            return;
+          }
+          user = newUser;
         }
 
         // Créer le profil ostéopathe démo
