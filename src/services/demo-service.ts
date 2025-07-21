@@ -136,20 +136,42 @@ export class DemoService {
         .single();
 
       if (!existingOsteopath) {
-        // Vérifier si l'utilisateur existe déjà dans la table User
-        const { data: existingUser } = await supabase
+        // Vérifier d'abord si l'utilisateur existe avec cet email et le corriger si nécessaire
+        const { data: existingUserByEmail } = await supabase
           .from('User')
-          .select('id')
-          .eq('auth_id', userId)
+          .select('*')
+          .eq('email', this.DEMO_EMAIL)
           .single();
 
-        let user = existingUser;
+        let user = existingUserByEmail;
         
-        if (!existingUser) {
-          // Créer l'utilisateur seulement s'il n'existe pas
+        if (existingUserByEmail) {
+          // L'utilisateur existe mais peut-être sans auth_id correct
+          if (!existingUserByEmail.auth_id || existingUserByEmail.auth_id !== userId) {
+            const { data: updatedUser, error: updateError } = await supabase
+              .from('User')
+              .update({ 
+                auth_id: userId, 
+                updated_at: new Date().toISOString(),
+                id: userId // S'assurer que l'ID correspond à l'auth_id
+              })
+              .eq('email', this.DEMO_EMAIL)
+              .select()
+              .single();
+            
+            if (!updateError) {
+              user = updatedUser;
+              console.log('Utilisateur démo mis à jour avec auth_id:', userId);
+            } else {
+              console.error('Erreur mise à jour utilisateur démo:', updateError);
+            }
+          }
+        } else {
+          // Créer l'utilisateur s'il n'existe pas
           const { data: newUser, error: userError } = await supabase
             .from('User')
             .insert({
+              id: userId,
               auth_id: userId,
               first_name: 'Dr. Marie',
               last_name: 'Dubois',
@@ -188,6 +210,27 @@ export class DemoService {
         }
 
         console.log('Profil ostéopathe démo créé avec succès:', osteopath.id);
+
+        // Créer un cabinet démo pour l'ostéopathe
+        const { data: cabinet, error: cabinetError } = await supabase
+          .from('Cabinet')
+          .insert({
+            name: 'Cabinet Ostéopathique Démo',
+            address: '123 Rue de la Santé, 75000 Paris',
+            phone: '01 23 45 67 89',
+            email: 'contact@cabinet-demo.fr',
+            osteopathId: osteopath.id
+          })
+          .select()
+          .single();
+
+        if (cabinetError) {
+          console.error('Erreur création cabinet démo:', cabinetError);
+        } else {
+          console.log('Cabinet démo créé avec succès:', cabinet.id);
+          // Les patients et rendez-vous démo peuvent être créés ici si nécessaire
+          // await this.createDemoPatients(osteopath.id, cabinet.id);
+        }
       }
     } catch (error) {
       console.error('Erreur lors de la création des données:', error);
