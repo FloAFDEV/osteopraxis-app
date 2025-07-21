@@ -144,71 +144,22 @@ export class DemoService {
         .eq('authId', userId)
         .single();
 
-      if (!existingOsteopath) {
-        // Vérifier d'abord si l'utilisateur existe avec cet email et le corriger si nécessaire
-        const { data: existingUserByEmail } = await supabase
-          .from('User')
-          .select('*')
-          .eq('email', this.DEMO_EMAIL)
-          .single();
-
-        let user = existingUserByEmail;
-        
-        if (existingUserByEmail) {
-          // L'utilisateur existe mais peut-être sans auth_id correct
-          if (!existingUserByEmail.auth_id || existingUserByEmail.auth_id !== userId) {
-            const { data: updatedUser, error: updateError } = await supabase
-              .from('User')
-              .update({ 
-                auth_id: userId, 
-                updated_at: new Date().toISOString(),
-                id: userId // S'assurer que l'ID correspond à l'auth_id
-              })
-              .eq('email', this.DEMO_EMAIL)
-              .select()
-              .single();
-            
-            if (!updateError) {
-              user = updatedUser;
-              console.log('Utilisateur démo mis à jour avec auth_id:', userId);
-            } else {
-              console.error('Erreur mise à jour utilisateur démo:', updateError);
-            }
-          }
-        } else {
-          // Créer l'utilisateur s'il n'existe pas
-          const { data: newUser, error: userError } = await supabase
-            .from('User')
-            .insert({
-              id: userId,
-              auth_id: userId,
-              first_name: 'Dr. Marie',
-              last_name: 'Dubois',
-              email: this.DEMO_EMAIL,
-              role: 'OSTEOPATH',
-              updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-          if (userError) {
-            console.error('Erreur création utilisateur:', userError);
-            return;
-          }
-          user = newUser;
-        }
-
-        // Créer le profil ostéopathe démo
+        if (!existingOsteopath) {
+        // Créer le profil ostéopathe démo d'abord
         const { data: osteopath, error: osteopathError } = await supabase
           .from('Osteopath')
-          .insert({
+          .upsert({
             authId: userId,
-            userId: user.id,
+            userId: userId,
             name: 'Dr. Marie Dubois',
             professional_title: 'Ostéopathe D.O.',
             rpps_number: '10003123456',
             siret: '12345678901234',
-            ape_code: '8690F'
+            ape_code: '8690F',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }, {
+            onConflict: 'authId'
           })
           .select()
           .single();
@@ -220,15 +171,46 @@ export class DemoService {
 
         console.log('Profil ostéopathe démo créé avec succès:', osteopath.id);
 
+        // Créer/mettre à jour l'utilisateur avec l'osteopathId
+        const { data: user, error: userError } = await supabase
+          .from('User')
+          .upsert({
+            id: userId,
+            auth_id: userId,
+            first_name: 'Dr. Marie',
+            last_name: 'Dubois',
+            email: this.DEMO_EMAIL,
+            role: 'OSTEOPATH',
+            osteopathId: osteopath.id,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'email'
+          })
+          .select()
+          .single();
+
+        if (userError) {
+          console.error('Erreur création utilisateur:', userError);
+          return;
+        }
+
+        console.log('Utilisateur démo créé/mis à jour avec succès:', user.id);
+
         // Créer un cabinet démo pour l'ostéopathe
         const { data: cabinet, error: cabinetError } = await supabase
           .from('Cabinet')
-          .insert({
+          .upsert({
             name: 'Cabinet Ostéopathique Démo',
             address: '123 Rue de la Santé, 75000 Paris',
             phone: '01 23 45 67 89',
             email: 'contact@cabinet-demo.fr',
-            osteopathId: osteopath.id
+            osteopathId: osteopath.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }, {
+            onConflict: 'osteopathId'
           })
           .select()
           .single();
@@ -237,8 +219,44 @@ export class DemoService {
           console.error('Erreur création cabinet démo:', cabinetError);
         } else {
           console.log('Cabinet démo créé avec succès:', cabinet.id);
-          // Les patients et rendez-vous démo peuvent être créés ici si nécessaire
-          // await this.createDemoPatients(osteopath.id, cabinet.id);
+          
+          // Créer quelques patients de démonstration
+          const demoPatients = [
+            {
+              firstName: 'Marie',
+              lastName: 'Martin',
+              email: 'marie.martin@demo.com',
+              phone: '06 12 34 56 78',
+              birthDate: '1985-03-15',
+              osteopathId: osteopath.id,
+              cabinetId: cabinet.id,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            {
+              firstName: 'Pierre',
+              lastName: 'Dubois', 
+              email: 'pierre.dubois@demo.com',
+              phone: '06 98 76 54 32',
+              birthDate: '1990-07-22',
+              osteopathId: osteopath.id,
+              cabinetId: cabinet.id,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          ];
+
+          for (const patient of demoPatients) {
+            const { error: patientError } = await supabase
+              .from('Patient')
+              .upsert(patient, {
+                onConflict: 'email'
+              });
+
+            if (patientError) {
+              console.error('Erreur création patient démo:', patientError);
+            }
+          }
         }
       }
     } catch (error) {
