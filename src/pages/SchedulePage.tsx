@@ -134,7 +134,12 @@ const SchedulePage = () => {
 
 	// Helper functions (getPatientById, getDayAppointments) remain the same
 	const getPatientById = (patientId: number) => {
-		return patients.find((patient) => patient.id === patientId);
+		const patient = patients.find((patient) => patient.id === patientId);
+		if (!patient) {
+			console.log(`Patient non trouvé pour ID ${patientId}. Patients disponibles:`, patients.length);
+			console.log('Premier patient exemple:', patients[0]);
+		}
+		return patient;
 	};
 
 	const getDayAppointments = (date: Date) => {
