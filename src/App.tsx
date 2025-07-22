@@ -20,6 +20,7 @@ import DataImportPage from "@/pages/DataImportPage";
 import OsteopathSettingsPage from "@/pages/OsteopathSettingsPage";
 import CabinetSettingsPage from "@/pages/CabinetSettingsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
+import SchedulePage from "@/pages/SchedulePage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
@@ -76,6 +77,11 @@ function App() {
                         <Route path="/appointments" element={
                           <ProtectedRoute>
                             <AppointmentsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/schedule" element={
+                          <ProtectedRoute>
+                            <SchedulePage />
                           </ProtectedRoute>
                         } />
                         <Route path="/invoices" element={
