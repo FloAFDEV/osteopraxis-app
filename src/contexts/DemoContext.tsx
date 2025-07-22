@@ -1,6 +1,10 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Patient, Appointment, Invoice, Cabinet, Osteopath } from '@/types';
+import { setDemoContext as setAppointmentDemoContext } from '@/services/api/appointment-service';
+import { setDemoContext as setPatientDemoContext } from '@/services/api/patient-service';
+import { setDemoContext as setCabinetDemoContext } from '@/services/api/cabinet-service';
+import { setDemoContext as setInvoiceDemoContext } from '@/services/api/invoice-service';
 
 interface DemoContextType {
   isDemoMode: boolean;
@@ -341,14 +345,15 @@ const mockPatients: Patient[] = [
 ];
 
 const mockAppointments: Appointment[] = [
+  // Rendez-vous pour aujourd'hui
   {
     id: 1,
     patientId: 1,
     osteopathId: 1,
     cabinetId: 1,
-    start: "2024-07-22T09:00:00",
-    end: "2024-07-22T09:45:00",
-    date: "2024-07-22T09:00:00",
+    start: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
+    end: new Date(new Date().setHours(9, 45, 0, 0)).toISOString(),
+    date: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
     reason: "Consultation lombalgie",
     status: "SCHEDULED",
     notes: "Patient se plaint de douleurs lombaires depuis 2 semaines, aggravées par la position assise prolongée",
@@ -361,24 +366,25 @@ const mockAppointments: Appointment[] = [
     patientId: 2,
     osteopathId: 1,
     cabinetId: 1,
-    start: "2024-07-22T10:30:00",
-    end: "2024-07-22T11:15:00",
-    date: "2024-07-22T10:30:00",
+    start: new Date(new Date().setHours(10, 30, 0, 0)).toISOString(),
+    end: new Date(new Date().setHours(11, 15, 0, 0)).toISOString(),
+    date: new Date(new Date().setHours(10, 30, 0, 0)).toISOString(),
     reason: "Suivi migraines",
-    status: "COMPLETED",
-    notes: "Séance axée sur les tensions cervicales. Amélioration notable des maux de tête. Techniques de relâchement des sous-occipitaux.",
+    status: "SCHEDULED",
+    notes: "Séance axée sur les tensions cervicales. Suivi des améliorations depuis la dernière séance.",
     notificationSent: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
+  // Rendez-vous pour demain
   {
     id: 3,
     patientId: 3,
     osteopathId: 1,
     cabinetId: 1,
-    start: "2024-07-23T14:00:00",
-    end: "2024-07-23T14:45:00",
-    date: "2024-07-23T14:00:00",
+    start: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T14:00:00'),
+    end: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T14:45:00'),
+    date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T14:00:00'),
     reason: "Tendinite épaule droite",
     status: "SCHEDULED",
     notes: "Première consultation pour tendinite épaule droite. Douleur apparue il y a 3 semaines.",
@@ -386,14 +392,15 @@ const mockAppointments: Appointment[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
+  // Rendez-vous pour dans 2 jours
   {
     id: 4,
     patientId: 4,
     osteopathId: 1,
     cabinetId: 1,
-    start: "2024-07-24T16:00:00",
-    end: "2024-07-24T16:45:00",
-    date: "2024-07-24T16:00:00",
+    start: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T16:00:00'),
+    end: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T16:45:00'),
+    date: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T16:00:00'),
     reason: "Tensions cervicales",
     status: "SCHEDULED",
     notes: "Suivi pour tensions cervicales liées au travail sur écran",
@@ -401,14 +408,15 @@ const mockAppointments: Appointment[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
+  // Rendez-vous pour dans 3 jours
   {
     id: 5,
     patientId: 5,
     osteopathId: 1,
     cabinetId: 1,
-    start: "2024-07-25T09:30:00",
-    end: "2024-07-25T10:15:00",
-    date: "2024-07-25T09:30:00",
+    start: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T09:30:00'),
+    end: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T10:15:00'),
+    date: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T09:30:00'),
     reason: "Troubles du sommeil (pédiatrie)",
     status: "SCHEDULED",
     notes: "Consultation pédiatrique pour troubles du sommeil. Enfant de 5 ans.",
@@ -416,14 +424,15 @@ const mockAppointments: Appointment[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
+  // Rendez-vous passés (il y a 1 semaine)
   {
     id: 6,
     patientId: 1,
     osteopathId: 1,
     cabinetId: 1,
-    start: "2024-07-15T09:00:00",
-    end: "2024-07-15T09:45:00",
-    date: "2024-07-15T09:00:00",
+    start: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T09:00:00'),
+    end: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T09:45:00'),
+    date: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T09:00:00'),
     reason: "Première consultation lombalgie",
     status: "COMPLETED",
     notes: "Anamnèse complète. Tests de mobilité. Programme d'exercices donné.",
@@ -431,17 +440,34 @@ const mockAppointments: Appointment[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
+  // Rendez-vous passés (il y a 2 semaines)
   {
     id: 7,
     patientId: 2,
     osteopathId: 1,
     cabinetId: 1,
-    start: "2024-07-08T10:30:00",
-    end: "2024-07-08T11:15:00",
-    date: "2024-07-08T10:30:00",
+    start: new Date(new Date().getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T10:30:00'),
+    end: new Date(new Date().getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T11:15:00'),
+    date: new Date(new Date().getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T10:30:00'),
     reason: "Consultation migraines",
     status: "COMPLETED",
     notes: "Première consultation pour migraines récurrentes. Evaluation posturale.",
+    notificationSent: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  // Rendez-vous passés (il y a 3 semaines)
+  {
+    id: 8,
+    patientId: 3,
+    osteopathId: 1,
+    cabinetId: 1,
+    start: new Date(new Date().getTime() - 21 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T15:00:00'),
+    end: new Date(new Date().getTime() - 21 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T15:45:00'),
+    date: new Date(new Date().getTime() - 21 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T15:00:00'),
+    reason: "Bilan ostéopathique complet",
+    status: "COMPLETED",
+    notes: "Premier rendez-vous. Evaluation complète des structures. Plan de traitement établi.",
     notificationSent: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -564,16 +590,29 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     osteopath: mockOsteopath
   };
 
+  // Injecter le contexte démo dans tous les services quand il change
+  useEffect(() => {
+    const contextData = { isDemoMode, demoData };
+    setAppointmentDemoContext(contextData);
+    setPatientDemoContext(contextData);
+    setCabinetDemoContext(contextData);
+    setInvoiceDemoContext(contextData);
+    
+    console.log('DemoContext: Mode démo mis à jour:', isDemoMode);
+  }, [isDemoMode, demoData]);
+
+  const contextValue = {
+    isDemoMode,
+    setDemoMode: setIsDemoMode,
+    demoData,
+    addDemoPatient,
+    updateDemoPatient,
+    addDemoAppointment,
+    updateDemoAppointment
+  };
+
   return (
-    <DemoContext.Provider value={{
-      isDemoMode,
-      setDemoMode: setIsDemoMode,
-      demoData,
-      addDemoPatient,
-      updateDemoPatient,
-      addDemoAppointment,
-      updateDemoAppointment
-    }}>
+    <DemoContext.Provider value={contextValue}>
       {children}
     </DemoContext.Provider>
   );

@@ -4,8 +4,21 @@ import { delay, USE_SUPABASE } from "./config";
 import { supabaseCabinetService } from "../supabase-api/cabinet";
 import { osteopathCabinetService } from "../supabase-api/osteopath-cabinet-service";
 
+// Hook pour accéder au contexte démo depuis les services
+let demoContext: any = null;
+export const setDemoContext = (context: any) => {
+  demoContext = context;
+};
+
 export const cabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log("cabinetService.getCabinets: Using demo data");
+      await delay(300);
+      return [...demoContext.demoData.cabinets];
+    }
+    
     if (USE_SUPABASE) {
       try {
         return await supabaseCabinetService.getCabinets();
@@ -19,6 +32,13 @@ export const cabinetService = {
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log("cabinetService.getCabinetById: Using demo data for ID", id);
+      await delay(200);
+      return demoContext.demoData.cabinets.find((cabinet: any) => cabinet.id === id);
+    }
+    
     if (USE_SUPABASE) {
       try {
         return await supabaseCabinetService.getCabinetById(id);

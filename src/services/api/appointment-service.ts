@@ -6,6 +6,12 @@ import { AppointmentStatus, CreateAppointmentPayload } from "@/types";
 import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
 import { getCurrentOsteopathId } from "@/services";
 
+// Hook pour accéder au contexte démo depuis les services
+let demoContext: any = null;
+export const setDemoContext = (context: any) => {
+  demoContext = context;
+};
+
 // Create a custom error class for appointment conflicts
 export class AppointmentConflictError extends Error {
   constructor(message: string) {
@@ -59,6 +65,13 @@ const appointments: Appointment[] = [
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     console.log("appointmentService.getAppointments: Starting");
+    
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log("appointmentService.getAppointments: Using demo data");
+      await delay(300); // Simuler un délai réseau
+      return [...demoContext.demoData.appointments];
+    }
     
     if (USE_SUPABASE) {
       try {

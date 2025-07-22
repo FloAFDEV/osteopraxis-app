@@ -5,8 +5,20 @@ import { supabaseInvoiceService } from "../supabase-api/invoice-service";
 import { getCurrentOsteopathId, isInvoiceOwnedByCurrentOsteopath, isPatientOwnedByCurrentOsteopath } from "@/services";
 import { SecurityViolationError } from "./appointment-service";
 
+// Hook pour accéder au contexte démo depuis les services
+let demoContext: any = null;
+export const setDemoContext = (context: any) => {
+  demoContext = context;
+};
+
 export const invoiceService = {
   async getInvoices(): Promise<Invoice[]> {
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log("invoiceService.getInvoices: Using demo data");
+      return [...demoContext.demoData.invoices];
+    }
+    
     if (USE_SUPABASE) {
       try {
         return await supabaseInvoiceService.getInvoices();

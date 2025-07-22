@@ -4,11 +4,24 @@ import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
 import { getCurrentOsteopathId } from "@/services";
 
+// Hook pour accéder au contexte démo depuis les services
+let demoContext: any = null;
+export const setDemoContext = (context: any) => {
+  demoContext = context;
+};
+
 // Empty array for patients to remove fictitious data
 const patients: Patient[] = [];
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log("patientService.getPatients: Using demo data");
+      await delay(300); // Simuler un délai réseau
+      return [...demoContext.demoData.patients];
+    }
+    
     if (USE_SUPABASE) {
       try {
         return await supabasePatientService.getPatients();
@@ -27,6 +40,13 @@ export const patientService = {
     if (!id || isNaN(id) || id <= 0) {
       console.warn("getPatientById appelé avec un ID invalide:", id);
       return undefined;
+    }
+
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log("patientService.getPatientById: Using demo data for ID", id);
+      await delay(200);
+      return demoContext.demoData.patients.find((patient: any) => patient.id === id);
     }
 
     if (USE_SUPABASE) {
