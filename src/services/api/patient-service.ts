@@ -161,7 +161,10 @@ export const patientService = {
       return true;
     }
     return false;
-  }
+  },
+  
+  // Méthode pour injecter le contexte démo
+  setDemoContext,
 };
 
 // Export la fonction isPatientOwnedByCurrentOsteopath pour la sécurité

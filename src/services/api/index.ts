@@ -86,7 +86,13 @@ export const api = {
       console.error("Error getting current osteopath:", error);
       return null;
     }
-  }
+  },
+
+  // Services accessors for demo context injection
+  getAppointmentService: () => appointmentService,
+  getPatientService: () => patientService,
+  getCabinetService: () => cabinetService,
+  getInvoiceService: () => invoiceService,
 };
 
 export default api;

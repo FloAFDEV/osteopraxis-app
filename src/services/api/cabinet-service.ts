@@ -135,4 +135,7 @@ export const cabinetService = {
       return [];
     }
   },
+  
+  // Méthode pour injecter le contexte démo
+  setDemoContext,
 };

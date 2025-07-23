@@ -39,6 +39,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useDemo } from "@/contexts/DemoContext";
 
 import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
@@ -54,6 +55,7 @@ const AppointmentsPage = () => {
 		useState<Appointment | null>(null);
 	const location = useLocation();
 	const navigate = useNavigate();
+	const { isDemoMode } = useDemo();
 
 	const [refreshKey, setRefreshKey] = useState(0);
 
@@ -69,6 +71,13 @@ const AppointmentsPage = () => {
 		const fetchData = async () => {
 			setLoading(true); // Ensure loading is true at the start
 			try {
+				// Injecter le contexte démo dans les services API
+				const appointmentService = api.getAppointmentService();
+				const patientService = api.getPatientService();
+				
+				appointmentService.setDemoContext({ isDemoMode });
+				patientService.setDemoContext({ isDemoMode });
+
 				const [appointmentsData, patientsData] = await Promise.all([
 					api.getAppointments(),
 					api.getPatients(),
@@ -85,7 +94,7 @@ const AppointmentsPage = () => {
 			}
 		};
 		fetchData();
-	}, [refreshKey]); // Dependency array includes refreshKey
+	}, [refreshKey, isDemoMode]); // Dependency array includes refreshKey and isDemoMode
 
 	const getPatientById = (patientId: number): Patient | undefined => {
 		return patients.find((patient) => patient.id === patientId);

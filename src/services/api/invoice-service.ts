@@ -185,5 +185,8 @@ export const invoiceService = {
       }
       return true;
     });
-  }
+  },
+  
+  // Méthode pour injecter le contexte démo
+  setDemoContext,
 };
