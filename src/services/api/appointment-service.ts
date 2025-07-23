@@ -96,6 +96,13 @@ export const appointmentService = {
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     console.log(`appointmentService.getAppointmentById: Starting for ID ${id}`);
     
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log(`appointmentService.getAppointmentById: Using demo data for ID ${id}`);
+      await delay(200);
+      return demoContext.demoData.appointments.find((appointment: Appointment) => appointment.id === id);
+    }
+    
     if (USE_SUPABASE) {
       try {
         console.log(`appointmentService.getAppointmentById: Using Supabase for ID ${id}`);
@@ -117,6 +124,13 @@ export const appointmentService = {
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     console.log(`appointmentService.getAppointmentsByPatientId: Starting for patient ${patientId}`);
     
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log(`appointmentService.getAppointmentsByPatientId: Using demo data for patient ${patientId}`);
+      await delay(200);
+      return demoContext.demoData.appointments.filter((appointment: Appointment) => appointment.patientId === patientId);
+    }
+    
     if (USE_SUPABASE) {
       try {
         console.log(`appointmentService.getAppointmentsByPatientId: Using Supabase for patient ${patientId}`);
@@ -137,6 +151,25 @@ export const appointmentService = {
   
   async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | null> {
     console.log(`appointmentService.getTodayAppointmentForPatient: Starting for patient ${patientId}`);
+    
+    // Vérifier d'abord si on est en mode démo
+    if (demoContext?.isDemoMode) {
+      console.log(`appointmentService.getTodayAppointmentForPatient: Using demo data for patient ${patientId}`);
+      await delay(200);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const result = demoContext.demoData.appointments.find((a: Appointment) => 
+        a.patientId === patientId && 
+        new Date(a.date) >= today && 
+        new Date(a.date) < tomorrow
+      ) || null;
+      
+      console.log(`appointmentService.getTodayAppointmentForPatient: Demo mode result for patient ${patientId}:`, result);
+      return result;
+    }
     
     if (USE_SUPABASE) {
       try {
