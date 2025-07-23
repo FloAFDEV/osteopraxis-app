@@ -18,7 +18,7 @@ export const patientService = {
     // Vérifier d'abord si on est en mode démo
     if (demoContext?.isDemoMode) {
       console.log("patientService.getPatients: Using demo data");
-      await delay(300); // Simuler un délai réseau
+      await delay(300);
       return [...demoContext.demoData.patients];
     }
     
@@ -27,6 +27,7 @@ export const patientService = {
         return await supabasePatientService.getPatients();
       } catch (error) {
         console.error("Erreur Supabase getPatients:", error);
+        throw error;
       }
     }
     
