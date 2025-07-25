@@ -217,30 +217,23 @@ export class InvoiceLocalAdapter extends SQLiteAdapter<any> {
 }
 
 /**
- * Factory pour créer les adaptateurs locaux
+ * Factory pour créer les adaptateurs locaux (SQLite)
+ * NOUVEAU : Utilise les adaptateurs SQLite optimisés
  */
 export function createLocalAdapters() {
-  return {
-    patients: new PatientLocalAdapter(),
-    appointments: new AppointmentLocalAdapter(),
-    invoices: new InvoiceLocalAdapter(),
-    // À ajouter : consultations, medicalDocuments, quotes, treatmentHistory, patientRelationships
-  };
+  // Importer les nouveaux adaptateurs SQLite
+  const { createSQLiteAdapters } = require('../sqlite/sqlite-adapters');
+  return createSQLiteAdapters();
 }
 
 /**
- * Initialise tous les adaptateurs locaux avec leurs schémas
+ * Initialise tous les adaptateurs locaux
+ * NOUVEAU : Utilise browserSQLite pour l'initialisation
  */
 export async function initializeLocalAdapters() {
-  const adapters = createLocalAdapters();
-  
-  // Initialiser les tables SQLite
-  await Promise.all([
-    adapters.patients.init(),
-    adapters.appointments.init(),
-    adapters.invoices.init(),
-  ]);
-  
-  console.log('✅ Local SQLite adapters initialized');
-  return adapters;
+  // L'initialisation se fait maintenant via browserSQLite.initialize()
+  const { browserSQLite } = await import('../sqlite/browser-sqlite');
+  await browserSQLite.initialize();
+  console.log('✅ All local adapters initialized via SQLite');
+  return createLocalAdapters();
 }

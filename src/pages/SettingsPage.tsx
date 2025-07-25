@@ -57,6 +57,15 @@ const SettingsPage = () => {
 			path: "/help",
 			color: "text-orange-500",
 		},
+		{
+			id: "debug",
+			title: "🔧 Diagnostic Technique",
+			description:
+				"Test de l'architecture hybride SQLite + OPFS",
+			icon: Settings,
+			path: "/settings/debug",
+			color: "text-red-500",
+		},
 	];
 
 	return (
