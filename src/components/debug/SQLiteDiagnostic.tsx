@@ -9,10 +9,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Badge } from '../ui/badge';
 import { useSQLiteTest } from '../../hooks/useSQLiteTest';
 import { useHybridDataDiagnostic } from '../../services/hybrid-data-adapter';
+import { useHybridArchitectureTest } from '../../hooks/useHybridArchitectureTest';
+import { Loader2, Zap } from 'lucide-react';
 
 export function SQLiteDiagnostic() {
   const { loading: sqliteLoading, result: sqliteResult, runTest: runSQLiteTest } = useSQLiteTest();
   const { runDiagnostic } = useHybridDataDiagnostic();
+  const {
+    isLoading: isHybridLoading,
+    testResults: hybridResults,
+    runHybridTest,
+    clearResults: clearHybridResults
+  } = useHybridArchitectureTest();
 
   const handleHybridDiagnostic = async () => {
     await runDiagnostic();
@@ -42,6 +50,16 @@ export function SQLiteDiagnostic() {
               variant="outline"
             >
               Diagnostic Hybride
+            </Button>
+
+            <Button 
+              onClick={runHybridTest}
+              disabled={isHybridLoading}
+              className="flex items-center gap-2"
+            >
+              {isHybridLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              <Zap className="h-4 w-4" />
+              Test Complet
             </Button>
           </div>
 
@@ -99,6 +117,51 @@ export function SQLiteDiagnostic() {
           )}
         </CardContent>
       </Card>
+
+      {/* Résultats du test hybride */}
+      {hybridResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                Résultats Test Architecture Hybride
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={clearHybridResults}
+                disabled={isHybridLoading}
+              >
+                Effacer
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {hybridResults.map((result, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <span className="font-medium">{result.step}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={
+                      result.status.includes('✅') ? 'default' : 
+                      result.status.includes('⚠️') ? 'secondary' : 
+                      result.status.includes('❌') ? 'destructive' : 'outline'
+                    }>
+                      {result.status}
+                    </Badge>
+                    {result.time > 0 && (
+                      <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded">
+                        {result.time}ms
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
