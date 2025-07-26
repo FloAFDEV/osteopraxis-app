@@ -40,6 +40,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDemo } from "@/contexts/DemoContext";
+import { useHybridAppointments } from "@/hooks/useHybridAppointments";
 
 import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
@@ -67,22 +68,27 @@ const AppointmentsPage = () => {
 		number | undefined
 	>(undefined);
 
+	// Migration vers l'architecture hybride
+	const {
+		appointments: hybridAppointments,
+		isLoading: appointmentsLoading,
+		error: appointmentsError,
+		refetch: refetchAppointments,
+		createAppointment,
+		updateAppointment,
+		updateAppointmentStatus,
+		deleteAppointment,
+	} = useHybridAppointments();
+
 	useEffect(() => {
 		const fetchData = async () => {
-			setLoading(true); // Ensure loading is true at the start
+			setLoading(true);
 			try {
-				// Injecter le contexte démo dans les services API
-				const appointmentService = api.getAppointmentService();
-				const patientService = api.getPatientService();
+				// Les rendez-vous viennent du hook hybride
+				setAppointments(hybridAppointments || []);
 				
-				appointmentService.setDemoContext({ isDemoMode });
-				patientService.setDemoContext({ isDemoMode });
-
-				const [appointmentsData, patientsData] = await Promise.all([
-					api.getAppointments(),
-					api.getPatients(),
-				]);
-				setAppointments(appointmentsData);
+				// Toujours récupérer les patients via l'API classique pour l'instant
+				const patientsData = await api.getPatients();
 				setPatients(patientsData);
 			} catch (error) {
 				console.error("Failed to fetch data:", error);
@@ -93,8 +99,11 @@ const AppointmentsPage = () => {
 				setLoading(false);
 			}
 		};
-		fetchData();
-	}, [refreshKey, isDemoMode]); // Dependency array includes refreshKey and isDemoMode
+		
+		if (hybridAppointments) {
+			fetchData();
+		}
+	}, [refreshKey, isDemoMode, hybridAppointments]);
 
 	const getPatientById = (patientId: number): Patient | undefined => {
 		return patients.find((patient) => patient.id === patientId);
@@ -249,8 +258,8 @@ const AppointmentsPage = () => {
 				)
 			);
 
-			// Appel API pour mettre à jour le statut
-			await api.updateAppointmentStatus(appointmentId, status);
+			// Utiliser le service hybride pour mettre à jour le statut
+			await updateAppointmentStatus(appointmentId, status);
 			toast.success("Statut mis à jour avec succès");
 		} catch (error) {
 			console.error("Error updating appointment status:", error);

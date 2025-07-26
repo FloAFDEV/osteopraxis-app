@@ -23,6 +23,7 @@ import { useOsteopaths } from "@/hooks/useOsteopaths";
 import { useCabinetsByOsteopath } from "@/hooks/useCabinetsByOsteopath";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { InvoiceExportButtons } from "@/components/invoices/InvoiceExportButtons";
+import { useHybridInvoices } from "@/hooks/useHybridInvoices";
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const {
@@ -52,14 +53,13 @@ const InvoicesPage = () => {
   const {
     cabinets
   } = useCabinetsByOsteopath(selectedOsteopathId && selectedOsteopathId !== "ALL" ? Number(selectedOsteopathId) : undefined);
+  // Migration vers l'architecture hybride
   const {
-    data: invoices,
+    invoices,
     isLoading,
-    refetch
-  } = useQuery({
-    queryKey: ["invoices"],
-    queryFn: api.getInvoices
-  });
+    refetch,
+    deleteInvoice: hybridDeleteInvoice,
+  } = useHybridInvoices();
 
   // Query for osteopath data
   const {
@@ -152,12 +152,11 @@ const InvoicesPage = () => {
   const handleDeleteInvoice = async () => {
     if (!selectedInvoiceId) return;
     try {
-      await api.deleteInvoice(selectedInvoiceId);
-      toast.success("Facture supprimée avec succès");
-      refetch();
+      await hybridDeleteInvoice(selectedInvoiceId);
+      // Le toast et refetch sont gérés par le hook hybride
     } catch (error) {
       console.error("Error deleting invoice:", error);
-      toast.error("Une erreur est survenue lors de la suppression");
+      // Le toast d'erreur est géré par le hook hybride
     } finally {
       setIsDeleteModalOpen(false);
       setSelectedInvoiceId(null);

@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useGlobalOptimization } from "@/hooks/useGlobalOptimization";
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
+import { useHybridPatients } from "@/hooks/useHybridPatients";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -51,32 +52,22 @@ const PatientsPage = () => {
 		refetchOnWindowFocus: false,
 	});
 
-	// Utilisation du cache global optimisé ou fallback sur useQuery
+	// Migration vers l'architecture hybride
 	const {
-		data: allPatients,
+		allPatients,
 		isLoading,
 		error,
 		refetch,
-	} = useQuery({
-		queryKey: ["patients"],
-		queryFn: async () => {
-			try {
-				// Utiliser les données du cache global si disponibles
-				if (globalData.patients.length > 0) {
-					return globalData.patients;
-				}
-				return await api.getPatients();
-			} catch (err) {
-				console.error("Error fetching patients:", err);
-				throw err;
-			}
-		},
-		retry: 2,
-		retryDelay: 1000,
-		refetchOnWindowFocus: false,
-		staleTime: 1000 * 60 * 5, // 5 minutes
-		initialData: globalData.patients.length > 0 ? globalData.patients : undefined,
-	});
+		createPatient,
+		updatePatient,
+		deletePatient,
+	} = useHybridPatients(
+		searchQuery,
+		selectedCabinetId,
+		sortBy,
+		currentPage,
+		patientsPerPage
+	);
 
 	// Filtrer les patients par cabinet sélectionné
 	const patients =
@@ -85,13 +76,12 @@ const PatientsPage = () => {
 			return patient.cabinetId === selectedCabinetId;
 		}) || [];
 
-	// Amélioration du handler avec cache global
+	// Amélioration du handler avec architecture hybride
 	const handleRetry = async () => {
 		setIsRefreshing(true);
 		toast.info("Chargement des patients en cours...");
 		try {
-			// Invalider le cache global et refetch
-			optimize.invalidateRelated('patient');
+			// Utiliser le refetch du hook hybride
 			await refetch();
 			if (patients && patients.length > 0) {
 				toast.success(
