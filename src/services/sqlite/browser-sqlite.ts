@@ -32,10 +32,15 @@ export class BrowserSQLiteManager {
     try {
       console.log('🔄 Initializing SQLite in browser...');
 
-      // Initialiser sql.js
+      // Initialiser sql.js avec les fichiers WASM
       this.sqljs = await initSqlJs({
-        // Le WASM sera chargé depuis node_modules/sql.js/dist/
-        locateFile: (file: string) => `/node_modules/sql.js/dist/${file}`
+        locateFile: (file: string) => {
+          // Utiliser les CDN pour les fichiers WASM
+          if (file.endsWith('.wasm')) {
+            return `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${file}`;
+          }
+          return file;
+        }
       });
 
       // Tenter de charger une base existante depuis OPFS

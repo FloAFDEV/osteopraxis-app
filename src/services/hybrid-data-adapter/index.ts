@@ -24,9 +24,9 @@ export {
   HybridStorageError
 } from './types';
 
-// Export des nouveaux services hybrides
-export { hybridPatientService } from '../hybrid-patient-service';
-export { hybridAppointmentService } from '../hybrid-appointment-service';
+// Export des nouveaux services hybrides (à implémenter)
+// export { hybridPatientService } from '../hybrid-patient-service';
+// export { hybridAppointmentService } from '../hybrid-appointment-service';
 
 /**
  * Utilitaire pour migration progressive

@@ -1,6 +1,6 @@
 /**
  * Composant de diagnostic SQLite
- * Permet de tester et diagnostiquer l'architecture hybride
+ * Permet de tester et diagnostiquer l'infrastructure SQLite locale
  */
 
 import React from 'react';
@@ -8,58 +8,27 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { useSQLiteTest } from '../../hooks/useSQLiteTest';
-import { useHybridDataDiagnostic } from '../../services/hybrid-data-adapter';
-import { useHybridArchitectureTest } from '../../hooks/useHybridArchitectureTest';
-import { Loader2, Zap } from 'lucide-react';
 
 export function SQLiteDiagnostic() {
   const { loading: sqliteLoading, result: sqliteResult, runTest: runSQLiteTest } = useSQLiteTest();
-  const { runDiagnostic } = useHybridDataDiagnostic();
-  const {
-    isLoading: isHybridLoading,
-    testResults: hybridResults,
-    runHybridTest,
-    clearResults: clearHybridResults
-  } = useHybridArchitectureTest();
-
-  const handleHybridDiagnostic = async () => {
-    await runDiagnostic();
-  };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>🔧 Diagnostic Architecture Hybride</CardTitle>
+          <CardTitle>🔧 Diagnostic Infrastructure SQLite</CardTitle>
           <CardDescription>
             Test de l'infrastructure SQLite + OPFS pour le stockage local des données sensibles
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="mt-6 p-4 rounded-lg bg-muted">
             <Button 
               onClick={runSQLiteTest} 
               disabled={sqliteLoading}
-              variant="outline"
+              className="px-6 py-2"
             >
               {sqliteLoading ? 'Test en cours...' : 'Tester SQLite'}
-            </Button>
-            
-            <Button 
-              onClick={handleHybridDiagnostic}
-              variant="outline"
-            >
-              Diagnostic Hybride
-            </Button>
-
-            <Button 
-              onClick={runHybridTest}
-              disabled={isHybridLoading}
-              className="flex items-center gap-2"
-            >
-              {isHybridLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              <Zap className="h-4 w-4" />
-              Test Complet
             </Button>
           </div>
 
@@ -118,56 +87,11 @@ export function SQLiteDiagnostic() {
         </CardContent>
       </Card>
 
-      {/* Résultats du test hybride */}
-      {hybridResults.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Résultats Test Architecture Hybride
-              </span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={clearHybridResults}
-                disabled={isHybridLoading}
-              >
-                Effacer
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {hybridResults.map((result, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <span className="font-medium">{result.step}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={
-                      result.status.includes('✅') ? 'default' : 
-                      result.status.includes('⚠️') ? 'secondary' : 
-                      result.status.includes('❌') ? 'destructive' : 'outline'
-                    }>
-                      {result.status}
-                    </Badge>
-                    {result.time > 0 && (
-                      <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded">
-                        {result.time}ms
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <Card>
         <CardHeader>
-          <CardTitle>📊 Classification des Données</CardTitle>
+          <CardTitle>📊 Classification des Données (Planifiée)</CardTitle>
           <CardDescription>
-            Répartition des données selon l'architecture hybride
+            Répartition future des données selon l'architecture hybride
           </CardDescription>
         </CardHeader>
         <CardContent>

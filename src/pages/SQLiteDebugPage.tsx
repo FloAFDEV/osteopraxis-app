@@ -5,16 +5,12 @@
 import React from 'react';
 import { Layout } from "@/components/ui/layout";
 import { SQLiteDiagnostic } from "@/components/debug/SQLiteDiagnostic";
-import { HybridArchitectureTest } from "@/components/debug/HybridArchitectureTest";
-import { Separator } from "@/components/ui/separator";
 
 const SQLiteDebugPage = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 space-y-8">
         <SQLiteDiagnostic />
-        <Separator />
-        <HybridArchitectureTest />
       </div>
     </Layout>
   );

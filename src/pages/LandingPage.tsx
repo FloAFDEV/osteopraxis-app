@@ -57,9 +57,9 @@ const features = [
 	},
 	{
 		icon: Shield,
-		title: "Sécurité RGPD",
+		title: "Stockage Local Sécurisé",
 		description:
-			"Vos données et celles de vos patients sont protégées selon les normes européennes.",
+			"Données sensibles stockées localement sur votre ordinateur. Conformité RGPD garantie.",
 	},
 ];
 
@@ -97,7 +97,7 @@ const faqs = [
 	},
 	{
 		question: "Mes données sont-elles sécurisées ?",
-		answer: "Absolument. Nous utilisons un chiffrement de niveau bancaire et sommes conformes au RGPD Certifications ISO 27001&HDS. Vos données sont hébergées sur des serveurs européens sécurisés.",
+		answer: "Oui ! Les données sensibles (patients, consultations) sont stockées localement sur votre ordinateur. Seules les données de configuration restent dans le cloud. Conformité RGPD maximale.",
 	},
 	{
 		question: "Puis-je importer mes données existantes ?",
@@ -488,7 +488,7 @@ export default function LandingPage() {
 									<div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-background border border-border/50 hover:bg-muted/30 transition-colors">
 										<div className="h-2 w-2 bg-primary rounded-full flex-shrink-0"></div>
 										<span className="text-xs sm:text-sm font-medium text-foreground">
-											Partage sécurisé des données
+											Stockage local des données sensibles
 										</span>
 									</div>
 								</div>
