@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useGlobalOptimization } from "@/hooks/useGlobalOptimization";
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
-import { useHybridPatients } from "@/hooks/useHybridPatients";
+import { useOptimizedPatients } from "@/hooks/useOptimizedPatients";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -52,22 +52,21 @@ const PatientsPage = () => {
 		refetchOnWindowFocus: false,
 	});
 
-	// Migration vers l'architecture hybride
+	// Récupération des patients (service original)
 	const {
-		allPatients,
+		data: allPatients = [],
 		isLoading,
 		error,
 		refetch,
-		createPatient,
-		updatePatient,
-		deletePatient,
-	} = useHybridPatients(
-		searchQuery,
-		selectedCabinetId,
-		sortBy,
-		currentPage,
-		patientsPerPage
-	);
+	} = useQuery({
+		queryKey: ["patients", user?.osteopathId],
+		queryFn: async () => {
+			if (!user?.osteopathId) return [];
+			return await api.getPatients();
+		},
+		enabled: !!user?.osteopathId,
+		refetchOnWindowFocus: false,
+	});
 
 	// Filtrer les patients par cabinet sélectionné
 	const patients =

@@ -40,14 +40,15 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDemo } from "@/contexts/DemoContext";
-import { useHybridAppointments } from "@/hooks/useHybridAppointments";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
 
 const AppointmentsPage = () => {
-	// ... keep existing code (états, variables, etc.)
-	const [appointments, setAppointments] = useState<Appointment[]>([]);
+	const { user } = useAuth();
+	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -68,42 +69,46 @@ const AppointmentsPage = () => {
 		number | undefined
 	>(undefined);
 
-	// Migration vers l'architecture hybride
+	// Récupération des rendez-vous (service original)
 	const {
-		appointments: hybridAppointments,
+		data: appointments = [],
 		isLoading: appointmentsLoading,
 		error: appointmentsError,
-		refetch: refetchAppointments,
-		createAppointment,
-		updateAppointment,
-		updateAppointmentStatus,
-		deleteAppointment,
-	} = useHybridAppointments();
+		refetch: refetchAppointments
+	} = useQuery({
+		queryKey: ["appointments", user?.osteopathId],
+		queryFn: async () => {
+			if (!user?.osteopathId) return [];
+			return await api.getAppointments();
+		},
+		enabled: !!user?.osteopathId,
+		refetchOnWindowFocus: false,
+	});
 
 	useEffect(() => {
 		const fetchData = async () => {
 			setLoading(true);
-			try {
-				// Les rendez-vous viennent du hook hybride
-				setAppointments(hybridAppointments || []);
-				
-				// Toujours récupérer les patients via l'API classique pour l'instant
-				const patientsData = await api.getPatients();
-				setPatients(patientsData);
-			} catch (error) {
-				console.error("Failed to fetch data:", error);
-				toast.error(
-					"Impossible de charger les données. Veuillez réessayer."
-				);
-			} finally {
-				setLoading(false);
-			}
-		};
-		
-		if (hybridAppointments) {
-			fetchData();
+		try {
+			// Les rendez-vous viennent du hook
+			setAllAppointments(appointments || []);
+			
+			// Toujours récupérer les patients via l'API classique pour l'instant
+			const patientsData = await api.getPatients();
+			setPatients(patientsData);
+		} catch (error) {
+			console.error("Failed to fetch data:", error);
+			toast.error(
+				"Impossible de charger les données. Veuillez réessayer."
+			);
+		} finally {
+			setLoading(false);
 		}
-	}, [refreshKey, isDemoMode, hybridAppointments]);
+	};
+	
+	if (appointments) {
+		fetchData();
+	}
+}, [refreshKey, isDemoMode, appointments]);
 
 	const getPatientById = (patientId: number): Patient | undefined => {
 		return patients.find((patient) => patient.id === patientId);
@@ -114,7 +119,7 @@ const AppointmentsPage = () => {
 	// Memoize filtered appointments to avoid recalculation on every render if inputs haven't changed
 	// This would be better with useMemo, but for simplicity here, it's a function call
 	const getFilteredAppointments = (): Appointment[] => {
-		return appointments
+		return allAppointments
 			.filter((appointment) => {
 				if (
 					statusFilter !== "all" &&
@@ -216,7 +221,7 @@ const AppointmentsPage = () => {
 		const originalAppointment = { ...appointmentToCancel }; // Keep original details for toast/rollback
 		try {
 			// Optimistic UI update
-			setAppointments((prevAppointments) =>
+			setAllAppointments((prevAppointments) =>
 				prevAppointments.map((app) =>
 					app.id === appointmentToCancel.id
 						? { ...app, status: "CANCELED" }
@@ -234,7 +239,7 @@ const AppointmentsPage = () => {
 				"Une erreur est survenue lors de l'annulation. La séance a été restaurée."
 			);
 			// Rollback optimistic update
-			setAppointments((prevAppointments) =>
+			setAllAppointments((prevAppointments) =>
 				prevAppointments.map((app) =>
 					app.id === originalAppointment.id
 						? originalAppointment
@@ -250,7 +255,7 @@ const AppointmentsPage = () => {
 			// ✅ Statut RDV mis à jour
 			
 			// Optimistic UI update
-			setAppointments((prevAppointments) =>
+			setAllAppointments((prevAppointments) =>
 				prevAppointments.map((app) =>
 					app.id === appointmentId
 						? { ...app, status }
@@ -258,19 +263,19 @@ const AppointmentsPage = () => {
 				)
 			);
 
-			// Utiliser le service hybride pour mettre à jour le statut
-			await updateAppointmentStatus(appointmentId, status);
+			// Utiliser l'API pour mettre à jour le statut
+			await api.updateAppointmentStatus(appointmentId, status);
 			toast.success("Statut mis à jour avec succès");
 		} catch (error) {
 			console.error("Error updating appointment status:", error);
 			toast.error("Erreur lors de la mise à jour du statut");
 			
 			// Rollback optimistic update
-			setAppointments((prevAppointments) =>
+			setAllAppointments((prevAppointments) =>
 				prevAppointments.map((app) => {
 					if (app.id === appointmentId) {
 						// Find original appointment to restore its status
-						const originalApp = appointments.find(a => a.id === appointmentId);
+						const originalApp = allAppointments.find(a => a.id === appointmentId);
 						return originalApp ? { ...app, status: originalApp.status } : app;
 					}
 					return app;

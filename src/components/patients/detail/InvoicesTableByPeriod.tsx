@@ -48,7 +48,7 @@ export function InvoicesTableByPeriod({
 							{formatAppointmentDate(invoice.date, "dd MMMM yyyy")}
 						</TableCell>
 						<TableCell>
-							<BlurredAmount amount={invoice.amount} currency="€" />
+							{invoice.amount}€
 						</TableCell>
 						<TableCell className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
 							<CreditCard className="h-4 w-4 text-gray-400" />

@@ -23,7 +23,6 @@ import { useOsteopaths } from "@/hooks/useOsteopaths";
 import { useCabinetsByOsteopath } from "@/hooks/useCabinetsByOsteopath";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { InvoiceExportButtons } from "@/components/invoices/InvoiceExportButtons";
-import { useHybridInvoices } from "@/hooks/useHybridInvoices";
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const {
@@ -53,13 +52,21 @@ const InvoicesPage = () => {
   const {
     cabinets
   } = useCabinetsByOsteopath(selectedOsteopathId && selectedOsteopathId !== "ALL" ? Number(selectedOsteopathId) : undefined);
-  // Migration vers l'architecture hybride
+  // Récupération des factures (service original)
   const {
-    invoices,
-    isLoading,
-    refetch,
-    deleteInvoice: hybridDeleteInvoice,
-  } = useHybridInvoices();
+    data: invoices = [],
+    isLoading: invoicesLoading,
+    error: invoicesError,
+    refetch: refetchInvoices
+  } = useQuery({
+    queryKey: ["invoices", user?.osteopathId],
+    queryFn: async () => {
+      if (!user?.osteopathId) return [];
+      return await api.getInvoices();
+    },
+    enabled: !!user?.osteopathId,
+    refetchOnWindowFocus: false,
+  });
 
   // Query for osteopath data
   const {
@@ -152,11 +159,12 @@ const InvoicesPage = () => {
   const handleDeleteInvoice = async () => {
     if (!selectedInvoiceId) return;
     try {
-      await hybridDeleteInvoice(selectedInvoiceId);
-      // Le toast et refetch sont gérés par le hook hybride
+      await api.deleteInvoice(selectedInvoiceId);
+      toast.success("Facture supprimée avec succès");
+      refetchInvoices();
     } catch (error) {
       console.error("Error deleting invoice:", error);
-      // Le toast d'erreur est géré par le hook hybride
+      toast.error("Erreur lors de la suppression de la facture");
     } finally {
       setIsDeleteModalOpen(false);
       setSelectedInvoiceId(null);
@@ -287,7 +295,7 @@ const InvoicesPage = () => {
           {/* Filters avec toutes les props nécessaires */}
           <InvoiceFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} statusFilter={statusFilter} setStatusFilter={setStatusFilter} selectedYear={selectedYear} setSelectedYear={setSelectedYear} selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} onDownloadAll={handleDownloadAllInvoices} invoiceYears={yearOptions} monthOptions={monthOptions} invoices={invoices || []} patientDataMap={patientDataMap} osteopath={osteopath} selectedCabinetId={selectedCabinetId} setSelectedCabinetId={setSelectedCabinetId} selectedOsteopathId={selectedOsteopathId} setSelectedOsteopathId={setSelectedOsteopathId} cabinets={cabinets} osteopaths={osteopaths} />
           {/* Content */}
-          {isLoading ? <div className="flex justify-center items-center py-20">
+          {invoicesLoading ? <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
             </div> : filteredInvoices && filteredInvoices.length > 0 ? <div className="space-y-6">
               {/* Invoices by year/month */}
