@@ -52,26 +52,26 @@ const DataImportPage = () => {
 	};
 
 	const downloadTemplate = () => {
-		// Créer un fichier Excel template avec les colonnes PatientHub
+		// Créer un fichier Excel template avec les champs réels de la table Patient
 		import('xlsx').then((XLSX) => {
 			const templateData = [
-				// Headers
+				// Headers - champs réels de la base de données Patient
 				[
-					'nom', 'prenom', 'date_naissance', 'sexe', 'email', 'telephone',
-					'adresse', 'ville', 'code_postal', 'profession', 'medecin_traitant',
-					'mutuelle', 'numero_secu', 'motif_consultation', 'antecedents',
-					'allergies', 'traitements', 'observations'
+					'firstName', 'lastName', 'birthDate', 'gender', 'email', 'phone',
+					'address', 'city', 'postalCode', 'job', 'generalPractitioner',
+					'medicalHistory', 'currentTreatment', 'allergies', 'notes',
+					'maritalStatus', 'hasChildren', 'physicalActivity'
 				],
-				// Exemple de données
+				// Exemple de données avec les vrais champs
 				[
-					'Dupont', 'Jean', '01/01/1980', 'M', 'jean.dupont@email.com', '0123456789',
+					'Jean', 'Dupont', '1980-01-15', 'MALE', 'jean.dupont@email.com', '0123456789',
 					'123 Rue de la Paix', 'Paris', '75001', 'Ingénieur', 'Dr Martin',
-					'MGEN', '1234567890123', 'Mal de dos', 'Aucun', 'Aucune', 'Aucun', ''
+					'Hypertension', 'Aucun', 'Aucune', 'Première consultation', 'MARRIED', 'Oui', 'Course à pied'
 				],
 				[
-					'Martin', 'Marie', '15/05/1990', 'F', 'marie.martin@email.com', '0987654321',
+					'Marie', 'Martin', '1990-05-20', 'FEMALE', 'marie.martin@email.com', '0987654321',
 					'456 Avenue des Champs', 'Lyon', '69000', 'Professeure', 'Dr Durand',
-					'MAIF', '9876543210987', 'Migraine', 'Hypertension', 'Aspirine', 'Doliprane', 'Stress au travail'
+					'Migraines fréquentes', 'Doliprane si besoin', 'Aspirine', 'Stress au travail', 'SINGLE', 'Non', 'Yoga'
 				]
 			];
 
@@ -79,10 +79,10 @@ const DataImportPage = () => {
 			
 			// Ajuster la largeur des colonnes
 			const colWidths = [
-				{ wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 8 }, { wch: 25 },
+				{ wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 25 },
 				{ wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 12 }, { wch: 20 },
-				{ wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 25 }, { wch: 30 },
-				{ wch: 20 }, { wch: 25 }, { wch: 30 }
+				{ wch: 20 }, { wch: 30 }, { wch: 25 }, { wch: 20 }, { wch: 30 },
+				{ wch: 15 }, { wch: 15 }, { wch: 20 }
 			];
 			worksheet['!cols'] = colWidths;
 
