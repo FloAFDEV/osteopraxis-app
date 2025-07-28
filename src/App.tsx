@@ -25,6 +25,7 @@ import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
+import NotFound from "@/pages/NotFound";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -53,7 +54,9 @@ function App() {
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/demo" element={<InteractiveDemoPage />} />
                         <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
+                        <Route path="/privacy" element={<PrivacyPolicyPage />} />
                         <Route path="/cgu" element={<TermsOfServicePage />} />
+                        <Route path="/terms" element={<TermsOfServicePage />} />
                         
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
@@ -115,6 +118,9 @@ function App() {
                             <AdminDashboardPage />
                           </ProtectedRoute>
                         } />
+                        
+                        {/* Route 404 - doit être en dernier */}
+                        <Route path="*" element={<NotFound />} />
                       </Routes>
                       <Toaster />
                     </div>
