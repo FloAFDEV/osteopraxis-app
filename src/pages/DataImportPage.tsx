@@ -55,23 +55,22 @@ const DataImportPage = () => {
 		// Créer un fichier Excel template avec les champs réels de la table Patient
 		import('xlsx').then((XLSX) => {
 			const templateData = [
-				// Headers - champs réels de la base de données Patient
+				// Headers - champs cohérents avec le système d'import
 				[
 					'firstName', 'lastName', 'birthDate', 'gender', 'email', 'phone',
-					'address', 'city', 'postalCode', 'job', 'generalPractitioner',
-					'medicalHistory', 'currentTreatment', 'allergies', 'notes',
-					'maritalStatus', 'hasChildren', 'physicalActivity'
+					'address', 'city', 'postalCode', 'occupation', 'medicalHistory',
+					'allergies', 'currentTreatment', 'notes', 'height', 'weight'
 				],
-				// Exemple de données avec les vrais champs
+				// Exemple de données 
 				[
 					'Jean', 'Dupont', '1980-01-15', 'MALE', 'jean.dupont@email.com', '0123456789',
-					'123 Rue de la Paix', 'Paris', '75001', 'Ingénieur', 'Dr Martin',
-					'Hypertension', 'Aucun', 'Aucune', 'Première consultation', 'MARRIED', 'Oui', 'Course à pied'
+					'123 Rue de la Paix', 'Paris', '75001', 'Ingénieur', 'Hypertension',
+					'Aucune', 'Aucun', 'Première consultation', '175', '75'
 				],
 				[
 					'Marie', 'Martin', '1990-05-20', 'FEMALE', 'marie.martin@email.com', '0987654321',
-					'456 Avenue des Champs', 'Lyon', '69000', 'Professeure', 'Dr Durand',
-					'Migraines fréquentes', 'Doliprane si besoin', 'Aspirine', 'Stress au travail', 'SINGLE', 'Non', 'Yoga'
+					'456 Avenue des Champs', 'Lyon', '69000', 'Professeure', 'Migraines fréquentes',
+					'Aspirine', 'Doliprane si besoin', 'Stress au travail', '165', '60'
 				]
 			];
 
@@ -81,8 +80,7 @@ const DataImportPage = () => {
 			const colWidths = [
 				{ wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 25 },
 				{ wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 12 }, { wch: 20 },
-				{ wch: 20 }, { wch: 30 }, { wch: 25 }, { wch: 20 }, { wch: 30 },
-				{ wch: 15 }, { wch: 15 }, { wch: 20 }
+				{ wch: 30 }, { wch: 20 }, { wch: 25 }, { wch: 30 }, { wch: 8 }, { wch: 8 }
 			];
 			worksheet['!cols'] = colWidths;
 
