@@ -55,22 +55,19 @@ const DataImportPage = () => {
 		// Créer un fichier Excel template avec les champs réels de la table Patient
 		import('xlsx').then((XLSX) => {
 			const templateData = [
-				// Headers - champs cohérents avec le système d'import
+				// Headers - champs essentiels les plus utilisés
 				[
-					'firstName', 'lastName', 'birthDate', 'gender', 'email', 'phone',
-					'address', 'city', 'postalCode', 'occupation', 'medicalHistory',
-					'allergies', 'currentTreatment', 'notes', 'height', 'weight'
+					'firstName', 'lastName', 'email', 'phone', 'birthDate', 
+					'address', 'city', 'postalCode', 'notes'
 				],
 				// Exemple de données 
 				[
-					'Jean', 'Dupont', '1980-01-15', 'MALE', 'jean.dupont@email.com', '0123456789',
-					'123 Rue de la Paix', 'Paris', '75001', 'Ingénieur', 'Hypertension',
-					'Aucune', 'Aucun', 'Première consultation', '175', '75'
+					'Jean', 'Dupont', 'jean.dupont@email.com', '0123456789', '1980-01-15',
+					'123 Rue de la Paix', 'Paris', '75001', 'Nouvelle consultation'
 				],
 				[
-					'Marie', 'Martin', '1990-05-20', 'FEMALE', 'marie.martin@email.com', '0987654321',
-					'456 Avenue des Champs', 'Lyon', '69000', 'Professeure', 'Migraines fréquentes',
-					'Aspirine', 'Doliprane si besoin', 'Stress au travail', '165', '60'
+					'Marie', 'Martin', 'marie.martin@email.com', '0987654321', '1990-05-20',
+					'456 Avenue des Champs', 'Lyon', '69000', 'Patiente suivie régulièrement'
 				]
 			];
 
@@ -78,9 +75,8 @@ const DataImportPage = () => {
 			
 			// Ajuster la largeur des colonnes
 			const colWidths = [
-				{ wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 25 },
-				{ wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 12 }, { wch: 20 },
-				{ wch: 30 }, { wch: 20 }, { wch: 25 }, { wch: 30 }, { wch: 8 }, { wch: 8 }
+				{ wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 12 },
+				{ wch: 30 }, { wch: 15 }, { wch: 12 }, { wch: 30 }
 			];
 			worksheet['!cols'] = colWidths;
 
