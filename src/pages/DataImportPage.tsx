@@ -55,19 +55,22 @@ const DataImportPage = () => {
 		// Créer un fichier Excel template avec les champs réels de la table Patient
 		import('xlsx').then((XLSX) => {
 			const templateData = [
-				// Headers - champs essentiels les plus utilisés
+				// Headers - champs essentiels du formulaire patient
 				[
 					'firstName', 'lastName', 'email', 'phone', 'birthDate', 
-					'address', 'city', 'postalCode', 'notes'
+					'address', 'allergies', 'surgicalHistory', 'traumaHistory', 
+					'currentTreatment', 'physicalActivity', 'notes'
 				],
 				// Exemple de données 
 				[
 					'Jean', 'Dupont', 'jean.dupont@email.com', '0123456789', '1980-01-15',
-					'123 Rue de la Paix', 'Paris', '75001', 'Nouvelle consultation'
+					'123 Rue de la Paix, 75001 Paris', 'Aucune', 'Appendicectomie 2015', 'Chute vélo 2018', 
+					'Aucun', 'Course à pied 2x/semaine', 'Patient régulier'
 				],
 				[
 					'Marie', 'Martin', 'marie.martin@email.com', '0987654321', '1990-05-20',
-					'456 Avenue des Champs', 'Lyon', '69000', 'Patiente suivie régulièrement'
+					'456 Avenue des Champs, 69000 Lyon', 'Aspirine', 'Aucune', 'Entorse cheville',
+					'Doliprane si besoin', 'Yoga, natation', 'Migraines fréquentes'
 				]
 			];
 
@@ -76,7 +79,8 @@ const DataImportPage = () => {
 			// Ajuster la largeur des colonnes
 			const colWidths = [
 				{ wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 12 },
-				{ wch: 30 }, { wch: 15 }, { wch: 12 }, { wch: 30 }
+				{ wch: 35 }, { wch: 20 }, { wch: 25 }, { wch: 25 }, 
+				{ wch: 25 }, { wch: 20 }, { wch: 30 }
 			];
 			worksheet['!cols'] = colWidths;
 
