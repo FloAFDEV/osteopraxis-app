@@ -53,11 +53,45 @@ const DataImportPage = () => {
 
 	const downloadTemplate = () => {
 		// Créer un fichier Excel template avec les colonnes PatientHub
-		const templateUrl = "/templates/patient-import-template.xlsx";
-		const link = document.createElement("a");
-		link.href = templateUrl;
-		link.download = "modele-import-patients.xlsx";
-		link.click();
+		import('xlsx').then((XLSX) => {
+			const templateData = [
+				// Headers
+				[
+					'nom', 'prenom', 'date_naissance', 'sexe', 'email', 'telephone',
+					'adresse', 'ville', 'code_postal', 'profession', 'medecin_traitant',
+					'mutuelle', 'numero_secu', 'motif_consultation', 'antecedents',
+					'allergies', 'traitements', 'observations'
+				],
+				// Exemple de données
+				[
+					'Dupont', 'Jean', '01/01/1980', 'M', 'jean.dupont@email.com', '0123456789',
+					'123 Rue de la Paix', 'Paris', '75001', 'Ingénieur', 'Dr Martin',
+					'MGEN', '1234567890123', 'Mal de dos', 'Aucun', 'Aucune', 'Aucun', ''
+				],
+				[
+					'Martin', 'Marie', '15/05/1990', 'F', 'marie.martin@email.com', '0987654321',
+					'456 Avenue des Champs', 'Lyon', '69000', 'Professeure', 'Dr Durand',
+					'MAIF', '9876543210987', 'Migraine', 'Hypertension', 'Aspirine', 'Doliprane', 'Stress au travail'
+				]
+			];
+
+			const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+			
+			// Ajuster la largeur des colonnes
+			const colWidths = [
+				{ wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 8 }, { wch: 25 },
+				{ wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 12 }, { wch: 20 },
+				{ wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 25 }, { wch: 30 },
+				{ wch: 20 }, { wch: 25 }, { wch: 30 }
+			];
+			worksheet['!cols'] = colWidths;
+
+			const workbook = XLSX.utils.book_new();
+			XLSX.utils.book_append_sheet(workbook, worksheet, "Patients");
+			
+			// Télécharger le fichier
+			XLSX.writeFile(workbook, "modele-import-patients.xlsx");
+		});
 	};
 
 	return (
