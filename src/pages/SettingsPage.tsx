@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Layout } from "@/components/ui/layout";
 import {
 	Card,
@@ -17,9 +18,13 @@ import {
 	Upload,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
+import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog";
 
 const SettingsPage = () => {
 	const navigate = useNavigate();
+	const [showExportDialog, setShowExportDialog] = useState(false);
+	const [showImportDialog, setShowImportDialog] = useState(false);
 
 	const settingsOptions = [
 		{
@@ -129,10 +134,20 @@ const SettingsPage = () => {
 							</p>
 						</CardContent>
 					</Card>
-				</div>
-			</div>
-		</Layout>
-	);
+        </div>
+      </div>
+
+      {/* Dialogs */}
+      <SecureExportDialog 
+        open={showExportDialog} 
+        onOpenChange={setShowExportDialog} 
+      />
+      <SecureImportDialog 
+        open={showImportDialog} 
+        onOpenChange={setShowImportDialog} 
+      />
+    </Layout>
+  );
 };
 
 export default SettingsPage;
