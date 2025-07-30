@@ -25,6 +25,10 @@ import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
+import CollaborationsSettingsPage from "@/pages/CollaborationsSettingsPage";
+import HelpPage from "@/pages/HelpPage";
+import SQLiteDebugPage from "@/pages/SQLiteDebugPage";
+import TipsPage from "@/pages/TipsPage";
 import NotFound from "@/pages/NotFound";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -110,6 +114,26 @@ function App() {
                         <Route path="/settings/cabinet" element={
                           <ProtectedRoute>
                             <CabinetSettingsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/settings/collaborations" element={
+                          <ProtectedRoute>
+                            <CollaborationsSettingsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/settings/debug" element={
+                          <ProtectedRoute>
+                            <SQLiteDebugPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/help" element={
+                          <ProtectedRoute>
+                            <HelpPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/conseils" element={
+                          <ProtectedRoute>
+                            <TipsPage />
                           </ProtectedRoute>
                         } />
                         {/* Routes admin */}

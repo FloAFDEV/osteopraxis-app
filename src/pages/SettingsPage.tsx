@@ -71,6 +71,15 @@ const SettingsPage = () => {
 			path: "/settings/debug",
 			color: "text-red-500",
 		},
+		{
+			id: "tips",
+			title: "💡 Conseils & Bonnes Pratiques",
+			description:
+				"Optimisez votre utilisation avec nos conseils d'experts",
+			icon: HelpCircle,
+			path: "/conseils",
+			color: "text-indigo-500",
+		},
 	];
 
 	return (
@@ -115,6 +124,41 @@ const SettingsPage = () => {
 							);
 						})}
 					</div>
+
+					{/* Section Partage Sécurisé USB */}
+					<Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+						<CardHeader>
+							<CardTitle className="text-green-800 dark:text-green-200 flex items-center gap-2">
+								🔒 Partage Sécurisé USB
+							</CardTitle>
+							<CardDescription className="text-green-700 dark:text-green-300">
+								Exportez et importez vos données en toute sécurité via clé USB chiffrée
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<Button 
+									variant="outline" 
+									className="flex items-center gap-2 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30"
+									onClick={() => setShowExportDialog(true)}
+								>
+									<Upload className="h-4 w-4" />
+									Export Sécurisé
+								</Button>
+								<Button 
+									variant="outline" 
+									className="flex items-center gap-2 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30"
+									onClick={() => setShowImportDialog(true)}
+								>
+									<Upload className="h-4 w-4" />
+									Import Sécurisé
+								</Button>
+							</div>
+							<p className="text-xs text-green-600 dark:text-green-400 mt-3">
+								Chiffrement AES-256 • Conformité RGPD • Format propriétaire .phub
+							</p>
+						</CardContent>
+					</Card>
 
 					{/* Section d'information */}
 					<Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800">
