@@ -31,6 +31,9 @@ export class USBExportService {
    * Exporte les données sélectionnées avec chiffrement
    */
   async exportSecureData(options: ExportOptions): Promise<Blob> {
+    const { usbMonitoringService } = await import('./usb-monitoring-service');
+    const timer = usbMonitoringService.startOperation('export');
+    
     try {
       console.log('🔒 Starting secure data export...');
 
@@ -107,17 +110,38 @@ export class USBExportService {
       exportData.metadata.checksum = CryptoJS.SHA256(dataString).toString();
 
       // Chiffrer les données
+      timer.startEncryption();
       const encryptedData = this.encryptData(JSON.stringify(exportData), options.password);
+      const encryptionTime = timer.endEncryption();
       
       // Créer le fichier
       const blob = new Blob([encryptedData], { 
         type: 'application/octet-stream' 
       });
 
+      // Enregistrer les métriques
+      timer.finish({
+        success: true,
+        fileSize: blob.size,
+        dataTypes: {
+          patients: exportData.patients.length,
+          appointments: exportData.appointments.length,
+          invoices: exportData.invoices.length
+        },
+        encryptionTime,
+        compressionRatio: blob.size / JSON.stringify(exportData).length
+      });
+
       console.log('✅ Secure export completed');
       return blob;
 
     } catch (error) {
+      timer.finish({
+        success: false,
+        dataTypes: { patients: 0, appointments: 0, invoices: 0 },
+        errors: [error instanceof Error ? error.message : 'Unknown error']
+      });
+      
       console.error('❌ Export failed:', error);
       throw new Error('Échec de l\'export des données');
     }

@@ -36,6 +36,9 @@ export class USBImportService {
    * Importe les données depuis un fichier chiffré
    */
   async importSecureData(file: File, options: ImportOptions): Promise<ImportResult> {
+    const { usbMonitoringService } = await import('./usb-monitoring-service');
+    const timer = usbMonitoringService.startOperation('import');
+    
     const result: ImportResult = {
       success: false,
       imported: { patients: 0, appointments: 0, invoices: 0 },
@@ -51,7 +54,9 @@ export class USBImportService {
       const fileContent = await this.readFileAsText(file);
       
       // Déchiffrer les données
+      timer.startDecryption();
       const decryptedData = this.decryptData(fileContent, options.password);
+      const decryptionTime = timer.endDecryption();
       const exportData: SecureExportData = JSON.parse(decryptedData);
 
       // Valider l'intégrité si demandé
