@@ -1,6 +1,6 @@
 import { HybridDataAdapter } from './hybrid-adapter';
 import { createCloudAdapters } from './cloud-adapters';
-import { createLocalAdapters } from './local-adapters';
+import { createLocalAdapters, initializeLocalAdapters } from './local-adapters';
 import { HybridConfig, DataLocation } from './types';
 
 /**
@@ -45,9 +45,8 @@ export class HybridDataManager {
       this.adapter.registerCloudAdapter('osteopaths', cloudAdapters.osteopaths);
       this.adapter.registerCloudAdapter('cabinets', cloudAdapters.cabinets);
 
-      // Initialiser les adaptateurs locaux (SQLite)
-      // Note: Dans l'étape 2, on initialisera vraiment SQLite
-      const localAdapters = createLocalAdapters();
+      // Initialiser les adaptateurs locaux (SQLite + OPFS)
+      const localAdapters = await initializeLocalAdapters();
       this.adapter.registerLocalAdapter('patients', localAdapters.patients);
       this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
       this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
@@ -109,6 +108,90 @@ export class HybridDataManager {
   async importData(backupPath: string, password: string): Promise<boolean> {
     if (!this.initialized) await this.initialize();
     return this.adapter.restoreFromBackup(backupPath, password);
+  }
+
+  /**
+   * Synchronisation Cloud -> Local
+   * Migre les données cloud vers le stockage local
+   */
+  async syncCloudToLocal(entityName: string): Promise<{
+    success: boolean;
+    migrated: number;
+    errors: string[];
+  }> {
+    if (!this.initialized) await this.initialize();
+
+    const result = {
+      success: false,
+      migrated: 0,
+      errors: [] as string[]
+    };
+
+    try {
+      console.log(`🔄 Starting cloud -> local sync for ${entityName}...`);
+
+      // Récupérer les données depuis le cloud
+      // Pour l'instant, on utilise l'interface existante
+      const cloudData = await this.adapter.getAll(entityName);
+      console.log(`📥 Found ${cloudData.length} ${entityName} records in cloud`);
+
+      // Migrer vers le local (simulation pour l'instant)
+      for (const item of cloudData) {
+        try {
+          // Créer dans le local storage
+          await this.adapter.create(entityName, item);
+          result.migrated++;
+        } catch (error) {
+          const errorMsg = `Failed to migrate ${entityName}: ${error}`;
+          result.errors.push(errorMsg);
+          console.error(errorMsg);
+        }
+      }
+
+      result.success = result.errors.length === 0;
+      console.log(`✅ Cloud -> Local sync completed: ${result.migrated} migrated, ${result.errors.length} errors`);
+
+    } catch (error) {
+      result.errors.push(`Sync failed: ${error}`);
+      console.error('❌ Cloud -> Local sync failed:', error);
+    }
+
+    return result;
+  }
+
+  /**
+   * Test de connectivité et de performance
+   */
+  async performanceTest(): Promise<{
+    cloud: { available: boolean; latency: number };
+    local: { available: boolean; latency: number };
+  }> {
+    const result = {
+      cloud: { available: false, latency: 0 },
+      local: { available: false, latency: 0 }
+    };
+
+    // Test cloud (users are stored in cloud)
+    try {
+      const start = performance.now();
+      await this.adapter.getAll('users');
+      result.cloud.latency = performance.now() - start;
+      result.cloud.available = true;
+    } catch (error) {
+      console.warn('Cloud performance test failed:', error);
+    }
+
+    // Test local (patients are stored locally)
+    try {
+      const start = performance.now();
+      await this.adapter.getAll('patients');
+      result.local.latency = performance.now() - start;
+      result.local.available = true;
+    } catch (error) {
+      console.warn('Local performance test failed:', error);
+    }
+
+    return result;
   }
 
   /**
