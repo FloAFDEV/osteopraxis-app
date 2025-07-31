@@ -363,7 +363,7 @@ export const USBMonitoringDashboard = ({ className }: USBMonitoringDashboardProp
                   <Alert>
                     <BarChart3 className="h-4 w-4" />
                     <AlertDescription>
-                      Les métriques anciennes (>30 jours) sont automatiquement supprimées pour optimiser les performances.
+                      Les métriques anciennes (&gt;30 jours) sont automatiquement supprimées pour optimiser les performances.
                     </AlertDescription>
                   </Alert>
                   
