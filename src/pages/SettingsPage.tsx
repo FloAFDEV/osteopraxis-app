@@ -20,7 +20,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
 import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog";
-import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard";
+
 
 const SettingsPage = () => {
 	const navigate = useNavigate();
@@ -160,9 +160,6 @@ const SettingsPage = () => {
 							</p>
 						</CardContent>
 					</Card>
-
-					{/* Dashboard de monitoring USB */}
-					<USBMonitoringDashboard />
 
 					{/* Section d'information */}
 					<Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800">

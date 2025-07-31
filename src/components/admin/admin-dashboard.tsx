@@ -16,6 +16,7 @@ import { AdminLogsPanel } from "./admin-logs";
 import { SystemHealthPanel } from "./system-health";
 import { DetailedStatsPanel } from "./detailed-stats";
 import { DeletedRecordsManager } from "./deleted-records-manager";
+import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck 
 } from "lucide-react";
@@ -151,7 +152,7 @@ export function AdminDashboard() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-9 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-10 overflow-x-auto">
             <TabsTrigger value="overview" className="text-xs md:text-sm">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="stats" className="text-xs md:text-sm">Statistiques</TabsTrigger>
             <TabsTrigger value="health" className="text-xs md:text-sm">Santé</TabsTrigger>
@@ -159,6 +160,7 @@ export function AdminDashboard() {
             <TabsTrigger value="cabinets" className="text-xs md:text-sm">Cabinets</TabsTrigger>
             <TabsTrigger value="patients" className="text-xs md:text-sm">Patients</TabsTrigger>
             <TabsTrigger value="deleted" className="text-xs md:text-sm">Supprimés</TabsTrigger>
+            <TabsTrigger value="usb" className="text-xs md:text-sm">USB</TabsTrigger>
             <TabsTrigger value="logs" className="text-xs md:text-sm">Logs</TabsTrigger>
             <TabsTrigger value="settings" className="text-xs md:text-sm">Paramètres</TabsTrigger>
           </TabsList>
@@ -189,6 +191,10 @@ export function AdminDashboard() {
           
           <TabsContent value="deleted">
             <DeletedRecordsManager />
+          </TabsContent>
+          
+          <TabsContent value="usb">
+            <USBMonitoringDashboard />
           </TabsContent>
           
           <TabsContent value="logs">
