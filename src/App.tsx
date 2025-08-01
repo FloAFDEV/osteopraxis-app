@@ -28,6 +28,7 @@ import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
 import CollaborationsSettingsPage from "@/pages/CollaborationsSettingsPage";
 import HelpPage from "@/pages/HelpPage";
 import SQLiteDebugPage from "@/pages/SQLiteDebugPage";
+import HybridMigrationPage from "@/pages/HybridMigrationPage";
 import TipsPage from "@/pages/TipsPage";
 import NotFound from "@/pages/NotFound";
 
@@ -119,6 +120,11 @@ function App() {
                         <Route path="/settings/collaborations" element={
                           <ProtectedRoute>
                             <CollaborationsSettingsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/settings/hybrid-migration" element={
+                          <ProtectedRoute>
+                            <HybridMigrationPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/settings/debug" element={

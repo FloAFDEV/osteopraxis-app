@@ -16,6 +16,7 @@ import {
 	HelpCircle,
 	ChevronRight,
 	Upload,
+	Database,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
@@ -62,6 +63,15 @@ const SettingsPage = () => {
 			icon: HelpCircle,
 			path: "/help",
 			color: "text-orange-500",
+		},
+		{
+			id: "hybrid",
+			title: "🔄 Migration Hybride",
+			description:
+				"Configuration du stockage hybride Cloud + Local",
+			icon: Database,
+			path: "/settings/hybrid-migration",
+			color: "text-blue-500",
 		},
 		{
 			id: "debug",
