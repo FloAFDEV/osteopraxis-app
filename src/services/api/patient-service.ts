@@ -2,6 +2,7 @@
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
+import { hdsLocalDataService } from "../hds-data-adapter/local-service";
 import { getCurrentOsteopathId } from "@/services";
 
 // Hook pour accéder au contexte démo depuis les services
@@ -22,18 +23,19 @@ export const patientService = {
       return [...demoContext.demoData.patients];
     }
     
-    if (USE_SUPABASE) {
-      try {
+    // Architecture HDS - Données patients toujours en local
+    try {
+      await hdsLocalDataService.validateDataSafety('patients', 'read');
+      return await hdsLocalDataService.patients.getAll();
+    } catch (error) {
+      console.error("Erreur stockage local HDS getPatients:", error);
+      // Fallback vers Supabase uniquement en cas d'urgence (non-HDS)
+      if (USE_SUPABASE) {
+        console.warn("Fallback vers Supabase - Non conforme HDS");
         return await supabasePatientService.getPatients();
-      } catch (error) {
-        console.error("Erreur Supabase getPatients:", error);
-        throw error;
       }
+      throw error;
     }
-    
-    // Fallback: code simulé existant
-    await delay(300);
-    return [...patients];
   },
 
   async getPatientById(id: number): Promise<Patient | undefined> {

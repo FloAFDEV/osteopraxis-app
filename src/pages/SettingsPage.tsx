@@ -65,12 +65,12 @@ const SettingsPage = () => {
 			color: "text-orange-500",
 		},
 		{
-			id: "hybrid",
-			title: "🔄 Migration Hybride",
+			id: "data",
+			title: "🛡️ Gestion des Données",
 			description:
-				"Configuration du stockage hybride Cloud + Local",
+				"Stockage sécurisé HDS et exports USB chiffrés",
 			icon: Database,
-			path: "/settings/hybrid-migration",
+			path: "/settings/data-management",
 			color: "text-blue-500",
 		},
 		{
