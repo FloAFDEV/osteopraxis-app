@@ -3,6 +3,7 @@ import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
 import { hdsLocalDataService } from "../hds-data-adapter/local-service";
+import { hdsDemoService } from "../hds-demo-service";
 import { getCurrentOsteopathId } from "@/services";
 
 // Hook pour accéder au contexte démo depuis les services
@@ -16,25 +17,60 @@ const patients: Patient[] = [];
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    // Vérifier d'abord si on est en mode démo
+    console.log("🏥 patientService.getPatients - Architecture HDS");
+    
+    // 1. Vérifier d'abord si on est en mode démo HDS
+    if (hdsDemoService.isDemoModeActive()) {
+      console.log("🎭 Mode démo HDS actif - Utilisation des données fictives");
+      const session = hdsDemoService.getCurrentSession();
+      if (session) {
+        // Étendre la session car l'utilisateur est actif
+        hdsDemoService.extendSession();
+        await delay(300);
+        return [...session.patients];
+      }
+    }
+    
+    // 2. Vérifier le mode démo classique (fallback)
     if (demoContext?.isDemoMode) {
-      console.log("patientService.getPatients: Using demo data");
+      console.log("🎭 Mode démo classique actif");
       await delay(300);
       return [...demoContext.demoData.patients];
     }
     
-    // Architecture HDS - Données patients toujours en local
+    // 3. Architecture HDS - Données patients toujours en local
     try {
+      console.log("💾 Accès aux données patients locales HDS");
       await hdsLocalDataService.validateDataSafety('patients', 'read');
-      return await hdsLocalDataService.patients.getAll();
-    } catch (error) {
-      console.error("Erreur stockage local HDS getPatients:", error);
-      // Fallback vers Supabase uniquement en cas d'urgence (non-HDS)
-      if (USE_SUPABASE) {
-        console.warn("Fallback vers Supabase - Non conforme HDS");
-        return await supabasePatientService.getPatients();
+      const localPatients = await hdsLocalDataService.patients.getAll();
+      
+      // Si pas de données locales, créer une session démo pour la démo
+      if (localPatients.length === 0) {
+        console.log("📝 Aucune donnée locale - Création d'une session démo HDS");
+        const session = await hdsDemoService.createDemoSession();
+        return [...session.patients];
       }
-      throw error;
+      
+      return localPatients;
+    } catch (error) {
+      console.error("❌ Erreur stockage local HDS getPatients:", error);
+      
+      // 4. Créer session démo en cas d'erreur pour assurer la continuité
+      try {
+        console.log("🔄 Création de session démo de secours");
+        const session = await hdsDemoService.createDemoSession();
+        return [...session.patients];
+      } catch (demoError) {
+        console.error("❌ Erreur création session démo:", demoError);
+        
+        // 5. Dernier recours: Supabase (non-conforme HDS)
+        if (USE_SUPABASE) {
+          console.warn("⚠️ Fallback vers Supabase - Non conforme HDS");
+          return await supabasePatientService.getPatients();
+        }
+        
+        throw error;
+      }
     }
   },
 
@@ -45,25 +81,41 @@ export const patientService = {
       return undefined;
     }
 
-    // Vérifier d'abord si on est en mode démo
+    // 1. Vérifier d'abord si on est en mode démo HDS
+    if (hdsDemoService.isDemoModeActive()) {
+      const session = hdsDemoService.getCurrentSession();
+      if (session) {
+        await delay(200);
+        return session.patients.find(patient => patient.id === id);
+      }
+    }
+
+    // 2. Vérifier le mode démo classique (fallback)
     if (demoContext?.isDemoMode) {
       console.log("patientService.getPatientById: Using demo data for ID", id);
       await delay(200);
       return demoContext.demoData.patients.find((patient: any) => patient.id === id);
     }
 
-    if (USE_SUPABASE) {
-      try {
-        return await supabasePatientService.getPatientById(id);
-      } catch (error) {
-        console.error("Erreur Supabase getPatientById:", error);
-        return undefined;
+    // 3. Architecture HDS - Stockage local
+    try {
+      await hdsLocalDataService.validateDataSafety('patients', 'read');
+      return await hdsLocalDataService.patients.getById(id);
+    } catch (error) {
+      console.error("Erreur stockage local HDS getPatientById:", error);
+      
+      // 4. Fallback Supabase (non-conforme HDS)
+      if (USE_SUPABASE) {
+        try {
+          return await supabasePatientService.getPatientById(id);
+        } catch (error) {
+          console.error("Erreur Supabase getPatientById:", error);
+          return undefined;
+        }
       }
+      
+      return undefined;
     }
-    
-    // Fallback: code simulé existant
-    await delay(200);
-    return patients.find(patient => patient.id === id);
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
