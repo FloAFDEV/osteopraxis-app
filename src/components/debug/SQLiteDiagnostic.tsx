@@ -7,10 +7,10 @@ import React from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { useSQLiteTest } from '../../hooks/useSQLiteTest';
+// Hook supprimé - Composant simplifié pour la démonstration
 
 export function SQLiteDiagnostic() {
-  const { loading: sqliteLoading, result: sqliteResult, runTest: runSQLiteTest } = useSQLiteTest();
+  // Composant simplifié sans tests SQLite complexes
 
   return (
     <div className="space-y-6">
@@ -23,67 +23,11 @@ export function SQLiteDiagnostic() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="mt-6 p-4 rounded-lg bg-muted">
-            <Button 
-              onClick={runSQLiteTest} 
-              disabled={sqliteLoading}
-              className="px-6 py-2"
-            >
-              {sqliteLoading ? 'Test en cours...' : 'Tester SQLite'}
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              Service SQLite temporairement désactivé pendant le refactoring HDS.
+              Les données sont maintenant gérées par le service démo HDS.
+            </p>
           </div>
-
-          {sqliteResult && (
-            <div className="space-y-3">
-              <h4 className="font-semibold">Résultats du test SQLite :</h4>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2">
-                  <span>Support SQLite :</span>
-                  <Badge variant={sqliteResult.isSupported ? "default" : "destructive"}>
-                    {sqliteResult.isSupported ? 'Supporté' : 'Non supporté'}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span>Support OPFS :</span>
-                  <Badge variant={sqliteResult.hasOPFS ? "default" : "secondary"}>
-                    {sqliteResult.hasOPFS ? 'Supporté' : 'Mémoire uniquement'}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span>Initialisation :</span>
-                  <Badge variant={sqliteResult.initSuccess ? "default" : "destructive"}>
-                    {sqliteResult.initSuccess ? 'Réussie' : 'Échouée'}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span>Test CRUD :</span>
-                  <Badge variant={sqliteResult.testPatientCreated ? "default" : "destructive"}>
-                    {sqliteResult.testPatientCreated ? 'Réussi' : 'Échoué'}
-                  </Badge>
-                </div>
-              </div>
-
-              {sqliteResult.storageInfo && (
-                <div className="mt-4 p-3 bg-muted rounded-lg">
-                  <h5 className="font-medium mb-2">Informations de stockage :</h5>
-                  <div className="text-sm space-y-1">
-                    <div>Taille DB : {sqliteResult.storageInfo.databaseSize} bytes</div>
-                    <div>Nombre de tables : {sqliteResult.storageInfo.tablesCount}</div>
-                    <div>OPFS disponible : {sqliteResult.storageInfo.opfsSupported ? 'Oui' : 'Non'}</div>
-                  </div>
-                </div>
-              )}
-
-              {sqliteResult.error && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                  <p className="text-sm text-destructive">{sqliteResult.error}</p>
-                </div>
-              )}
-            </div>
-          )}
         </CardContent>
       </Card>
 

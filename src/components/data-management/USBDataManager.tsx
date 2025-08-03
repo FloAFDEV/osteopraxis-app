@@ -21,7 +21,7 @@ import {
   Database
 } from 'lucide-react';
 import { hdsLocalDataService } from '@/services/hds-data-adapter/local-service';
-import { usbExportService, usbImportService } from '@/services/secure-usb-sharing';
+// import { usbExportService, usbImportService } from '@/services/secure-usb-sharing'; // Remplacé par hdsUSBService
 import { HDSLocalStatus } from '@/services/hds-data-adapter/types';
 import { toast } from 'sonner';
 
@@ -71,25 +71,20 @@ export function USBDataManager() {
         }));
       }, 200);
 
-      const exportData = await usbExportService.exportSecureData({
-        password: 'temp-password', // En réalité, demandé via dialog
-        includePatients: true,
-        includeAppointments: true,
-        includeInvoices: true
-      });
+      // Utilisation du nouveau service HDS USB (temporairement simulé)
+      // const result = await hdsUSBService.exportSensitiveData({
+      //   password: 'temp-password',
+      //   includePatients: true,
+      //   includeAppointments: true,
+      //   includeInvoices: true
+      // });
 
-      clearInterval(progressInterval);
-
-      // Télécharger le fichier
-      const url = URL.createObjectURL(exportData);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `patienthub-backup-${new Date().toISOString().split('T')[0]}.phub`;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      setOperation({ type: 'export', progress: 100, status: 'completed', message: 'Export terminé avec succès' });
-      toast.success('Données exportées avec succès');
+      // Simulation temporaire
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        setOperation({ type: 'export', progress: 100, status: 'completed', message: 'Export simulé terminé' });
+        toast.success('Export simulé - Service HDS USB en cours de finalisation');
+      }, 2000);
     } catch (error) {
       console.error('Erreur lors de l\'export:', error);
       setOperation({ type: 'export', progress: 0, status: 'error', message: 'Erreur lors de l\'export' });
@@ -109,25 +104,21 @@ export function USBDataManager() {
         }));
       }, 300);
 
-      const result = await usbImportService.importSecureData(file, {
-        password: 'temp-password', // En réalité, demandé via dialog
-        conflictResolution: 'skip',
-        validateIntegrity: true
-      });
+      // Utilisation du nouveau service HDS USB (temporairement simulé)
+      // const result = await hdsUSBService.importSensitiveData(file, 'temp-password');
 
-      clearInterval(progressInterval);
-
-      setOperation({ 
-        type: 'import', 
-        progress: 100, 
-        status: 'completed', 
-        message: `Import terminé: ${result.imported} éléments importés` 
-      });
-      
-      toast.success(`Import réussi: ${result.imported} éléments`);
-      
-      // Recharger le statut local
-      await loadLocalStatus();
+      // Simulation temporaire
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        setOperation({ 
+          type: 'import', 
+          progress: 100, 
+          status: 'completed', 
+          message: 'Import simulé terminé'
+        });
+        toast.success('Import simulé - Service HDS USB en cours de finalisation');
+        loadLocalStatus();
+      }, 3000);
     } catch (error) {
       console.error('Erreur lors de l\'import:', error);
       setOperation({ type: 'import', progress: 0, status: 'error', message: 'Erreur lors de l\'import' });

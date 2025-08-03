@@ -16,7 +16,7 @@ import { AdminLogsPanel } from "./admin-logs";
 import { SystemHealthPanel } from "./system-health";
 import { DetailedStatsPanel } from "./detailed-stats";
 import { DeletedRecordsManager } from "./deleted-records-manager";
-import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard";
+// import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard"; // Supprimé
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck 
 } from "lucide-react";
@@ -194,7 +194,16 @@ export function AdminDashboard() {
           </TabsContent>
           
           <TabsContent value="usb">
-            <USBMonitoringDashboard />
+            <Card>
+              <CardHeader>
+                <CardTitle>Gestion USB</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Service USB temporairement désactivé pendant le refactoring HDS.
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="logs">

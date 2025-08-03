@@ -19,8 +19,8 @@ import {
 	Database,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
-import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog";
+// import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog"; // Supprimé
+// import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog"; // Supprimé
 
 
 const SettingsPage = () => {
@@ -192,7 +192,8 @@ const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Dialogs */}
+      {/* Dialogs temporairement désactivés */}
+      {/*
       <SecureExportDialog 
         open={showExportDialog} 
         onOpenChange={setShowExportDialog} 
@@ -201,6 +202,7 @@ const SettingsPage = () => {
         open={showImportDialog} 
         onOpenChange={setShowImportDialog} 
       />
+      */}
     </Layout>
   );
 };

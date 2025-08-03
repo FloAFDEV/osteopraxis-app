@@ -4,7 +4,6 @@
 
 import React from 'react';
 import { Layout } from "@/components/ui/layout";
-import { HybridStorageDiagnostic } from "@/components/debug/HybridStorageDiagnostic";
 import { SQLiteDiagnostic } from "@/components/debug/SQLiteDiagnostic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,21 +25,13 @@ const SQLiteDebugPage = () => {
           </CardHeader>
         </Card>
 
-        <Tabs defaultValue="hybrid" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="hybrid" className="flex items-center gap-2">
-              <Database className="w-4 h-4" />
-              Diagnostic Hybride
-            </TabsTrigger>
+        <Tabs defaultValue="sqlite" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="sqlite" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" />
-              Test SQLite Détaillé
+              Test SQLite
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="hybrid">
-            <HybridStorageDiagnostic />
-          </TabsContent>
 
           <TabsContent value="sqlite">
             <SQLiteDiagnostic />
