@@ -37,22 +37,24 @@ import { toast } from "sonner";
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
 
-	// Guard: Vérifier si l'ID est "new" ou invalide
-	if (!id || id === "new") {
-		console.warn(
-			"PatientDetailPage: ID de patient invalide ou route 'new':",
-			id
-		);
+	// Guard: Rediriger si route 'new' vers création de patient
+	if (id === "new") {
+		window.location.href = "/patients/new";
+		return null;
+	}
+
+	// Guard: Vérifier si l'ID est invalide
+	if (!id) {
+		console.warn("PatientDetailPage: ID de patient manquant");
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">
 					<AlertCircle className="h-10 w-10 text-red-500 mb-4" />
 					<p className="text-xl font-semibold text-center">
-						Accès non autorisé
+						ID de patient manquant
 					</p>
 					<p className="text-muted-foreground mt-2">
-						Cette page est réservée aux détails des patients
-						existants
+						Veuillez spécifier un identifiant de patient valide
 					</p>
 				</div>
 			</Layout>

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Play, Eye } from "lucide-react";
-import { DemoService } from "@/services/demo-service";
+import { hdsDemoService } from "@/services/hds-demo-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -25,10 +25,10 @@ export const DemoLoginButton = ({
     setIsLoading(true);
     try {
       // Créer/vérifier le compte démo
-      const credentials = await DemoService.createDemoAccount();
+      const session = await hdsDemoService.createDemoSession();
       
-      // Se connecter avec le compte démo
-      await login(credentials.email, credentials.password);
+      // Rediriger vers le dashboard - session HDS créée
+      window.location.href = "/dashboard";
       
       toast.success("Connexion démo réussie ! Explorez PatientHub.");
     } catch (error) {

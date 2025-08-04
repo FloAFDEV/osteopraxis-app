@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Patient } from '@/types';
 import { api } from '@/services/api';
 import { useMemo } from 'react';
-import { useDemo } from '@/contexts/DemoContext';
+import { hdsDemoService } from '@/services/hds-demo-service';
 
 // Hook optimisé pour la gestion des patients avec cache intelligent
 export const useOptimizedPatients = (
@@ -12,7 +12,7 @@ export const useOptimizedPatients = (
   currentPage: number = 1,
   patientsPerPage: number = 25
 ) => {
-  const { isDemoMode } = useDemo();
+  const isDemoMode = hdsDemoService.isDemoModeActive();
   
   // Query principale avec cache
   const {

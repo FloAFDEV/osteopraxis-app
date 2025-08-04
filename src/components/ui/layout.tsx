@@ -31,7 +31,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { CurrentDateTimeDisplay } from "./CurrentDateTimeDisplay";
 import { DemoIndicator } from "@/components/demo/DemoIndicator";
-import { DemoService } from "@/services/demo-service";
+import { hdsDemoService } from "@/services/hds-demo-service";
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -40,7 +40,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	const { user, logout, isAdmin } = useAuth();
-	const isDemoMode = React.useMemo(() => user?.email ? DemoService.isDemoUser(user.email) : false, [user?.email]);
+	const isDemoMode = hdsDemoService.isDemoModeActive();
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDemo } from "@/contexts/DemoContext";
-import { DemoService } from "@/services/demo-service";
+import { hdsDemoService } from "@/services/hds-demo-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
@@ -10,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function InteractiveDemoPage() {
-  const { isDemoMode } = useDemo();
+  const isDemoMode = hdsDemoService.isDemoModeActive();
   const { isAuthenticated, user, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,11 +17,11 @@ export default function InteractiveDemoPage() {
   const handleStartDemo = async () => {
     setIsLoading(true);
     try {
-      // Créer/préparer le compte démo
-      const credentials = await DemoService.createDemoAccount();
+      // Créer session démo HDS
+      await hdsDemoService.createDemoSession();
       
-      // Utiliser la méthode login du contexte AuthContext
-      await login(credentials.email, credentials.password);
+      // Rediriger vers le dashboard
+      navigate("/dashboard");
       
       toast.success("Connexion en mode démo réussie !");
     } catch (error) {

@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-import { useDemo } from "@/contexts/DemoContext";
+import { hdsDemoService } from "@/services/hds-demo-service";
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -42,9 +42,7 @@ const SchedulePage = () => {
     events: googleEvents,
     isConnected: isGoogleConnected
   } = useGoogleCalendar();
-  const {
-    isDemoMode
-  } = useDemo();
+  const isDemoMode = hdsDemoService.isDemoModeActive();
 
   // Utiliser le hook pour la mise à jour automatique des statuts
   useAppointmentStatusUpdate({

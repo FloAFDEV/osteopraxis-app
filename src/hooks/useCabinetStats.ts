@@ -10,7 +10,7 @@ import {
   calculateRevenueMetrics,
 } from "@/components/dashboard/utils/dashboard-calculations";
 import { formatAppointmentDate } from "@/utils/date-utils";
-import { useDemo } from "@/contexts/DemoContext";
+import { hdsDemoService } from "@/services/hds-demo-service";
 
 const initialDashboardData: DashboardData = {
   totalPatients: 0,
@@ -49,7 +49,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isDemoMode } = useDemo();
+  const isDemoMode = hdsDemoService.isDemoModeActive();
 
   useEffect(() => {
     const loadCabinetStats = async () => {
@@ -57,14 +57,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       setError(null);
       
       try {
-        // Injecter le contexte démo dans les services API
-        const appointmentService = api.getAppointmentService();
-        const patientService = api.getPatientService();
-        const invoiceService = api.getInvoiceService();
-        
-        appointmentService.setDemoContext({ isDemoMode });
-        patientService.setDemoContext({ isDemoMode });
-        invoiceService.setDemoContext({ isDemoMode });
+        // Les services utilisent automatiquement HDS demo quand actif
 
         // Récupération des données (réelles ou démo selon le contexte)
         const [patientsData, appointmentsData, invoicesData] = await Promise.all([
