@@ -31,7 +31,7 @@ import HelpPage from "@/pages/HelpPage";
 import SQLiteDebugPage from "@/pages/SQLiteDebugPage";
 import DataManagementPage from "@/pages/DataManagementPage";
 import TipsPage from "@/pages/TipsPage";
-import NewPatientPage from "@/pages/NewPatientPage";
+import DebugPage from "@/pages/DebugPage";
 import NotFound from "@/pages/NotFound";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -86,11 +86,7 @@ function App() {
                           <PatientsPage />
                         </ProtectedRoute>
                       } />
-                      <Route path="/patients/new" element={
-                        <ProtectedRoute>
-                          <NewPatientPage />
-                        </ProtectedRoute>
-                      } />
+                      {/* Suppression de la route /patients/new - redirection gérée dans PatientDetailPage */}
                       <Route path="/patients/:id" element={
                         <ProtectedRoute>
                           <PatientDetailPage />
@@ -141,7 +137,8 @@ function App() {
                           <DataManagementPage />
                         </ProtectedRoute>
                       } />
-                      <Route path="/settings/debug" element={
+                        <Route path="/debug" element={<DebugPage />} />
+                        <Route path="/settings/debug" element={
                         <ProtectedRoute>
                           <SQLiteDebugPage />
                         </ProtectedRoute>

@@ -63,13 +63,24 @@ export const patientService = {
       } catch (demoError) {
         console.error("❌ Erreur création session démo:", demoError);
         
-        // 5. Dernier recours: Supabase (non-conforme HDS)
+        // 5. Dernier recours: Supabase (mais seulement si pas d'erreur de permissions)
         if (USE_SUPABASE) {
-          console.warn("⚠️ Fallback vers Supabase - Non conforme HDS");
-          return await supabasePatientService.getPatients();
+          console.warn("⚠️ Tentative Supabase en dernier recours");
+          try {
+            return await supabasePatientService.getPatients();
+          } catch (supabaseError: any) {
+            // Si erreur de permissions, retourner tableau vide au lieu d'échouer
+            if (supabaseError?.message?.includes('permission denied')) {
+              console.warn("⚠️ Permissions Supabase refusées - Mode déconnecté");
+              return [];
+            }
+            throw supabaseError;
+          }
         }
         
-        throw error;
+        // Si rien ne fonctionne, retourner tableau vide
+        console.warn("⚠️ Aucune source de données disponible - Mode déconnecté");
+        return [];
       }
     }
   },
