@@ -173,9 +173,18 @@ export function useOptimizedCache<T>(
         setError(null);
         return result;
       }
-    } catch (err) {
+    } catch (err: any) {
       if (!abortController.signal.aborted) {
         const error = err instanceof Error ? err : new Error('An error occurred');
+        console.error(`Cache fetch error for key ${key}:`, error);
+        
+        // Pour les erreurs d'authentification, ne pas retry automatiquement
+        if (err?.code === '42501' || err?.status === 401 || err?.message?.includes('permission denied')) {
+          setError(error);
+          setData(null);
+          return; // Ne pas throw pour éviter les boucles
+        }
+        
         setError(error);
         setData(null);
         throw error;

@@ -1,27 +1,23 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { LoadingStates } from "@/components/ui/loading-states";
 
 const DashboardPage = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  
-  // Vérifier si l'utilisateur a besoin de configurer son profil
-  useEffect(() => {
-    console.log("DashboardPage - Vérification du profil utilisateur:", user);
-    
-    // Ne rediriger que si l'utilisateur est connecté mais n'a pas d'osteopathId
-    if (user && !user.osteopathId) {
-      console.log("Utilisateur sans profil ostéopathe détecté, redirection vers la configuration");
-      navigate("/osteopath-profile");
-    } else {
-      console.log("Utilisateur avec profil ostéopathe ou non connecté:", user?.osteopathId);
-    }
-  }, [user, navigate]);
+  const { isReady, user, loading } = useAuthGuard();
+
+  if (loading) {
+    return <LoadingStates.FullPageLoading message="Vérification de l'authentification..." />;
+  }
+
+  if (!isReady) {
+    return null; // Le guard redirige vers login
+  }
+
+  console.log("DashboardPage - Vérification du profil utilisateur:", user);
 
   return (
     <Layout>
