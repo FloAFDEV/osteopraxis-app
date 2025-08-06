@@ -179,51 +179,6 @@ export type Database = {
           },
         ]
       }
-      cabinet_encryption_keys: {
-        Row: {
-          cabinet_id: number
-          created_at: string | null
-          created_by_osteopath_id: number
-          id: string
-          is_active: boolean | null
-          key_hash: string
-          key_version: number
-        }
-        Insert: {
-          cabinet_id: number
-          created_at?: string | null
-          created_by_osteopath_id: number
-          id?: string
-          is_active?: boolean | null
-          key_hash: string
-          key_version?: number
-        }
-        Update: {
-          cabinet_id?: number
-          created_at?: string | null
-          created_by_osteopath_id?: number
-          id?: string
-          is_active?: boolean | null
-          key_hash?: string
-          key_version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cabinet_encryption_keys_cabinet_id_fkey"
-            columns: ["cabinet_id"]
-            isOneToOne: false
-            referencedRelation: "Cabinet"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cabinet_encryption_keys_created_by_osteopath_id_fkey"
-            columns: ["created_by_osteopath_id"]
-            isOneToOne: false
-            referencedRelation: "Osteopath"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       cabinet_invitations: {
         Row: {
           cabinet_id: number
@@ -281,121 +236,6 @@ export type Database = {
             columns: ["used_by_osteopath_id"]
             isOneToOne: false
             referencedRelation: "Osteopath"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cabinet_patient_sync: {
-        Row: {
-          cabinet_id: number
-          created_at: string | null
-          expires_at: string | null
-          id: string
-          is_active: boolean | null
-          last_sync_timestamp: string | null
-          owner_osteopath_id: number
-          patient_local_hash: string
-          patient_sync_key_hash: string
-          shared_with_osteopath_id: number
-          sync_permission: string
-          updated_at: string | null
-        }
-        Insert: {
-          cabinet_id: number
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          last_sync_timestamp?: string | null
-          owner_osteopath_id: number
-          patient_local_hash: string
-          patient_sync_key_hash: string
-          shared_with_osteopath_id: number
-          sync_permission: string
-          updated_at?: string | null
-        }
-        Update: {
-          cabinet_id?: number
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          last_sync_timestamp?: string | null
-          owner_osteopath_id?: number
-          patient_local_hash?: string
-          patient_sync_key_hash?: string
-          shared_with_osteopath_id?: number
-          sync_permission?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cabinet_patient_sync_cabinet_id_fkey"
-            columns: ["cabinet_id"]
-            isOneToOne: false
-            referencedRelation: "Cabinet"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cabinet_patient_sync_owner_osteopath_id_fkey"
-            columns: ["owner_osteopath_id"]
-            isOneToOne: false
-            referencedRelation: "Osteopath"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cabinet_patient_sync_shared_with_osteopath_id_fkey"
-            columns: ["shared_with_osteopath_id"]
-            isOneToOne: false
-            referencedRelation: "Osteopath"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cabinet_sync_logs: {
-        Row: {
-          action: string
-          created_at: string | null
-          id: string
-          ip_address: unknown | null
-          metadata: Json | null
-          performed_by_osteopath_id: number
-          sync_id: string
-          user_agent: string | null
-        }
-        Insert: {
-          action: string
-          created_at?: string | null
-          id?: string
-          ip_address?: unknown | null
-          metadata?: Json | null
-          performed_by_osteopath_id: number
-          sync_id: string
-          user_agent?: string | null
-        }
-        Update: {
-          action?: string
-          created_at?: string | null
-          id?: string
-          ip_address?: unknown | null
-          metadata?: Json | null
-          performed_by_osteopath_id?: number
-          sync_id?: string
-          user_agent?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cabinet_sync_logs_performed_by_osteopath_id_fkey"
-            columns: ["performed_by_osteopath_id"]
-            isOneToOne: false
-            referencedRelation: "Osteopath"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cabinet_sync_logs_sync_id_fkey"
-            columns: ["sync_id"]
-            isOneToOne: false
-            referencedRelation: "cabinet_patient_sync"
             referencedColumns: ["id"]
           },
         ]
@@ -1428,33 +1268,6 @@ export type Database = {
         }
         Relationships: []
       }
-      system_metrics: {
-        Row: {
-          id: string
-          metadata: Json | null
-          metric_name: string
-          metric_unit: string | null
-          metric_value: number
-          recorded_at: string | null
-        }
-        Insert: {
-          id?: string
-          metadata?: Json | null
-          metric_name: string
-          metric_unit?: string | null
-          metric_value: number
-          recorded_at?: string | null
-        }
-        Update: {
-          id?: string
-          metadata?: Json | null
-          metric_name?: string
-          metric_unit?: string | null
-          metric_value?: number
-          recorded_at?: string | null
-        }
-        Relationships: []
-      }
       TreatmentHistory: {
         Row: {
           consultationId: number
@@ -1759,10 +1572,6 @@ export type Database = {
         Args: { p_osteopath_id: number }
         Returns: boolean
       }
-      auto_optimize_system: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
       can_osteopath_access_patient: {
         Args: { osteopath_auth_id: string; patient_id: number }
         Returns: boolean
@@ -1770,10 +1579,6 @@ export type Database = {
       can_perform_action: {
         Args: { user_uuid: string; action_type: string }
         Returns: boolean
-      }
-      cleanup_expired_syncs: {
-        Args: Record<PropertyKey, never>
-        Returns: number
       }
       cleanup_old_google_calendar_events: {
         Args: Record<PropertyKey, never>
@@ -1835,27 +1640,9 @@ export type Database = {
         }
         Returns: undefined
       }
-      record_metric: {
-        Args: {
-          p_name: string
-          p_value: number
-          p_unit?: string
-          p_metadata?: Json
-        }
-        Returns: undefined
-      }
       restore_record: {
         Args: { p_table_name: string; p_record_id: string }
         Returns: boolean
-      }
-      security_health_check: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          metric_name: string
-          status: string
-          details: string
-          critical: boolean
-        }[]
       }
       soft_delete_record: {
         Args: { p_table_name: string; p_record_id: string }

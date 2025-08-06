@@ -1,7 +1,7 @@
+
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
-import { supabase } from "@/integrations/supabase/client";
 import { getCurrentOsteopathId } from "@/services";
 
 // Hook pour accéder au contexte démo depuis les services
@@ -13,46 +13,27 @@ export const setDemoContext = (context: any) => {
 // Empty array for patients to remove fictitious data
 const patients: Patient[] = [];
 
-// Fonction utilitaire pour adapter les données Supabase
-function adaptSupabasePatient(supaData: any): Patient {
-  return supaData as Patient;
-}
-
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    console.log("🏥 patientService.getPatients - Architecture hybride");
-    
-    // 1. Vérifier le mode démo classique (fallback)
+    // Vérifier d'abord si on est en mode démo
     if (demoContext?.isDemoMode) {
-      console.log("🎭 Mode démo classique actif");
+      console.log("patientService.getPatients: Using demo data");
       await delay(300);
       return [...demoContext.demoData.patients];
     }
     
-    // 2. Architecture hybride - Données patients via Supabase
-    try {
-      const { data: supaPatientsData, error: supaError } = await supabase
-        .from("Patient")
-        .select("*")
-        .eq("deleted_at", null);
-    
-      if (supaError) {
-        console.error("❌ Erreur lors de la récupération des patients:", supaError);
-        throw new Error("Erreur lors de la récupération des patients");
+    if (USE_SUPABASE) {
+      try {
+        return await supabasePatientService.getPatients();
+      } catch (error) {
+        console.error("Erreur Supabase getPatients:", error);
+        throw error;
       }
-    
-      const supabasePatients = supaPatientsData || [];
-      console.log(`📊 ${supabasePatients.length} patients trouvés via Supabase`);
-    
-      return supabasePatients;
-    } catch (supabaseError: any) {
-      // Si erreur de permissions, retourner tableau vide au lieu d'échouer
-      if (supabaseError?.message?.includes('permission denied')) {
-        console.warn("⚠️ Permissions Supabase refusées - Mode déconnecté");
-        return [];
-      }
-      throw supabaseError;
     }
+    
+    // Fallback: code simulé existant
+    await delay(300);
+    return [...patients];
   },
 
   async getPatientById(id: number): Promise<Patient | undefined> {
@@ -62,20 +43,25 @@ export const patientService = {
       return undefined;
     }
 
-    // 1. Vérifier le mode démo classique (fallback)
+    // Vérifier d'abord si on est en mode démo
     if (demoContext?.isDemoMode) {
       console.log("patientService.getPatientById: Using demo data for ID", id);
       await delay(200);
       return demoContext.demoData.patients.find((patient: any) => patient.id === id);
     }
 
-    // 2. Architecture hybride - Stockage via Supabase
-    try {
-      return await supabasePatientService.getPatientById(id);
-    } catch (error) {
-      console.error("Erreur Supabase getPatientById:", error);
-      return undefined;
+    if (USE_SUPABASE) {
+      try {
+        return await supabasePatientService.getPatientById(id);
+      } catch (error) {
+        console.error("Erreur Supabase getPatientById:", error);
+        return undefined;
+      }
     }
+    
+    // Fallback: code simulé existant
+    await delay(200);
+    return patients.find(patient => patient.id === id);
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {

@@ -16,7 +16,7 @@ import { AdminLogsPanel } from "./admin-logs";
 import { SystemHealthPanel } from "./system-health";
 import { DetailedStatsPanel } from "./detailed-stats";
 import { DeletedRecordsManager } from "./deleted-records-manager";
-// import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard"; // Supprimé
+import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck 
 } from "lucide-react";
@@ -194,16 +194,7 @@ export function AdminDashboard() {
           </TabsContent>
           
           <TabsContent value="usb">
-            <Card>
-              <CardHeader>
-                <CardTitle>Synchronisation Inter-cabinets</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Système de partage sécurisé de données patients entre collègues d'un même cabinet.
-                </p>
-              </CardContent>
-            </Card>
+            <USBMonitoringDashboard />
           </TabsContent>
           
           <TabsContent value="logs">

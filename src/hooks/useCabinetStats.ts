@@ -10,7 +10,7 @@ import {
   calculateRevenueMetrics,
 } from "@/components/dashboard/utils/dashboard-calculations";
 import { formatAppointmentDate } from "@/utils/date-utils";
-// Service demo supprimé
+import { useDemo } from "@/contexts/DemoContext";
 
 const initialDashboardData: DashboardData = {
   totalPatients: 0,
@@ -49,7 +49,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Mode démo supprimé
+  const { isDemoMode } = useDemo();
 
   useEffect(() => {
     const loadCabinetStats = async () => {
@@ -57,7 +57,14 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       setError(null);
       
       try {
-        // Les services utilisent automatiquement HDS demo quand actif
+        // Injecter le contexte démo dans les services API
+        const appointmentService = api.getAppointmentService();
+        const patientService = api.getPatientService();
+        const invoiceService = api.getInvoiceService();
+        
+        appointmentService.setDemoContext({ isDemoMode });
+        patientService.setDemoContext({ isDemoMode });
+        invoiceService.setDemoContext({ isDemoMode });
 
         // Récupération des données (réelles ou démo selon le contexte)
         const [patientsData, appointmentsData, invoicesData] = await Promise.all([
@@ -153,7 +160,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
     };
 
     loadCabinetStats();
-  }, [selectedCabinetId]);
+  }, [selectedCabinetId, isDemoMode]);
 
   return {
     dashboardData,

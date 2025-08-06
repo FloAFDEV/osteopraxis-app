@@ -16,11 +16,10 @@ import {
 	HelpCircle,
 	ChevronRight,
 	Upload,
-	Database,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-// import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog"; // Supprimé
-// import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog"; // Supprimé
+import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
+import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog";
 
 
 const SettingsPage = () => {
@@ -68,7 +67,7 @@ const SettingsPage = () => {
 			id: "debug",
 			title: "🔧 Diagnostic Technique",
 			description:
-				"Test de l'architecture hybride et synchronisation",
+				"Test de l'architecture hybride SQLite + OPFS",
 			icon: Settings,
 			path: "/settings/debug",
 			color: "text-red-500",
@@ -183,8 +182,7 @@ const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Dialogs temporairement désactivés */}
-      {/*
+      {/* Dialogs */}
       <SecureExportDialog 
         open={showExportDialog} 
         onOpenChange={setShowExportDialog} 
@@ -193,7 +191,6 @@ const SettingsPage = () => {
         open={showImportDialog} 
         onOpenChange={setShowImportDialog} 
       />
-      */}
     </Layout>
   );
 };

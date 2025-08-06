@@ -79,15 +79,8 @@ export const appointmentService = {
         const result = await supabaseAppointmentService.getAppointments();
         console.log(`appointmentService.getAppointments: Supabase returned ${result.length} appointments`);
         return result;
-      } catch (error: any) {
+      } catch (error) {
         console.error("appointmentService.getAppointments: Supabase error:", error);
-        
-        // Si erreur d'authentification ou de permission, retourner un tableau vide au lieu de throw
-        if (error?.code === '42501' || error?.status === 401 || error?.message?.includes('permission denied')) {
-          console.warn("appointmentService.getAppointments: Authentication/permission error, returning empty array");
-          return [];
-        }
-        
         throw error;
       }
     }

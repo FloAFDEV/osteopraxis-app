@@ -39,7 +39,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-// Service demo supprimé
+import { useDemo } from "@/contexts/DemoContext";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -57,7 +57,7 @@ const AppointmentsPage = () => {
 		useState<Appointment | null>(null);
 	const location = useLocation();
 	const navigate = useNavigate();
-	// Mode démo supprimé
+	const { isDemoMode } = useDemo();
 
 	const [refreshKey, setRefreshKey] = useState(0);
 
@@ -108,7 +108,7 @@ const AppointmentsPage = () => {
 	if (appointments) {
 		fetchData();
 	}
-}, [refreshKey, appointments]);
+}, [refreshKey, isDemoMode, appointments]);
 
 	const getPatientById = (patientId: number): Patient | undefined => {
 		return patients.find((patient) => patient.id === patientId);
