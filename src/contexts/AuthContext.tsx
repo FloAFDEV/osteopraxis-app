@@ -1,3 +1,4 @@
+
 import React, {
 	createContext,
 	useState,
@@ -5,7 +6,6 @@ import React, {
 	useContext,
 	useCallback,
 } from "react";
-import { useNavigate } from "react-router-dom";
 import { User } from "@/types";
 import { api } from "@/services/api";
 import { toast } from "sonner";
@@ -52,9 +52,8 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-	const [loading, setLoading] = useState<boolean>(false); // Start with false to avoid immediate loading
+	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
-	const navigate = useNavigate();
 	
 	// Activer la déconnexion automatique si l'utilisateur est connecté
 	useAutoLogout();
@@ -66,12 +65,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			const authResult = await api.login(email, password);
 			setUser(authResult.user);
 			setIsAuthenticated(authResult.isAuthenticated);
-			// Redirection basée sur le rôle
-			if (authResult.user?.role === "ADMIN") {
-				navigate("/admin/dashboard");
-			} else {
-				navigate("/dashboard");
-			}
+			// Navigation sera gérée par le composant qui appelle login
 			toast.success("Connexion réussie !");
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de la connexion");
@@ -80,7 +74,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		} finally {
 			setLoading(false);
 		}
-	}, [navigate]);
+	}, []);
 
 	const register = useCallback(async (userData: any) => {
 		setLoading(true);
@@ -88,7 +82,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		try {
 			await api.register(userData);
 			toast.success("Inscription réussie !");
-			navigate("/login");
+			// Navigation sera gérée par le composant qui appelle register
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de l'inscription");
 			console.error("Registration failed", err);
@@ -96,7 +90,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		} finally {
 			setLoading(false);
 		}
-	}, [navigate]);
+	}, []);
 
 	const logout = useCallback(async () => {
 		setLoading(true);
@@ -105,7 +99,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			await api.logout();
 			setUser(null);
 			setIsAuthenticated(false);
-			navigate("/login");
+			// Navigation sera gérée par le composant qui appelle logout
 			toast.success("Déconnexion réussie !");
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de la déconnexion");
@@ -114,7 +108,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		} finally {
 			setLoading(false);
 		}
-	}, [navigate]);
+	}, []);
 
 	const checkAuth = useCallback(async () => {
 		try {

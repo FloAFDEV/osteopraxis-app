@@ -31,7 +31,15 @@ export function SecurityMonitor() {
         return;
       }
       
-      setMetrics(data || []);
+      // Fix the TypeScript error by properly typing the data
+      const typedMetrics = (data || []).map(item => ({
+        metric_name: item.metric_name,
+        status: item.status as 'OK' | 'WARNING' | 'CRITICAL',
+        details: item.details,
+        critical: item.critical
+      }));
+      
+      setMetrics(typedMetrics);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Exception lors de la récupération des métriques:', error);
