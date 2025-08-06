@@ -1428,6 +1428,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_metrics: {
+        Row: {
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_unit: string | null
+          metric_value: number
+          recorded_at: string | null
+        }
+        Insert: {
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_unit?: string | null
+          metric_value: number
+          recorded_at?: string | null
+        }
+        Update: {
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_unit?: string | null
+          metric_value?: number
+          recorded_at?: string | null
+        }
+        Relationships: []
+      }
       TreatmentHistory: {
         Row: {
           consultationId: number
@@ -1732,6 +1759,10 @@ export type Database = {
         Args: { p_osteopath_id: number }
         Returns: boolean
       }
+      auto_optimize_system: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       can_osteopath_access_patient: {
         Args: { osteopath_auth_id: string; patient_id: number }
         Returns: boolean
@@ -1804,9 +1835,27 @@ export type Database = {
         }
         Returns: undefined
       }
+      record_metric: {
+        Args: {
+          p_name: string
+          p_value: number
+          p_unit?: string
+          p_metadata?: Json
+        }
+        Returns: undefined
+      }
       restore_record: {
         Args: { p_table_name: string; p_record_id: string }
         Returns: boolean
+      }
+      security_health_check: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          metric_name: string
+          status: string
+          details: string
+          critical: boolean
+        }[]
       }
       soft_delete_record: {
         Args: { p_table_name: string; p_record_id: string }
