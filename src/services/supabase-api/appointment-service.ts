@@ -40,6 +40,27 @@ type UpdateAppointmentPayload = Partial<CreateAppointmentPayload>;
 export const supabaseAppointmentService = {
 	async getAppointments(): Promise<Appointment[]> {
 		try {
+			// Vérifier d'abord l'authentification
+			const { data: sessionData } = await supabase.auth.getSession();
+			if (!sessionData?.session) {
+				throw new Error("Non authentifié - aucune session trouvée");
+			}
+			
+			console.log("Session utilisateur trouvée:", sessionData.session.user.id);
+			
+			// Debug: Tester la fonction get_current_osteopath_id
+			try {
+				const { data: debugData, error: debugError } = await supabase
+					.rpc('get_current_osteopath_id_debug');
+				
+				console.log("Debug osteopath ID:", debugData);
+				if (debugError) {
+					console.error("Erreur debug osteopath ID:", debugError);
+				}
+			} catch (debugErr) {
+				console.error("Exception debug osteopath ID:", debugErr);
+			}
+			
 			// Avec RLS activé, nous récupérons directement tous les rendez-vous
 			// Les politiques RLS filtreront automatiquement selon l'ostéopathe connecté
 			const { data, error } = await supabase
