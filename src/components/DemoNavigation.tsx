@@ -23,6 +23,11 @@ export function DemoNavigation() {
       label: 'Planning',
       icon: Calendar,
     },
+    {
+      path: '/demo/invoices',
+      label: 'Factures',
+      icon: BarChart3,
+    },
   ];
 
   return (

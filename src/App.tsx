@@ -10,6 +10,7 @@ import { ModeProvider } from "@/contexts/ModeContext";
 import DemoPage from "@/pages/DemoPage";
 import DemoSchedulePage from "@/pages/DemoSchedulePage";
 import DemoPatientsPage from "@/pages/DemoPatientsPage";
+import DemoInvoicesPage from "@/pages/DemoInvoicesPage";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
@@ -67,6 +68,7 @@ function App() {
                       <Route path="/demo" element={<DemoPage />} />
                       <Route path="/demo/schedule" element={<DemoSchedulePage />} />
                       <Route path="/demo/patients" element={<DemoPatientsPage />} />
+                      <Route path="/demo/invoices" element={<DemoInvoicesPage />} />
                       
                       {/* Route pour l'index - redirige vers dashboard ou landing selon l'auth */}
                       <Route path="/index" element={
