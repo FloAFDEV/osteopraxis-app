@@ -31,6 +31,7 @@ import SQLiteDebugPage from "@/pages/SQLiteDebugPage";
 import TipsPage from "@/pages/TipsPage";
 import NotFound from "@/pages/NotFound";
 import { DebugAuthPage } from "@/pages/DebugAuthPage";
+import NewPatientPage from "@/pages/NewPatientPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -75,6 +76,11 @@ function App() {
                         <Route path="/patients" element={
                           <ProtectedRoute>
                             <PatientsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/patients/new" element={
+                          <ProtectedRoute>
+                            <NewPatientPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/patients/:id" element={

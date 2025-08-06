@@ -262,13 +262,15 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 							setSession(session);
 							setIsAuthenticated(true);
 
-							// Navigate based on role only on login events
+							// Navigate based on role only on SIGNED_IN events (not INITIAL_SESSION)
 							if (event === 'SIGNED_IN') {
-								if (userWithRole.role === "ADMIN") {
-									navigate("/admin/dashboard");
-								} else {
-									navigate("/dashboard");
-								}
+								setTimeout(() => {
+									if (userWithRole.role === "ADMIN") {
+										navigate("/admin/dashboard");
+									} else {
+										navigate("/dashboard");
+									}
+								}, 100);
 							}
 						}
 					} catch (error) {
@@ -297,14 +299,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		// THEN check for existing session
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			if (!mounted) return;
-			// This will trigger the onAuthStateChange listener above
+			// This will trigger the onAuthStateChange listener above with INITIAL_SESSION event
 		});
 
 		return () => {
 			mounted = false;
 			subscription.unsubscribe();
 		};
-	}, [navigate]);
+	}, []); // Remove navigate dependency to prevent loops
 
 	const value = {
 		user,
