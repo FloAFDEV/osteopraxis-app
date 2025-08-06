@@ -65,19 +65,10 @@ const SettingsPage = () => {
 			color: "text-orange-500",
 		},
 		{
-			id: "data",
-			title: "🛡️ Gestion des Données",
-			description:
-				"Stockage sécurisé HDS et exports USB chiffrés",
-			icon: Database,
-			path: "/settings/data-management",
-			color: "text-blue-500",
-		},
-		{
 			id: "debug",
 			title: "🔧 Diagnostic Technique",
 			description:
-				"Test de l'architecture hybride SQLite + OPFS",
+				"Test de l'architecture hybride et synchronisation",
 			icon: Settings,
 			path: "/settings/debug",
 			color: "text-red-500",

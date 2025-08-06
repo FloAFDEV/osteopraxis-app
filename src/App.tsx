@@ -5,7 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { OptimizationProvider } from "@/contexts/OptimizationContext";
 import { PrivacyProvider } from "@/contexts/PrivacyContext";
-// DemoContext supprimé - utilisation du service HDS demo
+// Routes principales de l'application
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
@@ -28,7 +28,7 @@ import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import CollaborationsSettingsPage from "@/pages/CollaborationsSettingsPage";
 import HelpPage from "@/pages/HelpPage";
 // SQLiteDebugPage supprimée
-import DataManagementPage from "@/pages/DataManagementPage";
+
 import TipsPage from "@/pages/TipsPage";
 // DebugPage supprimée
 import NotFound from "@/pages/NotFound";
@@ -128,11 +128,6 @@ function App() {
                       <Route path="/settings/collaborations" element={
                         <ProtectedRoute>
                           <CollaborationsSettingsPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/settings/data-management" element={
-                        <ProtectedRoute>
-                          <DataManagementPage />
                         </ProtectedRoute>
                       } />
                         {/* Route debug supprimée */}

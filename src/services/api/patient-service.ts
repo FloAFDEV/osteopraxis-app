@@ -1,9 +1,7 @@
-
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
-import { hdsLocalDataService } from "../hds-data-adapter/local-service";
-// Service demo supprimé
+import { supabase } from "@/integrations/supabase/client";
 import { getCurrentOsteopathId } from "@/services";
 
 // Hook pour accéder au contexte démo depuis les services
@@ -15,63 +13,45 @@ export const setDemoContext = (context: any) => {
 // Empty array for patients to remove fictitious data
 const patients: Patient[] = [];
 
+// Fonction utilitaire pour adapter les données Supabase
+function adaptSupabasePatient(supaData: any): Patient {
+  return supaData as Patient;
+}
+
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    console.log("🏥 patientService.getPatients - Architecture HDS");
+    console.log("🏥 patientService.getPatients - Architecture hybride");
     
-    // Mode démo HDS supprimé
-    
-    // 2. Vérifier le mode démo classique (fallback)
+    // 1. Vérifier le mode démo classique (fallback)
     if (demoContext?.isDemoMode) {
       console.log("🎭 Mode démo classique actif");
       await delay(300);
       return [...demoContext.demoData.patients];
     }
     
-    // 3. Architecture HDS - Données patients toujours en local
+    // 2. Architecture hybride - Données patients via Supabase
     try {
-      console.log("💾 Accès aux données patients locales HDS");
-      await hdsLocalDataService.validateDataSafety('patients', 'read');
-      const localPatients = await hdsLocalDataService.patients.getAll();
-      
-      // Si pas de données locales, créer une session démo pour la démo
-      if (localPatients.length === 0) {
-        console.log("📝 Aucune donnée locale - Création d'une session démo HDS");
-        // Session démo supprimée - retour tableau vide
+      const { data: supaPatientsData, error: supaError } = await supabase
+        .from("Patient")
+        .select("*")
+        .eq("deleted_at", null);
+    
+      if (supaError) {
+        console.error("❌ Erreur lors de la récupération des patients:", supaError);
+        throw new Error("Erreur lors de la récupération des patients");
+      }
+    
+      const supabasePatients = supaPatientsData || [];
+      console.log(`📊 ${supabasePatients.length} patients trouvés via Supabase`);
+    
+      return supabasePatients;
+    } catch (supabaseError: any) {
+      // Si erreur de permissions, retourner tableau vide au lieu d'échouer
+      if (supabaseError?.message?.includes('permission denied')) {
+        console.warn("⚠️ Permissions Supabase refusées - Mode déconnecté");
         return [];
       }
-      
-      return localPatients;
-    } catch (error) {
-      console.error("❌ Erreur stockage local HDS getPatients:", error);
-      
-      // 4. Créer session démo en cas d'erreur pour assurer la continuité
-      try {
-        console.log("🔄 Création de session démo de secours");
-        // Session démo supprimée - continuer avec fallback
-        return [];
-      } catch (demoError) {
-        console.error("❌ Erreur création session démo:", demoError);
-        
-        // 5. Dernier recours: Supabase (mais seulement si pas d'erreur de permissions)
-        if (USE_SUPABASE) {
-          console.warn("⚠️ Tentative Supabase en dernier recours");
-          try {
-            return await supabasePatientService.getPatients();
-          } catch (supabaseError: any) {
-            // Si erreur de permissions, retourner tableau vide au lieu d'échouer
-            if (supabaseError?.message?.includes('permission denied')) {
-              console.warn("⚠️ Permissions Supabase refusées - Mode déconnecté");
-              return [];
-            }
-            throw supabaseError;
-          }
-        }
-        
-        // Si rien ne fonctionne, retourner tableau vide
-        console.warn("⚠️ Aucune source de données disponible - Mode déconnecté");
-        return [];
-      }
+      throw supabaseError;
     }
   },
 
@@ -82,32 +62,18 @@ export const patientService = {
       return undefined;
     }
 
-    // Mode démo HDS supprimé
-
-    // 2. Vérifier le mode démo classique (fallback)
+    // 1. Vérifier le mode démo classique (fallback)
     if (demoContext?.isDemoMode) {
       console.log("patientService.getPatientById: Using demo data for ID", id);
       await delay(200);
       return demoContext.demoData.patients.find((patient: any) => patient.id === id);
     }
 
-    // 3. Architecture HDS - Stockage local
+    // 2. Architecture hybride - Stockage via Supabase
     try {
-      await hdsLocalDataService.validateDataSafety('patients', 'read');
-      return await hdsLocalDataService.patients.getById(id);
+      return await supabasePatientService.getPatientById(id);
     } catch (error) {
-      console.error("Erreur stockage local HDS getPatientById:", error);
-      
-      // 4. Fallback Supabase (non-conforme HDS)
-      if (USE_SUPABASE) {
-        try {
-          return await supabasePatientService.getPatientById(id);
-        } catch (error) {
-          console.error("Erreur Supabase getPatientById:", error);
-          return undefined;
-        }
-      }
-      
+      console.error("Erreur Supabase getPatientById:", error);
       return undefined;
     }
   },

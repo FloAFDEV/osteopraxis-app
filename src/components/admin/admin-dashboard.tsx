@@ -196,11 +196,11 @@ export function AdminDashboard() {
           <TabsContent value="usb">
             <Card>
               <CardHeader>
-                <CardTitle>Gestion USB</CardTitle>
+                <CardTitle>Synchronisation Inter-cabinets</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Service USB temporairement désactivé pendant le refactoring HDS.
+                  Système de partage sécurisé de données patients entre collègues d'un même cabinet.
                 </p>
               </CardContent>
             </Card>
