@@ -1,13 +1,17 @@
+
 import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useMode } from '@/contexts/ModeContext';
+import { useAdaptiveData } from '@/hooks/useAdaptiveData';
+import { useQuery } from '@tanstack/react-query';
 import { DemoBanner } from "@/components/DemoBanner";
 import { DemoNavigation } from "@/components/DemoNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function DemoInvoicesPage() {
-  const { mode, setMode, getDemoData } = useMode();
+  const { mode, setMode } = useMode();
+  const dataService = useAdaptiveData();
 
   useEffect(() => {
     if (mode !== 'demo') {
@@ -15,11 +19,21 @@ export default function DemoInvoicesPage() {
     }
   }, [mode, setMode]);
 
+  const { data: invoices = [] } = useQuery({
+    queryKey: ['demo-invoices'],
+    queryFn: () => dataService.getInvoices(),
+    enabled: mode === 'demo',
+  });
+
+  const { data: patients = [] } = useQuery({
+    queryKey: ['demo-patients'],
+    queryFn: () => dataService.getPatients(),
+    enabled: mode === 'demo',
+  });
+
   if (mode !== 'demo') {
     return <Navigate to="/" replace />;
   }
-
-  const demoData = getDemoData();
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,7 +43,7 @@ export default function DemoInvoicesPage() {
         <h1 className="text-3xl font-bold mb-6">Factures - Mode Démo</h1>
         
         <div className="space-y-4">
-          {demoData.invoices.map((invoice: any) => (
+          {invoices.map((invoice: any) => (
             <Card key={invoice.id}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
@@ -43,7 +57,7 @@ export default function DemoInvoicesPage() {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      Patient: {demoData.patients.find((p: any) => p.id === invoice.patientId)?.firstName} {demoData.patients.find((p: any) => p.id === invoice.patientId)?.lastName}
+                      Patient: {patients.find((p: any) => p.id === invoice.patientId)?.firstName} {patients.find((p: any) => p.id === invoice.patientId)?.lastName}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Date: {new Date(invoice.date).toLocaleDateString()}

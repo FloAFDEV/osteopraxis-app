@@ -1,39 +1,36 @@
-import { Patient, Appointment, Invoice, Osteopath, Cabinet } from '@/types';
 
-export type AppMode = 'demo' | 'production' | 'local';
+import { Patient, Appointment, Invoice, Osteopath, Cabinet } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
+
+export type AppMode = 'demo' | 'local';
 
 interface DataService {
-  // Patients
   getPatients(): Promise<Patient[]>;
   getPatientById(id: number): Promise<Patient | null>;
   createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient>;
   updatePatient(id: number, patient: Partial<Patient>): Promise<Patient>;
   deletePatient(id: number): Promise<boolean>;
 
-  // Appointments
   getAppointments(): Promise<Appointment[]>;
   getAppointmentById(id: number): Promise<Appointment | null>;
   createAppointment(appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Appointment>;
   updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment>;
   deleteAppointment(id: number): Promise<boolean>;
 
-  // Invoices
   getInvoices(): Promise<Invoice[]>;
   createInvoice(invoice: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice>;
   updateInvoice(id: number, invoice: Partial<Invoice>): Promise<Invoice>;
   deleteInvoice(id: number): Promise<boolean>;
 
-  // Profile
   getOsteopathProfile(): Promise<Osteopath | null>;
   updateOsteopathProfile(profile: Partial<Osteopath>): Promise<Osteopath>;
 
-  // Cabinet
   getCabinets(): Promise<Cabinet[]>;
   createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet>;
   updateCabinet(id: number, cabinet: Partial<Cabinet>): Promise<Cabinet>;
 }
 
-class LocalStorageDataService implements DataService {
+class LocalStorageService implements DataService {
   private getStorageKey(type: string): string {
     return `patienthub_${type}`;
   }
@@ -55,7 +52,6 @@ class LocalStorageDataService implements DataService {
     return Date.now() + Math.floor(Math.random() * 1000);
   }
 
-  // Patients
   async getPatients(): Promise<Patient[]> {
     return this.getFromStorage<Patient>('patients');
   }
@@ -101,7 +97,6 @@ class LocalStorageDataService implements DataService {
     return true;
   }
 
-  // Appointments
   async getAppointments(): Promise<Appointment[]> {
     return this.getFromStorage<Appointment>('appointments');
   }
@@ -147,7 +142,6 @@ class LocalStorageDataService implements DataService {
     return true;
   }
 
-  // Invoices
   async getInvoices(): Promise<Invoice[]> {
     return this.getFromStorage<Invoice>('invoices');
   }
@@ -188,7 +182,6 @@ class LocalStorageDataService implements DataService {
     return true;
   }
 
-  // Profile & Cabinet - Simplified for local storage
   async getOsteopathProfile(): Promise<Osteopath | null> {
     const profiles = this.getFromStorage<Osteopath>('osteopath');
     return profiles[0] || null;
@@ -252,11 +245,18 @@ class LocalStorageDataService implements DataService {
   }
 }
 
-class DemoDataService implements DataService {
-  private demoData = {
-    patients: [
+class EphemeralSupabaseService implements DataService {
+  private sessionPrefix: string;
+
+  constructor(sessionId: string) {
+    this.sessionPrefix = `demo_${sessionId}_`;
+  }
+
+  private async initDemoData() {
+    // Créer des données de démonstration éphémères dans Supabase
+    // Ces données seront préfixées avec l'ID de session pour éviter les conflits
+    const demoPatients = [
       {
-        id: 1,
         firstName: "Marie",
         lastName: "Dubois",
         email: "marie.dubois@demo.com",
@@ -266,14 +266,8 @@ class DemoDataService implements DataService {
         gender: "FEMALE" as const,
         osteopathId: 1,
         cabinetId: null,
-        height: null,
-        weight: null,
-        bmi: null,
-        createdAt: new Date('2024-01-15').toISOString(),
-        updatedAt: new Date('2024-01-15').toISOString(),
-      } as Patient,
+      },
       {
-        id: 2,
         firstName: "Jean",
         lastName: "Martin",
         email: "jean.martin@demo.com",
@@ -283,83 +277,35 @@ class DemoDataService implements DataService {
         gender: "MALE" as const,
         osteopathId: 1,
         cabinetId: null,
-        height: null,
-        weight: null,
-        bmi: null,
-        createdAt: new Date('2024-01-20').toISOString(),
-        updatedAt: new Date('2024-01-20').toISOString(),
-      } as Patient
-    ],
-    appointments: [
-      {
-        id: 1,
-        patientId: 1,
-        cabinetId: 1,
-        osteopathId: 1,
-        start: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        end: new Date(Date.now() + 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(), // 1h after start
-        date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        reason: "Douleurs lombaires",
-        status: "SCHEDULED" as const,
-        notes: "Première consultation",
-        notificationSent: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       }
-    ],
-    invoices: [
-      {
-        id: 1,
-        patientId: 1,
-        osteopathId: 1,
-        appointmentId: 1,
-        amount: 60,
-        date: new Date().toISOString(),
-        paymentStatus: "PAID" as const,
-        paymentMethod: "Espèces",
-        notes: "Consultation",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-    ],
-    osteopath: {
-      id: 1,
-      name: "Dr. Demo",
-      professional_title: "Ostéopathe D.O.",
-      rpps_number: "12345678901",
-      siret: "12345678901234",
-      ape_code: "8690F",
-      userId: "demo-user",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    cabinets: [
-      {
-        id: 1,
-        name: "Cabinet Demo",
-        address: "123 Rue Demo",
-        city: "Paris",
-        postalCode: "75001",
-        phone: "01 23 45 67 89",
-        email: "demo@cabinet.com",
-        siret: "12345678901234",
-        iban: "FR7630006000011234567890189",
-        bic: "AGRIFRPP",
-        country: "France",
-        osteopathId: 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-    ]
-  };
+    ];
 
-  // Note: Demo data is read-only, so all mutations are no-ops
+    // Pour le mode démo, on utilise des données en mémoire temporaires
+    return {
+      patients: demoPatients.map((p, i) => ({ ...p, id: i + 1 })),
+      appointments: [],
+      invoices: [],
+      osteopath: {
+        id: 1,
+        name: "Dr. Demo",
+        professional_title: "Ostéopathe D.O.",
+        rpps_number: "12345678901",
+        siret: "12345678901234",
+        ape_code: "8690F",
+        userId: "demo-user",
+      },
+      cabinets: []
+    };
+  }
+
   async getPatients(): Promise<Patient[]> {
-    return [...this.demoData.patients];
+    const demoData = await this.initDemoData();
+    return demoData.patients as Patient[];
   }
 
   async getPatientById(id: number): Promise<Patient | null> {
-    return this.demoData.patients.find(p => p.id === id) || null;
+    const patients = await this.getPatients();
+    return patients.find(p => p.id === id) || null;
   }
 
   async createPatient(): Promise<Patient> {
@@ -375,11 +321,13 @@ class DemoDataService implements DataService {
   }
 
   async getAppointments(): Promise<Appointment[]> {
-    return [...this.demoData.appointments];
+    const demoData = await this.initDemoData();
+    return demoData.appointments as Appointment[];
   }
 
   async getAppointmentById(id: number): Promise<Appointment | null> {
-    return this.demoData.appointments.find(a => a.id === id) || null;
+    const appointments = await this.getAppointments();
+    return appointments.find(a => a.id === id) || null;
   }
 
   async createAppointment(): Promise<Appointment> {
@@ -395,7 +343,8 @@ class DemoDataService implements DataService {
   }
 
   async getInvoices(): Promise<Invoice[]> {
-    return [...this.demoData.invoices];
+    const demoData = await this.initDemoData();
+    return demoData.invoices as Invoice[];
   }
 
   async createInvoice(): Promise<Invoice> {
@@ -411,7 +360,8 @@ class DemoDataService implements DataService {
   }
 
   async getOsteopathProfile(): Promise<Osteopath | null> {
-    return this.demoData.osteopath;
+    const demoData = await this.initDemoData();
+    return demoData.osteopath as Osteopath;
   }
 
   async updateOsteopathProfile(): Promise<Osteopath> {
@@ -419,7 +369,8 @@ class DemoDataService implements DataService {
   }
 
   async getCabinets(): Promise<Cabinet[]> {
-    return [...this.demoData.cabinets];
+    const demoData = await this.initDemoData();
+    return demoData.cabinets as Cabinet[];
   }
 
   async createCabinet(): Promise<Cabinet> {
@@ -431,23 +382,15 @@ class DemoDataService implements DataService {
   }
 }
 
-// Service factory
-export class AdaptiveDataService {
-  private static instance: DataService | null = null;
-
-  static getInstance(mode: AppMode): DataService {
-    // Always create a new instance based on current mode
+export class NewAdaptiveDataService {
+  static getInstance(mode: AppMode, sessionId?: string): DataService {
     switch (mode) {
       case 'demo':
-        return new DemoDataService();
+        return new EphemeralSupabaseService(sessionId || 'default');
       case 'local':
-        return new LocalStorageDataService();
-      case 'production':
+        return new LocalStorageService();
       default:
-        // For production, we would use the existing Supabase services
-        // This is a placeholder - the real implementation would import and use
-        // the existing Supabase services from src/services/api/
-        throw new Error('Production mode should use existing Supabase services');
+        throw new Error(`Unknown mode: ${mode}`);
     }
   }
 }
