@@ -1,161 +1,83 @@
 
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/contexts/theme-context";
-import { OptimizationProvider } from "@/contexts/OptimizationContext";
-import { PrivacyProvider } from "@/contexts/PrivacyContext";
-import { DemoProvider } from "@/contexts/DemoContext";
-import { Toaster } from "@/components/ui/sonner";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import LandingPage from "@/pages/LandingPage";
-import LoginPage from "@/pages/LoginPage";
-import RegisterPage from "@/pages/RegisterPage";
-import DashboardPage from "@/pages/DashboardPage";
-import PatientsPage from "@/pages/PatientsPage";
-import PatientDetailPage from "@/pages/PatientDetailPage";
-import AppointmentsPage from "@/pages/AppointmentsPage";
-import SettingsPage from "@/pages/SettingsPage";
-import DataImportPage from "@/pages/DataImportPage";
-import OsteopathSettingsPage from "@/pages/OsteopathSettingsPage";
-import CabinetSettingsPage from "@/pages/CabinetSettingsPage";
-import InvoicesPage from "@/pages/InvoicesPage";
-import SchedulePage from "@/pages/SchedulePage";
-import AdminDashboardPage from "@/pages/AdminDashboardPage";
-import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
-import TermsOfServicePage from "@/pages/TermsOfServicePage";
-import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
-import CollaborationsSettingsPage from "@/pages/CollaborationsSettingsPage";
-import HelpPage from "@/pages/HelpPage";
-import SQLiteDebugPage from "@/pages/SQLiteDebugPage";
-import TipsPage from "@/pages/TipsPage";
-import NotFound from "@/pages/NotFound";
+import { Toaster } from "@/components/ui/toaster";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
+import { DemoProvider } from "./contexts/DemoContext";
+import { ThemeProvider } from "./components/theme-provider";
+import { Dashboard } from "./components/dashboard/dashboard";
+import PatientList from "./components/patient-list";
+import PatientForm from "./components/patient-form";
+import { PatientDetail } from "./components/patient-detail";
+import AppointmentCalendar from "./components/appointment-calendar";
+import InvoiceList from "./components/invoice-list";
+import { InvoiceForm } from "./components/invoice-form";
+import { InvoiceDetails } from "./components/invoice-details";
+import { Login } from "./components/login";
+import { Register } from "./components/register";
+import { CabinetList } from "./components/cabinet/CabinetList";
+import { CabinetForm } from "./components/cabinet/CabinetForm";
+import { CabinetSettings } from "./components/cabinet/CabinetSettings";
+import { AdminDashboard } from "./components/admin/admin-dashboard";
+import { DemoBanner } from "./components/DemoBanner";
+import { SQLiteDiagnostic } from "./components/debug/SQLiteDiagnostic";
+import { EnhancedSQLiteDiagnostic } from "./components/debug/EnhancedSQLiteDiagnostic";
+import { HybridStorageDiagnostic } from "./components/debug/HybridStorageDiagnostic";
+import "./App.css";
 
-import ProtectedRoute from "@/components/ProtectedRoute";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-    },
-  },
-});
+// Create query client instance
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <OptimizationProvider>
-            <PrivacyProvider>
-              <DemoProvider>
-                <Router>
-                  <AuthProvider>
-                    <div className="min-h-screen bg-background">
-                      <Routes>
-                        {/* Routes publiques */}
-                        <Route path="/" element={<LandingPage />} />
-                        <Route path="/demo" element={<InteractiveDemoPage />} />
-                        <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
-                        <Route path="/privacy" element={<PrivacyPolicyPage />} />
-                        <Route path="/cgu" element={<TermsOfServicePage />} />
-                        <Route path="/terms" element={<TermsOfServicePage />} />
-                        
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <DemoProvider>
+            <ErrorBoundary>
+              <Router>
+                <div className="min-h-screen bg-background">
+                  <DemoBanner />
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
 
-                        {/* Routes protégées */}
-                        <Route path="/dashboard" element={
-                          <ProtectedRoute>
-                            <DashboardPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/patients" element={
-                          <ProtectedRoute>
-                            <PatientsPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/patients/:id" element={
-                          <ProtectedRoute>
-                            <PatientDetailPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/appointments" element={
-                          <ProtectedRoute>
-                            <AppointmentsPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/schedule" element={
-                          <ProtectedRoute>
-                            <SchedulePage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/invoices" element={
-                          <ProtectedRoute>
-                            <InvoicesPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/settings" element={
-                          <ProtectedRoute>
-                            <SettingsPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/settings/import" element={
-                          <ProtectedRoute>
-                            <DataImportPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/settings/osteopath" element={
-                          <ProtectedRoute>
-                            <OsteopathSettingsPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/settings/cabinet" element={
-                          <ProtectedRoute>
-                            <CabinetSettingsPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/settings/collaborations" element={
-                          <ProtectedRoute>
-                            <CollaborationsSettingsPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/settings/debug" element={
-                          <ProtectedRoute>
-                            <SQLiteDebugPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/help" element={
-                          <ProtectedRoute>
-                            <HelpPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/conseils" element={
-                          <ProtectedRoute>
-                            <TipsPage />
-                          </ProtectedRoute>
-                        } />
-                        {/* Routes admin */}
-                        <Route path="/admin/dashboard" element={
-                          <ProtectedRoute>
-                            <AdminDashboardPage />
-                          </ProtectedRoute>
-                        } />
-                        
-                        {/* Route 404 - doit être en dernier */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                      <Toaster />
-                    </div>
-                  </AuthProvider>
-                </Router>
-              </DemoProvider>
-            </PrivacyProvider>
-          </OptimizationProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+                    {/* Protected routes */}
+                    <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/patients" element={<ProtectedRoute><PatientList /></ProtectedRoute>} />
+                    <Route path="/patients/new" element={<ProtectedRoute><PatientForm /></ProtectedRoute>} />
+                    <Route path="/patients/:id" element={<ProtectedRoute><PatientDetail /></ProtectedRoute>} />
+                    <Route path="/patients/:id/edit" element={<ProtectedRoute><PatientForm /></ProtectedRoute>} />
+                    <Route path="/appointments" element={<ProtectedRoute><AppointmentCalendar /></ProtectedRoute>} />
+                    <Route path="/invoices" element={<ProtectedRoute><InvoiceList /></ProtectedRoute>} />
+                    <Route path="/invoices/new" element={<ProtectedRoute><InvoiceForm /></ProtectedRoute>} />
+                    <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetails /></ProtectedRoute>} />
+                    <Route path="/invoices/:id/edit" element={<ProtectedRoute><InvoiceForm /></ProtectedRoute>} />
+                    <Route path="/cabinets" element={<ProtectedRoute><CabinetList /></ProtectedRoute>} />
+                    <Route path="/cabinets/new" element={<ProtectedRoute><CabinetForm /></ProtectedRoute>} />
+                    <Route path="/cabinets/:id/edit" element={<ProtectedRoute><CabinetForm /></ProtectedRoute>} />
+                    <Route path="/cabinets/settings" element={<ProtectedRoute><CabinetSettings /></ProtectedRoute>} />
+
+                    {/* Admin routes */}
+                    <Route path="/admin/*" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+
+                    {/* Debug routes */}
+                    <Route path="/debug/sqlite" element={<ProtectedRoute><SQLiteDiagnostic /></ProtectedRoute>} />
+                    <Route path="/debug/sqlite-enhanced" element={<ProtectedRoute><EnhancedSQLiteDiagnostic /></ProtectedRoute>} />
+                    <Route path="/debug/hybrid-storage" element={<ProtectedRoute><HybridStorageDiagnostic /></ProtectedRoute>} />
+                  </Routes>
+                </div>
+              </Router>
+            </ErrorBoundary>
+          </DemoProvider>
+        </AuthProvider>
+        <Toaster />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
