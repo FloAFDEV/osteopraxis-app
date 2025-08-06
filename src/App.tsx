@@ -55,11 +55,11 @@ function App() {
                     <Route path="/appointments" element={<ProtectedRoute><AppointmentCalendar /></ProtectedRoute>} />
                     <Route path="/invoices" element={<ProtectedRoute><InvoiceList /></ProtectedRoute>} />
                     <Route path="/invoices/new" element={<ProtectedRoute><InvoiceForm /></ProtectedRoute>} />
-                    <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetails />}</ProtectedRoute>} />
+                    <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetails /></ProtectedRoute>} />
                     <Route path="/invoices/:id/edit" element={<ProtectedRoute><InvoiceForm /></ProtectedRoute>} />
                     <Route path="/cabinets" element={<ProtectedRoute><CabinetList /></ProtectedRoute>} />
-                    <Route path="/cabinets/new" element={<ProtectedRoute><CabinetForm />}</ProtectedRoute>} />
-                    <Route path="/cabinets/:id/edit" element={<ProtectedRoute><CabinetForm />}</ProtectedRoute>} />
+                    <Route path="/cabinets/new" element={<ProtectedRoute><CabinetForm /></ProtectedRoute>} />
+                    <Route path="/cabinets/:id/edit" element={<ProtectedRoute><CabinetForm /></ProtectedRoute>} />
                     <Route path="/cabinets/settings" element={<ProtectedRoute><CabinetSettings /></ProtectedRoute>} />
 
                     {/* Admin routes */}
