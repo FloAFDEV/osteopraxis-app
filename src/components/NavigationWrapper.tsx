@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface NavigationWrapperProps {
@@ -9,30 +9,44 @@ interface NavigationWrapperProps {
 
 export const NavigationWrapper = ({ children }: NavigationWrapperProps) => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const location = useLocation();
+  const { user, isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    // Handle navigation based on authentication state
+    // Ne pas faire de redirection pendant le chargement
+    if (loading) return;
+
+    const currentPath = location.pathname;
+    
+    // Pages publiques qui ne nécessitent pas d'authentification
+    const publicPaths = ['/login', '/register'];
+    const isPublicPath = publicPaths.includes(currentPath);
+
+    // Si l'utilisateur est authentifié
     if (isAuthenticated && user) {
-      const currentPath = window.location.pathname;
-      
-      // Redirect admins to admin dashboard if they're on login/register pages
-      if (user.role === "ADMIN" && (currentPath === "/login" || currentPath === "/register")) {
-        navigate("/admin/dashboard");
+      // Rediriger les admins depuis les pages de connexion vers le dashboard admin
+      if (user.role === "ADMIN" && isPublicPath) {
+        navigate("/admin/dashboard", { replace: true });
       }
-      // Redirect regular users away from login/register pages
-      else if (user.role !== "ADMIN" && (currentPath === "/login" || currentPath === "/register")) {
-        navigate("/");
+      // Rediriger les utilisateurs normaux depuis les pages de connexion vers le dashboard
+      else if (user.role !== "ADMIN" && isPublicPath) {
+        navigate("/", { replace: true });
       }
     }
-    // Redirect unauthenticated users to login (except if already on login/register)
-    else if (!isAuthenticated) {
-      const currentPath = window.location.pathname;
-      if (currentPath !== "/login" && currentPath !== "/register") {
-        navigate("/login");
-      }
+    // Si l'utilisateur n'est pas authentifié et n'est pas sur une page publique
+    else if (!isAuthenticated && !isPublicPath) {
+      navigate("/login", { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, loading, navigate, location.pathname]);
+
+  // Afficher un loader pendant la vérification d'authentification
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 };
