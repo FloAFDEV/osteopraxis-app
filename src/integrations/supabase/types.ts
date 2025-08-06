@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_rate_limits: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          request_count: number | null
+          user_id: string | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       Appointment: {
         Row: {
           cabinetId: number | null
@@ -1771,6 +1798,15 @@ export type Database = {
         Args: { user_uuid: string; action_type: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          p_user_id: string
+          p_endpoint: string
+          p_max_requests?: number
+          p_window_minutes?: number
+        }
+        Returns: boolean
+      }
       cleanup_expired_syncs: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -1778,6 +1814,10 @@ export type Database = {
       cleanup_old_google_calendar_events: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      cleanup_rate_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       generate_invitation_code: {
         Args: Record<PropertyKey, never>
@@ -1799,6 +1839,10 @@ export type Database = {
         }[]
       }
       get_current_osteopath_id: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_current_osteopath_id_secure: {
         Args: Record<PropertyKey, never>
         Returns: number
       }
@@ -1848,6 +1892,10 @@ export type Database = {
         Args: { p_table_name: string; p_record_id: string }
         Returns: boolean
       }
+      scheduled_cleanup: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       security_health_check: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1864,6 +1912,18 @@ export type Database = {
       use_cabinet_invitation: {
         Args: { p_invitation_code: string; p_osteopath_id: number }
         Returns: Json
+      }
+      validate_email: {
+        Args: { email: string }
+        Returns: boolean
+      }
+      validate_phone: {
+        Args: { phone: string }
+        Returns: boolean
+      }
+      verify_admin_access: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
     Enums: {

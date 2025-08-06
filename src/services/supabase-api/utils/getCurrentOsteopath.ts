@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function getCurrentOsteopath() {
   try {
-    console.log('🔍 getCurrentOsteopath: Début de la récupération...');
+    console.log('🔍 getCurrentOsteopath: Début de la récupération sécurisée...');
     
     // Récupérer l'utilisateur authentifié
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -20,19 +20,16 @@ export async function getCurrentOsteopath() {
 
     console.log('✅ getCurrentOsteopath: Utilisateur authentifié trouvé:', user.id);
 
-    // Récupérer les informations de l'ostéopathe
-    const { data: osteopathData, error: osteopathError } = await supabase
-      .from("Osteopath")
-      .select("*")
-      .eq("authId", user.id)
-      .maybeSingle();
+    // Utiliser la nouvelle fonction sécurisée
+    const { data: osteopathId, error: secureError } = await supabase
+      .rpc('get_current_osteopath_id_secure');
 
-    if (osteopathError) {
-      console.error('❌ getCurrentOsteopath: Erreur lors de la récupération de l\'ostéopathe:', osteopathError);
-      throw osteopathError;
+    if (secureError) {
+      console.error('❌ getCurrentOsteopath: Erreur lors de la récupération sécurisée:', secureError);
+      throw secureError;
     }
 
-    if (!osteopathData) {
+    if (!osteopathId) {
       console.error('❌ getCurrentOsteopath: Aucun ostéopathe trouvé pour l\'utilisateur:', user.id);
       
       // Essayer de créer automatiquement un profil ostéopathe
@@ -80,6 +77,18 @@ export async function getCurrentOsteopath() {
       return newOsteopath;
     }
 
+    // Récupérer les informations complètes de l'ostéopathe
+    const { data: osteopathData, error: osteopathError } = await supabase
+      .from("Osteopath")
+      .select("*")
+      .eq("id", osteopathId)
+      .single();
+
+    if (osteopathError || !osteopathData) {
+      console.error('❌ getCurrentOsteopath: Erreur lors de la récupération des détails de l\'ostéopathe:', osteopathError);
+      throw new Error("Profil ostéopathe introuvable");
+    }
+
     console.log('✅ getCurrentOsteopath: Ostéopathe trouvé:', osteopathData.id);
     return osteopathData;
   } catch (error) {
@@ -90,19 +99,30 @@ export async function getCurrentOsteopath() {
 
 export async function getCurrentOsteopathId(): Promise<number | null> {
   try {
-    const osteopath = await getCurrentOsteopath();
-    return osteopath?.id || null;
+    // Utiliser la nouvelle fonction sécurisée
+    const { data: osteopathId, error } = await supabase
+      .rpc('get_current_osteopath_id_secure');
+
+    if (error) {
+      console.error('❌ getCurrentOsteopathId: Erreur:', error);
+      return null;
+    }
+
+    return osteopathId;
   } catch (error) {
     console.error('❌ getCurrentOsteopathId: Erreur:', error);
     return null;
   }
 }
 
-// Fonctions de sécurité pour vérifier la propriété des données
+// Fonctions de sécurité pour vérifier la propriété des données (mises à jour pour plus de sécurité)
 export async function isPatientOwnedByCurrentOsteopath(patientId: number): Promise<boolean> {
   try {
     const osteopathId = await getCurrentOsteopathId();
     if (!osteopathId) return false;
+
+    // Audit de la vérification d'accès
+    console.log(`🔒 Vérification d'accès au patient ${patientId} par l'ostéopathe ${osteopathId}`);
 
     const { data, error } = await supabase
       .from("Patient")
@@ -110,7 +130,10 @@ export async function isPatientOwnedByCurrentOsteopath(patientId: number): Promi
       .eq("id", patientId)
       .maybeSingle();
 
-    if (error || !data) return false;
+    if (error || !data) {
+      console.warn(`⚠️ Patient ${patientId} non trouvé ou accès refusé`);
+      return false;
+    }
 
     // Vérifier si le patient appartient directement à l'ostéopathe
     if (data.osteopathId === osteopathId) return true;
@@ -129,7 +152,7 @@ export async function isPatientOwnedByCurrentOsteopath(patientId: number): Promi
 
     return false;
   } catch (error) {
-    console.error('Erreur lors de la vérification de propriété du patient:', error);
+    console.error('❌ Erreur lors de la vérification de propriété du patient:', error);
     return false;
   }
 }
@@ -139,13 +162,19 @@ export async function isAppointmentOwnedByCurrentOsteopath(appointmentId: number
     const osteopathId = await getCurrentOsteopathId();
     if (!osteopathId) return false;
 
+    // Audit de la vérification d'accès
+    console.log(`🔒 Vérification d'accès au rendez-vous ${appointmentId} par l'ostéopathe ${osteopathId}`);
+
     const { data, error } = await supabase
       .from("Appointment")
       .select("osteopathId, patientId")
       .eq("id", appointmentId)
       .maybeSingle();
 
-    if (error || !data) return false;
+    if (error || !data) {
+      console.warn(`⚠️ Rendez-vous ${appointmentId} non trouvé ou accès refusé`);
+      return false;
+    }
 
     // Vérifier si le rendez-vous appartient directement à l'ostéopathe
     if (data.osteopathId === osteopathId) return true;
@@ -153,7 +182,7 @@ export async function isAppointmentOwnedByCurrentOsteopath(appointmentId: number
     // Vérifier via le patient
     return await isPatientOwnedByCurrentOsteopath(data.patientId);
   } catch (error) {
-    console.error('Erreur lors de la vérification de propriété du rendez-vous:', error);
+    console.error('❌ Erreur lors de la vérification de propriété du rendez-vous:', error);
     return false;
   }
 }
@@ -163,13 +192,19 @@ export async function isInvoiceOwnedByCurrentOsteopath(invoiceId: number): Promi
     const osteopathId = await getCurrentOsteopathId();
     if (!osteopathId) return false;
 
+    // Audit de la vérification d'accès
+    console.log(`🔒 Vérification d'accès à la facture ${invoiceId} par l'ostéopathe ${osteopathId}`);
+
     const { data, error } = await supabase
       .from("Invoice")
       .select("osteopathId, patientId")
       .eq("id", invoiceId)
       .maybeSingle();
 
-    if (error || !data) return false;
+    if (error || !data) {
+      console.warn(`⚠️ Facture ${invoiceId} non trouvée ou accès refusé`);
+      return false;
+    }
 
     // Vérifier si la facture appartient directement à l'ostéopathe
     if (data.osteopathId === osteopathId) return true;
@@ -177,7 +212,7 @@ export async function isInvoiceOwnedByCurrentOsteopath(invoiceId: number): Promi
     // Vérifier via le patient
     return await isPatientOwnedByCurrentOsteopath(data.patientId);
   } catch (error) {
-    console.error('Erreur lors de la vérification de propriété de la facture:', error);
+    console.error('❌ Erreur lors de la vérification de propriété de la facture:', error);
     return false;
   }
 }
