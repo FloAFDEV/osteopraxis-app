@@ -5,7 +5,11 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { OptimizationProvider } from "@/contexts/OptimizationContext";
 import { PrivacyProvider } from "@/contexts/PrivacyContext";
+import { ModeProvider } from "@/contexts/ModeContext";
 // Routes principales de l'application
+import DemoPage from "@/pages/DemoPage";
+import DemoSchedulePage from "@/pages/DemoSchedulePage";
+import DemoPatientsPage from "@/pages/DemoPatientsPage";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
@@ -48,17 +52,22 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <OptimizationProvider>
-            <PrivacyProvider>
+        <ModeProvider>
+          <ThemeProvider>
+            <OptimizationProvider>
+              <PrivacyProvider>
               <Router>
                 <AuthProvider>
                   <div className="min-h-screen bg-background">
                     <Routes>
                       {/* Routes publiques */}
                       <Route path="/" element={<LandingPage />} />
-                      {/* Routes démo supprimées - architecture hybride */}
-
+                      
+                      {/* Routes démo - accessibles sans authentification */}
+                      <Route path="/demo" element={<DemoPage />} />
+                      <Route path="/demo/schedule" element={<DemoSchedulePage />} />
+                      <Route path="/demo/patients" element={<DemoPatientsPage />} />
+                      
                       {/* Route pour l'index - redirige vers dashboard ou landing selon l'auth */}
                       <Route path="/index" element={
                         <ProtectedRoute>
@@ -159,8 +168,9 @@ function App() {
             </PrivacyProvider>
           </OptimizationProvider>
         </ThemeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+      </ModeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
   );
 }
 
