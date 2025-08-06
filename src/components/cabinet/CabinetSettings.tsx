@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Cabinet } from "@/types";
 import { api } from "@/services";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,10 +31,8 @@ export function CabinetSettings() {
       }
     } catch (error) {
       console.error('Erreur lors du chargement des cabinets:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les cabinets",
-        variant: "destructive",
+      toast.error("Erreur", {
+        description: "Impossible de charger les cabinets"
       });
     } finally {
       setLoading(false);
@@ -51,16 +48,13 @@ export function CabinetSettings() {
       setSelectedCabinet(updatedCabinet);
       setCabinets(cabinets.map(c => c.id === updatedCabinet.id ? updatedCabinet : c));
       
-      toast({
-        title: "Succès",
-        description: "Cabinet mis à jour avec succès",
+      toast.success("Succès", {
+        description: "Cabinet mis à jour avec succès"
       });
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le cabinet",
-        variant: "destructive",
+      toast.error("Erreur", {
+        description: "Impossible de mettre à jour le cabinet"
       });
     } finally {
       setSaving(false);
