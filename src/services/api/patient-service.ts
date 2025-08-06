@@ -3,7 +3,7 @@ import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService, isPatientOwnedByCurrentOsteopath } from "../supabase-api/patient-service";
 import { hdsLocalDataService } from "../hds-data-adapter/local-service";
-import { hdsDemoService } from "../hds-demo-service";
+// Service demo supprimé
 import { getCurrentOsteopathId } from "@/services";
 
 // Hook pour accéder au contexte démo depuis les services
@@ -19,17 +19,7 @@ export const patientService = {
   async getPatients(): Promise<Patient[]> {
     console.log("🏥 patientService.getPatients - Architecture HDS");
     
-    // 1. Vérifier d'abord si on est en mode démo HDS
-    if (hdsDemoService.isDemoModeActive()) {
-      console.log("🎭 Mode démo HDS actif - Utilisation des données fictives");
-      const session = hdsDemoService.getCurrentSession();
-      if (session) {
-        // Étendre la session car l'utilisateur est actif
-        hdsDemoService.extendSession();
-        await delay(300);
-        return [...session.patients];
-      }
-    }
+    // Mode démo HDS supprimé
     
     // 2. Vérifier le mode démo classique (fallback)
     if (demoContext?.isDemoMode) {
@@ -47,8 +37,8 @@ export const patientService = {
       // Si pas de données locales, créer une session démo pour la démo
       if (localPatients.length === 0) {
         console.log("📝 Aucune donnée locale - Création d'une session démo HDS");
-        const session = await hdsDemoService.createDemoSession();
-        return [...session.patients];
+        // Session démo supprimée - retour tableau vide
+        return [];
       }
       
       return localPatients;
@@ -58,8 +48,8 @@ export const patientService = {
       // 4. Créer session démo en cas d'erreur pour assurer la continuité
       try {
         console.log("🔄 Création de session démo de secours");
-        const session = await hdsDemoService.createDemoSession();
-        return [...session.patients];
+        // Session démo supprimée - continuer avec fallback
+        return [];
       } catch (demoError) {
         console.error("❌ Erreur création session démo:", demoError);
         
@@ -92,14 +82,7 @@ export const patientService = {
       return undefined;
     }
 
-    // 1. Vérifier d'abord si on est en mode démo HDS
-    if (hdsDemoService.isDemoModeActive()) {
-      const session = hdsDemoService.getCurrentSession();
-      if (session) {
-        await delay(200);
-        return session.patients.find(patient => patient.id === id);
-      }
-    }
+    // Mode démo HDS supprimé
 
     // 2. Vérifier le mode démo classique (fallback)
     if (demoContext?.isDemoMode) {

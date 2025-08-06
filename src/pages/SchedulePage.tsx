@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-import { hdsDemoService } from "@/services/hds-demo-service";
+// Service demo supprimé
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -42,7 +42,7 @@ const SchedulePage = () => {
     events: googleEvents,
     isConnected: isGoogleConnected
   } = useGoogleCalendar();
-  const isDemoMode = hdsDemoService.isDemoModeActive();
+  // Mode démo supprimé
 
   // Utiliser le hook pour la mise à jour automatique des statuts
   useAppointmentStatusUpdate({
@@ -56,11 +56,7 @@ const SchedulePage = () => {
     loading: appointmentsLoading,
     invalidate: invalidateAppointments
   } = useOptimizedCache('appointments', () => {
-    // Injecter le contexte démo dans les services API
-    const appointmentService = api.getAppointmentService();
-    appointmentService.setDemoContext({
-      isDemoMode
-    });
+    // Mode démo supprimé
     return api.getAppointments();
   }, {
     ttl: 2 * 60 * 1000
@@ -71,11 +67,7 @@ const SchedulePage = () => {
     loading: patientsLoading,
     invalidate: invalidatePatients
   } = useOptimizedCache('patients', () => {
-    // Injecter le contexte démo dans les services API
-    const patientService = api.getPatientService();
-    patientService.setDemoContext({
-      isDemoMode
-    });
+    // Mode démo supprimé
     return api.getPatients();
   }, {
     ttl: 10 * 60 * 1000

@@ -30,8 +30,7 @@ import {
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { CurrentDateTimeDisplay } from "./CurrentDateTimeDisplay";
-import { DemoIndicator } from "@/components/demo/DemoIndicator";
-import { hdsDemoService } from "@/services/hds-demo-service";
+// Imports demo supprimés
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -40,7 +39,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	const { user, logout, isAdmin } = useAuth();
-	const isDemoMode = hdsDemoService.isDemoModeActive();
+	// Demo mode supprimé
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -429,7 +428,6 @@ export function Layout({ children }: LayoutProps) {
 			)}
 
 			<main className="flex-1 container px-4 md:px-6 py-6 print:p-0 print:m-0">
-				{isDemoMode && <DemoIndicator />}
 				{children}
 			</main>
 

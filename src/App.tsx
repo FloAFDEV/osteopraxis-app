@@ -24,14 +24,13 @@ import SchedulePage from "@/pages/SchedulePage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
-import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
-import HDSDemoPage from "@/pages/HDSDemoPage";
+// Pages supprimées - migration vers architecture hybride
 import CollaborationsSettingsPage from "@/pages/CollaborationsSettingsPage";
 import HelpPage from "@/pages/HelpPage";
-import SQLiteDebugPage from "@/pages/SQLiteDebugPage";
+// SQLiteDebugPage supprimée
 import DataManagementPage from "@/pages/DataManagementPage";
 import TipsPage from "@/pages/TipsPage";
-import DebugPage from "@/pages/DebugPage";
+// DebugPage supprimée
 import NotFound from "@/pages/NotFound";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -58,8 +57,7 @@ function App() {
                     <Routes>
                       {/* Routes publiques */}
                       <Route path="/" element={<LandingPage />} />
-                      <Route path="/demo" element={<HDSDemoPage />} />
-                      <Route path="/demo-legacy" element={<InteractiveDemoPage />} />
+                      {/* Routes démo supprimées - architecture hybride */}
 
                       {/* Route pour l'index - redirige vers dashboard ou landing selon l'auth */}
                       <Route path="/index" element={
@@ -137,12 +135,8 @@ function App() {
                           <DataManagementPage />
                         </ProtectedRoute>
                       } />
-                        <Route path="/debug" element={<DebugPage />} />
-                        <Route path="/settings/debug" element={
-                        <ProtectedRoute>
-                          <SQLiteDebugPage />
-                        </ProtectedRoute>
-                      } />
+                        {/* Route debug supprimée */}
+                        {/* Route debug SQLite supprimée */}
                       <Route path="/help" element={
                         <ProtectedRoute>
                           <HelpPage />

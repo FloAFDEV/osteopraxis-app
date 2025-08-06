@@ -39,7 +39,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { hdsDemoService } from "@/services/hds-demo-service";
+// Service demo supprimé
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -57,7 +57,7 @@ const AppointmentsPage = () => {
 		useState<Appointment | null>(null);
 	const location = useLocation();
 	const navigate = useNavigate();
-	const isDemoMode = hdsDemoService.isDemoModeActive();
+	// Mode démo supprimé
 
 	const [refreshKey, setRefreshKey] = useState(0);
 
@@ -108,7 +108,7 @@ const AppointmentsPage = () => {
 	if (appointments) {
 		fetchData();
 	}
-}, [refreshKey, isDemoMode, appointments]);
+}, [refreshKey, appointments]);
 
 	const getPatientById = (patientId: number): Patient | undefined => {
 		return patients.find((patient) => patient.id === patientId);

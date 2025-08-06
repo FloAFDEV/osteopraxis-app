@@ -10,7 +10,7 @@ import {
   calculateRevenueMetrics,
 } from "@/components/dashboard/utils/dashboard-calculations";
 import { formatAppointmentDate } from "@/utils/date-utils";
-import { hdsDemoService } from "@/services/hds-demo-service";
+// Service demo supprimé
 
 const initialDashboardData: DashboardData = {
   totalPatients: 0,
@@ -49,7 +49,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isDemoMode = hdsDemoService.isDemoModeActive();
+  // Mode démo supprimé
 
   useEffect(() => {
     const loadCabinetStats = async () => {
@@ -153,7 +153,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
     };
 
     loadCabinetStats();
-  }, [selectedCabinetId, isDemoMode]);
+  }, [selectedCabinetId]);
 
   return {
     dashboardData,

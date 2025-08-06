@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Patient } from '@/types';
 import { api } from '@/services/api';
 import { useMemo } from 'react';
-import { hdsDemoService } from '@/services/hds-demo-service';
+// Service demo supprimé
 
 // Hook optimisé pour la gestion des patients avec cache intelligent
 export const useOptimizedPatients = (
@@ -12,7 +12,7 @@ export const useOptimizedPatients = (
   currentPage: number = 1,
   patientsPerPage: number = 25
 ) => {
-  const isDemoMode = hdsDemoService.isDemoModeActive();
+  // Mode démo supprimé
   
   // Query principale avec cache
   const {
@@ -21,13 +21,8 @@ export const useOptimizedPatients = (
     error,
     refetch,
   } = useQuery({
-    queryKey: ['patients', isDemoMode],
-    queryFn: () => {
-      // Injecter le contexte démo dans le service API
-      const patientService = api.getPatientService();
-      patientService.setDemoContext({ isDemoMode });
-      return api.getPatients();
-    },
+    queryKey: ['patients'],
+    queryFn: () => api.getPatients(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes de cache
     refetchOnWindowFocus: false,
