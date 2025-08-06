@@ -1,15 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type AppMode = 'demo' | 'production' | 'local';
+export type AppMode = 'demo' | 'local';
 
 interface ModeContextType {
   mode: AppMode;
   setMode: (mode: AppMode) => void;
   isDemo: boolean;
-  isProduction: boolean;
   isLocal: boolean;
-  getDemoData: () => any;
-  clearDemoData: () => void;
+  getDemoSessionId: () => string;
+  clearDemoSession: () => void;
 }
 
 const ModeContext = createContext<ModeContextType | undefined>(undefined);
@@ -22,103 +21,42 @@ export function useMode() {
   return context;
 }
 
-// Données de démonstration simplifiées
-const demoData = {
-  patients: [
-    {
-      id: 1,
-      firstName: "Marie",
-      lastName: "Dubois",
-      email: "marie.dubois@demo.com",
-      phone: "06 12 34 56 78",
-      birthDate: "1985-06-15",
-      address: "123 Rue de la Paix, 31000 Toulouse",
-      gender: "FEMALE" as const,
-      osteopathId: 1,
-      cabinetId: 1,
-      height: null,
-      weight: null,
-      bmi: null,
-      createdAt: new Date('2024-01-15').toISOString(),
-      updatedAt: new Date('2024-01-15').toISOString(),
-    },
-    {
-      id: 2,
-      firstName: "Jean",
-      lastName: "Martin",
-      email: "jean.martin@demo.com",
-      phone: "06 98 76 54 32",
-      birthDate: "1978-03-22",
-      address: "456 Avenue de la République, 31100 Toulouse",
-      gender: "MALE" as const,
-      osteopathId: 1,
-      cabinetId: 1,
-      height: null,
-      weight: null,
-      bmi: null,
-      createdAt: new Date('2024-01-20').toISOString(),
-      updatedAt: new Date('2024-01-20').toISOString(),
-    }
-  ],
-  appointments: [
-    {
-      id: 1,
-      patientId: 1,
-      cabinetId: 1,
-      osteopathId: 1,
-      start: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      end: new Date(Date.now() + 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(),
-      date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      reason: "Douleurs lombaires",
-      status: "SCHEDULED" as const,
-      notes: "Première consultation",
-      notificationSent: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-  ],
-  invoices: [
-    {
-      id: 1,
-      patientId: 1,
-      osteopathId: 1,
-      appointmentId: 1,
-      amount: 60,
-      date: new Date().toISOString(),
-      paymentStatus: "PAID" as const,
-      paymentMethod: "Espèces",
-      notes: "Consultation",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      patientId: 2,
-      osteopathId: 1,
-      amount: 55,
-      date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-      paymentStatus: "PENDING" as const,
-      notes: "Consultation de suivi",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-  ]
-};
+// Gestion des sessions démo éphémères (30 minutes)
+const DEMO_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
+
+function generateDemoSessionId(): string {
+  return `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function isDemoSessionExpired(sessionId: string): boolean {
+  if (!sessionId.startsWith('demo_')) return true;
+  const timestamp = parseInt(sessionId.split('_')[1]);
+  return Date.now() - timestamp > DEMO_SESSION_DURATION;
+}
 
 export function ModeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<AppMode>(() => {
     const path = window.location.pathname;
     if (path.startsWith('/demo')) return 'demo';
-    
-    const saved = localStorage.getItem('app-mode');
-    return (saved as AppMode) || 'production';
+    return 'local'; // Par défaut, mode local pour HDS
+  });
+
+  const [demoSessionId, setDemoSessionId] = useState<string>(() => {
+    const existing = localStorage.getItem('demo-session-id');
+    if (existing && !isDemoSessionExpired(existing)) {
+      return existing;
+    }
+    return generateDemoSessionId();
   });
 
   const setMode = (newMode: AppMode) => {
     setModeState(newMode);
-    localStorage.setItem('app-mode', newMode);
     
     if (newMode === 'demo' && !window.location.pathname.startsWith('/demo')) {
+      // Créer nouvelle session démo
+      const newSessionId = generateDemoSessionId();
+      setDemoSessionId(newSessionId);
+      localStorage.setItem('demo-session-id', newSessionId);
       window.location.href = '/demo';
     } else if (mode === 'demo' && newMode !== 'demo' && window.location.pathname.startsWith('/demo')) {
       window.location.href = '/dashboard';
@@ -131,8 +69,7 @@ export function ModeProvider({ children }: { children: ReactNode }) {
       if (path.startsWith('/demo') && mode !== 'demo') {
         setModeState('demo');
       } else if (!path.startsWith('/demo') && mode === 'demo') {
-        const saved = localStorage.getItem('app-mode');
-        setModeState((saved as AppMode) || 'production');
+        setModeState('local');
       }
     };
 
@@ -140,14 +77,35 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('popstate', handlePathChange);
   }, [mode]);
 
+  // Vérifier l'expiration de la session démo
+  useEffect(() => {
+    if (mode === 'demo') {
+      const checkExpiration = () => {
+        if (isDemoSessionExpired(demoSessionId)) {
+          // Session expirée, créer une nouvelle
+          const newSessionId = generateDemoSessionId();
+          setDemoSessionId(newSessionId);
+          localStorage.setItem('demo-session-id', newSessionId);
+        }
+      };
+
+      const interval = setInterval(checkExpiration, 60000); // Vérifier toutes les minutes
+      return () => clearInterval(interval);
+    }
+  }, [mode, demoSessionId]);
+
   const value: ModeContextType = {
     mode,
     setMode,
     isDemo: mode === 'demo',
-    isProduction: mode === 'production',
     isLocal: mode === 'local',
-    getDemoData: () => demoData,
-    clearDemoData: () => console.log('Demo data cleared'),
+    getDemoSessionId: () => demoSessionId,
+    clearDemoSession: () => {
+      localStorage.removeItem('demo-session-id');
+      const newSessionId = generateDemoSessionId();
+      setDemoSessionId(newSessionId);
+      localStorage.setItem('demo-session-id', newSessionId);
+    },
   };
 
   return <ModeContext.Provider value={value}>{children}</ModeContext.Provider>;

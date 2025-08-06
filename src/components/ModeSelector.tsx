@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Monitor, Cloud, HardDrive } from 'lucide-react';
 
 export function ModeSelector() {
-  const { mode, setMode, isDemo, isProduction, isLocal } = useMode();
+  const { mode, setMode, isDemo, isLocal } = useMode();
 
   return (
     <div className="flex items-center gap-2">
@@ -18,17 +18,10 @@ export function ModeSelector() {
         </Badge>
       )}
       
-      {isProduction && (
-        <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-          <Cloud className="h-3 w-3 mr-1" />
-          Production
-        </Badge>
-      )}
-      
       {isLocal && (
         <Badge variant="outline" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
           <HardDrive className="h-3 w-3 mr-1" />
-          Local
+          Local (HDS)
         </Badge>
       )}
       
@@ -41,17 +34,6 @@ export function ModeSelector() {
             className="text-xs"
           >
             Démo
-          </Button>
-        )}
-        
-        {!isProduction && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setMode('production')}
-            className="text-xs"
-          >
-            Cloud
           </Button>
         )}
         
