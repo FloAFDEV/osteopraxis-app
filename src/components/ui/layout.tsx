@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +28,7 @@ import {
 	X,
 } from "lucide-react";
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { CurrentDateTimeDisplay } from "./CurrentDateTimeDisplay";
 import { DemoIndicator } from "@/components/demo/DemoIndicator";
 import { DemoService } from "@/services/demo-service";
@@ -41,7 +40,6 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	const { user, logout, isAdmin } = useAuth();
-	const navigate = useNavigate();
 	const isDemoMode = React.useMemo(() => user?.email ? DemoService.isDemoUser(user.email) : false, [user?.email]);
 
 	const toggleMenu = () => {
@@ -50,7 +48,6 @@ export function Layout({ children }: LayoutProps) {
 
 	const handleLogout = async () => {
 		await logout();
-		navigate('/login');
 	};
 
 	const getInitials = () => {

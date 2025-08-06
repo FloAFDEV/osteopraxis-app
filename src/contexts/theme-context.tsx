@@ -10,11 +10,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-interface ThemeProviderProps {
-  children: React.ReactNode;
-}
-
-export function ThemeProvider({ children }: ThemeProviderProps) {
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with a simple default value
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
@@ -26,7 +22,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     
     try {
       // Check for saved theme preference or use system preference
-      const savedTheme = localStorage.getItem("vite-ui-theme") as Theme;
+      const savedTheme = localStorage.getItem("theme") as Theme;
       if (savedTheme && (savedTheme === "light" || savedTheme === "dark")) {
         setTheme(savedTheme);
       } else {
@@ -50,7 +46,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     if (!mounted) return;
     
     try {
-      localStorage.setItem("vite-ui-theme", theme);
+      localStorage.setItem("theme", theme);
     } catch (error) {
       console.warn("Could not save theme preference to localStorage", error);
     }

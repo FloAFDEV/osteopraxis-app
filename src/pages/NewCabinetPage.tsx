@@ -1,61 +1,48 @@
 
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Building2 } from "lucide-react";
 import { Layout } from "@/components/ui/layout";
-import { CabinetForm } from "@/components/cabinet/CabinetForm";
-import { useAuth } from "@/contexts/AuthContext";
+import { CabinetForm } from "@/components/cabinet";
 import { api } from "@/services/api";
+import { AuthState } from "@/types";
 import { toast } from "sonner";
 
-const NewCabinetPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [osteopathId, setOsteopathId] = useState<number | null>(null);
+const NewCabinetPage = () => {
+  const [osteopathId, setOsteopathId] = useState<number>(1); // Valeur par défaut
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadOsteopath = async () => {
+    // Essayer de récupérer l'ostéopathe connecté
+    const getUserOsteopath = async () => {
       try {
-        if (!user) return;
-        
-        const osteopath = await api.getCurrentOsteopath();
-        if (osteopath && osteopath.id) {
-          setOsteopathId(osteopath.id);
-        } else {
-          toast.error("Profil ostéopathe introuvable");
-          navigate("/");
+        // Dans un vrai cas, on récupérerait l'ostéopathe lié à l'utilisateur actuel
+        // Ici on utilise juste la première valeur disponible
+        const authData = localStorage.getItem("authState");
+        if (authData) {
+          const auth: AuthState = JSON.parse(authData);
+          if (auth.user?.osteopathId) {
+            setOsteopathId(auth.user.osteopathId);
+          }
         }
       } catch (error) {
-        console.error("Error loading osteopath:", error);
-        toast.error("Erreur lors du chargement du profil");
-        navigate("/");
+        console.error("Erreur lors de la récupération de l'ostéopathe:", error);
+        toast.error("Impossible de récupérer votre identifiant d'ostéopathe.");
       } finally {
         setLoading(false);
       }
     };
 
-    loadOsteopath();
-  }, [user, navigate]);
-
-  const handleSuccess = () => {
-    navigate("/cabinets");
-  };
+    getUserOsteopath();
+  }, []);
 
   if (loading) {
     return (
       <Layout>
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!osteopathId) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center py-12">
-          <p className="text-muted-foreground">Profil ostéopathe requis</p>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Chargement...</p>
+          </div>
         </div>
       </Layout>
     );
@@ -63,12 +50,20 @@ const NewCabinetPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Nouveau Cabinet</h1>
-        <CabinetForm 
-          osteopathId={osteopathId}
-          onSuccess={handleSuccess}
-        />
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Building2 className="h-8 w-8 text-primary" />
+            Nouveau Cabinet
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Créez un nouveau cabinet en remplissant le formulaire ci-dessous.
+          </p>
+        </div>
+
+        <div className="bg-card rounded-lg border shadow-sm p-6">
+          <CabinetForm osteopathId={osteopathId} />
+        </div>
       </div>
     </Layout>
   );

@@ -24,6 +24,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Pour les admins, ne pas rediriger automatiquement si déjà sur une page admin
+  // Laisser les admins naviguer librement sans forcer la redirection
+
   return <>{children}</>;
 };
 
