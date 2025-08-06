@@ -23,6 +23,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useDemo } from "@/contexts/DemoContext";
+import { useAuth } from "@/contexts/AuthContext";
+
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -45,6 +47,7 @@ const SchedulePage = () => {
   const {
     isDemoMode
   } = useDemo();
+  const { user, isAuthenticated } = useAuth();
 
   // Utiliser le hook pour la mise à jour automatique des statuts
   useAppointmentStatusUpdate({
@@ -65,8 +68,9 @@ const SchedulePage = () => {
     });
     return api.getAppointments();
   }, {
-    ttl: 2 * 60 * 1000
-  } // 2 minutes pour les rendez-vous
+    ttl: 2 * 60 * 1000,
+    enabled: !!user && isAuthenticated
+  } // 2 minutes pour les rendez-vous, seulement si authentifié
   );
   const {
     data: cachedPatients,
@@ -80,8 +84,9 @@ const SchedulePage = () => {
     });
     return api.getPatients();
   }, {
-    ttl: 10 * 60 * 1000
-  } // 10 minutes pour les patients (changent moins souvent)
+    ttl: 10 * 60 * 1000,
+    enabled: !!user && isAuthenticated
+  } // 10 minutes pour les patients (changent moins souvent), seulement si authentifié
   );
 
   // États locaux mis à jour depuis le cache

@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
+import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Appointment, DashboardData } from "@/types";
 import {
@@ -25,6 +26,7 @@ export function AppointmentsOverview({
 	data,
 	className,
 }: AppointmentsOverviewProps) {
+	const { isAuthenticated } = useAuth();
 	const [upcomingAppointments, setUpcomingAppointments] = useState<
 		Appointment[]
 	>([]);
@@ -79,6 +81,8 @@ export function AppointmentsOverview({
 	};
 
 	useEffect(() => {
+		if (!isAuthenticated) return; // Ne pas charger si pas authentifié
+		
 		const fetchData = async () => {
 			try {
 				// Récupérer les rendez-vous et les patients
@@ -100,7 +104,7 @@ export function AppointmentsOverview({
 			}
 		};
 		fetchData();
-	}, []);
+	}, [isAuthenticated]);
 
 	// Obtenir les informations sur un patient par ID
 	const getPatientById = (patientId: number) => {

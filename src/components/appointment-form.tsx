@@ -38,6 +38,8 @@ import { fr } from "date-fns/locale";
 import { AppointmentConflictDialog } from "@/components/appointment-conflict-dialog";
 import { ConflictResolutionDialog } from "@/components/conflict-resolution-dialog";
 import { EnhancedDatePicker } from "@/components/ui/enhanced-date-picker";
+import { useDemo } from "@/contexts/DemoContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { CalendarAppointment } from "@/types/calendar";
 import { PatientCombobox } from "@/components/patients/PatientCombobox";
 
@@ -78,6 +80,7 @@ export function AppointmentForm({
 	isEditing,
 	onSuccess,
 }: AppointmentFormProps) {
+	const { isAuthenticated } = useAuth();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [patients, setPatients] = useState<Patient[]>(propPatients || []);
 	const [customTime, setCustomTime] = useState<string | null>(null);
@@ -126,6 +129,8 @@ export function AppointmentForm({
 
 	// Updated useEffect to load appointment details for calendar
 	useEffect(() => {
+		if (!isAuthenticated) return; // Ne pas charger si pas authentifié
+		
 		const loadAppointmentData = async () => {
 			try {
 				const appointments = await api.getAppointments();
@@ -152,7 +157,7 @@ export function AppointmentForm({
 		if (patients.length > 0) {
 			loadAppointmentData();
 		}
-	}, [patients]);
+	}, [patients, isAuthenticated]);
 
 	const form = useForm<AppointmentFormValues>({
 		resolver: zodResolver(appointmentFormSchema),

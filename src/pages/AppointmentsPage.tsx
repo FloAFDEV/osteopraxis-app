@@ -47,7 +47,6 @@ import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
 
 const AppointmentsPage = () => {
-	const { user } = useAuth();
 	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -58,6 +57,7 @@ const AppointmentsPage = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { isDemoMode } = useDemo();
+	const { user, isAuthenticated } = useAuth();
 
 	const [refreshKey, setRefreshKey] = useState(0);
 
@@ -81,7 +81,7 @@ const AppointmentsPage = () => {
 			if (!user?.osteopathId) return [];
 			return await api.getAppointments();
 		},
-		enabled: !!user?.osteopathId,
+		enabled: !!user?.osteopathId && isAuthenticated,
 		refetchOnWindowFocus: false,
 	});
 
