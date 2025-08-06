@@ -1,4 +1,3 @@
-
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -15,11 +14,12 @@ import { PatientDetail } from "./components/patient-detail";
 import { AppointmentCalendar } from "./components/appointment-calendar";
 import { InvoiceList } from "./components/invoice-list";
 import { InvoiceForm } from "./components/invoice-form";
-import { InvoiceDetails } from "./components/invoice-details";
+import InvoiceDetailPage from "./pages/InvoiceDetailPage";
 import { Login } from "./components/login";
 import { Register } from "./components/register";
 import { CabinetList } from "./components/cabinet/CabinetList";
-import { CabinetForm } from "./components/cabinet/CabinetForm";
+import NewCabinetPage from "./pages/NewCabinetPage";
+import EditCabinetPage from "./pages/EditCabinetPage";
 import { CabinetSettings } from "./components/cabinet/CabinetSettings";
 import { AdminDashboard } from "./components/admin/admin-dashboard";
 import { DemoBanner } from "./components/DemoBanner";
@@ -55,11 +55,11 @@ function App() {
                     <Route path="/appointments" element={<ProtectedRoute><AppointmentCalendar /></ProtectedRoute>} />
                     <Route path="/invoices" element={<ProtectedRoute><InvoiceList /></ProtectedRoute>} />
                     <Route path="/invoices/new" element={<ProtectedRoute><InvoiceForm /></ProtectedRoute>} />
-                    <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetails /></ProtectedRoute>} />
+                    <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetailPage /></ProtectedRoute>} />
                     <Route path="/invoices/:id/edit" element={<ProtectedRoute><InvoiceForm /></ProtectedRoute>} />
                     <Route path="/cabinets" element={<ProtectedRoute><CabinetList /></ProtectedRoute>} />
-                    <Route path="/cabinets/new" element={<ProtectedRoute><CabinetForm /></ProtectedRoute>} />
-                    <Route path="/cabinets/:id/edit" element={<ProtectedRoute><CabinetForm /></ProtectedRoute>} />
+                    <Route path="/cabinets/new" element={<ProtectedRoute><NewCabinetPage /></ProtectedRoute>} />
+                    <Route path="/cabinets/:id/edit" element={<ProtectedRoute><EditCabinetPage /></ProtectedRoute>} />
                     <Route path="/cabinets/settings" element={<ProtectedRoute><CabinetSettings /></ProtectedRoute>} />
 
                     {/* Admin routes */}
