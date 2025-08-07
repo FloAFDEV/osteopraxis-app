@@ -1599,6 +1599,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_access_with_audit: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       admin_deactivate_cabinet: {
         Args: { cabinet_id: number }
         Returns: boolean
