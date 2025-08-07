@@ -134,7 +134,8 @@ export class ForcedMigrationService {
           await hybridDataManager.create(entityName.toLowerCase(), record);
           result.migratedCount++;
         } catch (error) {
-          const errorMsg = `Erreur migration ${entityName} ID ${record.id}: ${error}`;
+          const recordId = (record as any)?.id || 'unknown';
+          const errorMsg = `Erreur migration ${entityName} ID ${recordId}: ${error}`;
           result.errors.push(errorMsg);
           console.error(errorMsg);
         }
