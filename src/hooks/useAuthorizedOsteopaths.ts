@@ -28,7 +28,7 @@ export function useAuthorizedOsteopaths() {
       // Récupérer l'utilisateur connecté
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log("Aucun utilisateur connecté");
+        // No authenticated user
         setOsteopaths([]);
         return;
       }

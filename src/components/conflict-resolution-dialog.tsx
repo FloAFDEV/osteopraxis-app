@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { AppointmentConflictInfo, AppointmentData } from "@/types/appointment";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, Calendar, ChevronRight } from "lucide-react";
@@ -17,7 +18,7 @@ interface TimeSlot {
 interface ConflictResolutionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  conflictInfo: any;
+  conflictInfo: AppointmentConflictInfo;
   requestedDate: string;
   onSelectAlternative: (newDate: string) => void;
   onForceUpdate: () => void;
@@ -95,7 +96,7 @@ export function ConflictResolutionDialog({
                 Un rendez-vous existe déjà le {formatDateTime(requestedDate)}
               </p>
               
-              {conflictInfo.conflictingAppointments?.map((appointment: any) => (
+              {conflictInfo.conflictingAppointments?.map((appointment: AppointmentData) => (
                 <div key={appointment.id} className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700 mb-2">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">

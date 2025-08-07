@@ -236,7 +236,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			async (event, session) => {
 				if (!mounted) return;
 
-				console.log('Auth state changed:', event, session?.user?.id);
+				// Auth state monitoring for debugging purposes
 
 				if (session?.user) {
 					// Fetch user data from our User table

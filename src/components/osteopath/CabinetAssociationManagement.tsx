@@ -45,7 +45,7 @@ export function CabinetAssociationManagement() {
 
   const loadCabinets = async () => {
     if (!user?.osteopathId) {
-      console.log("CabinetAssociationManagement: Pas d'osteopathId trouvé");
+      // No osteopath ID found
       setLoading(false);
       return;
     }
@@ -56,14 +56,14 @@ export function CabinetAssociationManagement() {
       
       // Charger les cabinets associés à l'ostéopathe
       const associatedCabinetIds = await api.getOsteopathCabinets(user.osteopathId);
-      console.log("CabinetAssociationManagement: Cabinets associés IDs:", associatedCabinetIds);
+      // Associated cabinet IDs retrieved
       
       const associatedCabsData = await Promise.all(
         associatedCabinetIds.map(id => api.getCabinetById(id))
       );
       const validAssociatedCabs = associatedCabsData.filter(Boolean) as Cabinet[];
       setAssociatedCabinets(validAssociatedCabs);
-      console.log("CabinetAssociationManagement: Cabinets associés:", validAssociatedCabs);
+      // Valid associated cabinets processed
       
     } catch (error) {
       console.error("CabinetAssociationManagement: Erreur lors du chargement des cabinets:", error);
@@ -123,7 +123,7 @@ export function CabinetAssociationManagement() {
   const ownedCabinets = associatedCabinets.filter(cabinet => cabinet.osteopathId === user?.osteopathId);
   const invitedCabinets = associatedCabinets.filter(cabinet => cabinet.osteopathId !== user?.osteopathId);
 
-  console.log("CabinetAssociationManagement: Rendu avec loading:", loading, "associatedCabinets:", associatedCabinets.length);
+  // Component render state tracking
 
   if (loading) {
     return (

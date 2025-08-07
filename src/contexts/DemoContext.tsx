@@ -598,7 +598,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCabinetDemoContext(contextData);
     setInvoiceDemoContext(contextData);
     
-    console.log('DemoContext: Mode démo mis à jour:', isDemoMode);
+    // Demo mode state change
   }, [isDemoMode, demoData]);
 
   const contextValue = {

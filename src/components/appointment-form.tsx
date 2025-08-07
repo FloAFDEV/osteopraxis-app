@@ -1,5 +1,6 @@
 import { api } from "@/services/api";
 import { AppointmentStatus, Patient } from "@/types";
+import { AppointmentConflictInfo, AppointmentFormData, AppointmentUpdateData, AppointmentData, ConflictInfo } from "@/types/appointment";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInYears, parseISO } from "date-fns";
 import { Baby, CalendarIcon, User } from "lucide-react";
@@ -87,8 +88,8 @@ export function AppointmentForm({
 	const [useCustomTime, setUseCustomTime] = useState(false);
 	const [conflictDialog, setConflictDialog] = useState<{
 		open: boolean;
-		conflictInfo: any;
-		formData: any;
+		conflictInfo: ConflictInfo | null;
+		formData: AppointmentFormData | null;
 	}>({
 		open: false,
 		conflictInfo: null,
@@ -96,7 +97,7 @@ export function AppointmentForm({
 	});
 	const [conflictResolutionDialog, setConflictResolutionDialog] = useState<{
 		open: boolean;
-		conflictInfo: any;
+		conflictInfo: AppointmentConflictInfo;
 		requestedDate: string;
 	}>({
 		open: false,
@@ -207,7 +208,7 @@ export function AppointmentForm({
 		setConflictResolutionDialog({ open: false, conflictInfo: null, requestedDate: "" });
 	};
 
-	const performUpdate = async (appointmentData: any, force = false) => {
+	const performUpdate = async (appointmentData: AppointmentUpdateData, force = false) => {
 		if (appointmentId) {
 			// For force updates, we might need to temporarily disable the trigger
 			// This is a simplified approach - in production you might want more sophisticated handling
@@ -266,38 +267,39 @@ export function AppointmentForm({
 					navigate("/appointments");
 				}, 500);
 			}
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error("Error submitting appointment form:", error);
 			
 			// Enhanced conflict handling with resolution dialog
-			if (error.isConflict && error.conflictInfo) {
+			const errorObj = error as { isConflict?: boolean; conflictInfo?: AppointmentConflictInfo; message?: string };
+			if (errorObj.isConflict && errorObj.conflictInfo) {
 				const selectedPatient = patients.find(p => p.id === data.patientId);
 				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'le patient sélectionné';
 				
 				// Show the enhanced conflict resolution dialog
 				setConflictResolutionDialog({
 					open: true,
-					conflictInfo: error.conflictInfo,
+					conflictInfo: errorObj.conflictInfo,
 					requestedDate: new Date(data.date).toISOString()
 				});
 				
 				toast.warning(`⚠️ Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`);
-			} else if (error.message?.includes("créneau horaire")) {
+			} else if (errorObj.message?.includes("créneau horaire")) {
 				// Cas d'erreur de conflit sans détails
 				const selectedPatient = patients.find(p => p.id === data.patientId);
 				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'ce patient';
 				
 				toast.error(`⛔ Impossible de programmer le rendez-vous pour ${patientName}. Ce créneau horaire est déjà occupé par un autre rendez-vous.`);
-			} else if (error.message?.includes("Patient introuvable")) {
+			} else if (errorObj.message?.includes("Patient introuvable")) {
 				toast.error("⛔ Patient introuvable. Veuillez actualiser la page et réessayer.");
-			} else if (error.message?.includes("non autorisé")) {
+			} else if (errorObj.message?.includes("non autorisé")) {
 				toast.error("⛔ Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient.");
 			} else {
 				// Erreur générique avec plus de contexte
 				const selectedPatient = patients.find(p => p.id === data.patientId);
 				const patientName = selectedPatient ? ` pour ${selectedPatient.firstName} ${selectedPatient.lastName}` : '';
 				
-				toast.error(`⛔ Impossible de ${appointmentId ? 'modifier' : 'créer'} le rendez-vous${patientName}. ${error.message || 'Veuillez réessayer dans quelques instants.'}`);
+				toast.error(`⛔ Impossible de ${appointmentId ? 'modifier' : 'créer'} le rendez-vous${patientName}. ${errorObj.message || 'Veuillez réessayer dans quelques instants.'}`);
 			}
 		} finally {
 			setIsSubmitting(false);
