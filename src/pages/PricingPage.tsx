@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Zap, Star } from "lucide-react";
+import { Check, Crown, Zap, Star, TrendingUp, Database, Activity } from "lucide-react";
 import { toast } from "sonner";
 
 const PricingPage = () => {
@@ -23,7 +23,8 @@ const PricingPage = () => {
         "1 cabinet",
         "1 praticien",
         "Gestion des RDV",
-        "Dossier médical basique"
+        "Dossier médical basique",
+        "Optimisation automatique"
       ],
       icon: Zap,
       badge: null,
@@ -39,7 +40,8 @@ const PricingPage = () => {
         "1 praticien",
         "Tout Gratuit +",
         "Facturation",
-        "Export comptable PDF"
+        "Export comptable PDF",
+        "Optimisations avancées"
       ],
       icon: Star,
       badge: null,
@@ -55,7 +57,8 @@ const PricingPage = () => {
         "2 praticiens",
         "Tout Essentiel +",
         "Statistiques avancées",
-        "Support prioritaire"
+        "Support prioritaire",
+        "Monitoring proactif"
       ],
       icon: Crown,
       badge: "Populaire",
@@ -71,7 +74,8 @@ const PricingPage = () => {
         "Praticiens illimités",
         "Tout Pro +",
         "Partage multi-praticiens",
-        "Accès API"
+        "Accès API",
+        "Interface admin complète"
       ],
       icon: Crown,
       badge: "Enterprise",
@@ -199,6 +203,48 @@ const PricingPage = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Performance Features */}
+        <div className="max-w-4xl mx-auto mt-16">
+          <h2 className="text-2xl font-bold text-center mb-8">Fonctionnalités d'optimisation incluses</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="border border-primary/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Optimisation temps réel</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Ajustements automatiques des performances pour une expérience fluide
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border border-primary/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <Database className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Nettoyage automatique</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Maintenance préventive et optimisation de la base de données
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border border-primary/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <Activity className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Monitoring proactif</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Surveillance continue avec alertes et recommandations
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* FAQ or Additional Info */}

@@ -32,8 +32,11 @@ import TipsPage from "@/pages/TipsPage";
 import NotFound from "@/pages/NotFound";
 import { DebugAuthPage } from "@/pages/DebugAuthPage";
 import NewPatientPage from "@/pages/NewPatientPage";
+import PricingPage from "@/pages/PricingPage";
+import ContactPage from "@/pages/ContactPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +62,8 @@ function App() {
                         {/* Routes publiques */}
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/demo" element={<InteractiveDemoPage />} />
+                        <Route path="/pricing" element={<PricingPage />} />
+                        <Route path="/contact" element={<ContactPage />} />
                         <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
                         <Route path="/privacy" element={<PrivacyPolicyPage />} />
                         <Route path="/cgu" element={<TermsOfServicePage />} />
@@ -158,6 +163,7 @@ function App() {
                         {/* Route 404 - doit être en dernier */}
                         <Route path="*" element={<NotFound />} />
                       </Routes>
+                      <PerformanceIndicator />
                       <Toaster />
                     </div>
                   </AuthProvider>

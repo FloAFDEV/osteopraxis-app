@@ -14,12 +14,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	AlertTriangle,
 	ArrowRight,
+	Building2,
 	Building,
 	CheckCircle,
+	CreditCard,
 	FileText,
 	HelpCircle,
 	UserCheck,
+	UserPlus,
 	Users,
+	Zap,
+	TrendingUp,
+	Database,
+	Activity,
 } from "lucide-react";
 
 const HelpPage = () => {
@@ -43,14 +50,26 @@ const HelpPage = () => {
 				</div>
 
 				<Tabs defaultValue="cabinets" className="space-y-6">
-					<TabsList className="grid w-full grid-cols-4">
-						<TabsTrigger value="cabinets">Cabinets</TabsTrigger>
-						<TabsTrigger value="remplacements">
+					<TabsList className="grid w-full grid-cols-5">
+						<TabsTrigger value="cabinets" className="flex items-center gap-2">
+							<Building2 className="w-4 h-4" />
+							Cabinets
+						</TabsTrigger>
+						<TabsTrigger value="remplacements" className="flex items-center gap-2">
+							<UserPlus className="w-4 h-4" />
 							Remplacements
 						</TabsTrigger>
-						<TabsTrigger value="patients">Patients</TabsTrigger>
-						<TabsTrigger value="facturation">
+						<TabsTrigger value="patients" className="flex items-center gap-2">
+							<Users className="w-4 h-4" />
+							Patients
+						</TabsTrigger>
+						<TabsTrigger value="facturation" className="flex items-center gap-2">
+							<CreditCard className="w-4 h-4" />
 							Facturation
+						</TabsTrigger>
+						<TabsTrigger value="optimisation" className="flex items-center gap-2">
+							<Zap className="w-4 h-4" />
+							Optimisation
 						</TabsTrigger>
 					</TabsList>
 
@@ -478,6 +497,118 @@ const HelpPage = () => {
 										informations sont utilisées pour la
 										facturation officielle et doivent être
 										conformes à votre statut professionnel.
+									</AlertDescription>
+								</Alert>
+							</CardContent>
+						</Card>
+					</TabsContent>
+
+					<TabsContent value="optimisation" className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<Zap className="h-5 w-5 text-yellow-500" />
+									Système d'Optimisation
+									<HelpButton content="Le système d'optimisation automatique améliore continuellement les performances de votre application pour une expérience utilisateur fluide et rapide." />
+								</CardTitle>
+								<CardDescription>
+									Comprendre et utiliser les fonctionnalités d'optimisation automatique
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-6">
+								<div>
+									<h3 className="font-semibold mb-3 flex items-center gap-2">
+										<TrendingUp className="h-4 w-4 text-primary" />
+										Optimisation en temps réel
+										<HelpButton content="Le système analyse automatiquement les performances et effectue des ajustements pour maintenir une vitesse optimale." />
+									</h3>
+									<div className="space-y-2 pl-4">
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Cache intelligent :</strong> Mise en cache automatique des données fréquemment utilisées
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Préchargement :</strong> Anticipation et chargement des données probablement nécessaires
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Rendu optimisé :</strong> Affichage intelligent pour réduire les temps de chargement
+										</p>
+									</div>
+								</div>
+
+								<div>
+									<h3 className="font-semibold mb-3 flex items-center gap-2">
+										<Database className="h-4 w-4 text-primary" />
+										Nettoyage automatique
+										<HelpButton content="Maintenance préventive qui s'exécute en arrière-plan pour maintenir les performances optimales." />
+									</h3>
+									<div className="space-y-2 pl-4">
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Nettoyage du cache :</strong> Suppression automatique des données temporaires obsolètes
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Optimisation de la base :</strong> Réorganisation périodique pour améliorer les performances
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Défragmentation :</strong> Optimisation de l'espace de stockage local
+										</p>
+									</div>
+								</div>
+
+								<div>
+									<h3 className="font-semibold mb-3 flex items-center gap-2">
+										<Activity className="h-4 w-4 text-primary" />
+										Monitoring et alertes
+										<HelpButton content="Surveillance continue des performances avec alertes proactives et recommandations personnalisées." />
+									</h3>
+									<div className="space-y-2 pl-4">
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Métriques en temps réel :</strong> Surveillance continue de la vitesse et des performances
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Alertes intelligentes :</strong> Notifications proactives en cas de problème détecté
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Recommandations :</strong> Suggestions personnalisées pour améliorer l'utilisation
+										</p>
+									</div>
+								</div>
+
+								<div>
+									<h3 className="font-semibold mb-3 flex items-center gap-2">
+										Interface admin (Premium)
+										<HelpButton content="Les utilisateurs Premium ont accès à une interface d'administration avancée pour surveiller et gérer l'ensemble du système." />
+									</h3>
+									<div className="space-y-2 pl-4">
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Tableau de bord admin :</strong> Vue d'ensemble des performances du système
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Gestion des utilisateurs :</strong> Administration des comptes et permissions
+										</p>
+										<p className="text-sm text-muted-foreground flex items-center gap-2">
+											<ArrowRight className="h-3 w-3" />
+											<strong>Analytiques avancées :</strong> Rapports détaillés d'utilisation et performance
+										</p>
+									</div>
+								</div>
+
+								<Alert>
+									<CheckCircle className="h-4 w-4" />
+									<AlertDescription>
+										<strong>Bon à savoir :</strong> Toutes les optimisations s'exécutent automatiquement en arrière-plan. 
+										Vous n'avez aucune action à effectuer - le système s'adapte intelligemment à votre utilisation 
+										pour vous offrir la meilleure expérience possible.
 									</AlertDescription>
 								</Alert>
 							</CardContent>

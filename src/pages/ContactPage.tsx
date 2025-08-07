@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Zap, TrendingUp, Database } from "lucide-react";
 import { toast } from "sonner";
 
 const ContactPage = () => {
@@ -181,10 +181,45 @@ const ContactPage = () => {
                   <Button variant="outline" className="w-full justify-start">
                     💬 Chat en direct
                   </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Zap className="w-4 h-4 mr-2" />
+                    Guide d'optimisation
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Performance Optimization Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Optimisation automatique
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Notre système d'optimisation améliore automatiquement les performances de votre application.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                  <Database className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium text-sm">Nettoyage automatique</p>
+                    <p className="text-xs text-muted-foreground">Maintenance préventive en arrière-plan</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                  <Zap className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium text-sm">Cache intelligent</p>
+                    <p className="text-xs text-muted-foreground">Accélération des temps de chargement</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
