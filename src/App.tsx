@@ -8,6 +8,7 @@ import { PrivacyProvider } from "@/contexts/PrivacyContext";
 import { DemoProvider } from "@/contexts/DemoContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { DemoDataManager } from "@/components/demo/DemoDataManager";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -57,6 +58,7 @@ function App() {
               <DemoProvider>
                 <Router>
                   <AuthProvider>
+                    <DemoDataManager />
                     <div className="min-h-screen bg-background">
                       <Routes>
                         {/* Routes publiques */}

@@ -429,8 +429,8 @@ export function Layout({ children }: LayoutProps) {
 			)}
 
 			<main className="flex-1 container px-4 md:px-6 py-6 print:p-0 print:m-0">
-				{isDemoMode && <DemoIndicator />}
-				{children}
+		{isDemoMode && <DemoIndicator className="mb-4" />}
+		{children}
 			</main>
 
 			<footer className="border-t py-6 bg-muted/30 print:hidden">
