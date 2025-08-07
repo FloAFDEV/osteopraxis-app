@@ -17,6 +17,12 @@ import { SystemHealthPanel } from "./system-health";
 import { DetailedStatsPanel } from "./detailed-stats";
 import { DeletedRecordsManager } from "./deleted-records-manager";
 import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard";
+import { SubscriptionManagement } from "./subscription-management";
+import { UserDeletionMonitoring } from "./user-deletion-monitoring";
+import { BusinessAnalytics } from "./business-analytics";
+import { ProactiveUserManagement } from "./proactive-user-management";
+import { SecurityCompliance } from "./security-compliance";
+import { SystemOptimization } from "./system-optimization";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck 
 } from "lucide-react";
@@ -152,13 +158,19 @@ export function AdminDashboard() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-10 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:grid-cols-16 overflow-x-auto">
             <TabsTrigger value="overview" className="text-xs md:text-sm">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="stats" className="text-xs md:text-sm">Statistiques</TabsTrigger>
             <TabsTrigger value="health" className="text-xs md:text-sm">Santé</TabsTrigger>
             <TabsTrigger value="users" className="text-xs md:text-sm">Utilisateurs</TabsTrigger>
             <TabsTrigger value="cabinets" className="text-xs md:text-sm">Cabinets</TabsTrigger>
             <TabsTrigger value="patients" className="text-xs md:text-sm">Patients</TabsTrigger>
+            <TabsTrigger value="subscriptions" className="text-xs md:text-sm">Abonnements</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs md:text-sm">Analytics</TabsTrigger>
+            <TabsTrigger value="proactive" className="text-xs md:text-sm">Gestion Pro.</TabsTrigger>
+            <TabsTrigger value="security" className="text-xs md:text-sm">Sécurité</TabsTrigger>
+            <TabsTrigger value="optimization" className="text-xs md:text-sm">Optimisation</TabsTrigger>
+            <TabsTrigger value="monitoring" className="text-xs md:text-sm">Monitoring</TabsTrigger>
             <TabsTrigger value="deleted" className="text-xs md:text-sm">Supprimés</TabsTrigger>
             <TabsTrigger value="usb" className="text-xs md:text-sm">USB</TabsTrigger>
             <TabsTrigger value="logs" className="text-xs md:text-sm">Logs</TabsTrigger>
@@ -187,6 +199,30 @@ export function AdminDashboard() {
           
           <TabsContent value="patients">
             <PatientsManagement />
+          </TabsContent>
+          
+          <TabsContent value="subscriptions">
+            <SubscriptionManagement />
+          </TabsContent>
+          
+          <TabsContent value="analytics">
+            <BusinessAnalytics />
+          </TabsContent>
+          
+          <TabsContent value="proactive">
+            <ProactiveUserManagement />
+          </TabsContent>
+          
+          <TabsContent value="security">
+            <SecurityCompliance />
+          </TabsContent>
+          
+          <TabsContent value="optimization">
+            <SystemOptimization />
+          </TabsContent>
+          
+          <TabsContent value="monitoring">
+            <UserDeletionMonitoring />
           </TabsContent>
           
           <TabsContent value="deleted">
