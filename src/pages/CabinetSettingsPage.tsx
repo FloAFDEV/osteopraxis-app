@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Building, Phone, MapPin, Save, Mail, Image } from "lucide-react";
+import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,8 @@ const CabinetSettingsPage = () => {
       }
 
       try {
+        // ✅ Chargement cabinets utilisateur
+        
         const cabinets = await api.getCabinetsByUserId(user.id);
         console.log("Cabinets récupérés:", cabinets);
         
@@ -127,9 +130,9 @@ const CabinetSettingsPage = () => {
             <p className="text-amber-800 dark:text-amber-300 mb-4">
               Vous n'avez pas encore de cabinet configuré.
             </p>
-            <p className="text-sm text-muted-foreground">
-              Contactez votre administrateur pour configurer votre cabinet.
-            </p>
+            <Button asChild>
+              <a href="/cabinets/new">Créer un cabinet</a>
+            </Button>
           </div>
         ) : (
           <div className="bg-card rounded-lg border shadow-sm p-6">
