@@ -12,6 +12,7 @@ import { Cabinet } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { BackButton } from "@/components/ui/back-button";
 
+// Page des paramètres du cabinet
 const CabinetSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
