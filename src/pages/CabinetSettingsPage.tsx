@@ -127,9 +127,9 @@ const CabinetSettingsPage = () => {
             <p className="text-amber-800 dark:text-amber-300 mb-4">
               Vous n'avez pas encore de cabinet configuré.
             </p>
-            <Button asChild>
-              <a href="/cabinets/new">Créer un cabinet</a>
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              Contactez votre administrateur pour configurer votre cabinet.
+            </p>
           </div>
         ) : (
           <div className="bg-card rounded-lg border shadow-sm p-6">
