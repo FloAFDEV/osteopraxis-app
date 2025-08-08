@@ -1,5 +1,5 @@
 
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -38,7 +38,7 @@ const NotFound = () => {
               asChild 
               className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:opacity-90 text-black font-medium px-8 py-6 h-auto text-lg"
             >
-              <a href="/">Retourner à l'accueil</a>
+              <Link to="/">Retourner à l'accueil</Link>
             </Button>
           </div>
         </div>

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Cabinet } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { BackButton } from "@/components/ui/back-button";
+import { Link } from "react-router-dom";
 
 const CabinetSettingsPage = () => {
   const [loading, setLoading] = useState(true);
@@ -131,7 +132,7 @@ const CabinetSettingsPage = () => {
               Vous n'avez pas encore de cabinet configuré.
             </p>
             <Button asChild>
-              <a href="/cabinets/new">Créer un cabinet</a>
+              <Link to="/cabinets/new">Créer un cabinet</Link>
             </Button>
           </div>
         ) : (

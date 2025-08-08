@@ -199,7 +199,7 @@ export function Layout({ children }: LayoutProps) {
 								</DropdownMenuItem>
 								<DropdownMenuItem asChild>
 									<NavLink
-										to="/cabinets"
+										to="/settings/cabinet"
 										className="flex items-center cursor-pointer"
 									>
 										<Building className="mr-2 h-4 w-4 text-green-500" />
@@ -358,7 +358,7 @@ export function Layout({ children }: LayoutProps) {
 							Notes d'honoraires
 						</NavLink>
 						<NavLink
-							to="/cabinets"
+							to="/settings/cabinet"
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2",

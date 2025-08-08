@@ -36,6 +36,11 @@ import NewPatientPage from "@/pages/NewPatientPage";
 import PricingPage from "@/pages/PricingPage";
 import ContactPage from "@/pages/ContactPage";
 
+import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
+import NewCabinetPage from "@/pages/NewCabinetPage";
+import EditCabinetPage from "@/pages/EditCabinetPage";
+import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
+
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
@@ -155,6 +160,28 @@ function App() {
                             <TipsPage />
                           </ProtectedRoute>
                         } />
+                        {/* Routes cabinets */}
+                        <Route path="/cabinets" element={
+                          <ProtectedRoute>
+                            <CabinetsManagementPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/cabinets/new" element={
+                          <ProtectedRoute>
+                            <NewCabinetPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/cabinets/:id/edit" element={
+                          <ProtectedRoute>
+                            <EditCabinetPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/cabinets/:id/invitations" element={
+                          <ProtectedRoute>
+                            <CabinetInvitationsPage />
+                          </ProtectedRoute>
+                        } />
+                        
                         {/* Routes admin */}
                         <Route path="/admin/dashboard" element={
                           <ProtectedRoute>

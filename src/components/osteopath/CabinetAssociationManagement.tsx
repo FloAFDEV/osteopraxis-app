@@ -22,6 +22,7 @@ import {
   Alert,
   AlertDescription,
 } from "@/components/ui/alert";
+import { Link } from "react-router-dom";
 
 export function CabinetAssociationManagement() {
   const { user } = useAuth();
@@ -211,9 +212,9 @@ export function CabinetAssociationManagement() {
                   asChild
                   className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300"
                 >
-                  <a href={`/cabinets/${cabinet.id}/invitations`}>
+                  <Link to={`/cabinets/${cabinet.id}/invitations`}>
                     Gérer invitations
-                  </a>
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -272,10 +273,10 @@ export function CabinetAssociationManagement() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild variant="outline">
-              <a href="/cabinets/new" className="flex items-center gap-2">
+              <Link to="/cabinets/new" className="flex items-center gap-2">
                 <Building className="h-4 w-4" />
                 Créer mon cabinet
-              </a>
+              </Link>
             </Button>
             <Button onClick={() => setJoinDialogOpen(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
