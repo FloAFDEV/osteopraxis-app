@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
+import { Building, Phone, MapPin, Save, Mail, Image } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { Cabinet } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { BackButton } from "@/components/ui/back-button";
 
-// Page des paramètres du cabinet
 const CabinetSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
@@ -37,8 +35,6 @@ const CabinetSettingsPage = () => {
       }
 
       try {
-        // ✅ Chargement cabinets utilisateur
-        
         const cabinets = await api.getCabinetsByUserId(user.id);
         console.log("Cabinets récupérés:", cabinets);
         
