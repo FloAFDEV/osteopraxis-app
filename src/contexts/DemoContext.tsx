@@ -18,9 +18,13 @@ interface DemoContextType {
   };
   addDemoPatient: (patient: Omit<Patient, 'id'>) => void;
   updateDemoPatient: (id: number, updates: Partial<Patient>) => void;
+  deleteDemoPatient: (id: number) => void;
   addDemoAppointment: (appointment: Omit<Appointment, 'id'>) => void;
   updateDemoAppointment: (id: number, updates: Partial<Appointment>) => void;
   deleteDemoAppointment: (id: number) => void;
+  addDemoInvoice?: (invoice: Omit<Invoice, 'id'>) => void;
+  updateDemoInvoice?: (id: number, updates: Partial<Invoice>) => void;
+  deleteDemoInvoice?: (id: number) => void;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
@@ -567,6 +571,10 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     ));
   };
 
+  const deleteDemoPatient = (id: number) => {
+    setPatients(prev => prev.filter(p => p.id !== id));
+  };
+
   const addDemoAppointment = (appointmentData: Omit<Appointment, 'id'>) => {
     const newAppointment: Appointment = {
       ...appointmentData,
@@ -577,15 +585,35 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setAppointments(prev => [...prev, newAppointment]);
   };
 
-const updateDemoAppointment = (id: number, updates: Partial<Appointment>) => {
-  setAppointments(prev => prev.map(a => 
-    a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
-  ));
-};
+  const updateDemoAppointment = (id: number, updates: Partial<Appointment>) => {
+    setAppointments(prev => prev.map(a => 
+      a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
+    ));
+  };
 
-const deleteDemoAppointment = (id: number) => {
-  setAppointments(prev => prev.filter(a => a.id !== id));
-};
+  const deleteDemoAppointment = (id: number) => {
+    setAppointments(prev => prev.filter(a => a.id !== id));
+  };
+
+  const addDemoInvoice = (invoiceData: Omit<Invoice, 'id'>) => {
+    const newInvoice: Invoice = {
+      ...invoiceData,
+      id: Math.max(...invoices.map(i => i.id)) + 1,
+      createdAt: new Date().toISOString() as any,
+      updatedAt: new Date().toISOString() as any,
+    };
+    setInvoices(prev => [...prev, newInvoice]);
+  };
+
+  const updateDemoInvoice = (id: number, updates: Partial<Invoice>) => {
+    setInvoices(prev => prev.map(i => 
+      i.id === id ? { ...i, ...updates, updatedAt: new Date().toISOString() as any } : i
+    ));
+  };
+
+  const deleteDemoInvoice = (id: number) => {
+    setInvoices(prev => prev.filter(i => i.id !== id));
+  };
 
   const demoData = {
     patients,
@@ -596,23 +624,27 @@ const deleteDemoAppointment = (id: number) => {
   };
 
   // Injecter le contexte démo dans tous les services quand il change
-useEffect(() => {
-  const contextData = { 
-    isDemoMode, 
-    demoData,
-    addDemoPatient,
-    updateDemoPatient,
-    addDemoAppointment,
-    updateDemoAppointment,
-    deleteDemoAppointment
-  };
-  setAppointmentDemoContext(contextData);
-  setPatientDemoContext(contextData);
-  setCabinetDemoContext(contextData);
-  setInvoiceDemoContext(contextData);
-  
-  // Demo mode state change
-}, [isDemoMode, demoData]);
+  useEffect(() => {
+    const contextData = { 
+      isDemoMode, 
+      demoData,
+      addDemoPatient,
+      updateDemoPatient,
+      deleteDemoPatient,
+      addDemoAppointment,
+      updateDemoAppointment,
+      deleteDemoAppointment,
+      addDemoInvoice,
+      updateDemoInvoice,
+      deleteDemoInvoice,
+    };
+    setAppointmentDemoContext(contextData);
+    setPatientDemoContext(contextData);
+    setCabinetDemoContext(contextData);
+    setInvoiceDemoContext(contextData);
+    
+    // Demo mode state change
+  }, [isDemoMode, demoData]);
 
 const contextValue = {
   isDemoMode,
@@ -620,9 +652,13 @@ const contextValue = {
   demoData,
   addDemoPatient,
   updateDemoPatient,
+  deleteDemoPatient,
   addDemoAppointment,
   updateDemoAppointment,
-  deleteDemoAppointment
+  deleteDemoAppointment,
+  addDemoInvoice,
+  updateDemoInvoice,
+  deleteDemoInvoice,
 };
 
   return (

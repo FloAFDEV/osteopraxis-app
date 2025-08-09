@@ -37,6 +37,11 @@ export const invoiceService = {
       return undefined;
     }
 
+    // Mode démo: lecture locale
+    if (demoContext?.isDemoMode) {
+      return demoContext.demoData.invoices.find((inv: Invoice) => inv.id === id);
+    }
+
     if (USE_SUPABASE) {
       try {
         const isOwned = await isInvoiceOwnedByCurrentOsteopath(id);
@@ -58,6 +63,11 @@ export const invoiceService = {
     if (!patientId || isNaN(patientId) || patientId <= 0) {
       console.warn("getInvoicesByPatientId appelé avec un ID patient invalide:", patientId);
       return [];
+    }
+
+    // Mode démo: lecture locale
+    if (demoContext?.isDemoMode) {
+      return demoContext.demoData.invoices.filter((inv: Invoice) => inv.patientId === patientId);
     }
 
     if (USE_SUPABASE) {
@@ -83,6 +93,11 @@ export const invoiceService = {
       return [];
     }
 
+    // Mode démo: lecture locale
+    if (demoContext?.isDemoMode) {
+      return demoContext.demoData.invoices.filter((inv: Invoice) => inv.appointmentId === appointmentId);
+    }
+
     if (USE_SUPABASE) {
       try {
         const { isAppointmentOwnedByCurrentOsteopath } = await import("@/services");
@@ -101,6 +116,30 @@ export const invoiceService = {
   },
 
   async createInvoice(invoiceData: Partial<Invoice> & { osteopathId?: number }): Promise<Invoice> {
+    // Mode démo: données éphémères
+    if (demoContext?.isDemoMode) {
+      const now = new Date().toISOString();
+      const nextId = Math.max(0, ...demoContext.demoData.invoices.map((i: Invoice) => i.id)) + 1;
+      const toCreate: Invoice = {
+        id: nextId,
+        amount: invoiceData.amount ?? 0,
+        paymentStatus: (invoiceData.paymentStatus ?? "PENDING") as PaymentStatus,
+        date: (invoiceData.date as any) ?? now,
+        notes: invoiceData.notes ?? null,
+        paymentMethod: invoiceData.paymentMethod ?? null,
+        patientId: invoiceData.patientId!,
+        appointmentId: invoiceData.appointmentId ?? null,
+        osteopathId: invoiceData.osteopathId ?? demoContext.demoData.osteopath.id,
+        cabinetId: invoiceData.cabinetId ?? demoContext.demoData.cabinets[0]?.id ?? null,
+        createdAt: now as any,
+        updatedAt: now as any,
+        tvaExoneration: true,
+        tvaMotif: 'TVA non applicable - Article 261-4-1° du CGI'
+      } as Invoice;
+      demoContext.addDemoInvoice({ ...(toCreate as any), id: undefined });
+      return toCreate;
+    }
+
     if (USE_SUPABASE) {
       try {
         let dataToSend = { ...invoiceData };
@@ -130,6 +169,13 @@ export const invoiceService = {
       return undefined;
     }
 
+    // Mode démo: mise à jour locale
+    if (demoContext?.isDemoMode) {
+      demoContext.updateDemoInvoice?.(id, invoiceData);
+      const updated = demoContext.demoData.invoices.find((i: Invoice) => i.id === id);
+      return updated;
+    }
+
     if (USE_SUPABASE) {
       try {
         let dataToSend = { ...invoiceData };
@@ -155,6 +201,12 @@ export const invoiceService = {
     if (!id || isNaN(id) || id <= 0) {
       console.warn("deleteInvoice appelé avec un ID invalide:", id);
       return false;
+    }
+
+    // Mode démo: suppression locale
+    if (demoContext?.isDemoMode) {
+      demoContext.deleteDemoInvoice?.(id);
+      return true;
     }
 
     if (USE_SUPABASE) {
