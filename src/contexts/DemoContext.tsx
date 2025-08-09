@@ -20,6 +20,7 @@ interface DemoContextType {
   updateDemoPatient: (id: number, updates: Partial<Patient>) => void;
   addDemoAppointment: (appointment: Omit<Appointment, 'id'>) => void;
   updateDemoAppointment: (id: number, updates: Partial<Appointment>) => void;
+  deleteDemoAppointment: (id: number) => void;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
@@ -576,11 +577,15 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setAppointments(prev => [...prev, newAppointment]);
   };
 
-  const updateDemoAppointment = (id: number, updates: Partial<Appointment>) => {
-    setAppointments(prev => prev.map(a => 
-      a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
-    ));
-  };
+const updateDemoAppointment = (id: number, updates: Partial<Appointment>) => {
+  setAppointments(prev => prev.map(a => 
+    a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
+  ));
+};
+
+const deleteDemoAppointment = (id: number) => {
+  setAppointments(prev => prev.filter(a => a.id !== id));
+};
 
   const demoData = {
     patients,
@@ -591,25 +596,34 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // Injecter le contexte démo dans tous les services quand il change
-  useEffect(() => {
-    const contextData = { isDemoMode, demoData };
-    setAppointmentDemoContext(contextData);
-    setPatientDemoContext(contextData);
-    setCabinetDemoContext(contextData);
-    setInvoiceDemoContext(contextData);
-    
-    // Demo mode state change
-  }, [isDemoMode, demoData]);
-
-  const contextValue = {
-    isDemoMode,
-    setDemoMode: setIsDemoMode,
+useEffect(() => {
+  const contextData = { 
+    isDemoMode, 
     demoData,
     addDemoPatient,
     updateDemoPatient,
     addDemoAppointment,
-    updateDemoAppointment
+    updateDemoAppointment,
+    deleteDemoAppointment
   };
+  setAppointmentDemoContext(contextData);
+  setPatientDemoContext(contextData);
+  setCabinetDemoContext(contextData);
+  setInvoiceDemoContext(contextData);
+  
+  // Demo mode state change
+}, [isDemoMode, demoData]);
+
+const contextValue = {
+  isDemoMode,
+  setDemoMode: setIsDemoMode,
+  demoData,
+  addDemoPatient,
+  updateDemoPatient,
+  addDemoAppointment,
+  updateDemoAppointment,
+  deleteDemoAppointment
+};
 
   return (
     <DemoContext.Provider value={contextValue}>

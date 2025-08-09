@@ -1,10 +1,10 @@
-
 import { Appointment } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
 import { AppointmentStatus, CreateAppointmentPayload } from "@/types"; 
 import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
 import { getCurrentOsteopathId } from "@/services";
+import { XSSProtection } from "@/services/security/xss-protection";
 
 // Hook pour accéder au contexte démo depuis les services
 let demoContext: any = null;
@@ -201,6 +201,39 @@ export const appointmentService = {
 
   async createAppointment(appointmentData: any): Promise<Appointment> {
     console.log("appointmentService.createAppointment: Starting with data:", appointmentData);
+
+    // Sanitize inputs
+    const sanitized = {
+      ...appointmentData,
+      reason: XSSProtection.sanitizeString(appointmentData?.reason),
+      notes: XSSProtection.sanitizeString(appointmentData?.notes),
+    };
+
+    // Demo mode: keep data ephemeral in memory only
+    if (demoContext?.isDemoMode) {
+      const nextId = Math.max(0, ...demoContext.demoData.appointments.map((a: Appointment) => a.id)) + 1;
+      const start = sanitized.start || sanitized.date || new Date().toISOString();
+      const end = sanitized.end || new Date(new Date(start).getTime() + 30 * 60000).toISOString();
+      const createdAt = new Date().toISOString();
+      const toCreate: Appointment = {
+        id: nextId,
+        patientId: sanitized.patientId,
+        cabinetId: sanitized.cabinetId ?? demoContext.demoData.cabinets[0]?.id,
+        osteopathId: sanitized.osteopathId ?? demoContext.demoData.osteopath.id,
+        start,
+        end,
+        date: sanitized.date || start,
+        reason: sanitized.reason || "Consultation",
+        status: sanitized.status || "SCHEDULED",
+        notes: sanitized.notes || null,
+        createdAt,
+        updatedAt: createdAt,
+        notificationSent: Boolean(sanitized.notificationSent),
+      } as Appointment;
+      // Update context state (without id per provider contract)
+      demoContext.addDemoAppointment({ ...toCreate, id: undefined as unknown as never });
+      return toCreate;
+    }
     
     if (USE_SUPABASE) {
       try {
@@ -211,10 +244,10 @@ export const appointmentService = {
         }
         
         // Écraser l'osteopathId dans le payload avec celui de l'utilisateur connecté
-        appointmentData.osteopathId = osteopathId;
+        sanitized.osteopathId = osteopathId;
         
         // Utiliser la fonction adaptateur pour créer le payload
-        const payload = createAppointmentPayload(appointmentData);
+        const payload = createAppointmentPayload(sanitized);
         const result = await supabaseAppointmentService.createAppointment(payload);
         console.log("appointmentService.createAppointment: Supabase result:", result);
         return result;
@@ -225,15 +258,15 @@ export const appointmentService = {
     }
     
     await delay(500);
-    // Assurer que tous les champs nécessaires sont présents
+    // Assurer que tous les champs nécessaires sont présents (local non-supabase)
     const appointmentWithAllFields = {
-      ...appointmentData,
+      ...sanitized,
       id: appointments.length + 1,
-      start: appointmentData.start || appointmentData.date,
-      end: appointmentData.end || new Date(new Date(appointmentData.date).getTime() + 30 * 60000).toISOString(),
-      date: appointmentData.date || appointmentData.start,
-      osteopathId: appointmentData.osteopathId || 1,
-    };
+      start: sanitized.start || sanitized.date,
+      end: sanitized.end || new Date(new Date(sanitized.date).getTime() + 30 * 60000).toISOString(),
+      date: sanitized.date || sanitized.start,
+      osteopathId: sanitized.osteopathId || 1,
+    } as Appointment;
     appointments.push(appointmentWithAllFields);
     console.log("appointmentService.createAppointment: Local mode result:", appointmentWithAllFields);
     return appointmentWithAllFields;
@@ -241,16 +274,29 @@ export const appointmentService = {
 
   async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {
     console.log(`appointmentService.updateAppointment: Starting for ID ${id} with update:`, update);
+
+    const sanitizedUpdate: Partial<Appointment> = {
+      ...update,
+      reason: update.reason ? XSSProtection.sanitizeString(update.reason) : update.reason,
+      notes: update.notes ? XSSProtection.sanitizeString(update.notes as any) : update.notes,
+    };
+
+    if (demoContext?.isDemoMode) {
+      demoContext.updateDemoAppointment(id, sanitizedUpdate);
+      const updated = demoContext.demoData.appointments.find((a: Appointment) => a.id === id);
+      if (!updated) throw new Error(`Séance avec l'identifiant ${id} non trouvée`);
+      return { ...updated, ...sanitizedUpdate, updatedAt: new Date().toISOString() } as Appointment;
+    }
     
     if (USE_SUPABASE) {
       try {
         // Empêcher la modification de l'osteopathId pour la sécurité
-        if (update.osteopathId !== undefined) {
+        if (sanitizedUpdate.osteopathId !== undefined) {
           console.warn(`appointmentService.updateAppointment: Security warning - osteopathId modification attempt blocked`);
-          delete update.osteopathId;
+          delete sanitizedUpdate.osteopathId;
         }
         
-        const result = await supabaseAppointmentService.updateAppointment(id, update);
+        const result = await supabaseAppointmentService.updateAppointment(id, sanitizedUpdate);
         console.log(`appointmentService.updateAppointment: Supabase result for ID ${id}:`, result);
         return result;
       } catch (error) {
@@ -262,7 +308,7 @@ export const appointmentService = {
     await delay(300);
     const index = appointments.findIndex((a) => a.id === id);
     if (index !== -1) {
-      appointments[index] = { ...appointments[index], ...update };
+      appointments[index] = { ...appointments[index], ...sanitizedUpdate } as Appointment;
       console.log(`appointmentService.updateAppointment: Local mode result for ID ${id}:`, appointments[index]);
       return appointments[index];
     }
@@ -293,6 +339,11 @@ export const appointmentService = {
 
   async deleteAppointment(id: number): Promise<boolean> {
     console.log(`appointmentService.deleteAppointment: Starting for ID ${id}`);
+
+    if (demoContext?.isDemoMode) {
+      demoContext.deleteDemoAppointment(id);
+      return true;
+    }
     
     if (USE_SUPABASE) {
       try {
@@ -314,7 +365,7 @@ export const appointmentService = {
     }
     console.log(`appointmentService.deleteAppointment: Local mode - ID ${id} not found`);
     return false;
-  },
+  }
   
   // Méthode pour injecter le contexte démo
   setDemoContext,
