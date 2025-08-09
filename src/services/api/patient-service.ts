@@ -65,6 +65,24 @@ export const patientService = {
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+    // Mode démo: données éphémères uniquement (pas d'appel Supabase)
+    if (demoContext?.isDemoMode) {
+      await delay(200);
+      const now = new Date().toISOString();
+      const nextId = Math.max(0, ...demoContext.demoData.patients.map((p: Patient) => p.id)) + 1;
+      const toCreate: Patient = {
+        ...patient,
+        id: nextId,
+        createdAt: now,
+        updatedAt: now,
+        osteopathId: (patient as any).osteopathId ?? demoContext.demoData.osteopath.id,
+        cabinetId: (patient as any).cabinetId ?? demoContext.demoData.cabinets[0]?.id ?? null,
+      } as Patient;
+      // Le provider crée l'id, on lui passe sans id pour respecter le contrat
+      demoContext.addDemoPatient({ ...(toCreate as any), id: undefined });
+      return toCreate;
+    }
+
     if (USE_SUPABASE) {
       try {
         // Récupérer l'osteopathId de l'utilisateur connecté
@@ -107,6 +125,15 @@ export const patientService = {
       throw new Error("ID patient invalide pour la mise à jour");
     }
 
+    // Mode démo: mise à jour éphémère
+    if (demoContext?.isDemoMode) {
+      await delay(150);
+      demoContext.updateDemoPatient(patient.id, { ...patient, updatedAt: new Date().toISOString() });
+      const updated = demoContext.demoData.patients.find((p: Patient) => p.id === patient.id);
+      if (!updated) throw new Error(`Patient with id ${patient.id} not found`);
+      return updated;
+    }
+
     if (USE_SUPABASE) {
       try {
         // Use the supabase patient service for update
@@ -139,6 +166,19 @@ export const patientService = {
     if (!id || isNaN(id) || id <= 0) {
       console.warn("deletePatient appelé avec un ID invalide:", id);
       return false;
+    }
+
+    // Mode démo: suppression éphémère
+    if (demoContext?.isDemoMode) {
+      await delay(120);
+      if (demoContext.deleteDemoPatient) {
+        demoContext.deleteDemoPatient(id);
+      } else {
+        // Sécurité si la fonction n'existe pas encore
+        const idx = demoContext.demoData.patients.findIndex((p: Patient) => p.id === id);
+        if (idx !== -1) demoContext.demoData.patients.splice(idx, 1);
+      }
+      return true;
     }
 
     if (USE_SUPABASE) {
