@@ -11,13 +11,14 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-
+import { useDemo } from '@/contexts/DemoContext';
 export function GoogleCalendarIntegration() {
   const { isConnected, events, isLoading, connectGoogle, syncCalendar, disconnectGoogle } = useGoogleCalendar();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [googleClientId, setGoogleClientId] = useState('');
   const [googleClientSecret, setGoogleClientSecret] = useState('');
+  const { isDemoMode } = useDemo();
 
   // Handle OAuth callback
   useEffect(() => {
@@ -179,7 +180,7 @@ export function GoogleCalendarIntegration() {
                 </DialogContent>
               </Dialog>
 
-              <Button onClick={connectGoogle} className="w-full" disabled>
+              <Button onClick={connectGoogle} className="w-full" disabled={isDemoMode}>
                 <Calendar className="h-4 w-4 mr-2" />
                 Connecter Google Calendar
               </Button>
@@ -211,6 +212,7 @@ export function GoogleCalendarIntegration() {
                 variant="outline"
                 size="sm"
                 className="w-full"
+                disabled={isDemoMode}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Synchroniser
@@ -221,6 +223,7 @@ export function GoogleCalendarIntegration() {
                 variant="outline" 
                 size="sm"
                 className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                disabled={isDemoMode}
               >
                 <Unlink className="h-4 w-4 mr-2" />
                 Déconnecter

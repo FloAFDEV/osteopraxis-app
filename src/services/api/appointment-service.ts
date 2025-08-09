@@ -365,7 +365,7 @@ export const appointmentService = {
     }
     console.log(`appointmentService.deleteAppointment: Local mode - ID ${id} not found`);
     return false;
-  }
+  },
   
   // Méthode pour injecter le contexte démo
   setDemoContext,

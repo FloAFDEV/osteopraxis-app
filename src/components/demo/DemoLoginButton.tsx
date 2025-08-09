@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Play, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { DemoService } from "@/services/demo-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useState } from "react";
+import { withRateLimit } from "@/services/security/rate-limiting";
 
 interface DemoLoginButtonProps {
   variant?: "default" | "outline" | "ghost";
@@ -21,23 +22,27 @@ export const DemoLoginButton = ({
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDemoLogin = async () => {
-    setIsLoading(true);
-    try {
-      // Créer/vérifier le compte démo
-      const credentials = await DemoService.createDemoAccount();
-      
-      // Se connecter avec le compte démo
-      await login(credentials.email, credentials.password);
-      
-      toast.success("Connexion démo réussie ! Explorez PatientHub.");
-    } catch (error) {
-      console.error("Erreur connexion démo:", error);
-      toast.error("Erreur lors de la connexion démo");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleDemoLogin = withRateLimit(
+    'demo_login',
+    async () => {
+      setIsLoading(true);
+      try {
+        // Créer/vérifier le compte démo
+        const credentials = await DemoService.createDemoAccount();
+        
+        // Se connecter avec le compte démo
+        await login(credentials.email, credentials.password);
+        
+        toast.success("Connexion démo réussie ! Explorez PatientHub.");
+      } catch (error: any) {
+        console.error("Erreur connexion démo:", error);
+        toast.error(error?.message || "Erreur lors de la connexion démo");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    { maxRequests: 5, windowMs: 60_000, blockDurationMs: 5 * 60_000 }
+  );
 
   return (
     <Button
