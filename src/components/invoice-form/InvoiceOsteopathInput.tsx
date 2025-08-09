@@ -15,6 +15,7 @@ interface InvoiceOsteopathInputProps {
 
 export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopathInputProps) {
   const { osteopaths, loading } = useAuthorizedOsteopaths();
+  const selfOnly = (osteopaths || []).filter(o => o.access_type === 'self');
 
   if (loading) {
     return (
@@ -80,7 +81,7 @@ export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopat
               <SelectValue placeholder="Choisir l'ostéopathe émetteur" />
             </SelectTrigger>
             <SelectContent>
-              {osteopaths.map(osteopath => (
+              {selfOnly.map(osteopath => (
                 <SelectItem key={osteopath.id} value={String(osteopath.id)}>
                   <div className="flex items-center justify-between w-full">
                     <span className="flex-1">

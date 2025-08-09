@@ -64,19 +64,43 @@ export async function verifyPatientOwnership(
   patientId: string | number,
   osteopathId: number
 ): Promise<boolean> {
-  const { data, error } = await supabaseClient
-    .from("Patient")
-    .select("id")
-    .eq("id", patientId)
-    .eq("osteopathId", osteopathId)
-    .maybeSingle();
+  try {
+    // 1) Vérifier d'abord la propriété directe
+    const { data: direct, error: directError } = await supabaseClient
+      .from("Patient")
+      .select("id")
+      .eq("id", patientId)
+      .eq("osteopathId", osteopathId)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Erreur lors de la vérification de propriété du patient:", error);
+    if (direct) return true;
+    if (directError) {
+      console.warn("Erreur vérif propriété directe du patient:", directError);
+    }
+
+    // 2) Sinon, vérifier l'accès étendu (remplacement / collègues de cabinet)
+    const { data: userData } = await supabaseClient.auth.getUser();
+    const authId = userData?.user?.id;
+    if (!authId) return false;
+
+    const { data: canAccess, error: rpcError } = await supabaseClient.rpc(
+      'can_osteopath_access_patient',
+      {
+        osteopath_auth_id: authId,
+        patient_id: Number(patientId)
+      }
+    );
+
+    if (rpcError) {
+      console.error("Erreur RPC can_osteopath_access_patient:", rpcError);
+      return false;
+    }
+
+    return !!canAccess;
+  } catch (e) {
+    console.error("Exception verifyPatientOwnership:", e);
     return false;
   }
-
-  return !!data;
 }
 
 export async function verifyAppointmentOwnership(

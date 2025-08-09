@@ -49,23 +49,35 @@ serve(async (req: Request) => {
     switch (method) {
       case "GET":
         if (patientId) {
-          // Récupérer un patient spécifique
+          // Vérifier l'accès (propriété directe ou accès étendu via cabinet/remplacement)
+          const hasAccess = await verifyPatientOwnership(supabaseClient, patientId, identity.osteopathId);
+          if (!hasAccess) {
+            return createErrorResponse("Accès non autorisé à ce patient", 403);
+          }
+
           const { data, error } = await supabaseClient
             .from("Patient")
             .select("*")
             .eq("id", patientId)
-            .eq("osteopathId", identity.osteopathId) // Sécurisation: filtrer par osteopathId
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
           return createSuccessResponse(data);
         } else {
-          // Récupérer tous les patients de l'ostéopathe connecté
-          const { data, error } = await supabaseClient
-            .from("Patient")
-            .select("*")
-            .eq("osteopathId", identity.osteopathId); // Sécurisation: filtrer par osteopathId
-            
+          // Récupérer tous les patients accessibles à l'ostéopathe (directs + cabinets associés)
+          const { data: cabinetsData, error: cabinetsError } = await supabaseClient
+            .rpc('get_osteopath_cabinets', { osteopath_auth_id: identity.authId });
+          if (cabinetsError) throw cabinetsError;
+          const cabinetIds: number[] = (cabinetsData || []).map((r: any) => r.cabinet_id);
+
+          let query = supabaseClient.from("Patient").select("*");
+          if (cabinetIds.length > 0) {
+            // OR: patients dont l'ostéo courant est propriétaire OU dont le cabinet est associé
+            query = query.or(`osteopathId.eq.${identity.osteopathId},cabinetId.in.(${cabinetIds.join(',')})`);
+          } else {
+            query = query.eq("osteopathId", identity.osteopathId);
+          }
+          const { data, error } = await query;
           if (error) throw error;
           return createSuccessResponse(data);
         }

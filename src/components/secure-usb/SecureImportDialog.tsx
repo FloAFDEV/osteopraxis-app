@@ -234,10 +234,13 @@ export const SecureImportDialog = ({ open, onOpenChange }: SecureImportDialogPro
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="merge" id="merge" />
                   <Label htmlFor="merge" className="text-sm">
-                    Demander pour chaque conflit
+                    Demander pour chaque conflit (vous choisirez au cas par cas)
                   </Label>
                 </div>
               </RadioGroup>
+              <p className="text-xs text-muted-foreground">
+                Astuce: "Ignorer" garde vos données actuelles, "Remplacer" écrase les doublons, "Demander" vous sollicite pour chaque conflit.
+              </p>
             </div>
 
             {errors.length > 0 && (

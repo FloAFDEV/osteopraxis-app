@@ -96,21 +96,29 @@ serve(async (req: Request) => {
     switch (method) {
       case "GET":
         if (cabinetId) {
-          // Récupérer un cabinet spécifique
+          // Récupérer un cabinet spécifique (propriétaire ou associé)
           let query = supabaseClient
             .from("Cabinet")
             .select("*")
             .eq("id", cabinetId);
-          
-          // Pour les ostéopathes, filtrer par osteopathId
-          if (!identity.isAdmin) {
-            query = query.eq("osteopathId", identity.osteopathId);
-          }
-          
-          const { data: cabinet, error } = await query.maybeSingle();
 
+          if (!identity.isAdmin) {
+            // Inclure les cabinets associés via osteopath_cabinet
+            const { data: assoc, error: assocErr } = await supabaseClient
+              .rpc('get_osteopath_cabinets', { osteopath_auth_id: identity.authId });
+            if (assocErr) throw assocErr;
+            const assocIds: number[] = (assoc || []).map((r: any) => r.cabinet_id);
+
+            if (assocIds.length > 0) {
+              query = query.or(`osteopathId.eq.${identity.osteopathId},id.in.(${assocIds.join(',')})`);
+            } else {
+              query = query.eq("osteopathId", identity.osteopathId);
+            }
+          }
+
+          const { data: cabinet, error } = await query.maybeSingle();
           if (error) throw error;
-          
+
           if (!cabinet) {
             return new Response(JSON.stringify({ error: "Cabinet non trouvé" }), {
               status: 404,
@@ -124,15 +132,23 @@ serve(async (req: Request) => {
           });
         } else {
           // Pour les admins, récupérer tous les cabinets
-          // Pour les ostéopathes, récupérer uniquement leurs cabinets
+          // Pour les ostéopathes, récupérer propriétaires + associés
           let query = supabaseClient.from("Cabinet").select("*");
-          
-          if (!identity.isAdmin) {
-            query = query.eq("osteopathId", identity.osteopathId);
-          }
-          
-          const { data: cabinets, error } = await query;
 
+          if (!identity.isAdmin) {
+            const { data: assoc, error: assocErr } = await supabaseClient
+              .rpc('get_osteopath_cabinets', { osteopath_auth_id: identity.authId });
+            if (assocErr) throw assocErr;
+            const assocIds: number[] = (assoc || []).map((r: any) => r.cabinet_id);
+
+            if (assocIds.length > 0) {
+              query = query.or(`osteopathId.eq.${identity.osteopathId},id.in.(${assocIds.join(',')})`);
+            } else {
+              query = query.eq("osteopathId", identity.osteopathId);
+            }
+          }
+
+          const { data: cabinets, error } = await query;
           if (error) throw error;
 
           return new Response(JSON.stringify({ data: cabinets }), {

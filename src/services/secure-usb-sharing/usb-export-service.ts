@@ -1,5 +1,6 @@
 import { hybridDataManager } from '../hybrid-data-adapter/hybrid-manager';
 import CryptoJS from 'crypto-js';
+import { getCurrentOsteopathId } from '@/services/supabase-api/utils/getCurrentOsteopath';
 
 export interface SecureExportData {
   patients: any[];
@@ -38,6 +39,7 @@ export class USBExportService {
       console.log('🔒 Starting secure data export...');
 
       // Collecter les données selon les options
+      const currentOsteopathId = (await getCurrentOsteopathId()) ?? -1;
       const exportData: SecureExportData = {
         patients: [],
         appointments: [],
@@ -45,7 +47,7 @@ export class USBExportService {
         metadata: {
           exportDate: new Date().toISOString(),
           version: '1.0.0',
-          osteopathId: 1, // TODO: Get from current user
+          osteopathId: currentOsteopathId,
           checksum: ''
         }
       };
