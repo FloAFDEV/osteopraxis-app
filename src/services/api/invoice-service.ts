@@ -1,4 +1,3 @@
-
 import { Invoice, PaymentStatus } from "@/types";
 import { USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
@@ -13,12 +12,11 @@ export const setDemoContext = (context: any) => {
 
 export const invoiceService = {
   async getInvoices(): Promise<Invoice[]> {
-    // Vérifier d'abord si on est en mode démo
+    // Démo: données locales éphémères
     if (demoContext?.isDemoMode) {
-      console.log("invoiceService.getInvoices: Using demo data");
       return [...demoContext.demoData.invoices];
     }
-    
+
     if (USE_SUPABASE) {
       try {
         return await supabaseInvoiceService.getInvoices();
@@ -31,13 +29,12 @@ export const invoiceService = {
   },
 
   async getInvoiceById(id: number): Promise<Invoice | undefined> {
-    // Vérification de l'ID avant toute opération
     if (!id || isNaN(id) || id <= 0) {
       console.warn("getInvoiceById appelé avec un ID invalide:", id);
       return undefined;
     }
 
-    // Mode démo: lecture locale
+    // Démo: lecture locale
     if (demoContext?.isDemoMode) {
       return demoContext.demoData.invoices.find((inv: Invoice) => inv.id === id);
     }
@@ -59,13 +56,12 @@ export const invoiceService = {
   },
 
   async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
-    // Vérification de l'ID patient avant toute opération
     if (!patientId || isNaN(patientId) || patientId <= 0) {
       console.warn("getInvoicesByPatientId appelé avec un ID patient invalide:", patientId);
       return [];
     }
 
-    // Mode démo: lecture locale
+    // Démo: lecture locale
     if (demoContext?.isDemoMode) {
       return demoContext.demoData.invoices.filter((inv: Invoice) => inv.patientId === patientId);
     }
@@ -87,13 +83,12 @@ export const invoiceService = {
   },
 
   async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {
-    // Vérification de l'ID rendez-vous avant toute opération
     if (!appointmentId || isNaN(appointmentId) || appointmentId <= 0) {
       console.warn("getInvoicesByAppointmentId appelé avec un ID rendez-vous invalide:", appointmentId);
       return [];
     }
 
-    // Mode démo: lecture locale
+    // Démo: lecture locale
     if (demoContext?.isDemoMode) {
       return demoContext.demoData.invoices.filter((inv: Invoice) => inv.appointmentId === appointmentId);
     }
@@ -116,7 +111,7 @@ export const invoiceService = {
   },
 
   async createInvoice(invoiceData: Partial<Invoice> & { osteopathId?: number }): Promise<Invoice> {
-    // Mode démo: données éphémères
+    // Démo: données éphémères
     if (demoContext?.isDemoMode) {
       const now = new Date().toISOString();
       const nextId = Math.max(0, ...demoContext.demoData.invoices.map((i: Invoice) => i.id)) + 1;
@@ -153,23 +148,18 @@ export const invoiceService = {
         throw error;
       }
     }
-    return {
-      id: Math.floor(Math.random() * 1000),
-      ...invoiceData,
-      osteopathId: (invoiceData.osteopathId ?? (await getCurrentOsteopathId?.())),
-      date: new Date().toISOString(),
-      paymentStatus: "PENDING"
-    } as Invoice;
+
+    // Pas de mode démo et Supabase désactivé
+    throw new Error("Service facture indisponible");
   },
 
   async updateInvoice(id: number, invoiceData: Partial<Invoice> & { osteopathId?: number }): Promise<Invoice | undefined> {
-    // Vérification de l'ID avant mise à jour
     if (!id || isNaN(id) || id <= 0) {
       console.warn("updateInvoice appelé avec un ID invalide:", id);
       return undefined;
     }
 
-    // Mode démo: mise à jour locale
+    // Démo: mise à jour locale
     if (demoContext?.isDemoMode) {
       demoContext.updateDemoInvoice?.(id, invoiceData);
       const updated = demoContext.demoData.invoices.find((i: Invoice) => i.id === id);
@@ -189,21 +179,18 @@ export const invoiceService = {
         throw error;
       }
     }
-    return { 
-      id, 
-      ...invoiceData,
-      osteopathId: (invoiceData.osteopathId ?? (await getCurrentOsteopathId?.())),
-    } as Invoice;
+
+    // Pas de mode démo et Supabase désactivé
+    throw new Error("Service facture indisponible");
   },
 
   async deleteInvoice(id: number): Promise<boolean> {
-    // Vérification de l'ID avant suppression
     if (!id || isNaN(id) || id <= 0) {
       console.warn("deleteInvoice appelé avec un ID invalide:", id);
       return false;
     }
 
-    // Mode démo: suppression locale
+    // Démo: suppression locale
     if (demoContext?.isDemoMode) {
       demoContext.deleteDemoInvoice?.(id);
       return true;
@@ -222,7 +209,9 @@ export const invoiceService = {
         throw error;
       }
     }
-    return true;
+
+    // Pas de mode démo et Supabase désactivé
+    return false;
   },
   
   async exportInvoicesByPeriod(year: string, month: string | null = null): Promise<Invoice[]> {
