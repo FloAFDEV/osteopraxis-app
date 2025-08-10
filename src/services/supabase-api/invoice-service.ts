@@ -203,6 +203,7 @@ export const supabaseInvoiceService = {
         notes: invoiceData.notes || undefined,
         tvaExoneration: invoiceData.tvaExoneration ?? true,
         tvaMotif: invoiceData.tvaMotif || "TVA non applicable - Article 261-4-1° du CGI",
+        osteopathId: osteopathId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
