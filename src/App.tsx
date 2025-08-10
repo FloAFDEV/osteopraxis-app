@@ -35,6 +35,9 @@ import { DebugAuthPage } from "@/pages/DebugAuthPage";
 import NewPatientPage from "@/pages/NewPatientPage";
 import PricingPage from "@/pages/PricingPage";
 import ContactPage from "@/pages/ContactPage";
+import NewInvoicePage from "@/pages/NewInvoicePage";
+import InvoiceDetailPage from "@/pages/InvoiceDetailPage";
+import NewAppointmentPage from "@/pages/NewAppointmentPage";
 
 import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
 import NewCabinetPage from "@/pages/NewCabinetPage";
@@ -105,6 +108,11 @@ function App() {
                             <AppointmentsPage />
                           </ProtectedRoute>
                         } />
+                        <Route path="/appointments/new" element={
+                          <ProtectedRoute>
+                            <NewAppointmentPage />
+                          </ProtectedRoute>
+                        } />
                         <Route path="/schedule" element={
                           <ProtectedRoute>
                             <SchedulePage />
@@ -113,6 +121,16 @@ function App() {
                         <Route path="/invoices" element={
                           <ProtectedRoute>
                             <InvoicesPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/invoices/new" element={
+                          <ProtectedRoute>
+                            <NewInvoicePage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/invoices/:id" element={
+                          <ProtectedRoute>
+                            <InvoiceDetailPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/settings" element={
