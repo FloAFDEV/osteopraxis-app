@@ -105,7 +105,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			if (error) throw error;
 
 			toast.success("Inscription réussie ! Vérifiez votre email pour confirmer votre compte.");
-			navigate("/login");
+			navigate("/login", { replace: true });
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de l'inscription");
 			console.error("Registration failed", err);
@@ -123,7 +123,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			if (error) throw error;
 
 			// State sera nettoyé par le listener onAuthStateChange
-			navigate("/login");
+			navigate("/login", { replace: true });
 			toast.success("Déconnexion réussie !");
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de la déconnexion");
@@ -233,65 +233,70 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 
 		// Set up auth state listener FIRST
 		const { data: { subscription } } = supabase.auth.onAuthStateChange(
-			async (event, session) => {
+			(event, session) => {
 				if (!mounted) return;
 
-				// Auth state monitoring for debugging purposes
+				// Synchronous state updates only
+				setSession(session ?? null);
+				const hasUser = !!session?.user;
+				setIsAuthenticated(hasUser);
 
-				if (session?.user) {
-					// Fetch user data from our User table
-					try {
-						const { data: userData, error } = await supabase
-							.from('User')
-							.select('*')
-							.eq('auth_id', session.user.id)
-							.maybeSingle();
+				if (hasUser) {
+					// Defer any Supabase calls to avoid deadlocks
+					setTimeout(() => {
+						if (!mounted || !session?.user) return;
+						(async () => {
+							try {
+								const { data: userData, error } = await supabase
+									.from('User')
+									.select('*')
+									.eq('auth_id', session.user.id)
+									.maybeSingle();
 
-						if (userData && !error && mounted) {
-							const userWithRole: User = {
-								id: userData.auth_id,
-								email: userData.email,
-								firstName: userData.first_name,
-								lastName: userData.last_name,
-								role: userData.role,
-								osteopathId: userData.osteopathId,
-								created_at: userData.created_at,
-								updated_at: userData.updated_at,
-							};
-							setUser(userWithRole);
-							setSession(session);
-							setIsAuthenticated(true);
-
-							// Navigate based on role only on SIGNED_IN events (not INITIAL_SESSION)
-							if (event === 'SIGNED_IN') {
-								setTimeout(() => {
-									if (userWithRole.role === "ADMIN") {
-										navigate("/admin/dashboard");
-									} else {
-										navigate("/dashboard");
+								if (!mounted) return;
+								if (userData && !error) {
+									const userWithRole: User = {
+										id: userData.auth_id,
+										email: userData.email,
+										firstName: userData.first_name,
+										lastName: userData.last_name,
+										role: userData.role,
+										osteopathId: userData.osteopathId,
+										created_at: userData.created_at,
+										updated_at: userData.updated_at,
+									};
+									setUser(userWithRole);
+									// Navigate based on role only on SIGNED_IN events (not INITIAL_SESSION)
+									if (event === 'SIGNED_IN') {
+										setTimeout(() => {
+											if (userWithRole.role === "ADMIN") {
+												navigate("/admin/dashboard");
+											} else {
+												navigate("/dashboard");
+											}
+										}, 100);
 									}
-								}, 100);
+								} else {
+									setUser(null);
+								}
+							} catch (error) {
+								console.error('Error fetching user data:', error);
+								if (mounted) {
+									setUser(null);
+									setSession(null);
+									setIsAuthenticated(false);
+								}
+							} finally {
+								if (mounted) setLoading(false);
 							}
-						}
-					} catch (error) {
-						console.error('Error fetching user data:', error);
-						if (mounted) {
-							setUser(null);
-							setSession(null);
-							setIsAuthenticated(false);
-						}
-					}
-				} else {
-					// User is signed out
-					if (mounted) {
-						setUser(null);
-						setSession(null);
-						setIsAuthenticated(false);
-					}
-				}
+						})();
+					}, 0);
 
-				if (mounted) {
-					setLoading(false);
+				} else {
+					setUser(null);
+					setSession(null);
+					setIsAuthenticated(false);
+					if (mounted) setLoading(false);
 				}
 			}
 		);
