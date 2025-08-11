@@ -30,6 +30,25 @@ serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
     const patientId = url.searchParams.get("id");
+
+    // Rate limiting to protect the endpoint (15 min window)
+    try {
+      const { data: allowed, error: rlError } = await supabaseClient.rpc('check_rate_limit', {
+        p_user_id: identity.authId,
+        p_endpoint: 'edge/patient',
+        p_max_requests: 300,
+        p_window_minutes: 15
+      });
+      if (!rlError && allowed === false) {
+        return new Response(
+          JSON.stringify({ error: 'Trop de requêtes, réessayez plus tard' }),
+          { status: 429, headers: { ...corsHeaders, 'Retry-After': '900', 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (_) {
+      // En cas d'erreur de quota, ne pas bloquer la requête
+    }
+    
     // Utiliser X-HTTP-Method-Override s'il existe, sinon utiliser la méthode HTTP standard
     const method = req.headers.get("X-HTTP-Method-Override") || req.method;
     

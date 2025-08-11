@@ -84,6 +84,25 @@ Deno.serve(async (req) => {
       return createErrorResponse('User not authenticated', 401);
     }
 
+    // Rate limiting to protect the endpoint (15 min window)
+    try {
+      const { data: allowed, error: rlError } = await supabase.rpc('check_rate_limit', {
+        p_user_id: user.id,
+        p_endpoint: 'edge/update-appointment',
+        p_max_requests: 200,
+        p_window_minutes: 15
+      });
+      if (!rlError && allowed === false) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Too many requests, please try again later' }),
+          { status: 429, headers: { ...corsHeaders, 'Retry-After': '900', 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (_) {
+      // ignore rate limit errors
+    }
+
+
     // Parse le body JSON avec meilleure gestion d'erreur
     let body;
     try {
