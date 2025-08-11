@@ -83,7 +83,7 @@ const useGeolocation = () => {
 						data.address?.municipality,
 				},
 				{
-					url: `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=demo`,
+					url: `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=demo`,
 					parser: (data: any) => data[0]?.name,
 				},
 			];

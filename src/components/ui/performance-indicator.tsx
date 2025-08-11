@@ -21,10 +21,10 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
     return null;
   }
 
-  // Track renders
+  // Track renders (increment once to avoid render loop)
   useEffect(() => {
     setRenderCount(prev => prev + 1);
-  });
+  }, []);
 
   // Toggle visibility with keyboard shortcut
   useEffect(() => {

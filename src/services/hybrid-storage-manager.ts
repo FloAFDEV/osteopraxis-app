@@ -349,8 +349,8 @@ class HybridStorageManager {
 
   private async checkCloudAvailability(): Promise<boolean> {
     try {
-      // Test simple de connectivité cloud
-      const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+      // Test simple de connectivité cloud (ressource locale, conforme CSP)
+      const response = await fetch('/robots.txt', { method: 'HEAD' });
       return response.ok;
     } catch {
       return false;
