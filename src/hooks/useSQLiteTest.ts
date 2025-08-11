@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { browserSQLite } from '../services/sqlite/browser-sqlite';
-import { createSQLiteAdapters } from '../services/sqlite/sqlite-adapters';
+
 
 interface SQLiteTestResult {
   isSupported: boolean;
