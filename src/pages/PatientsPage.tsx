@@ -252,16 +252,11 @@ const PatientsPage = () => {
 				{!isLoading && !globalLoading.initializing && !error && (
 					<>
 						{filteredPatients.length === 0 ? (
-							<EmptyPatientState
-								searchQuery={searchQuery}
-								activeLetter={activeLetter}
-								onClearFilter={handleClearFilter}
-								onCreateTestPatient={() => {
-									toast.info(
-										"Création de patient de test non implémentée"
-									);
-								}}
-							/>
+								<EmptyPatientState
+									searchQuery={searchQuery}
+									activeLetter={activeLetter}
+									onClearFilter={handleClearFilter}
+								/>
 						) : (
 							<>
 								<PatientResultsSummary

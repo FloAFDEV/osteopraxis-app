@@ -421,14 +421,6 @@ export const HybridStorageDiagnostic = () => {
               </Alert>
             )}
             
-            {sqliteResult.testPatientCreated && (
-              <Alert className="mt-4">
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Test patient créé et supprimé avec succès ✓
-                </AlertDescription>
-              </Alert>
-            )}
           </CardContent>
         </Card>
       )}

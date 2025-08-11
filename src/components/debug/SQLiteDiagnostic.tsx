@@ -58,12 +58,6 @@ export function SQLiteDiagnostic() {
                   </Badge>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <span>Test CRUD :</span>
-                  <Badge variant={sqliteResult.testPatientCreated ? "default" : "destructive"}>
-                    {sqliteResult.testPatientCreated ? 'Réussi' : 'Échoué'}
-                  </Badge>
-                </div>
               </div>
 
               {sqliteResult.storageInfo && (

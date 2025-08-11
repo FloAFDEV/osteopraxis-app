@@ -7,7 +7,6 @@ interface EmptyPatientStateProps {
 	searchQuery: string;
 	activeLetter: string;
 	onClearFilter: () => void;
-	onCreateTestPatient: () => void;
 }
 const EmptyPatientState: React.FC<EmptyPatientStateProps> = ({
 	searchQuery,

@@ -8,7 +8,6 @@ interface PatientHeaderProps {
 	patientCount: number;
 	isRefreshing: boolean;
 	onRefresh: () => void;
-	onCreateTestPatient?: () => void;
 }
 
 const PatientHeader: React.FC<PatientHeaderProps> = ({

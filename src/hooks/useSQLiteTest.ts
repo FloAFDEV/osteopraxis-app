@@ -12,7 +12,6 @@ interface SQLiteTestResult {
   hasOPFS: boolean;
   initSuccess: boolean;
   storageInfo?: any;
-  testPatientCreated?: boolean;
   error?: string;
 }
 
@@ -51,23 +50,8 @@ export function useSQLiteTest() {
         testResult.storageInfo = await browserSQLite.getStorageInfo();
         console.log('✅ Storage info:', testResult.storageInfo);
 
-        // Test 5: Tester la création d'un patient
-        const adapters = createSQLiteAdapters();
-        const testPatient = await adapters.patients.create({
-          firstName: 'Test',
-          lastName: 'Patient',
-          email: 'test@example.com',
-          osteopathId: 1
-        });
-        
-        if (testPatient && testPatient.id) {
-          testResult.testPatientCreated = true;
-          console.log('✅ Test patient created:', testPatient);
-
-          // Nettoyer le patient de test
-          await adapters.patients.delete(testPatient.id);
-          console.log('🧹 Test patient cleaned up');
-        }
+        // Test 5: Création de patient test – ignorée (aucune création automatique)
+        console.log('ℹ️ Test de création de patient ignoré (tester manuellement).');
 
       } catch (initError) {
         console.error('❌ SQLite initialization failed:', initError);
