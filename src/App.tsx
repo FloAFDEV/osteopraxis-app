@@ -38,6 +38,9 @@ import ContactPage from "@/pages/ContactPage";
 import NewInvoicePage from "@/pages/NewInvoicePage";
 import InvoiceDetailPage from "@/pages/InvoiceDetailPage";
 import NewAppointmentPage from "@/pages/NewAppointmentPage";
+import EditPatientPage from "@/pages/EditPatientPage";
+import EditAppointmentPage from "@/pages/EditAppointmentPage";
+import EditInvoicePage from "@/pages/EditInvoicePage";
 
 import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
 import NewCabinetPage from "@/pages/NewCabinetPage";
@@ -103,6 +106,11 @@ function App() {
                             <PatientDetailPage />
                           </ProtectedRoute>
                         } />
+                        <Route path="/patients/:id/edit" element={
+                          <ProtectedRoute>
+                            <EditPatientPage />
+                          </ProtectedRoute>
+                        } />
                         <Route path="/appointments" element={
                           <ProtectedRoute>
                             <AppointmentsPage />
@@ -111,6 +119,11 @@ function App() {
                         <Route path="/appointments/new" element={
                           <ProtectedRoute>
                             <NewAppointmentPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/appointments/:id/edit" element={
+                          <ProtectedRoute>
+                            <EditAppointmentPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/schedule" element={
@@ -131,6 +144,11 @@ function App() {
                         <Route path="/invoices/:id" element={
                           <ProtectedRoute>
                             <InvoiceDetailPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/invoices/:id/edit" element={
+                          <ProtectedRoute>
+                            <EditInvoicePage />
                           </ProtectedRoute>
                         } />
                         <Route path="/settings" element={

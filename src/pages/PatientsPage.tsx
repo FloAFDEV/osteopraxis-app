@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { useGlobalOptimization } from "@/hooks/useGlobalOptimization";
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
 import { useOptimizedPatients } from "@/hooks/useOptimizedPatients";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Shield } from "lucide-react";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -196,6 +198,18 @@ const PatientsPage = () => {
 					isRefreshing={isRefreshing}
 					onRefresh={handleRetry}
 				/>
+
+				{/* HDS notice */}
+				<div className="mb-4">
+					<Alert>
+						<AlertTitle className="flex items-center gap-2">
+							<Shield className="h-4 w-4" /> Données patients stockées localement (HDS)
+						</AlertTitle>
+						<AlertDescription>
+							Vos données sensibles ne quittent pas votre appareil. Partage via export USB sécurisé ou future synchronisation de cabinet.
+						</AlertDescription>
+					</Alert>
+				</div>
 
 				{/* Search and filter section */}
 				<div className="mb-4 space-y-4">

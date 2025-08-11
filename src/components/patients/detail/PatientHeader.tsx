@@ -18,6 +18,9 @@ export function PatientHeader({ patientId }: PatientHeaderProps) {
 					</Link>
 				</Button>
 			</div>
+			<Button variant="outline" size="sm" asChild>
+				<Link to={`/patients/${patientId}/edit`}>Modifier</Link>
+			</Button>
 		</div>
 	);
 }

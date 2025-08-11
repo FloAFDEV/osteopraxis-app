@@ -23,6 +23,8 @@ import { useOsteopaths } from "@/hooks/useOsteopaths";
 import { useCabinetsByOsteopath } from "@/hooks/useCabinetsByOsteopath";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { InvoiceExportButtons } from "@/components/invoices/InvoiceExportButtons";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Shield } from "lucide-react";
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const {
@@ -290,6 +292,18 @@ const InvoicesPage = () => {
               <Plus className="h-5 w-5" />
               Nouvelle note d'honoraire
             </Button>
+          </div>
+
+          {/* Alerte HDS */}
+          <div className="mb-4">
+            <Alert>
+              <AlertTitle className="flex items-center gap-2">
+                <Shield className="h-4 w-4" /> Données de facturation sensibles (locales)
+              </AlertTitle>
+              <AlertDescription>
+                Les détails patients et factures restent stockés sur votre appareil. Partage via export sécurisé.
+              </AlertDescription>
+            </Alert>
           </div>
 
           {/* Filters avec toutes les props nécessaires */}

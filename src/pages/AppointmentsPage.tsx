@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/ui/layout";
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	Select,
 	SelectContent,
@@ -35,6 +36,7 @@ import {
 	Plus,
 	RefreshCw,
 	Search,
+	Shield,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -374,6 +376,19 @@ const AppointmentsPage = () => {
 							</Button>
 						</div>
 					</div>
+
+					{/* HDS notice */}
+					<div className="mb-4">
+						<Alert>
+							<AlertTitle className="flex items-center gap-2">
+								<Shield className="h-4 w-4" /> Données RDV sensibles stockées localement (HDS)
+							</AlertTitle>
+							<AlertDescription>
+								Les informations patients et de séance restent sur votre appareil. Partage ciblé à venir.
+							</AlertDescription>
+						</Alert>
+					</div>
+
 					{/* Section Recherche et Filtrage */}
 					<div className="flex flex-col md:flex-row gap-4 mb-6">
 						<div className="flex-grow relative">
