@@ -2,6 +2,7 @@ import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
 import { getCurrentOsteopathId } from "@/services";
+import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
 
 // Hook pour accéder au contexte démo depuis les services
 let demoContext: any = null;
@@ -19,9 +20,10 @@ export const patientService = {
 
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.getPatients();
+        // Route via stockage local hybride (HDS)
+        return await hybridDataManager.get<Patient>('patients');
       } catch (error) {
-        console.error("Erreur Supabase getPatients:", error);
+        console.error("Erreur Hybrid getPatients:", error);
         throw error;
       }
     }
@@ -44,9 +46,10 @@ export const patientService = {
 
     if (USE_SUPABASE) {
       try {
-        return await supabasePatientService.getPatientById(id);
+        const res = await hybridDataManager.getById<Patient>('patients', id);
+        return res || undefined;
       } catch (error) {
-        console.error("Erreur Supabase getPatientById:", error);
+        console.error("Erreur Hybrid getPatientById:", error);
         return undefined;
       }
     }
@@ -76,23 +79,20 @@ export const patientService = {
 
     if (USE_SUPABASE) {
       try {
-        // Récupérer l'osteopathId de l'utilisateur connecté
+        // Forcer l'osteopathId via service existant puis créer en local
         const osteopathId = await getCurrentOsteopathId();
         if (!osteopathId) {
           throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
         }
-
-        // S'assurer que l'osteopathId est correct et que cabinetId est inclus
         const securedPatientData = {
           ...patient,
           osteopathId,
           cabinetId: patient.cabinetId || null,
-        };
-
-        const createdPatient = await supabasePatientService.createPatient(securedPatientData);
-        return createdPatient;
+        } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
+        const created = await hybridDataManager.create<Patient>('patients', securedPatientData);
+        return created;
       } catch (error) {
-        console.error("Erreur Supabase createPatient:", error);
+        console.error("Erreur Hybrid createPatient:", error);
         throw error;
       }
     }
@@ -117,10 +117,10 @@ export const patientService = {
 
     if (USE_SUPABASE) {
       try {
-        const updatedPatient = await supabasePatientService.updatePatient(patient);
+        const updatedPatient = await hybridDataManager.update<Patient>('patients', patient.id, patient);
         return updatedPatient;
       } catch (error) {
-        console.error("Erreur Supabase updatePatient:", error);
+        console.error("Erreur Hybrid updatePatient:", error);
         throw error;
       }
     }
@@ -149,13 +149,10 @@ export const patientService = {
 
     if (USE_SUPABASE) {
       try {
-        const { error } = await supabasePatientService.deletePatient(id);
-        if (error) {
-          throw error;
-        }
-        return true;
+        const ok = await hybridDataManager.delete('patients', id);
+        return ok;
       } catch (error) {
-        console.error("Erreur Supabase deletePatient:", error);
+        console.error("Erreur Hybrid deletePatient:", error);
         throw error;
       }
     }

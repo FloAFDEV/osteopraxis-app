@@ -97,3 +97,13 @@ function_name = "update-cabinet"
 path = "/update-osteopath"
 verify_jwt = true
 function_name = "update-osteopath"
+
+[[edge_functions]]
+path = "/secure-publish-patient-delta"
+verify_jwt = true
+function_name = "secure-publish-patient-delta"
+
+[[edge_functions]]
+path = "/secure-fetch-patient-deltas"
+verify_jwt = true
+function_name = "secure-fetch-patient-deltas"

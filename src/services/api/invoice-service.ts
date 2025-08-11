@@ -3,6 +3,7 @@ import { USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
 import { getCurrentOsteopathId, isInvoiceOwnedByCurrentOsteopath, isPatientOwnedByCurrentOsteopath } from "@/services";
 import { SecurityViolationError } from "./appointment-service";
+import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
 
 // Hook pour accéder au contexte démo depuis les services
 let demoContext: any = null;
@@ -19,9 +20,9 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        return await supabaseInvoiceService.getInvoices();
+        return await hybridDataManager.get<Invoice>('invoices');
       } catch (error) {
-        console.error("Erreur Supabase getInvoices:", error);
+        console.error("Erreur Hybrid getInvoices:", error);
         throw error;
       }
     }
@@ -41,14 +42,10 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const isOwned = await isInvoiceOwnedByCurrentOsteopath(id);
-        if (!isOwned) {
-          console.error(`[SECURITY VIOLATION] Tentative d'accès à la facture ${id} qui n'appartient pas à l'ostéopathe connecté`);
-          throw new SecurityViolationError(`Vous n'avez pas accès à cette facture`);
-        }
-        return await supabaseInvoiceService.getInvoiceById(id);
+        const res = await hybridDataManager.getById<Invoice>('invoices', id);
+        return res || undefined;
       } catch (error) {
-        console.error("Erreur Supabase getInvoiceById:", error);
+        console.error("Erreur Hybrid getInvoiceById:", error);
         throw error;
       }
     }
@@ -68,14 +65,10 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const isOwned = await isPatientOwnedByCurrentOsteopath(patientId);
-        if (!isOwned) {
-          console.error(`[SECURITY VIOLATION] Tentative d'accès aux factures du patient ${patientId} qui n'appartient pas à l'ostéopathe connecté`);
-          throw new SecurityViolationError(`Vous n'avez pas accès à ce patient`);
-        }
-        return await supabaseInvoiceService.getInvoicesByPatientId(patientId);
+        const all = await hybridDataManager.get<Invoice>('invoices');
+        return all.filter(inv => inv.patientId === patientId);
       } catch (error) {
-        console.error("Erreur Supabase getInvoicesByPatientId:", error);
+        console.error("Erreur Hybrid getInvoicesByPatientId:", error);
         throw error;
       }
     }
@@ -95,15 +88,10 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const { isAppointmentOwnedByCurrentOsteopath } = await import("@/services");
-        const isOwned = await isAppointmentOwnedByCurrentOsteopath(appointmentId);
-        if (!isOwned) {
-          console.error(`[SECURITY VIOLATION] Tentative d'accès aux factures du rendez-vous ${appointmentId} qui n'appartient pas à l'ostéopathe connecté`);
-          throw new SecurityViolationError(`Vous n'avez pas accès à ce rendez-vous`);
-        }
-        return await supabaseInvoiceService.getInvoicesByAppointmentId(appointmentId);
+        const all = await hybridDataManager.get<Invoice>('invoices');
+        return all.filter(inv => inv.appointmentId === appointmentId);
       } catch (error) {
-        console.error("Erreur Supabase getInvoicesByAppointmentId:", error);
+        console.error("Erreur Hybrid getInvoicesByAppointmentId:", error);
         throw error;
       }
     }
@@ -137,14 +125,14 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        let dataToSend = { ...invoiceData };
+        let dataToSend = { ...invoiceData } as any;
         if (!dataToSend.osteopathId) {
           dataToSend.osteopathId = await getCurrentOsteopathId();
         }
-        // On laisse la backend RLS faire la vérification
-        return await supabaseInvoiceService.createInvoice(dataToSend as Omit<Invoice, "id">);
+        const created = await hybridDataManager.create<Invoice>('invoices', dataToSend as Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>);
+        return created;
       } catch (error) {
-        console.error("Erreur Supabase createInvoice:", error);
+        console.error("Erreur Hybrid createInvoice:", error);
         throw error;
       }
     }
@@ -168,14 +156,14 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        let dataToSend = { ...invoiceData };
+        let dataToSend = { ...invoiceData } as any;
         if (!dataToSend.osteopathId) {
           dataToSend.osteopathId = await getCurrentOsteopathId();
         }
-        const updatedInvoice = await supabaseInvoiceService.updateInvoice(id, dataToSend);
-        return updatedInvoice;
+        const updated = await hybridDataManager.update<Invoice>('invoices', id, dataToSend);
+        return updated;
       } catch (error) {
-        console.error("Erreur Supabase updateInvoice:", error);
+        console.error("Erreur Hybrid updateInvoice:", error);
         throw error;
       }
     }
@@ -198,14 +186,10 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const isOwned = await isInvoiceOwnedByCurrentOsteopath(id);
-        if (!isOwned) {
-          console.error(`[SECURITY VIOLATION] Tentative de suppression de la facture ${id} qui n'appartient pas à l'ostéopathe connecté`);
-          throw new SecurityViolationError(`Vous n'avez pas accès à cette facture`);
-        }
-        return await supabaseInvoiceService.deleteInvoice(id);
+        const ok = await hybridDataManager.delete('invoices', id);
+        return ok;
       } catch (error) {
-        console.error("Erreur Supabase deleteInvoice:", error);
+        console.error("Erreur Hybrid deleteInvoice:", error);
         throw error;
       }
     }

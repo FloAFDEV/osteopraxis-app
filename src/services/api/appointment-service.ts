@@ -5,6 +5,7 @@ import { AppointmentStatus, CreateAppointmentPayload } from "@/types";
 import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
 import { getCurrentOsteopathId } from "@/services";
 import { XSSProtection } from "@/services/security/xss-protection";
+import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
 
 // Hook pour accéder au contexte démo depuis les services
 let demoContext: any = null;
@@ -75,12 +76,12 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        console.log("appointmentService.getAppointments: Using Supabase");
-        const result = await supabaseAppointmentService.getAppointments();
-        console.log(`appointmentService.getAppointments: Supabase returned ${result.length} appointments`);
+        console.log("appointmentService.getAppointments: Using Hybrid local storage");
+        const result = await hybridDataManager.get<Appointment>('appointments');
+        console.log(`appointmentService.getAppointments: Hybrid returned ${result.length} appointments`);
         return result;
       } catch (error) {
-        console.error("appointmentService.getAppointments: Supabase error:", error);
+        console.error("appointmentService.getAppointments: Hybrid error:", error);
         throw error;
       }
     }
@@ -105,12 +106,12 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        console.log(`appointmentService.getAppointmentById: Using Supabase for ID ${id}`);
-        const result = await supabaseAppointmentService.getAppointmentById(id);
-        console.log(`appointmentService.getAppointmentById: Supabase result for ID ${id}:`, result);
-        return result;
+        console.log(`appointmentService.getAppointmentById: Using Hybrid for ID ${id}`);
+        const result = await hybridDataManager.getById<Appointment>('appointments', id);
+        console.log(`appointmentService.getAppointmentById: Hybrid result for ID ${id}:`, result);
+        return result || undefined;
       } catch (error) {
-        console.error(`appointmentService.getAppointmentById: Supabase error for ID ${id}:`, error);
+        console.error(`appointmentService.getAppointmentById: Hybrid error for ID ${id}:`, error);
         throw error;
       }
     }
@@ -133,12 +134,13 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        console.log(`appointmentService.getAppointmentsByPatientId: Using Supabase for patient ${patientId}`);
-        const result = await supabaseAppointmentService.getAppointmentsByPatientId(patientId);
-        console.log(`appointmentService.getAppointmentsByPatientId: Supabase returned ${result.length} appointments for patient ${patientId}`);
+        console.log(`appointmentService.getAppointmentsByPatientId: Using Hybrid for patient ${patientId}`);
+        const all = await hybridDataManager.get<Appointment>('appointments');
+        const result = all.filter(a => a.patientId === patientId);
+        console.log(`appointmentService.getAppointmentsByPatientId: Hybrid returned ${result.length} appointments for patient ${patientId}`);
         return result;
       } catch (error) {
-        console.error(`appointmentService.getAppointmentsByPatientId: Supabase error for patient ${patientId}:`, error);
+        console.error(`appointmentService.getAppointmentsByPatientId: Hybrid error for patient ${patientId}:`, error);
         throw error;
       }
     }
@@ -173,11 +175,16 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        const result = await supabaseAppointmentService.getTodayAppointmentForPatient(patientId);
-        console.log(`appointmentService.getTodayAppointmentForPatient: Supabase result for patient ${patientId}:`, result);
+        const all = await hybridDataManager.get<Appointment>('appointments');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const result = all.find(a => a.patientId === patientId && new Date(a.date) >= today && new Date(a.date) < tomorrow) || null;
+        console.log(`appointmentService.getTodayAppointmentForPatient: Hybrid result for patient ${patientId}:`, result);
         return result;
       } catch (error) {
-        console.error(`appointmentService.getTodayAppointmentForPatient: Supabase error for patient ${patientId}:`, error);
+        console.error(`appointmentService.getTodayAppointmentForPatient: Hybrid error for patient ${patientId}:`, error);
         throw error;
       }
     }
@@ -237,22 +244,12 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        // Récupérer l'osteopathId de l'utilisateur connecté pour le forcer dans le payload
-        const osteopathId = await getCurrentOsteopathId();
-        if (!osteopathId) {
-          throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
-        }
-        
-        // Écraser l'osteopathId dans le payload avec celui de l'utilisateur connecté
-        sanitized.osteopathId = osteopathId;
-        
-        // Utiliser la fonction adaptateur pour créer le payload
-        const payload = createAppointmentPayload(sanitized);
-        const result = await supabaseAppointmentService.createAppointment(payload);
-        console.log("appointmentService.createAppointment: Supabase result:", result);
-        return result;
+        // Forcer l'osteopathId si disponible côté cloud, sinon laisser hybride gérer
+        const created = await hybridDataManager.create<Appointment>('appointments', sanitized);
+        console.log("appointmentService.createAppointment: Hybrid result:", created);
+        return created;
       } catch (error) {
-        console.error("appointmentService.createAppointment: Supabase error:", error);
+        console.error("appointmentService.createAppointment: Hybrid error:", error);
         throw error;
       }
     }
@@ -290,17 +287,11 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        // Empêcher la modification de l'osteopathId pour la sécurité
-        if (sanitizedUpdate.osteopathId !== undefined) {
-          console.warn(`appointmentService.updateAppointment: Security warning - osteopathId modification attempt blocked`);
-          delete sanitizedUpdate.osteopathId;
-        }
-        
-        const result = await supabaseAppointmentService.updateAppointment(id, sanitizedUpdate);
-        console.log(`appointmentService.updateAppointment: Supabase result for ID ${id}:`, result);
+        const result = await hybridDataManager.update<Appointment>('appointments', id, sanitizedUpdate);
+        console.log(`appointmentService.updateAppointment: Hybrid result for ID ${id}:`, result);
         return result;
       } catch (error) {
-        console.error(`appointmentService.updateAppointment: Supabase error for ID ${id}:`, error);
+        console.error(`appointmentService.updateAppointment: Hybrid error for ID ${id}:`, error);
         throw error;
       }
     }
@@ -325,11 +316,11 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        const result = await supabaseAppointmentService.cancelAppointment(id);
-        console.log(`appointmentService.cancelAppointment: Supabase result for ID ${id}:`, result);
+        const result = await hybridDataManager.update<Appointment>('appointments', id, { status: 'CANCELED' } as Partial<Appointment>);
+        console.log(`appointmentService.cancelAppointment: Hybrid result for ID ${id}:`, result);
         return result;
       } catch (error) {
-        console.error(`appointmentService.cancelAppointment: Supabase error for ID ${id}:`, error);
+        console.error(`appointmentService.cancelAppointment: Hybrid error for ID ${id}:`, error);
         throw error;
       }
     }
@@ -347,11 +338,11 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        await supabaseAppointmentService.deleteAppointment(id);
-        console.log(`appointmentService.deleteAppointment: Supabase success for ID ${id}`);
+        await hybridDataManager.delete('appointments', id);
+        console.log(`appointmentService.deleteAppointment: Hybrid success for ID ${id}`);
         return true;
       } catch (error) {
-        console.error(`appointmentService.deleteAppointment: Supabase error for ID ${id}:`, error);
+        console.error(`appointmentService.deleteAppointment: Hybrid error for ID ${id}:`, error);
         throw error;
       }
     }
