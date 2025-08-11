@@ -1,7 +1,7 @@
 import { Invoice, PaymentStatus } from "@/types";
 import { USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
-import { getCurrentOsteopathId, isInvoiceOwnedByCurrentOsteopath, isPatientOwnedByCurrentOsteopath } from "@/services";
+import { getCurrentOsteopathId, isInvoiceOwnedByCurrentOsteopath, isPatientOwnedByCurrentOsteopath } from "../supabase-api/utils/getCurrentOsteopath";
 import { SecurityViolationError } from "./appointment-service";
 import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
 

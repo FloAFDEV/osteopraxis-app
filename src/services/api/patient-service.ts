@@ -1,7 +1,7 @@
 import { Patient } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabasePatientService } from "../supabase-api/patient-service";
-import { getCurrentOsteopathId } from "@/services";
+import { getCurrentOsteopathId } from "../supabase-api/utils/getCurrentOsteopath";
 import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
 
 // Hook pour accéder au contexte démo depuis les services

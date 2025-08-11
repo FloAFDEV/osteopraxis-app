@@ -3,7 +3,7 @@ import { delay, USE_SUPABASE } from "./config";
 import { supabaseAppointmentService } from "../supabase-api/appointment-service";
 import { AppointmentStatus, CreateAppointmentPayload } from "@/types"; 
 import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
-import { getCurrentOsteopathId } from "@/services";
+import { getCurrentOsteopathId } from "../supabase-api/utils/getCurrentOsteopath";
 import { XSSProtection } from "@/services/security/xss-protection";
 import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
 
