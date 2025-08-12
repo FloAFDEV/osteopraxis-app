@@ -176,16 +176,7 @@ function App() {
                             <CollaborationsSettingsPage />
                           </ProtectedRoute>
                         } />
-                        <Route path="/settings/debug" element={
-                          <ProtectedRoute>
-                            <SQLiteDebugPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/debug-auth" element={
-                          <ProtectedRoute>
-                            <DebugAuthPage />
-                          </ProtectedRoute>
-                        } />
+                        {/* Retiré des paramètres pour les praticiens */}
                         <Route path="/help" element={
                           <ProtectedRoute>
                             <HelpPage />
@@ -222,6 +213,11 @@ function App() {
                         <Route path="/admin/dashboard" element={
                           <ProtectedRoute>
                             <AdminDashboardPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/admin/tech-debug" element={
+                          <ProtectedRoute>
+                            <AdminTechDebugPage />
                           </ProtectedRoute>
                         } />
                         

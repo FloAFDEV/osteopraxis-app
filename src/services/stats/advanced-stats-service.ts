@@ -94,37 +94,20 @@ export class AdvancedStatsService {
     };
   }
 
-  private async getAppointments(osteopathId: number): Promise<Appointment[]> {
-    const { data, error } = await supabase
-      .from("Appointment")
-      .select("*")
-      .eq("osteopathId", osteopathId)
-      .is("deleted_at", null);
-    
-    if (error) throw error;
-    return data || [];
+  private async getAppointments(osteopathId: number) {
+    // Utiliser la couche API (hybride: local -> cloud si nécessaire)
+    const all = await import("@/services/api").then(m => m.api.getAppointments());
+    return all.filter((a: any) => a.osteopathId === osteopathId);
   }
 
-  private async getInvoices(osteopathId: number): Promise<Invoice[]> {
-    const { data, error } = await supabase
-      .from("Invoice")
-      .select("*")
-      .eq("osteopathId", osteopathId)
-      .is("deleted_at", null);
-    
-    if (error) throw error;
-    return data || [];
+  private async getInvoices(osteopathId: number) {
+    const all = await import("@/services/api").then(m => m.api.getInvoices());
+    return all.filter((i: any) => i.osteopathId === osteopathId);
   }
 
-  private async getPatients(osteopathId: number): Promise<Patient[]> {
-    const { data, error } = await supabase
-      .from("Patient")
-      .select("*")
-      .eq("osteopathId", osteopathId)
-      .is("deleted_at", null);
-    
-    if (error) throw error;
-    return data || [];
+  private async getPatients(osteopathId: number) {
+    const all = await import("@/services/api").then(m => m.api.getPatients());
+    return all.filter((p: any) => p.osteopathId === (osteopathId as any));
   }
 
   private calculateRevenueStats(

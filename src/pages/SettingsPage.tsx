@@ -63,24 +63,7 @@ const SettingsPage = () => {
 			path: "/help",
 			color: "text-orange-500",
 		},
-		{
-			id: "debug",
-			title: "🔧 Diagnostic Technique",
-			description:
-				"Test de l'architecture hybride SQLite + OPFS",
-			icon: Settings,
-			path: "/settings/debug",
-			color: "text-red-500",
-		},
-		{
-			id: "tips",
-			title: "💡 Conseils & Bonnes Pratiques",
-			description:
-				"Optimisez votre utilisation avec nos conseils d'experts",
-			icon: HelpCircle,
-			path: "/conseils",
-			color: "text-indigo-500",
-		},
+    ];
 	];
 
 	return (

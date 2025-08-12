@@ -307,6 +307,7 @@ export class OPFSSQLiteService {
 
 // Instance singleton
 let opfsSQLiteService: OPFSSQLiteService | null = null;
+let initPromise: Promise<void> | null = null;
 
 /**
  * Obtient l'instance SQLite OPFS
@@ -319,6 +320,14 @@ export async function getOPFSSQLiteService(): Promise<OPFSSQLiteService> {
       enableEncryption: false // TODO: Implémenter le chiffrement
     });
     
+    // Démarrer et mémoriser l'initialisation pour éviter les courses
+    initPromise = opfsSQLiteService.initialize();
+    await initPromise;
+  } else if (initPromise) {
+    // Attendre toute initialisation en cours
+    await initPromise;
+  } else {
+    // S'assurer que le service est bien initialisé (idempotent)
     await opfsSQLiteService.initialize();
   }
   
