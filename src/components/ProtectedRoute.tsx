@@ -2,6 +2,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ReactNode } from 'react';
+import { HybridStorageProvider } from '@/contexts/HybridStorageContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -27,7 +28,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Pour les admins, ne pas rediriger automatiquement si déjà sur une page admin
   // Laisser les admins naviguer librement sans forcer la redirection
 
-  return <>{children}</>;
+  return <HybridStorageProvider>{children}</HybridStorageProvider>;
 };
 
 export default ProtectedRoute;
