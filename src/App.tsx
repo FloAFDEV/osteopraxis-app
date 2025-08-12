@@ -45,6 +45,7 @@ import NewCabinetPage from "@/pages/NewCabinetPage";
 import EditCabinetPage from "@/pages/EditCabinetPage";
 import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
 import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
+import HybridStorageSettingsPage from "@/pages/HybridStorageSettingsPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
@@ -173,6 +174,11 @@ function App() {
                         <Route path="/settings/collaborations" element={
                           <ProtectedRoute>
                             <CollaborationsSettingsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/settings/storage" element={
+                          <ProtectedRoute>
+                            <HybridStorageSettingsPage />
                           </ProtectedRoute>
                         } />
                         {/* Retiré des paramètres pour les praticiens */}

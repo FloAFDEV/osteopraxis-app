@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { hybridStorageManager, type StorageConfig } from '@/services/hybrid-storage-manager';
 import { LocalStorageSetup } from '@/components/storage/LocalStorageSetup';
 import { StorageUnlockPrompt } from '@/components/storage/StorageUnlockPrompt';
@@ -33,12 +34,13 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
   const [showSetup, setShowSetup] = useState(false);
   const [showUnlock, setShowUnlock] = useState(false);
   const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('password');
-
+  const navigate = useNavigate();
+  const [skipped, setSkipped] = useState<boolean>(() => sessionStorage.getItem('hybrid-storage-skip') === 'true');
   useEffect(() => {
     if (!isLoading && status) {
-      if (!status.isConfigured) {
+      if (!status.isConfigured && !skipped) {
         setShowSetup(true);
-      } else if (!status.isUnlocked) {
+      } else if (status.isConfigured && !status.isUnlocked && !skipped) {
         // Charger la méthode de sécurité depuis la configuration
         const config = localStorage.getItem('hybrid-storage-config');
         if (config) {
@@ -53,7 +55,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
         setShowUnlock(true);
       }
     }
-  }, [isLoading, status]);
+  }, [isLoading, status, skipped]);
 
   const configureStorage = async (config: StorageConfig): Promise<void> => {
     try {
@@ -87,6 +89,14 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     setShowUnlock(true);
   };
 
+  const handleCancel = () => {
+    sessionStorage.setItem('hybrid-storage-skip', 'true');
+    setSkipped(true);
+    setShowSetup(false);
+    setShowUnlock(false);
+    toast.info("Configuration du stockage local ignorée pour l'instant. Certaines fonctionnalités hors-ligne peuvent être désactivées. Vous pourrez la configurer plus tard dans Paramètres > Stockage.");
+    try { navigate('/'); } catch {}
+  };
   // Affichage conditionnel des modales
   if (isLoading) {
     return (
@@ -103,10 +113,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     return (
       <LocalStorageSetup
         onComplete={configureStorage}
-        onCancel={() => {
-          // En mode obligatoire, on ne peut pas annuler
-          toast.warning('La configuration du stockage local est obligatoire');
-        }}
+        onCancel={handleCancel}
       />
     );
   }
@@ -116,10 +123,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
       <StorageUnlockPrompt
         securityMethod={securityMethod}
         onUnlock={() => setShowUnlock(false)}
-        onCancel={() => {
-          // En mode obligatoire, on ne peut pas annuler
-          toast.warning('Le déverrouillage du stockage est obligatoire');
-        }}
+        onCancel={handleCancel}
       />
     );
   }
