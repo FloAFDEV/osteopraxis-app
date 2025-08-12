@@ -123,17 +123,10 @@ export default function LandingPage() {
 	const { user, loading } = useAuth();
 	const navigate = useNavigate();
 
-	// Redirection avec useNavigate au lieu de window.location.href
-	useEffect(() => {
-		if (user && !loading) {
-			// Rediriger les admins vers leur dashboard spécifique
-			if (user.role === "ADMIN") {
-				navigate("/admin/dashboard");
-			} else {
-				navigate("/dashboard");
-			}
-		}
-	}, [user, loading, navigate]);
+	// Ne plus rediriger automatiquement les utilisateurs connectés depuis la landing
+	// Ils peuvent naviguer via les boutons (Connexion / Démo / Dashboard)
+	// Cela permet d'accéder à la page marketing même en étant authentifié.
+
 
 	// Ne pas afficher la landing page pendant le loading
 	if (loading) {
