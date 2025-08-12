@@ -8,8 +8,8 @@ import { SQLiteDiagnostic } from '@/components/debug/SQLiteDiagnostic';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { untypedSupabase } from '@/integrations/supabase/unsafeClient';
 
 const AdminTechDebugPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,21 +30,21 @@ const AdminTechDebugPage: React.FC = () => {
     setLoading(true);
     try {
       // Trouver l'utilisateur par email
-      const { data: userRow, error: userErr } = await supabase
+      const { data: userRow, error: userErr } = await untypedSupabase
         .from('User')
         .select('auth_id')
         .eq('email', email)
         .maybeSingle();
       if (userErr || !userRow) throw new Error('Utilisateur introuvable');
 
-      const { error: insertErr } = await supabase
+      const { error: insertErr } = await untypedSupabase
         .from('hybrid_storage_unlock_requests')
         .insert({
           user_id: userRow.auth_id,
           new_credential: newCredential,
           method,
           status: 'pending'
-        });
+        } as any);
       if (insertErr) throw insertErr;
 
       toast.success('Demande de déblocage créée');

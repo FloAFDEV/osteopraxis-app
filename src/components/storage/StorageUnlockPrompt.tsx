@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Shield, AlertTriangle } from 'lucide-react';
+import { hybridStorageManager } from '@/services/hybrid-storage-manager';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { untypedSupabase } from '@/integrations/supabase/unsafeClient';
