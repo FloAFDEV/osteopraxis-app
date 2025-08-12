@@ -44,6 +44,7 @@ import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
 import NewCabinetPage from "@/pages/NewCabinetPage";
 import EditCabinetPage from "@/pages/EditCabinetPage";
 import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
+import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";

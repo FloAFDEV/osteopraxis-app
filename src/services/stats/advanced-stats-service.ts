@@ -1,11 +1,6 @@
-import { Tables } from "@/integrations/supabase/types";
-import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, format, subMonths, isWithinInterval } from "date-fns";
 import { fr } from "date-fns/locale";
-
-type Appointment = Tables<"Appointment">;
-type Invoice = Tables<"Invoice">;
-type Patient = Tables<"Patient">;
+import type { Appointment, Invoice, Patient } from "@/types";
 
 export interface AdvancedStats {
   // Statistiques de revenus

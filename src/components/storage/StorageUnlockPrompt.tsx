@@ -6,10 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Shield, AlertTriangle } from 'lucide-react';
-import { hybridStorageManager } from '@/services/hybrid-storage-manager';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { untypedSupabase } from '@/integrations/supabase/unsafeClient';
 
 interface StorageUnlockPromptProps {
   securityMethod: 'pin' | 'password';
@@ -203,7 +202,7 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
                       toast.error('Utilisateur non connecté');
                       return;
                     }
-                    const { data, error } = await supabase
+                    const { data, error } = await untypedSupabase
                       .from('hybrid_storage_unlock_requests')
                       .select('id, new_credential, method')
                       .eq('user_id', user.id)
@@ -216,7 +215,7 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
                     }
                     await hybridStorageManager.applyAdminReset(data.new_credential, data.method as 'pin' | 'password');
                     // Marquer comme appliquée
-                    await supabase
+                    await untypedSupabase
                       .from('hybrid_storage_unlock_requests')
                       .update({ status: 'applied', applied_at: new Date().toISOString() })
                       .eq('id', data.id);
