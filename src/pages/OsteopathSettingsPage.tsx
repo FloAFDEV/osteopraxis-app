@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { BackButton } from "@/components/ui/back-button";
 import { HelpButton } from "@/components/ui/help-button";
+import { ProfileSecuritySettings } from "@/components/settings/ProfileSecuritySettings";
 
 const OsteopathSettingsPage = () => {
   const { user } = useAuth();
@@ -111,6 +112,9 @@ const OsteopathSettingsPage = () => {
             isEditing={!!osteopath} 
             onSuccess={handleSuccess} 
           />
+
+          {/* Sécurité du stockage local */}
+          <ProfileSecuritySettings />
           
           <div className="flex justify-end">
             <button 

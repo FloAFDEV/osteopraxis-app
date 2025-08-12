@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { browserSQLite } from '../services/sqlite/browser-sqlite';
+import { browserSQLite, BrowserSQLiteManager } from '../services/sqlite/browser-sqlite';
 
 
 interface SQLiteTestResult {
@@ -33,11 +33,11 @@ export function useSQLiteTest() {
       };
 
       // Test 1: Vérifier le support SQLite
-      testResult.isSupported = await browserSQLite.constructor.prototype.constructor.isSupported?.() ?? false;
+      testResult.isSupported = BrowserSQLiteManager.isSupported?.() ?? false;
       console.log('✅ SQLite supported:', testResult.isSupported);
 
       // Test 2: Vérifier le support OPFS
-      testResult.hasOPFS = await browserSQLite.constructor.prototype.constructor.hasOPFSSupport?.() ?? false;
+      testResult.hasOPFS = BrowserSQLiteManager.hasOPFSSupport?.() ?? false;
       console.log('✅ OPFS supported:', testResult.hasOPFS);
 
       // Test 3: Initialiser SQLite

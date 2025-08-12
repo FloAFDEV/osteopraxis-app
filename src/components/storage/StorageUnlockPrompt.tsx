@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Lock, Shield, AlertTriangle } from 'lucide-react';
 import { hybridStorageManager } from '@/services/hybrid-storage-manager';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StorageUnlockPromptProps {
   securityMethod: 'pin' | 'password';
@@ -24,6 +26,7 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const maxAttempts = 3;
   const isLocked = attempts >= maxAttempts;
@@ -187,6 +190,47 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
                 size="sm"
               >
                 Annuler
+              </Button>
+            )}
+
+            {/* Lien de déblocage admin */}
+            {!isLocked && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    if (!user?.id) {
+                      toast.error('Utilisateur non connecté');
+                      return;
+                    }
+                    const { data, error } = await supabase
+                      .from('hybrid_storage_unlock_requests')
+                      .select('id, new_credential, method')
+                      .eq('user_id', user.id)
+                      .eq('status', 'pending')
+                      .maybeSingle();
+                    if (error) throw error;
+                    if (!data) {
+                      toast.info('Aucune demande de déblocage trouvée');
+                      return;
+                    }
+                    await hybridStorageManager.applyAdminReset(data.new_credential, data.method as 'pin' | 'password');
+                    // Marquer comme appliquée
+                    await supabase
+                      .from('hybrid_storage_unlock_requests')
+                      .update({ status: 'applied', applied_at: new Date().toISOString() })
+                      .eq('id', data.id);
+                    toast.success('Nouveau code appliqué');
+                    onUnlock();
+                  } catch (e: any) {
+                    console.error(e);
+                    toast.error(e.message || 'Erreur de déblocage');
+                  }
+                }}
+                className="w-full"
+                size="sm"
+              >
+                J'ai oublié mon code — appliquer le déblocage admin
               </Button>
             )}
           </div>

@@ -188,6 +188,41 @@ class HybridStorageManager {
   }
 
   /**
+   * Changer le code PIN/mot de passe par l’utilisateur
+   */
+  async changeCredential(oldCredential: string, newCredential: string, method?: 'pin' | 'password'): Promise<boolean> {
+    if (!this.config) throw new Error('Aucune configuration');
+    if (oldCredential !== this.config.credential) return false;
+    this.config = {
+      ...this.config,
+      credential: newCredential,
+      securityMethod: method ?? this.config.securityMethod,
+    };
+    await this.saveStorageConfig(this.config);
+    this.isUnlocked = true;
+    return true;
+  }
+
+  /**
+   * Appliquer un réinitialisation administrateur (sans ancien code)
+   */
+  async applyAdminReset(newCredential: string, method: 'pin' | 'password'): Promise<void> {
+    if (!this.config) {
+      this.config = {
+        storageLocation: 'OPFS',
+        credential: newCredential,
+        securityMethod: method,
+        encryptionEnabled: true,
+      };
+    } else {
+      this.config.credential = newCredential;
+      this.config.securityMethod = method;
+    }
+    await this.saveStorageConfig(this.config);
+    this.isUnlocked = true;
+  }
+
+  /**
    * Retourne le statut du stockage
    */
   async getStorageStatus(): Promise<StorageStatus> {

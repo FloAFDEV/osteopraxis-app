@@ -64,7 +64,6 @@ const SettingsPage = () => {
 			color: "text-orange-500",
 		},
     ];
-	];
 
 	return (
 		<Layout>
