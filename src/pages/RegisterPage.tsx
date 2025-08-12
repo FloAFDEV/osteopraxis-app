@@ -12,7 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Info, Lock, Mail, User, UserPlus } from "lucide-react";
+import { Info, Lock, Mail, User, UserPlus } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -195,15 +196,7 @@ const RegisterPage = () => {
 							Hub
 						</span>
 					</h1>
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => navigate("/")}
-						className="text-gray-400 hover:text-white hover:bg-gray-800/50 transition-colors"
-					>
-						<ArrowLeft className="h-4 w-4 mr-2" />
-						Retour
-					</Button>
+					<BackButton to="/" />
 				</div>
 
 				<div className="flex-grow flex items-center justify-center">

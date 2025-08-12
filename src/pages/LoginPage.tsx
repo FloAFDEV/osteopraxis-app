@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -90,17 +91,7 @@ const LoginPage = () => {
 							Hub
 						</span>
 					</h1>
-					<Button
-						variant="ghost"
-						size="sm"
-						className="text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-						asChild
-					>
-						<Link to="/" className="flex items-center gap-2">
-							<ArrowLeft className="h-4 w-4" />
-							Retour
-						</Link>
-					</Button>
+					<BackButton to="/" />
 				</div>
 
 				<div className="flex-grow flex items-center justify-center">
