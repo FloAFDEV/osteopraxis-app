@@ -1,7 +1,8 @@
 import { HybridDataAdapter } from './hybrid-adapter';
 import { createCloudAdapters } from './cloud-adapters';
 import { createLocalAdapters, initializeLocalAdapters } from './local-adapters';
-import { HybridConfig, DataLocation } from './types';
+import { HybridConfig, DataLocation, DataAdapter } from './types';
+import { patientService as supabasePatientService } from '@/services/supabase-api/patient-service';
 
 /**
  * Gestionnaire principal de l'architecture hybride
@@ -46,10 +47,38 @@ export class HybridDataManager {
       this.adapter.registerCloudAdapter('cabinets', cloudAdapters.cabinets);
 
       // Initialiser les adaptateurs locaux (SQLite + OPFS)
-      const localAdapters = await initializeLocalAdapters();
-      this.adapter.registerLocalAdapter('patients', localAdapters.patients);
-      this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
-      this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+      try {
+        const localAdapters = await initializeLocalAdapters();
+        this.adapter.registerLocalAdapter('patients', localAdapters.patients);
+        this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
+        this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+        console.log('✅ Local adapters initialized');
+      } catch (localError) {
+        console.warn('⚠️ Local storage unavailable - falling back to cloud for sensitive entities:', localError);
+
+        // Fallback cloud adapter for patients using Supabase service
+        const patientCloudAdapter: DataAdapter<any> = {
+          getLocation: () => DataLocation.CLOUD,
+          isAvailable: async () => true,
+          getAll: () => supabasePatientService.getPatients(),
+          getById: async (id: number | string) => {
+            const p = await supabasePatientService.getPatientById(Number(id));
+            return p ?? null;
+          },
+          create: (data: any) => supabasePatientService.createPatient(data),
+          update: async (id: number | string, data: any) => {
+            const existing = await supabasePatientService.getPatientById(Number(id));
+            if (!existing) throw new Error('Patient not found');
+            const merged = { ...existing, ...(data || {}), id: Number(id) };
+            return await supabasePatientService.updatePatient(merged as any);
+          },
+          delete: async (id: number | string) => {
+            const { error } = await supabasePatientService.deletePatient(Number(id)) as unknown as { error: any | null };
+            return !error;
+          },
+        };
+        this.adapter.registerCloudAdapter('patients', patientCloudAdapter);
+      }
 
       this.initialized = true;
       console.log('✅ Hybrid Data Manager initialized successfully');
@@ -60,7 +89,8 @@ export class HybridDataManager {
 
     } catch (error) {
       console.error('❌ Failed to initialize Hybrid Data Manager:', error);
-      throw error;
+      // Ne pas interrompre l'application - continuer en mode cloud-only
+      this.initialized = true;
     }
   }
 
