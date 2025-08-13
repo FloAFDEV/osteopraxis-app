@@ -3,6 +3,7 @@ import { createCloudAdapters } from './cloud-adapters';
 import { createLocalAdapters, initializeLocalAdapters } from './local-adapters';
 import { HybridConfig, DataLocation, DataAdapter } from './types';
 import { patientService as supabasePatientService } from '@/services/supabase-api/patient-service';
+import { appointmentService } from '@/services/api/appointment-service';
 
 /**
  * Gestionnaire principal de l'architecture hybride
@@ -54,9 +55,9 @@ export class HybridDataManager {
         this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
         console.log('✅ Local adapters initialized');
       } catch (localError) {
-        console.warn('⚠️ Local storage unavailable - falling back to cloud for sensitive entities:', localError);
+        console.warn('⚠️ Local storage unavailable - falling back to cloud for all entities:', localError);
 
-        // Fallback cloud adapter for patients using Supabase service
+        // Fallback cloud adapters for all entities using Supabase service
         const patientCloudAdapter: DataAdapter<any> = {
           getLocation: () => DataLocation.CLOUD,
           isAvailable: async () => true,
@@ -77,7 +78,26 @@ export class HybridDataManager {
             return !error;
           },
         };
+        
+        const appointmentCloudAdapter: DataAdapter<any> = {
+          getLocation: () => DataLocation.CLOUD,
+          isAvailable: async () => true,
+          getAll: () => appointmentService.getAppointments(),
+          getById: async (id: number | string) => {
+            const a = await appointmentService.getAppointmentById(Number(id));
+            return a ?? null;
+          },
+          create: (data: any) => appointmentService.createAppointment(data),
+          update: async (id: number | string, data: any) => {
+            return await appointmentService.updateAppointment(Number(id), data);
+          },
+          delete: async (id: number | string) => {
+            return await appointmentService.deleteAppointment(Number(id));
+          },
+        };
+        
         this.adapter.registerCloudAdapter('patients', patientCloudAdapter);
+        this.adapter.registerCloudAdapter('appointments', appointmentCloudAdapter);
       }
 
       this.initialized = true;
