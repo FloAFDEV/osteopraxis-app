@@ -46,9 +46,11 @@ import EditCabinetPage from "@/pages/EditCabinetPage";
 import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
 import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 import HybridStorageSettingsPage from "@/pages/HybridStorageSettingsPage";
+import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
+import { MemoryStorageAlert } from "@/components/ui/memory-storage-alert";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +73,7 @@ function App() {
                   <AuthProvider>
                     <DemoDataManager />
                     <div className="min-h-screen bg-background">
+                      <MemoryStorageAlert />
                       <Routes>
                         {/* Routes publiques */}
                         <Route path="/" element={<LandingPage />} />
@@ -179,6 +182,11 @@ function App() {
                         <Route path="/settings/storage" element={
                           <ProtectedRoute>
                             <HybridStorageSettingsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/storage-diagnostic" element={
+                          <ProtectedRoute>
+                            <StorageDiagnosticPage />
                           </ProtectedRoute>
                         } />
                         {/* Retiré des paramètres pour les praticiens */}

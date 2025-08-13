@@ -63,7 +63,16 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
       setShowSetup(false);
       setShowUnlock(false);
       await initialize();
-      toast.success('Configuration de stockage terminée');
+      
+      // Vérifier si le stockage local fonctionne réellement
+      const { isUsingMemoryFallback } = await import('@/services/hybrid-data-adapter/local-adapters');
+      const usingMemory = isUsingMemoryFallback();
+      
+      if (usingMemory) {
+        toast.warning('Configuration terminée - Mode récupération actif (stockage temporaire)');
+      } else {
+        toast.success('Configuration de stockage local réussie !');
+      }
     } catch (error) {
       console.error('Storage configuration failed:', error);
       toast.error('Erreur lors de la configuration du stockage');

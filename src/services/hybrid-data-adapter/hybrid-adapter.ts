@@ -31,17 +31,26 @@ export class HybridDataAdapter {
    * Obtient l'adaptateur approprié selon le type de données
    */
   private getAdapter<T>(entityName: string, preferredLocation?: DataLocation): DataAdapter<T> {
-    // Classification des données (peut être externalisée dans un config)
-    const localEntities = ['patients', 'appointments', 'consultations', 'invoices', 'medicalDocuments', 'quotes', 'treatmentHistory', 'patientRelationships'];
-    const isLocalEntity = localEntities.includes(entityName);
+    // Classification des données HDS (OBLIGATOIREMENT locales)
+    const sensitiveHDSEntities = ['patients', 'appointments', 'consultations', 'invoices', 'medicalDocuments', 'quotes', 'treatmentHistory', 'patientRelationships'];
+    const isHDSEntity = sensitiveHDSEntities.includes(entityName);
     
-    const targetLocation = preferredLocation || (isLocalEntity ? DataLocation.LOCAL : DataLocation.CLOUD);
+    const targetLocation = preferredLocation || (isHDSEntity ? DataLocation.LOCAL : DataLocation.CLOUD);
     
-    if (targetLocation === DataLocation.LOCAL) {
+    if (targetLocation === DataLocation.LOCAL || isHDSEntity) {
       const adapter = this.localAdapters.get(entityName);
       if (adapter) return adapter;
       
-      // Fallback vers cloud si configuré
+      // CONFORMITÉ HDS: Pas de fallback cloud pour les données sensibles
+      if (isHDSEntity) {
+        throw new HybridStorageError(
+          `❌ CONFORMITÉ HDS VIOLÉE: Les données sensibles '${entityName}' ne peuvent pas être stockées dans le cloud. Le stockage local SQLite/OPFS est OBLIGATOIRE.`,
+          DataLocation.LOCAL,
+          'getAdapter'
+        );
+      }
+      
+      // Pour les entités non-HDS, fallback possible vers cloud
       if (this.config.fallbackToCloud) {
         console.warn(`Fallback to cloud for ${entityName} - local storage not available`);
         const cloudAdapter = this.cloudAdapters.get(entityName);
