@@ -6,9 +6,10 @@ import { HybridStorageProvider } from '@/contexts/HybridStorageContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requireRole?: 'ADMIN' | 'OSTEOPATH';
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   const { user, isAuthenticated, loading } = useAuth();
 
   // Afficher un loader pendant la vérification d'authentification
@@ -25,8 +26,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Pour les admins, ne pas rediriger automatiquement si déjà sur une page admin
-  // Laisser les admins naviguer librement sans forcer la redirection
+  // Vérifier le rôle si requis
+  if (requireRole && user.role !== requireRole) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return <HybridStorageProvider>{children}</HybridStorageProvider>;
 };

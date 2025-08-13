@@ -184,8 +184,8 @@ function App() {
                             <HybridStorageSettingsPage />
                           </ProtectedRoute>
                         } />
-                        <Route path="/storage-diagnostic" element={
-                          <ProtectedRoute>
+                        <Route path="/admin/storage-diagnostic" element={
+                          <ProtectedRoute requireRole="ADMIN">
                             <StorageDiagnosticPage />
                           </ProtectedRoute>
                         } />

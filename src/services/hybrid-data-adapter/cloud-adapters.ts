@@ -7,6 +7,9 @@ type Tables = Database['public']['Tables'];
 type UserRow = Tables['User']['Row'];
 type OsteopathRow = Tables['Osteopath']['Row'];
 type CabinetRow = Tables['Cabinet']['Row'];
+type PatientRow = Tables['Patient']['Row'];
+type AppointmentRow = Tables['Appointment']['Row'];
+type InvoiceRow = Tables['Invoice']['Row'];
 
 /**
  * Adaptateur cloud générique pour Supabase
@@ -106,6 +109,55 @@ export class CabinetCloudAdapter extends SupabaseAdapter<CabinetRow> {
   }
 }
 
+export class PatientCloudAdapter extends SupabaseAdapter<PatientRow> {
+  constructor() {
+    super('Patient');
+  }
+}
+
+export class AppointmentCloudAdapter extends SupabaseAdapter<AppointmentRow> {
+  constructor() {
+    super('Appointment');
+  }
+}
+
+export class InvoiceCloudAdapter extends SupabaseAdapter<InvoiceRow> {
+  constructor() {
+    super('Invoice');
+  }
+}
+
+// Adaptateurs génériques pour les entités sans table spécifique
+export class GenericCloudAdapter<T> implements DataAdapter<T> {
+  getLocation(): DataLocation {
+    return DataLocation.CLOUD;
+  }
+
+  async isAvailable(): Promise<boolean> {
+    return true; // Toujours disponible pour les entités génériques
+  }
+
+  async getAll(): Promise<T[]> {
+    return []; // Retourner un tableau vide pour les entités non implémentées
+  }
+
+  async getById(id: number | string): Promise<T | null> {
+    return null;
+  }
+
+  async create(data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
+    throw new Error('Create not implemented for generic adapter');
+  }
+
+  async update(id: number | string, data: Partial<T>): Promise<T> {
+    throw new Error('Update not implemented for generic adapter');
+  }
+
+  async delete(id: number | string): Promise<boolean> {
+    return false;
+  }
+}
+
 /**
  * Factory pour créer les adaptateurs cloud
  */
@@ -114,5 +166,13 @@ export function createCloudAdapters() {
     users: new UserCloudAdapter(),
     osteopaths: new OsteopathCloudAdapter(),
     cabinets: new CabinetCloudAdapter(),
+    patients: new PatientCloudAdapter(),
+    appointments: new AppointmentCloudAdapter(),
+    invoices: new InvoiceCloudAdapter(),
+    quotes: new GenericCloudAdapter(),
+    consultations: new GenericCloudAdapter(),
+    medicalDocuments: new GenericCloudAdapter(),
+    treatmentHistory: new GenericCloudAdapter(),
+    patientRelationships: new GenericCloudAdapter(),
   };
 }

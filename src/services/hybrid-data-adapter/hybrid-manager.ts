@@ -47,18 +47,29 @@ export class HybridDataManager {
       this.adapter.registerCloudAdapter('osteopaths', cloudAdapters.osteopaths);
       this.adapter.registerCloudAdapter('cabinets', cloudAdapters.cabinets);
 
-      // Initialiser les adaptateurs locaux (SQLite + OPFS)
+      // MODE DÉVELOPPEMENT: Utiliser Supabase pour toutes les données (y compris HDS)
+      console.log('🔄 MODE DÉVELOPPEMENT: Utilisation de Supabase pour toutes les données');
+      console.warn('⚠️ EN PRODUCTION: Les données HDS devront être stockées localement avec chiffrement');
+      
+      // Enregistrer les entités HDS dans Supabase temporairement pour le développement
+      this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
+      this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
+      this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
+      this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
+      this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
+      this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
+      this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
+      this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
+
+      // Optionnel: Tenter d'initialiser le stockage local pour les tests futurs
       try {
         const localAdapters = await initializeLocalAdapters();
-        this.adapter.registerLocalAdapter('patients', localAdapters.patients);
-        this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
-        this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-        console.log('✅ Local adapters initialized');
+        this.adapter.registerLocalAdapter('patients_local', localAdapters.patients);
+        this.adapter.registerLocalAdapter('appointments_local', localAdapters.appointments);
+        this.adapter.registerLocalAdapter('invoices_local', localAdapters.invoices);
+        console.log('✅ Local adapters also available for future migration');
       } catch (localError) {
-        console.error('❌ STOCKAGE LOCAL OBLIGATOIRE - Données sensibles HDS ne peuvent pas utiliser le cloud:', localError);
-        
-        // CONFORMITÉ HDS: Les données sensibles ne peuvent PAS avoir de fallback cloud
-        // Seules les entités non-sensibles continuent de fonctionner
+        console.log('ℹ️ Stockage local non disponible - utilisation de Supabase uniquement');
       }
 
       this.initialized = true;

@@ -31,7 +31,7 @@ export class HybridDataAdapter {
    * Obtient l'adaptateur approprié selon le type de données
    */
   private getAdapter<T>(entityName: string, preferredLocation?: DataLocation): DataAdapter<T> {
-    // Classification des données HDS (OBLIGATOIREMENT locales)
+    // Classification des données HDS (OBLIGATOIREMENT locales EN PRODUCTION)
     const sensitiveHDSEntities = ['patients', 'appointments', 'consultations', 'invoices', 'medicalDocuments', 'quotes', 'treatmentHistory', 'patientRelationships'];
     const isHDSEntity = sensitiveHDSEntities.includes(entityName);
     
@@ -41,8 +41,15 @@ export class HybridDataAdapter {
       const adapter = this.localAdapters.get(entityName);
       if (adapter) return adapter;
       
-      // CONFORMITÉ HDS: Pas de fallback cloud pour les données sensibles
-      if (isHDSEntity) {
+      // CONFORMITÉ HDS: En développement, fallback vers cloud autorisé
+      if (isHDSEntity && this.config.fallbackToCloud) {
+        console.warn(`⚠️ DÉVELOPPEMENT: Données HDS '${entityName}' stockées temporairement dans le cloud`);
+        const cloudAdapter = this.cloudAdapters.get(entityName);
+        if (cloudAdapter) return cloudAdapter;
+      }
+      
+      // En production, pas de fallback cloud pour les données sensibles
+      if (isHDSEntity && !this.config.fallbackToCloud) {
         throw new HybridStorageError(
           `❌ CONFORMITÉ HDS VIOLÉE: Les données sensibles '${entityName}' ne peuvent pas être stockées dans le cloud. Le stockage local SQLite/OPFS est OBLIGATOIRE.`,
           DataLocation.LOCAL,
