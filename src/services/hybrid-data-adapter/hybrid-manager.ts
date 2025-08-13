@@ -55,49 +55,10 @@ export class HybridDataManager {
         this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
         console.log('✅ Local adapters initialized');
       } catch (localError) {
-        console.warn('⚠️ Local storage unavailable - falling back to cloud for all entities:', localError);
-
-        // Fallback cloud adapters for all entities using Supabase service
-        const patientCloudAdapter: DataAdapter<any> = {
-          getLocation: () => DataLocation.CLOUD,
-          isAvailable: async () => true,
-          getAll: () => supabasePatientService.getPatients(),
-          getById: async (id: number | string) => {
-            const p = await supabasePatientService.getPatientById(Number(id));
-            return p ?? null;
-          },
-          create: (data: any) => supabasePatientService.createPatient(data),
-          update: async (id: number | string, data: any) => {
-            const existing = await supabasePatientService.getPatientById(Number(id));
-            if (!existing) throw new Error('Patient not found');
-            const merged = { ...existing, ...(data || {}), id: Number(id) };
-            return await supabasePatientService.updatePatient(merged as any);
-          },
-          delete: async (id: number | string) => {
-            const { error } = await supabasePatientService.deletePatient(Number(id)) as unknown as { error: any | null };
-            return !error;
-          },
-        };
+        console.error('❌ STOCKAGE LOCAL OBLIGATOIRE - Données sensibles HDS ne peuvent pas utiliser le cloud:', localError);
         
-        const appointmentCloudAdapter: DataAdapter<any> = {
-          getLocation: () => DataLocation.CLOUD,
-          isAvailable: async () => true,
-          getAll: () => appointmentService.getAppointments(),
-          getById: async (id: number | string) => {
-            const a = await appointmentService.getAppointmentById(Number(id));
-            return a ?? null;
-          },
-          create: (data: any) => appointmentService.createAppointment(data),
-          update: async (id: number | string, data: any) => {
-            return await appointmentService.updateAppointment(Number(id), data);
-          },
-          delete: async (id: number | string) => {
-            return await appointmentService.deleteAppointment(Number(id));
-          },
-        };
-        
-        this.adapter.registerCloudAdapter('patients', patientCloudAdapter);
-        this.adapter.registerCloudAdapter('appointments', appointmentCloudAdapter);
+        // CONFORMITÉ HDS: Les données sensibles ne peuvent PAS avoir de fallback cloud
+        // Seules les entités non-sensibles continuent de fonctionner
       }
 
       this.initialized = true;
