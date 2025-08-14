@@ -12,6 +12,7 @@ import { appointmentService } from '@/services/api/appointment-service';
 export class HybridDataManager {
   private adapter: HybridDataAdapter;
   private initialized = false;
+  private initializing = false;
 
   constructor(config?: Partial<HybridConfig>) {
     const defaultConfig: HybridConfig = {
@@ -36,8 +37,9 @@ export class HybridDataManager {
    * Initialise le gestionnaire hybride
    */
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized || this.initializing) return;
 
+    this.initializing = true;
     console.log('🔄 Initializing Hybrid Data Manager...');
 
     try {
@@ -89,6 +91,7 @@ export class HybridDataManager {
       }
 
       this.initialized = true;
+      this.initializing = false;
       console.log('✅ Hybrid Data Manager initialized successfully');
 
       // Afficher le statut du stockage
@@ -99,6 +102,7 @@ export class HybridDataManager {
       console.error('❌ Failed to initialize Hybrid Data Manager:', error);
       // Ne pas interrompre l'application - continuer en mode cloud-only
       this.initialized = true;
+      this.initializing = false;
     }
   }
 
@@ -106,6 +110,10 @@ export class HybridDataManager {
    * Réinitialise le gestionnaire pour un changement d'état d'authentification
    */
   async reinitialize(): Promise<void> {
+    if (this.initializing) {
+      console.log('⏳ Initialization already in progress, skipping reinitialize');
+      return;
+    }
     console.log('🔄 Reinitializing Hybrid Data Manager...');
     this.initialized = false;
     await this.initialize();

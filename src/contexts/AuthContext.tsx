@@ -241,12 +241,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 				const hasUser = !!session?.user;
 				setIsAuthenticated(hasUser);
 				
-				// Ré-initialiser le gestionnaire hybride selon l'état d'authentification
-				try {
-					const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
-					await hybridDataManager.reinitialize();
-				} catch (error) {
-					console.warn('Failed to reinitialize hybrid data manager:', error);
+				// Ré-initialiser le gestionnaire hybride seulement sur les changements significatifs
+				if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+					try {
+						const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
+						await hybridDataManager.reinitialize();
+					} catch (error) {
+						console.warn('Failed to reinitialize hybrid data manager:', error);
+					}
 				}
 
 				if (hasUser) {
