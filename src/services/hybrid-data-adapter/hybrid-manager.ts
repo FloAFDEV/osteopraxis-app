@@ -67,20 +67,19 @@ export class HybridDataManager {
         this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
         this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
         
-        // Données HDS sensibles -> Stockage local avec fallback
+        // Données HDS sensibles -> OBLIGATOIREMENT stockage local (conformité française)
         try {
           const localAdapters = await initializeLocalAdapters();
           this.adapter.registerLocalAdapter('patients', localAdapters.patients);
           this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
           this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-          console.log('✅ Configuration hybride : HDS sensible en local, non-HDS en cloud');
+          console.log('✅ Configuration hybride conforme HDS : données sensibles en local uniquement');
         } catch (localError) {
-          console.warn('⚠️ Stockage local indisponible - fallback vers Supabase pour données HDS:', localError);
-          // Fallback vers Supabase pour les données HDS si stockage local échoue
-          this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
-          this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
-          this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
-          console.log('✅ Fallback Supabase activé pour données HDS');
+          console.error('❌ ERREUR CONFORMITÉ HDS: Stockage local obligatoire pour données sensibles');
+          throw new Error(
+            'CONFORMITÉ HDS REQUISE: Le stockage local est obligatoire pour les données de santé sensibles (patients, rendez-vous, factures). ' +
+            'Veuillez vérifier que votre navigateur supporte OPFS/SQLite ou contactez le support technique.'
+          );
         }
       } else {
         // MODE DÉMO (NON CONNECTÉ): Toutes les données en Supabase éphémère
