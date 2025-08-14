@@ -3,7 +3,7 @@
  * Utilise OPFS (Origin Private File System) + sql.js
  */
 
-import initSqlJs, { Database } from 'sql.js';
+import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
 
 interface BrowserSQLiteDB {
   exec(sql: string): void;

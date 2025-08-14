@@ -3,7 +3,7 @@
  * Implémentation complète du stockage local sécurisé
  */
 
-import { Database } from 'sql.js';
+import type { Database } from 'sql.js';
 
 interface SQLiteOPFSConfig {
   dbName: string;
@@ -69,8 +69,8 @@ export class OPFSSQLiteService {
         const uint8Array = new Uint8Array(arrayBuffer);
         
         // Charger sql.js avec le bon chemin WASM
-        const SQL = await import('sql.js');
-        const sqlite = await SQL.default({
+        const initSqlJs = (await import('sql.js')).default;
+        const sqlite = await initSqlJs({
           locateFile: (file: string) => {
             if (file.endsWith('.wasm')) {
               return '/sql-wasm.wasm';
@@ -84,8 +84,8 @@ export class OPFSSQLiteService {
         
       } catch (error) {
         // Base de données n'existe pas, en créer une nouvelle
-        const SQL = await import('sql.js');
-        const sqlite = await SQL.default({
+        const initSqlJs = (await import('sql.js')).default;
+        const sqlite = await initSqlJs({
           locateFile: (file: string) => {
             if (file.endsWith('.wasm')) {
               return '/sql-wasm.wasm';

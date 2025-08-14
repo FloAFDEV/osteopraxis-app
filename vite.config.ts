@@ -23,7 +23,11 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    exclude: ['sql.js']
+    exclude: ['sql.js'],
+    include: []
+  },
+  define: {
+    global: 'globalThis'
   },
   worker: {
     format: 'es'
