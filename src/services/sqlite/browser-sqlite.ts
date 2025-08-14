@@ -3,7 +3,7 @@
  * Utilise OPFS (Origin Private File System) + sql.js
  */
 
-import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
+import type { Database, SqlJsStatic } from 'sql.js';
 
 interface BrowserSQLiteDB {
   exec(sql: string): void;
@@ -33,11 +33,12 @@ export class BrowserSQLiteManager {
       console.log('🔄 Initializing SQLite in browser...');
 
       // Initialiser sql.js avec les fichiers WASM
+      const initSqlJs = (await import('sql.js')).default;
       this.sqljs = await initSqlJs({
         locateFile: (file: string) => {
-          // Utiliser les CDN pour les fichiers WASM
+          // Utiliser le fichier WASM local
           if (file.endsWith('.wasm')) {
-            return `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${file}`;
+            return '/sql-wasm.wasm';
           }
           return file;
         }
@@ -326,7 +327,17 @@ export class BrowserSQLiteManager {
    * Importe une base de données depuis une sauvegarde
    */
   async importDatabase(data: Uint8Array): Promise<void> {
-    if (!this.sqljs) throw new Error('SQLite not initialized');
+    if (!this.sqljs) {
+      const initSqlJs = (await import('sql.js')).default;
+      this.sqljs = await initSqlJs({
+        locateFile: (file: string) => {
+          if (file.endsWith('.wasm')) {
+            return '/sql-wasm.wasm';
+          }
+          return file;
+        }
+      });
+    }
     
     if (this.db) {
       this.db.close();
