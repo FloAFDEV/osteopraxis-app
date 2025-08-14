@@ -41,35 +41,51 @@ export class HybridDataManager {
     console.log('🔄 Initializing Hybrid Data Manager...');
 
     try {
-      // Initialiser les adaptateurs cloud (Supabase)
+      // Initialiser les adaptateurs cloud (Supabase) - pour les données non-sensibles et le mode démo
       const cloudAdapters = createCloudAdapters();
       this.adapter.registerCloudAdapter('users', cloudAdapters.users);
       this.adapter.registerCloudAdapter('osteopaths', cloudAdapters.osteopaths);
       this.adapter.registerCloudAdapter('cabinets', cloudAdapters.cabinets);
 
-      // MODE DÉVELOPPEMENT: Utiliser Supabase pour toutes les données (y compris HDS)
-      console.log('🔄 MODE DÉVELOPPEMENT: Utilisation de Supabase pour toutes les données');
-      console.warn('⚠️ EN PRODUCTION: Les données HDS devront être stockées localement avec chiffrement');
-      
-      // Enregistrer les entités HDS dans Supabase temporairement pour le développement
-      this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
-      this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
-      this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
-      this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
-      this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
-      this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
-      this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
-      this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
+      // Vérifier l'état d'authentification pour déterminer la stratégie
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAuthenticated = !!session?.user;
 
-      // Optionnel: Tenter d'initialiser le stockage local pour les tests futurs
-      try {
-        const localAdapters = await initializeLocalAdapters();
-        this.adapter.registerLocalAdapter('patients_local', localAdapters.patients);
-        this.adapter.registerLocalAdapter('appointments_local', localAdapters.appointments);
-        this.adapter.registerLocalAdapter('invoices_local', localAdapters.invoices);
-        console.log('✅ Local adapters also available for future migration');
-      } catch (localError) {
-        console.log('ℹ️ Stockage local non disponible - utilisation de Supabase uniquement');
+      if (isAuthenticated) {
+        // UTILISATEUR CONNECTÉ: Utiliser le stockage local pour les données HDS
+        console.log('👤 Utilisateur connecté - Initialisation du stockage local pour les données HDS');
+        
+        try {
+          const localAdapters = await initializeLocalAdapters();
+          this.adapter.registerLocalAdapter('patients', localAdapters.patients);
+          this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
+          this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+          // Note: quotes, consultations, etc. utiliseront des adaptateurs génériques locaux
+          console.log('✅ Stockage local HDS activé pour l\'utilisateur connecté');
+        } catch (localError) {
+          console.warn('⚠️ Échec du stockage local - fallback vers Supabase temporaire:', localError);
+          // Fallback vers Supabase si le stockage local échoue
+          this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
+          this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
+          this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
+          this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
+          this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
+          this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
+          this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
+          this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
+        }
+      } else {
+        // MODE DÉMO (NON CONNECTÉ): Utiliser Supabase pour toutes les données
+        console.log('🎭 Mode démo - Utilisation de Supabase pour toutes les données');
+        this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
+        this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
+        this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
+        this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
+        this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
+        this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
+        this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
+        this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
       }
 
       this.initialized = true;
@@ -84,6 +100,15 @@ export class HybridDataManager {
       // Ne pas interrompre l'application - continuer en mode cloud-only
       this.initialized = true;
     }
+  }
+
+  /**
+   * Réinitialise le gestionnaire pour un changement d'état d'authentification
+   */
+  async reinitialize(): Promise<void> {
+    console.log('🔄 Reinitializing Hybrid Data Manager...');
+    this.initialized = false;
+    await this.initialize();
   }
 
   /**

@@ -233,13 +233,21 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 
 		// Set up auth state listener FIRST
 		const { data: { subscription } } = supabase.auth.onAuthStateChange(
-			(event, session) => {
+			async (event, session) => {
 				if (!mounted) return;
 
 				// Synchronous state updates only
 				setSession(session ?? null);
 				const hasUser = !!session?.user;
 				setIsAuthenticated(hasUser);
+				
+				// Ré-initialiser le gestionnaire hybride selon l'état d'authentification
+				try {
+					const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
+					await hybridDataManager.reinitialize();
+				} catch (error) {
+					console.warn('Failed to reinitialize hybrid data manager:', error);
+				}
 
 				if (hasUser) {
 					// Defer any Supabase calls to avoid deadlocks
