@@ -56,19 +56,32 @@ export class HybridDataManager {
 
       if (isAuthenticated) {
         // UTILISATEUR CONNECTÉ: 
-        // TEMPORAIRE: Utiliser Supabase pour tout en attendant la correction SQLite
-        console.log('👤 Utilisateur connecté - Utilisation temporaire Supabase (SQLite en maintenance)');
+        // - Données non-sensibles HDS : Supabase 
+        // - Données HDS sensibles : Stockage local (avec fallback Supabase)
+        console.log('👤 Utilisateur connecté - Configuration stockage hybride');
         
-        this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
-        this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
-        this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
+        // Données non-sensibles HDS -> Toujours Supabase
         this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
         this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
         this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
         this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
         this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
         
-        console.log('✅ Configuration temporaire Supabase uniquement');
+        // Données HDS sensibles -> Stockage local avec fallback
+        try {
+          const localAdapters = await initializeLocalAdapters();
+          this.adapter.registerLocalAdapter('patients', localAdapters.patients);
+          this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
+          this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+          console.log('✅ Configuration hybride : HDS sensible en local, non-HDS en cloud');
+        } catch (localError) {
+          console.warn('⚠️ Stockage local indisponible - fallback vers Supabase pour données HDS:', localError);
+          // Fallback vers Supabase pour les données HDS si stockage local échoue
+          this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
+          this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
+          this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
+          console.log('✅ Fallback Supabase activé pour données HDS');
+        }
       } else {
         // MODE DÉMO (NON CONNECTÉ): Toutes les données en Supabase éphémère
         console.log('🎭 Mode démo - Données éphémères Supabase (suppression auto 30min)');
@@ -80,6 +93,7 @@ export class HybridDataManager {
         this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
         this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
         this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
+        console.log('✅ Mode démo configuré - Tout en Supabase éphémère');
       }
 
       this.initialized = true;
