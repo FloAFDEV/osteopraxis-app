@@ -40,3 +40,5 @@ export const DebugAuthPage: React.FC = () => {
     </div>
   );
 };
+
+export default DebugAuthPage;

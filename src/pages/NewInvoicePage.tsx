@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
 import { Appointment, Patient, Cabinet, Osteopath } from "@/types";
 import { Layout } from "@/components/ui/layout";
-import { InvoiceForm } from "@/components/invoice-form";
+import { InvoiceForm } from "@/components/InvoiceForm";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";

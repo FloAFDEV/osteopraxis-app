@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { AppointmentForm } from "@/components/appointment-form";
+import { AppointmentForm } from "@/components/AppointmentForm";
 import { Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";

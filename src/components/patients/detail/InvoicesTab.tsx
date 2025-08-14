@@ -1,4 +1,4 @@
-import { InvoiceDetails } from "@/components/invoice-details";
+import { InvoiceDetails } from "@/components/InvoiceDetails";
 import { Button } from "@/components/ui/button";
 import {
 	Table,

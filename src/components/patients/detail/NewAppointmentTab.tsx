@@ -1,5 +1,5 @@
 
-import { AppointmentForm } from "@/components/appointment-form";
+import { AppointmentForm } from "@/components/AppointmentForm";
 import { Patient } from "@/types";
 import { Calendar } from "lucide-react";
 

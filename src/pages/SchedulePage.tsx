@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 import { useOptimizedCache } from "@/hooks/useOptimizedCache";
 import { MonthlyScheduleView } from "@/components/schedule/MonthlyScheduleView";
-import { AppointmentModal } from "@/components/appointment-modal";
+import { AppointmentModal } from "@/components/AppointmentModal";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
 import { Appointment, AppointmentStatus, Patient } from "@/types";

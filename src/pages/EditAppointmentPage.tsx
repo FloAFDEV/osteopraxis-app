@@ -7,7 +7,7 @@ import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { AppointmentForm } from "@/components/appointment-form";
+import { AppointmentForm } from "@/components/AppointmentForm";
 
 const EditAppointmentPage = () => {
   const { id } = useParams<{ id: string }>();

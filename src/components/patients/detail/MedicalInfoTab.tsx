@@ -1,5 +1,5 @@
-import { AppointmentForm } from "@/components/appointment-form";
-import { PatientForm } from "@/components/patient-form";
+import { AppointmentForm } from "@/components/AppointmentForm";
+import { PatientForm } from "@/components/PatientForm";
 import { PatientFormValues } from "@/components/patient-form/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

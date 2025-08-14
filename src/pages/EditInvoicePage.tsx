@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/ui/layout';
 import { useNavigate, useParams } from 'react-router-dom';
-import { InvoiceForm } from '@/components/invoice-form';
+import { InvoiceForm } from '@/components/InvoiceForm';
 import { api } from '@/services/api';
 import { Invoice, Patient } from '@/types';
 import { toast } from 'sonner';

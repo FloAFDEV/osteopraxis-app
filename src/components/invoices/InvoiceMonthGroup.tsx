@@ -1,5 +1,5 @@
 
-import { InvoiceDetails } from "@/components/invoice-details";
+import { InvoiceDetails } from "@/components/InvoiceDetails";
 import {
 	AccordionContent,
 	AccordionItem,

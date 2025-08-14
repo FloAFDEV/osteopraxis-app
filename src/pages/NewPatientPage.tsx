@@ -1,4 +1,4 @@
-import { PatientForm } from "@/components/patient-form";
+import { PatientForm } from "@/components/PatientForm";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";

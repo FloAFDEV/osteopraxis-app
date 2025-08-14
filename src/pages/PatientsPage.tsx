@@ -1,4 +1,4 @@
-import { PatientCard } from "@/components/patient-card";
+import { PatientCard } from "@/components/PatientCard";
 import { Card } from "@/components/ui/card";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";

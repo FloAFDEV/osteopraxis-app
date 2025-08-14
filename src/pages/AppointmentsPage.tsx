@@ -1,4 +1,4 @@
-import { AppointmentCard } from "@/components/appointment-card";
+import { AppointmentCard } from "@/components/AppointmentCard";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,

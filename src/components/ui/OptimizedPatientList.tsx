@@ -1,5 +1,5 @@
 import { Patient } from '@/types';
-import { PatientCard } from '@/components/patient-card';
+import { PatientCard } from '@/components/PatientCard';
 import PatientListItem from '@/components/patients/PatientListItem';
 import { Card } from '@/components/ui/card';
 import { memo } from 'react';

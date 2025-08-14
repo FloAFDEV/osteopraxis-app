@@ -1,4 +1,4 @@
-import { AppointmentForm } from "@/components/appointment-form";
+import { AppointmentForm } from "@/components/AppointmentForm";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { api } from "@/services/api";
