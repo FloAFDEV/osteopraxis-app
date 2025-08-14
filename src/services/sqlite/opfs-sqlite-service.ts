@@ -69,7 +69,7 @@ export class OPFSSQLiteService {
         const uint8Array = new Uint8Array(arrayBuffer);
         
         // Charger sql.js avec le bon chemin WASM
-        const initSqlJs = (await import('sql.js')).default;
+        const { default: initSqlJs } = await import('sql.js');
         const sqlite = await initSqlJs({
           locateFile: (file: string) => {
             if (file.endsWith('.wasm')) {
@@ -84,7 +84,7 @@ export class OPFSSQLiteService {
         
       } catch (error) {
         // Base de données n'existe pas, en créer une nouvelle
-        const initSqlJs = (await import('sql.js')).default;
+        const { default: initSqlJs } = await import('sql.js');
         const sqlite = await initSqlJs({
           locateFile: (file: string) => {
             if (file.endsWith('.wasm')) {

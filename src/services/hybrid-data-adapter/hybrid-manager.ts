@@ -55,31 +55,38 @@ export class HybridDataManager {
       const isAuthenticated = !!session?.user;
 
       if (isAuthenticated) {
-        // UTILISATEUR CONNECTÉ: Utiliser le stockage local pour les données HDS
-        console.log('👤 Utilisateur connecté - Initialisation du stockage local pour les données HDS');
+        // UTILISATEUR CONNECTÉ: 
+        // - Données non-sensibles HDS : Supabase (comme le mode démo)
+        // - Données HDS sensibles : Stockage local
+        console.log('👤 Utilisateur connecté - Configuration stockage hybride');
         
+        // Données non-sensibles HDS -> Supabase
+        this.adapter.registerCloudAdapter('users', cloudAdapters.users);
+        this.adapter.registerCloudAdapter('osteopaths', cloudAdapters.osteopaths);
+        this.adapter.registerCloudAdapter('cabinets', cloudAdapters.cabinets);
+        this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
+        this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
+        this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
+        this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
+        this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
+        
+        // Données HDS sensibles -> Stockage local
         try {
           const localAdapters = await initializeLocalAdapters();
           this.adapter.registerLocalAdapter('patients', localAdapters.patients);
           this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
           this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-          // Note: quotes, consultations, etc. utiliseront des adaptateurs génériques locaux
-          console.log('✅ Stockage local HDS activé pour l\'utilisateur connecté');
+          console.log('✅ Configuration hybride activée : HDS sensible en local, reste en cloud');
         } catch (localError) {
-          console.warn('⚠️ Échec du stockage local - fallback vers Supabase temporaire:', localError);
-          // Fallback vers Supabase si le stockage local échoue
+          console.warn('⚠️ Échec du stockage local HDS - fallback vers Supabase:', localError);
+          // Fallback complet vers Supabase si le stockage local échoue
           this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
           this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
           this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
-          this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
-          this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
-          this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
-          this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
-          this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
         }
       } else {
-        // MODE DÉMO (NON CONNECTÉ): Utiliser Supabase pour toutes les données
-        console.log('🎭 Mode démo - Utilisation de Supabase pour toutes les données');
+        // MODE DÉMO (NON CONNECTÉ): Toutes les données en Supabase éphémère
+        console.log('🎭 Mode démo - Données éphémères Supabase (suppression auto 30min)');
         this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
         this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
         this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
@@ -269,17 +276,19 @@ export class HybridDataManager {
         entities: status.local.tables
       },
       dataClassification: {
+        // Toujours en cloud
         users: DataLocation.CLOUD,
         osteopaths: DataLocation.CLOUD,
         cabinets: DataLocation.CLOUD,
+        quotes: DataLocation.CLOUD,
+        consultations: DataLocation.CLOUD,
+        medicalDocuments: DataLocation.CLOUD,
+        treatmentHistory: DataLocation.CLOUD,
+        patientRelationships: DataLocation.CLOUD,
+        // HDS sensible en local (si connecté)
         patients: DataLocation.LOCAL,
         appointments: DataLocation.LOCAL,
         invoices: DataLocation.LOCAL,
-        consultations: DataLocation.LOCAL,
-        medicalDocuments: DataLocation.LOCAL,
-        quotes: DataLocation.LOCAL,
-        treatmentHistory: DataLocation.LOCAL,
-        patientRelationships: DataLocation.LOCAL,
       }
     };
   }
