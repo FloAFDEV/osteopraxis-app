@@ -68,12 +68,12 @@ export class OPFSSQLiteService {
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        // Charger sql.js avec le bon chemin WASM
+        // Charger sql.js dynamiquement
         const { default: initSqlJs } = await import('sql.js');
         const sqlite = await initSqlJs({
           locateFile: (file: string) => {
             if (file.endsWith('.wasm')) {
-              return '/sql-wasm.wasm';
+              return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
             }
             return file;
           }
@@ -88,7 +88,7 @@ export class OPFSSQLiteService {
         const sqlite = await initSqlJs({
           locateFile: (file: string) => {
             if (file.endsWith('.wasm')) {
-              return '/sql-wasm.wasm';
+              return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
             }
             return file;
           }
