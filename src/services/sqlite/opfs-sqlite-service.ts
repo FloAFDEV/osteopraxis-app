@@ -68,9 +68,16 @@ export class OPFSSQLiteService {
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        // Charger sql.js
+        // Charger sql.js avec le bon chemin WASM
         const SQL = await import('sql.js');
-        const sqlite = await SQL.default();
+        const sqlite = await SQL.default({
+          locateFile: (file: string) => {
+            if (file.endsWith('.wasm')) {
+              return '/sql-wasm.wasm';
+            }
+            return file;
+          }
+        });
         
         this.db = new sqlite.Database(uint8Array);
         console.log('📂 Existing database loaded from OPFS');
@@ -78,7 +85,14 @@ export class OPFSSQLiteService {
       } catch (error) {
         // Base de données n'existe pas, en créer une nouvelle
         const SQL = await import('sql.js');
-        const sqlite = await SQL.default();
+        const sqlite = await SQL.default({
+          locateFile: (file: string) => {
+            if (file.endsWith('.wasm')) {
+              return '/sql-wasm.wasm';
+            }
+            return file;
+          }
+        });
         
         this.db = new sqlite.Database();
         console.log('🆕 New database created');
