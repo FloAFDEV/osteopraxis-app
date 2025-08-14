@@ -85,94 +85,49 @@ export class HybridDataAdapter {
    * Interface unifiée pour les opérations CRUD
    */
   async getAll<T>(entityName: string): Promise<T[]> {
-    try {
-      const adapter = this.getAdapter<T>(entityName);
-      return await adapter.getAll();
-    } catch (error) {
-      throw new HybridStorageError(
-        `Failed to get all ${entityName}`,
-        this.getDataLocation(entityName),
-        'getAll',
-        error as Error
-      );
-    }
+    const adapter = this.getAdapter<T>(entityName);
+    return await adapter.getAll();
   }
 
   async getById<T>(entityName: string, id: number | string): Promise<T | null> {
-    try {
-      const adapter = this.getAdapter<T>(entityName);
-      return await adapter.getById(id);
-    } catch (error) {
-      throw new HybridStorageError(
-        `Failed to get ${entityName} with id ${id}`,
-        this.getDataLocation(entityName),
-        'getById',
-        error as Error
-      );
-    }
+    const adapter = this.getAdapter<T>(entityName);
+    return await adapter.getById(id);
   }
 
   async create<T>(entityName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
-    try {
-      const adapter = this.getAdapter<T>(entityName);
-      const result = await adapter.create(data);
-      
-      // Déclencher une sauvegarde automatique si activée
-      if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
-        this.scheduleBackup();
-      }
-      
-      return result;
-    } catch (error) {
-      throw new HybridStorageError(
-        `Failed to create ${entityName}`,
-        this.getDataLocation(entityName),
-        'create',
-        error as Error
-      );
+    const adapter = this.getAdapter<T>(entityName);
+    const result = await adapter.create(data);
+    
+    // Déclencher une sauvegarde automatique si activée
+    if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
+      this.scheduleBackup();
     }
+    
+    return result;
   }
 
   async update<T>(entityName: string, id: number | string, data: Partial<T>): Promise<T> {
-    try {
-      const adapter = this.getAdapter<T>(entityName);
-      const result = await adapter.update(id, data);
-      
-      // Déclencher une sauvegarde automatique si activée
-      if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
-        this.scheduleBackup();
-      }
-      
-      return result;
-    } catch (error) {
-      throw new HybridStorageError(
-        `Failed to update ${entityName} with id ${id}`,
-        this.getDataLocation(entityName),
-        'update',
-        error as Error
-      );
+    const adapter = this.getAdapter<T>(entityName);
+    const result = await adapter.update(id, data);
+    
+    // Déclencher une sauvegarde automatique si activée
+    if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
+      this.scheduleBackup();
     }
+    
+    return result;
   }
 
   async delete(entityName: string, id: number | string): Promise<boolean> {
-    try {
-      const adapter = this.getAdapter<any>(entityName);
-      const result = await adapter.delete(id);
-      
-      // Déclencher une sauvegarde automatique si activée
-      if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
-        this.scheduleBackup();
-      }
-      
-      return result;
-    } catch (error) {
-      throw new HybridStorageError(
-        `Failed to delete ${entityName} with id ${id}`,
-        this.getDataLocation(entityName),
-        'delete',
-        error as Error
-      );
+    const adapter = this.getAdapter<any>(entityName);
+    const result = await adapter.delete(id);
+    
+    // Déclencher une sauvegarde automatique si activée
+    if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
+      this.scheduleBackup();
     }
+    
+    return result;
   }
 
   /**
