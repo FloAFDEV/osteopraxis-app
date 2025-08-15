@@ -192,7 +192,19 @@ class HybridStorageManager {
   /**
    * Vérifie si la configuration de stockage est nécessaire
    */
-  isSetupRequired(): boolean {
+  async isSetupRequired(): Promise<boolean> {
+    // En mode démo, pas besoin de configuration locale
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const isDemoMode = session?.user?.email === 'demo@patienthub.fr' || 
+                      session?.user?.user_metadata?.is_demo_user === true;
+    
+    if (isDemoMode) {
+      console.log('🎭 Mode démo détecté - configuration locale non requise');
+      return false;
+    }
+    
     return !this.config || !this.isInitialized;
   }
 

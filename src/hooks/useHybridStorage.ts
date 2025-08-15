@@ -88,7 +88,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   return {
     status,
     isLoading,
-    isSetupRequired: hybridStorageManager.isSetupRequired(),
+    isSetupRequired: status ? !status.isConfigured : true, // Dérivé du status plutôt qu'async
     isUnlocked: hybridStorageManager.isStorageUnlocked(),
     initialize,
     unlock,

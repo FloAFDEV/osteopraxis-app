@@ -182,9 +182,32 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 					setSession(session);
 					setIsAuthenticated(true);
 				} else {
-					setUser(null);
-					setSession(null);
-					setIsAuthenticated(false);
+					// Vérifier si c'est un utilisateur démo
+					const isDemoUser = session.user.email === 'demo@patienthub.fr' || 
+									  session.user.user_metadata?.is_demo_user === true;
+
+					if (isDemoUser) {
+						// Mode démo - créer un utilisateur virtuel
+						const demoUser: User = {
+							id: session.user.id,
+							email: session.user.email || '',
+							firstName: 'Utilisateur',
+							lastName: 'Démo',
+							role: 'OSTEOPATH',
+							osteopathId: 534, // ID fixe pour le mode démo
+							created_at: new Date().toISOString(),
+							updated_at: new Date().toISOString(),
+						};
+
+						setUser(demoUser);
+						setSession(session);
+						setIsAuthenticated(true);
+						console.log('🎭 Mode démo activé - utilisateur virtuel configuré');
+					} else {
+						setUser(null);
+						setSession(null);
+						setIsAuthenticated(false);
+					}
 				}
 			} else {
 				setUser(null);

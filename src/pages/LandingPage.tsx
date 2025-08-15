@@ -123,9 +123,17 @@ export default function LandingPage() {
 	const { user, loading } = useAuth();
 	const navigate = useNavigate();
 
-	// Ne plus rediriger automatiquement les utilisateurs connectés depuis la landing
-	// Ils peuvent naviguer via les boutons (Connexion / Démo / Dashboard)
-	// Cela permet d'accéder à la page marketing même en étant authentifié.
+	// Redirection automatique vers le dashboard pour les utilisateurs connectés
+	useEffect(() => {
+		if (!loading && user) {
+			// Vérifier si c'est un utilisateur démo
+			const isDemoUser = user.email === 'demo@patienthub.fr';
+			if (!isDemoUser) {
+				// Utilisateur réel - rediriger vers le dashboard
+				navigate('/dashboard');
+			}
+		}
+	}, [user, loading, navigate]);
 
 
 	// Ne pas afficher la landing page pendant le loading

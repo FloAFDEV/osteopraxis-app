@@ -54,11 +54,15 @@ export class HybridDataManager {
       const { data: { session } } = await supabase.auth.getSession();
       const isAuthenticated = !!session?.user;
 
-      if (isAuthenticated) {
-        // UTILISATEUR CONNECTÉ: 
+      // Vérifier si on est en mode démo (utilisateur demo avec email spécifique)
+      const isDemoMode = session?.user?.email === 'demo@patienthub.fr' || 
+                        session?.user?.user_metadata?.is_demo_user === true;
+
+      if (isAuthenticated && !isDemoMode) {
+        // UTILISATEUR CONNECTÉ RÉEL: 
         // - Données non-sensibles HDS : Supabase 
-        // - Données HDS sensibles : Stockage local (avec fallback Supabase)
-        console.log('👤 Utilisateur connecté - Configuration stockage hybride');
+        // - Données HDS sensibles : Stockage local OBLIGATOIRE
+        console.log('👤 Utilisateur connecté - Configuration stockage hybride (conformité HDS)');
         
         // Données non-sensibles HDS -> Toujours Supabase
         this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
@@ -82,8 +86,9 @@ export class HybridDataManager {
           );
         }
       } else {
-        // MODE DÉMO (NON CONNECTÉ): Toutes les données en Supabase éphémère
-        console.log('🎭 Mode démo - Données éphémères Supabase (suppression auto 30min)');
+        // MODE DÉMO: Toutes les données en Supabase éphémère
+        const modeDesc = isDemoMode ? 'utilisateur démo connecté' : 'non connecté';
+        console.log(`🎭 Mode démo (${modeDesc}) - Données éphémères Supabase (suppression auto 30min)`);
         this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
         this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
         this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
