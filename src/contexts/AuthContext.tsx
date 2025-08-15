@@ -119,11 +119,24 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		setLoading(true);
 		setError(null);
 		try {
+			// Nettoyer d'abord l'état local
+			setUser(null);
+			setSession(null);
+			setIsAuthenticated(false);
+			
+			// Réinitialiser le gestionnaire hybride
+			try {
+				const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
+				await hybridDataManager.reinitialize();
+			} catch (error) {
+				console.warn('Failed to reinitialize hybrid data manager:', error);
+			}
+
+			// Ensuite déconnecter de Supabase
 			const { error } = await supabase.auth.signOut();
 			if (error) throw error;
 
-			// State sera nettoyé par le listener onAuthStateChange
-			navigate("/login", { replace: true });
+			navigate("/", { replace: true });
 			toast.success("Déconnexion réussie !");
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de la déconnexion");

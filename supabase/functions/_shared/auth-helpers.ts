@@ -35,7 +35,8 @@ export async function verifyUserAndGetIdentity(req: Request): Promise<{
   const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
   
   if (userError || !user) {
-    return { identity: null, supabaseClient: null, message: "Token invalide" };
+    console.log("Token validation failed:", userError?.message || "No user");
+    return { identity: null, supabaseClient: null, message: "Token invalide ou expiré" };
   }
 
   // Récupérer l'osteopathId via la table Osteopath avec authId

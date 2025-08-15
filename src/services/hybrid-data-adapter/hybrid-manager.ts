@@ -125,7 +125,28 @@ export class HybridDataManager {
       return;
     }
     console.log('🔄 Reinitializing Hybrid Data Manager...');
+    
+    // Nettoyer l'état existant
     this.initialized = false;
+    // Créer un nouveau adaptateur pour éviter les conflits
+    const defaultConfig: HybridConfig = {
+      fallbackToCloud: true,
+      syncMode: 'none',
+      encryption: {
+        enabled: true,
+        keyDerivation: 'pbkdf2'
+      },
+      backup: {
+        autoBackup: true,
+        backupInterval: 60,
+        maxBackups: 7
+      }
+    };
+    this.adapter = new HybridDataAdapter(defaultConfig);
+    
+    // Attendre un peu pour que les changements d'auth se propagent
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     await this.initialize();
   }
 
