@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { hybridStorageManager, type StorageStatus } from '@/services/hybrid-storage-manager';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UseHybridStorageReturn {
   status: StorageStatus | null;
@@ -14,8 +15,12 @@ interface UseHybridStorageReturn {
 }
 
 export const useHybridStorage = (): UseHybridStorageReturn => {
+  const { user } = useAuth();
   const [status, setStatus] = useState<StorageStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Vérifier si c'est un utilisateur démo
+  const isDemoUser = user?.email === 'demo@patienthub.fr';
 
   const loadStatus = useCallback(async () => {
     try {
@@ -32,6 +37,23 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   const initialize = useCallback(async () => {
     try {
       setIsLoading(true);
+      
+      // En mode démo, on bypass l'initialisation du stockage local
+      if (isDemoUser) {
+        setStatus({
+          isConfigured: true,
+          isUnlocked: true,
+          localAvailable: false,
+          cloudAvailable: true,
+          dataClassification: {
+            local: [],
+            cloud: ['appointments', 'patients', 'invoices']
+          }
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       await hybridStorageManager.initialize();
       await loadStatus();
     } catch (error) {
@@ -40,7 +62,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [loadStatus]);
+  }, [loadStatus, isDemoUser]);
 
   const unlock = useCallback(async (credential: string): Promise<boolean> => {
     try {
@@ -88,8 +110,8 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   return {
     status,
     isLoading,
-    isSetupRequired: status ? !status.isConfigured : true, // Dérivé du status plutôt qu'async
-    isUnlocked: hybridStorageManager.isStorageUnlocked(),
+    isSetupRequired: isDemoUser ? false : (status ? !status.isConfigured : true),
+    isUnlocked: isDemoUser ? true : hybridStorageManager.isStorageUnlocked(),
     initialize,
     unlock,
     lock,
