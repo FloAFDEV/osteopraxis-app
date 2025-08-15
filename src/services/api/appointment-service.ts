@@ -67,21 +67,20 @@ export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     console.log("appointmentService.getAppointments: Starting");
     
-    // Vérifier d'abord si on est en mode démo
-    if (demoContext?.isDemoMode) {
-      console.log("appointmentService.getAppointments: Using demo data");
-      await delay(300); // Simuler un délai réseau
-      return [...demoContext.demoData.appointments];
-    }
-    
     if (USE_SUPABASE) {
       try {
-        console.log("appointmentService.getAppointments: Using Hybrid local storage");
+        console.log("appointmentService.getAppointments: Using Hybrid storage (Supabase in demo mode)");
         const result = await hybridDataManager.get<Appointment>('appointments');
-        console.log(`appointmentService.getAppointments: Hybrid returned ${result.length} appointments`);
+        console.log("appointmentService.getAppointments: Hybrid returned", result.length, "appointments");
         return result;
       } catch (error) {
         console.error("appointmentService.getAppointments: Hybrid error:", error);
+        // En cas d'erreur, utiliser les données démo uniquement si le contexte est disponible
+        if (demoContext?.isDemoMode) {
+          console.log("appointmentService.getAppointments: Fallback to demo context");
+          await delay(300);
+          return [...demoContext.demoData.appointments];
+        }
         throw error;
       }
     }
@@ -97,21 +96,17 @@ export const appointmentService = {
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
     console.log(`appointmentService.getAppointmentById: Starting for ID ${id}`);
     
-    // Vérifier d'abord si on est en mode démo
-    if (demoContext?.isDemoMode) {
-      console.log(`appointmentService.getAppointmentById: Using demo data for ID ${id}`);
-      await delay(200);
-      return demoContext.demoData.appointments.find((appointment: Appointment) => appointment.id === id);
-    }
-    
     if (USE_SUPABASE) {
       try {
-        console.log(`appointmentService.getAppointmentById: Using Hybrid for ID ${id}`);
         const result = await hybridDataManager.getById<Appointment>('appointments', id);
         console.log(`appointmentService.getAppointmentById: Hybrid result for ID ${id}:`, result);
         return result || undefined;
       } catch (error) {
         console.error(`appointmentService.getAppointmentById: Hybrid error for ID ${id}:`, error);
+        // Fallback to demo context only if available
+        if (demoContext?.isDemoMode) {
+          return demoContext.demoData.appointments.find((a: Appointment) => a.id === id);
+        }
         throw error;
       }
     }
@@ -125,22 +120,18 @@ export const appointmentService = {
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     console.log(`appointmentService.getAppointmentsByPatientId: Starting for patient ${patientId}`);
     
-    // Vérifier d'abord si on est en mode démo
-    if (demoContext?.isDemoMode) {
-      console.log(`appointmentService.getAppointmentsByPatientId: Using demo data for patient ${patientId}`);
-      await delay(200);
-      return demoContext.demoData.appointments.filter((appointment: Appointment) => appointment.patientId === patientId);
-    }
-    
     if (USE_SUPABASE) {
       try {
-        console.log(`appointmentService.getAppointmentsByPatientId: Using Hybrid for patient ${patientId}`);
-        const all = await hybridDataManager.get<Appointment>('appointments');
-        const result = all.filter(a => a.patientId === patientId);
-        console.log(`appointmentService.getAppointmentsByPatientId: Hybrid returned ${result.length} appointments for patient ${patientId}`);
+        const allAppointments = await hybridDataManager.get<Appointment>('appointments');
+        const result = allAppointments.filter(a => a.patientId === patientId);
+        console.log(`appointmentService.getAppointmentsByPatientId: Found ${result.length} appointments for patient ${patientId}`);
         return result;
       } catch (error) {
-        console.error(`appointmentService.getAppointmentsByPatientId: Hybrid error for patient ${patientId}:`, error);
+        console.error(`appointmentService.getAppointmentsByPatientId: Error for patient ${patientId}:`, error);
+        // Fallback to demo context only if available  
+        if (demoContext?.isDemoMode) {
+          return demoContext.demoData.appointments.filter((a: Appointment) => a.patientId === patientId);
+        }
         throw error;
       }
     }
@@ -154,37 +145,38 @@ export const appointmentService = {
   async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | null> {
     console.log(`appointmentService.getTodayAppointmentForPatient: Starting for patient ${patientId}`);
     
-    // Vérifier d'abord si on est en mode démo
-    if (demoContext?.isDemoMode) {
-      console.log(`appointmentService.getTodayAppointmentForPatient: Using demo data for patient ${patientId}`);
-      await delay(200);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const result = demoContext.demoData.appointments.find((a: Appointment) => 
-        a.patientId === patientId && 
-        new Date(a.date) >= today && 
-        new Date(a.date) < tomorrow
-      ) || null;
-      
-      console.log(`appointmentService.getTodayAppointmentForPatient: Demo mode result for patient ${patientId}:`, result);
-      return result;
-    }
-    
     if (USE_SUPABASE) {
       try {
-        const all = await hybridDataManager.get<Appointment>('appointments');
+        const allAppointments = await hybridDataManager.get<Appointment>('appointments');
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const result = all.find(a => a.patientId === patientId && new Date(a.date) >= today && new Date(a.date) < tomorrow) || null;
-        console.log(`appointmentService.getTodayAppointmentForPatient: Hybrid result for patient ${patientId}:`, result);
-        return result;
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+        
+        const todayAppointment = allAppointments.find(appointment => {
+          if (appointment.patientId !== patientId) return false;
+          
+          const appointmentDate = new Date(appointment.date);
+          return appointmentDate >= startOfDay && appointmentDate <= endOfDay;
+        });
+        
+        console.log(`appointmentService.getTodayAppointmentForPatient: Found today appointment for patient ${patientId}:`, todayAppointment);
+        return todayAppointment || null;
       } catch (error) {
-        console.error(`appointmentService.getTodayAppointmentForPatient: Hybrid error for patient ${patientId}:`, error);
+        console.error(`appointmentService.getTodayAppointmentForPatient: Error for patient ${patientId}:`, error);
+        // Fallback to demo context only if available
+        if (demoContext?.isDemoMode) {
+          const today = new Date();
+          const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+          
+          const todayAppointment = demoContext.demoData.appointments.find((appointment: Appointment) => {
+            if (appointment.patientId !== patientId) return false;
+            const appointmentDate = new Date(appointment.date);
+            return appointmentDate >= startOfDay && appointmentDate <= endOfDay;
+          });
+          
+          return todayAppointment || null;
+        }
         throw error;
       }
     }
@@ -216,40 +208,25 @@ export const appointmentService = {
       notes: XSSProtection.sanitizeString(appointmentData?.notes),
     };
 
-    // Demo mode: keep data ephemeral in memory only
-    if (demoContext?.isDemoMode) {
-      const nextId = Math.max(0, ...demoContext.demoData.appointments.map((a: Appointment) => a.id)) + 1;
-      const start = sanitized.start || sanitized.date || new Date().toISOString();
-      const end = sanitized.end || new Date(new Date(start).getTime() + 30 * 60000).toISOString();
-      const createdAt = new Date().toISOString();
-      const toCreate: Appointment = {
-        id: nextId,
-        patientId: sanitized.patientId,
-        cabinetId: sanitized.cabinetId ?? demoContext.demoData.cabinets[0]?.id,
-        osteopathId: sanitized.osteopathId ?? demoContext.demoData.osteopath.id,
-        start,
-        end,
-        date: sanitized.date || start,
-        reason: sanitized.reason || "Consultation",
-        status: sanitized.status || "SCHEDULED",
-        notes: sanitized.notes || null,
-        createdAt,
-        updatedAt: createdAt,
-        notificationSent: Boolean(sanitized.notificationSent),
-      } as Appointment;
-      // Update context state (without id per provider contract)
-      demoContext.addDemoAppointment({ ...toCreate, id: undefined as unknown as never });
-      return toCreate;
-    }
-    
     if (USE_SUPABASE) {
       try {
-        // Forcer l'osteopathId si disponible côté cloud, sinon laisser hybride gérer
         const created = await hybridDataManager.create<Appointment>('appointments', sanitized);
         console.log("appointmentService.createAppointment: Hybrid result:", created);
         return created;
       } catch (error) {
         console.error("appointmentService.createAppointment: Hybrid error:", error);
+        // En cas d'erreur, essayer de créer via le contexte démo si disponible
+        if (demoContext?.isDemoMode) {
+          console.log("appointmentService.createAppointment: Fallback to demo context");
+          const newAppointment = {
+            ...sanitized,
+            id: Math.max(...demoContext.demoData.appointments.map((a: Appointment) => a.id), 0) + 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          demoContext.addDemoAppointment(newAppointment);
+          return newAppointment as Appointment;
+        }
         throw error;
       }
     }
@@ -278,13 +255,6 @@ export const appointmentService = {
       notes: update.notes ? XSSProtection.sanitizeString(update.notes as any) : update.notes,
     };
 
-    if (demoContext?.isDemoMode) {
-      demoContext.updateDemoAppointment(id, sanitizedUpdate);
-      const updated = demoContext.demoData.appointments.find((a: Appointment) => a.id === id);
-      if (!updated) throw new Error(`Séance avec l'identifiant ${id} non trouvée`);
-      return { ...updated, ...sanitizedUpdate, updatedAt: new Date().toISOString() } as Appointment;
-    }
-    
     if (USE_SUPABASE) {
       try {
         const result = await hybridDataManager.update<Appointment>('appointments', id, sanitizedUpdate);
@@ -292,6 +262,13 @@ export const appointmentService = {
         return result;
       } catch (error) {
         console.error(`appointmentService.updateAppointment: Hybrid error for ID ${id}:`, error);
+        // Fallback to demo context only if available
+        if (demoContext?.isDemoMode) {
+          demoContext.updateDemoAppointment(id, sanitizedUpdate);
+          const updated = demoContext.demoData.appointments.find((a: Appointment) => a.id === id);
+          if (!updated) throw new Error(`Séance avec l'identifiant ${id} non trouvée`);
+          return { ...updated, ...sanitizedUpdate, updatedAt: new Date().toISOString() } as Appointment;
+        }
         throw error;
       }
     }
@@ -330,11 +307,6 @@ export const appointmentService = {
 
   async deleteAppointment(id: number): Promise<boolean> {
     console.log(`appointmentService.deleteAppointment: Starting for ID ${id}`);
-
-    if (demoContext?.isDemoMode) {
-      demoContext.deleteDemoAppointment(id);
-      return true;
-    }
     
     if (USE_SUPABASE) {
       try {
@@ -343,6 +315,11 @@ export const appointmentService = {
         return true;
       } catch (error) {
         console.error(`appointmentService.deleteAppointment: Hybrid error for ID ${id}:`, error);
+        // Fallback to demo context only if available
+        if (demoContext?.isDemoMode) {
+          demoContext.deleteDemoAppointment(id);
+          return true;
+        }
         throw error;
       }
     }
