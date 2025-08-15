@@ -55,6 +55,41 @@ export class OPFSSQLiteService {
   }
 
   /**
+   * Initialise SQL.js avec fallback CDN
+   */
+  private async initSqlJsWithFallback(initSqlJs: any): Promise<any> {
+    const cdnUrls = [
+      // Essayer d'abord une version locale/bundlée (à configurer avec Vite)
+      '/sql-wasm.wasm',
+      // Fallback vers différents CDN
+      'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm',
+      'https://unpkg.com/sql.js@1.10.2/dist/sql-wasm.wasm',
+      'https://cdn.skypack.dev/sql.js@1.10.2/dist/sql-wasm.wasm'
+    ];
+
+    for (const wasmUrl of cdnUrls) {
+      try {
+        console.log(`🔄 Tentative de chargement SQL.js depuis: ${wasmUrl}`);
+        const sqlite = await initSqlJs({
+          locateFile: (file: string) => {
+            if (file.endsWith('.wasm')) {
+              return wasmUrl;
+            }
+            return file;
+          }
+        });
+        console.log(`✅ SQL.js chargé avec succès depuis: ${wasmUrl}`);
+        return sqlite;
+      } catch (error) {
+        console.warn(`❌ Échec du chargement depuis ${wasmUrl}:`, error);
+        // Continuer avec le CDN suivant
+      }
+    }
+    
+    throw new Error('❌ ERREUR CRITIQUE: Impossible de charger SQL.js depuis aucun CDN. Stockage local indisponible.');
+  }
+
+  /**
    * Charge ou crée la base de données
    */
   private async loadOrCreateDatabase(): Promise<void> {
@@ -68,16 +103,9 @@ export class OPFSSQLiteService {
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        // Charger sql.js dynamiquement
+        // Charger sql.js dynamiquement avec fallback CDN
         const { default: initSqlJs } = await import('sql.js');
-        const sqlite = await initSqlJs({
-          locateFile: (file: string) => {
-            if (file.endsWith('.wasm')) {
-              return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
-            }
-            return file;
-          }
-        });
+        const sqlite = await this.initSqlJsWithFallback(initSqlJs);
         
         this.db = new sqlite.Database(uint8Array);
         console.log('📂 Existing database loaded from OPFS');
@@ -85,14 +113,7 @@ export class OPFSSQLiteService {
       } catch (error) {
         // Base de données n'existe pas, en créer une nouvelle
         const { default: initSqlJs } = await import('sql.js');
-        const sqlite = await initSqlJs({
-          locateFile: (file: string) => {
-            if (file.endsWith('.wasm')) {
-              return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
-            }
-            return file;
-          }
-        });
+        const sqlite = await this.initSqlJsWithFallback(initSqlJs);
         
         this.db = new sqlite.Database();
         console.log('🆕 New database created');
@@ -349,12 +370,47 @@ export async function getOPFSSQLiteService(): Promise<OPFSSQLiteService> {
 }
 
 /**
- * Vérifie le support OPFS du navigateur
+ * Vérifie le support OPFS du navigateur avec diagnostic détaillé
  */
-export function checkOPFSSupport(): boolean {
-  return (
-    'storage' in navigator &&
-    'getDirectory' in navigator.storage &&
-    'createWritable' in FileSystemFileHandle.prototype
-  );
+export function checkOPFSSupport(): { supported: boolean; details: string[] } {
+  const details: string[] = [];
+  let supported = true;
+
+  if (!('storage' in navigator)) {
+    details.push('❌ navigator.storage non disponible');
+    supported = false;
+  } else {
+    details.push('✅ navigator.storage disponible');
+  }
+
+  if (!('getDirectory' in navigator.storage)) {
+    details.push('❌ navigator.storage.getDirectory non disponible');
+    supported = false;
+  } else {
+    details.push('✅ navigator.storage.getDirectory disponible');
+  }
+
+  if (typeof FileSystemFileHandle === 'undefined' || !('createWritable' in FileSystemFileHandle.prototype)) {
+    details.push('❌ FileSystemFileHandle.createWritable non disponible');
+    supported = false;
+  } else {
+    details.push('✅ FileSystemFileHandle.createWritable disponible');
+  }
+
+  // Vérifications supplémentaires
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    details.push('⚠️ OPFS nécessite HTTPS ou localhost');
+    supported = false;
+  } else {
+    details.push('✅ Contexte sécurisé (HTTPS/localhost)');
+  }
+
+  return { supported, details };
+}
+
+/**
+ * Version simple pour rétrocompatibilité
+ */
+export function isOPFSSupported(): boolean {
+  return checkOPFSSupport().supported;
 }

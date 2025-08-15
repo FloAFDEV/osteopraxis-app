@@ -139,11 +139,33 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			const { data: { session } } = await supabase.auth.getSession();
 			if (session?.user) {
 				// Récupérer les données utilisateur complètes depuis la table User
-				const { data: userData, error } = await supabase
+				let { data: userData, error } = await supabase
 					.from('User')
 					.select('*')
 					.eq('auth_id', session.user.id)
 					.maybeSingle();
+
+				// Si erreur 401, essayer de réauthentifier
+				if (error && error.message?.includes('401')) {
+					console.warn('Session expirée, tentative de rafraîchissement...');
+					const { error: refreshError } = await supabase.auth.refreshSession();
+					if (refreshError) {
+						console.error('Échec du rafraîchissement de session:', refreshError);
+						throw refreshError;
+					}
+					// Réessayer après refresh
+					const { data: retryUserData, error: retryError } = await supabase
+						.from('User')
+						.select('*')
+						.eq('auth_id', session.user.id)
+						.maybeSingle();
+					
+					if (retryError) throw retryError;
+					userData = retryUserData;
+					error = retryError;
+				} else if (error) {
+					throw error;
+				}
 
 				if (userData && !error) {
 					const userWithRole: User = {
@@ -257,13 +279,33 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 						if (!mounted || !session?.user) return;
 						(async () => {
 							try {
-								const { data: userData, error } = await supabase
+								let { data: userData, error } = await supabase
 									.from('User')
 									.select('*')
 									.eq('auth_id', session.user.id)
 									.maybeSingle();
 
 								if (!mounted) return;
+								
+								// Gestion des erreurs 401 avec réauthentification
+								if (error && error.message?.includes('401')) {
+									console.warn('Session expirée dans listener, tentative de rafraîchissement...');
+									const { error: refreshError } = await supabase.auth.refreshSession();
+									if (!refreshError) {
+										// Réessayer après refresh
+										const { data: retryUserData, error: retryError } = await supabase
+											.from('User')
+											.select('*')
+											.eq('auth_id', session.user.id)
+											.maybeSingle();
+										
+										if (retryUserData && !retryError) {
+											userData = retryUserData;
+											error = retryError;
+										}
+									}
+								}
+								
 								if (userData && !error) {
 									const userWithRole: User = {
 										id: userData.auth_id,

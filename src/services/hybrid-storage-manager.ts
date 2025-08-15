@@ -78,6 +78,22 @@ class HybridStorageManager {
     console.log('🔄 Initializing Hybrid Storage Manager...');
     
     try {
+      // Vérifier le support OPFS avant d'initialiser
+      const { checkOPFSSupport } = await import('./sqlite/opfs-sqlite-service');
+      const opfsStatus = checkOPFSSupport();
+      
+      if (!opfsStatus.supported) {
+        console.error('❌ OPFS non supporté:', opfsStatus.details);
+        toast.error(
+          'CONFORMITÉ HDS REQUISE: Votre navigateur ne supporte pas le stockage local sécurisé (OPFS). ' +
+          'Détails: ' + opfsStatus.details.join(', ') + '. ' +
+          'Veuillez utiliser un navigateur récent (Chrome 102+, Edge 102+, Firefox avec flag activé).'
+        );
+        throw new Error('OPFS non supporté - conformité HDS compromise');
+      }
+      
+      console.log('✅ Support OPFS vérifié:', opfsStatus.details);
+      
       // Vérifier si une configuration existe déjà
       const existingConfig = await this.loadStorageConfig();
       
