@@ -107,3 +107,8 @@ function_name = "secure-publish-patient-delta"
 path = "/secure-fetch-patient-deltas"
 verify_jwt = true
 function_name = "secure-fetch-patient-deltas"
+
+[[edge_functions]]
+path = "/demo-cleanup"
+verify_jwt = false
+function_name = "demo-cleanup"

@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -87,7 +87,9 @@ export type Database = {
           date: string
           deleted_at: string | null
           deleted_by: string | null
+          demo_expires_at: string | null
           id: number
+          is_demo_data: boolean | null
           notes: string | null
           notificationSent: boolean
           osteopathId: number
@@ -103,7 +105,9 @@ export type Database = {
           date: string
           deleted_at?: string | null
           deleted_by?: string | null
+          demo_expires_at?: string | null
           id?: number
+          is_demo_data?: boolean | null
           notes?: string | null
           notificationSent?: boolean
           osteopathId: number
@@ -119,7 +123,9 @@ export type Database = {
           date?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          demo_expires_at?: string | null
           id?: number
+          is_demo_data?: boolean | null
           notes?: string | null
           notificationSent?: boolean
           osteopathId?: number
@@ -222,9 +228,11 @@ export type Database = {
         Row: {
           address: string
           createdAt: string
+          demo_expires_at: string | null
           email: string | null
           id: number
           imageUrl: string | null
+          is_demo_data: boolean | null
           logoUrl: string | null
           name: string
           osteopathId: number
@@ -236,9 +244,11 @@ export type Database = {
         Insert: {
           address: string
           createdAt?: string
+          demo_expires_at?: string | null
           email?: string | null
           id?: number
           imageUrl?: string | null
+          is_demo_data?: boolean | null
           logoUrl?: string | null
           name: string
           osteopathId: number
@@ -250,9 +260,11 @@ export type Database = {
         Update: {
           address?: string
           createdAt?: string
+          demo_expires_at?: string | null
           email?: string | null
           id?: number
           imageUrl?: string | null
+          is_demo_data?: boolean | null
           logoUrl?: string | null
           name?: string
           osteopathId?: number
@@ -638,6 +650,39 @@ export type Database = {
           },
         ]
       }
+      hybrid_storage_unlock_requests: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          id: string
+          method: string
+          new_credential: string
+          requested_by: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          method: string
+          new_credential: string
+          requested_by?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          method?: string
+          new_credential?: string
+          requested_by?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       Invoice: {
         Row: {
           amount: number
@@ -647,7 +692,9 @@ export type Database = {
           date: string
           deleted_at: string | null
           deleted_by: string | null
+          demo_expires_at: string | null
           id: number
+          is_demo_data: boolean | null
           notes: string | null
           osteopathId: number | null
           patientId: number
@@ -665,7 +712,9 @@ export type Database = {
           date?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          demo_expires_at?: string | null
           id?: number
+          is_demo_data?: boolean | null
           notes?: string | null
           osteopathId?: number | null
           patientId: number
@@ -683,7 +732,9 @@ export type Database = {
           date?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          demo_expires_at?: string | null
           id?: number
+          is_demo_data?: boolean | null
           notes?: string | null
           osteopathId?: number | null
           patientId?: number
@@ -758,7 +809,9 @@ export type Database = {
           ape_code: string | null
           authId: string
           createdAt: string
+          demo_expires_at: string | null
           id: number
+          is_demo_data: boolean | null
           name: string
           professional_title: string | null
           rpps_number: string | null
@@ -771,7 +824,9 @@ export type Database = {
           ape_code?: string | null
           authId: string
           createdAt?: string
+          demo_expires_at?: string | null
           id?: number
+          is_demo_data?: boolean | null
           name: string
           professional_title?: string | null
           rpps_number?: string | null
@@ -784,7 +839,9 @@ export type Database = {
           ape_code?: string | null
           authId?: string
           createdAt?: string
+          demo_expires_at?: string | null
           id?: number
+          is_demo_data?: boolean | null
           name?: string
           professional_title?: string | null
           rpps_number?: string | null
@@ -920,6 +977,7 @@ export type Database = {
           currentTreatment: string | null
           deleted_at: string | null
           deleted_by: string | null
+          demo_expires_at: string | null
           dental_exam: string | null
           dental_health: string | null
           developmentMilestones: string | null
@@ -951,6 +1009,7 @@ export type Database = {
           height_at_birth: number | null
           id: number
           intestinal_transit: string | null
+          is_demo_data: boolean | null
           isDeceased: boolean
           isExSmoker: boolean | null
           isSmoker: boolean
@@ -1033,6 +1092,7 @@ export type Database = {
           currentTreatment?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          demo_expires_at?: string | null
           dental_exam?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
@@ -1064,6 +1124,7 @@ export type Database = {
           height_at_birth?: number | null
           id?: number
           intestinal_transit?: string | null
+          is_demo_data?: boolean | null
           isDeceased?: boolean
           isExSmoker?: boolean | null
           isSmoker?: boolean
@@ -1146,6 +1207,7 @@ export type Database = {
           currentTreatment?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          demo_expires_at?: string | null
           dental_exam?: string | null
           dental_health?: string | null
           developmentMilestones?: string | null
@@ -1177,6 +1239,7 @@ export type Database = {
           height_at_birth?: number | null
           id?: number
           intestinal_transit?: string | null
+          is_demo_data?: boolean | null
           isDeceased?: boolean
           isExSmoker?: boolean | null
           isSmoker?: boolean
@@ -1751,180 +1814,180 @@ export type Database = {
       admin_find_patient_duplicates: {
         Args: Record<PropertyKey, never>
         Returns: {
-          group_id: number
-          patient_id: number
-          first_name: string
-          last_name: string
-          email: string
-          phone: string
           birth_date: string
+          email: string
+          first_name: string
+          group_id: number
+          last_name: string
+          patient_id: number
+          phone: string
           similarity_score: number
         }[]
       }
       admin_get_cabinets_with_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
+          active_patients_count: number
+          address: string
+          associated_osteopaths_count: number
+          created_at: string
+          deleted_at: string
+          email: string
           id: number
           name: string
-          address: string
-          email: string
-          phone: string
-          owner_osteopath_id: number
           owner_name: string
-          associated_osteopaths_count: number
+          owner_osteopath_id: number
           patients_count: number
-          active_patients_count: number
-          created_at: string
+          phone: string
           updated_at: string
-          deleted_at: string
         }[]
       }
       admin_get_detailed_stats: {
         Args: { period_type?: string; periods_count?: number }
         Returns: {
-          period_label: string
-          period_start: string
-          period_end: string
-          new_users: number
+          active_users: number
+          canceled_appointments: number
+          completed_appointments: number
+          error_count: number
+          new_cabinets: number
           new_osteopaths: number
           new_patients: number
-          new_cabinets: number
-          total_appointments: number
-          completed_appointments: number
-          canceled_appointments: number
-          total_invoices: number
+          new_users: number
           paid_invoices: number
+          period_end: string
+          period_label: string
+          period_start: string
+          total_appointments: number
+          total_invoices: number
           total_revenue: number
-          active_users: number
-          error_count: number
         }[]
       }
       admin_get_error_logs: {
         Args: { limit_count?: number }
         Returns: {
-          log_id: string
-          log_timestamp: string
-          level: string
-          message: string
-          user_id: string
-          table_name: string
           action: string
           error_details: Json
+          level: string
+          log_id: string
+          log_timestamp: string
+          message: string
+          table_name: string
+          user_id: string
         }[]
       }
       admin_get_monthly_stats: {
-        Args: { year_filter?: number; month_filter?: number }
+        Args: { month_filter?: number; year_filter?: number }
         Returns: {
-          month_year: string
-          total_appointments: number
-          completed_appointments: number
-          canceled_appointments: number
-          total_revenue: number
-          active_patients: number
-          new_patients: number
           active_osteopaths: number
+          active_patients: number
+          canceled_appointments: number
+          completed_appointments: number
+          month_year: string
+          new_patients: number
+          total_appointments: number
+          total_revenue: number
         }[]
       }
       admin_get_orphan_patients: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: number
-          first_name: string
-          last_name: string
-          email: string
-          phone: string
-          osteopath_id: number
           cabinet_id: number
           cabinet_name: string
           created_at: string
+          email: string
+          first_name: string
+          id: number
           issue_type: string
+          last_name: string
+          osteopath_id: number
+          phone: string
         }[]
       }
       admin_get_osteopath_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
+          active_patients: number
+          avg_revenue_per_appointment: number
+          completed_appointments: number
+          last_activity_date: string
           osteopath_id: number
           osteopath_name: string
-          total_patients: number
-          active_patients: number
           total_appointments: number
-          completed_appointments: number
+          total_patients: number
           total_revenue: number
-          avg_revenue_per_appointment: number
-          last_activity_date: string
         }[]
       }
       admin_get_system_health: {
         Args: Record<PropertyKey, never>
         Returns: {
-          metric_name: string
-          metric_value: string
-          metric_type: string
-          status: string
           last_updated: string
+          metric_name: string
+          metric_type: string
+          metric_value: string
+          status: string
         }[]
       }
       admin_get_system_logs: {
         Args: {
-          limit_count?: number
-          log_level?: string
           date_from?: string
           date_to?: string
+          limit_count?: number
+          log_level?: string
         }
         Returns: {
+          action: string
+          ip_address: unknown
+          level: string
           log_id: string
           log_timestamp: string
-          level: string
-          action: string
-          table_name: string
-          user_id: string
-          user_email: string
-          record_id: string
-          old_values: Json
           new_values: Json
-          ip_address: unknown
-          user_agent: string
+          old_values: Json
+          record_id: string
           success: boolean
+          table_name: string
+          user_agent: string
+          user_email: string
+          user_id: string
         }[]
       }
       admin_get_system_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
-          total_users: number
-          active_users: number
-          total_osteopaths: number
-          total_cabinets: number
-          total_patients: number
           active_patients: number
-          total_appointments: number
+          active_users: number
           appointments_this_month: number
-          total_invoices: number
-          paid_invoices: number
-          system_revenue: number
           avg_appointments_per_osteopath: number
           database_size: string
+          paid_invoices: number
+          system_revenue: number
+          total_appointments: number
+          total_cabinets: number
+          total_invoices: number
+          total_osteopaths: number
+          total_patients: number
+          total_users: number
         }[]
       }
       admin_search_patients: {
         Args: {
-          search_term?: string
-          osteopath_filter?: number
           cabinet_filter?: number
           limit_count?: number
+          osteopath_filter?: number
+          search_term?: string
         }
         Returns: {
-          id: number
-          first_name: string
-          last_name: string
-          email: string
-          phone: string
-          osteopath_id: number
-          osteopath_name: string
           cabinet_id: number
           cabinet_name: string
           created_at: string
-          updated_at: string
           deleted_at: string
+          email: string
+          first_name: string
+          id: number
+          last_name: string
+          osteopath_id: number
+          osteopath_name: string
+          phone: string
+          updated_at: string
         }[]
       }
       are_google_tokens_expired: {
@@ -1940,17 +2003,21 @@ export type Database = {
         Returns: boolean
       }
       can_perform_action: {
-        Args: { user_uuid: string; action_type: string }
+        Args: { action_type: string; user_uuid: string }
         Returns: boolean
       }
       check_rate_limit: {
         Args: {
-          p_user_id: string
           p_endpoint: string
           p_max_requests?: number
+          p_user_id: string
           p_window_minutes?: number
         }
         Returns: boolean
+      }
+      cleanup_expired_demo_data: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       cleanup_expired_syncs: {
         Args: Record<PropertyKey, never>
@@ -1969,18 +2036,18 @@ export type Database = {
         Returns: string
       }
       generate_recurring_appointments: {
-        Args: { p_recurring_id: number; p_limit?: number }
+        Args: { p_limit?: number; p_recurring_id: number }
         Returns: number
       }
       get_authorized_osteopaths: {
         Args: { current_osteopath_auth_id: string }
         Returns: {
+          access_type: string
           id: number
           name: string
           professional_title: string
           rpps_number: string
           siret: string
-          access_type: string
         }[]
       }
       get_current_osteopath_id: {
@@ -1991,8 +2058,8 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           auth_uid: string
-          osteopath_id: number
           error_message: string
+          osteopath_id: number
         }[]
       }
       get_current_osteopath_id_secure: {
@@ -2008,14 +2075,14 @@ export type Database = {
       get_subscription_limits: {
         Args: { user_uuid: string }
         Returns: {
-          max_patients: number
-          max_cabinets: number
           features: Json
+          max_cabinets: number
+          max_patients: number
           subscription_tier: string
         }[]
       }
       is_admin: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { uid: string }
         Returns: boolean
       }
       is_admin_user: {
@@ -2025,24 +2092,24 @@ export type Database = {
       log_audit_action: {
         Args: {
           p_action: string
-          p_table_name: string
-          p_record_id: string
-          p_old_values?: Json
           p_new_values?: Json
+          p_old_values?: Json
+          p_record_id: string
+          p_table_name: string
         }
         Returns: undefined
       }
       record_metric: {
         Args: {
-          p_name: string
-          p_value: number
-          p_unit?: string
           p_metadata?: Json
+          p_name: string
+          p_unit?: string
+          p_value: number
         }
         Returns: undefined
       }
       restore_record: {
-        Args: { p_table_name: string; p_record_id: string }
+        Args: { p_record_id: string; p_table_name: string }
         Returns: boolean
       }
       scheduled_cleanup: {
@@ -2052,14 +2119,14 @@ export type Database = {
       security_health_check: {
         Args: Record<PropertyKey, never>
         Returns: {
+          critical: boolean
+          details: string
           metric_name: string
           status: string
-          details: string
-          critical: boolean
         }[]
       }
       soft_delete_record: {
-        Args: { p_table_name: string; p_record_id: string }
+        Args: { p_record_id: string; p_table_name: string }
         Returns: boolean
       }
       use_cabinet_invitation: {
