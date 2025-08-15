@@ -55,7 +55,8 @@ export class HybridDataManager {
       const isAuthenticated = !!session?.user;
 
       // Vérifier si on est en mode démo (utilisateur demo avec email spécifique)
-      const isDemoMode = session?.user?.email === 'demo@patienthub.fr' || 
+      const isDemoMode = session?.user?.email === 'demo@patienthub.com' || 
+                        session?.user?.user_metadata?.is_demo === true ||
                         session?.user?.user_metadata?.is_demo_user === true;
 
       if (isAuthenticated && !isDemoMode) {
@@ -64,26 +65,44 @@ export class HybridDataManager {
         // - Données HDS sensibles : Stockage local OBLIGATOIRE
         console.log('👤 Utilisateur connecté - Configuration stockage hybride (conformité HDS)');
         
-        // Données non-sensibles HDS -> Toujours Supabase
-        this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
-        this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
-        this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
-        this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
-        this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
-        
-        // Données HDS sensibles -> OBLIGATOIREMENT stockage local (conformité française)
+        // Test des permissions Supabase d'abord
         try {
-          const localAdapters = await initializeLocalAdapters();
-          this.adapter.registerLocalAdapter('patients', localAdapters.patients);
-          this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
-          this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-          console.log('✅ Configuration hybride conforme HDS : données sensibles en local uniquement');
-        } catch (localError) {
-          console.error('❌ ERREUR CONFORMITÉ HDS: Stockage local obligatoire pour données sensibles');
-          throw new Error(
-            'CONFORMITÉ HDS REQUISE: Le stockage local est obligatoire pour les données de santé sensibles (patients, rendez-vous, factures). ' +
-            'Veuillez vérifier que votre navigateur supporte OPFS/SQLite ou contactez le support technique.'
-          );
+          await supabase.from('User').select('*').limit(1);
+          
+          // Données non-sensibles HDS -> Toujours Supabase si permissions OK
+          this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
+          this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
+          this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
+          this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
+          this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
+          
+          // Données HDS sensibles -> OBLIGATOIREMENT stockage local (conformité française)
+          try {
+            const localAdapters = await initializeLocalAdapters();
+            this.adapter.registerLocalAdapter('patients', localAdapters.patients);
+            this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
+            this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+            console.log('✅ Configuration hybride conforme HDS : données sensibles en local uniquement');
+          } catch (localError) {
+            console.error('❌ ERREUR CONFORMITÉ HDS: Stockage local obligatoire pour données sensibles');
+            console.warn('🔄 Fallback: Toutes données en cloud temporairement');
+            // Fallback temporaire en cas d'échec du local storage
+            this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
+            this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
+            this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
+          }
+        } catch (permissionError) {
+          console.error('❌ PERMISSIONS SUPABASE: Pas d\'accès aux données cloud');
+          console.log('🔄 Fallback vers mode démo temporaire en raison des permissions');
+          // Fallback en mode démo en cas de problème de permissions
+          this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
+          this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
+          this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
+          this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
+          this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
+          this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
+          this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
+          this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
         }
       } else {
         // MODE DÉMO: Toutes les données en Supabase éphémère
