@@ -28,14 +28,17 @@ class MemoryStorage {
   
   create(entityName: string, data: any): any {
     const store = this.getEntityStore(entityName);
-    const id = data.id || Math.random().toString(36).substr(2, 9);
+    // Générer un ID numérique pour maintenir la compatibilité avec les types Patient
+    const existingIds = Array.from(store.keys()).map(id => parseInt(id)).filter(id => !isNaN(id));
+    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+    const id = data.id || nextId;
     const item = { 
       ...data, 
       id, 
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-    store.set(id, item);
+    store.set(String(id), item);
     return item;
   }
   
