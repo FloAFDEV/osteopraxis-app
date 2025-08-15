@@ -150,41 +150,52 @@ export default function LandingPage() {
 							</span>
 						</h1>
 
-						{/* Desktop Navigation */}
-						<nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-							<a
-								href="#features"
-								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
+					{/* Desktop Navigation */}
+					<nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+						<a
+							href="#features"
+							className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
+						>
+							Fonctionnalités
+						</a>
+						<a
+							href="#pricing"
+							className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
+						>
+							Tarifs
+						</a>
+						<a
+							href="#testimonials"
+							className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
+						>
+							Témoignages
+						</a>
+						{user ? (
+							<Button
+								asChild
+								variant="outline"
+								size="sm"
+								className="whitespace-nowrap"
 							>
-								Fonctionnalités
-							</a>
-							<a
-								href="#pricing"
-								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
-							>
-								Tarifs
-							</a>
-							<a
-								href="#testimonials"
-								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
-							>
-								Témoignages
-							</a>
+								<Link to="/dashboard">Dashboard</Link>
+							</Button>
+						) : (
 							<Link
 								to="/login"
 								className="text-muted-foreground hover:text-foreground transition-colors text-base whitespace-nowrap"
 							>
 								Connexion
 							</Link>
-							<ThemeToggle />
-							<Button
-								asChild
-								size="sm"
-								className="whitespace-nowrap text-white"
-							>
-								<Link to="/demo">Essayer la démo</Link>
-							</Button>
-						</nav>
+						)}
+						<ThemeToggle />
+						<Button
+							asChild
+							size="sm"
+							className="whitespace-nowrap text-white"
+						>
+							<Link to="/demo">Essayer la démo</Link>
+						</Button>
+					</nav>
 
 						{/* Tablet Navigation */}
 						<nav className="hidden md:flex lg:hidden items-center space-x-4">

@@ -55,6 +55,15 @@ const SettingsPage = () => {
 			color: "text-purple-500",
 		},
 		{
+			id: "storage",
+			title: "Stockage hybride",
+			description:
+				"Gérez votre stockage local sécurisé et sa configuration",
+			icon: Settings,
+			path: "/settings/storage",
+			color: "text-cyan-500",
+		},
+		{
 			id: "help",
 			title: "Guide d'utilisation",
 			description:

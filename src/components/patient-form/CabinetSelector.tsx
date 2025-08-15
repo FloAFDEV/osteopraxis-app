@@ -26,6 +26,14 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
         const userCabinets = await api.getCabinets();
         setCabinets(userCabinets);
         
+        // Sélectionner automatiquement le premier cabinet en mode démo
+        if (userCabinets.length > 0 && !selectedCabinetId) {
+          const firstCabinet = userCabinets[0];
+          setSelectedCabinet(firstCabinet);
+          onCabinetChange(firstCabinet.id.toString());
+          form.setValue('cabinetId', firstCabinet.id);
+        }
+        
         // Trouver le cabinet sélectionné
         if (selectedCabinetId) {
           const cabinet = userCabinets.find(c => c.id === parseInt(selectedCabinetId));
@@ -39,7 +47,7 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
     };
     
     loadCabinets();
-  }, [selectedCabinetId]);
+  }, [selectedCabinetId, onCabinetChange, form]);
 
   const handleCabinetChange = (value: string) => {
     const cabinet = cabinets.find(c => c.id === parseInt(value));

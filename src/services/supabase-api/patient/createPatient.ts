@@ -54,7 +54,9 @@ export async function createPatient(
 			throw error;
 		}
 
-		return adaptPatientFromSupabase(data);
+		const adaptedPatient = adaptPatientFromSupabase(data);
+		console.log("Patient créé avec succès:", adaptedPatient);
+		return adaptedPatient;
 	} catch (error) {
 		console.error("Erreur createPatient:", error);
 		throw error;

@@ -18,11 +18,8 @@ export default function InteractiveDemoPage() {
   const handleStartDemo = async () => {
     setIsLoading(true);
     try {
-      // Créer/préparer le compte démo
-      const credentials = await DemoService.createDemoAccount();
-      
-      // Utiliser la méthode login du contexte AuthContext
-      await login(credentials.email, credentials.password);
+      // Directement se connecter avec les identifiants démo (pas besoin de créer)
+      await login("demo@patienthub.com", "demo123456");
       
       toast.success("Connexion en mode démo réussie !");
     } catch (error) {

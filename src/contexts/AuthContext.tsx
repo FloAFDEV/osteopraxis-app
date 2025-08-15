@@ -276,18 +276,18 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										updated_at: userData.updated_at,
 									};
 									setUser(userWithRole);
-									// Navigate based on role after login or token refresh
-									if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-										setTimeout(() => {
-											if (userWithRole.role === "ADMIN") {
-												navigate("/admin/dashboard", { replace: true });
-												toast.success("Connexion réussie ! Redirection vers l'administration.");
-											} else {
-												navigate("/dashboard", { replace: true });
-												toast.success("Connexion réussie !");
-											}
-										}, 100);
-									}
+					// Navigation uniquement sur connexion explicite (pas TOKEN_REFRESHED)
+					if (event === 'SIGNED_IN') {
+						setTimeout(() => {
+							if (userWithRole.role === "ADMIN") {
+								navigate("/admin/dashboard", { replace: true });
+								toast.success("Connexion réussie ! Redirection vers l'administration.");
+							} else {
+								navigate("/dashboard", { replace: true });
+								toast.success("Connexion réussie !");
+							}
+						}, 100);
+					}
 								} else {
 									setUser(null);
 								}
