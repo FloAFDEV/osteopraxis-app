@@ -254,6 +254,23 @@ export class AppointmentSQLiteAdapter extends SQLiteAdapter<any> {
     return super.isBooleanField(fieldName) || ['notificationSent'].includes(fieldName);
   }
 
+  // Override mapToDB pour transformer start -> date
+  protected mapToDB(data: any): any {
+    const mapped = { ...data };
+    
+    // Mapper start vers date si start existe et date n'existe pas
+    if (mapped.start && !mapped.date) {
+      mapped.date = mapped.start;
+    }
+    
+    // Supprimer start et end car ils ne sont pas dans le schéma SQLite
+    delete mapped.start;
+    delete mapped.end;
+    
+    // Appeler la méthode parent pour les autres transformations
+    return super.mapToDB(mapped);
+  }
+
   // Méthodes spécifiques aux rendez-vous
   async getByPatientId(patientId: number): Promise<any[]> {
     await browserSQLite.initialize();

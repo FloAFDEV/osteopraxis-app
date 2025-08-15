@@ -150,6 +150,40 @@ export class AppointmentSQLiteAdapter extends EnhancedSQLiteAdapter<any> {
     super('appointments');
   }
 
+  // Override create pour transformer start -> date
+  async create(data: any): Promise<any> {
+    // Transformer les données pour correspondre au schéma SQLite
+    const transformedData = { ...data };
+    
+    // Mapper start vers date si start existe
+    if (transformedData.start && !transformedData.date) {
+      transformedData.date = transformedData.start;
+    }
+    
+    // Supprimer start et end car ils ne sont pas dans le schéma SQLite
+    delete transformedData.start;
+    delete transformedData.end;
+    
+    return super.create(transformedData);
+  }
+
+  // Override update pour transformer start -> date
+  async update(id: number | string, data: any): Promise<any> {
+    // Transformer les données pour correspondre au schéma SQLite
+    const transformedData = { ...data };
+    
+    // Mapper start vers date si start existe
+    if (transformedData.start && !transformedData.date) {
+      transformedData.date = transformedData.start;
+    }
+    
+    // Supprimer start et end car ils ne sont pas dans le schéma SQLite
+    delete transformedData.start;
+    delete transformedData.end;
+    
+    return super.update(id, transformedData);
+  }
+
   async getByPatient(patientId: number): Promise<any[]> {
     return this.getByField('patientId', patientId);
   }
