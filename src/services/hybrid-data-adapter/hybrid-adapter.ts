@@ -30,7 +30,7 @@ export class HybridDataAdapter {
   /**
    * Obtient l'adaptateur approprié selon le type de données
    */
-  private getAdapter<T>(entityName: string, preferredLocation?: DataLocation): DataAdapter<T> {
+  private async getAdapter<T>(entityName: string, preferredLocation?: DataLocation): Promise<DataAdapter<T>> {
     // Classification des données HDS (OBLIGATOIREMENT locales EN PRODUCTION)
     const sensitiveHDSEntities = ['patients', 'appointments', 'consultations', 'invoices', 'medicalDocuments', 'quotes', 'treatmentHistory', 'patientRelationships'];
     const isHDSEntity = sensitiveHDSEntities.includes(entityName);
@@ -41,11 +41,17 @@ export class HybridDataAdapter {
       const adapter = this.localAdapters.get(entityName);
       if (adapter) return adapter;
       
-      // CONFORMITÉ HDS: En développement, fallback vers cloud autorisé
-      if (isHDSEntity && this.config.fallbackToCloud) {
-        console.warn(`⚠️ DÉVELOPPEMENT: Données HDS '${entityName}' stockées temporairement dans le cloud`);
-        const cloudAdapter = this.cloudAdapters.get(entityName);
-        if (cloudAdapter) return cloudAdapter;
+      // CORRECTION: En mode authentifié, empêcher définitivement le stockage cloud pour HDS 
+      if (isHDSEntity) {
+        // En mode authentifié, REFUSER CATÉGORIQUEMENT le stockage cloud pour les données HDS
+        if (this.config.fallbackToCloud) {
+          console.error(`❌ REFUS DE CONFORMITÉ HDS: '${entityName}' ne peut pas être stocké dans le cloud en mode authentifié`);
+          throw new HybridStorageError(
+            `❌ ERREUR CRITIQUE DE CONFORMITÉ HDS: Les données '${entityName}' ne peuvent pas être stockées dans le cloud en mode authentifié. Le stockage local sécurisé est OBLIGATOIRE.`,
+            DataLocation.LOCAL,
+            'getAdapter'
+          );
+        }
       }
       
       // En production, pas de fallback cloud pour les données sensibles
@@ -58,7 +64,7 @@ export class HybridDataAdapter {
       }
       
       // Pour les entités non-HDS, fallback possible vers cloud
-      if (this.config.fallbackToCloud) {
+      if (!isHDSEntity && this.config.fallbackToCloud) {
         console.warn(`Fallback to cloud for ${entityName} - local storage not available`);
         const cloudAdapter = this.cloudAdapters.get(entityName);
         if (cloudAdapter) return cloudAdapter;
@@ -86,7 +92,7 @@ export class HybridDataAdapter {
    */
   async getAll<T>(entityName: string): Promise<T[]> {
     try {
-      const adapter = this.getAdapter<T>(entityName);
+      const adapter = await this.getAdapter<T>(entityName);
       return await adapter.getAll();
     } catch (error) {
       console.error(`Error in getAll for ${entityName}:`, error);
@@ -96,7 +102,7 @@ export class HybridDataAdapter {
 
   async getById<T>(entityName: string, id: number | string): Promise<T | null> {
     try {
-      const adapter = this.getAdapter<T>(entityName);
+      const adapter = await this.getAdapter<T>(entityName);
       return await adapter.getById(id);
     } catch (error) {
       console.error(`Error in getById for ${entityName}:`, error);
@@ -106,23 +112,40 @@ export class HybridDataAdapter {
 
   async create<T>(entityName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
     try {
-      const adapter = this.getAdapter<T>(entityName);
+      const adapter = await this.getAdapter<T>(entityName);
+      const adapterLocation = adapter.getLocation();
+      
+      // CORRECTION: Vérifier que pour les données HDS on utilise bien le stockage local
+      const sensitiveHDSEntities = ['patients', 'appointments', 'consultations', 'invoices', 'medicalDocuments', 'quotes', 'treatmentHistory', 'patientRelationships'];
+      const isHDSEntity = sensitiveHDSEntities.includes(entityName);
+      
+      if (isHDSEntity && adapterLocation === DataLocation.CLOUD) {
+        // EN MODE IDENTIFIÉ: Refuser le stockage cloud pour les données HDS sensibles
+        console.error(`❌ TENTATIVE DE STOCKAGE CLOUD POUR DONNÉES HDS: ${entityName}`);
+        throw new HybridStorageError(
+          `❌ ERREUR DE CONFORMITÉ: Les données patients ne peuvent pas être stockées dans le cloud en mode authentifié. Veuillez activer le stockage local sécurisé.`,
+          DataLocation.LOCAL,
+          'create'
+        );
+      }
+      
       const result = await adapter.create(data);
       
       // Déclencher une sauvegarde automatique si activée
-      if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
+      if (this.config.backup.autoBackup && adapterLocation === DataLocation.LOCAL) {
         this.scheduleBackup();
       }
       
       return result;
     } catch (error) {
       console.error(`Error in create for ${entityName}:`, error);
+      // CORRECTION: Ne pas masquer les erreurs HDS avec des fallbacks silencieux
       throw error;
     }
   }
 
   async update<T>(entityName: string, id: number | string, data: Partial<T>): Promise<T> {
-    const adapter = this.getAdapter<T>(entityName);
+    const adapter = await this.getAdapter<T>(entityName);
     const result = await adapter.update(id, data);
     
     // Déclencher une sauvegarde automatique si activée
@@ -134,7 +157,7 @@ export class HybridDataAdapter {
   }
 
   async delete(entityName: string, id: number | string): Promise<boolean> {
-    const adapter = this.getAdapter<any>(entityName);
+    const adapter = await this.getAdapter<any>(entityName);
     const result = await adapter.delete(id);
     
     // Déclencher une sauvegarde automatique si activée

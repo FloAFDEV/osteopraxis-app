@@ -80,7 +80,7 @@ export const patientService = {
 
     if (USE_SUPABASE) {
       try {
-        // Forcer l'osteopathId via service existant puis créer en local
+        // Forcer l'osteopathId via service existant puis créer en local sécurisé
         const osteopathId = await getCurrentOsteopathId();
         if (!osteopathId) {
           throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
@@ -90,16 +90,34 @@ export const patientService = {
           osteopathId,
           cabinetId: patient.cabinetId || null,
         } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
+        
+        console.log("Tentative de création patient avec stockage local sécurisé...");
         const created = await hybridDataManager.create<Patient>('patients', securedPatientData);
-        return created;
+        
+        // CORRECTION: Vérifier explicitement que le patient a été créé correctement
+        if (created && created.id) {
+          console.log("✅ Patient créé avec succès en stockage local sécurisé:", created.id);
+          return created;
+        } else {
+          throw new Error("Échec de la création patient - données incomplètes");
+        }
       } catch (error) {
-        console.error("Erreur Hybrid createPatient:", error);
-        throw error;
+        console.error("❌ Erreur création patient:", error);
+        
+        // CORRECTION: Messages d'erreur explicites pour éviter la confusion
+        if ((error as any)?.message?.includes('CONFORMITÉ')) {
+          // Erreur de conformité HDS - ne pas masquer
+          throw new Error("❌ ERREUR CRITIQUE: Impossible de créer le patient en mode sécurisé. Le stockage local est requis pour la conformité HDS.");
+        } else if ((error as any)?.message?.includes('permission denied') || (error as any)?.code === '42501') {
+          throw new Error("❌ ERREUR D'AUTORISATION: Vous n'avez pas les permissions pour créer ce patient.");
+        } else {
+          throw new Error(`❌ ERREUR DE CRÉATION: ${(error as any)?.message || 'Échec de la création du patient'}`);
+        }
       }
     }
 
     // Pas de mode démo et Supabase désactivé
-    throw new Error("Service patient indisponible");
+    throw new Error("❌ Service patient indisponible");
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
