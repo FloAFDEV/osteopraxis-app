@@ -211,6 +211,15 @@ export function PatientForm({
 				data.childrenAges = null;
 			}
 
+			// CORRECTION: Validation email unique - générer email unique si vide
+			if (!data.email || data.email.trim() === '') {
+				const timestamp = Date.now();
+				const randomId = Math.floor(Math.random() * 1000);
+				data.email = `patient-${timestamp}-${randomId}@temp.local`;
+			}
+
+			console.log("Données patient avant création:", data);
+
 			if (onSubmit) {
 				await onSubmit(data);
 			} else if (onSave) {

@@ -85,25 +85,40 @@ export class HybridDataAdapter {
    * Interface unifiée pour les opérations CRUD
    */
   async getAll<T>(entityName: string): Promise<T[]> {
-    const adapter = this.getAdapter<T>(entityName);
-    return await adapter.getAll();
+    try {
+      const adapter = this.getAdapter<T>(entityName);
+      return await adapter.getAll();
+    } catch (error) {
+      console.error(`Error in getAll for ${entityName}:`, error);
+      throw error;
+    }
   }
 
   async getById<T>(entityName: string, id: number | string): Promise<T | null> {
-    const adapter = this.getAdapter<T>(entityName);
-    return await adapter.getById(id);
+    try {
+      const adapter = this.getAdapter<T>(entityName);
+      return await adapter.getById(id);
+    } catch (error) {
+      console.error(`Error in getById for ${entityName}:`, error);
+      return null;
+    }
   }
 
   async create<T>(entityName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
-    const adapter = this.getAdapter<T>(entityName);
-    const result = await adapter.create(data);
-    
-    // Déclencher une sauvegarde automatique si activée
-    if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
-      this.scheduleBackup();
+    try {
+      const adapter = this.getAdapter<T>(entityName);
+      const result = await adapter.create(data);
+      
+      // Déclencher une sauvegarde automatique si activée
+      if (this.config.backup.autoBackup && this.getDataLocation(entityName) === DataLocation.LOCAL) {
+        this.scheduleBackup();
+      }
+      
+      return result;
+    } catch (error) {
+      console.error(`Error in create for ${entityName}:`, error);
+      throw error;
     }
-    
-    return result;
   }
 
   async update<T>(entityName: string, id: number | string, data: Partial<T>): Promise<T> {

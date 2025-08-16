@@ -24,7 +24,8 @@ export const patientService = {
         return await hybridDataManager.get<Patient>('patients');
       } catch (error) {
         console.error("Erreur Hybrid getPatients:", error);
-        throw error;
+        // Fallback pour éviter les erreurs bloquantes
+        return [];
       }
     }
 
