@@ -116,34 +116,44 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	}, [navigate]);
 
 	const logout = useCallback(async () => {
-		setLoading(true);
-		setError(null);
 		try {
-			// Nettoyer d'abord l'état local
+			// CORRECTION: Déconnexion plus rapide et fiable
+			// Nettoyer immédiatement l'état local
 			setUser(null);
 			setSession(null);
 			setIsAuthenticated(false);
-			
-			// Réinitialiser le gestionnaire hybride
-			try {
-				const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
-				await hybridDataManager.reinitialize();
-			} catch (error) {
-				console.warn('Failed to reinitialize hybrid data manager:', error);
-			}
-
-			// Ensuite déconnecter de Supabase
-			const { error } = await supabase.auth.signOut();
-			if (error) throw error;
-
-			navigate("/", { replace: true });
-			toast.success("Déconnexion réussie !");
-		} catch (err: any) {
-			setError(err.message || "Erreur lors de la déconnexion");
-			console.error("Logout failed", err);
-			toast.error("Échec de la déconnexion");
-		} finally {
 			setLoading(false);
+			
+			// Naviguer immédiatement
+			navigate("/", { replace: true });
+			
+			// Opérations asynchrones en arrière-plan (sans bloquer)
+			Promise.all([
+				supabase.auth.signOut(),
+				(async () => {
+					try {
+						const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
+						await hybridDataManager.reinitialize();
+					} catch (error) {
+						console.warn('Failed to reinitialize hybrid data manager:', error);
+					}
+				})()
+			]).then(() => {
+				toast.success("Déconnexion réussie !");
+			}).catch((err) => {
+				console.warn("Logout cleanup failed:", err);
+				// Pas d'erreur affichée car la déconnexion principale a réussi
+			});
+			
+		} catch (err: any) {
+			console.error("Logout failed", err);
+			// En cas d'échec, forcer la déconnexion
+			setUser(null);
+			setSession(null);
+			setIsAuthenticated(false);
+			setLoading(false);
+			navigate("/", { replace: true });
+			toast.error("Déconnexion forcée");
 		}
 	}, [navigate]);
 

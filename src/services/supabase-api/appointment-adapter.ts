@@ -21,7 +21,8 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 }
 
 export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Partial<Appointment>): any {
-	return {
+	// CORRECTION: Exclure les colonnes start/end qui n'existent pas dans Supabase
+	const supabaseData: any = {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
 		osteopathId: data.osteopathId,
@@ -32,9 +33,19 @@ export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Part
 		notificationSent: data.notificationSent || false,
 		user_id: data.user_id || null,
 	};
+
+	// Filtrer les propriétés undefined pour éviter les erreurs Supabase
+	Object.keys(supabaseData).forEach(key => {
+		if (supabaseData[key] === undefined) {
+			delete supabaseData[key];
+		}
+	});
+
+	return supabaseData;
 }
 
 export function createAppointmentPayload(data: any): CreateAppointmentPayload {
+	// CORRECTION: Les colonnes start/end sont pour l'interface, pas pour Supabase
 	return {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId || 1,
