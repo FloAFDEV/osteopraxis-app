@@ -6,6 +6,7 @@ import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
 import { getCurrentOsteopathId } from "../supabase-api/utils/getCurrentOsteopath";
 import { XSSProtection } from "@/services/security/xss-protection";
 import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
+import { supabase } from "@/integrations/supabase/client";
 
 // Hook pour accéder au contexte démo depuis les services
 let demoContext: any = null;
@@ -69,12 +70,24 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
+        // CORRECTION: Éviter les appels multiples en vérifiant d'abord les permissions
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log("No session found, using fallback empty array");
+          return [];
+        }
+
         console.log("appointmentService.getAppointments: Using Hybrid storage (Supabase in demo mode)");
         const result = await hybridDataManager.get<Appointment>('appointments');
         console.log("appointmentService.getAppointments: Hybrid returned", result.length, "appointments");
         return result;
       } catch (error) {
         console.error("appointmentService.getAppointments: Hybrid error:", error);
+        // Fallback seulement si c'est une erreur de permissions, pas autre chose
+        if ((error as any)?.code === '42501' || (error as any)?.message?.includes('permission denied')) {
+          console.log("Permission denied, returning empty array to avoid loops");
+          return [];
+        }
         // En cas d'erreur, utiliser les données démo uniquement si le contexte est disponible
         if (demoContext?.isDemoMode) {
           console.log("appointmentService.getAppointments: Fallback to demo context");

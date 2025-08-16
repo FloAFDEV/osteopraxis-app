@@ -35,12 +35,27 @@ abstract class SupabaseAdapter<T> implements DataAdapter<T> {
   }
 
   async getAll(): Promise<T[]> {
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .select('*');
-    
-    if (error) throw error;
-    return (data as unknown as T[]) || [];
+    try {
+      // CORRECTION: S'assurer que la session est valide avant la requête
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.warn(`No valid session for ${this.tableName} getAll request`);
+        throw new Error('Session expirée');
+      }
+
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*');
+      
+      if (error) {
+        console.error(`Error in ${this.tableName} getAll:`, error);
+        throw error;
+      }
+      return (data as unknown as T[]) || [];
+    } catch (error) {
+      console.error(`Failed to getAll from ${this.tableName}:`, error);
+      throw error;
+    }
   }
 
   async getById(id: number | string): Promise<T | null> {
@@ -55,14 +70,29 @@ abstract class SupabaseAdapter<T> implements DataAdapter<T> {
   }
 
   async create(data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
-    const { data: result, error } = await supabase
-      .from(this.tableName)
-      .insert([data as any])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return result as unknown as T;
+    try {
+      // CORRECTION: S'assurer que la session est valide avant la requête
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.warn(`No valid session for ${this.tableName} create request`);
+        throw new Error('Session expirée');
+      }
+
+      const { data: result, error } = await supabase
+        .from(this.tableName)
+        .insert([data as any])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error(`Error in ${this.tableName} create:`, error);
+        throw error;
+      }
+      return result as unknown as T;
+    } catch (error) {
+      console.error(`Failed to create in ${this.tableName}:`, error);
+      throw error;
+    }
   }
 
   async update(id: number | string, data: Partial<T>): Promise<T> {

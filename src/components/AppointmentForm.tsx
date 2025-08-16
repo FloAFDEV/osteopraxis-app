@@ -221,6 +221,12 @@ export function AppointmentForm({
 	};
 
 	const onSubmit = async (data: AppointmentFormValues) => {
+		// CORRECTION: Empêcher les soumissions multiples
+		if (isSubmitting) {
+			console.warn("Form already submitting, ignoring duplicate submission");
+			return;
+		}
+
 		try {
 			setIsSubmitting(true);
 
@@ -232,7 +238,6 @@ export function AppointmentForm({
 			// Vérifier que l'heure est entre 8h et 20h
 			if (hours < 8 || hours >= 20) {
 				toast.error("⚠️ Les séances doivent être prises entre 8h et 20h");
-				setIsSubmitting(false);
 				return;
 			}
 			dateTime.setHours(hours, minutes);
@@ -257,6 +262,8 @@ export function AppointmentForm({
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
+
+			console.log("Submitting appointment data:", appointmentData);
 
 			await performUpdate(appointmentData);
 
