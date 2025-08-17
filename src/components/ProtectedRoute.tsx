@@ -36,7 +36,7 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   }
 
   // Vérifier si c'est un utilisateur démo
-  const isDemoUser = user.email === 'demo@patienthub.fr';
+  const isDemoUser = user.email?.startsWith('demo-') && user.email?.includes('@patienthub.com');
 
   // Pour les utilisateurs connectés réels : vérifier le stockage local
   if (!isDemoUser && status && !status.isConfigured) {

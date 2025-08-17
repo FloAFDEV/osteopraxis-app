@@ -9,6 +9,7 @@ import { DemoProvider } from "@/contexts/DemoContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { DemoDataManager } from "@/components/demo/DemoDataManager";
+import { DemoSessionTimer } from "@/components/demo/DemoSessionTimer";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -238,6 +239,7 @@ function App() {
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                       <PerformanceIndicator />
+                      <DemoSessionTimer />
                       <Toaster />
                     </div>
                   </AuthProvider>

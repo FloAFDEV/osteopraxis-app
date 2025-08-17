@@ -27,21 +27,23 @@ export const DemoLoginButton = ({
     async () => {
       setIsLoading(true);
       try {
-        // Créer/vérifier le compte démo
-        const credentials = await DemoService.createDemoAccount();
+        // Créer un compte démo temporaire unique
+        const { email, password, sessionId } = await DemoService.createDemoAccount();
         
-        // Se connecter avec le compte démo
-        await login(credentials.email, credentials.password);
+        // Se connecter avec le compte démo temporaire
+        await login(email, password);
         
-        toast.success("Connexion démo réussie ! Explorez PatientHub.");
+        toast.success(`Session démo créée (${sessionId})`, {
+          description: "Vos données sont isolées et expireront dans 30 minutes"
+        });
       } catch (error: any) {
         console.error("Erreur connexion démo:", error);
-        toast.error(error?.message || "Erreur lors de la connexion démo");
+        toast.error(error?.message || "Erreur lors de la création de la session démo");
       } finally {
         setIsLoading(false);
       }
     },
-    { maxRequests: 5, windowMs: 60_000, blockDurationMs: 5 * 60_000 }
+    { maxRequests: 3, windowMs: 60_000, blockDurationMs: 2 * 60_000 }
   );
 
   return (

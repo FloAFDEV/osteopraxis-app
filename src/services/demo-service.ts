@@ -7,132 +7,295 @@ export interface DemoData {
   stats: any;
 }
 
-// Service pour gérer le profil démo
+// Service pour gérer les profils démo temporaires
 export class DemoService {
-  private static readonly DEMO_EMAIL = 'demo@patienthub.com';
   private static readonly DEMO_PASSWORD = 'demo123456';
+  private static readonly DEMO_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 
-  // Créer ou obtenir le compte démo
-  static async createDemoAccount(): Promise<{ email: string; password: string }> {
+  // Générer un email démo unique pour la session
+  private static generateDemoEmail(): string {
+    const sessionId = crypto.randomUUID().substring(0, 8);
+    return `demo-${sessionId}@patienthub.com`;
+  }
+
+  // Créer un compte démo temporaire unique
+  static async createDemoAccount(): Promise<{ email: string; password: string; sessionId: string }> {
     try {
-      // Vérifier si le compte existe déjà
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: this.DEMO_EMAIL,
-        password: this.DEMO_PASSWORD,
-      });
+      const demoEmail = this.generateDemoEmail();
+      const sessionId = demoEmail.split('-')[1].split('@')[0];
+      const expiresAt = new Date(Date.now() + this.DEMO_SESSION_DURATION);
 
-      if (signInData.user) {
-        // Le compte existe, vérifier s'il a un profil ostéopathe
-        const { data: osteopath } = await supabase
-          .from('Osteopath')
-          .select('id')
-          .eq('authId', signInData.user.id)
-          .single();
+      console.log(`🎭 Création compte démo temporaire: ${demoEmail}`);
 
-        if (!osteopath) {
-          // Créer le profil ostéopathe manquant
-          await this.seedDemoData(signInData.user.id);
-        }
-
-        // Toujours mettre à jour l'utilisateur avec l'auth_id correct
-        await supabase
-          .from('User')
-          .update({ 
-            auth_id: signInData.user.id,
-            updated_at: new Date().toISOString()
-          })
-          .eq('email', this.DEMO_EMAIL);
-
-        await supabase.auth.signOut();
-        return { email: this.DEMO_EMAIL, password: this.DEMO_PASSWORD };
-      }
-
-      // Créer le compte s'il n'existe pas
+      // Créer le compte temporaire
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: this.DEMO_EMAIL,
+        email: demoEmail,
         password: this.DEMO_PASSWORD,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            first_name: 'Dr. Marie',
-            last_name: 'Dubois',
+            first_name: 'Dr. Demo',
+            last_name: `Session-${sessionId}`,
             role: 'OSTEOPATH',
             is_demo: true,
+            session_id: sessionId
           }
         }
       });
 
       if (signUpError) {
-        console.error('Erreur création compte démo:', signUpError);
+        console.error('Erreur création compte démo temporaire:', signUpError);
         throw signUpError;
       }
 
       if (signUpData.user) {
-        // Créer le profil ostéopathe
-        await this.seedDemoData(signUpData.user.id);
+        // Créer le profil ostéopathe temporaire avec données éphémères
+        await this.seedTemporaryDemoData(signUpData.user.id, sessionId, expiresAt);
         await supabase.auth.signOut();
+        
+        // Stocker les infos de session
+        localStorage.setItem('demo-session', JSON.stringify({
+          email: demoEmail,
+          sessionId,
+          expiresAt: expiresAt.toISOString(),
+          createdAt: new Date().toISOString()
+        }));
       }
 
-      return { email: this.DEMO_EMAIL, password: this.DEMO_PASSWORD };
+      return { email: demoEmail, password: this.DEMO_PASSWORD, sessionId };
     } catch (error) {
-      console.error('Erreur lors de la création du compte démo:', error);
+      console.error('Erreur lors de la création du compte démo temporaire:', error);
       throw error;
     }
   }
 
-  // Réinitialiser les données démo (à appeler quotidiennement)
+  // Réinitialiser les données démo (redirige vers le nettoyage automatique)
   static async resetDemoData(): Promise<void> {
-    try {
-      // Se connecter avec le compte démo
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: this.DEMO_EMAIL,
-        password: this.DEMO_PASSWORD,
-      });
+    await this.cleanupExpiredDemoAccounts();
+  }
 
-      if (authError || !authData.user) {
-        console.error('Impossible de se connecter au compte démo:', authError);
+  // Nettoyer automatiquement les comptes démo expirés
+  static async cleanupExpiredDemoAccounts(): Promise<void> {
+    try {
+      console.log('🧹 Nettoyage des comptes démo expirés...');
+      
+      // Appeler la fonction de nettoyage edge
+      const { data, error } = await supabase.functions.invoke('demo-cleanup');
+      
+      if (error) {
+        console.error('Erreur lors du nettoyage:', error);
+      } else {
+        console.log(`✅ Nettoyage terminé: ${data?.deletedCount || 0} comptes supprimés`);
+      }
+    } catch (error) {
+      console.error('Erreur lors du nettoyage automatique:', error);
+    }
+  }
+
+  // Vérifier si la session démo actuelle est expirée
+  static isSessionExpired(): boolean {
+    const session = localStorage.getItem('demo-session');
+    if (!session) return true;
+    
+    try {
+      const { expiresAt } = JSON.parse(session);
+      return new Date(expiresAt) < new Date();
+    } catch {
+      return true;
+    }
+  }
+
+  // Obtenir les infos de la session démo actuelle
+  static getCurrentDemoSession(): { email: string; sessionId: string; expiresAt: string; remainingTime: number } | null {
+    const session = localStorage.getItem('demo-session');
+    if (!session) return null;
+    
+    try {
+      const sessionData = JSON.parse(session);
+      const expiresAt = new Date(sessionData.expiresAt);
+      const remainingTime = Math.max(0, expiresAt.getTime() - Date.now());
+      
+      return {
+        ...sessionData,
+        remainingTime
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // Créer des données démo temporaires avec expiration
+  private static async seedTemporaryDemoData(userId: string, sessionId: string, expiresAt: Date): Promise<void> {
+    try {
+      console.log(`🌱 Création données temporaires pour session ${sessionId}`);
+      
+      // Créer le profil ostéopathe temporaire
+      const { data: osteopath, error: osteopathError } = await supabase
+        .from('Osteopath')
+        .insert({
+          authId: userId,
+          userId: userId,
+          name: `Dr. Demo Session-${sessionId}`,
+          professional_title: 'Ostéopathe D.O.',
+          rpps_number: `demo${sessionId}`,
+          siret: `demo${sessionId}${Math.floor(Math.random() * 1000)}`,
+          ape_code: '8690F',
+          is_demo_data: true,
+          demo_expires_at: expiresAt.toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (osteopathError) {
+        console.error('Erreur création ostéopathe temporaire:', osteopathError);
         return;
       }
 
-      // Supprimer les données existantes
-      await this.clearDemoData(authData.user.id);
+      // Créer l'utilisateur
+      await supabase
+        .from('User')
+        .insert({
+          id: userId,
+          auth_id: userId,
+          first_name: 'Dr. Demo',
+          last_name: `Session-${sessionId}`,
+          email: `demo-${sessionId}@patienthub.com`,
+          role: 'OSTEOPATH',
+          osteopathId: osteopath.id,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
 
-      // Recréer les données démo
-      await this.seedDemoData(authData.user.id);
-
-      // Se déconnecter
-      await supabase.auth.signOut();
-
-      console.log('Données démo réinitialisées avec succès');
-    } catch (error) {
-      console.error('Erreur lors de la réinitialisation des données démo:', error);
-    }
-  }
-
-  // Supprimer les données existantes
-  private static async clearDemoData(userId: string): Promise<void> {
-    try {
-      console.log('Nettoyage des données démo pour:', userId);
-      
-      // Supprimer les données de test créées
-      const { data: osteopath } = await supabase
-        .from('Osteopath')
-        .select('id')
-        .eq('authId', userId)
+      // Créer le cabinet temporaire
+      const { data: cabinet } = await supabase
+        .from('Cabinet')
+        .insert({
+          name: `Cabinet Démo ${sessionId}`,
+          address: `123 Rue de la Démo, 75000 Paris`,
+          phone: '01 23 45 67 89',
+          email: `cabinet-${sessionId}@demo.fr`,
+          osteopathId: osteopath.id,
+          is_demo_data: true,
+          demo_expires_at: expiresAt.toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        .select()
         .single();
 
-      if (osteopath) {
-        // Supprimer les données dans l'ordre des dépendances
-        await supabase.from('Invoice').delete().eq('osteopathId', osteopath.id);
-        await supabase.from('Appointment').delete().eq('osteopathId', osteopath.id);
-        await supabase.from('Patient').delete().eq('osteopathId', osteopath.id);
+      if (cabinet) {
+        // Créer des patients temporaires uniques
+        const patients = await this.createTemporaryPatients(osteopath.id, cabinet.id, expiresAt, sessionId);
+        
+        // Créer quelques rendez-vous temporaires
+        await this.createTemporaryAppointments(patients, osteopath.id, cabinet.id, expiresAt);
+        
+        // Créer quelques factures temporaires
+        await this.createTemporaryInvoices(patients, osteopath.id, cabinet.id, expiresAt);
       }
+
+      console.log(`✅ Données temporaires créées pour session ${sessionId}, expire le ${expiresAt.toLocaleString()}`);
     } catch (error) {
-      console.error('Erreur lors du nettoyage:', error);
+      console.error('Erreur lors de la création des données temporaires:', error);
     }
   }
 
-  // Créer les données démo réalistes
+  private static async createTemporaryPatients(osteopathId: number, cabinetId: number, expiresAt: Date, sessionId: string) {
+    const patientNames = [
+      { firstName: 'Jean', lastName: 'Dupont', phone: '06 12 34 56 78', birthDate: '1985-03-15' },
+      { firstName: 'Marie', lastName: 'Martin', phone: '06 98 76 54 32', birthDate: '1990-07-22' },
+      { firstName: 'Pierre', lastName: 'Bernard', phone: '06 45 67 89 12', birthDate: '1978-11-08' }
+    ];
+
+    const patients = [];
+    for (let i = 0; i < patientNames.length; i++) {
+      const patient = patientNames[i];
+      const { data, error } = await supabase
+        .from('Patient')
+        .insert({
+          firstName: patient.firstName,
+          lastName: patient.lastName,
+          email: `${patient.firstName.toLowerCase()}.${patient.lastName.toLowerCase()}-${sessionId}@demo.com`,
+          phone: patient.phone,
+          birthDate: patient.birthDate,
+          osteopathId,
+          cabinetId,
+          is_demo_data: true,
+          demo_expires_at: expiresAt.toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        patients.push(data);
+      }
+    }
+    return patients;
+  }
+
+  private static async createTemporaryAppointments(patients: any[], osteopathId: number, cabinetId: number, expiresAt: Date) {
+    const now = new Date();
+    const appointments = [
+      {
+        patientId: patients[0]?.id,
+        date: new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString(), // Dans 2h
+        reason: 'Consultation lombalgie',
+        status: 'SCHEDULED' as const
+      },
+      {
+        patientId: patients[1]?.id,
+        date: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(), // Demain
+        reason: 'Suivi cervicalgie',
+        status: 'SCHEDULED' as const
+      }
+    ];
+
+    for (const apt of appointments) {
+      if (apt.patientId) {
+        await supabase
+          .from('Appointment')
+          .insert({
+            ...apt,
+            osteopathId: osteopathId,
+            cabinetId: cabinetId,
+            notes: 'Rendez-vous de démonstration',
+            notificationSent: false,
+            is_demo_data: true,
+            demo_expires_at: expiresAt.toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+      }
+    }
+  }
+
+  private static async createTemporaryInvoices(patients: any[], osteopathId: number, cabinetId: number, expiresAt: Date) {
+    if (patients.length > 0) {
+      await supabase
+        .from('Invoice')
+        .insert({
+          patientId: patients[0].id,
+          osteopathId,
+          cabinetId,
+          amount: 60,
+          date: new Date().toISOString(),
+          paymentStatus: 'PAID' as const,
+          paymentMethod: 'Carte bancaire',
+          notes: 'Facture de démonstration',
+          is_demo_data: true,
+          demo_expires_at: expiresAt.toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+    }
+  }
+
+  // Maintenir l'ancienne méthode pour compatibilité (peut être supprimée)
   private static async seedDemoData(userId: string): Promise<void> {
     try {
       console.log('Création des données démo pour:', userId);
@@ -179,7 +342,7 @@ export class DemoService {
             auth_id: userId,
             first_name: 'Dr. Marie',
             last_name: 'Dubois',
-            email: this.DEMO_EMAIL,
+            email: `demo-old@patienthub.com`, // Old demo email for compatibility
             role: 'OSTEOPATH',
             osteopathId: osteopath.id,
             is_active: true,
@@ -266,30 +429,32 @@ export class DemoService {
 
   // Vérifier si l'utilisateur actuel est en mode démo
   static isDemoUser(userEmail?: string): boolean {
-    return userEmail === this.DEMO_EMAIL;
+    if (!userEmail) return false;
+    return userEmail.startsWith('demo-') && userEmail.includes('@patienthub.com');
   }
 
-  // Obtenir les informations de connexion démo
-  static getDemoCredentials(): { email: string; password: string } {
+  // Obtenir les informations de connexion démo de la session actuelle
+  static getDemoCredentials(): { email: string; password: string } | null {
+    const session = this.getCurrentDemoSession();
+    if (!session) return null;
+    
     return {
-      email: this.DEMO_EMAIL,
+      email: session.email,
       password: this.DEMO_PASSWORD,
     };
   }
 }
 
-// Hook pour la gestion de l'authentification démo
+// Hook pour la gestion de l'authentification démo temporaire
 export function useDemoAuth() {
   const loginDemo = async () => {
-    const credentials = DemoService.getDemoCredentials();
+    // Créer un nouveau compte démo temporaire unique
+    const { email, password } = await DemoService.createDemoAccount();
     
-    // Créer le compte s'il n'existe pas
-    await DemoService.createDemoAccount();
-    
-    // Se connecter
+    // Se connecter avec le compte temporaire
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
+      email,
+      password,
     });
 
     if (error) {
@@ -301,6 +466,8 @@ export function useDemoAuth() {
 
   return {
     loginDemo,
-    isLoading: false, // Peut être étendu avec un state de loading
+    isLoading: false,
+    getCurrentSession: DemoService.getCurrentDemoSession,
+    isSessionExpired: DemoService.isSessionExpired,
   };
 }
