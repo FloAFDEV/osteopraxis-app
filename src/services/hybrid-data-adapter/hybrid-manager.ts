@@ -56,6 +56,7 @@ export class HybridDataManager {
 
       // Vérifier si on est en mode démo (utilisateur demo avec email spécifique)
       const isDemoMode = session?.user?.email === 'demo@patienthub.com' || 
+                        session?.user?.email?.startsWith('demo-') ||
                         session?.user?.user_metadata?.is_demo === true ||
                         session?.user?.user_metadata?.is_demo_user === true;
 

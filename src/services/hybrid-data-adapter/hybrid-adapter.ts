@@ -41,10 +41,26 @@ export class HybridDataAdapter {
       const adapter = this.localAdapters.get(entityName);
       if (adapter) return adapter;
       
-      // CORRECTION: En mode authentifié, empêcher définitivement le stockage cloud pour HDS 
+      // CORRECTION: Vérifier le mode démo avant d'appliquer les restrictions HDS
       if (isHDSEntity) {
-        // En mode authentifié, REFUSER CATÉGORIQUEMENT le stockage cloud pour les données HDS
-        if (this.config.fallbackToCloud) {
+        // Vérifier si on est en mode démo via la session
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        const isDemoMode = session?.user?.email === 'demo@patienthub.com' || 
+                          session?.user?.email?.startsWith('demo-') ||
+                          session?.user?.user_metadata?.is_demo === true ||
+                          session?.user?.user_metadata?.is_demo_user === true;
+        
+        // En mode démo : Autoriser le stockage cloud
+        if (isDemoMode) {
+          console.log(`🎭 Mode démo détecté pour ${entityName} - Autorisation stockage cloud`);
+          const cloudAdapter = this.cloudAdapters.get(entityName);
+          if (cloudAdapter) return cloudAdapter;
+        }
+        
+        // En mode authentifié RÉEL, REFUSER CATÉGORIQUEMENT le stockage cloud pour les données HDS
+        if (!isDemoMode && this.config.fallbackToCloud) {
           console.error(`❌ REFUS DE CONFORMITÉ HDS: '${entityName}' ne peut pas être stocké dans le cloud en mode authentifié`);
           throw new HybridStorageError(
             `❌ ERREUR CRITIQUE DE CONFORMITÉ HDS: Les données '${entityName}' ne peuvent pas être stockées dans le cloud en mode authentifié. Le stockage local sécurisé est OBLIGATOIRE.`,
@@ -120,13 +136,27 @@ export class HybridDataAdapter {
       const isHDSEntity = sensitiveHDSEntities.includes(entityName);
       
       if (isHDSEntity && adapterLocation === DataLocation.CLOUD) {
-        // EN MODE IDENTIFIÉ: Refuser le stockage cloud pour les données HDS sensibles
-        console.error(`❌ TENTATIVE DE STOCKAGE CLOUD POUR DONNÉES HDS: ${entityName}`);
-        throw new HybridStorageError(
-          `❌ ERREUR DE CONFORMITÉ: Les données patients ne peuvent pas être stockées dans le cloud en mode authentifié. Veuillez activer le stockage local sécurisé.`,
-          DataLocation.LOCAL,
-          'create'
-        );
+        // Vérifier si on est en mode démo avant de refuser
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        const isDemoMode = session?.user?.email === 'demo@patienthub.com' || 
+                          session?.user?.email?.startsWith('demo-') ||
+                          session?.user?.user_metadata?.is_demo === true ||
+                          session?.user?.user_metadata?.is_demo_user === true;
+        
+        // EN MODE IDENTIFIÉ RÉEL: Refuser le stockage cloud pour les données HDS sensibles
+        if (!isDemoMode) {
+          console.error(`❌ TENTATIVE DE STOCKAGE CLOUD POUR DONNÉES HDS: ${entityName}`);
+          throw new HybridStorageError(
+            `❌ ERREUR DE CONFORMITÉ: Les données patients ne peuvent pas être stockées dans le cloud en mode authentifié. Veuillez activer le stockage local sécurisé.`,
+            DataLocation.LOCAL,
+            'create'
+          );
+        }
+        
+        // En mode démo, autoriser le stockage cloud
+        console.log(`🎭 Mode démo - Autorisation stockage cloud pour ${entityName}`);
       }
       
       const result = await adapter.create(data);
