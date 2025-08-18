@@ -4,6 +4,7 @@
  */
 
 import type { Database } from 'sql.js';
+import { SQLiteFallbackService } from './sqlite-fallback';
 
 interface SQLiteOPFSConfig {
   dbName: string;
@@ -14,6 +15,8 @@ interface SQLiteOPFSConfig {
 
 export class OPFSSQLiteService {
   private db: Database | null = null;
+  private fallbackService: SQLiteFallbackService | null = null;
+  private useFallback: boolean = false;
   private opfsRoot: FileSystemDirectoryHandle | null = null;
   private config: SQLiteOPFSConfig;
   private initialized = false;
@@ -58,18 +61,42 @@ export class OPFSSQLiteService {
    * Initialise SQL.js avec fallback CDN
    */
   private async initSqlJsWithFallback(initSqlJs: any): Promise<any> {
+    // Première tentative: utiliser la version locale 
+    try {
+      console.log('🔄 Tentative de chargement SQL.js avec WASM local');
+      const sqlite = await initSqlJs({
+        locateFile: (file: string) => {
+          if (file.endsWith('.wasm')) {
+            return '/sql-wasm.wasm';
+          }
+          return file;
+        }
+      });
+      console.log('✅ SQL.js chargé avec succès avec WASM local');
+      return sqlite;
+    } catch (error) {
+      console.warn('❌ Échec du chargement WASM local:', error);
+    }
+
+    // Deuxième tentative: charger sans WASM (mode memory-only)
+    try {
+      console.log('🔄 Tentative de chargement SQL.js en mode mémoire uniquement');
+      const sqlite = await initSqlJs();
+      console.log('✅ SQL.js chargé avec succès en mode mémoire');
+      return sqlite;
+    } catch (error) {
+      console.warn('❌ Échec du chargement en mode mémoire:', error);
+    }
+
+    // Troisième tentative: CDN fallbacks
     const cdnUrls = [
-      // Essayer d'abord une version locale/bundlée (à configurer avec Vite)
-      '/sql-wasm.wasm',
-      // Fallback vers différents CDN
       'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm',
-      'https://unpkg.com/sql.js@1.10.2/dist/sql-wasm.wasm',
-      'https://cdn.skypack.dev/sql.js@1.10.2/dist/sql-wasm.wasm'
+      'https://unpkg.com/sql.js@1.10.2/dist/sql-wasm.wasm'
     ];
 
     for (const wasmUrl of cdnUrls) {
       try {
-        console.log(`🔄 Tentative de chargement SQL.js depuis: ${wasmUrl}`);
+        console.log(`🔄 Tentative de chargement SQL.js depuis CDN: ${wasmUrl}`);
         const sqlite = await initSqlJs({
           locateFile: (file: string) => {
             if (file.endsWith('.wasm')) {
@@ -78,15 +105,14 @@ export class OPFSSQLiteService {
             return file;
           }
         });
-        console.log(`✅ SQL.js chargé avec succès depuis: ${wasmUrl}`);
+        console.log(`✅ SQL.js chargé avec succès depuis CDN: ${wasmUrl}`);
         return sqlite;
       } catch (error) {
-        console.warn(`❌ Échec du chargement depuis ${wasmUrl}:`, error);
-        // Continuer avec le CDN suivant
+        console.warn(`❌ Échec du chargement depuis CDN ${wasmUrl}:`, error);
       }
     }
     
-    throw new Error('❌ ERREUR CRITIQUE: Impossible de charger SQL.js depuis aucun CDN. Stockage local indisponible.');
+    throw new Error('❌ ERREUR CRITIQUE: Impossible de charger SQL.js depuis aucune source. Stockage local indisponible.');
   }
 
   /**
@@ -94,34 +120,57 @@ export class OPFSSQLiteService {
    */
   private async loadOrCreateDatabase(): Promise<void> {
     try {
-      const dbFileName = `${this.config.dbName}.sqlite`;
+      // Première tentative: utiliser SQL.js normal
+      await this.tryLoadSQLiteDatabase();
+    } catch (sqliteError) {
+      console.warn('❌ SQLite normal échoué, basculement vers le service de fallback:', sqliteError);
       
-      // Essayer de charger la base existante
+      // Activer le mode fallback
+      this.useFallback = true;
+      this.fallbackService = new SQLiteFallbackService();
+      
+      console.log('🔄 Service de fallback activé - stockage mémoire simple');
+    }
+  }
+
+  private async tryLoadSQLiteDatabase(): Promise<void> {
+    const dbFileName = `${this.config.dbName}.sqlite`;
+    
+    // Essayer de charger la base existante
+    try {
+      const fileHandle = await this.opfsRoot!.getFileHandle(dbFileName);
+      const file = await fileHandle.getFile();
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      // Charger sql.js dynamiquement avec fallback CDN
+      let initSqlJs;
       try {
-        const fileHandle = await this.opfsRoot!.getFileHandle(dbFileName);
-        const file = await fileHandle.getFile();
-        const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        
-        // Charger sql.js dynamiquement avec fallback CDN
-        const { default: initSqlJs } = await import('sql.js');
-        const sqlite = await this.initSqlJsWithFallback(initSqlJs);
-        
-        this.db = new sqlite.Database(uint8Array);
-        console.log('📂 Existing database loaded from OPFS');
-        
-      } catch (error) {
-        // Base de données n'existe pas, en créer une nouvelle
-        const { default: initSqlJs } = await import('sql.js');
-        const sqlite = await this.initSqlJsWithFallback(initSqlJs);
-        
-        this.db = new sqlite.Database();
-        console.log('🆕 New database created');
+        const sqlJsModule = await import('sql.js');
+        initSqlJs = sqlJsModule.default || sqlJsModule;
+      } catch (importError) {
+        console.warn('❌ Import sql.js échoué:', importError);
+        throw new Error('sql.js module non disponible');
       }
       
+      const sqlite = await this.initSqlJsWithFallback(initSqlJs);
+      this.db = new sqlite.Database(uint8Array);
+      console.log('📂 Existing database loaded from OPFS');
+      
     } catch (error) {
-      console.error('Failed to load/create database:', error);
-      throw error;
+      // Base de données n'existe pas, en créer une nouvelle
+      let initSqlJs;
+      try {
+        const sqlJsModule = await import('sql.js');
+        initSqlJs = sqlJsModule.default || sqlJsModule;
+      } catch (importError) {
+        console.warn('❌ Import sql.js échoué:', importError);
+        throw new Error('sql.js module non disponible');
+      }
+      
+      const sqlite = await this.initSqlJsWithFallback(initSqlJs);
+      this.db = new sqlite.Database();
+      console.log('🆕 New database created');
     }
   }
 
@@ -129,7 +178,10 @@ export class OPFSSQLiteService {
    * Crée les tables nécessaires
    */
   private async createTables(): Promise<void> {
-    if (!this.db) throw new Error('Database not initialized');
+    if (this.useFallback || !this.db) {
+      console.log('📋 Utilisation du service de fallback - tables déjà créées');
+      return;
+    }
 
     const tables = [
       // Table patients
@@ -234,6 +286,10 @@ export class OPFSSQLiteService {
    * Exécute une requête SELECT
    */
   query<T = any>(sql: string, params: any[] = []): T[] {
+    if (this.useFallback && this.fallbackService) {
+      return this.fallbackService.query<T>(sql, params);
+    }
+    
     if (!this.db) throw new Error('Database not initialized');
     
     const stmt = this.db.prepare(sql);
@@ -251,6 +307,10 @@ export class OPFSSQLiteService {
    * Exécute une requête INSERT/UPDATE/DELETE
    */
   async run(sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
+    if (this.useFallback && this.fallbackService) {
+      return await this.fallbackService.run(sql, params);
+    }
+    
     if (!this.db) throw new Error('Database not initialized');
     
     this.db.run(sql, params);
@@ -272,6 +332,10 @@ export class OPFSSQLiteService {
    * Démarre une transaction
    */
   beginTransaction(): void {
+    if (this.useFallback && this.fallbackService) {
+      this.fallbackService.beginTransaction();
+      return;
+    }
     if (!this.db) throw new Error('Database not initialized');
     this.db.run('BEGIN TRANSACTION');
   }
@@ -280,6 +344,10 @@ export class OPFSSQLiteService {
    * Valide une transaction
    */
   async commit(): Promise<void> {
+    if (this.useFallback && this.fallbackService) {
+      await this.fallbackService.commit();
+      return;
+    }
     if (!this.db) throw new Error('Database not initialized');
     this.db.run('COMMIT');
     await this.save();
@@ -289,6 +357,10 @@ export class OPFSSQLiteService {
    * Annule une transaction
    */
   rollback(): void {
+    if (this.useFallback && this.fallbackService) {
+      this.fallbackService.rollback();
+      return;
+    }
     if (!this.db) throw new Error('Database not initialized');
     this.db.run('ROLLBACK');
   }
@@ -297,6 +369,9 @@ export class OPFSSQLiteService {
    * Exporte la base de données
    */
   export(): Uint8Array {
+    if (this.useFallback && this.fallbackService) {
+      return this.fallbackService.export();
+    }
     if (!this.db) throw new Error('Database not initialized');
     return this.db.export();
   }
@@ -305,6 +380,10 @@ export class OPFSSQLiteService {
    * Ferme la base de données
    */
   close(): void {
+    if (this.useFallback && this.fallbackService) {
+      this.fallbackService.close();
+      return;
+    }
     if (this.db) {
       this.db.close();
       this.db = null;
@@ -320,6 +399,10 @@ export class OPFSSQLiteService {
     tables: string[];
     version: string;
   } {
+    if (this.useFallback && this.fallbackService) {
+      return this.fallbackService.getStats();
+    }
+    
     if (!this.db) throw new Error('Database not initialized');
 
     const tables = this.query<{ name: string }>(

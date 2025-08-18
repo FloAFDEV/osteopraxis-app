@@ -31,5 +31,14 @@ export default defineConfig(({ mode }) => ({
   },
   worker: {
     format: 'es'
+  },
+  assetsInclude: ['**/*.wasm'],
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        if (id.includes('sql.js')) return false;
+        return false;
+      }
+    }
   }
 }));
