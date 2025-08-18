@@ -108,6 +108,16 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							showTooltip={true}
 						/>
 					)}
+					{patient.childrenAges && patient.childrenAges.length > 0 && (
+						<InfoBubble
+							icon={Baby}
+							label="Enfants"
+							value={`${patient.childrenAges.length} enfant${patient.childrenAges.length > 1 ? 's' : ''} (${patient.childrenAges.join(', ')} ans)`}
+							variant="default"
+							size="sm"
+							showTooltip={true}
+						/>
+					)}
 					{patient.bmi && (
 						<InfoBubble
 							icon={Activity}
