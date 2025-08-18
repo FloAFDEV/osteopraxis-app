@@ -1,6 +1,6 @@
 /**
  * Service de fallback pour SQLite quand sql.js n'est pas disponible
- * Utilise une base mémoire simple comme alternative
+ * Utilise une base mémoire simple comme alternative avec persistance localStorage
  */
 
 export class SQLiteFallbackService {
@@ -64,6 +64,9 @@ export class SQLiteFallbackService {
       this.data.set('patients', patients);
       this.autoIncrement.set('patients', newId + 1);
       
+      // Sauvegarder automatiquement
+      this.saveToLocalStorage();
+      
       return { lastID: newId, changes: 1 };
     }
     
@@ -76,6 +79,7 @@ export class SQLiteFallbackService {
 
   async commit(): Promise<void> {
     console.log('✅ Fallback: Commit transaction (no-op)');
+    this.saveToLocalStorage();
   }
 
   rollback(): void {
@@ -84,6 +88,7 @@ export class SQLiteFallbackService {
 
   close(): void {
     console.log('🔒 Fallback: Close database (no-op)');
+    this.saveToLocalStorage();
   }
 
   export(): Uint8Array {
@@ -99,5 +104,41 @@ export class SQLiteFallbackService {
       tables: Array.from(this.data.keys()),
       version: 'fallback-1.0'
     };
+  }
+
+  /**
+   * Exporte les données pour la persistance
+   */
+  exportForStorage(): any {
+    return {
+      data: Object.fromEntries(this.data),
+      autoIncrement: Object.fromEntries(this.autoIncrement)
+    };
+  }
+
+  /**
+   * Importe les données depuis la persistance
+   */
+  importData(savedData: any): void {
+    if (savedData.data) {
+      this.data = new Map(Object.entries(savedData.data));
+    }
+    if (savedData.autoIncrement) {
+      this.autoIncrement = new Map(Object.entries(savedData.autoIncrement));
+    }
+    console.log('📂 Données importées depuis la sauvegarde');
+  }
+
+  /**
+   * Sauvegarde automatique en localStorage
+   */
+  private saveToLocalStorage(): void {
+    try {
+      const data = this.exportForStorage();
+      localStorage.setItem('sqlite-fallback-data', JSON.stringify(data));
+      console.log('💾 Données sauvegardées automatiquement en localStorage');
+    } catch (error) {
+      console.warn('⚠️ Impossible de sauvegarder en localStorage:', error);
+    }
   }
 }

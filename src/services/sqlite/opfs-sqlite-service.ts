@@ -57,79 +57,33 @@ export class OPFSSQLiteService {
     }
   }
 
-  /**
-   * Initialise SQL.js avec fallback CDN
-   */
-  private async initSqlJsWithFallback(initSqlJs: any): Promise<any> {
-    // Première tentative: utiliser la version locale 
-    try {
-      console.log('🔄 Tentative de chargement SQL.js avec WASM local');
-      const sqlite = await initSqlJs({
-        locateFile: (file: string) => {
-          if (file.endsWith('.wasm')) {
-            return '/sql-wasm.wasm';
-          }
-          return file;
-        }
-      });
-      console.log('✅ SQL.js chargé avec succès avec WASM local');
-      return sqlite;
-    } catch (error) {
-      console.warn('❌ Échec du chargement WASM local:', error);
-    }
-
-    // Deuxième tentative: charger sans WASM (mode memory-only)
-    try {
-      console.log('🔄 Tentative de chargement SQL.js en mode mémoire uniquement');
-      const sqlite = await initSqlJs();
-      console.log('✅ SQL.js chargé avec succès en mode mémoire');
-      return sqlite;
-    } catch (error) {
-      console.warn('❌ Échec du chargement en mode mémoire:', error);
-    }
-
-    // Troisième tentative: CDN fallbacks
-    const cdnUrls = [
-      'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm',
-      'https://unpkg.com/sql.js@1.10.2/dist/sql-wasm.wasm'
-    ];
-
-    for (const wasmUrl of cdnUrls) {
-      try {
-        console.log(`🔄 Tentative de chargement SQL.js depuis CDN: ${wasmUrl}`);
-        const sqlite = await initSqlJs({
-          locateFile: (file: string) => {
-            if (file.endsWith('.wasm')) {
-              return wasmUrl;
-            }
-            return file;
-          }
-        });
-        console.log(`✅ SQL.js chargé avec succès depuis CDN: ${wasmUrl}`);
-        return sqlite;
-      } catch (error) {
-        console.warn(`❌ Échec du chargement depuis CDN ${wasmUrl}:`, error);
-      }
-    }
-    
-    throw new Error('❌ ERREUR CRITIQUE: Impossible de charger SQL.js depuis aucune source. Stockage local indisponible.');
-  }
 
   /**
    * Charge ou crée la base de données
    */
   private async loadOrCreateDatabase(): Promise<void> {
     try {
-      // Première tentative: utiliser SQL.js normal
+      // Première tentative: utiliser SQL.js avec OPFS
       await this.tryLoadSQLiteDatabase();
     } catch (sqliteError) {
-      console.warn('❌ SQLite normal échoué, basculement vers le service de fallback:', sqliteError);
+      console.warn('❌ SQLite avec OPFS échoué, basculement vers le service de fallback:', sqliteError);
       
-      // Activer le mode fallback
+      // Activer le mode fallback avec persistance locale
       this.useFallback = true;
       this.fallbackService = new SQLiteFallbackService();
       
-      console.log('🔄 Service de fallback activé - stockage mémoire simple');
+      // Charger les données existantes si disponibles
+      try {
+        const existingData = localStorage.getItem('sqlite-fallback-data');
+        if (existingData) {
+          this.fallbackService.importData(JSON.parse(existingData));
+          console.log('📂 Données de fallback restaurées depuis localStorage');
+        }
+      } catch (error) {
+        console.warn('⚠️ Impossible de restaurer les données de fallback:', error);
+      }
+      
+      console.log('🔄 Service de fallback activé avec persistance localStorage');
     }
   }
 
@@ -143,35 +97,99 @@ export class OPFSSQLiteService {
       const arrayBuffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       
-      // Charger sql.js dynamiquement avec fallback CDN
-      let initSqlJs;
-      try {
-        const sqlJsModule = await import('sql.js');
-        initSqlJs = sqlJsModule.default || sqlJsModule;
-      } catch (importError) {
-        console.warn('❌ Import sql.js échoué:', importError);
-        throw new Error('sql.js module non disponible');
-      }
-      
-      const sqlite = await this.initSqlJsWithFallback(initSqlJs);
+      // Charger sql.js avec plusieurs stratégies
+      const sqlite = await this.loadSqlJsModule();
       this.db = new sqlite.Database(uint8Array);
       console.log('📂 Existing database loaded from OPFS');
       
     } catch (error) {
       // Base de données n'existe pas, en créer une nouvelle
-      let initSqlJs;
-      try {
-        const sqlJsModule = await import('sql.js');
-        initSqlJs = sqlJsModule.default || sqlJsModule;
-      } catch (importError) {
-        console.warn('❌ Import sql.js échoué:', importError);
-        throw new Error('sql.js module non disponible');
-      }
-      
-      const sqlite = await this.initSqlJsWithFallback(initSqlJs);
+      const sqlite = await this.loadSqlJsModule();
       this.db = new sqlite.Database();
       console.log('🆕 New database created');
     }
+  }
+
+  /**
+   * Charge le module SQL.js avec stratégie de fallback améliorée
+   */
+  private async loadSqlJsModule(): Promise<any> {
+    // Stratégie 1: Essayer le chargement direct depuis public/
+    try {
+      console.log('🔄 Tentative de chargement SQL.js direct');
+      
+      // Charger directement depuis le répertoire public
+      const wasmResponse = await fetch('/sql-wasm.wasm');
+      if (wasmResponse.ok) {
+        const wasmBuffer = await wasmResponse.arrayBuffer();
+        
+        // Import dynamique du module
+        const sqlJsModule = await import('sql.js');
+        const initSqlJs = sqlJsModule.default || sqlJsModule;
+        
+        const sqlite = await (typeof initSqlJs === 'function' ? initSqlJs : initSqlJs.default)({
+          wasmBinary: wasmBuffer
+        });
+        
+        console.log('✅ SQL.js chargé avec succès avec WASM local');
+        return sqlite;
+      }
+    } catch (error) {
+      console.warn('❌ Échec du chargement WASM local:', error);
+    }
+
+    // Stratégie 2: Essayer sans WASM (mode mémoire)
+    try {
+      console.log('🔄 Tentative de chargement SQL.js en mode mémoire');
+      const sqlJsModule = await import('sql.js');
+      const initSqlJs = sqlJsModule.default || sqlJsModule;
+      
+      const sqlite = await (typeof initSqlJs === 'function' ? initSqlJs : initSqlJs.default)();
+      console.log('✅ SQL.js chargé en mode mémoire');
+      return sqlite;
+    } catch (error) {
+      console.warn('❌ Échec du chargement en mode mémoire:', error);
+    }
+
+    // Stratégie 3: CDN fallbacks avec timeout
+    const cdnUrls = [
+      'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm',
+      'https://unpkg.com/sql.js@1.10.2/dist/sql-wasm.wasm'
+    ];
+
+    for (const wasmUrl of cdnUrls) {
+      try {
+        console.log(`🔄 Tentative de chargement depuis CDN: ${wasmUrl}`);
+        
+        // Timeout de 5 secondes pour éviter les blocages
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const wasmResponse = await fetch(wasmUrl, { 
+          signal: controller.signal,
+          mode: 'cors'
+        });
+        clearTimeout(timeoutId);
+        
+        if (wasmResponse.ok) {
+          const wasmBuffer = await wasmResponse.arrayBuffer();
+          
+          const sqlJsModule = await import('sql.js');
+          const initSqlJs = sqlJsModule.default || sqlJsModule;
+          
+          const sqlite = await (typeof initSqlJs === 'function' ? initSqlJs : initSqlJs.default)({
+            wasmBinary: wasmBuffer
+          });
+          
+          console.log(`✅ SQL.js chargé depuis CDN: ${wasmUrl}`);
+          return sqlite;
+        }
+      } catch (error) {
+        console.warn(`❌ Échec CDN ${wasmUrl}:`, error);
+      }
+    }
+    
+    throw new Error('❌ ERREUR CRITIQUE: Impossible de charger SQL.js depuis aucune source');
   }
 
   /**
@@ -258,9 +276,21 @@ export class OPFSSQLiteService {
   }
 
   /**
-   * Sauvegarde la base de données dans OPFS
+   * Sauvegarde la base de données dans OPFS ou localStorage
    */
   async save(): Promise<void> {
+    if (this.useFallback && this.fallbackService) {
+      // Sauvegarder en mode fallback avec localStorage
+      try {
+        const data = this.fallbackService.exportForStorage();
+        localStorage.setItem('sqlite-fallback-data', JSON.stringify(data));
+        console.log('💾 Fallback data saved to localStorage');
+      } catch (error) {
+        console.warn('⚠️ Failed to save fallback data to localStorage:', error);
+      }
+      return;
+    }
+
     if (!this.db || !this.opfsRoot) throw new Error('Database not initialized');
 
     try {
