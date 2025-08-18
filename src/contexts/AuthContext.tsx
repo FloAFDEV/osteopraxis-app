@@ -205,8 +205,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 					setSession(session);
 					setIsAuthenticated(true);
 				} else {
-					// Vérifier si c'est un utilisateur démo
+					// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
 					const isDemoUser = session.user.email === 'demo@patienthub.com' || 
+									  session.user.email?.startsWith('demo-') ||
 									  session.user.user_metadata?.is_demo === true ||
 									  session.user.user_metadata?.is_demo_user === true;
 
@@ -378,7 +379,38 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 						}, 100);
 					}
 								} else {
-									setUser(null);
+									// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
+									const isDemoUser = session.user.email === 'demo@patienthub.com' || 
+													  session.user.email?.startsWith('demo-') ||
+													  session.user.user_metadata?.is_demo === true ||
+													  session.user.user_metadata?.is_demo_user === true;
+
+									if (isDemoUser) {
+										// Mode démo - créer un utilisateur virtuel
+										const demoUser: User = {
+											id: session.user.id,
+											email: session.user.email || '',
+											firstName: 'Utilisateur',
+											lastName: 'Démo',
+											role: 'OSTEOPATH',
+											osteopathId: 999, // ID factice pour démo
+											created_at: new Date().toISOString(),
+											updated_at: new Date().toISOString(),
+										};
+										setUser(demoUser);
+										setSession(session);
+										setIsAuthenticated(true);
+										
+										// Navigation uniquement sur connexion explicite (pas TOKEN_REFRESHED)
+										if (event === 'SIGNED_IN') {
+											setTimeout(() => {
+												navigate("/dashboard", { replace: true });
+												toast.success("Connexion en mode démo réussie !");
+											}, 100);
+										}
+									} else {
+										setUser(null);
+									}
 								}
 							} catch (error) {
 								console.error('Error fetching user data:', error);
