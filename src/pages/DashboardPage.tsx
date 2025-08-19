@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
+import { DemoGuide } from "@/components/demo/DemoGuide";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -29,6 +30,7 @@ const DashboardPage = () => {
         variant="subtle" 
         className="p-3 md:p-6 rounded-xl animate-fade-in"
       >
+        <DemoGuide />
         <Dashboard />
       </GradientBackground>
     </Layout>

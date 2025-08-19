@@ -47,7 +47,7 @@ export class HybridDataAdapter {
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { session } } = await supabase.auth.getSession();
         
-        const isDemoMode = session?.user?.email === 'demo@patienthub.fr' || 
+        const isDemoMode = session?.user?.email === 'demo@patienthub.com' ||
                           session?.user?.email?.startsWith('demo-') ||
                           session?.user?.user_metadata?.is_demo === true ||
                           session?.user?.user_metadata?.is_demo_user === true;
@@ -59,11 +59,14 @@ export class HybridDataAdapter {
           if (cloudAdapter) return cloudAdapter;
         }
         
-        // En mode authentifié RÉEL, TEMPORAIREMENT autoriser le stockage cloud si le stockage local n'est pas disponible
-        if (!isDemoMode && this.config.fallbackToCloud) {
-          console.warn(`⚠️ AVERTISSEMENT CONFORMITÉ HDS: '${entityName}' utilise temporairement le stockage cloud car le stockage local n'est pas disponible. Configuration du stockage local sécurisé recommandée.`);
-          const cloudAdapter = this.cloudAdapters.get(entityName);
-          if (cloudAdapter) return cloudAdapter;
+        // En mode authentifié RÉEL, EXIGER le stockage local sécurisé
+        if (!isDemoMode) {
+          console.error(`❌ REFUS CONFORMITÉ HDS: '${entityName}' nécessite un stockage local sécurisé en mode authentifié`);
+          throw new HybridStorageError(
+            `❌ ERREUR CRITIQUE: Les données '${entityName}' nécessitent un stockage local sécurisé. Veuillez configurer votre stockage local.`,
+            DataLocation.LOCAL,
+            'getAdapter'
+          );
         }
       }
       
@@ -137,14 +140,19 @@ export class HybridDataAdapter {
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { session } } = await supabase.auth.getSession();
         
-        const isDemoMode = session?.user?.email === 'demo@patienthub.fr' || 
+        const isDemoMode = session?.user?.email === 'demo@patienthub.com' || 
                           session?.user?.email?.startsWith('demo-') ||
                           session?.user?.user_metadata?.is_demo === true ||
                           session?.user?.user_metadata?.is_demo_user === true;
         
-        // EN MODE IDENTIFIÉ RÉEL: Avertir mais autoriser temporairement le stockage cloud
+        // EN MODE IDENTIFIÉ RÉEL: REFUSER le stockage cloud pour les données HDS
         if (!isDemoMode) {
-          console.warn(`⚠️ AVERTISSEMENT CONFORMITÉ HDS: Les données '${entityName}' utilisent temporairement le stockage cloud. Configuration du stockage local sécurisé recommandée.`);
+          console.error(`❌ TENTATIVE DE STOCKAGE CLOUD POUR DONNÉES HDS: ${entityName}`);
+          throw new HybridStorageError(
+            `❌ ERREUR DE CONFORMITÉ: Les données patients ne peuvent pas être stockées dans le cloud en mode authentifié. Veuillez configurer le stockage local sécurisé.`,
+            DataLocation.LOCAL,
+            'create'
+          );
         }
         
         // En mode démo, autoriser le stockage cloud

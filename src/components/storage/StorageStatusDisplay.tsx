@@ -79,51 +79,6 @@ export const StorageStatusDisplay: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Classification des données */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            Classification des données
-          </CardTitle>
-          <CardDescription>
-            Répartition automatique selon la sensibilité HDS
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <HardDrive className="h-4 w-4 text-orange-500" />
-                <span className="text-sm font-medium">Stockage Local (HDS)</span>
-              </div>
-              <div className="space-y-1">
-                {status?.dataClassification?.local?.map((entityType) => (
-                  <div key={entityType} className="flex items-center gap-2">
-                    <Lock className="h-3 w-3 text-green-500" />
-                    <span className="text-xs">{entityType}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Cloud className="h-4 w-4 text-blue-500" />
-                <span className="text-sm font-medium">Stockage Cloud</span>
-              </div>
-              <div className="space-y-1">
-                {status?.dataClassification?.cloud?.map((entityType) => (
-                  <div key={entityType} className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-blue-500" />
-                    <span className="text-xs">{entityType}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Informations techniques */}
       <Card>

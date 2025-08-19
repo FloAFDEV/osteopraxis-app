@@ -38,7 +38,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
     try {
       setIsLoading(true);
       
-      // En mode démo OU quand le stockage local n'est pas disponible, utiliser le cloud
+      // En mode démo uniquement, utiliser le cloud
       if (isDemoUser) {
         setStatus({
           isConfigured: true,
