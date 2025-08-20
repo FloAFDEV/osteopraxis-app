@@ -41,17 +41,23 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
                      user.id === '999' || // ID factice pour démo
                      user.osteopathId === 999; // osteopathId factice pour démo
 
+  console.log('🔍 ProtectedRoute - User:', { email: user.email, id: user.id, osteopathId: user.osteopathId, isDemoUser });
+  console.log('🔍 ProtectedRoute - Storage status:', status);
+
   // Pour les utilisateurs démo : pas de stockage local requis
   if (isDemoUser) {
+    console.log('🎭 Utilisateur démo - Bypass stockage local');
     return <>{children}</>;
   }
 
   // Pour les utilisateurs connectés réels : vérifier le stockage local
-  if (status && !status.isConfigured) {
+  if (!status || !status.isConfigured) {
+    console.log('🔧 Stockage local non configuré - Affichage setup');
     return <HybridStorageSetup />;
   }
 
   // Pour le stockage configuré : utiliser le provider hybride
+  console.log('✅ Stockage configuré - Utilisation provider hybride');
   return <HybridStorageProvider>{children}</HybridStorageProvider>;
 };
 

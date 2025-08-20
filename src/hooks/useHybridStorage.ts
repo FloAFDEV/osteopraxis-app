@@ -43,6 +43,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
       
       // En mode démo uniquement, utiliser le cloud
       if (isDemoUser) {
+        console.log('🎭 Utilisateur démo détecté - Stockage cloud');
         setStatus({
           isConfigured: true,
           isUnlocked: true,
@@ -57,8 +58,10 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
         return;
       }
       
+      console.log('🔧 Utilisateur réel - Initialisation stockage hybride...');
       await hybridStorageManager.initialize();
-      await loadStatus();
+      const storageStatus = await loadStatus();
+      console.log('📊 Statut stockage après initialisation:', storageStatus);
     } catch (error) {
       console.error('Failed to initialize hybrid storage:', error);
       toast.error('Erreur lors de l\'initialisation du stockage hybride');
