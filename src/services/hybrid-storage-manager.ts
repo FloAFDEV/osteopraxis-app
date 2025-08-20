@@ -94,6 +94,17 @@ class HybridStorageManager {
       
       console.log('✅ Support OPFS vérifié:', opfsStatus.details);
       
+      // FORCER l'initialisation SQLite OPFS même si pas configuré pour tester la disponibilité
+      console.log('🔧 Test forcé d\'initialisation OPFS SQLite...');
+      try {
+        const { getOPFSSQLiteService } = await import('./sqlite/opfs-sqlite-service');
+        await getOPFSSQLiteService();
+        console.log('✅ Service SQLite OPFS initialisé avec succès');
+      } catch (sqliteError) {
+        console.error('❌ Échec initialisation SQLite OPFS:', sqliteError);
+        // Ne pas faire échouer l'initialisation complète pour cela
+      }
+      
       // Vérifier si une configuration existe déjà
       const existingConfig = await this.loadStorageConfig();
       

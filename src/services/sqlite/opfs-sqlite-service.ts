@@ -39,8 +39,10 @@ export class OPFSSQLiteService {
         throw new Error('OPFS not supported in this browser');
       }
 
-      // Obtenir l'accès au système de fichiers privé
+      // FORCER la demande d'accès OPFS - ceci devrait déclencher la popup de permissions
+      console.log('🔐 Demande d\'accès au stockage privé OPFS...');
       this.opfsRoot = await navigator.storage.getDirectory();
+      console.log('✅ Accès OPFS accordé, répertoire racine obtenu');
       
       // Charger ou créer la base de données
       await this.loadOrCreateDatabase();
