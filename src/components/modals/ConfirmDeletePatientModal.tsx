@@ -19,41 +19,55 @@ const ConfirmDeletePatientModal: React.FC<ConfirmDeletePatientModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md border-2 border-red-600 dark:border-red-800">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white">
-            Supprimer le patient
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-6 md:p-8">
+      <Card className="w-full sm:w-4/5 md:w-2/3 lg:w-1/2 max-w-2xl border-4 border-red-600 dark:border-red-800">
+        <CardHeader>
+          <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-white">
+            Suppression des Données Patient
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="text-center">
-            <div className="font-semibold text-lg text-amber-600 dark:text-amber-400 mb-2">
-              {patientName}
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Cette action est <span className="font-semibold text-red-600 dark:text-red-400">irréversible</span> et supprimera définitivement toutes les données du patient.
-            </p>
+        <CardContent>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4">
+            Attention : cette action est{" "}
+            <span className="font-semibold text-red-600 dark:text-red-400 text-lg sm:text-xl">
+              irréversible
+            </span>{" "}
+            et entraînera la perte permanente de toutes les données associées à ce patient.
+          </p>
+          <div className="font-extrabold text-xl sm:text-2xl text-amber-500 dark:text-amber-400 mt-2 mb-2 text-center">
+            {patientName}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-md">
-            <p className="font-medium mb-1">⚠️ Rappel légal :</p>
-            <p>Les dossiers médicaux doivent être conservés 20 ans (RGPD).</p>
+          <p className="font-bold text-center mb-4">
+            Êtes-vous sûr de vouloir supprimer ce patient de manière définitive ?
+          </p>
+          <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            <span className="font-semibold">Remarque : </span>certaines données peuvent être
+            nécessaires pour des raisons légales, médicales ou administratives.
           </div>
+          <ul className="list-disc pl-6 mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            <li>
+              Les dossiers médicaux doivent être conservés pendant <strong>20 ans</strong> après le dernier contact avec le patient.
+            </li>
+            <li>
+              Le <strong>Règlement Général sur la Protection des Données (RGPD)</strong> permet
+              la conservation des données médicales pour des raisons de santé publique.
+            </li>
+          </ul>
         </CardContent>
-        <CardFooter className="pt-3 flex justify-end space-x-2">
+        <CardFooter className="bg-gray-50 dark:bg-gray-800 rounded-b-lg flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
           <Button
             variant="outline"
             onClick={onCancel}
-            size="sm"
+            className="w-full sm:w-auto"
           >
             Annuler
           </Button>
           <Button
             variant="destructive"
             onClick={onDelete}
-            size="sm"
+            className="w-full sm:w-auto"
           >
-            Supprimer
+            Supprimer définitivement
           </Button>
         </CardFooter>
       </Card>
