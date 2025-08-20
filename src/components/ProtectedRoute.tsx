@@ -42,7 +42,7 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Vérifier si c'est un utilisateur démo (même logique que AuthContext)
+  // Vérifier si c'est un utilisateur démo (logique centralisée)
   const isDemoUser = user.email === 'demo@patienthub.com' || 
                      user.email?.startsWith('demo-') ||
                      user.id === '999' || // ID factice pour démo
@@ -50,10 +50,10 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
 
   console.log('🔍 ProtectedRoute - isDemoUser:', isDemoUser);
 
-  // FORCER L'AFFICHAGE DU SETUP POUR UTILISATEURS RÉELS
+  // Pour les utilisateurs réels : utiliser le provider hybride
   if (!isDemoUser) {
-    console.log('🔧 Utilisateur réel détecté - FORCER affichage setup');
-    return <HybridStorageSetup />;
+    console.log('🔧 Utilisateur réel - Utilisation provider hybride');
+    return <HybridStorageProvider>{children}</HybridStorageProvider>;
   }
 
   // Pour les utilisateurs démo : pas de stockage local requis

@@ -41,16 +41,10 @@ export class HybridDataAdapter {
       const adapter = this.localAdapters.get(entityName);
       if (adapter) return adapter;
       
-      // CORRECTION: Vérifier le mode démo avant d'appliquer les restrictions HDS
       if (isHDSEntity) {
         // Vérifier si on est en mode démo via la session
-        const { supabase } = await import('@/integrations/supabase/client');
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        const isDemoMode = session?.user?.email === 'demo@patienthub.fr' ||
-                          session?.user?.email?.startsWith('demo-') ||
-                          session?.user?.user_metadata?.is_demo === true ||
-                          session?.user?.user_metadata?.is_demo_user === true;
+        const { isDemoSession } = await import('@/utils/demo-detection');
+        const isDemoMode = await isDemoSession();
         
         // En mode démo : Autoriser le stockage cloud
         if (isDemoMode) {
@@ -146,13 +140,8 @@ export class HybridDataAdapter {
       
       if (isHDSEntity && adapterLocation === DataLocation.CLOUD) {
         // Vérifier si on est en mode démo avant de refuser
-        const { supabase } = await import('@/integrations/supabase/client');
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        const isDemoMode = session?.user?.email === 'demo@patienthub.fr' || 
-                          session?.user?.email?.startsWith('demo-') ||
-                          session?.user?.user_metadata?.is_demo === true ||
-                          session?.user?.user_metadata?.is_demo_user === true;
+        const { isDemoSession } = await import('@/utils/demo-detection');
+        const isDemoMode = await isDemoSession();
         
         // EN MODE IDENTIFIÉ RÉEL: REFUSER le stockage cloud pour les données HDS
         if (!isDemoMode) {
