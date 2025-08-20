@@ -6,9 +6,10 @@ import React from 'react';
 import { Layout } from "@/components/ui/layout";
 import { HybridStorageDiagnostic } from "@/components/debug/HybridStorageDiagnostic";
 import { SQLiteDiagnostic } from "@/components/debug/SQLiteDiagnostic";
+import { OPFSTestComponent } from "@/components/debug/OPFSTestComponent";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Database, TestTube } from "lucide-react";
+import { Database, TestTube, Wrench } from "lucide-react";
 
 const SQLiteDebugPage = () => {
   return (
@@ -26,8 +27,12 @@ const SQLiteDebugPage = () => {
           </CardHeader>
         </Card>
 
-        <Tabs defaultValue="hybrid" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="opfs-test" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="opfs-test" className="flex items-center gap-2">
+              <Wrench className="w-4 h-4" />
+              Test OPFS Complet
+            </TabsTrigger>
             <TabsTrigger value="hybrid" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               Diagnostic Hybride
@@ -37,6 +42,10 @@ const SQLiteDebugPage = () => {
               Test SQLite Détaillé
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="opfs-test">
+            <OPFSTestComponent />
+          </TabsContent>
 
           <TabsContent value="hybrid">
             <HybridStorageDiagnostic />

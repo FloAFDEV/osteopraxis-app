@@ -34,15 +34,43 @@ export class OPFSSQLiteService {
     try {
       console.log('🔄 Initializing SQLite with OPFS...');
 
+      // Diagnostic détaillé du navigateur
+      console.log('🔍 Diagnostic navigateur:', {
+        userAgent: navigator.userAgent,
+        hasStorage: 'storage' in navigator,
+        hasGetDirectory: 'storage' in navigator && 'getDirectory' in navigator.storage,
+        isSecureContext: window.isSecureContext,
+        origin: window.location.origin
+      });
+
       // Vérifier le support OPFS
-      if (!('storage' in navigator) || !('getDirectory' in navigator.storage)) {
-        throw new Error('OPFS not supported in this browser');
+      if (!('storage' in navigator)) {
+        throw new Error('❌ navigator.storage non disponible - navigateur trop ancien ou contexte non sécurisé');
+      }
+      
+      if (!('getDirectory' in navigator.storage)) {
+        throw new Error('❌ navigator.storage.getDirectory non disponible - OPFS non supporté par ce navigateur');
       }
 
-      // FORCER la demande d'accès OPFS - ceci devrait déclencher la popup de permissions
+      // Vérifier le contexte sécurisé (HTTPS requis pour OPFS)
+      if (!window.isSecureContext) {
+        throw new Error('❌ Contexte non sécurisé - OPFS nécessite HTTPS ou localhost');
+      }
+
+      // FORCER la demande d'accès OPFS avec gestion d'erreur détaillée
       console.log('🔐 Demande d\'accès au stockage privé OPFS...');
-      this.opfsRoot = await navigator.storage.getDirectory();
-      console.log('✅ Accès OPFS accordé, répertoire racine obtenu');
+      try {
+        this.opfsRoot = await navigator.storage.getDirectory();
+        console.log('✅ Accès OPFS accordé, répertoire racine obtenu');
+      } catch (opfsError: any) {
+        console.error('❌ Échec accès OPFS:', {
+          error: opfsError,
+          message: opfsError?.message,
+          name: opfsError?.name,
+          stack: opfsError?.stack
+        });
+        throw new Error(`❌ Accès OPFS refusé: ${opfsError?.message || 'Erreur inconnue'}`);
+      }
       
       // Charger ou créer la base de données
       await this.loadOrCreateDatabase();
@@ -409,18 +437,25 @@ export class OPFSSQLiteService {
   }
 
   /**
-   * Ferme la base de données
+   * Force une réinitialisation complète du service OPFS
    */
-  close(): void {
-    if (this.useFallback && this.fallbackService) {
-      this.fallbackService.close();
-      return;
-    }
+  async forceReinitialize(): Promise<void> {
+    console.log('🔄 Force réinitialisation OPFS...');
+    
+    // Fermer la base existante
     if (this.db) {
       this.db.close();
       this.db = null;
     }
+    
+    // Réinitialiser les états
     this.initialized = false;
+    this.useFallback = false;
+    this.fallbackService = null;
+    this.opfsRoot = null;
+    
+    // Relancer l'initialisation
+    await this.initialize();
   }
 
   /**
@@ -490,6 +525,11 @@ export async function getOPFSSQLiteService(): Promise<OPFSSQLiteService> {
 export function checkOPFSSupport(): { supported: boolean; details: string[] } {
   const details: string[] = [];
   let supported = true;
+  
+  // Informations navigateur
+  details.push(`🌐 Navigateur: ${navigator.userAgent.split(' ').pop()}`);
+  details.push(`🔒 Contexte sécurisé: ${window.isSecureContext ? 'Oui' : 'Non'}`);
+  details.push(`📍 Origine: ${window.location.origin}`);
 
   if (!('storage' in navigator)) {
     details.push('❌ navigator.storage non disponible');
