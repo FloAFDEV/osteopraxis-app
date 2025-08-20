@@ -556,6 +556,39 @@ export type Database = {
           },
         ]
       }
+      demo_sessions: {
+        Row: {
+          cleaned_up_at: string | null
+          created_at: string | null
+          data_types: string[] | null
+          expires_at: string | null
+          id: string
+          is_demo: boolean | null
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          cleaned_up_at?: string | null
+          created_at?: string | null
+          data_types?: string[] | null
+          expires_at?: string | null
+          id?: string
+          is_demo?: boolean | null
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          cleaned_up_at?: string | null
+          created_at?: string | null
+          data_types?: string[] | null
+          expires_at?: string | null
+          id?: string
+          is_demo?: boolean | null
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       google_calendar_events: {
         Row: {
           created_at: string
@@ -2018,6 +2051,14 @@ export type Database = {
       cleanup_expired_demo_data: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      cleanup_expired_demo_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cleaned_appointments: number
+          cleaned_patients: number
+          cleaned_sessions: number
+        }[]
       }
       cleanup_expired_syncs: {
         Args: Record<PropertyKey, never>
