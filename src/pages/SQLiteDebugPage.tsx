@@ -8,6 +8,7 @@ import { HybridStorageDiagnostic } from "@/components/debug/HybridStorageDiagnos
 import { SQLiteDiagnostic } from "@/components/debug/SQLiteDiagnostic";
 import { OPFSTestComponent } from "@/components/debug/OPFSTestComponent";
 import { LocalStorageTest } from "@/components/debug/LocalStorageTest";
+import { PersistentStorageTest } from "@/components/debug/PersistentStorageTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Database, TestTube, Wrench } from "lucide-react";
@@ -28,8 +29,12 @@ const SQLiteDebugPage = () => {
           </CardHeader>
         </Card>
 
-        <Tabs defaultValue="local-test" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="persistent-test" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="persistent-test" className="flex items-center gap-2">
+              <TestTube className="w-4 h-4" />
+              Persistant IndexedDB
+            </TabsTrigger>
             <TabsTrigger value="local-test" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" />
               Test Local CRUD
@@ -48,16 +53,16 @@ const SQLiteDebugPage = () => {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="persistent-test">
+            <PersistentStorageTest />
+          </TabsContent>
+
           <TabsContent value="local-test">
             <LocalStorageTest />
           </TabsContent>
-
-          <TabsContent value="hybrid">
-            <HybridStorageDiagnostic />
-          </TabsContent>
-
-          <TabsContent value="sqlite">
-            <SQLiteDiagnostic />
+          
+          <TabsContent value="opfs-test">
+            <OPFSTestComponent />
           </TabsContent>
         </Tabs>
       </div>

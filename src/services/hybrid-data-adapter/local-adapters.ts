@@ -1,115 +1,57 @@
 import { DataAdapter, DataLocation } from './types';
 import { createEnhancedSQLiteAdapters } from '../sqlite/enhanced-sqlite-adapters';
 import { getOPFSSQLiteService, checkOPFSSupport } from '../sqlite/opfs-sqlite-service';
+import { getPersistentLocalStorage } from '../storage/persistent-local-storage';
 
 /**
- * Stockage persistant avec localStorage pour les données HDS
- * Utilisé en mode "récupération" quand SQLite/OPFS n'est pas disponible
+ * Stockage local VRAIMENT persistant avec IndexedDB
+ * Utilisé quand SQLite/OPFS n'est pas disponible mais on veut de la vraie persistance
  */
-class PersistentLocalStorage {
-  private data: Map<string, Map<string, any>> = new Map();
-  private readonly STORAGE_KEY = 'hds-local-storage';
-  
-  constructor() {
-    this.loadFromLocalStorage();
-  }
-  
-  private loadFromLocalStorage(): void {
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        const parsedData = JSON.parse(stored);
-        for (const [entityName, entityData] of Object.entries(parsedData)) {
-          this.data.set(entityName, new Map(Object.entries(entityData as any)));
-        }
-        console.log('📂 Données HDS restaurées depuis localStorage');
-      }
-    } catch (error) {
-      console.warn('⚠️ Erreur lors du chargement des données localStorage:', error);
+class RealPersistentLocalStorage {
+  private storage: any = null;
+  private initialized = false;
+
+  async initialize(): Promise<void> {
+    if (!this.initialized) {
+      this.storage = await getPersistentLocalStorage();
+      this.initialized = true;
+      console.log('✅ Stockage IndexedDB persistant initialisé');
     }
   }
-  
-  private saveToLocalStorage(): void {
-    try {
-      const dataToSave: any = {};
-      for (const [entityName, entityMap] of this.data.entries()) {
-        dataToSave[entityName] = Object.fromEntries(entityMap);
-      }
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataToSave));
-      console.log('💾 Données HDS sauvegardées en localStorage');
-    } catch (error) {
-      console.warn('⚠️ Erreur lors de la sauvegarde localStorage:', error);
-    }
+
+  async getAll(entityName: string): Promise<any[]> {
+    await this.initialize();
+    return await this.storage.getAll(entityName);
   }
-  
-  private getEntityStore(entityName: string): Map<string, any> {
-    if (!this.data.has(entityName)) {
-      this.data.set(entityName, new Map());
-    }
-    return this.data.get(entityName)!;
+
+  async getById(entityName: string, id: string): Promise<any | null> {
+    await this.initialize();
+    return await this.storage.getById(entityName, id);
   }
-  
-  getAll(entityName: string): any[] {
-    const store = this.getEntityStore(entityName);
-    return Array.from(store.values());
+
+  async create(entityName: string, data: any): Promise<any> {
+    await this.initialize();
+    return await this.storage.create(entityName, data);
   }
-  
-  getById(entityName: string, id: string): any | null {
-    const store = this.getEntityStore(entityName);
-    return store.get(id) || null;
+
+  async update(entityName: string, id: string, data: any): Promise<any> {
+    await this.initialize();
+    return await this.storage.update(entityName, id, data);
   }
-  
-  create(entityName: string, data: any): any {
-    const store = this.getEntityStore(entityName);
-    // Générer un ID numérique pour maintenir la compatibilité avec les types Patient
-    const existingIds = Array.from(store.keys()).map(id => parseInt(id)).filter(id => !isNaN(id));
-    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-    const id = data.id || nextId;
-    const item = { 
-      ...data, 
-      id, 
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    store.set(String(id), item);
-    this.saveToLocalStorage(); // Sauvegarder automatiquement
-    return item;
+
+  async delete(entityName: string, id: string): Promise<boolean> {
+    await this.initialize();
+    return await this.storage.delete(entityName, id);
   }
-  
-  update(entityName: string, id: string, data: any): any {
-    const store = this.getEntityStore(entityName);
-    const existing = store.get(id);
-    if (!existing) throw new Error(`${entityName} with id ${id} not found`);
-    
-    const updated = { 
-      ...existing, 
-      ...data, 
-      id,
-      updatedAt: new Date().toISOString()
-    };
-    store.set(id, updated);
-    this.saveToLocalStorage(); // Sauvegarder automatiquement
-    return updated;
-  }
-  
-  delete(entityName: string, id: string): boolean {
-    const store = this.getEntityStore(entityName);
-    const result = store.delete(id);
-    if (result) {
-      this.saveToLocalStorage(); // Sauvegarder automatiquement
-    }
-    return result;
-  }
-  
-  clear() {
-    this.data.clear();
-    localStorage.removeItem(this.STORAGE_KEY);
-    console.log('🧹 Stockage local HDS effacé');
+
+  async clear(entityName: string): Promise<void> {
+    await this.initialize();
+    return await this.storage.clear(entityName);
   }
 }
 
-// Instance globale du stockage persistant local
-const persistentLocalStorage = new PersistentLocalStorage();
+// Instance globale du VRAI stockage persistant local
+const realPersistentStorage = new RealPersistentLocalStorage();
 
 /**
  * Adaptateurs locaux utilisant SQLite avec OPFS
@@ -150,72 +92,72 @@ class LocalPatientAdapter implements DataAdapter<any> {
 
   async getAll(): Promise<any[]> {
     if (this.fallbackToMemory) {
-      console.warn('⚠️ Mode récupération: utilisation du stockage localStorage persistant pour les patients');
-      return persistentLocalStorage.getAll('patients');
+      console.warn('⚠️ Mode stockage persistant: utilisation IndexedDB pour les patients');
+      return await realPersistentStorage.getAll('patients');
     }
     
     try {
       return await this.sqliteAdapter.getAll();
     } catch (error) {
-      console.error('Error getting all patients from local storage, falling back to localStorage:', error);
+      console.error('Error getting all patients from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.getAll('patients');
+      return await realPersistentStorage.getAll('patients');
     }
   }
 
   async getById(id: number | string): Promise<any | null> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.getById('patients', String(id));
+      return await realPersistentStorage.getById('patients', String(id));
     }
     
     try {
       return await this.sqliteAdapter.getById(id);
     } catch (error) {
-      console.error('Error getting patient by ID from local storage, falling back to localStorage:', error);
+      console.error('Error getting patient by ID from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.getById('patients', String(id));
+      return await realPersistentStorage.getById('patients', String(id));
     }
   }
 
   async create(data: any): Promise<any> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.create('patients', data);
+      return await realPersistentStorage.create('patients', data);
     }
     
     try {
       return await this.sqliteAdapter.create(data);
     } catch (error) {
-      console.error('Error creating patient in local storage, falling back to localStorage:', error);
+      console.error('Error creating patient in local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.create('patients', data);
+      return await realPersistentStorage.create('patients', data);
     }
   }
 
   async update(id: number | string, data: any): Promise<any> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.update('patients', String(id), data);
+      return await realPersistentStorage.update('patients', String(id), data);
     }
     
     try {
       return await this.sqliteAdapter.update(id, data);
     } catch (error) {
-      console.error('Error updating patient in local storage, falling back to localStorage:', error);
+      console.error('Error updating patient in local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.update('patients', String(id), data);
+      return await realPersistentStorage.update('patients', String(id), data);
     }
   }
 
   async delete(id: number | string): Promise<boolean> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.delete('patients', String(id));
+      return await realPersistentStorage.delete('patients', String(id));
     }
     
     try {
       return await this.sqliteAdapter.delete(id);
     } catch (error) {
-      console.error('Error deleting patient from local storage, falling back to localStorage:', error);
+      console.error('Error deleting patient from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.delete('patients', String(id));
+      return await realPersistentStorage.delete('patients', String(id));
     }
   }
 }
@@ -254,72 +196,72 @@ class LocalAppointmentAdapter implements DataAdapter<any> {
 
   async getAll(): Promise<any[]> {
     if (this.fallbackToMemory) {
-      console.warn('⚠️ Mode récupération: utilisation du stockage localStorage persistant pour les rendez-vous');
-      return persistentLocalStorage.getAll('appointments');
+      console.warn('⚠️ Mode stockage persistant: utilisation IndexedDB pour les rendez-vous');
+      return await realPersistentStorage.getAll('appointments');
     }
     
     try {
       return await this.sqliteAdapter.getAll();
     } catch (error) {
-      console.error('Error getting all appointments from local storage, falling back to localStorage:', error);
+      console.error('Error getting all appointments from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.getAll('appointments');
+      return await realPersistentStorage.getAll('appointments');
     }
   }
 
   async getById(id: number | string): Promise<any | null> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.getById('appointments', String(id));
+      return await realPersistentStorage.getById('appointments', String(id));
     }
     
     try {
       return await this.sqliteAdapter.getById(id);
     } catch (error) {
-      console.error('Error getting appointment by ID from local storage, falling back to localStorage:', error);
+      console.error('Error getting appointment by ID from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.getById('appointments', String(id));
+      return await realPersistentStorage.getById('appointments', String(id));
     }
   }
 
   async create(data: any): Promise<any> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.create('appointments', data);
+      return await realPersistentStorage.create('appointments', data);
     }
     
     try {
       return await this.sqliteAdapter.create(data);
     } catch (error) {
-      console.error('Error creating appointment in local storage, falling back to localStorage:', error);
+      console.error('Error creating appointment in local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.create('appointments', data);
+      return await realPersistentStorage.create('appointments', data);
     }
   }
 
   async update(id: number | string, data: any): Promise<any> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.update('appointments', String(id), data);
+      return await realPersistentStorage.update('appointments', String(id), data);
     }
     
     try {
       return await this.sqliteAdapter.update(id, data);
     } catch (error) {
-      console.error('Error updating appointment in local storage, falling back to localStorage:', error);
+      console.error('Error updating appointment in local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.update('appointments', String(id), data);
+      return await realPersistentStorage.update('appointments', String(id), data);
     }
   }
 
   async delete(id: number | string): Promise<boolean> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.delete('appointments', String(id));
+      return await realPersistentStorage.delete('appointments', String(id));
     }
     
     try {
       return await this.sqliteAdapter.delete(id);
     } catch (error) {
-      console.error('Error deleting appointment from local storage, falling back to localStorage:', error);
+      console.error('Error deleting appointment from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.delete('appointments', String(id));
+      return await realPersistentStorage.delete('appointments', String(id));
     }
   }
 }
@@ -358,72 +300,72 @@ class LocalInvoiceAdapter implements DataAdapter<any> {
 
   async getAll(): Promise<any[]> {
     if (this.fallbackToMemory) {
-      console.warn('⚠️ Mode récupération: utilisation du stockage localStorage persistant pour les factures');
-      return persistentLocalStorage.getAll('invoices');
+      console.warn('⚠️ Mode stockage persistant: utilisation IndexedDB pour les factures');
+      return await realPersistentStorage.getAll('invoices');
     }
     
     try {
       return await this.sqliteAdapter.getAll();
     } catch (error) {
-      console.error('Error getting all invoices from local storage, falling back to localStorage:', error);
+      console.error('Error getting all invoices from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.getAll('invoices');
+      return await realPersistentStorage.getAll('invoices');
     }
   }
 
   async getById(id: number | string): Promise<any | null> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.getById('invoices', String(id));
+      return await realPersistentStorage.getById('invoices', String(id));
     }
     
     try {
       return await this.sqliteAdapter.getById(id);
     } catch (error) {
-      console.error('Error getting invoice by ID from local storage, falling back to localStorage:', error);
+      console.error('Error getting invoice by ID from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.getById('invoices', String(id));
+      return await realPersistentStorage.getById('invoices', String(id));
     }
   }
 
   async create(data: any): Promise<any> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.create('invoices', data);
+      return await realPersistentStorage.create('invoices', data);
     }
     
     try {
       return await this.sqliteAdapter.create(data);
     } catch (error) {
-      console.error('Error creating invoice in local storage, falling back to localStorage:', error);
+      console.error('Error creating invoice in local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.create('invoices', data);
+      return await realPersistentStorage.create('invoices', data);
     }
   }
 
   async update(id: number | string, data: any): Promise<any> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.update('invoices', String(id), data);
+      return await realPersistentStorage.update('invoices', String(id), data);
     }
     
     try {
       return await this.sqliteAdapter.update(id, data);
     } catch (error) {
-      console.error('Error updating invoice in local storage, falling back to localStorage:', error);
+      console.error('Error updating invoice in local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.update('invoices', String(id), data);
+      return await realPersistentStorage.update('invoices', String(id), data);
     }
   }
 
   async delete(id: number | string): Promise<boolean> {
     if (this.fallbackToMemory) {
-      return persistentLocalStorage.delete('invoices', String(id));
+      return await realPersistentStorage.delete('invoices', String(id));
     }
     
     try {
       return await this.sqliteAdapter.delete(id);
     } catch (error) {
-      console.error('Error deleting invoice from local storage, falling back to localStorage:', error);
+      console.error('Error deleting invoice from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return persistentLocalStorage.delete('invoices', String(id));
+      return await realPersistentStorage.delete('invoices', String(id));
     }
   }
 }
@@ -471,9 +413,11 @@ export async function initializeLocalAdapters() {
  * Efface toutes les données persistantes
  * Utile pour les tests ou le nettoyage
  */
-export function clearMemoryStorage() {
-  persistentLocalStorage.clear();
-  console.log('🧹 Persistent local storage cleared');
+export async function clearMemoryStorage() {
+  await realPersistentStorage.clear('patients');
+  await realPersistentStorage.clear('appointments');
+  await realPersistentStorage.clear('invoices');
+  console.log('🧹 Persistent IndexedDB storage cleared');
 }
 
 /**
