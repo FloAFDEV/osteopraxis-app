@@ -72,8 +72,8 @@ function App() {
               <DemoProvider>
                 <Router>
                   <AuthProvider>
-                    <DemoDataManager />
                     <div className="min-h-screen bg-background">
+                      <DemoDataManager />
                       <MemoryStorageAlert />
                       <Routes>
                         {/* Routes publiques */}

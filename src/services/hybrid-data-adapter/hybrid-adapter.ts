@@ -52,35 +52,19 @@ export class HybridDataAdapter {
           if (cloudAdapter) return cloudAdapter;
         }
         
-        // EN MODE AUTHENTIFIÉ RÉEL: STOCKAGE LOCAL OBLIGATOIRE - AUCUN FALLBACK
+        // EN MODE AUTHENTIFIÉ RÉEL: ACCEPTER STOCKAGE LOCAL (localStorage ou OPFS)
         if (!isDemoMode) {
           if (!adapter) {
             console.error(`❌ CONFORMITÉ HDS CRITIQUE: Aucun adaptateur local pour '${entityName}'`);
             throw new HybridStorageError(
-              `❌ CONFORMITÉ HDS VIOLÉE: L'entité '${entityName}' DOIT être stockée localement. Veuillez configurer votre stockage local OPFS.`,
+              `❌ CONFORMITÉ HDS VIOLÉE: L'entité '${entityName}' DOIT être stockée localement. Veuillez configurer votre stockage local.`,
               DataLocation.LOCAL,
               'getAdapter'
             );
           }
           
-          // Vérifier que l'adaptateur local n'est pas en mode fallback
-          console.log(`🛡️ Validation adaptateur local pour '${entityName}'...`);
-          
-          // Test de validation que l'adaptateur fonctionne en vrai local
-          try {
-            // Test simple pour s'assurer que ce n'est pas le fallback localStorage
-            await adapter.getAll();
-            console.log(`✅ Adaptateur local validé pour '${entityName}'`);
-          } catch (testError) {
-            console.error(`❌ Test adaptateur local échoué pour '${entityName}':`, testError);
-            throw new HybridStorageError(
-              `❌ CONFORMITÉ HDS: L'adaptateur local pour '${entityName}' ne fonctionne pas correctement. ` +
-              `Erreur: ${testError instanceof Error ? testError.message : 'Inconnue'}`,
-              DataLocation.LOCAL,
-              'getAdapter'
-            );
-          }
-          
+          // CORRECTION: Accepter localStorage comme stockage local valide
+          console.log(`🛡️ Utilisation adaptateur local pour '${entityName}' (localStorage ou OPFS)`);
           return adapter;
         }
       }
@@ -88,16 +72,7 @@ export class HybridDataAdapter {
       // Pour les entités non-HDS, utiliser l'adaptateur local s'il existe
       if (adapter) return adapter;
       
-      // En production, pas de fallback cloud pour les données sensibles
-      if (isHDSEntity && !this.config.fallbackToCloud) {
-        throw new HybridStorageError(
-          `❌ CONFORMITÉ HDS VIOLÉE: Les données sensibles '${entityName}' ne peuvent pas être stockées dans le cloud. Le stockage local SQLite/OPFS est OBLIGATOIRE.`,
-          DataLocation.LOCAL,
-          'getAdapter'
-        );
-      }
-      
-      // Pour les entités non-HDS, fallback possible vers cloud
+      // Fallback vers cloud pour les entités non-HDS uniquement
       if (!isHDSEntity && this.config.fallbackToCloud) {
         console.warn(`Fallback to cloud for ${entityName} - local storage not available`);
         const cloudAdapter = this.cloudAdapters.get(entityName);
@@ -149,7 +124,7 @@ export class HybridDataAdapter {
       const adapter = await this.getAdapter<T>(entityName);
       const adapterLocation = adapter.getLocation();
       
-      // CORRECTION: Vérifier que pour les données HDS on utilise bien le stockage local
+      // CORRECTION: Permettre localStorage comme stockage local valide pour HDS
       const sensitiveHDSEntities = ['patients', 'appointments', 'consultations', 'invoices', 'medicalDocuments', 'quotes', 'treatmentHistory', 'patientRelationships'];
       const isHDSEntity = sensitiveHDSEntities.includes(entityName);
       
@@ -182,7 +157,6 @@ export class HybridDataAdapter {
       return result;
     } catch (error) {
       console.error(`Error in create for ${entityName}:`, error);
-      // CORRECTION: Ne pas masquer les erreurs HDS avec des fallbacks silencieux
       throw error;
     }
   }
