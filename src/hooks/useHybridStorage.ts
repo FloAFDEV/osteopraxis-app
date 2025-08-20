@@ -19,8 +19,11 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   const [status, setStatus] = useState<StorageStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Vérifier si c'est un utilisateur démo
-  const isDemoUser = user?.email === 'demo@patienthub.fr';
+  // Vérifier si c'est un utilisateur démo (même logique que AuthContext)
+  const isDemoUser = user?.email === 'demo@patienthub.com' || 
+                     user?.email?.startsWith('demo-') ||
+                     (user as any)?.is_demo === true ||
+                     (user as any)?.is_demo_user === true;
 
   const loadStatus = useCallback(async () => {
     try {

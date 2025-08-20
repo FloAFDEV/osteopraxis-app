@@ -36,6 +36,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
   const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('password');
   const navigate = useNavigate();
   const [skipped, setSkipped] = useState<boolean>(() => sessionStorage.getItem('hybrid-storage-skip') === 'true');
+  
   useEffect(() => {
     if (!isLoading && status) {
       if (!status.isConfigured && !skipped) {

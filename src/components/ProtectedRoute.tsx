@@ -35,18 +35,23 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Vérifier si c'est un utilisateur démo (tous les cas possibles)
+  // Vérifier si c'est un utilisateur démo (même logique que AuthContext)
   const isDemoUser = user.email === 'demo@patienthub.com' || 
                      user.email?.startsWith('demo-') ||
                      user.id === '999' || // ID factice pour démo
                      user.osteopathId === 999; // osteopathId factice pour démo
 
+  // Pour les utilisateurs démo : pas de stockage local requis
+  if (isDemoUser) {
+    return <>{children}</>;
+  }
+
   // Pour les utilisateurs connectés réels : vérifier le stockage local
-  if (!isDemoUser && status && !status.isConfigured) {
+  if (status && !status.isConfigured) {
     return <HybridStorageSetup />;
   }
 
-  // Pour les utilisateurs démo ou stockage configuré : afficher le contenu
+  // Pour le stockage configuré : utiliser le provider hybride
   return <HybridStorageProvider>{children}</HybridStorageProvider>;
 };
 
