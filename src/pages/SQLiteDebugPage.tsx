@@ -7,6 +7,7 @@ import { Layout } from "@/components/ui/layout";
 import { HybridStorageDiagnostic } from "@/components/debug/HybridStorageDiagnostic";
 import { SQLiteDiagnostic } from "@/components/debug/SQLiteDiagnostic";
 import { OPFSTestComponent } from "@/components/debug/OPFSTestComponent";
+import { LocalStorageTest } from "@/components/debug/LocalStorageTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Database, TestTube, Wrench } from "lucide-react";
@@ -27,11 +28,15 @@ const SQLiteDebugPage = () => {
           </CardHeader>
         </Card>
 
-        <Tabs defaultValue="opfs-test" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="local-test" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="local-test" className="flex items-center gap-2">
+              <TestTube className="w-4 h-4" />
+              Test Local CRUD
+            </TabsTrigger>
             <TabsTrigger value="opfs-test" className="flex items-center gap-2">
               <Wrench className="w-4 h-4" />
-              Test OPFS Complet
+              Test OPFS
             </TabsTrigger>
             <TabsTrigger value="hybrid" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
@@ -39,12 +44,12 @@ const SQLiteDebugPage = () => {
             </TabsTrigger>
             <TabsTrigger value="sqlite" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" />
-              Test SQLite Détaillé
+              SQLite Détaillé
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="opfs-test">
-            <OPFSTestComponent />
+          <TabsContent value="local-test">
+            <LocalStorageTest />
           </TabsContent>
 
           <TabsContent value="hybrid">
