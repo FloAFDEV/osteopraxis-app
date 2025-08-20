@@ -39,7 +39,6 @@ export class HybridDataAdapter {
     
     if (targetLocation === DataLocation.LOCAL || isHDSEntity) {
       const adapter = this.localAdapters.get(entityName);
-      if (adapter) return adapter;
       
       if (isHDSEntity) {
         // Vérifier si on est en mode démo via la session
@@ -53,25 +52,41 @@ export class HybridDataAdapter {
           if (cloudAdapter) return cloudAdapter;
         }
         
-        // EN MODE AUTHENTIFIÉ RÉEL: Vérifier si le stockage local est configuré
+        // EN MODE AUTHENTIFIÉ RÉEL: STOCKAGE LOCAL OBLIGATOIRE - AUCUN FALLBACK
         if (!isDemoMode) {
-          // Si le stockage local n'est pas configuré, permettre un fallback temporaire vers Supabase
-          // avec un avertissement de conformité
-          const hasLocalStorage = this.localAdapters.size > 0;
-          if (!hasLocalStorage) {
-            console.warn(`⚠️ AVERTISSEMENT CONFORMITÉ HDS: '${entityName}' utilise temporairement Supabase en attendant la configuration du stockage local sécurisé`);
-            const cloudAdapter = this.cloudAdapters.get(entityName);
-            if (cloudAdapter) return cloudAdapter;
+          if (!adapter) {
+            console.error(`❌ CONFORMITÉ HDS CRITIQUE: Aucun adaptateur local pour '${entityName}'`);
+            throw new HybridStorageError(
+              `❌ CONFORMITÉ HDS VIOLÉE: L'entité '${entityName}' DOIT être stockée localement. Veuillez configurer votre stockage local OPFS.`,
+              DataLocation.LOCAL,
+              'getAdapter'
+            );
           }
           
-          console.error(`❌ REFUS CONFORMITÉ HDS: '${entityName}' nécessite un stockage local sécurisé en mode authentifié`);
-          throw new HybridStorageError(
-            `❌ ERREUR CRITIQUE: Les données '${entityName}' nécessitent un stockage local sécurisé. Veuillez configurer votre stockage local.`,
-            DataLocation.LOCAL,
-            'getAdapter'
-          );
+          // Vérifier que l'adaptateur local n'est pas en mode fallback
+          console.log(`🛡️ Validation adaptateur local pour '${entityName}'...`);
+          
+          // Test de validation que l'adaptateur fonctionne en vrai local
+          try {
+            // Test simple pour s'assurer que ce n'est pas le fallback localStorage
+            await adapter.getAll();
+            console.log(`✅ Adaptateur local validé pour '${entityName}'`);
+          } catch (testError) {
+            console.error(`❌ Test adaptateur local échoué pour '${entityName}':`, testError);
+            throw new HybridStorageError(
+              `❌ CONFORMITÉ HDS: L'adaptateur local pour '${entityName}' ne fonctionne pas correctement. ` +
+              `Erreur: ${testError instanceof Error ? testError.message : 'Inconnue'}`,
+              DataLocation.LOCAL,
+              'getAdapter'
+            );
+          }
+          
+          return adapter;
         }
       }
+      
+      // Pour les entités non-HDS, utiliser l'adaptateur local s'il existe
+      if (adapter) return adapter;
       
       // En production, pas de fallback cloud pour les données sensibles
       if (isHDSEntity && !this.config.fallbackToCloud) {

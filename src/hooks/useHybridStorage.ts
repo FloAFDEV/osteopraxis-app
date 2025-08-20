@@ -58,13 +58,70 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
         return;
       }
       
-      console.log('🔧 Utilisateur réel - Initialisation stockage hybride...');
+      console.log('🔧 Utilisateur réel - Initialisation stockage hybride OBLIGATOIRE...');
+      
+      // FORCER l'initialisation OPFS AVANT tout le reste
+      console.log('🚨 ÉTAPE CRITIQUE: Test d\'initialisation OPFS SQLite...');
+      try {
+        const { getOPFSSQLiteService, checkOPFSSupport } = await import('@/services/sqlite/opfs-sqlite-service');
+        
+        // Vérifier support OPFS en premier
+        const opfsSupport = checkOPFSSupport();
+        console.log('🔍 Support OPFS détecté:', opfsSupport);
+        
+        if (!opfsSupport.supported) {
+          throw new Error(`OPFS non supporté: ${opfsSupport.details.join(', ')}`);
+        }
+        
+        // Forcer l'initialisation du service SQLite
+        console.log('⚡ Initialisation forcée du service SQLite OPFS...');
+        const sqliteService = await getOPFSSQLiteService();
+        
+        // Test de validation que SQLite fonctionne
+        console.log('🧪 Test de validation SQLite...');
+        await sqliteService.run('CREATE TABLE IF NOT EXISTS validation_test (id INTEGER PRIMARY KEY, data TEXT)');
+        await sqliteService.run('INSERT INTO validation_test (data) VALUES (?)', ['test_hds_compliance']);
+        const testResult = await sqliteService.query('SELECT * FROM validation_test WHERE data = ?', ['test_hds_compliance']);
+        await sqliteService.run('DROP TABLE IF EXISTS validation_test');
+        
+        if (!testResult || testResult.length === 0) {
+          throw new Error('Test de validation SQLite OPFS échoué');
+        }
+        
+        console.log('✅ SUCCÈS: SQLite OPFS opérationnel et testé');
+        
+      } catch (opfsError) {
+        console.error('❌ ÉCHEC CRITIQUE OPFS:', opfsError);
+        throw new Error(`❌ CONFORMITÉ HDS IMPOSSIBLE: ${opfsError instanceof Error ? opfsError.message : 'Erreur OPFS inconnue'}`);
+      }
+      
+      // Maintenant initialiser le gestionnaire hybride
       await hybridStorageManager.initialize();
       const storageStatus = await loadStatus();
       console.log('📊 Statut stockage après initialisation:', storageStatus);
+      
+      // Validation finale: le stockage local DOIT être disponible
+      if (!storageStatus?.localAvailable) {
+        throw new Error('❌ CONFORMITÉ HDS: Le stockage local sécurisé n\'est pas disponible');
+      }
+      
+      console.log('🎉 INITIALISATION RÉUSSIE: Stockage hybride HDS opérationnel');
+      
     } catch (error) {
-      console.error('Failed to initialize hybrid storage:', error);
-      toast.error('Erreur lors de l\'initialisation du stockage hybride');
+      console.error('❌ ÉCHEC INITIALISATION HYBRIDE:', error);
+      toast.error('❌ ERREUR CRITIQUE: Impossible d\'initialiser le stockage sécurisé HDS');
+      
+      // En cas d'échec, mettre un statut d'erreur
+      setStatus({
+        isConfigured: false,
+        isUnlocked: false,
+        localAvailable: false,
+        cloudAvailable: false,
+        dataClassification: {
+          local: ['patients', 'appointments', 'invoices'],
+          cloud: []
+        }
+      });
     } finally {
       setIsLoading(false);
     }
