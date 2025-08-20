@@ -423,8 +423,15 @@ class HybridStorageManager {
   private async checkLocalAvailability(): Promise<boolean> {
     try {
       const service = await getOPFSSQLiteService();
-      return service !== null;
-    } catch {
+      
+      // Test complet: vérifier que le service fonctionne vraiment en OPFS et pas en fallback
+      const testResult = await service.query('SELECT sqlite_version() as version');
+      const isRealSQLite = testResult && testResult.length > 0;
+      
+      console.log('🔍 Test disponibilité stockage local - SQLite version:', testResult);
+      return service !== null && isRealSQLite;
+    } catch (error) {
+      console.error('❌ Test disponibilité stockage local échoué:', error);
       return false;
     }
   }

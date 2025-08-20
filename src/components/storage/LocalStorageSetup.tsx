@@ -162,9 +162,32 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
   };
 
   const testStorageSetup = async (config: LocalStorageConfig) => {
-    // Simulation du test de configuration
-    // Dans la vraie implémentation, ceci initialiserait le service SQLite avec chiffrement
-    return new Promise(resolve => setTimeout(resolve, 1000));
+    // VRAI test d'initialisation OPFS SQLite
+    try {
+      console.log('🧪 Test réel d\'initialisation OPFS SQLite...');
+      
+      // Forcer l'accès OPFS et la création de base de données
+      const { getOPFSSQLiteService } = await import('@/services/sqlite/opfs-sqlite-service');
+      const sqliteService = await getOPFSSQLiteService();
+      
+      // Test d'écriture pour valider le stockage
+      await sqliteService.run('CREATE TABLE IF NOT EXISTS test_setup (id INTEGER PRIMARY KEY, data TEXT)');
+      await sqliteService.run('INSERT INTO test_setup (data) VALUES (?)', ['setup_validation']);
+      const result = await sqliteService.query('SELECT * FROM test_setup WHERE data = ?', ['setup_validation']);
+      
+      if (!result || result.length === 0) {
+        throw new Error('Test de validation SQLite échoué');
+      }
+      
+      // Nettoyer le test
+      await sqliteService.run('DROP TABLE IF EXISTS test_setup');
+      
+      console.log('✅ Test d\'initialisation OPFS SQLite réussi');
+      return true;
+    } catch (error) {
+      console.error('❌ Test d\'initialisation OPFS SQLite échoué:', error);
+      throw new Error(`Échec du test de stockage local: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
   };
 
   const getProgressPercentage = () => {
