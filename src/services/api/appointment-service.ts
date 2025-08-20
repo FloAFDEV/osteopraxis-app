@@ -77,7 +77,7 @@ export const appointmentService = {
           return [];
         }
 
-        console.log("appointmentService.getAppointments: Using Hybrid storage (Supabase in demo mode)");
+        console.log("appointmentService.getAppointments: Using Hybrid storage");
         const result = await hybridDataManager.get<Appointment>('appointments');
         console.log("appointmentService.getAppointments: Hybrid returned", result.length, "appointments");
         return result;

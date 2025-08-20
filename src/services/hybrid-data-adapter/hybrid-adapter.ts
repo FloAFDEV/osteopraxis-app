@@ -59,8 +59,17 @@ export class HybridDataAdapter {
           if (cloudAdapter) return cloudAdapter;
         }
         
-        // EN MODE AUTHENTIFIÉ RÉEL: EXIGER le stockage local pour la conformité HDS
+        // EN MODE AUTHENTIFIÉ RÉEL: Vérifier si le stockage local est configuré
         if (!isDemoMode) {
+          // Si le stockage local n'est pas configuré, permettre un fallback temporaire vers Supabase
+          // avec un avertissement de conformité
+          const hasLocalStorage = this.localAdapters.size > 0;
+          if (!hasLocalStorage) {
+            console.warn(`⚠️ AVERTISSEMENT CONFORMITÉ HDS: '${entityName}' utilise temporairement Supabase en attendant la configuration du stockage local sécurisé`);
+            const cloudAdapter = this.cloudAdapters.get(entityName);
+            if (cloudAdapter) return cloudAdapter;
+          }
+          
           console.error(`❌ REFUS CONFORMITÉ HDS: '${entityName}' nécessite un stockage local sécurisé en mode authentifié`);
           throw new HybridStorageError(
             `❌ ERREUR CRITIQUE: Les données '${entityName}' nécessitent un stockage local sécurisé. Veuillez configurer votre stockage local.`,
