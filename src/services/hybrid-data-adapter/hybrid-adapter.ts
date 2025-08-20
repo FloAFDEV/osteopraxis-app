@@ -47,7 +47,7 @@ export class HybridDataAdapter {
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { session } } = await supabase.auth.getSession();
         
-        const isDemoMode = session?.user?.email === 'demo@patienthub.com' ||
+        const isDemoMode = session?.user?.email === 'demo@patienthub.fr' ||
                           session?.user?.email?.startsWith('demo-') ||
                           session?.user?.user_metadata?.is_demo === true ||
                           session?.user?.user_metadata?.is_demo_user === true;
@@ -59,7 +59,7 @@ export class HybridDataAdapter {
           if (cloudAdapter) return cloudAdapter;
         }
         
-        // En mode authentifié RÉEL, EXIGER le stockage local sécurisé
+        // EN MODE AUTHENTIFIÉ RÉEL: EXIGER le stockage local pour la conformité HDS
         if (!isDemoMode) {
           console.error(`❌ REFUS CONFORMITÉ HDS: '${entityName}' nécessite un stockage local sécurisé en mode authentifié`);
           throw new HybridStorageError(
@@ -140,7 +140,7 @@ export class HybridDataAdapter {
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { session } } = await supabase.auth.getSession();
         
-        const isDemoMode = session?.user?.email === 'demo@patienthub.com' || 
+        const isDemoMode = session?.user?.email === 'demo@patienthub.fr' || 
                           session?.user?.email?.startsWith('demo-') ||
                           session?.user?.user_metadata?.is_demo === true ||
                           session?.user?.user_metadata?.is_demo_user === true;

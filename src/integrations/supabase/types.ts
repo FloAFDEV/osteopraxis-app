@@ -2031,6 +2031,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      enhanced_cleanup_system: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       generate_invitation_code: {
         Args: Record<PropertyKey, never>
         Returns: string

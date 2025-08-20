@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDemo } from '@/contexts/DemoContext';
 
 interface GuideStep {
@@ -61,14 +61,24 @@ export const DemoGuide: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDemoMode } = useDemo();
 
-  // Masquer le guide si pas en mode démo
   useEffect(() => {
-    if (!isDemoMode) {
-      setIsVisible(false);
+    if (!isDemoMode) return;
+
+    // Rediriger vers le dashboard en mode démo
+    if (location.pathname !== '/dashboard') {
+      navigate('/dashboard');
+      return;
     }
-  }, [isDemoMode]);
+
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [isDemoMode, location.pathname, navigate]);
 
   if (!isVisible || !isDemoMode) {
     return null;
