@@ -20,7 +20,7 @@ const ConfirmDeletePatientModal: React.FC<ConfirmDeletePatientModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-6 md:p-8">
-      <Card className="w-full sm:w-4/5 md:w-2/3 lg:w-1/2 max-w-2xl border-4 border-red-600 dark:border-red-800">
+<Card className="w-full sm:w-4/5 md:w-2/3 lg:w-1/2 max-w-2xl h-auto max-h-[90vh] overflow-y-auto border-4 border-red-600 dark:border-red-800">
         <CardHeader>
           <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-white">
             Suppression des Données Patient
