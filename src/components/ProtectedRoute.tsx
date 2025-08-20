@@ -16,8 +16,13 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   const { status, isLoading: storageLoading } = useHybridStorage();
   const location = useLocation();
 
+  console.log('🔍 ProtectedRoute - User:', user);
+  console.log('🔍 ProtectedRoute - Storage status:', status);
+  console.log('🔍 ProtectedRoute - Storage loading:', storageLoading);
+
   // Afficher un loader pendant la vérification d'authentification et stockage
   if (loading || storageLoading) {
+    console.log('⏳ ProtectedRoute - Loading...');
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -27,11 +32,13 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
 
   // Rediriger vers login si pas authentifié
   if (!isAuthenticated || !user) {
+    console.log('🚪 ProtectedRoute - Not authenticated, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Vérifier le rôle si requis
   if (requireRole && user.role !== requireRole) {
+    console.log('🚫 ProtectedRoute - Wrong role, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -41,24 +48,17 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
                      user.id === '999' || // ID factice pour démo
                      user.osteopathId === 999; // osteopathId factice pour démo
 
-  console.log('🔍 ProtectedRoute - User:', { email: user.email, id: user.id, osteopathId: user.osteopathId, isDemoUser });
-  console.log('🔍 ProtectedRoute - Storage status:', status);
+  console.log('🔍 ProtectedRoute - isDemoUser:', isDemoUser);
 
-  // Pour les utilisateurs démo : pas de stockage local requis
-  if (isDemoUser) {
-    console.log('🎭 Utilisateur démo - Bypass stockage local');
-    return <>{children}</>;
-  }
-
-  // Pour les utilisateurs connectés réels : vérifier le stockage local
-  if (!status || !status.isConfigured) {
-    console.log('🔧 Stockage local non configuré - Affichage setup');
+  // FORCER L'AFFICHAGE DU SETUP POUR UTILISATEURS RÉELS
+  if (!isDemoUser) {
+    console.log('🔧 Utilisateur réel détecté - FORCER affichage setup');
     return <HybridStorageSetup />;
   }
 
-  // Pour le stockage configuré : utiliser le provider hybride
-  console.log('✅ Stockage configuré - Utilisation provider hybride');
-  return <HybridStorageProvider>{children}</HybridStorageProvider>;
+  // Pour les utilisateurs démo : pas de stockage local requis
+  console.log('🎭 Utilisateur démo - Bypass stockage local');
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
