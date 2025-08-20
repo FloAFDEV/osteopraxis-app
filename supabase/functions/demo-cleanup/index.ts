@@ -1,70 +1,80 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-Deno.serve(async (req) => {
-  // Handle CORS preflight requests
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('🧹 Starting demo data cleanup...')
-
-    // Appeler la fonction de nettoyage des données de démo
-    const { data, error } = await supabase.rpc('cleanup_expired_demo_data')
-
-    if (error) {
-      console.error('❌ Error during demo cleanup:', error)
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: error.message,
-          timestamp: new Date().toISOString()
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+    console.log('🧹 Démarrage du nettoyage automatique des données de démonstration...')
+    
+    // Appeler la fonction de nettoyage de la base de données
+    const { data: cleanupResult, error: cleanupError } = await supabase
+      .rpc('cleanup_expired_demo_sessions')
+    
+    if (cleanupError) {
+      console.error('❌ Erreur lors du nettoyage:', cleanupError)
+      throw cleanupError
     }
-
-    const deletedCount = data || 0
-    console.log(`✅ Demo cleanup completed. Deleted ${deletedCount} records`)
-
+    
+    console.log('📊 Résultats du nettoyage:', cleanupResult)
+    
+    // Nettoyer aussi les données locales expirées (localStorage) via une requête de nettoyage général
+    const { data: generalCleanup, error: generalError } = await supabase
+      .rpc('enhanced_cleanup_system')
+    
+    if (generalError) {
+      console.warn('⚠️ Avertissement nettoyage général:', generalError)
+    }
+    
+    const finalResult = {
+      timestamp: new Date().toISOString(),
+      database_cleanup: cleanupResult || [],
+      general_cleanup: generalCleanup || 0,
+      status: 'success',
+      message: 'Nettoyage automatique des données de démonstration terminé'
+    }
+    
+    console.log('✅ Nettoyage terminé avec succès:', finalResult)
+    
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        deletedCount,
-        message: `Successfully cleaned up ${deletedCount} expired demo records`,
-        timestamp: new Date().toISOString()
-      }),
+      JSON.stringify(finalResult),
       { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
       }
     )
-
+    
   } catch (error) {
-    console.error('❌ Unexpected error during demo cleanup:', error)
+    console.error('❌ Erreur critique lors du nettoyage:', error)
     
     return new Response(
       JSON.stringify({ 
-        success: false, 
-        error: error.message,
-        timestamp: new Date().toISOString()
+        error: 'Erreur lors du nettoyage des données de démonstration',
+        details: error.message,
+        timestamp: new Date().toISOString(),
+        status: 'error'
       }),
       { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        status: 500,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
       }
     )
   }
