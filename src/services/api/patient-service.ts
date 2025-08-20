@@ -168,11 +168,41 @@ export const patientService = {
 
     if (USE_SUPABASE) {
       try {
+        console.log(`🗑️ Tentative de suppression patient ID: ${id}`);
         const ok = await hybridDataManager.delete('patients', id);
+        console.log(`✅ Suppression patient ${id} réussie:`, ok);
         return ok;
       } catch (error) {
-        console.error("Erreur Hybrid deletePatient:", error);
-        throw error;
+        console.error("❌ Erreur Hybrid deletePatient:", error);
+        
+        // Si c'est une erreur de conformité HDS, essayer la suppression directe localStorage
+        if ((error as any)?.message?.includes('CONFORMITÉ') || (error as any)?.message?.includes('stockage local sécurisé')) {
+          console.log(`🔄 Tentative de suppression directe localStorage pour patient ${id}`);
+          try {
+            // Accès direct au localStorage pour la suppression
+            const storageKey = 'patient-hub-local-hds-data';
+            const localData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            
+            if (localData.patients) {
+              const patientIndex = localData.patients.findIndex((p: any) => p.id === id || p.id === String(id));
+              if (patientIndex !== -1) {
+                localData.patients.splice(patientIndex, 1);
+                localStorage.setItem(storageKey, JSON.stringify(localData));
+                console.log(`✅ Patient ${id} supprimé directement du localStorage`);
+                return true;
+              } else {
+                console.warn(`⚠️ Patient ${id} non trouvé dans localStorage`);
+                return false;
+              }
+            }
+            return false;
+          } catch (localError) {
+            console.error("❌ Erreur suppression directe localStorage:", localError);
+            throw error; // Relancer l'erreur originale
+          }
+        } else {
+          throw error;
+        }
       }
     }
 
