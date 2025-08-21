@@ -932,24 +932,6 @@ export function MedicalInfoTab({
 				<h3 className="text-lg font-semibold">Dossier médical</h3>
 				<div className="fixed top-20 right-16 z-50 flex flex-col md:flex-row gap-2 items-end md:items-center">
 					<Button
-						onClick={handleEditClick}
-						variant={showEditPatientForm ? "outline" : "default"}
-						className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 hover:text-white text-white dark:bg-white dark:text-slate-900 dark:hover:bg-white/80 text-sm md:text-base px-3 md:px-4 py-2"
-						disabled={isUpdating}
-					>
-						{showEditPatientForm ? (
-							<>
-								<X className="h-4 w-4 bg-red-700 hover:text-white dark:text-white" />
-								Annuler
-							</>
-						) : (
-							<>
-								<Edit className="h-4 w-4" />
-								{isUpdating ? "Mise à jour..." : "Modifier"}
-							</>
-						)}
-					</Button>
-					<Button
 						onClick={handleNewAppointmentClick}
 						variant={showNewAppointmentForm ? "outline" : "default"}
 						className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-white/80 hover:text-white text-sm md:text-base px-3 md:px-4 py-2"

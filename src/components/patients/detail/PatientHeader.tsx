@@ -9,7 +9,7 @@ interface PatientHeaderProps {
 
 export function PatientHeader({ patientId }: PatientHeaderProps) {
 	return (
-		<div className="flex justify-start items-start p-4">
+		<div className="flex justify-between items-start p-4">
 			<div className="flex items-center gap-2">
 				<Button variant="outline" size="sm" asChild>
 					<Link to="/patients">
@@ -18,6 +18,9 @@ export function PatientHeader({ patientId }: PatientHeaderProps) {
 					</Link>
 				</Button>
 			</div>
+			<Button variant="outline" size="sm" asChild>
+				<Link to={`/patients/${patientId}/edit`}>Modifier</Link>
+			</Button>
 		</div>
 	);
 }
