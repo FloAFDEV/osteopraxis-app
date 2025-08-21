@@ -51,7 +51,7 @@ import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
-import { MemoryStorageAlert } from "@/components/ui/memory-storage-alert";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,7 +74,7 @@ function App() {
                   <AuthProvider>
                     <div className="min-h-screen bg-background">
                       <DemoDataManager />
-                      <MemoryStorageAlert />
+                      
                       <Routes>
                         {/* Routes publiques */}
                         <Route path="/" element={<LandingPage />} />
