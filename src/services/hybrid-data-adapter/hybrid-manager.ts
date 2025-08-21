@@ -78,20 +78,12 @@ export class HybridDataManager {
           this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
           
           // Données HDS sensibles -> OBLIGATOIREMENT stockage local (conformité française)
-          try {
-            const localAdapters = await initializeLocalAdapters();
-            this.adapter.registerLocalAdapter('patients', localAdapters.patients);
-            this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
-            this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-            console.log('✅ Configuration hybride conforme HDS : données sensibles en local uniquement');
-          } catch (localError) {
-            console.error('❌ ERREUR CONFORMITÉ HDS: Stockage local obligatoire pour données sensibles');
-            console.warn('🔄 Fallback: Toutes données en cloud temporairement');
-            // Fallback temporaire en cas d'échec du local storage
-            this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
-            this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
-            this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
-          }
+          // CORRECTION: Plus de try-catch ici pour forcer l'utilisation du stockage persistant IndexedDB
+          const localAdapters = await initializeLocalAdapters();
+          this.adapter.registerLocalAdapter('patients', localAdapters.patients);
+          this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
+          this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+          console.log('✅ Configuration hybride conforme HDS : données sensibles en local uniquement (IndexedDB persistant)');
         } catch (permissionError) {
           console.error('❌ PERMISSIONS SUPABASE: Pas d\'accès aux données cloud');
           console.log('🔄 Fallback vers mode démo temporaire en raison des permissions');
