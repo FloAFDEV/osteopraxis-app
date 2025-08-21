@@ -281,15 +281,25 @@ const EditPatientPage = () => {
 								</div>
 							)}
 					</div>
-					<Button
-						variant="destructive"
-						onClick={() => setShowDeleteModal(true)}
-						className="flex items-center gap-2"
-						size="sm"
-					>
-						<Trash className="mr-1 h-4 w-4" />
-						Supprimer
-					</Button>
+					<div className="flex gap-2">
+						<Button
+							variant="outline"
+							onClick={() => navigate(`/patients/${patient.id}`)}
+							className="flex items-center gap-2"
+							size="sm"
+						>
+							Annuler
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={() => setShowDeleteModal(true)}
+							className="flex items-center gap-2"
+							size="sm"
+						>
+							<Trash className="mr-1 h-4 w-4" />
+							Supprimer
+						</Button>
+					</div>
 				</div>
 				{patient && (
 					<PatientForm

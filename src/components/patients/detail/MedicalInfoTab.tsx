@@ -51,7 +51,6 @@ export function MedicalInfoTab({
 }: MedicalInfoTabProps) {
 	const [isChild, setIsChild] = useState<boolean>(false);
 	const [showNewAppointmentForm, setShowNewAppointmentForm] = useState(false);
-	const [showEditPatientForm, setShowEditPatientForm] = useState(false);
 	const [isUpdating, setIsUpdating] = useState(false);
 
 	const lastAppointment =
@@ -874,7 +873,6 @@ export function MedicalInfoTab({
 			try {
 				setIsUpdating(true);
 				await onPatientUpdated(updatedData);
-				setShowEditPatientForm(false);
 				toast.success("Informations mises à jour avec succès !");
 			} catch (error) {
 				console.error("Error updating patient:", error);
@@ -885,19 +883,8 @@ export function MedicalInfoTab({
 		}
 	};
 
-	// Gestionnaire pour le bouton Modifier
-	const handleEditClick = () => {
-		if (showNewAppointmentForm) {
-			setShowNewAppointmentForm(false);
-		}
-		setShowEditPatientForm(!showEditPatientForm);
-	};
-
 	// Gestionnaire pour le bouton Nouvelle séance
 	const handleNewAppointmentClick = () => {
-		if (showEditPatientForm) {
-			setShowEditPatientForm(false);
-		}
 		setShowNewAppointmentForm(!showNewAppointmentForm);
 	};
 
@@ -950,29 +937,6 @@ export function MedicalInfoTab({
 					</Button>
 				</div>
 			</div>
-
-			{/* Formulaire de modification du patient */}
-			{showEditPatientForm && (
-				<Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
-					<CardHeader>
-						<CardTitle className="text-lg flex items-center gap-2">
-							<Edit className="h-5 w-5 text-amber-500" />
-							Modifier les informations de {
-								patient.firstName
-							}{" "}
-							{patient.lastName}
-						</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<PatientForm
-							patient={patient}
-							onSave={handlePatientUpdate}
-							selectedCabinetId={selectedCabinetId}
-							isLoading={isUpdating}
-						/>
-					</CardContent>
-				</Card>
-			)}
 
 			{/* Formulaire de nouvelle séance */}
 			{showNewAppointmentForm && (
