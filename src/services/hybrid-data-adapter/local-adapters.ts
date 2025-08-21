@@ -382,31 +382,25 @@ export function createLocalAdapters() {
 }
 
 /**
- * Initialise tous les adaptateurs locaux avec SQLite + OPFS
+ * Initialise tous les adaptateurs locaux avec IndexedDB persistant
+ * SIMPLIFIÉ: Utilise directement IndexedDB, pas de SQLite/OPFS
  */
 export async function initializeLocalAdapters() {
-  try {
-    console.log('🔄 Initializing SQLite local adapters with OPFS...');
-    
-    // Vérifier le support OPFS d'abord
-    if (!checkOPFSSupport().supported) {
-      console.warn('⚠️ OPFS not supported by browser - using localStorage fallback mode for HDS data');
-      return createLocalAdapters(); // Retourne les adaptateurs avec mode localStorage
-    }
-    
-    // Tenter d'initialiser le service SQLite
-    const service = await getOPFSSQLiteService();
-    if (!service) {
-      console.warn('⚠️ SQLite service not available - using localStorage fallback mode for HDS data');
-      return createLocalAdapters(); // Retourne les adaptateurs avec mode localStorage
-    }
-    
-    console.log('✅ SQLite local adapters initialized successfully');
-    return createLocalAdapters();
-  } catch (error) {
-    console.warn('⚠️ Failed to initialize SQLite local adapters - using localStorage fallback mode for HDS data:', error);
-    return createLocalAdapters(); // Retourne les adaptateurs avec mode localStorage même en cas d'erreur
-  }
+  console.log('🔄 Initialisation adaptateurs locaux avec IndexedDB persistant...');
+  
+  // FORCER le mode IndexedDB persistant pour tous les adaptateurs
+  const adapters = createLocalAdapters();
+  
+  // Forcer l'initialisation en mode IndexedDB persistant
+  (adapters.patients as any).fallbackToMemory = true;
+  (adapters.appointments as any).fallbackToMemory = true;
+  (adapters.invoices as any).fallbackToMemory = true;
+  
+  // Initialiser le stockage persistant
+  await realPersistentStorage.initialize();
+  
+  console.log('✅ Adaptateurs locaux IndexedDB persistant initialisés avec succès');
+  return adapters;
 }
 
 /**
