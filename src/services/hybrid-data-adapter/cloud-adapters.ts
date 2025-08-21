@@ -43,15 +43,37 @@ abstract class SupabaseAdapter<T> implements DataAdapter<T> {
         throw new Error('Session expirée');
       }
 
-      const { data, error } = await supabase
+      // SÉCURITÉ DÉMO: Filtrer les données selon le type d'utilisateur
+      const isDemoUser = session.user?.email === 'demo@patienthub.com' || 
+                        session.user?.email?.startsWith('demo-') ||
+                        session.user?.user_metadata?.is_demo === true;
+
+      // Pour les utilisateurs démo, ne montrer que les données démo
+      if (isDemoUser) {
+        console.log(`🎭 Mode démo: Filtrage des données ${this.tableName} pour ne montrer que les données démo`);
+        // @ts-ignore - Contournement pour éviter les erreurs TypeScript
+        const result = await supabase
+          .from(this.tableName as any)
+          .select('*')
+          .eq('is_demo_data', true);
+        
+        if (result.error) {
+          console.error(`Error in ${this.tableName} getAll (demo filter):`, result.error);
+          throw result.error;
+        }
+        return (result.data as unknown as T[]) || [];
+      }
+
+      // Utilisateur normal - toutes les données (selon RLS)
+      const normalResult = await supabase
         .from(this.tableName)
         .select('*');
       
-      if (error) {
-        console.error(`Error in ${this.tableName} getAll:`, error);
-        throw error;
+      if (normalResult.error) {
+        console.error(`Error in ${this.tableName} getAll:`, normalResult.error);
+        throw normalResult.error;
       }
-      return (data as unknown as T[]) || [];
+      return (normalResult.data as unknown as T[]) || [];
     } catch (error) {
       console.error(`Failed to getAll from ${this.tableName}:`, error);
       throw error;
@@ -59,14 +81,32 @@ abstract class SupabaseAdapter<T> implements DataAdapter<T> {
   }
 
   async getById(id: number | string): Promise<T | null> {
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error && error.code !== 'PGRST116') throw error;
-    return (data as unknown as T) || null;
+    try {
+      // SÉCURITÉ DÉMO: Filtrer les données selon le type d'utilisateur
+      const { data: { session } } = await supabase.auth.getSession();
+      const isDemoUser = session?.user?.email === 'demo@patienthub.com' || 
+                        session?.user?.email?.startsWith('demo-') ||
+                        session?.user?.user_metadata?.is_demo === true;
+
+      let query = supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('id', id);
+
+      // Pour les utilisateurs démo, ne montrer que les données démo
+      if (isDemoUser) {
+        // @ts-ignore - Contournement pour éviter les erreurs TypeScript
+        query = query.eq('is_demo_data', true);
+      }
+
+      const { data, error } = await query.single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return (data as unknown as T) || null;
+    } catch (error) {
+      console.error(`Failed to getById from ${this.tableName}:`, error);
+      throw error;
+    }
   }
 
   async create(data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
@@ -78,9 +118,24 @@ abstract class SupabaseAdapter<T> implements DataAdapter<T> {
         throw new Error('Session expirée');
       }
 
+      // SÉCURITÉ DÉMO: Marquer automatiquement les données comme démo si nécessaire
+      const isDemoUser = session.user?.email === 'demo@patienthub.com' || 
+                        session.user?.email?.startsWith('demo-') ||
+                        session.user?.user_metadata?.is_demo === true;
+
+      let createData = data as any;
+      if (isDemoUser) {
+        console.log(`🎭 Mode démo: Marquage automatique des données ${this.tableName} comme démo`);
+        createData = {
+          ...data,
+          is_demo_data: true,
+          demo_expires_at: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+        };
+      }
+
       const { data: result, error } = await supabase
         .from(this.tableName)
-        .insert([data as any])
+        .insert([createData])
         .select()
         .single();
       
