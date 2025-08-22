@@ -60,8 +60,10 @@ export const patientService = {
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
+    console.log("🏥 PatientService.createPatient - Début", patient);
     // Démo: données locales éphémères (pas d'appel Supabase)
     if (demoContext?.isDemoMode) {
+      console.log("🎭 Mode démo détecté dans createPatient");
       await delay(200);
       const now = new Date().toISOString();
       const nextId = Math.max(0, ...demoContext.demoData.patients.map((p: Patient) => p.id)) + 1;
@@ -78,7 +80,9 @@ export const patientService = {
       return toCreate;
     }
 
+    console.log("☁️ Mode Supabase détecté dans createPatient");
     if (USE_SUPABASE) {
+      console.log("🔧 Début traitement Supabase");
       try {
         // Forcer l'osteopathId via service existant puis créer en local sécurisé
         const osteopathId = await getCurrentOsteopathId();

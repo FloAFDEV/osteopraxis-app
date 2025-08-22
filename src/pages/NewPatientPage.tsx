@@ -57,6 +57,7 @@ const NewPatientPage = () => {
 	}
 
 	const handleAddPatient = async (patientData: any) => {
+		console.log("🚀 Début de handleAddPatient", patientData);
 		try {
 			setLoading(true);
 
@@ -161,22 +162,26 @@ const NewPatientPage = () => {
 				"Envoi du patient à l'API avec cabinetId:",
 				patientToCreate.cabinetId
 			);
+			console.log("📤 Appel api.createPatient avec:", patientToCreate);
 			const newPatient = await api.createPatient(patientToCreate);
-			console.log("Patient créé avec succès:", newPatient);
+			console.log("✅ Patient créé avec succès:", newPatient);
 
 			// Vérifier que le patient a bien un ID valide
 			if (!newPatient?.id) {
+				console.error("❌ Patient créé sans ID:", newPatient);
 				throw new Error("Le patient n'a pas été créé correctement - ID manquant");
 			}
 
+			console.log("🎉 Affichage du toast de succès");
 			toast.success(
 				`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`
 			);
 
+			console.log("🔄 Navigation vers la fiche patient:", `/patients/${newPatient.id}`);
 			// Navigation immédiate sans délai pour éviter les problèmes de synchronisation
 			navigate(`/patients/${newPatient.id}`);
 		} catch (error) {
-			console.error("Error adding patient:", error);
+			console.error("❌ Erreur complète dans handleAddPatient:", error);
 			if (
 				error instanceof Error &&
 				error.message.includes("duplicate key value")
@@ -190,6 +195,7 @@ const NewPatientPage = () => {
 				);
 			}
 		} finally {
+			console.log("🔄 setLoading(false)");
 			setLoading(false);
 		}
 	};
