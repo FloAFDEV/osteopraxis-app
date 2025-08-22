@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { hybridStorageManager, type StorageStatus } from '@/services/hybrid-storage-manager';
+import { nativeStorageManager, type NativeStorageStatus } from '@/services/native-file-storage/native-storage-manager';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UseHybridStorageReturn {
-  status: StorageStatus | null;
+  status: NativeStorageStatus | null;
   isLoading: boolean;
   isSetupRequired: boolean;
   isUnlocked: boolean;
@@ -16,7 +16,7 @@ interface UseHybridStorageReturn {
 
 export const useHybridStorage = (): UseHybridStorageReturn => {
   const { user } = useAuth();
-  const [status, setStatus] = useState<StorageStatus | null>(null);
+  const [status, setStatus] = useState<NativeStorageStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Vérifier si c'est un utilisateur démo (même logique que AuthContext)
@@ -27,7 +27,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
 
   const loadStatus = useCallback(async () => {
     try {
-      const storageStatus = await hybridStorageManager.getStorageStatus();
+      const storageStatus = await nativeStorageManager.getStatus();
       setStatus(storageStatus);
       return storageStatus;
     } catch (error) {
@@ -41,86 +41,64 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
     try {
       setIsLoading(true);
       
-      // En mode démo uniquement, utiliser le cloud
+      // En mode démo uniquement, bypass complet du stockage local
       if (isDemoUser) {
-        console.log('🎭 Utilisateur démo détecté - Stockage cloud');
+        console.log('🎭 Utilisateur démo détecté - Aucun stockage local requis');
         setStatus({
           isConfigured: true,
           isUnlocked: true,
           localAvailable: false,
-          cloudAvailable: true,
-          dataClassification: {
-            local: [],
-            cloud: ['appointments', 'patients', 'invoices']
-          }
+          cloudAvailable: false, // Démo utilise localStorage uniquement
+          entitiesCount: {},
+          totalSize: 0
         });
         setIsLoading(false);
         return;
       }
       
-      console.log('🔧 Utilisateur réel - Initialisation stockage hybride OBLIGATOIRE...');
+      console.log('🔧 Utilisateur réel - Initialisation stockage natif obligatoire...');
       
-      // FORCER l'initialisation OPFS AVANT tout le reste
-      console.log('🚨 ÉTAPE CRITIQUE: Test d\'initialisation OPFS SQLite...');
-      try {
-        const { getOPFSSQLiteService, checkOPFSSupport } = await import('@/services/sqlite/opfs-sqlite-service');
-        
-        // Vérifier support OPFS en premier
-        const opfsSupport = checkOPFSSupport();
-        console.log('🔍 Support OPFS détecté:', opfsSupport);
-        
-        if (!opfsSupport.supported) {
-          throw new Error(`OPFS non supporté: ${opfsSupport.details.join(', ')}`);
-        }
-        
-        // Forcer l'initialisation du service SQLite
-        console.log('⚡ Initialisation forcée du service SQLite OPFS...');
-        const sqliteService = await getOPFSSQLiteService();
-        
-        // Test de validation que SQLite fonctionne
-        console.log('🧪 Test de validation SQLite...');
-        await sqliteService.run('CREATE TABLE IF NOT EXISTS validation_test (id INTEGER PRIMARY KEY, data TEXT)');
-        await sqliteService.run('INSERT INTO validation_test (data) VALUES (?)', ['test_hds_compliance']);
-        const testResult = await sqliteService.query('SELECT * FROM validation_test WHERE data = ?', ['test_hds_compliance']);
-        await sqliteService.run('DROP TABLE IF EXISTS validation_test');
-        
-        if (!testResult || testResult.length === 0) {
-          throw new Error('Test de validation SQLite OPFS échoué');
-        }
-        
-        console.log('✅ SUCCÈS: SQLite OPFS opérationnel et testé');
-        
-      } catch (opfsError) {
-        console.error('❌ ÉCHEC CRITIQUE OPFS:', opfsError);
-        throw new Error(`❌ CONFORMITÉ HDS IMPOSSIBLE: ${opfsError instanceof Error ? opfsError.message : 'Erreur OPFS inconnue'}`);
+      // Vérifier le support du stockage natif
+      const support = nativeStorageManager.checkSupport();
+      console.log('🔍 Support stockage natif:', support);
+      
+      if (!support.supported) {
+        throw new Error(`❌ CONFORMITÉ HDS IMPOSSIBLE: ${support.details.join(', ')}`);
       }
       
-      // Maintenant initialiser le gestionnaire hybride
-      await hybridStorageManager.initialize();
-      const storageStatus = await loadStatus();
-      console.log('📊 Statut stockage après initialisation:', storageStatus);
+      // Vérifier si déjà configuré
+      const isConfigured = nativeStorageManager.isConfiguredFromStorage();
       
-      // Validation finale: le stockage local DOIT être disponible
-      if (!storageStatus?.localAvailable) {
-        throw new Error('❌ CONFORMITÉ HDS: Le stockage local sécurisé n\'est pas disponible');
+      if (!isConfigured) {
+        console.log('⚙️ Stockage natif non configuré - Configuration requise');
+        setStatus({
+          isConfigured: false,
+          isUnlocked: false,
+          localAvailable: false,
+          cloudAvailable: true,
+          entitiesCount: {},
+          totalSize: 0
+        });
+      } else {
+        console.log('✅ Stockage natif déjà configuré');
+        const storageStatus = await loadStatus();
+        console.log('📊 Statut stockage:', storageStatus);
       }
       
-      console.log('🎉 INITIALISATION RÉUSSIE: Stockage hybride HDS opérationnel');
+      console.log('🎉 INITIALISATION RÉUSSIE: Stockage natif opérationnel');
       
     } catch (error) {
-      console.error('❌ ÉCHEC INITIALISATION HYBRIDE:', error);
-      toast.error('❌ ERREUR CRITIQUE: Impossible d\'initialiser le stockage sécurisé HDS');
+      console.error('❌ ÉCHEC INITIALISATION STOCKAGE NATIF:', error);
+      toast.error('❌ ERREUR CRITIQUE: Impossible d\'initialiser le stockage local sécurisé');
       
       // En cas d'échec, mettre un statut d'erreur
       setStatus({
         isConfigured: false,
         isUnlocked: false,
         localAvailable: false,
-        cloudAvailable: false,
-        dataClassification: {
-          local: ['patients', 'appointments', 'invoices'],
-          cloud: []
-        }
+        cloudAvailable: true,
+        entitiesCount: {},
+        totalSize: 0
       });
     } finally {
       setIsLoading(false);
@@ -129,7 +107,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
 
   const unlock = useCallback(async (credential: string): Promise<boolean> => {
     try {
-      const success = await hybridStorageManager.unlockStorage(credential);
+      const success = await nativeStorageManager.unlock(credential);
       
       if (success) {
         await loadStatus();
@@ -145,7 +123,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   }, [loadStatus]);
 
   const lock = useCallback(() => {
-    hybridStorageManager.lockStorage();
+    nativeStorageManager.lock();
     setStatus(prev => prev ? { ...prev, isUnlocked: false } : null);
     toast.info('Stockage verrouillé');
   }, []);
@@ -174,7 +152,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
     status,
     isLoading,
     isSetupRequired: isDemoUser ? false : (status ? !status.isConfigured : true),
-    isUnlocked: isDemoUser ? true : hybridStorageManager.isStorageUnlocked(),
+    isUnlocked: isDemoUser ? true : (status?.isUnlocked || false),
     initialize,
     unlock,
     lock,

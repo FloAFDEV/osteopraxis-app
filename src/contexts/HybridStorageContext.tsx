@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { hybridStorageManager, type StorageConfig } from '@/services/hybrid-storage-manager';
+import { nativeStorageManager, type NativeStorageConfig } from '@/services/native-file-storage/native-storage-manager';
 import { LocalStorageSetup } from '@/components/storage/LocalStorageSetup';
 import { StorageUnlockPrompt } from '@/components/storage/StorageUnlockPrompt';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
@@ -10,7 +10,7 @@ interface HybridStorageContextType {
   isConfigured: boolean;
   isUnlocked: boolean;
   isLoading: boolean;
-  configureStorage: (config: StorageConfig) => Promise<void>;
+  configureStorage: (config: NativeStorageConfig) => Promise<void>;
   unlockStorage: (credential: string) => Promise<boolean>;
   lockStorage: () => void;
 }
@@ -58,22 +58,14 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     }
   }, [isLoading, status, skipped]);
 
-  const configureStorage = async (config: StorageConfig): Promise<void> => {
+  const configureStorage = async (config: NativeStorageConfig): Promise<void> => {
     try {
-      await hybridStorageManager.configureStorage(config);
+      await nativeStorageManager.configure(config);
       setShowSetup(false);
       setShowUnlock(false);
       await initialize();
       
-      // Vérifier si le stockage local fonctionne réellement
-      const { isUsingMemoryFallback } = await import('@/services/hybrid-data-adapter/local-adapters');
-      const usingMemory = isUsingMemoryFallback();
-      
-      if (usingMemory) {
-        toast.warning('Configuration terminée - Mode récupération actif (stockage temporaire)');
-      } else {
-        toast.success('Configuration de stockage local réussie !');
-      }
+      toast.success('Configuration de stockage local réussie !');
     } catch (error) {
       console.error('Storage configuration failed:', error);
       toast.error('Erreur lors de la configuration du stockage');

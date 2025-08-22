@@ -15,6 +15,9 @@ interface LocalStorageSetupProps {
 }
 
 interface LocalStorageConfig {
+  directoryHandle?: FileSystemDirectoryHandle;
+  encryptionKey?: string;
+  entities?: string[];
   storageLocation: string;
   securityMethod: 'pin' | 'password';
   credential: string;
