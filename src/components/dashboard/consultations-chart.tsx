@@ -73,8 +73,7 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 					</div>
 
 					<ChartContainer config={chartConfig} className="h-[225px]">
-						<ResponsiveContainer width="100%" height="100%">
-							<AreaChart data={data.consultationsLast12Months}>
+						<AreaChart data={data.consultationsLast12Months} width={598} height={225}>
 								<defs>
 									<linearGradient
 										id="consultationsGradient"
@@ -129,7 +128,6 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 									fill="url(#consultationsGradient)"
 								/>
 							</AreaChart>
-						</ResponsiveContainer>
 					</ChartContainer>
 				</div>
 
@@ -139,8 +137,7 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 						7 derniers jours
 					</h4>
 					<ChartContainer config={chartConfig} className="h-[225px]">
-						<ResponsiveContainer width="100%" height="100%">
-							<BarChart data={data.consultationsLast7Days}>
+						<BarChart data={data.consultationsLast7Days} width={598} height={225}>
 								<XAxis
 									dataKey="day"
 									axisLine={false}
@@ -168,7 +165,6 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 									radius={[2, 2, 0, 0]}
 								/>
 							</BarChart>
-						</ResponsiveContainer>
 					</ChartContainer>
 				</div>
 
