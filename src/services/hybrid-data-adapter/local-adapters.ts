@@ -107,7 +107,19 @@ class LocalPatientAdapter implements DataAdapter<any> {
 
   async getById(id: number | string): Promise<any | null> {
     if (this.fallbackToMemory) {
-      return await realPersistentStorage.getById('patients', String(id));
+      console.log(`🔍 Recherche patient ${id} dans IndexedDB persistant...`);
+      const result = await realPersistentStorage.getById('patients', String(id));
+      
+      if (!result) {
+        console.warn(`⚠️ Patient ${id} non trouvé dans IndexedDB`);
+        // Lister tous les patients pour débugger
+        const allPatients = await realPersistentStorage.getAll('patients');
+        console.log(`📋 ${allPatients.length} patients disponibles en IndexedDB:`, allPatients.map(p => ({ id: p.id, name: `${p.firstName} ${p.lastName}` })));
+      } else {
+        console.log(`✅ Patient ${id} trouvé en IndexedDB:`, { id: result.id, name: `${result.firstName} ${result.lastName}` });
+      }
+      
+      return result;
     }
     
     try {
