@@ -367,8 +367,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 									};
 									setUser(userWithRole);
 					// Navigation après connexion réussie
-					if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-						// Redirection immédiate basée sur le rôle
+					if (event === 'SIGNED_IN') {
+						// Redirection uniquement lors d'une nouvelle connexion
 						if (userWithRole.role === "ADMIN") {
 							navigate("/admin/dashboard", { replace: true });
 							console.log("🔄 Redirection vers admin dashboard");
