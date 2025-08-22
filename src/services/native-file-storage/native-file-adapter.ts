@@ -21,6 +21,11 @@ export class NativeFileAdapter {
 
   constructor(private entityName: string) {}
 
+  // Générer un ID compatible avec PostgreSQL (max 2^31-1 = 2147483647)
+  private generateSafeId(): number {
+    return Math.floor(Math.random() * 2000000000) + 1;
+  }
+
   /**
    * Initialiser le stockage natif
    */
@@ -101,7 +106,7 @@ export class NativeFileAdapter {
       throw new Error('Adaptateur non initialisé');
     }
 
-    const id = data.id || Date.now().toString();
+    const id = data.id || this.generateSafeId();
     const record = { ...data, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     
     try {

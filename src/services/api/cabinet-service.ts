@@ -3,52 +3,25 @@ import { Cabinet } from "@/types";
 import { delay, USE_SUPABASE } from "./config";
 import { supabaseCabinetService } from "../supabase-api/cabinet";
 import { osteopathCabinetService } from "../supabase-api/osteopath-cabinet-service";
+import { cabinetCache } from "../cache/cabinet-cache";
 
 // Hook pour accéder au contexte démo depuis les services
 let demoContext: any = null;
 export const setDemoContext = (context: any) => {
   demoContext = context;
+  // Aussi passer le contexte au cache
+  cabinetCache.setDemoContext(context);
 };
 
 export const cabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
-    // Vérifier d'abord si on est en mode démo
-    if (demoContext?.isDemoMode) {
-      console.log("cabinetService.getCabinets: Using demo data");
-      await delay(300);
-      return [...demoContext.demoData.cabinets];
-    }
-    
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseCabinetService.getCabinets();
-      } catch (error) {
-        console.error("Erreur Supabase getCabinets:", error);
-      }
-    }
-    
-    await delay(300);
-    return [];
+    // Utiliser le cache global en premier
+    return await cabinetCache.getCabinets();
   },
 
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
-    // Vérifier d'abord si on est en mode démo
-    if (demoContext?.isDemoMode) {
-      console.log("cabinetService.getCabinetById: Using demo data for ID", id);
-      await delay(200);
-      return demoContext.demoData.cabinets.find((cabinet: any) => cabinet.id === id);
-    }
-    
-    if (USE_SUPABASE) {
-      try {
-        return await supabaseCabinetService.getCabinetById(id);
-      } catch (error) {
-        console.error("Erreur Supabase getCabinetById:", error);
-      }
-    }
-    
-    await delay(200);
-    return undefined;
+    // Utiliser le cache global en premier
+    return await cabinetCache.getCabinetById(id);
   },
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
@@ -64,6 +37,9 @@ export const cabinetService = {
           );
         }
         
+        // Invalider le cache après création
+        cabinetCache.invalidate();
+        
         return newCabinet;
       } catch (error) {
         console.error("Erreur Supabase createCabinet:", error);
@@ -78,6 +54,9 @@ export const cabinetService = {
   async updateCabinet(id: number, cabinet: Partial<Cabinet>): Promise<Cabinet> {
     if (USE_SUPABASE) {
       try {
+        // Invalider le cache après mise à jour
+        cabinetCache.invalidate(id);
+        
         return await supabaseCabinetService.updateCabinet(id, cabinet);
       } catch (error) {
         console.error("Erreur Supabase updateCabinet:", error);
@@ -92,6 +71,9 @@ export const cabinetService = {
   async deleteCabinet(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
+        // Invalider le cache après suppression
+        cabinetCache.invalidate(id);
+        
         await supabaseCabinetService.deleteCabinet(id);
         return true;
       } catch (error) {

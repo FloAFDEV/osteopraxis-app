@@ -13,6 +13,11 @@ class PersistentLocalStorage {
   private version = 1;
   private db: IDBDatabase | null = null;
 
+  // Générer un ID compatible avec PostgreSQL (max 2^31-1 = 2147483647)
+  private generateSafeId(): number {
+    return Math.floor(Math.random() * 2000000000) + 1;
+  }
+
   async initialize(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
@@ -45,7 +50,7 @@ class PersistentLocalStorage {
       const transaction = this.db!.transaction([tableName], 'readwrite');
       const store = transaction.objectStore(tableName);
       
-      const record = { ...data, id: data.id || Date.now() };
+      const record = { ...data, id: data.id || this.generateSafeId() };
       const request = store.add(record);
       
       request.onerror = () => reject(request.error);
