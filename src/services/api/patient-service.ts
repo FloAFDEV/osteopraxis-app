@@ -18,18 +18,22 @@ export const patientService = {
       return [...demoContext.demoData.patients];
     }
 
+    // Utilisateur connecté: stockage hybride avec fallback Supabase
     if (USE_SUPABASE) {
       try {
-        // Route via stockage local hybride (HDS)
         return await hybridDataManager.get<Patient>('patients');
       } catch (error) {
         console.error("Erreur Hybrid getPatients:", error);
-        // Fallback pour éviter les erreurs bloquantes
-        return [];
+        // Fallback vers Supabase
+        try {
+          return await supabasePatientService.getPatients();
+        } catch (supabaseError) {
+          console.error("Erreur Supabase getPatients:", supabaseError);
+          return [];
+        }
       }
     }
 
-    // Pas de mode démo et Supabase désactivé
     return [];
   },
 
@@ -45,25 +49,30 @@ export const patientService = {
       return demoContext.demoData.patients.find((patient: any) => patient.id === id);
     }
 
+    // Utilisateur connecté: stockage hybride avec fallback Supabase
     if (USE_SUPABASE) {
       try {
         const res = await hybridDataManager.getById<Patient>('patients', id);
-        return res || undefined;
+        if (res) return res;
       } catch (error) {
         console.error("Erreur Hybrid getPatientById:", error);
+      }
+      
+      // Fallback vers Supabase si pas trouvé en local
+      try {
+        return await supabasePatientService.getPatientById(id);
+      } catch (supabaseError) {
+        console.error("Erreur Supabase getPatientById:", supabaseError);
         return undefined;
       }
     }
 
-    // Pas de mode démo et Supabase désactivé
     return undefined;
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    console.log("🏥 PatientService.createPatient - Début", patient);
-    // Démo: données locales éphémères (pas d'appel Supabase)
+    // Démo: données locales éphémères
     if (demoContext?.isDemoMode) {
-      console.log("🎭 Mode démo détecté dans createPatient");
       await delay(200);
       const now = new Date().toISOString();
       const nextId = Math.max(0, ...demoContext.demoData.patients.map((p: Patient) => p.id)) + 1;
@@ -75,65 +84,37 @@ export const patientService = {
         osteopathId: (patient as any).osteopathId ?? demoContext.demoData.osteopath.id,
         cabinetId: (patient as any).cabinetId ?? demoContext.demoData.cabinets[0]?.id ?? null,
       } as Patient;
-      // Le provider crée l'id, on lui passe sans id pour respecter le contrat
       demoContext.addDemoPatient({ ...(toCreate as any), id: undefined });
       return toCreate;
     }
 
-    console.log("☁️ Mode Supabase détecté dans createPatient");
+    // Utilisateur connecté: d'abord stockage hybride, puis Supabase si échec
     if (USE_SUPABASE) {
-      console.log("🔧 Début traitement Supabase");
       try {
-        // Forcer l'osteopathId via service existant puis créer en local sécurisé
         const osteopathId = await getCurrentOsteopathId();
         if (!osteopathId) {
           throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
         }
+        
         const securedPatientData = {
           ...patient,
           osteopathId,
           cabinetId: patient.cabinetId || null,
         } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
         
-        console.log("Tentative de création patient avec stockage local sécurisé...");
+        // Tentative création via stockage hybride
         const created = await hybridDataManager.create<Patient>('patients', securedPatientData);
-        
-        // CORRECTION: Vérifier explicitement que le patient a été créé correctement
-        if (created && created.id) {
-          console.log("✅ Patient créé avec succès en stockage local sécurisé:", created.id);
-          
-          // S'assurer que le patient est immédiatement disponible pour la lecture
-          try {
-            const verification = await hybridDataManager.getById<Patient>('patients', created.id);
-            if (!verification) {
-              console.warn("⚠️ Patient créé mais non trouvé immédiatement, attente...");
-              // Petit délai pour laisser le temps au stockage
-              await new Promise(resolve => setTimeout(resolve, 100));
-            }
-          } catch (verifyError) {
-            console.warn("Erreur de vérification post-création:", verifyError);
-          }
-          
-          return created;
-        } else {
-          throw new Error("Échec de la création patient - données incomplètes");
-        }
+        return created;
       } catch (error) {
-        console.error("❌ Erreur création patient:", error);
-        
-        // CORRECTION: Messages d'erreur explicites pour éviter la confusion
+        console.error("Erreur Hybrid createPatient:", error);
+        // Si erreur de conformité HDS, relancer sans fallback
         if ((error as any)?.message?.includes('CONFORMITÉ')) {
-          // Erreur de conformité HDS - ne pas masquer
           throw new Error("❌ ERREUR CRITIQUE: Impossible de créer le patient en mode sécurisé. Le stockage local est requis pour la conformité HDS.");
-        } else if ((error as any)?.message?.includes('permission denied') || (error as any)?.code === '42501') {
-          throw new Error("❌ ERREUR D'AUTORISATION: Vous n'avez pas les permissions pour créer ce patient.");
-        } else {
-          throw new Error(`❌ ERREUR DE CRÉATION: ${(error as any)?.message || 'Échec de la création du patient'}`);
         }
+        throw error;
       }
     }
 
-    // Pas de mode démo et Supabase désactivé
     throw new Error("❌ Service patient indisponible");
   },
 
