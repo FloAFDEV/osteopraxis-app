@@ -277,9 +277,10 @@ const NewPatientPage = () => {
 				) : (
 					<div className="bg-card rounded-lg border shadow-sm p-3">
 						<PatientForm
-							onSave={handleAddPatient}
+							onSubmit={handleAddPatient}
 							emailRequired={false}
 							selectedCabinetId={selectedCabinetId}
+							isLoading={loading}
 						/>
 					</div>
 				)}

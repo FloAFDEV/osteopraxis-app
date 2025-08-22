@@ -197,6 +197,11 @@ export function PatientForm({
 	});
 
 	const handleSubmit = async (data: PatientFormValues) => {
+		console.log("🎯 PatientForm handleSubmit appelé", {
+			hasOnSubmit: !!onSubmit,
+			hasOnSave: !!onSave,
+			data: data
+		});
 		try {
 			// ✅ Données soumises
 
@@ -221,9 +226,13 @@ export function PatientForm({
 			console.log("Données patient avant création:", data);
 
 			if (onSubmit) {
+				console.log("📤 Appel de onSubmit");
 				await onSubmit(data);
 			} else if (onSave) {
+				console.log("📤 Appel de onSave");
 				await onSave(data);
+			} else {
+				console.error("❌ Aucune fonction onSubmit ou onSave fournie");
 			}
 		} catch (error) {
 			console.error("Error submitting form:", error);
