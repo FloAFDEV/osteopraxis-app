@@ -23,6 +23,7 @@ export const PersistentStorageTest: React.FC = () => {
       // 2. Créer un patient
       setTestResult(prev => prev + '2️⃣ Création patient...\n');
       const patientData = {
+        id: `patient_${Date.now()}`,
         firstName: patientName,
         lastName: 'Persistant',
         email: `${Date.now()}@vraimentlocal.fr`,

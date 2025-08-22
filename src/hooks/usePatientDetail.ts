@@ -18,12 +18,16 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['patient', patientId],
     queryFn: async () => {
-    const result = await api.getPatientById(patientId);
+      const result = await api.getPatientById(patientId);
+      if (!result) {
+        throw new Error(`Patient ${patientId} non trouvé`);
+      }
       return result;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
     retry: 3,
+    enabled: !!patientId && patientId > 0,
   });
 
   // Appointments with moderate stale time

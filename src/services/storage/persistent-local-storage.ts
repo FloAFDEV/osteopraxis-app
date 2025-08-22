@@ -109,6 +109,33 @@ class PersistentLocalStorage {
       request.onsuccess = () => resolve(true);
     });
   }
+
+  async clear(tableName: string): Promise<void> {
+    if (!this.db) await this.initialize();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([tableName], 'readwrite');
+      const store = transaction.objectStore(tableName);
+      const request = store.clear();
+      
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  }
+
+  async getStorageInfo(): Promise<{ tables: string[]; size: number }> {
+    if (!this.db) await this.initialize();
+    
+    const tables = Array.from(this.db!.objectStoreNames);
+    let totalSize = 0;
+    
+    for (const tableName of tables) {
+      const data = await this.getAll(tableName);
+      totalSize += new Blob([JSON.stringify(data)]).size;
+    }
+    
+    return { tables, size: totalSize };
+  }
 }
 
 let instance: PersistentLocalStorage | null = null;
