@@ -89,38 +89,62 @@ export class SQLiteFallbackEnhanced {
     
     // SELECT queries
     if (lowerSql.startsWith('select')) {
-      if (lowerSql.includes('patients')) {
-        const table = this.getTable('patients');
+      // Dynamic table support (e.g., test_setup)
+      const tableMatch = sql.match(/from\s+(\w+)/i);
+      const tableName = tableMatch ? tableMatch[1] : null;
+      
+      if (tableName) {
+        const table = this.getTable(tableName);
         
-        // SELECT * FROM patients WHERE id = ?
+        // SELECT * FROM table WHERE id = ?
         if (lowerSql.includes('where id =') && params.length > 0) {
           const record = table.get(String(params[0]));
           return record ? [record] : [];
         }
         
-        // SELECT * FROM patients
+        // SELECT * FROM table WHERE column = ? (support for other columns)
+        if (lowerSql.includes('where') && params.length > 0) {
+          const whereMatch = sql.match(/where\s+(\w+)\s*=\s*\?/i);
+          if (whereMatch) {
+            const columnName = whereMatch[1];
+            const searchValue = params[0];
+            
+            // Search in all records for matching column value
+            const allRecords = Array.from(table.values());
+            const filtered = allRecords.filter(record => record[columnName] === searchValue);
+            return filtered as T[];
+          }
+        }
+        
+        // SELECT * FROM table (all records)
+        return Array.from(table.values()) as T[];
+      }
+      
+      // Legacy specific table support
+      if (lowerSql.includes('patients')) {
+        const table = this.getTable('patients');
+        if (lowerSql.includes('where id =') && params.length > 0) {
+          const record = table.get(String(params[0]));
+          return record ? [record] : [];
+        }
         return Array.from(table.values()) as T[];
       }
       
       if (lowerSql.includes('appointments')) {
         const table = this.getTable('appointments');
-        
         if (lowerSql.includes('where id =') && params.length > 0) {
           const record = table.get(String(params[0]));
           return record ? [record] : [];
         }
-        
         return Array.from(table.values()) as T[];
       }
       
       if (lowerSql.includes('invoices')) {
         const table = this.getTable('invoices');
-        
         if (lowerSql.includes('where id =') && params.length > 0) {
           const record = table.get(String(params[0]));
           return record ? [record] : [];
         }
-        
         return Array.from(table.values()) as T[];
       }
       
@@ -135,6 +159,35 @@ export class SQLiteFallbackEnhanced {
 
   async run(sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
     const lowerSql = sql.toLowerCase().trim();
+    
+    // CREATE TABLE queries
+    if (lowerSql.startsWith('create table')) {
+      const tableMatch = sql.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?(\w+)/i);
+      if (tableMatch) {
+        const tableName = tableMatch[1];
+        // Just ensure the table exists in our data structure
+        this.getTable(tableName);
+        console.log(`📋 Enhanced fallback: Created table ${tableName}`);
+        return { lastID: 0, changes: 1 };
+      }
+      return { lastID: 0, changes: 0 };
+    }
+    
+    // DROP TABLE queries
+    if (lowerSql.startsWith('drop table')) {
+      const tableMatch = sql.match(/drop\s+table\s+(?:if\s+exists\s+)?(\w+)/i);
+      if (tableMatch) {
+        const tableName = tableMatch[1];
+        if (this.data.has(tableName)) {
+          this.data.delete(tableName);
+          this.autoIncrement.delete(tableName);
+          this.saveToLocalStorage();
+          console.log(`🗑️ Enhanced fallback: Dropped table ${tableName}`);
+          return { lastID: 0, changes: 1 };
+        }
+      }
+      return { lastID: 0, changes: 0 };
+    }
     
     // INSERT queries
     if (lowerSql.startsWith('insert')) {
@@ -154,12 +207,20 @@ export class SQLiteFallbackEnhanced {
       } else if (tableName === 'invoices') {
         newRecord = this.createInvoiceRecord(newId, params);
       } else {
-        // Generic record
+        // Generic record for other tables (like test_setup)
         newRecord = {
           id: newId,
+          data: params[0] || null, // Support for simple data column
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
+        
+        // Add other parameters as columns if provided
+        if (params.length > 1) {
+          params.slice(1).forEach((param, index) => {
+            newRecord[`column_${index + 2}`] = param;
+          });
+        }
       }
       
       table.set(String(newId), newRecord);

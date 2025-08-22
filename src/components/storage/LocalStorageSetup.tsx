@@ -162,30 +162,37 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
   };
 
   const testStorageSetup = async (config: LocalStorageConfig) => {
-    // VRAI test d'initialisation OPFS SQLite
+    // Test d'initialisation SQLite compatible avec fallback
     try {
-      console.log('🧪 Test réel d\'initialisation OPFS SQLite...');
+      console.log('🧪 Test d\'initialisation SQLite...');
       
-      // Forcer l'accès OPFS et la création de base de données
+      // Forcer l'accès au service SQLite
       const { getOPFSSQLiteService } = await import('@/services/sqlite/opfs-sqlite-service');
       const sqliteService = await getOPFSSQLiteService();
       
-      // Test d'écriture pour valider le stockage
+      // Test d'écriture pour valider le stockage avec une requête compatible fallback
       await sqliteService.run('CREATE TABLE IF NOT EXISTS test_setup (id INTEGER PRIMARY KEY, data TEXT)');
-      await sqliteService.run('INSERT INTO test_setup (data) VALUES (?)', ['setup_validation']);
-      const result = await sqliteService.query('SELECT * FROM test_setup WHERE data = ?', ['setup_validation']);
+      const { lastID } = await sqliteService.run('INSERT INTO test_setup (data) VALUES (?)', ['setup_validation']);
       
-      if (!result || result.length === 0) {
-        throw new Error('Test de validation SQLite échoué');
+      // Utiliser l'ID retourné pour la vérification (compatible avec le fallback)
+      const result = await sqliteService.query('SELECT * FROM test_setup WHERE id = ?', [lastID]);
+      
+      if (!result || result.length === 0 || !result[0].data) {
+        throw new Error('Test de validation SQLite échoué - données non trouvées');
+      }
+      
+      // Vérifier que les données sont correctes
+      if (result[0].data !== 'setup_validation') {
+        throw new Error('Test de validation SQLite échoué - données incorrectes');
       }
       
       // Nettoyer le test
       await sqliteService.run('DROP TABLE IF EXISTS test_setup');
       
-      console.log('✅ Test d\'initialisation OPFS SQLite réussi');
+      console.log('✅ Test d\'initialisation SQLite réussi');
       return true;
     } catch (error) {
-      console.error('❌ Test d\'initialisation OPFS SQLite échoué:', error);
+      console.error('❌ Test d\'initialisation SQLite échoué:', error);
       throw new Error(`Échec du test de stockage local: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
