@@ -164,13 +164,17 @@ const NewPatientPage = () => {
 			const newPatient = await api.createPatient(patientToCreate);
 			console.log("Patient créé avec succès:", newPatient);
 
+			// Vérifier que le patient a bien un ID valide
+			if (!newPatient?.id) {
+				throw new Error("Le patient n'a pas été créé correctement - ID manquant");
+			}
+
 			toast.success(
 				`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`
 			);
 
-			setTimeout(() => {
-				navigate(`/patients/${newPatient.id}`);
-			}, 1500);
+			// Navigation immédiate sans délai pour éviter les problèmes de synchronisation
+			navigate(`/patients/${newPatient.id}`);
 		} catch (error) {
 			console.error("Error adding patient:", error);
 			if (

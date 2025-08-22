@@ -97,6 +97,19 @@ export const patientService = {
         // CORRECTION: Vérifier explicitement que le patient a été créé correctement
         if (created && created.id) {
           console.log("✅ Patient créé avec succès en stockage local sécurisé:", created.id);
+          
+          // S'assurer que le patient est immédiatement disponible pour la lecture
+          try {
+            const verification = await hybridDataManager.getById<Patient>('patients', created.id);
+            if (!verification) {
+              console.warn("⚠️ Patient créé mais non trouvé immédiatement, attente...");
+              // Petit délai pour laisser le temps au stockage
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+          } catch (verifyError) {
+            console.warn("Erreur de vérification post-création:", verifyError);
+          }
+          
           return created;
         } else {
           throw new Error("Échec de la création patient - données incomplètes");
