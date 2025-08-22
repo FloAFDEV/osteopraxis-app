@@ -1,12 +1,11 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Patient, Appointment, Invoice, Cabinet, Osteopath } from '@/types';
-import { appointmentService } from '@/services/appointment-service';
-import { patientService } from '@/services/patient-service';
-import { invoiceService } from '@/services/invoice-service';
-import { cabinetService } from '@/services/cabinet-service';
-import { doctorService } from '@/services/doctor-service';
-import { useHybridStorage } from '@/contexts/HybridStorageContext';
+import { appointmentService } from '@/services/api/appointment-service';
+import { patientService } from '@/services/api/patient-service';
+import { invoiceService } from '@/services/api/invoice-service';
+import { cabinetService } from '@/services/api/cabinet-service';
+import { osteopathCabinetService } from '@/services/supabase-api/osteopath-cabinet-service';
 
 interface DemoContextType {
   isDemoMode: boolean;
@@ -555,22 +554,40 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isDemoMode, setIsDemoMode] = useState(() => {
     return localStorage.getItem('demo_mode') === 'true';
   });
-  const { storageReady, storeData, getData } = useHybridStorage();
   const [patients, setPatients] = useState<Patient[]>(mockPatients);
   const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
+
+  // Utiliser localStorage pour le stockage des données démo
+  const storeData = (key: string, data: any) => {
+    try {
+      localStorage.setItem(`demo_${key}`, JSON.stringify(data));
+    } catch (error) {
+      console.error('Erreur stockage données démo:', error);
+    }
+  };
+
+  const getData = (key: string) => {
+    try {
+      const data = localStorage.getItem(`demo_${key}`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Erreur récupération données démo:', error);
+      return null;
+    }
+  };
 
   const setDemoMode = async (enabled: boolean) => {
     setIsDemoMode(enabled);
     localStorage.setItem('demo_mode', enabled.toString());
     
-    if (enabled && storageReady) {
-      // Sauvegarder les données démo dans IndexedDB
-      await storeData('demo_patients', patients);
-      await storeData('demo_appointments', appointments);
-      await storeData('demo_invoices', invoices);
-      await storeData('demo_cabinets', mockCabinets);
-      await storeData('demo_osteopath', [mockOsteopath]);
+    if (enabled) {
+      // Sauvegarder les données démo dans localStorage
+      storeData('patients', patients);
+      storeData('appointments', appointments);
+      storeData('invoices', invoices);
+      storeData('cabinets', mockCabinets);
+      storeData('osteopath', [mockOsteopath]);
     }
   };
 
@@ -583,7 +600,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     const updatedPatients = [...patients, newPatient];
     setPatients(updatedPatients);
-    if (storageReady) await storeData('demo_patients', updatedPatients);
+    storeData('patients', updatedPatients);
   };
 
   const updateDemoPatient = async (id: number, updates: Partial<Patient>) => {
@@ -591,13 +608,13 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
     );
     setPatients(updatedPatients);
-    if (storageReady) await storeData('demo_patients', updatedPatients);
+    storeData('patients', updatedPatients);
   };
 
   const deleteDemoPatient = async (id: number) => {
     const updatedPatients = patients.filter(p => p.id !== id);
     setPatients(updatedPatients);
-    if (storageReady) await storeData('demo_patients', updatedPatients);
+    storeData('patients', updatedPatients);
   };
 
   const addDemoAppointment = async (appointmentData: Omit<Appointment, 'id'>) => {
@@ -609,7 +626,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     const updatedAppointments = [...appointments, newAppointment];
     setAppointments(updatedAppointments);
-    if (storageReady) await storeData('demo_appointments', updatedAppointments);
+    storeData('appointments', updatedAppointments);
   };
 
   const updateDemoAppointment = async (id: number, updates: Partial<Appointment>) => {
@@ -617,13 +634,13 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
     );
     setAppointments(updatedAppointments);
-    if (storageReady) await storeData('demo_appointments', updatedAppointments);
+    storeData('appointments', updatedAppointments);
   };
 
   const deleteDemoAppointment = async (id: number) => {
     const updatedAppointments = appointments.filter(a => a.id !== id);
     setAppointments(updatedAppointments);
-    if (storageReady) await storeData('demo_appointments', updatedAppointments);
+    storeData('appointments', updatedAppointments);
   };
 
   const addDemoInvoice = async (invoiceData: Omit<Invoice, 'id'>) => {
@@ -635,7 +652,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     const updatedInvoices = [...invoices, newInvoice];
     setInvoices(updatedInvoices);
-    if (storageReady) await storeData('demo_invoices', updatedInvoices);
+    storeData('invoices', updatedInvoices);
   };
 
   const updateDemoInvoice = async (id: number, updates: Partial<Invoice>) => {
@@ -643,25 +660,23 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       i.id === id ? { ...i, ...updates, updatedAt: new Date().toISOString() as any } : i
     );
     setInvoices(updatedInvoices);
-    if (storageReady) await storeData('demo_invoices', updatedInvoices);
+    storeData('invoices', updatedInvoices);
   };
 
   const deleteDemoInvoice = async (id: number) => {
     const updatedInvoices = invoices.filter(i => i.id !== id);
     setInvoices(updatedInvoices);
-    if (storageReady) await storeData('demo_invoices', updatedInvoices);
+    storeData('invoices', updatedInvoices);
   };
 
-  // Charger les données depuis IndexedDB au démarrage
+  // Charger les données depuis localStorage au démarrage
   useEffect(() => {
     const loadDemoData = async () => {
-      if (isDemoMode && storageReady) {
+      if (isDemoMode) {
         try {
-          const [storedPatients, storedAppointments, storedInvoices] = await Promise.all([
-            getData('demo_patients'),
-            getData('demo_appointments'), 
-            getData('demo_invoices'),
-          ]);
+          const storedPatients = getData('patients');
+          const storedAppointments = getData('appointments');
+          const storedInvoices = getData('invoices');
 
           if (storedPatients) setPatients(storedPatients);
           if (storedAppointments) setAppointments(storedAppointments);
@@ -673,7 +688,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     loadDemoData();
-  }, [isDemoMode, storageReady, getData]);
+  }, [isDemoMode]);
 
   const demoData = {
     patients,
@@ -703,14 +718,12 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       patientService.setDemoContext(contextData);
       invoiceService.setDemoContext(contextData);
       cabinetService.setDemoContext(contextData);
-      doctorService.setDemoContext(contextData);
     } else {
       // Réinitialiser les services
       appointmentService.setDemoContext(null);
       patientService.setDemoContext(null);
       invoiceService.setDemoContext(null);
       cabinetService.setDemoContext(null);
-      doctorService.setDemoContext(null);
     }
   }, [isDemoMode, demoData]);
 

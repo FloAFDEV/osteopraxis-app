@@ -2,7 +2,6 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useHybridStorage } from "@/hooks/useHybridStorage";
 import { HybridStorageProvider } from "@/contexts/HybridStorageContext";
 import { useDemo } from "@/contexts/DemoContext";
 
@@ -13,10 +12,9 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
-  const { storageReady } = useHybridStorage();
   const { isDemoMode } = useDemo();
 
-  if (loading || !storageReady) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -37,15 +35,7 @@ export const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) =
     return <>{children}</>;
   }
 
-  // Pour les vrais utilisateurs, on attend que le stockage soit prêt
-  if (!storageReady) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
+  // Pour les vrais utilisateurs, utiliser le stockage hybride
   return (
     <HybridStorageProvider>
       {children}

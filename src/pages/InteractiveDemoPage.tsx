@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDemo } from "@/contexts/DemoContext";
-import { DemoService } from "@/services/demo-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/ui/layout";
