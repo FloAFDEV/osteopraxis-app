@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { api } from "@/services/api";
 import { Building, Info, Plus, ArrowRight } from "lucide-react";
 import { Cabinet } from "@/types";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
@@ -10,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
+import { useCabinets } from "@/hooks/useCabinets";
 
 interface CabinetSelectorProps {
   form: UseFormReturn<PatientFormValues>;
@@ -18,70 +18,24 @@ interface CabinetSelectorProps {
 }
 
 export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: CabinetSelectorProps) => {
-  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: cabinets = [], isLoading: loading } = useCabinets();
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
 
   useEffect(() => {
-    const loadCabinets = async () => {
-      try {
-        // Vérifier d'abord le cache de session
-        const cacheKey = 'user_cabinets';
-        const cachedCabinets = sessionStorage.getItem(cacheKey);
-        
-        if (cachedCabinets) {
-          // Utiliser les données en cache pour un chargement instantané
-          const userCabinets = JSON.parse(cachedCabinets);
-          setCabinets(userCabinets);
-          setLoading(false);
-          
-          // Configuration automatique du premier cabinet
-          if (userCabinets.length > 0 && !selectedCabinetId) {
-            const firstCabinet = userCabinets[0];
-            setSelectedCabinet(firstCabinet);
-            onCabinetChange(firstCabinet.id.toString());
-            form.setValue('cabinetId', firstCabinet.id);
-          }
-          
-          // Trouver le cabinet sélectionné
-          if (selectedCabinetId) {
-            const cabinet = userCabinets.find(c => c.id === parseInt(selectedCabinetId));
-            setSelectedCabinet(cabinet || null);
-          }
-          
-          return; // Sortir si on a des données en cache
-        }
-        
-        // Sinon, charger depuis l'API
-        const userCabinets = await api.getCabinets();
-        setCabinets(userCabinets);
-        
-        // Mettre en cache pour 5 minutes
-        sessionStorage.setItem(cacheKey, JSON.stringify(userCabinets));
-        setTimeout(() => sessionStorage.removeItem(cacheKey), 5 * 60 * 1000);
-        
-        // Sélectionner automatiquement le premier cabinet en mode démo
-        if (userCabinets.length > 0 && !selectedCabinetId) {
-          const firstCabinet = userCabinets[0];
-          setSelectedCabinet(firstCabinet);
-          onCabinetChange(firstCabinet.id.toString());
-          form.setValue('cabinetId', firstCabinet.id);
-        }
-        
+    if (cabinets.length > 0) {
+      // Configuration automatique du premier cabinet
+      if (!selectedCabinetId) {
+        const firstCabinet = cabinets[0];
+        setSelectedCabinet(firstCabinet);
+        onCabinetChange(firstCabinet.id.toString());
+        form.setValue('cabinetId', firstCabinet.id);
+      } else {
         // Trouver le cabinet sélectionné
-        if (selectedCabinetId) {
-          const cabinet = userCabinets.find(c => c.id === parseInt(selectedCabinetId));
-          setSelectedCabinet(cabinet || null);
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des cabinets:", error);
-      } finally {
-        setLoading(false);
+        const cabinet = cabinets.find(c => c.id === parseInt(selectedCabinetId));
+        setSelectedCabinet(cabinet || null);
       }
-    };
-    
-    loadCabinets();
-  }, [selectedCabinetId, onCabinetChange, form]);
+    }
+  }, [cabinets, selectedCabinetId, onCabinetChange, form]);
 
   const handleCabinetChange = (value: string) => {
     const cabinet = cabinets.find(c => c.id === parseInt(value));

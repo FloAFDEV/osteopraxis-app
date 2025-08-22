@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { api } from "@/services/api";
 import { Building, ChevronDown } from "lucide-react";
 import { Cabinet } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCurrentOsteopathId } from "@/services";
+import { useCabinets } from "@/hooks/useCabinets";
 
 interface CabinetSelectorProps {
   selectedCabinetId?: number;
@@ -24,8 +24,7 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
   onCabinetChange,
   className = ""
 }) => {
-  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: cabinets = [], isLoading: loading } = useCabinets();
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
   const [osteopathId, setOsteopathId] = useState<number | null>(null);
   const navigate = useNavigate();
@@ -46,36 +45,23 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
   }, []);
 
   useEffect(() => {
-    const loadCabinets = async () => {
-      try {
-        setLoading(true);
-        const userCabinets = await api.getCabinets();
-        
-        setCabinets(userCabinets);
-        
-        // Si aucun cabinet n'est sélectionné mais qu'il y en a disponibles, sélectionner le premier
-        if (!selectedCabinetId && userCabinets.length > 0) {
-          setSelectedCabinet(userCabinets[0]);
-          if (onCabinetChange) {
-            onCabinetChange(userCabinets[0].id);
-          }
-        } 
-        // Si un cabinet est sélectionné, le trouver dans la liste
-        else if (selectedCabinetId) {
-          const cabinet = userCabinets.find(c => c.id === selectedCabinetId);
-          if (cabinet) {
-            setSelectedCabinet(cabinet);
-          }
+    if (cabinets.length > 0) {
+      // Si aucun cabinet n'est sélectionné mais qu'il y en a disponibles, sélectionner le premier
+      if (!selectedCabinetId) {
+        setSelectedCabinet(cabinets[0]);
+        if (onCabinetChange) {
+          onCabinetChange(cabinets[0].id);
         }
-      } catch (error) {
-        console.error("Erreur lors du chargement des cabinets:", error);
-      } finally {
-        setLoading(false);
+      } 
+      // Si un cabinet est sélectionné, le trouver dans la liste
+      else {
+        const cabinet = cabinets.find(c => c.id === selectedCabinetId);
+        if (cabinet) {
+          setSelectedCabinet(cabinet);
+        }
       }
-    };
-    
-    loadCabinets();
-  }, [selectedCabinetId, onCabinetChange, osteopathId]);
+    }
+  }, [cabinets, selectedCabinetId, onCabinetChange]);
 
   const handleCabinetSelect = (cabinet: Cabinet) => {
     setSelectedCabinet(cabinet);

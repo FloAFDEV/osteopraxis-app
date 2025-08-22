@@ -10,12 +10,14 @@ interface CacheEntry {
   data: Cabinet[];
   timestamp: number;
   promise?: Promise<Cabinet[]>;
+  promiseResolvers?: Set<(value: Cabinet[]) => void>;
 }
 
 class CabinetCacheService {
   private cache = new Map<string, CacheEntry>();
   private readonly TTL = 5 * 60 * 1000; // 5 minutes
   private demoContext: any = null;
+  private activeFetches = new Map<string, Promise<Cabinet[]>>();
 
   setDemoContext(context: any) {
     this.demoContext = context;
@@ -29,28 +31,25 @@ class CabinetCacheService {
     const cached = this.cache.get(cacheKey);
     const now = Date.now();
 
-    // Si on a une promesse en cours, l'attendre
-    if (cached?.promise) {
-      console.log('🔄 Attente de la requête cabinets en cours...');
-      return cached.promise;
-    }
-
-    // Si on a des données fraîches, les retourner
+    // Si on a des données fraîches, les retourner immédiatement
     if (cached?.data && (now - cached.timestamp) < this.TTL) {
       console.log('⚡ Cabinets depuis le cache');
       return cached.data;
     }
 
-    // Sinon, faire l'appel API avec promesse partagée
+    // Si on a déjà une requête en cours, l'attendre
+    const activePromise = this.activeFetches.get(cacheKey);
+    if (activePromise) {
+      console.log('🔄 Attente de la requête cabinets en cours...');
+      return activePromise;
+    }
+
+    // Créer une nouvelle requête
     console.log('🌐 Récupération cabinets depuis l\'API...');
     const promise = this.fetchCabinetsFromAPI();
     
     // Stocker la promesse pour éviter les appels multiples
-    this.cache.set(cacheKey, {
-      data: cached?.data || [],
-      timestamp: cached?.timestamp || 0,
-      promise
-    });
+    this.activeFetches.set(cacheKey, promise);
 
     try {
       const data = await promise;
@@ -58,19 +57,16 @@ class CabinetCacheService {
       // Mettre à jour le cache avec les nouvelles données
       this.cache.set(cacheKey, {
         data,
-        timestamp: now,
-        promise: undefined
+        timestamp: now
       });
 
       return data;
     } catch (error) {
-      // Supprimer la promesse en cas d'erreur
-      this.cache.set(cacheKey, {
-        data: cached?.data || [],
-        timestamp: cached?.timestamp || 0,
-        promise: undefined
-      });
+      console.error('Erreur lors du chargement des cabinets:', error);
       throw error;
+    } finally {
+      // Nettoyer la promesse active
+      this.activeFetches.delete(cacheKey);
     }
   }
 
@@ -129,6 +125,7 @@ class CabinetCacheService {
       console.log(`🗑️ Cache cabinet ${cabinetId} invalidé`);
     } else {
       this.cache.clear();
+      this.activeFetches.clear();
       console.log('🗑️ Cache cabinets totalement invalidé');
     }
   }
