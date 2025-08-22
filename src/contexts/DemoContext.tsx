@@ -1,10 +1,12 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Patient, Appointment, Invoice, Cabinet, Osteopath } from '@/types';
-import { setDemoContext as setAppointmentDemoContext } from '@/services/api/appointment-service';
-import { setDemoContext as setPatientDemoContext } from '@/services/api/patient-service';
-import { setDemoContext as setCabinetDemoContext } from '@/services/api/cabinet-service';
-import { setDemoContext as setInvoiceDemoContext } from '@/services/api/invoice-service';
+import { appointmentService } from '@/services/appointment-service';
+import { patientService } from '@/services/patient-service';
+import { invoiceService } from '@/services/invoice-service';
+import { cabinetService } from '@/services/cabinet-service';
+import { doctorService } from '@/services/doctor-service';
+import { useHybridStorage } from '@/contexts/HybridStorageContext';
 
 interface DemoContextType {
   isDemoMode: boolean;
@@ -550,70 +552,128 @@ const mockInvoices: Invoice[] = [
 ];
 
 export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(() => {
+    return localStorage.getItem('demo_mode') === 'true';
+  });
+  const { storageReady, storeData, getData } = useHybridStorage();
   const [patients, setPatients] = useState<Patient[]>(mockPatients);
   const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
 
-  const addDemoPatient = (patientData: Omit<Patient, 'id'>) => {
+  const setDemoMode = async (enabled: boolean) => {
+    setIsDemoMode(enabled);
+    localStorage.setItem('demo_mode', enabled.toString());
+    
+    if (enabled && storageReady) {
+      // Sauvegarder les données démo dans IndexedDB
+      await storeData('demo_patients', patients);
+      await storeData('demo_appointments', appointments);
+      await storeData('demo_invoices', invoices);
+      await storeData('demo_cabinets', mockCabinets);
+      await storeData('demo_osteopath', [mockOsteopath]);
+    }
+  };
+
+  const addDemoPatient = async (patientData: Omit<Patient, 'id'>) => {
     const newPatient: Patient = {
       ...patientData,
       id: Math.max(...patients.map(p => p.id)) + 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setPatients(prev => [...prev, newPatient]);
+    const updatedPatients = [...patients, newPatient];
+    setPatients(updatedPatients);
+    if (storageReady) await storeData('demo_patients', updatedPatients);
   };
 
-  const updateDemoPatient = (id: number, updates: Partial<Patient>) => {
-    setPatients(prev => prev.map(p => 
+  const updateDemoPatient = async (id: number, updates: Partial<Patient>) => {
+    const updatedPatients = patients.map(p => 
       p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
-    ));
+    );
+    setPatients(updatedPatients);
+    if (storageReady) await storeData('demo_patients', updatedPatients);
   };
 
-  const deleteDemoPatient = (id: number) => {
-    setPatients(prev => prev.filter(p => p.id !== id));
+  const deleteDemoPatient = async (id: number) => {
+    const updatedPatients = patients.filter(p => p.id !== id);
+    setPatients(updatedPatients);
+    if (storageReady) await storeData('demo_patients', updatedPatients);
   };
 
-  const addDemoAppointment = (appointmentData: Omit<Appointment, 'id'>) => {
+  const addDemoAppointment = async (appointmentData: Omit<Appointment, 'id'>) => {
     const newAppointment: Appointment = {
       ...appointmentData,
       id: Math.max(...appointments.map(a => a.id)) + 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setAppointments(prev => [...prev, newAppointment]);
+    const updatedAppointments = [...appointments, newAppointment];
+    setAppointments(updatedAppointments);
+    if (storageReady) await storeData('demo_appointments', updatedAppointments);
   };
 
-  const updateDemoAppointment = (id: number, updates: Partial<Appointment>) => {
-    setAppointments(prev => prev.map(a => 
+  const updateDemoAppointment = async (id: number, updates: Partial<Appointment>) => {
+    const updatedAppointments = appointments.map(a => 
       a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
-    ));
+    );
+    setAppointments(updatedAppointments);
+    if (storageReady) await storeData('demo_appointments', updatedAppointments);
   };
 
-  const deleteDemoAppointment = (id: number) => {
-    setAppointments(prev => prev.filter(a => a.id !== id));
+  const deleteDemoAppointment = async (id: number) => {
+    const updatedAppointments = appointments.filter(a => a.id !== id);
+    setAppointments(updatedAppointments);
+    if (storageReady) await storeData('demo_appointments', updatedAppointments);
   };
 
-  const addDemoInvoice = (invoiceData: Omit<Invoice, 'id'>) => {
+  const addDemoInvoice = async (invoiceData: Omit<Invoice, 'id'>) => {
     const newInvoice: Invoice = {
       ...invoiceData,
       id: Math.max(...invoices.map(i => i.id)) + 1,
       createdAt: new Date().toISOString() as any,
       updatedAt: new Date().toISOString() as any,
     };
-    setInvoices(prev => [...prev, newInvoice]);
+    const updatedInvoices = [...invoices, newInvoice];
+    setInvoices(updatedInvoices);
+    if (storageReady) await storeData('demo_invoices', updatedInvoices);
   };
 
-  const updateDemoInvoice = (id: number, updates: Partial<Invoice>) => {
-    setInvoices(prev => prev.map(i => 
+  const updateDemoInvoice = async (id: number, updates: Partial<Invoice>) => {
+    const updatedInvoices = invoices.map(i => 
       i.id === id ? { ...i, ...updates, updatedAt: new Date().toISOString() as any } : i
-    ));
+    );
+    setInvoices(updatedInvoices);
+    if (storageReady) await storeData('demo_invoices', updatedInvoices);
   };
 
-  const deleteDemoInvoice = (id: number) => {
-    setInvoices(prev => prev.filter(i => i.id !== id));
+  const deleteDemoInvoice = async (id: number) => {
+    const updatedInvoices = invoices.filter(i => i.id !== id);
+    setInvoices(updatedInvoices);
+    if (storageReady) await storeData('demo_invoices', updatedInvoices);
   };
+
+  // Charger les données depuis IndexedDB au démarrage
+  useEffect(() => {
+    const loadDemoData = async () => {
+      if (isDemoMode && storageReady) {
+        try {
+          const [storedPatients, storedAppointments, storedInvoices] = await Promise.all([
+            getData('demo_patients'),
+            getData('demo_appointments'), 
+            getData('demo_invoices'),
+          ]);
+
+          if (storedPatients) setPatients(storedPatients);
+          if (storedAppointments) setAppointments(storedAppointments);
+          if (storedInvoices) setInvoices(storedInvoices);
+        } catch (error) {
+          console.error('Erreur lors du chargement des données démo:', error);
+        }
+      }
+    };
+
+    loadDemoData();
+  }, [isDemoMode, storageReady, getData]);
 
   const demoData = {
     patients,
@@ -625,41 +685,49 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Injecter le contexte démo dans tous les services quand il change
   useEffect(() => {
-    const contextData = { 
-      isDemoMode, 
-      demoData,
-      addDemoPatient,
-      updateDemoPatient,
-      deleteDemoPatient,
-      addDemoAppointment,
-      updateDemoAppointment,
-      deleteDemoAppointment,
-      addDemoInvoice,
-      updateDemoInvoice,
-      deleteDemoInvoice,
-    };
-    setAppointmentDemoContext(contextData);
-    setPatientDemoContext(contextData);
-    setCabinetDemoContext(contextData);
-    setInvoiceDemoContext(contextData);
-    
-    // Demo mode state change
+    if (isDemoMode) {
+      const contextData = { 
+        isDemoMode: true, 
+        demoData,
+        addPatient: addDemoPatient,
+        updatePatient: updateDemoPatient,
+        deletePatient: deleteDemoPatient,
+        addAppointment: addDemoAppointment,
+        updateAppointment: updateDemoAppointment,
+        deleteAppointment: deleteDemoAppointment,
+        addInvoice: addDemoInvoice,
+        updateInvoice: updateDemoInvoice,
+        deleteInvoice: deleteDemoInvoice,
+      };
+      appointmentService.setDemoContext(contextData);
+      patientService.setDemoContext(contextData);
+      invoiceService.setDemoContext(contextData);
+      cabinetService.setDemoContext(contextData);
+      doctorService.setDemoContext(contextData);
+    } else {
+      // Réinitialiser les services
+      appointmentService.setDemoContext(null);
+      patientService.setDemoContext(null);
+      invoiceService.setDemoContext(null);
+      cabinetService.setDemoContext(null);
+      doctorService.setDemoContext(null);
+    }
   }, [isDemoMode, demoData]);
 
-const contextValue = {
-  isDemoMode,
-  setDemoMode: setIsDemoMode,
-  demoData,
-  addDemoPatient,
-  updateDemoPatient,
-  deleteDemoPatient,
-  addDemoAppointment,
-  updateDemoAppointment,
-  deleteDemoAppointment,
-  addDemoInvoice,
-  updateDemoInvoice,
-  deleteDemoInvoice,
-};
+  const contextValue = {
+    isDemoMode,
+    setDemoMode,
+    demoData,
+    addDemoPatient,
+    updateDemoPatient,
+    deleteDemoPatient,
+    addDemoAppointment,
+    updateDemoAppointment,
+    deleteDemoAppointment,
+    addDemoInvoice,
+    updateDemoInvoice,
+    deleteDemoInvoice,
+  };
 
   return (
     <DemoContext.Provider value={contextValue}>
