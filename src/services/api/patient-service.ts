@@ -18,20 +18,9 @@ export const patientService = {
       return [...demoContext.demoData.patients];
     }
 
-    // Utilisateur connecté: stockage hybride avec fallback Supabase
+    // Utilisateur connecté: UNIQUEMENT stockage hybride HDS
     if (USE_SUPABASE) {
-      try {
-        return await hybridDataManager.get<Patient>('patients');
-      } catch (error) {
-        console.error("Erreur Hybrid getPatients:", error);
-        // Fallback vers Supabase
-        try {
-          return await supabasePatientService.getPatients();
-        } catch (supabaseError) {
-          console.error("Erreur Supabase getPatients:", supabaseError);
-          return [];
-        }
-      }
+      return await hybridDataManager.get<Patient>('patients');
     }
 
     return [];
@@ -49,22 +38,10 @@ export const patientService = {
       return demoContext.demoData.patients.find((patient: any) => patient.id === id);
     }
 
-    // Utilisateur connecté: stockage hybride avec fallback Supabase
+    // Utilisateur connecté: UNIQUEMENT stockage hybride HDS
     if (USE_SUPABASE) {
-      try {
-        const res = await hybridDataManager.getById<Patient>('patients', id);
-        if (res) return res;
-      } catch (error) {
-        console.error("Erreur Hybrid getPatientById:", error);
-      }
-      
-      // Fallback vers Supabase si pas trouvé en local
-      try {
-        return await supabasePatientService.getPatientById(id);
-      } catch (supabaseError) {
-        console.error("Erreur Supabase getPatientById:", supabaseError);
-        return undefined;
-      }
+      const res = await hybridDataManager.getById<Patient>('patients', id);
+      return res || undefined;
     }
 
     return undefined;
@@ -88,31 +65,20 @@ export const patientService = {
       return toCreate;
     }
 
-    // Utilisateur connecté: d'abord stockage hybride, puis Supabase si échec
+    // Utilisateur connecté: UNIQUEMENT stockage hybride HDS
     if (USE_SUPABASE) {
-      try {
-        const osteopathId = await getCurrentOsteopathId();
-        if (!osteopathId) {
-          throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
-        }
-        
-        const securedPatientData = {
-          ...patient,
-          osteopathId,
-          cabinetId: patient.cabinetId || null,
-        } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
-        
-        // Tentative création via stockage hybride
-        const created = await hybridDataManager.create<Patient>('patients', securedPatientData);
-        return created;
-      } catch (error) {
-        console.error("Erreur Hybrid createPatient:", error);
-        // Si erreur de conformité HDS, relancer sans fallback
-        if ((error as any)?.message?.includes('CONFORMITÉ')) {
-          throw new Error("❌ ERREUR CRITIQUE: Impossible de créer le patient en mode sécurisé. Le stockage local est requis pour la conformité HDS.");
-        }
-        throw error;
+      const osteopathId = await getCurrentOsteopathId();
+      if (!osteopathId) {
+        throw new Error("Impossible de récupérer l'identifiant de l'ostéopathe connecté");
       }
+      
+      const securedPatientData = {
+        ...patient,
+        osteopathId,
+        cabinetId: patient.cabinetId || null,
+      } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>;
+      
+      return await hybridDataManager.create<Patient>('patients', securedPatientData);
     }
 
     throw new Error("❌ Service patient indisponible");
@@ -132,17 +98,11 @@ export const patientService = {
       return updated;
     }
 
+    // Utilisateur connecté: UNIQUEMENT stockage hybride HDS
     if (USE_SUPABASE) {
-      try {
-        const updatedPatient = await hybridDataManager.update<Patient>('patients', patient.id, patient);
-        return updatedPatient;
-      } catch (error) {
-        console.error("Erreur Hybrid updatePatient:", error);
-        throw error;
-      }
+      return await hybridDataManager.update<Patient>('patients', patient.id, patient);
     }
 
-    // Pas de mode démo et Supabase désactivé
     throw new Error("Service patient indisponible");
   },
 
@@ -164,47 +124,11 @@ export const patientService = {
       return true;
     }
 
+    // Utilisateur connecté: UNIQUEMENT stockage hybride HDS
     if (USE_SUPABASE) {
-      try {
-        console.log(`🗑️ Tentative de suppression patient ID: ${id}`);
-        const ok = await hybridDataManager.delete('patients', id);
-        console.log(`✅ Suppression patient ${id} réussie:`, ok);
-        return ok;
-      } catch (error) {
-        console.error("❌ Erreur Hybrid deletePatient:", error);
-        
-        // Si c'est une erreur de conformité HDS, essayer la suppression directe localStorage
-        if ((error as any)?.message?.includes('CONFORMITÉ') || (error as any)?.message?.includes('stockage local sécurisé')) {
-          console.log(`🔄 Tentative de suppression directe localStorage pour patient ${id}`);
-          try {
-            // Accès direct au localStorage pour la suppression
-            const storageKey = 'patient-hub-local-hds-data';
-            const localData = JSON.parse(localStorage.getItem(storageKey) || '{}');
-            
-            if (localData.patients) {
-              const patientIndex = localData.patients.findIndex((p: any) => p.id === id || p.id === String(id));
-              if (patientIndex !== -1) {
-                localData.patients.splice(patientIndex, 1);
-                localStorage.setItem(storageKey, JSON.stringify(localData));
-                console.log(`✅ Patient ${id} supprimé directement du localStorage`);
-                return true;
-              } else {
-                console.warn(`⚠️ Patient ${id} non trouvé dans localStorage`);
-                return false;
-              }
-            }
-            return false;
-          } catch (localError) {
-            console.error("❌ Erreur suppression directe localStorage:", localError);
-            throw error; // Relancer l'erreur originale
-          }
-        } else {
-          throw error;
-        }
-      }
+      return await hybridDataManager.delete('patients', id);
     }
 
-    // Pas de mode démo et Supabase désactivé
     return false;
   },
 
