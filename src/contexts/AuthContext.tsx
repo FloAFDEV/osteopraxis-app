@@ -366,17 +366,16 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										updated_at: userData.updated_at,
 									};
 									setUser(userWithRole);
-					// Navigation uniquement sur connexion explicite (pas TOKEN_REFRESHED)
-					if (event === 'SIGNED_IN') {
-						setTimeout(() => {
-							if (userWithRole.role === "ADMIN") {
-								navigate("/admin/dashboard", { replace: true });
-								toast.success("Connexion réussie ! Redirection vers l'administration.");
-							} else {
-								navigate("/dashboard", { replace: true });
-								toast.success("Connexion réussie !");
-							}
-						}, 100);
+					// Navigation après connexion réussie
+					if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+						// Redirection immédiate basée sur le rôle
+						if (userWithRole.role === "ADMIN") {
+							navigate("/admin/dashboard", { replace: true });
+							console.log("🔄 Redirection vers admin dashboard");
+						} else {
+							navigate("/dashboard", { replace: true });
+							console.log("🔄 Redirection vers dashboard");
+						}
 					}
 								} else {
 									// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
