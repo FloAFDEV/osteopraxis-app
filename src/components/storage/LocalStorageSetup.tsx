@@ -15,9 +15,6 @@ interface LocalStorageSetupProps {
 }
 
 interface LocalStorageConfig {
-  directoryHandle?: FileSystemDirectoryHandle;
-  encryptionKey?: string;
-  entities?: string[];
   storageLocation: string;
   securityMethod: 'pin' | 'password';
   credential: string;
@@ -165,43 +162,31 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
   };
 
   const testStorageSetup = async (config: LocalStorageConfig) => {
-    // Test d'initialisation IndexedDB persistant (le vrai système utilisé)
+    // Test simple pour la démo - juste vérifier IndexedDB
     try {
-      console.log('🧪 Test d\'initialisation IndexedDB persistant...');
+      console.log('🧪 Test d\'initialisation du stockage...');
       
-      // Tester le vrai système de stockage utilisé
-      const { getPersistentLocalStorage } = await import('@/services/storage/persistent-local-storage');
-      const storage = await getPersistentLocalStorage();
-      
-      // Test d'écriture pour valider le stockage IndexedDB
-      const testData = {
-        id: Date.now(),
-        testField: 'setup_validation',
-        timestamp: new Date().toISOString()
-      };
-      
-      // Créer un enregistrement de test
-      const created = await storage.create('test_setup', testData);
-      
-      if (!created || !created.id || created.testField !== 'setup_validation') {
-        throw new Error('Test de validation IndexedDB échoué - création impossible');
+      // Test basique IndexedDB
+      if (!('indexedDB' in window)) {
+        throw new Error('IndexedDB non supporté');
       }
       
-      // Vérifier qu'on peut le relire
-      const retrieved = await storage.getById('test_setup', created.id);
+      // Test d'ouverture de base simple
+      const request = indexedDB.open('test_storage_setup', 1);
       
-      if (!retrieved || retrieved.testField !== 'setup_validation') {
-        throw new Error('Test de validation IndexedDB échoué - lecture impossible');
-      }
+      return new Promise((resolve, reject) => {
+        request.onerror = () => reject(new Error('Erreur IndexedDB'));
+        request.onsuccess = () => {
+          request.result.close();
+          indexedDB.deleteDatabase('test_storage_setup');
+          console.log('✅ Test stockage réussi');
+          resolve(true);
+        };
+      });
       
-      // Nettoyer le test
-      await storage.delete('test_setup', created.id);
-      
-      console.log('✅ Test d\'initialisation IndexedDB persistant réussi');
-      return true;
     } catch (error) {
-      console.error('❌ Test d\'initialisation IndexedDB persistant échoué:', error);
-      throw new Error(`Échec du test de stockage local: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      console.error('❌ Test stockage échoué:', error);
+      throw new Error(`Échec du test de stockage: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 

@@ -10,7 +10,7 @@ interface HybridStorageContextType {
   isConfigured: boolean;
   isUnlocked: boolean;
   isLoading: boolean;
-  configureStorage: (config: NativeStorageConfig) => Promise<void>;
+  configureStorage: (config: any) => Promise<void>;
   unlockStorage: (credential: string) => Promise<boolean>;
   lockStorage: () => void;
 }
@@ -58,9 +58,15 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     }
   }, [isLoading, status, skipped]);
 
-  const configureStorage = async (config: NativeStorageConfig): Promise<void> => {
+  const configureStorage = async (config: any): Promise<void> => {
     try {
-      await nativeStorageManager.configure(config);
+      // Convertir la config LocalStorageSetup vers NativeStorageConfig
+      const nativeConfig: NativeStorageConfig = {
+        encryptionKey: config.credential,
+        entities: ['patients', 'appointments', 'invoices']
+      };
+      
+      await nativeStorageManager.configure(nativeConfig);
       setShowSetup(false);
       setShowUnlock(false);
       await initialize();

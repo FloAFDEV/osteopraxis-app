@@ -6,9 +6,12 @@
 import { NativeFileAdapter, checkNativeStorageSupport, requestStorageDirectory } from './native-file-adapter';
 
 export interface NativeStorageConfig {
-  directoryHandle: FileSystemDirectoryHandle;
+  directoryHandle?: FileSystemDirectoryHandle;
   encryptionKey?: string;
-  entities: string[];
+  entities?: string[];
+  storageLocation?: string;
+  securityMethod?: 'pin' | 'password';
+  credential?: string;
 }
 
 export interface NativeStorageStatus {
