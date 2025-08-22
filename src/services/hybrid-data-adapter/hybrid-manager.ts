@@ -37,7 +37,14 @@ export class HybridDataManager {
    * Initialise le gestionnaire hybride
    */
   async initialize(): Promise<void> {
-    if (this.initialized || this.initializing) return;
+    if (this.initialized) return;
+    if (this.initializing) {
+      // Attendre que l'initialisation en cours se termine
+      while (this.initializing) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      return;
+    }
 
     this.initializing = true;
     console.log('🔄 Initializing Hybrid Data Manager...');
@@ -133,16 +140,25 @@ export class HybridDataManager {
    */
   async reinitialize(): Promise<void> {
     if (this.initializing) {
-      console.log('⏳ Initialization already in progress, skipping reinitialize');
+      console.log('⏳ Initialization already in progress, waiting...');
+      while (this.initializing) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
       return;
     }
+    
+    if (this.initialized) {
+      console.log('✅ Already initialized, skipping reinitialize');
+      return;
+    }
+    
     console.log('🔄 Reinitializing Hybrid Data Manager...');
     
     // Nettoyer l'état existant
     this.initialized = false;
     // Créer un nouveau adaptateur pour éviter les conflits
     const defaultConfig: HybridConfig = {
-      fallbackToCloud: true,
+      fallbackToCloud: false, // IMPORTANT: Pas de fallback pour les utilisateurs connectés
       syncMode: 'none',
       encryption: {
         enabled: true,
@@ -155,9 +171,6 @@ export class HybridDataManager {
       }
     };
     this.adapter = new HybridDataAdapter(defaultConfig);
-    
-    // Attendre un peu pour que les changements d'auth se propagent
-    await new Promise(resolve => setTimeout(resolve, 100));
     
     await this.initialize();
   }
@@ -177,7 +190,10 @@ export class HybridDataManager {
 
   async create<T>(entity: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
     if (!this.initialized) await this.initialize();
-    return this.adapter.create<T>(entity, data);
+    console.log(`🏗️ HybridDataManager.create() appelé pour ${entity}:`, data);
+    const result = await this.adapter.create<T>(entity, data);
+    console.log(`✅ HybridDataManager.create() succès pour ${entity}:`, result);
+    return result;
   }
 
   async update<T>(entity: string, id: number | string, data: Partial<T>): Promise<T> {
