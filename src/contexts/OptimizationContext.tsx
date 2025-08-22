@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react';
-import { useGlobalOptimization } from '@/hooks/useGlobalOptimization';
+import React, { createContext, useContext, useState } from 'react';
 
 interface OptimizationContextType {
   data: {
@@ -35,16 +34,37 @@ const OptimizationContext = createContext<OptimizationContextType | null>(null);
 export const OptimizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   children 
 }) => {
-  const optimization = useGlobalOptimization();
+  // État simplifié sans hooks supprimés
+  const [loading] = useState({
+    patients: false,
+    appointments: false,
+    cabinets: false,
+    any: false,
+    initializing: false,
+  });
 
-  // Préchargement automatique au démarrage
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      optimization.optimize.preloadData();
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const optimization: OptimizationContextType = {
+    data: {
+      patients: [],
+      appointments: [],
+      cabinets: [],
+    },
+    loading,
+    optimize: {
+      invalidateAll: () => {},
+      invalidateRelated: () => {},
+      preloadData: async () => {},
+    },
+    stats: {
+      totalLoading: false,
+      cacheHitRate: 0,
+      dataFreshness: {
+        patients: 'fresh',
+        appointments: 'fresh',
+        cabinets: 'fresh',
+      },
+    },
+  };
 
   return (
     <OptimizationContext.Provider value={optimization}>

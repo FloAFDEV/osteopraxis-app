@@ -6,7 +6,7 @@ import { api } from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useGlobalOptimization } from "@/hooks/useGlobalOptimization";
+
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
 import { useOptimizedPatients } from "@/hooks/useOptimizedPatients";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -40,8 +40,8 @@ const PatientsPage = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const patientsPerPage = 30;
 
-	// Utilisation du système d'optimisation global
-	const { data: globalData, loading: globalLoading, optimize } = useGlobalOptimization();
+	// États de chargement simplifiés
+	const globalLoading = false;
 
 	// Récupérer les cabinets de l'utilisateur
 	const { data: cabinets = [], isLoading: cabinetsLoading } = useQuery({
@@ -237,19 +237,19 @@ const PatientsPage = () => {
 					onLetterChange={handleLetterChange}
 				/>
 
-				{/* Loading and error states optimisées */}
-				{(isLoading || globalLoading.initializing) ? (
+				{/* Loading and error states */}
+				{isLoading ? (
 					<SmartSkeleton type="patient-list" count={10} />
-				) : (
+				) : error ? (
 					<PatientLoadingState
 						isLoading={isLoading}
 						error={error}
 						onRetry={handleRetry}
 					/>
-				)}
+				) : null}
 
 				{/* Main content - patient list or empty state */}
-				{!isLoading && !globalLoading.initializing && !error && (
+				{!isLoading && !error && (
 					<>
 						{filteredPatients.length === 0 ? (
 								<EmptyPatientState
