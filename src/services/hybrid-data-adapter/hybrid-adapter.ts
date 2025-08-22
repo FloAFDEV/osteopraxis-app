@@ -41,8 +41,9 @@ export class HybridDataAdapter {
       const adapter = this.localAdapters.get(entityName);
       
       if (isHDSEntity) {
-        // Vérifier si on est en mode démo via l'utilisateur
-        const isDemoMode = false; // Pour l'instant désactiver la logique démo ici
+        // Vérifier si on est en mode démo via la session
+        const { isDemoSession } = await import('@/utils/demo-detection');
+        const isDemoMode = await isDemoSession();
         
         // En mode démo : Autoriser le stockage cloud
         if (isDemoMode) {
@@ -128,8 +129,9 @@ export class HybridDataAdapter {
       const isHDSEntity = sensitiveHDSEntities.includes(entityName);
       
       if (isHDSEntity && adapterLocation === DataLocation.CLOUD) {
-        // Pour l'instant, permettre les adaptateurs cloud pour les tests
-        const isDemoMode = false;
+        // Vérifier si on est en mode démo avant de refuser
+        const { isDemoSession } = await import('@/utils/demo-detection');
+        const isDemoMode = await isDemoSession();
         
         // EN MODE IDENTIFIÉ RÉEL: REFUSER le stockage cloud pour les données HDS
         if (!isDemoMode) {

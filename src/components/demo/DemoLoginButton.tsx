@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { useDemo } from "@/contexts/DemoContext";
+import { DemoService } from "@/services/demo-service";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { withRateLimit } from "@/services/security/rate-limiting";
 
 interface DemoLoginButtonProps {
   variant?: "default" | "outline" | "ghost";
@@ -18,25 +19,32 @@ export const DemoLoginButton = ({
   className = "",
   showIcon = true 
 }: DemoLoginButtonProps) => {
-  const { setDemoMode } = useDemo();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const handleDemoLogin = async () => {
-    setIsLoading(true);
-    try {
-      await setDemoMode(true);
-      navigate('/dashboard');
-      toast.success("Mode démo activé", {
-        description: "Vous pouvez maintenant tester toutes les fonctionnalités avec des données fictives"
-      });
-    } catch (error: any) {
-      console.error("Erreur activation démo:", error);
-      toast.error("Erreur lors de l'activation du mode démo");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleDemoLogin = withRateLimit(
+    'demo_login',
+    async () => {
+      setIsLoading(true);
+      try {
+        // Créer un compte démo temporaire unique
+        const { email, password, sessionId } = await DemoService.createDemoAccount();
+        
+        // Se connecter avec le compte démo temporaire
+        await login(email, password);
+        
+        toast.success(`Session démo créée (${sessionId})`, {
+          description: "Vos données sont isolées et expireront dans 30 minutes"
+        });
+      } catch (error: any) {
+        console.error("Erreur connexion démo:", error);
+        toast.error(error?.message || "Erreur lors de la création de la session démo");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    { maxRequests: 3, windowMs: 60_000, blockDurationMs: 2 * 60_000 }
+  );
 
   return (
     <Button

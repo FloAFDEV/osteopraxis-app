@@ -1,56 +1,73 @@
 
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowRight, Database } from "lucide-react";
+import { AlertCircle, ArrowRight, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useDemo } from "@/contexts/DemoContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { DemoService } from "@/services/demo-service";
+import { useEffect, useState } from "react";
 
 export const DemoBanner = () => {
-  const { isDemoMode, setDemoMode } = useDemo();
+  const { user } = useAuth();
+  const [remainingTime, setRemainingTime] = useState<number>(0);
+  const [isTemporaryDemo, setIsTemporaryDemo] = useState(false);
 
-  const handleExitDemo = () => {
-    setDemoMode(false);
-    localStorage.removeItem('demo_mode');
+  useEffect(() => {
+    if (user?.email && DemoService.isDemoUser(user.email)) {
+      const session = DemoService.getCurrentDemoSession();
+      if (session) {
+        setIsTemporaryDemo(true);
+        setRemainingTime(session.remainingTime);
+        
+        const interval = setInterval(() => {
+          const currentSession = DemoService.getCurrentDemoSession();
+          if (currentSession) {
+            setRemainingTime(currentSession.remainingTime);
+          }
+        }, 1000);
+
+        return () => clearInterval(interval);
+      }
+    }
+  }, [user]);
+
+  const formatTime = (ms: number): string => {
+    const minutes = Math.floor(ms / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  if (!isDemoMode) return null;
-
   return (
-    <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 px-4 shadow-md">
+    <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 shadow-md">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
           <AlertCircle className="h-5 w-5 animate-pulse" />
           <div>
             <span className="font-semibold">
-              MODE DÉMO - DONNÉES DE TEST UNIQUEMENT
+              {isTemporaryDemo ? 'Session Démo Temporaire' : 'Mode Démonstration'}
             </span>
-            <span className="ml-2 text-amber-100">
-              Vos modifications sont sauvegardées localement pour tester toutes les fonctionnalités
+            <span className="ml-2 text-blue-100">
+              {isTemporaryDemo 
+                ? `Données isolées pour votre test • Expire dans ${formatTime(remainingTime)}`
+                : 'Toutes les données sont fictives et les modifications ne sont pas sauvegardées'
+              }
             </span>
           </div>
-          <Database className="h-4 w-4 text-amber-200" />
+          {isTemporaryDemo && (
+            <Clock className="h-4 w-4 text-blue-200" />
+          )}
         </div>
         
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={handleExitDemo}
-            className="bg-white/20 text-white hover:bg-white/30 border-white/30"
-          >
-            Quitter la démo
-          </Button>
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            asChild
-            className="bg-white text-orange-600 hover:bg-orange-50"
-          >
-            <Link to="/register" className="flex items-center gap-2">
-              Créer mon compte
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
+        <Button 
+          variant="secondary" 
+          size="sm" 
+          asChild
+          className="bg-white text-blue-600 hover:bg-blue-50"
+        >
+          <Link to="/register" className="flex items-center gap-2">
+            Créer mon compte
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
       </div>
     </div>
   );

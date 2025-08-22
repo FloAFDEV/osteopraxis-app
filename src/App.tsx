@@ -8,6 +8,8 @@ import { PrivacyProvider } from "@/contexts/PrivacyContext";
 import { DemoProvider } from "@/contexts/DemoContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { DemoDataManager } from "@/components/demo/DemoDataManager";
+import { DemoSessionTimer } from "@/components/demo/DemoSessionTimer";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -47,7 +49,7 @@ import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 import HybridStorageSettingsPage from "@/pages/HybridStorageSettingsPage";
 import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
 
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 
@@ -71,6 +73,7 @@ function App() {
                 <Router>
                   <AuthProvider>
                     <div className="min-h-screen bg-background">
+                      <DemoDataManager />
                       
                       <Routes>
                         {/* Routes publiques */}
@@ -236,6 +239,7 @@ function App() {
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                       <PerformanceIndicator />
+                      <DemoSessionTimer />
                       <Toaster />
                     </div>
                   </AuthProvider>

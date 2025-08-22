@@ -4,6 +4,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { dataCompartmentManager } from './data-compartment-manager';
 
 interface DemoSessionConfig {
   userId: string;
@@ -49,8 +50,14 @@ class CompartmentedSessionManager {
         throw error;
       }
 
-      // Créer le compartiment local simplifié
-      const compartmentId = `compartment_${config.sessionId}`;
+      // Créer le compartiment local
+      const compartmentId = dataCompartmentManager.createCompartment({
+        sessionId: config.sessionId,
+        userId: config.userId,
+        timestamp: Date.now(),
+        autoCleanup: true,
+        cleanupInterval: config.expiresInMinutes || 30
+      });
 
       // Associer session et compartiment
       this.activeSessions.set(config.sessionId, compartmentId);
@@ -77,7 +84,7 @@ class CompartmentedSessionManager {
       return;
     }
 
-    // Marquer les données avec un timestamp de session et les stocker dans localStorage
+    // Marquer les données avec un timestamp de session
     const sessionData = data.map(item => ({
       ...item,
       sessionId: sessionId,
@@ -85,8 +92,7 @@ class CompartmentedSessionManager {
       sessionTimestamp: Date.now()
     }));
 
-    // Stocker simplement dans localStorage pour cette implémentation
-    localStorage.setItem(`${compartmentId}_${entityType}`, JSON.stringify(sessionData));
+    dataCompartmentManager.storeData(compartmentId, entityType, sessionData);
     console.log(`📦 Données stockées pour session ${sessionId}: ${entityType} (${data.length} éléments)`);
   }
 
@@ -100,8 +106,7 @@ class CompartmentedSessionManager {
       return [];
     }
 
-    const data = localStorage.getItem(`${compartmentId}_${entityType}`);
-    return data ? JSON.parse(data) : [];
+    return dataCompartmentManager.getData(compartmentId, entityType);
   }
 
   /**
@@ -113,13 +118,8 @@ class CompartmentedSessionManager {
       
       const compartmentId = this.activeSessions.get(sessionId);
       if (compartmentId) {
-        // Nettoyer les données localStorage de ce compartiment
-        const keys = Object.keys(localStorage);
-        keys.forEach(key => {
-          if (key.startsWith(compartmentId)) {
-            localStorage.removeItem(key);
-          }
-        });
+        // Nettoyer le compartiment local
+        dataCompartmentManager.cleanupCompartment(compartmentId);
         this.activeSessions.delete(sessionId);
       }
 
@@ -166,6 +166,9 @@ class CompartmentedSessionManager {
     try {
       console.log('🧹 Nettoyage périodique des sessions...');
 
+      // Nettoyer les compartiments expirés
+      dataCompartmentManager.cleanupExpiredCompartments();
+
       // Appeler l'edge function de nettoyage
       const { data, error } = await supabase.functions.invoke('demo-cleanup');
       
@@ -175,14 +178,9 @@ class CompartmentedSessionManager {
         console.log('✅ Nettoyage edge function terminé:', data);
       }
 
-      // Nettoyer les sessions locales orphelines (simplifié)
+      // Nettoyer les sessions locales orphelines
       const expiredSessions = Array.from(this.activeSessions.entries()).filter(([sessionId]) => {
-        const compartmentId = this.activeSessions.get(sessionId);
-        if (!compartmentId) return true;
-        
-        // Vérifier si des données existent encore pour ce compartiment
-        const keys = Object.keys(localStorage);
-        return !keys.some(key => key.startsWith(compartmentId));
+        return !dataCompartmentManager.getData(this.activeSessions.get(sessionId)!, 'sessions').length;
       });
 
       for (const [sessionId] of expiredSessions) {
@@ -217,26 +215,12 @@ class CompartmentedSessionManager {
     totalCompartments: number;
     dataItemsTotal: number;
   } {
-    // Calculer approximativement le nombre d'éléments
-    let totalDataItems = 0;
-    this.activeSessions.forEach((compartmentId) => {
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith(compartmentId)) {
-          try {
-            const data = JSON.parse(localStorage.getItem(key) || '[]');
-            totalDataItems += Array.isArray(data) ? data.length : 1;
-          } catch {
-            totalDataItems += 1;
-          }
-        }
-      });
-    });
+    const compartmentStats = dataCompartmentManager.getStats();
     
     return {
       activeSessions: this.activeSessions.size,
-      totalCompartments: this.activeSessions.size,
-      dataItemsTotal: totalDataItems
+      totalCompartments: compartmentStats.totalCompartments,
+      dataItemsTotal: compartmentStats.totalDataItems
     };
   }
 
