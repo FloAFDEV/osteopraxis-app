@@ -63,7 +63,7 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
       const usedSpace = estimate.usage || 0;
 
       setStorageStatus({
-        available: availableSpace > 50 * 1024 * 1024, // Minimum 50MB pour IndexedDB
+        available: true, // IndexedDB supporté = stockage disponible
         size: availableSpace - usedSpace,
         location: 'IndexedDB (Stockage Persistant)',
         encrypted: true
@@ -241,9 +241,13 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
                   Location : {storageStatus.location}
                   <br />
                   Chiffrement : {storageStatus.encrypted ? 'Activé' : 'Désactivé'}
+                  <br />
+                  <span className="text-xs mt-2 block">
+                    💡 Estimation : ~5-10KB par patient, ~50KB par export comptable
+                  </span>
                 </>
               ) : (
-                'Stockage local non disponible ou insuffisant (minimum 50MB requis)'
+                'IndexedDB non supporté par ce navigateur'
               )}
             </AlertDescription>
           </Alert>
