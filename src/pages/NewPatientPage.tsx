@@ -25,11 +25,21 @@ const NewPatientPage = () => {
 				const cabinetId = Number(storedCabinetId);
 				setSelectedCabinetId(cabinetId);
 				
-				// Récupérer les détails du cabinet
+				// Utiliser le cache si possible pour éviter un appel API supplémentaire
 				try {
-					const cabinet = await api.getCabinetById(cabinetId);
-					if (cabinet) {
-						setSelectedCabinet(cabinet);
+					const cacheKey = `cabinet_${cabinetId}`;
+					const cachedCabinet = sessionStorage.getItem(cacheKey);
+					
+					if (cachedCabinet) {
+						// Utiliser le cabinet en cache
+						setSelectedCabinet(JSON.parse(cachedCabinet));
+					} else {
+						// Récupérer depuis l'API en cas de cache manquant
+						const cabinet = await api.getCabinetById(cabinetId);
+						if (cabinet) {
+							setSelectedCabinet(cabinet);
+							sessionStorage.setItem(cacheKey, JSON.stringify(cabinet));
+						}
 					}
 				} catch (error) {
 					console.error("Erreur lors de la récupération du cabinet:", error);

@@ -25,8 +25,40 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
   useEffect(() => {
     const loadCabinets = async () => {
       try {
+        // Vérifier d'abord le cache de session
+        const cacheKey = 'user_cabinets';
+        const cachedCabinets = sessionStorage.getItem(cacheKey);
+        
+        if (cachedCabinets) {
+          // Utiliser les données en cache pour un chargement instantané
+          const userCabinets = JSON.parse(cachedCabinets);
+          setCabinets(userCabinets);
+          setLoading(false);
+          
+          // Configuration automatique du premier cabinet
+          if (userCabinets.length > 0 && !selectedCabinetId) {
+            const firstCabinet = userCabinets[0];
+            setSelectedCabinet(firstCabinet);
+            onCabinetChange(firstCabinet.id.toString());
+            form.setValue('cabinetId', firstCabinet.id);
+          }
+          
+          // Trouver le cabinet sélectionné
+          if (selectedCabinetId) {
+            const cabinet = userCabinets.find(c => c.id === parseInt(selectedCabinetId));
+            setSelectedCabinet(cabinet || null);
+          }
+          
+          return; // Sortir si on a des données en cache
+        }
+        
+        // Sinon, charger depuis l'API
         const userCabinets = await api.getCabinets();
         setCabinets(userCabinets);
+        
+        // Mettre en cache pour 5 minutes
+        sessionStorage.setItem(cacheKey, JSON.stringify(userCabinets));
+        setTimeout(() => sessionStorage.removeItem(cacheKey), 5 * 60 * 1000);
         
         // Sélectionner automatiquement le premier cabinet en mode démo
         if (userCabinets.length > 0 && !selectedCabinetId) {

@@ -6,9 +6,31 @@ import { corsHeaders } from "../_shared/cors.ts";
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-interface AuthenticatedRequest {
-  user: any;
-  supabaseClient: any;
+// Cache simple en mémoire pour améliorer les performances
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+
+function getCachedData(key: string) {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  cache.delete(key);
+  return null;
+}
+
+function setCachedData(key: string, data: any) {
+  cache.set(key, { data, timestamp: Date.now() });
+  
+  // Nettoyer le cache si il devient trop gros (éviter les fuites mémoire)
+  if (cache.size > 50) {
+    const entries = Array.from(cache.entries());
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    // Supprimer les 10 plus anciens
+    for (let i = 0; i < 10; i++) {
+      cache.delete(entries[i][0]);
+    }
+  }
 }
 
 async function verifyUserAndGetIdentity(req: Request): Promise<{ identity: any; supabaseClient: any; message?: string }> {
@@ -96,6 +118,16 @@ serve(async (req: Request) => {
     switch (method) {
       case "GET":
         if (cabinetId) {
+          // Vérifier le cache d'abord pour un cabinet spécifique
+          const cacheKey = `cabinet_${cabinetId}_${identity.authId}`;
+          const cachedCabinet = getCachedData(cacheKey);
+          
+          if (cachedCabinet) {
+            return new Response(JSON.stringify({ data: cachedCabinet }), {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" }
+            });
+          }
           // Récupérer un cabinet spécifique (propriétaire ou associé)
           let query = supabaseClient
             .from("Cabinet")
@@ -126,11 +158,24 @@ serve(async (req: Request) => {
             });
           }
 
+          // Mettre en cache le résultat
+          setCachedData(cacheKey, cabinet);
+
           return new Response(JSON.stringify({ data: cabinet }), {
             status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         } else {
+          // Vérifier le cache pour la liste des cabinets
+          const listCacheKey = `cabinets_list_${identity.authId}`;
+          const cachedCabinets = getCachedData(listCacheKey);
+          
+          if (cachedCabinets) {
+            return new Response(JSON.stringify({ data: cachedCabinets }), {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" }
+            });
+          }
           // Pour les admins, récupérer tous les cabinets
           // Pour les ostéopathes, récupérer propriétaires + associés
           let query = supabaseClient.from("Cabinet").select("*");
@@ -150,6 +195,9 @@ serve(async (req: Request) => {
 
           const { data: cabinets, error } = await query;
           if (error) throw error;
+
+          // Mettre en cache la liste
+          setCachedData(listCacheKey, cabinets);
 
           return new Response(JSON.stringify({ data: cabinets }), {
             status: 200,
