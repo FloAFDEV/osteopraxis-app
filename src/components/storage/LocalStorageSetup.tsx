@@ -52,9 +52,9 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
     try {
       setIsValidating(true);
       
-      // Vérifier le support OPFS
-      if (!('navigator' in window && 'storage' in navigator)) {
-        throw new Error('Le stockage local n\'est pas supporté par ce navigateur');
+      // Vérifier le support IndexedDB
+      if (!('indexedDB' in window) || !indexedDB) {
+        throw new Error('IndexedDB n\'est pas supporté par ce navigateur');
       }
 
       // Estimer l'espace disponible
@@ -63,9 +63,9 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
       const usedSpace = estimate.usage || 0;
 
       setStorageStatus({
-        available: availableSpace > 100 * 1024 * 1024, // Minimum 100MB
+        available: availableSpace > 50 * 1024 * 1024, // Minimum 50MB pour IndexedDB
         size: availableSpace - usedSpace,
-        location: 'OPFS (Origin Private File System)',
+        location: 'IndexedDB (Stockage Persistant)',
         encrypted: true
       });
 
@@ -162,37 +162,42 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
   };
 
   const testStorageSetup = async (config: LocalStorageConfig) => {
-    // Test d'initialisation SQLite compatible avec fallback
+    // Test d'initialisation IndexedDB persistant (le vrai système utilisé)
     try {
-      console.log('🧪 Test d\'initialisation SQLite...');
+      console.log('🧪 Test d\'initialisation IndexedDB persistant...');
       
-      // Forcer l'accès au service SQLite
-      const { getOPFSSQLiteService } = await import('@/services/sqlite/opfs-sqlite-service');
-      const sqliteService = await getOPFSSQLiteService();
+      // Tester le vrai système de stockage utilisé
+      const { getPersistentLocalStorage } = await import('@/services/storage/persistent-local-storage');
+      const storage = await getPersistentLocalStorage();
       
-      // Test d'écriture pour valider le stockage avec une requête compatible fallback
-      await sqliteService.run('CREATE TABLE IF NOT EXISTS test_setup (id INTEGER PRIMARY KEY, data TEXT)');
-      const { lastID } = await sqliteService.run('INSERT INTO test_setup (data) VALUES (?)', ['setup_validation']);
+      // Test d'écriture pour valider le stockage IndexedDB
+      const testData = {
+        id: Date.now(),
+        testField: 'setup_validation',
+        timestamp: new Date().toISOString()
+      };
       
-      // Utiliser l'ID retourné pour la vérification (compatible avec le fallback)
-      const result = await sqliteService.query('SELECT * FROM test_setup WHERE id = ?', [lastID]);
+      // Créer un enregistrement de test
+      const created = await storage.create('test_setup', testData);
       
-      if (!result || result.length === 0 || !result[0].data) {
-        throw new Error('Test de validation SQLite échoué - données non trouvées');
+      if (!created || !created.id || created.testField !== 'setup_validation') {
+        throw new Error('Test de validation IndexedDB échoué - création impossible');
       }
       
-      // Vérifier que les données sont correctes
-      if (result[0].data !== 'setup_validation') {
-        throw new Error('Test de validation SQLite échoué - données incorrectes');
+      // Vérifier qu'on peut le relire
+      const retrieved = await storage.getById('test_setup', created.id);
+      
+      if (!retrieved || retrieved.testField !== 'setup_validation') {
+        throw new Error('Test de validation IndexedDB échoué - lecture impossible');
       }
       
       // Nettoyer le test
-      await sqliteService.run('DROP TABLE IF EXISTS test_setup');
+      await storage.delete('test_setup', created.id);
       
-      console.log('✅ Test d\'initialisation SQLite réussi');
+      console.log('✅ Test d\'initialisation IndexedDB persistant réussi');
       return true;
     } catch (error) {
-      console.error('❌ Test d\'initialisation SQLite échoué:', error);
+      console.error('❌ Test d\'initialisation IndexedDB persistant échoué:', error);
       throw new Error(`Échec du test de stockage local: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
@@ -238,7 +243,7 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
                   Chiffrement : {storageStatus.encrypted ? 'Activé' : 'Désactivé'}
                 </>
               ) : (
-                'Stockage local non disponible ou insuffisant (minimum 100MB requis)'
+                'Stockage local non disponible ou insuffisant (minimum 50MB requis)'
               )}
             </AlertDescription>
           </Alert>
