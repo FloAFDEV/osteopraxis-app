@@ -5,7 +5,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export const DemoDataManager = () => {
-  const { isDemoMode } = useDemo();
+  // Utilisation conditionnelle du hook pour éviter l'erreur de contexte
+  let isDemoMode = false;
+  let demoContext = null;
+  
+  try {
+    demoContext = useDemo();
+    isDemoMode = demoContext.isDemoMode;
+  } catch (error) {
+    // Hook non disponible, probablement hors du provider
+    console.warn("DemoDataManager: useDemo hook not available, skipping demo mode");
+    return null;
+  }
+  
   const { user } = useAuth();
 
   useEffect(() => {
