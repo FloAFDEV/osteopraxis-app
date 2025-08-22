@@ -719,7 +719,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       invoiceService.setDemoContext(contextData);
       cabinetService.setDemoContext(contextData);
     } else {
-      // Réinitialiser les services
+      // Réinitialiser les services pour utiliser Supabase
       appointmentService.setDemoContext(null);
       patientService.setDemoContext(null);
       invoiceService.setDemoContext(null);
