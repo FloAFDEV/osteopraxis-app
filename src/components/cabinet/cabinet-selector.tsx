@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCurrentOsteopathId } from "@/services";
 import { useCabinets } from "@/hooks/useCabinets";
 
 interface CabinetSelectorProps {
@@ -26,35 +25,15 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
 }) => {
   const { data: cabinets = [], isLoading: loading } = useCabinets();
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
-  const [osteopathId, setOsteopathId] = useState<number | null>(null);
   const navigate = useNavigate();
-
-  // Effet pour récupérer l'ostéopathId courant pour le debug
-  useEffect(() => {
-    const getOsteopathId = async () => {
-      try {
-        const id = await getCurrentOsteopathId();
-        setOsteopathId(id);
-        
-      } catch (error) {
-        console.error("Erreur lors de la récupération de l'osteopathId:", error);
-      }
-    };
-    
-    getOsteopathId();
-  }, []);
 
   useEffect(() => {
     if (cabinets.length > 0) {
-      // Si aucun cabinet n'est sélectionné mais qu'il y en a disponibles, sélectionner le premier
+      // Auto-sélection ou trouve le cabinet sélectionné
       if (!selectedCabinetId) {
         setSelectedCabinet(cabinets[0]);
-        if (onCabinetChange) {
-          onCabinetChange(cabinets[0].id);
-        }
-      } 
-      // Si un cabinet est sélectionné, le trouver dans la liste
-      else {
+        onCabinetChange?.(cabinets[0].id);
+      } else {
         const cabinet = cabinets.find(c => c.id === selectedCabinetId);
         if (cabinet) {
           setSelectedCabinet(cabinet);
@@ -65,15 +44,11 @@ export const CabinetSelector: React.FC<CabinetSelectorProps> = ({
 
   const handleCabinetSelect = (cabinet: Cabinet) => {
     setSelectedCabinet(cabinet);
-    if (onCabinetChange) {
-      onCabinetChange(cabinet.id);
-    }
+    onCabinetChange?.(cabinet.id);
   };
 
   if (loading) {
-    return (
-      <Skeleton className={`h-9 w-[200px] rounded-md ${className}`} />
-    );
+    return <Skeleton className={`h-9 w-[200px] rounded-md ${className}`} />;
   }
 
   if (cabinets.length === 0) {

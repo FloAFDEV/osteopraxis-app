@@ -6,30 +6,21 @@ import { osteopathCabinetService } from "../supabase-api/osteopath-cabinet-servi
 import { cabinetCache } from "../cache/cabinet-cache";
 
 // Hook pour accéder au contexte démo depuis les services
-let demoContext: any = null;
 export const setDemoContext = (context: any) => {
-  demoContext = context;
-  // Aussi passer le contexte au cache
   cabinetCache.setDemoContext(context);
 };
 
 export const cabinetService = {
-  async getCabinets(): Promise<Cabinet[]> {
-    // Utiliser le cache global en premier
-    return await cabinetCache.getCabinets();
-  },
-
-  async getCabinetById(id: number): Promise<Cabinet | undefined> {
-    // Utiliser le cache global en premier
-    return await cabinetCache.getCabinetById(id);
-  },
+  // Utiliser le cache directement
+  getCabinets: () => cabinetCache.getCabinets(),
+  getCabinetById: (id: number) => cabinetCache.getCabinetById(id),
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     if (USE_SUPABASE) {
       try {
         const newCabinet = await supabaseCabinetService.createCabinet(cabinet);
         
-        // Automatiquement associer l'ostéopathe au nouveau cabinet
+        // Associer l'ostéopathe au nouveau cabinet
         if (cabinet.osteopathId) {
           await osteopathCabinetService.associateOsteopathToCabinet(
             cabinet.osteopathId, 
@@ -37,12 +28,12 @@ export const cabinetService = {
           );
         }
         
-        // Invalider le cache après création
+        // Invalider le cache
         cabinetCache.invalidate();
         
         return newCabinet;
       } catch (error) {
-        console.error("Erreur Supabase createCabinet:", error);
+        console.error("Erreur createCabinet:", error);
         throw error;
       }
     }
@@ -54,12 +45,11 @@ export const cabinetService = {
   async updateCabinet(id: number, cabinet: Partial<Cabinet>): Promise<Cabinet> {
     if (USE_SUPABASE) {
       try {
-        // Invalider le cache après mise à jour
-        cabinetCache.invalidate(id);
-        
-        return await supabaseCabinetService.updateCabinet(id, cabinet);
+        const result = await supabaseCabinetService.updateCabinet(id, cabinet);
+        cabinetCache.invalidate();
+        return result;
       } catch (error) {
-        console.error("Erreur Supabase updateCabinet:", error);
+        console.error("Erreur updateCabinet:", error);
         throw error;
       }
     }
@@ -71,13 +61,11 @@ export const cabinetService = {
   async deleteCabinet(id: number): Promise<boolean> {
     if (USE_SUPABASE) {
       try {
-        // Invalider le cache après suppression
-        cabinetCache.invalidate(id);
-        
         await supabaseCabinetService.deleteCabinet(id);
+        cabinetCache.invalidate();
         return true;
       } catch (error) {
-        console.error("Erreur Supabase deleteCabinet:", error);
+        console.error("Erreur deleteCabinet:", error);
         throw error;
       }
     }
@@ -86,38 +74,25 @@ export const cabinetService = {
     return false;
   },
 
-  // Méthodes pour la gestion des associations ostéopathe-cabinet (sécurisées)
-  async associateOsteopathToCabinet(osteopathId: number, cabinetId: number): Promise<void> {
-    return await osteopathCabinetService.associateOsteopathToCabinet(osteopathId, cabinetId);
-  },
-
-  async dissociateOsteopathFromCabinet(osteopathId: number, cabinetId: number): Promise<void> {
-    return await osteopathCabinetService.dissociateOsteopathFromCabinet(osteopathId, cabinetId);
-  },
-
-  async getOsteopathCabinets(osteopathId: number): Promise<number[]> {
-    return await osteopathCabinetService.getOsteopathCabinets(osteopathId);
-  },
+  // Méthodes pour les associations ostéopathe-cabinet
+  associateOsteopathToCabinet: osteopathCabinetService.associateOsteopathToCabinet,
+  dissociateOsteopathFromCabinet: osteopathCabinetService.dissociateOsteopathFromCabinet,
+  getOsteopathCabinets: osteopathCabinetService.getOsteopathCabinets,
 
   // Méthodes héritées pour compatibilité
   getCabinetsByUserId: supabaseCabinetService.getCabinetsByUserId,
-  getCabinetsByOsteopathId: async (osteopathId: number): Promise<Cabinet[]> => {
+  async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
     try {
-      // Récupérer les IDs des cabinets associés via le système sécurisé
       const cabinetIds = await osteopathCabinetService.getOsteopathCabinets(osteopathId);
-      
-      // Récupérer les détails de chaque cabinet
       const cabinets = await Promise.all(
         cabinetIds.map(id => supabaseCabinetService.getCabinetById(id))
       );
-      
       return cabinets.filter(Boolean) as Cabinet[];
     } catch (error) {
-      console.error("Erreur lors de la récupération des cabinets de l'ostéopathe:", error);
+      console.error("Erreur getCabinetsByOsteopathId:", error);
       return [];
     }
   },
   
-  // Méthode pour injecter le contexte démo
   setDemoContext,
 };
