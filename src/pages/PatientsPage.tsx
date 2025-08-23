@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
-import { useOptimizedPatients } from "@/hooks/useOptimizedPatients";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Shield } from "lucide-react";
 
@@ -54,7 +53,7 @@ const PatientsPage = () => {
 		refetchOnWindowFocus: false,
 	});
 
-	// Récupération des patients (service original)
+	// Récupération des patients optimisée
 	const {
 		data: allPatients = [],
 		isLoading,
@@ -68,6 +67,8 @@ const PatientsPage = () => {
 		},
 		enabled: !!user?.osteopathId,
 		refetchOnWindowFocus: false,
+		staleTime: 1000 * 60 * 5, // 5 minutes
+		gcTime: 1000 * 60 * 30, // 30 minutes
 	});
 
 	// Filtrer les patients par cabinet sélectionné
@@ -99,10 +100,6 @@ const PatientsPage = () => {
 		}
 	};
 
-	// Force reload on component mount
-	useEffect(() => {
-		refetch();
-	}, [refetch]);
 
 	const handleLetterChange = (letter: string) => {
 		setActiveLetter(letter);
