@@ -128,21 +128,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			navigate("/", { replace: true });
 			
 			// Opérations asynchrones en arrière-plan (sans bloquer)
-			Promise.all([
-				supabase.auth.signOut(),
-				(async () => {
-					try {
-						const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
-						await hybridDataManager.reinitialize();
-					} catch (error) {
-						console.warn('Failed to reinitialize hybrid data manager:', error);
-					}
-				})()
-			]).then(() => {
+			supabase.auth.signOut().then(() => {
 				toast.success("Déconnexion réussie !");
 			}).catch((err) => {
 				console.warn("Logout cleanup failed:", err);
-				// Pas d'erreur affichée car la déconnexion principale a réussi
 			});
 			
 		} catch (err: any) {
@@ -311,15 +300,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 				const hasUser = !!session?.user;
 				setIsAuthenticated(hasUser);
 				
-				// Ré-initialiser le gestionnaire hybride seulement sur les changements significatifs
-				if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
-					try {
-						const { hybridDataManager } = await import('@/services/hybrid-data-adapter');
-						await hybridDataManager.reinitialize();
-					} catch (error) {
-						console.warn('Failed to reinitialize hybrid data manager:', error);
-					}
-				}
+				// Plus besoin de réinitialisation
 
 				if (hasUser) {
 					// Defer any Supabase calls to avoid deadlocks
