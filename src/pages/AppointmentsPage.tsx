@@ -49,10 +49,6 @@ import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
 
 const AppointmentsPage = () => {
-	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
-	const [patients, setPatients] = useState<Patient[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<string>("all");
 	const [appointmentToCancel, setAppointmentToCancel] =
 		useState<Appointment | null>(null);
@@ -71,7 +67,7 @@ const AppointmentsPage = () => {
 		number | undefined
 	>(undefined);
 
-	// Récupération des rendez-vous (service original)
+	// Récupération des rendez-vous optimisée
 	const {
 		data: appointments = [],
 		isLoading: appointmentsLoading,
@@ -85,43 +81,40 @@ const AppointmentsPage = () => {
 		},
 		enabled: !!user?.osteopathId && isAuthenticated,
 		refetchOnWindowFocus: false,
+		staleTime: 1000 * 60 * 5, // 5 minutes
+		gcTime: 1000 * 60 * 30, // 30 minutes
 	});
 
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoading(true);
-		try {
-			// Les rendez-vous viennent du hook
-			setAllAppointments(appointments || []);
-			
-			// Toujours récupérer les patients via l'API classique pour l'instant
-			const patientsData = await api.getPatients();
-			setPatients(patientsData);
-		} catch (error) {
-			console.error("Failed to fetch data:", error);
-			toast.error(
-				"Impossible de charger les données. Veuillez réessayer."
-			);
-		} finally {
-			setLoading(false);
-		}
-	};
-	
-	if (appointments) {
-		fetchData();
-	}
-}, [refreshKey, isDemoMode, appointments]);
+	// Récupération des patients optimisée
+	const {
+		data: patients = [],
+		isLoading: patientsLoading,
+		error: patientsError,
+	} = useQuery({
+		queryKey: ["patients", user?.osteopathId],
+		queryFn: async () => {
+			if (!user?.osteopathId) return [];
+			return await api.getPatients();
+		},
+		enabled: !!user?.osteopathId && isAuthenticated,
+		refetchOnWindowFocus: false,
+		staleTime: 1000 * 60 * 5, // 5 minutes
+		gcTime: 1000 * 60 * 30, // 30 minutes
+	});
+
+	// Loading state combiné
+	const loading = appointmentsLoading || patientsLoading;
+	const error = appointmentsError || patientsError;
+
+	const [searchQuery, setSearchQuery] = useState("");
 
 	const getPatientById = (patientId: number): Patient | undefined => {
 		return patients.find((patient) => patient.id === patientId);
 	};
 
-	// ... keep existing code (getFilteredAppointments, categorizeAppointments, groupAppointmentsByMonthAndDay)
-
-	// Memoize filtered appointments to avoid recalculation on every render if inputs haven't changed
-	// This would be better with useMemo, but for simplicity here, it's a function call
+	// Filtrage des rendez-vous optimisé
 	const getFilteredAppointments = (): Appointment[] => {
-		return allAppointments
+		return appointments
 			.filter((appointment) => {
 				if (
 					statusFilter !== "all" &&
@@ -222,14 +215,8 @@ const AppointmentsPage = () => {
 		if (!appointmentToCancel) return;
 		const originalAppointment = { ...appointmentToCancel }; // Keep original details for toast/rollback
 		try {
-			// Optimistic UI update
-			setAllAppointments((prevAppointments) =>
-				prevAppointments.map((app) =>
-					app.id === appointmentToCancel.id
-						? { ...app, status: "CANCELED" }
-						: app
-				)
-			);
+			// Optimistic UI update - utiliser refetch pour actualiser
+			await refetchAppointments();
 			setAppointmentToCancel(null); // Close dialog immediately
 			toast.success("Séance annulée avec succès");
 
@@ -238,51 +225,24 @@ const AppointmentsPage = () => {
 		} catch (error) {
 			console.error("Error cancelling appointment:", error);
 			toast.error(
-				"Une erreur est survenue lors de l'annulation. La séance a été restaurée."
+				"Une erreur est survenue lors de l'annulation."
 			);
-			// Rollback optimistic update
-			setAllAppointments((prevAppointments) =>
-				prevAppointments.map((app) =>
-					app.id === originalAppointment.id
-						? originalAppointment
-						: app
-				)
-			);
+			// Refresh data on error
+			await refetchAppointments();
 		}
 	};
 
 	// Nouveau handler pour la mise à jour de statut via badge
 	const handleStatusChange = async (appointmentId: number, status: AppointmentStatus) => {
 		try {
-			// ✅ Statut RDV mis à jour
-			
-			// Optimistic UI update
-			setAllAppointments((prevAppointments) =>
-				prevAppointments.map((app) =>
-					app.id === appointmentId
-						? { ...app, status }
-						: app
-				)
-			);
-
 			// Utiliser l'API pour mettre à jour le statut
 			await api.updateAppointmentStatus(appointmentId, status);
 			toast.success("Statut mis à jour avec succès");
+			// Refresh data
+			await refetchAppointments();
 		} catch (error) {
 			console.error("Error updating appointment status:", error);
 			toast.error("Erreur lors de la mise à jour du statut");
-			
-			// Rollback optimistic update
-			setAllAppointments((prevAppointments) =>
-				prevAppointments.map((app) => {
-					if (app.id === appointmentId) {
-						// Find original appointment to restore its status
-						const originalApp = allAppointments.find(a => a.id === appointmentId);
-						return originalApp ? { ...app, status: originalApp.status } : app;
-					}
-					return app;
-				})
-			);
 		}
 	};
 
