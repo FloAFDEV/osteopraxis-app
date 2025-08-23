@@ -132,21 +132,12 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
     await loadStatus();
   }, [loadStatus]);
 
-  // Initialisation au montage du hook
+  // Initialisation au montage du hook - Une seule fois
   useEffect(() => {
     initialize();
-  }, [initialize]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-refresh du statut toutes les 30 secondes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (status?.isUnlocked) {
-        loadStatus();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [status?.isUnlocked, loadStatus]);
+  // Pas d'auto-refresh pour éviter les boucles - sera fait manuellement si nécessaire
 
   return {
     status,
