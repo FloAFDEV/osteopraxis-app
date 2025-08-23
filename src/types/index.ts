@@ -177,37 +177,39 @@ export interface Appointment {
 	patientId: number;
 	cabinetId: number;
 	osteopathId: number;
-	start: string;
-	end: string;
+	date: string; // Timestamp de début de la séance - seule colonne réelle en DB
 	status: AppointmentStatus;
+	reason: string;
 	notes: string | null;
+	notificationSent: boolean;
 	createdAt: string;
 	updatedAt: string;
-	date: string; // Rendu obligatoire pour compatibilité
-	reason: string;
-	notificationSent: boolean;
 	user_id?: string | null;
+	// Propriétés calculées côté client (pas dans la DB)
+	start?: string; // Calculé à partir de 'date'
+	end?: string;   // Calculé à partir de 'date' + durée
 }
 
 // Changed from enum to type union for better compatibility
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHEDULED" | "NO_SHOW";
 
-// Type d'entrée pour créer un rendez-vous (modification pour résoudre les erreurs)
+// Type d'entrée pour créer un rendez-vous - aligné avec la structure DB
 export interface CreateAppointmentPayload {
 	patientId: number;
 	cabinetId: number;
 	osteopathId: number;
-	start: string;
-	end: string; // Gardé pour compatibilité avec le code client mais non utilisé en DB
-	date: string; // Rendu obligatoire pour compatibilité
+	date: string; // Timestamp de début de la séance - seule colonne réelle en DB
 	reason: string;
 	status: AppointmentStatus;
-	notes?: string | null;
 	notificationSent: boolean;
+	notes?: string | null;
 	createdAt?: string;
 	updatedAt?: string;
 	website?: string; // Ajouté pour le honeypot dans le formulaire
-	user_id?: string | null; // Ajouté pour résoudre l'erreur TypeScript
+	user_id?: string | null;
+	// Propriétés optionnelles pour compatibilité interface client
+	start?: string; // Calculé côté client
+	end?: string;   // Calculé côté client
 }
 
 // Interface Invoice mise à jour pour correspondre exactement à la base de données

@@ -7,26 +7,27 @@ export function adaptAppointmentFromSupabase(data: any): Appointment {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
 		osteopathId: data.osteopathId,
-		start: data.date, // Utiliser date comme start
-		end: data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : data.date, // Calculer end à partir de date + 30min
+		date: data.date, // Colonne réelle en DB
 		status: data.status as AppointmentStatus,
+		reason: data.reason,
 		notes: data.notes,
+		notificationSent: data.notificationSent || false,
 		createdAt: data.createdAt,
 		updatedAt: data.updatedAt,
-		date: data.date,
-		reason: data.reason,
-		notificationSent: data.notificationSent || false,
 		user_id: data.user_id,
+		// Propriétés calculées côté client pour la compatibilité
+		start: data.date, // Start = date de début
+		end: data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : data.date, // End = début + 30min
 	};
 }
 
 export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Partial<Appointment>): any {
-	// CORRECTION: Exclure les colonnes start/end qui n'existent pas dans Supabase
+	// CORRECTION: Utiliser seulement les colonnes qui existent dans Supabase
 	const supabaseData: any = {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId,
 		osteopathId: data.osteopathId,
-		date: data.date || data.start, // Utiliser date en priorité, sinon start
+		date: data.date || data.start, // Utiliser date en priorité, sinon start si fourni
 		status: data.status,
 		reason: data.reason,
 		notes: data.notes,
@@ -44,15 +45,15 @@ export function adaptAppointmentToSupabase(data: CreateAppointmentPayload | Part
 	return supabaseData;
 }
 
-export function createAppointmentPayload(data: any): CreateAppointmentPayload {
-	// CORRECTION: Les colonnes start/end sont pour l'interface, pas pour Supabase
+export function createAppointmentPayload(data: any): any {
+	// CORRECTION: Préparer les données pour l'interface client avec start/end calculés
 	return {
 		patientId: data.patientId,
 		cabinetId: data.cabinetId || 1,
 		osteopathId: data.osteopathId,
-		start: data.start || data.date,
-		end: data.end || (data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : undefined),
-		date: data.date || data.start,
+		date: data.date || data.start, // Priorité à date
+		start: data.start || data.date, // Calculé pour l'interface
+		end: data.end || (data.date ? new Date(new Date(data.date).getTime() + 30 * 60000).toISOString() : undefined), // Calculé pour l'interface
 		reason: data.reason,
 		status: data.status || "SCHEDULED",
 		notes: data.notes,

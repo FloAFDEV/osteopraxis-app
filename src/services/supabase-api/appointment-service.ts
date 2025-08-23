@@ -8,23 +8,24 @@ import {
 import { getCurrentOsteopathId } from "./utils/getCurrentOsteopath";
 import { adaptAppointmentFromSupabase, adaptAppointmentToSupabase, createAppointmentPayload } from "./appointment-adapter";
 
-// Type plus spécifique pour la création d'appointment
+// Type plus spécifique pour la création d'appointment - aligné avec la DB Supabase
 type CreateAppointmentPayload = {
-	date: string;
+	date: string; // Timestamp de début de la séance
 	patientId: number;
 	reason: string;
-	start: string;
-	end: string;
 	status?: AppointmentStatus;
 	cabinetId?: number;
 	osteopathId?: number;
 	notificationSent?: boolean;
 	notes?: string | null;
+	// Propriétés optionnelles pour compatibilité client mais non utilisées en DB
+	start?: string;
+	end?: string;
 };
 
-// Type pour l'objet réellement envoyé à Supabase
+// Type pour l'objet réellement envoyé à Supabase - seulement les colonnes qui existent
 type InsertableAppointment = {
-	date: string;
+	date: string; // Timestamp de début
 	patientId: number;
 	reason: string;
 	status: AppointmentStatus;

@@ -37,9 +37,9 @@ const appointments: Appointment[] = [
     patientId: 1,
     cabinetId: 1,
     osteopathId: 1,
+    date: new Date().toISOString(),
     start: new Date().toISOString(),
     end: new Date(new Date().getTime() + 30 * 60000).toISOString(),
-    date: new Date().toISOString(),
     reason: "Consultation de routine",
     status: "SCHEDULED",
     notes: null,
@@ -52,9 +52,9 @@ const appointments: Appointment[] = [
     patientId: 2,
     cabinetId: 1,
     osteopathId: 1,
+    date: new Date().toISOString(),
     start: new Date().toISOString(),
     end: new Date(new Date().getTime() + 30 * 60000).toISOString(),
-    date: new Date().toISOString(),
     reason: "Suivi post-opératoire",
     status: "COMPLETED",
     notes: "Séance complétée avec succès. Patient récupère bien.",
@@ -249,10 +249,12 @@ export const appointmentService = {
     const appointmentWithAllFields = {
       ...sanitized,
       id: appointments.length + 1,
-      start: sanitized.start || sanitized.date,
-      end: sanitized.end || new Date(new Date(sanitized.date).getTime() + 30 * 60000).toISOString(),
-      date: sanitized.date || sanitized.start,
+      date: sanitized.date || new Date().toISOString(),
+      start: sanitized.start || sanitized.date || new Date().toISOString(),
+      end: sanitized.end || new Date(new Date(sanitized.date || new Date()).getTime() + 30 * 60000).toISOString(),
       osteopathId: sanitized.osteopathId || 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     } as Appointment;
     appointments.push(appointmentWithAllFields);
     console.log("appointmentService.createAppointment: Local mode result:", appointmentWithAllFields);
