@@ -139,41 +139,8 @@ export class HybridDataManager {
    * Réinitialise le gestionnaire pour un changement d'état d'authentification
    */
   async reinitialize(): Promise<void> {
-    // Si déjà initialisé, pas besoin de réinitialiser
-    if (this.initialized && !this.initializing) {
-      console.log('✅ Already initialized, skipping reinitialize');
-      return;
-    }
-    
-    if (this.initializing) {
-      console.log('⏳ Initialization already in progress, waiting...');
-      while (this.initializing) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      return;
-    }
-    
-    console.log('🔄 Reinitializing Hybrid Data Manager...');
-    
-    // Nettoyer l'état existant
-    this.initialized = false;
-    // Créer un nouveau adaptateur pour éviter les conflits
-    const defaultConfig: HybridConfig = {
-      fallbackToCloud: false, // IMPORTANT: Pas de fallback pour les utilisateurs connectés
-      syncMode: 'none',
-      encryption: {
-        enabled: true,
-        keyDerivation: 'pbkdf2'
-      },
-      backup: {
-        autoBackup: true,
-        backupInterval: 60,
-        maxBackups: 7
-      }
-    };
-    this.adapter = new HybridDataAdapter(defaultConfig);
-    
-    await this.initialize();
+    // Ne pas réinitialiser inutilement
+    return;
   }
 
   /**
