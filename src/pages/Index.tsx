@@ -10,11 +10,7 @@ const Index = () => {
     <Layout>
       <div className="space-y-8">
         <div className="animate-fade-in animate-delay-300">
-          {loading.initializing ? (
-            <SmartSkeleton type="dashboard" />
-          ) : (
-            <Dashboard />
-          )}
+          <Dashboard />
         </div>
       </div>
     </Layout>
