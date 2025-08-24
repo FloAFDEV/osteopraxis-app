@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Invoice, Appointment, Patient, Osteopath } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { useForm, Controller } from "react-hook-form";
@@ -144,9 +143,8 @@ export function InvoiceForm({
       <InvoiceOsteopathInput control={form.control} isSubmitting={isSubmitting} />
       {/* Patient */}
       <div>
-        <Label htmlFor="patient-readonly">Patient</Label>
+        <label className="block text-sm mb-1 font-semibold text-muted-foreground">Patient</label>
         <Input
-          id="patient-readonly"
           disabled
           value={
             patient
@@ -169,23 +167,21 @@ export function InvoiceForm({
             name="tvaExoneration"
             render={({ field }) => (
               <Checkbox
-                id="tva-exoneration"
                 checked={!!field.value}
                 onCheckedChange={checked => field.onChange(!!checked)}
                 disabled={isSubmitting}
               />
             )}
           />
-          <Label htmlFor="tva-exoneration" className="text-sm">
+          <label className="text-sm">
             Exonération de TVA
-          </Label>
+          </label>
         </div>
         {/* Si pas d’exonération → motif obligatoire */}
         {!tvaExoneration && (
           <div className="mt-2">
-            <Label htmlFor="tva-motif" className="block text-xs mb-1">Motif</Label>
+            <label className="block text-xs mb-1">Motif</label>
             <Input
-              id="tva-motif"
               {...form.register("tvaMotif")}
               disabled={isSubmitting || tvaExoneration}
               placeholder="Renseigner le motif d’application de la TVA"
@@ -200,8 +196,8 @@ export function InvoiceForm({
       </div>
       {/* Notes complémentaires */}
       <div>
-        <Label htmlFor="notes" className="block text-sm mb-1">Notes complémentaires</Label>
-        <Textarea id="notes" {...form.register("notes")} disabled={isSubmitting} rows={3} />
+        <label className="block text-sm mb-1">Notes complémentaires</label>
+        <Textarea {...form.register("notes")} disabled={isSubmitting} rows={3} />
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <Button type="submit" disabled={isSubmitting} className="min-w-[140px]">

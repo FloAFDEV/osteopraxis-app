@@ -343,25 +343,6 @@ export function checkNativeStorageSupport(): { supported: boolean; details: stri
     details.push('✅ Contexte sécurisé (HTTPS/localhost)');
   }
 
-  // Vérifier si nous sommes dans un iframe cross-origin (comme Lovable)
-  try {
-    if (window.self !== window.top) {
-      details.push('⚠️ Iframe détectée - File System Access peut être restreinte');
-      // On teste si l'API est vraiment accessible
-      if ('showDirectoryPicker' in window) {
-        // Test rapide pour voir si l'API va fonctionner
-        const userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
-          details.push('⚠️ Safari dans iframe - API probablement non accessible');
-          supported = false;
-        }
-      }
-    }
-  } catch (e) {
-    details.push('⚠️ Contexte iframe cross-origin détecté - API restreinte');
-    supported = false;
-  }
-
   return { supported, details };
 }
 
@@ -374,7 +355,6 @@ export async function requestStorageDirectory(): Promise<FileSystemDirectoryHand
   }
 
   try {
-    // Test si nous sommes dans un contexte qui permet l'API
     const dirHandle = await (window as any).showDirectoryPicker({
       mode: 'readwrite',
       startIn: 'documents'
@@ -382,17 +362,8 @@ export async function requestStorageDirectory(): Promise<FileSystemDirectoryHand
     
     console.log('✅ Accès au dossier de stockage accordé');
     return dirHandle;
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Erreur accès dossier:', error);
-    
-    // Si l'erreur est liée au contexte iframe/cross-origin
-    if (error.name === 'SecurityError' && 
-        (error.message.includes('Cross origin') || 
-         error.message.includes('iframe') ||
-         error.message.includes('file picker'))) {
-      throw new Error('IFRAME_RESTRICTION: File System Access API non accessible dans ce contexte (iframe cross-origin)');
-    }
-    
     throw error;
   }
 }
