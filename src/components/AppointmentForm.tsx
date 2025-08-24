@@ -240,17 +240,9 @@ export function AppointmentForm({
 			}
 			dateTime.setHours(hours, minutes);
 
-			// L'heure de fin de séance est l'heure du submit SEULEMENT SI statut = COMPLETED
-			let endDateTime: Date | undefined;
-			if (data.status === "COMPLETED") {
-				endDateTime = new Date(); // On prend l'heure du submit
-			}
-
 			const appointmentData = {
 				patientId: data.patientId,
 				date: dateTime.toISOString(),
-				start: dateTime.toISOString(),
-				end: endDateTime ? endDateTime.toISOString() : undefined,
 				reason: data.reason,
 				notes: data.notes || null,
 				status: data.status as AppointmentStatus,
