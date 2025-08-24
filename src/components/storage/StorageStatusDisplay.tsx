@@ -10,12 +10,18 @@ import {
   Lock, 
   CheckCircle, 
   AlertCircle,
-  Info
+  Info,
+  User
 } from "lucide-react";
 import { useHybridStorage } from "@/hooks/useHybridStorage";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const StorageStatusDisplay: React.FC = () => {
   const { status, isLoading } = useHybridStorage();
+  const { user } = useAuth();
+  
+  // Détecter le mode démo
+  const isDemoMode = user?.email?.includes('demo') || user?.id?.toString().includes('demo');
 
   if (isLoading) {
     return (
@@ -31,6 +37,28 @@ export const StorageStatusDisplay: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Message d'information pour le mode démo */}
+      {isDemoMode && (
+        <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/20 dark:border-amber-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+              <User className="h-5 w-5" />
+              Mode démonstration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                ⚠️ Vous êtes en mode démonstration. Aucune donnée ne sera enregistrée en stockage local.
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Les données saisies seront automatiquement supprimées dans quelques minutes.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* État général du stockage */}
       <Card>
         <CardHeader>
