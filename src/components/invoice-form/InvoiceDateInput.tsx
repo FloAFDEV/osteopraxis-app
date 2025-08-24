@@ -1,6 +1,7 @@
 
 import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface InvoiceDateInputProps {
   control: any;
@@ -10,12 +11,13 @@ interface InvoiceDateInputProps {
 export function InvoiceDateInput({ control, isSubmitting }: InvoiceDateInputProps) {
   return (
     <div>
-      <label className="block text-sm mb-1">Date de la facture</label>
+      <Label htmlFor="date-input" className="block text-sm mb-1">Date de la facture</Label>
       <Controller
         control={control}
         name="date"
         render={({ field }) => (
           <Input
+            id="date-input"
             type="date"
             {...field}
             value={field.value}

@@ -3,6 +3,7 @@ import { Invoice, Appointment, Patient, Osteopath } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -143,8 +144,9 @@ export function InvoiceForm({
       <InvoiceOsteopathInput control={form.control} isSubmitting={isSubmitting} />
       {/* Patient */}
       <div>
-        <label className="block text-sm mb-1 font-semibold text-muted-foreground">Patient</label>
+        <Label htmlFor="patient-input" className="block text-sm mb-1 font-semibold text-muted-foreground">Patient</Label>
         <Input
+          id="patient-input"
           disabled
           value={
             patient
@@ -162,26 +164,28 @@ export function InvoiceForm({
       {/* Exonération TVA */}
       <div className="mt-2">
         <div className="flex items-center gap-2">
-          <Controller
+            <Controller
             control={form.control}
             name="tvaExoneration"
             render={({ field }) => (
               <Checkbox
+                id="tva-exoneration"
                 checked={!!field.value}
                 onCheckedChange={checked => field.onChange(!!checked)}
                 disabled={isSubmitting}
               />
             )}
           />
-          <label className="text-sm">
+          <Label htmlFor="tva-exoneration" className="text-sm">
             Exonération de TVA
-          </label>
+          </Label>
         </div>
         {/* Si pas d’exonération → motif obligatoire */}
         {!tvaExoneration && (
           <div className="mt-2">
-            <label className="block text-xs mb-1">Motif</label>
+            <Label htmlFor="tva-motif" className="block text-xs mb-1">Motif</Label>
             <Input
+              id="tva-motif"
               {...form.register("tvaMotif")}
               disabled={isSubmitting || tvaExoneration}
               placeholder="Renseigner le motif d’application de la TVA"
@@ -196,8 +200,8 @@ export function InvoiceForm({
       </div>
       {/* Notes complémentaires */}
       <div>
-        <label className="block text-sm mb-1">Notes complémentaires</label>
-        <Textarea {...form.register("notes")} disabled={isSubmitting} rows={3} />
+        <Label htmlFor="notes-input" className="block text-sm mb-1">Notes complémentaires</Label>
+        <Textarea id="notes-input" {...form.register("notes")} disabled={isSubmitting} rows={3} />
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <Button type="submit" disabled={isSubmitting} className="min-w-[140px]">
