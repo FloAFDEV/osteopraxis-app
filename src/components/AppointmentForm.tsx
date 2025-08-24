@@ -130,8 +130,6 @@ export function AppointmentForm({
 
 	// Updated useEffect to load appointment details for calendar
 	useEffect(() => {
-		if (!isAuthenticated) return; // Ne pas charger si pas authentifié
-		
 		const loadAppointmentData = async () => {
 			try {
 				const appointments = await api.getAppointments();
