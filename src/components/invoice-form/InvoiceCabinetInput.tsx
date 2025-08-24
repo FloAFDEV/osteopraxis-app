@@ -4,6 +4,7 @@ import { Controller } from "react-hook-form";
 import { Cabinet, Osteopath } from "@/types";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { api } from "@/services/api";
 
 interface InvoiceCabinetInputProps {
@@ -32,8 +33,8 @@ export function InvoiceCabinetInput({ control, isSubmitting, selectedOsteopathId
   if (!selectedOsteopathId) {
     return (
       <div>
-        <label className="block text-sm mb-1 font-semibold text-muted-foreground">Cabinet</label>
-        <Input disabled value="Sélectionnez d'abord un praticien" />
+        <Label htmlFor="cabinet-disabled">Cabinet</Label>
+        <Input id="cabinet-disabled" disabled value="Sélectionnez d'abord un praticien" />
       </div>
     );
   }
@@ -41,15 +42,15 @@ export function InvoiceCabinetInput({ control, isSubmitting, selectedOsteopathId
   if (loading) {
     return (
       <div>
-        <label className="block text-sm mb-1 font-semibold text-muted-foreground">Cabinet</label>
-        <Input disabled value="Chargement..." />
+        <Label htmlFor="cabinet-loading">Cabinet</Label>
+        <Input id="cabinet-loading" disabled value="Chargement..." />
       </div>
     );
   }
 
   return (
     <div>
-      <label className="block text-sm mb-1 font-semibold text-muted-foreground">Cabinet</label>
+      <Label htmlFor="cabinet-select">Cabinet</Label>
       <Controller
         control={control}
         name="cabinetId"
@@ -59,7 +60,7 @@ export function InvoiceCabinetInput({ control, isSubmitting, selectedOsteopathId
             onValueChange={v => field.onChange(Number(v))}
             disabled={isSubmitting}
           >
-            <SelectTrigger>
+            <SelectTrigger id="cabinet-select">
               <SelectValue placeholder="Choisir le cabinet" />
             </SelectTrigger>
             <SelectContent>

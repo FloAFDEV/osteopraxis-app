@@ -3,6 +3,7 @@ import React from "react";
 import { Controller } from "react-hook-form";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuthorizedOsteopaths } from "@/hooks/useAuthorizedOsteopaths";
 import { Badge } from "@/components/ui/badge";
 import { User, Users, UserCheck } from "lucide-react";
@@ -20,8 +21,8 @@ export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopat
   if (loading) {
     return (
       <div>
-        <label className="block text-sm mb-1">Émetteur</label>
-        <Input disabled value="Chargement..." />
+        <Label htmlFor="emetteur-loading">Émetteur</Label>
+        <Input id="emetteur-loading" disabled value="Chargement..." />
       </div>
     );
   }
@@ -67,7 +68,7 @@ export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopat
 
   return (
     <div>
-      <label className="block text-sm mb-1 font-semibold text-muted-foreground">Émetteur (Ostéopathe)</label>
+      <Label htmlFor="osteopath-select">Émetteur (Ostéopathe)</Label>
       <Controller
         control={control}
         name="osteopathId"
@@ -77,7 +78,7 @@ export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopat
             onValueChange={v => field.onChange(Number(v))}
             disabled={isSubmitting}
           >
-            <SelectTrigger>
+            <SelectTrigger id="osteopath-select">
               <SelectValue placeholder="Choisir l'ostéopathe émetteur" />
             </SelectTrigger>
             <SelectContent>
