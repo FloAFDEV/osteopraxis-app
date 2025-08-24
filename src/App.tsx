@@ -11,6 +11,8 @@ import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { DemoDataManager } from "@/components/demo/DemoDataManager";
 import { DemoSessionTimer } from "@/components/demo/DemoSessionTimer";
+import { SkipToContent } from "@/components/accessibility/SkipToContent";
+import { SecurityHeaders } from "@/components/security/SecurityHeaders";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -73,9 +75,11 @@ function App() {
               <PrivacyProvider>
                 <DemoProvider>
                   <Router>
-                  <AuthProvider>
-                    <div className="min-h-screen bg-background">
-                      <DemoDataManager />
+                    <AuthProvider>
+                      <SecurityHeaders />
+                      <SkipToContent />
+                      <div id="main-content" className="min-h-screen bg-background">
+                        <DemoDataManager />
                       
                       <Routes>
                         {/* Routes publiques */}

@@ -2031,6 +2031,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      can_access_patient_secure: {
+        Args: { patient_id: number }
+        Returns: boolean
+      }
       can_osteopath_access_patient: {
         Args: { osteopath_auth_id: string; patient_id: number }
         Returns: boolean
@@ -2160,6 +2164,10 @@ export type Database = {
       scheduled_cleanup: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      secure_cleanup_expired_data: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       security_health_check: {
         Args: Record<PropertyKey, never>
