@@ -80,62 +80,6 @@ export const StorageStatusDisplay: React.FC = () => {
       </Card>
 
 
-      {/* Informations techniques */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Info className="h-5 w-5 text-primary" />
-            Informations techniques
-          </CardTitle>
-          <CardDescription>
-            Détails sur votre stockage local
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Format de stockage</span>
-                <Badge variant="outline">SQLite + OPFS</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Base de données SQLite stockée dans le système de fichiers privé du navigateur
-              </p>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Localisation</span>
-                <Badge variant="outline">Origin Private File System</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Fichier: <code>patienthub.sqlite</code> (accessible uniquement à cette application)
-              </p>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Sécurité</span>
-                <Badge variant="outline">Chiffrement navigateur</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Protection automatique par le navigateur, isolation par domaine
-              </p>
-            </div>
-
-            {status?.lastBackup && (
-              <div>
-                <div className="flex items-center justify-between text-sm">
-                  <span>Dernière sauvegarde</span>
-                  <span className="text-xs">
-                    {new Date(status.lastBackup).toLocaleString('fr-FR')}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Alertes de conformité */}
       {!status?.localAvailable && (

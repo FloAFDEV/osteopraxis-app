@@ -29,15 +29,6 @@ const HybridStorageSettingsPage: React.FC = () => {
 
           {/* Affichage du statut en temps réel */}
           <StorageStatusDisplay />
-
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h3 className="font-medium text-green-800 mb-2">✅ Stockage Local Configuré</h3>
-            <div className="text-sm text-green-700 space-y-2">
-              <p>
-                Votre stockage local sécurisé est configuré et opérationnel. Les données sensibles sont protégées localement selon les standards HDS.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </Layout>
