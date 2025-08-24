@@ -1,8 +1,14 @@
+# Robots.txt pour PatientHub
+# Gestion de l'indexation SEO et protection contre les bots malveillants
+
+# Moteurs de recherche autorisés
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +16,43 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
+# Autres bots autorisés
+User-agent: LinkedInBot
 Allow: /
+
+# Bots malveillants bloqués
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# Routes protégées - interdites à tous les bots
+User-agent: *
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /patients/
+Disallow: /appointments/
+Disallow: /invoices/
+Disallow: /settings/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /*.json$
+Disallow: /*?
+Allow: /
+
+# Limiter la fréquence pour les autres bots
+Crawl-delay: 2
+
+# Sitemap
+Sitemap: https://www.patienthub.fr/sitemap.xml
