@@ -48,12 +48,22 @@ export class NativeStorageManager {
       // Vérifier le support
       const support = this.checkSupport();
       if (!support.supported) {
-        throw new Error(`Stockage natif non supporté: ${support.details.join(', ')}`);
+        const errorMsg = `Stockage natif non supporté: ${support.details.join(', ')}`;
+        console.warn(errorMsg);
+        throw new Error(errorMsg);
       }
 
       // Demander l'accès au dossier si pas fourni
       if (!config?.directoryHandle) {
-        this.directoryHandle = await requestStorageDirectory();
+        try {
+          this.directoryHandle = await requestStorageDirectory();
+        } catch (error: any) {
+          // Si c'est une restriction iframe, on renvoie une erreur spécifique
+          if (error.message?.includes('IFRAME_RESTRICTION')) {
+            throw new Error('IFRAME_RESTRICTION: Configuration du stockage natif impossible dans cet environnement (iframe cross-origin). Utilisation du stockage OPFS recommandée.');
+          }
+          throw error;
+        }
       } else {
         this.directoryHandle = config.directoryHandle;
       }

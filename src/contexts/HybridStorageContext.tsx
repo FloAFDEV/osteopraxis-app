@@ -72,8 +72,26 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
       await initialize();
       
       toast.success('Configuration de stockage local réussie !');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Storage configuration failed:', error);
+      
+      // Si c'est une restriction iframe, on propose l'OPFS automatiquement
+      if (error.message?.includes('IFRAME_RESTRICTION')) {
+        console.log('🔄 Basculement automatique vers OPFS suite à restriction iframe...');
+        toast.info('Basculement automatique vers le stockage OPFS (environnement de développement)');
+        
+        // Essayer d'initialiser avec OPFS
+        try {
+          await initialize();
+          setShowSetup(false);
+          setShowUnlock(false);
+          toast.success('Stockage OPFS configuré avec succès !');
+          return;
+        } catch (opfsError) {
+          console.error('OPFS fallback failed:', opfsError);
+        }
+      }
+      
       toast.error('Erreur lors de la configuration du stockage');
       throw error;
     }

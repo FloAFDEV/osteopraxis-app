@@ -59,6 +59,28 @@ export const StorageStatusDisplay: React.FC = () => {
         </Card>
       )}
 
+      {/* Message spécifique à l'environnement Lovable */}
+      {!isDemoMode && window.self !== window.top && (
+        <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
+              <Info className="h-5 w-5" />
+              Environnement de développement
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                💡 Dans cet environnement, le stockage OPFS est utilisé automatiquement pour assurer la conformité HDS.
+              </p>
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                En production, le stockage natif File System Access sera disponible pour une sécurité maximale.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* État général du stockage */}
       <Card>
         <CardHeader>
