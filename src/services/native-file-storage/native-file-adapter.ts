@@ -350,11 +350,6 @@ export function checkNativeStorageSupport(): { supported: boolean; details: stri
  * Demander l'accès au dossier de stockage
  */
 export async function requestStorageDirectory(): Promise<FileSystemDirectoryHandle> {
-  // Vérifier si nous sommes dans un iframe (Lovable environment)
-  if (window !== window.top) {
-    throw new Error('Le sélecteur de dossier n\'est pas disponible dans cet environnement. Utilisez le stockage local intégré à la place.');
-  }
-
   if (!('showDirectoryPicker' in window)) {
     throw new Error('File System Access API non supportée');
   }

@@ -45,30 +45,7 @@ export class NativeStorageManager {
     try {
       console.log('🚀 Configuration du stockage natif...');
       
-      // Si nous sommes dans un iframe (Lovable), utiliser le stockage local persistant
-      if (window !== window.top) {
-        console.log('🔍 Environnement iframe détecté, utilisation du stockage local persistant');
-        
-        // Configuration simplifiée pour l'environnement Lovable
-        this.configured = true;
-        this.unlocked = true;
-        this.directoryHandle = null; // Pas de handle physique nécessaire
-        this.encryptionKey = config?.encryptionKey || null;
-
-        console.log('✅ Stockage local persistant configuré (environnement iframe)');
-        
-        // Sauvegarder la configuration
-        localStorage.setItem('native-storage-config', JSON.stringify({
-          configured: true,
-          entities: config?.entities || ['patients', 'appointments', 'invoices'],
-          hasEncryption: !!this.encryptionKey,
-          storageType: 'persistent-local'
-        }));
-        
-        return;
-      }
-
-      // Vérifier le support pour les environnements normaux
+      // Vérifier le support
       const support = this.checkSupport();
       if (!support.supported) {
         throw new Error(`Stockage natif non supporté: ${support.details.join(', ')}`);
@@ -102,8 +79,7 @@ export class NativeStorageManager {
       localStorage.setItem('native-storage-config', JSON.stringify({
         configured: true,
         entities,
-        hasEncryption: !!this.encryptionKey,
-        storageType: 'native-file-system'
+        hasEncryption: !!this.encryptionKey
       }));
 
     } catch (error) {
