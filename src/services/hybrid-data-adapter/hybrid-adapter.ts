@@ -41,29 +41,28 @@ export class HybridDataAdapter {
       const adapter = this.localAdapters.get(entityName);
       
       if (isHDSEntity) {
-        // Vérifier si on est en mode démo via la session
+        // Vérifier si on est en mode démo
         const { isDemoSession } = await import('@/utils/demo-detection');
         const isDemoMode = await isDemoSession();
         
-        // En mode démo : Autoriser le stockage cloud UNIQUEMENT
+        // En mode démo : Utiliser le stockage cloud
         if (isDemoMode) {
-          console.log(`🎭 Mode démo détecté pour ${entityName} - Utilisation stockage cloud éphémère`);
+          console.log(`🎭 Mode démo - Stockage cloud pour ${entityName}`);
           const cloudAdapter = this.cloudAdapters.get(entityName);
           if (cloudAdapter) return cloudAdapter;
           throw new HybridStorageError(`❌ Aucun adaptateur cloud pour ${entityName} en mode démo`, DataLocation.CLOUD, 'getAdapter');
         }
         
-        // EN MODE AUTHENTIFIÉ RÉEL: STOCKAGE LOCAL NATIF OBLIGATOIRE (OPFS/IndexedDB persistant)
+        // Mode connecté : OBLIGATOIREMENT stockage local pour données HDS
         if (!adapter) {
-          console.error(`❌ CONFORMITÉ HDS CRITIQUE: Aucun adaptateur local natif pour '${entityName}'`);
           throw new HybridStorageError(
-            `❌ CONFORMITÉ HDS VIOLÉE: L'entité '${entityName}' DOIT être stockée dans le stockage local natif sécurisé (pas localStorage). Veuillez configurer votre stockage local.`,
+            `❌ ERREUR: Aucun adaptateur local configuré pour '${entityName}'. Les données HDS doivent être stockées localement.`,
             DataLocation.LOCAL,
             'getAdapter'
           );
         }
         
-        console.log(`🛡️ Utilisation stockage local natif sécurisé pour '${entityName}' (OPFS/IndexedDB)`);
+        console.log(`🛡️ Stockage local sécurisé pour '${entityName}'`);
         return adapter;
       }
       
@@ -118,37 +117,16 @@ export class HybridDataAdapter {
   async create<T>(entityName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
     try {
       const adapter = await this.getAdapter<T>(entityName);
-      const adapterLocation = adapter.getLocation();
-      
-      // Données HDS sensibles - Stockage local natif OBLIGATOIRE
-      const sensitiveHDSEntities = ['patients', 'appointments', 'invoices'];
-      const isHDSEntity = sensitiveHDSEntities.includes(entityName);
-      
-      if (isHDSEntity && adapterLocation === DataLocation.CLOUD) {
-        // Vérifier si on est en mode démo avant de refuser
-        const { isDemoSession } = await import('@/utils/demo-detection');
-        const isDemoMode = await isDemoSession();
-        
-        // EN MODE IDENTIFIÉ RÉEL: ACCEPTER TEMPORAIREMENT le stockage cloud en cas d'erreur locale
-        if (!isDemoMode) {
-          console.warn(`⚠️ ATTENTION: Données HDS '${entityName}' stockées en cloud temporairement (non-conforme HDS). Le stockage local devrait être disponible.`);
-          // Ne pas bloquer complètement - permettre le stockage cloud en attendant
-        }
-        
-        // En mode démo, autoriser le stockage cloud
-        console.log(`🎭 Mode démo - Autorisation stockage cloud pour ${entityName}`);
-      }
-      
       const result = await adapter.create(data);
       
-      // Déclencher une sauvegarde automatique si activée
-      if (this.config.backup.autoBackup && adapterLocation === DataLocation.LOCAL) {
+      // Déclencher une sauvegarde automatique si stockage local
+      if (adapter.getLocation() === DataLocation.LOCAL && this.config.backup.autoBackup) {
         this.scheduleBackup();
       }
       
       return result;
     } catch (error) {
-      console.error(`Error in create for ${entityName}:`, error);
+      console.error(`❌ Erreur création ${entityName}:`, error);
       throw error;
     }
   }

@@ -84,37 +84,23 @@ export class HybridDataManager {
           this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
           this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
           
-          // Données HDS sensibles -> OBLIGATOIREMENT stockage local (conformité française)
+          // Données HDS sensibles -> Stockage local obligatoire
           console.log('🛠️ Initialisation du stockage local pour données HDS...');
           const localAdapters = await initializeLocalAdapters();
           this.adapter.registerLocalAdapter('patients', localAdapters.patients);
           this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
           this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-          console.log('✅ Configuration hybride conforme HDS : données sensibles en local uniquement (IndexedDB persistant)');
+          console.log('✅ Stockage local configuré pour données HDS');
         } catch (permissionError) {
-          console.error('❌ PERMISSIONS SUPABASE: Pas d\'accès aux données cloud', permissionError);
+          console.error('❌ Erreur Supabase:', permissionError);
           
-          // En cas d'erreur Supabase, on initialise quand même le stockage local pour les données HDS
-          console.log('🛠️ Initialisation du stockage local pour données HDS (fallback)...');
-          try {
-            const localAdapters = await initializeLocalAdapters();
-            this.adapter.registerLocalAdapter('patients', localAdapters.patients);
-            this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
-            this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-            console.log('✅ Stockage local HDS initialisé malgré erreur Supabase');
-          } catch (localError) {
-            console.error('❌ ERREUR CRITIQUE: Impossible d\'initialiser le stockage local', localError);
-            // En dernier recours, utiliser les adaptateurs cloud
-            console.log('🔄 Fallback vers stockage cloud (non conforme HDS)');
-            this.adapter.registerCloudAdapter('patients', cloudAdapters.patients);
-            this.adapter.registerCloudAdapter('appointments', cloudAdapters.appointments);
-            this.adapter.registerCloudAdapter('invoices', cloudAdapters.invoices);
-            this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
-            this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
-            this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
-            this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
-            this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
-          }
+          // Même en cas d'erreur Supabase, initialiser le stockage local pour HDS
+          console.log('🛠️ Initialisation stockage local (fallback)...');
+          const localAdapters = await initializeLocalAdapters();
+          this.adapter.registerLocalAdapter('patients', localAdapters.patients);
+          this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
+          this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+          console.log('✅ Stockage local HDS configuré malgré erreur Supabase');
         }
       } else {
         // MODE DÉMO: Toutes les données en Supabase éphémère
