@@ -82,28 +82,33 @@ export function InvoiceForm({
 
   // SUBMIT
   const onSubmit = async (data: any) => {
+    // Validation avec alertes
+    const validationErrors = [];
+    
     if (!patient) {
-      toast.error("Veuillez spécifier un patient.");
-      return;
+      validationErrors.push("• Patient requis");
     }
     if (!data.osteopathId) {
-      toast.error("Veuillez sélectionner l'émetteur (ostéopathe).");
-      return;
+      validationErrors.push("• Émetteur (ostéopathe) requis");
     }
     if (!data.date) {
-      toast.error("Veuillez saisir la date de la note d'honoraires.");
-      return;
+      validationErrors.push("• Date de la note d'honoraires requise");
     }
     if (!data.amount || data.amount <= 0) {
-      toast.error("Veuillez saisir un montant valide.");
-      return;
+      validationErrors.push("• Montant valide requis");
     }
     if (!data.paymentMethod) {
-      toast.error("Le mode de paiement est requis.");
-      return;
+      validationErrors.push("• Mode de paiement requis");
     }
     if (!data.paymentStatus) {
-      toast.error("Le statut de paiement est requis.");
+      validationErrors.push("• Statut de paiement requis");
+    }
+
+    if (validationErrors.length > 0) {
+      toast.error(
+        "Veuillez corriger les erreurs suivantes :\n" + validationErrors.join("\n"),
+        { duration: 5000 }
+      );
       return;
     }
 
@@ -141,7 +146,7 @@ export function InvoiceForm({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
       <h2 className="text-lg font-semibold mb-2">
-        Note d'honoraire
+        Note d'honoraires
       </h2>
       {/* Émetteur (ostéopathe) */}
       <InvoiceOsteopathInput control={form.control} isSubmitting={isSubmitting} />
@@ -209,7 +214,7 @@ export function InvoiceForm({
       <div className="flex justify-end gap-2 pt-2">
         <Button type="submit" disabled={isSubmitting} className="min-w-[140px]">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {isEditing ? "Mettre à jour" : "Créer la note d'honoraire"}
+          {isEditing ? "Mettre à jour" : "Créer la note d'honoraires"}
         </Button>
       </div>
     </form>
