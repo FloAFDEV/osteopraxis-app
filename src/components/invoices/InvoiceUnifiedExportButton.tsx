@@ -92,7 +92,7 @@ export const InvoiceUnifiedExportButton: React.FC<InvoiceUnifiedExportButtonProp
             disabled={!hasInvoices}
             variant="outline"
             size={isMobile ? "sm" : "default"}
-            className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground border-border hover:border-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex items-center gap-2 bg-secondary hover:bg-accent text-secondary-foreground hover:text-accent-foreground border-border hover:border-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <FileDown className="h-4 w-4" />
             PDF {selectedMonth ? "du mois" : "de l'année"}
