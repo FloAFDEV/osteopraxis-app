@@ -20,6 +20,14 @@ export const StorageStatusDisplay: React.FC = () => {
   const { status, isLoading } = useHybridStorage();
   const { user } = useAuth();
   
+  // Vérifier si l'utilisateur est admin
+  const isAdmin = user?.email?.includes('admin');
+  
+  // Si ce n'est pas un admin, ne pas afficher le diagnostic technique
+  if (!isAdmin) {
+    return null;
+  }
+  
   // Détecter le mode démo
   const isDemoMode = user?.email?.includes('demo') || user?.id?.toString().includes('demo');
 
