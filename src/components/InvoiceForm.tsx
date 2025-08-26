@@ -194,7 +194,7 @@ export function InvoiceForm({
       <div className="flex justify-end gap-2 pt-2">
         <Button type="submit" disabled={isSubmitting} className="min-w-[140px]">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {isEditing ? "Mettre à jour" : "Créer la facture"}
+          {isEditing ? "Mettre à jour" : "Créer la note d'honoraire"}
         </Button>
       </div>
     </form>

@@ -203,35 +203,50 @@ const InvoicesPage = () => {
     setPrintCabinet(relatedData.cabinet);
   };
   const handleDownloadInvoice = async (invoice: Invoice) => {
-    // Load related data before printing
-    const relatedData = await loadInvoiceRelatedData(invoice);
-    setIsPreparingPrint(true);
-    setPrintInvoice(invoice);
-    setPrintPatient(relatedData.patient);
-    setPrintOsteopath(relatedData.osteopath);
-    setPrintCabinet(relatedData.cabinet);
-    setPrintAllInvoices(null);
-  };
-  const handleDownloadAllInvoices = async () => {
-    const yearInvoices = filteredInvoices.filter(invoice => {
-      const date = new Date(invoice.date);
-      return date.getFullYear().toString() === selectedYear;
-    });
-    if (yearInvoices.length === 0) {
-      toast.error(`Aucune facture trouvée pour l'année ${selectedYear}`);
-      return;
-    }
-
-    // For multiple invoices, use the first one's data
-    if (yearInvoices.length > 0) {
-      const relatedData = await loadInvoiceRelatedData(yearInvoices[0]);
-      setPrintPatient(null);
+    try {
+      // Load related data before printing
+      const relatedData = await loadInvoiceRelatedData(invoice);
+      setIsPreparingPrint(true);
+      setPrintInvoice(invoice);
+      setPrintPatient(relatedData.patient);
       setPrintOsteopath(relatedData.osteopath);
       setPrintCabinet(relatedData.cabinet);
+      setPrintAllInvoices(null);
+      setReadyToPrint(true);
+    } catch (error) {
+      console.error("Erreur lors de la préparation de l'impression:", error);
+      toast.error("Erreur lors de la préparation du PDF");
+      setIsPreparingPrint(false);
     }
-    setPrintAllInvoices(yearInvoices);
-    setPrintInvoice(null);
-    toast.info(`Préparation du téléchargement des ${yearInvoices.length} factures de ${selectedYear}...`);
+  };
+  const handleDownloadAllInvoices = async () => {
+    try {
+      const yearInvoices = filteredInvoices.filter(invoice => {
+        const date = new Date(invoice.date);
+        return date.getFullYear().toString() === selectedYear;
+      });
+      if (yearInvoices.length === 0) {
+        toast.error(`Aucune facture trouvée pour l'année ${selectedYear}`);
+        return;
+      }
+
+      setIsPreparingPrint(true);
+      // For multiple invoices, use the first one's data
+      if (yearInvoices.length > 0) {
+        const relatedData = await loadInvoiceRelatedData(yearInvoices[0]);
+        setPrintPatient(null);
+        setPrintOsteopath(relatedData.osteopath);
+        setPrintCabinet(relatedData.cabinet);
+      }
+      setPrintAllInvoices(yearInvoices);
+      setPrintInvoice(null);
+      setReadyToPrint(true);
+      toast.info(`Préparation du téléchargement des ${yearInvoices.length} factures de ${selectedYear}...`);
+    } catch (error) {
+      console.error("Erreur lors de la préparation des exports:", error);
+      toast.error("Erreur lors de la préparation des exports PDF");
+      setIsPreparingPrint(false);
+    }
   };
   const handleDownloadMonthInvoices = async (year: string, monthKey: string) => {
     if (!invoices) return;
@@ -283,9 +298,9 @@ const InvoicesPage = () => {
   return <>
       {isPreparingPrint && <div className="fixed inset-0 bg-white/80 dark:bg-black/80 flex flex-col items-center justify-center z-50">
           <div className="flex gap-2">
-            <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-            <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-            <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce"></div>
+            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce"></div>
           </div>
           <p className="mt-6 text-lg font-semibold text-gray-800 dark:text-gray-200">
             Préparation du PDF en cours...
@@ -311,9 +326,9 @@ const InvoicesPage = () => {
                 Notes d'honoraires
               </span>
             </h1>
-            <Button onClick={() => navigate("/invoices/new")} className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 hover:text-white text-slate-950">
+            <Button onClick={() => navigate("/invoices/new")} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 hover:text-white text-slate-950">
               <Plus className="h-5 w-5" />
-              Nouvelle note d'honoraire
+              Créer une note d'honoraire
             </Button>
           </div>
 
@@ -333,7 +348,7 @@ const InvoicesPage = () => {
           <InvoiceFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} statusFilter={statusFilter} setStatusFilter={setStatusFilter} selectedYear={selectedYear} setSelectedYear={setSelectedYear} selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} onDownloadAll={handleDownloadAllInvoices} invoiceYears={yearOptions} monthOptions={monthOptions} invoices={invoices || []} patientDataMap={patientDataMap} osteopath={osteopath} selectedCabinetId={selectedCabinetId} setSelectedCabinetId={setSelectedCabinetId} selectedOsteopathId={selectedOsteopathId} setSelectedOsteopathId={setSelectedOsteopathId} cabinets={cabinets} osteopaths={osteopaths} />
           {/* Content */}
           {invoicesLoading ? <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
             </div> : filteredInvoices && filteredInvoices.length > 0 ? <div className="space-y-6">
               {/* Invoices by year/month */}
               {Object.entries(groupedInvoices).sort((a, b) => b[0].localeCompare(a[0])).map(([year, months]) => {

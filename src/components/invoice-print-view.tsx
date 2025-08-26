@@ -75,7 +75,7 @@ export const InvoicePrintView = ({
 					<div>
 						{/* Ligne titre + logo */}
 						<div className="flex items-center gap-4 mb-2 mt-6">
-							<h1 className="text-2xl font-extrabold text-amber-700">
+							<h1 className="text-2xl font-extrabold text-emerald-700">
 								{cabinet?.name || "PatientHub"}
 							</h1>
 							{cabinet?.logoUrl && (
@@ -143,10 +143,10 @@ export const InvoicePrintView = ({
 
 					{/* Colonne droite : info facture */}
 					<div className="text-right mt-6">
-						<h2 className="text-lg font-medium text-amber-700 mb-1">
+						<h2 className="text-lg font-medium text-emerald-700 mb-1">
 							NOTE D'HONORAIRES
 						</h2>
-						<p className="font-medium text-amber-600">
+						<p className="font-medium text-emerald-600">
 							n° #{invoice.id.toString().padStart(4, "0")}
 						</p>
 						<p className="mt-4 text-gray-600 whitespace-nowrap">
@@ -158,10 +158,10 @@ export const InvoicePrintView = ({
 				{/* Infos patient + paiement */}
 				<div className="grid grid-cols-2 gap-8 mb-6">
 					<div>
-						<h3 className="font-medium text-amber-700 mb-3">
+						<h3 className="font-medium text-emerald-700 mb-3">
 							Facturer à:
 						</h3>
-						<div className="border-l-4 border-amber-200 pl-4 break-words">
+						<div className="border-l-4 border-emerald-200 pl-4 break-words">
 							<p className="font-medium text-gray-800 text-lg mb-2">
 								{getPatientName()}
 							</p>
@@ -188,7 +188,7 @@ export const InvoicePrintView = ({
 						</div>
 					</div>
 					<div className="text-right">
-						<h3 className="font-medium text-amber-700 mb-3">
+						<h3 className="font-medium text-emerald-700 mb-3">
 							Mode de règlement:
 						</h3>
 						<p className="font-medium text-gray-800">
@@ -211,34 +211,34 @@ export const InvoicePrintView = ({
 				</div>
 
 				{/* Tableau prestations */}
-				<div className="rounded-lg border border-amber-200 overflow-hidden mb-6">
+				<div className="rounded-lg border border-emerald-200 overflow-hidden mb-6">
 					<table className="w-full">
 						<thead>
 							<tr className="bg-gray-100">
-								<th className="py-3 px-4 text-left text-amber-700 font-semibold">
+								<th className="py-3 px-4 text-left text-emerald-700 font-semibold">
 									Désignation
 								</th>
-								<th className="py-3 px-4 text-right text-amber-700 font-semibold">
+								<th className="py-3 px-4 text-right text-emerald-700 font-semibold">
 									Montant
 								</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr className="border-t border-amber-200">
+							<tr className="border-t border-emerald-200">
 								<td className="py-4 px-4 text-gray-700">
 									Consultation d'ostéopathie
 								</td>
-								<td className="py-4 px-4 text-right text-amber-700 font-bold">
+								<td className="py-4 px-4 text-right text-emerald-700 font-bold">
 									{formatAmount(invoice.amount)}
 								</td>
 							</tr>
 						</tbody>
 						<tfoot>
-							<tr className="border-t border-amber-200 bg-amber-50/50">
-								<td className="py-2 px-2 text-right text-amber-700 font-medium">
+							<tr className="border-t border-emerald-200 bg-emerald-50/50">
+								<td className="py-2 px-2 text-right text-emerald-700 font-medium">
 									Total
 								</td>
-								<td className="py-2 px-2 text-right text-amber-700 font-bold">
+								<td className="py-2 px-2 text-right text-emerald-700 font-bold">
 									{formatAmount(invoice.amount)}
 								</td>
 							</tr>
@@ -247,23 +247,32 @@ export const InvoicePrintView = ({
 				</div>
 			</div>
 			{/* Signature/tampon de l'ostéopathe */}
-			{osteopath?.stampUrl && (
+			{osteopath && (
 				<div className="flex-1 flex justify-end">
 					<div className="text-center">
 						<p className="text-sm text-gray-600 mb-2">
-							{osteopath.professional_title || "Ostéopathe D.O."}
+							Signature et cachet du praticien
 						</p>
-						<div className="max-h-[100px] max-w-[200px] mx-auto">
-							<img
-								src={osteopath.stampUrl}
-								alt="Signature/Tampon professionnel"
-								className="max-h-[100px] w-auto object-contain"
-								onError={(e) => {
-									const target = e.target as HTMLImageElement;
-									target.style.display = "none";
-								}}
-							/>
-						</div>
+						{osteopath.stampUrl ? (
+							<div className="max-h-[120px] max-w-[200px] mx-auto">
+								<img
+									src={osteopath.stampUrl}
+									alt="Signature/Tampon professionnel"
+									className="max-h-[120px] w-auto object-contain"
+									onError={(e) => {
+										const target = e.target as HTMLImageElement;
+										target.style.display = "none";
+									}}
+								/>
+							</div>
+						) : (
+							<div className="border-2 border-dashed border-gray-300 rounded-lg p-8 min-h-[120px] min-w-[200px] flex items-center justify-center mx-auto">
+								<p className="text-gray-400 text-sm text-center">
+									Signature<br />
+									{osteopath.professional_title || "Ostéopathe D.O."}
+								</p>
+							</div>
+						)}
 						<p className="text-sm text-gray-600 mt-2 font-medium">
 							{osteopath.name}
 						</p>
@@ -272,7 +281,7 @@ export const InvoicePrintView = ({
 			)}
 			{/* Footer Mentions */}
 			<footer className="pt-6 mt-auto border-t border-gray-200">
-				<h3 className="font-medium text-amber-700 mb-2">
+				<h3 className="font-medium text-emerald-700 mb-2">
 					Mentions obligatoires:
 				</h3>
 				<p className="text-gray-700 mb-3 font-medium">
