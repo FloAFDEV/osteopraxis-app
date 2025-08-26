@@ -93,6 +93,22 @@ textarea:focus-visible {
   letter-spacing: 0.02em;
 }
 
+/* Animation hover pour les cartes */
+.hover-scale {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.hover-scale:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode support pour hover-scale */
+.dark .hover-scale:hover {
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+}
+
 /* Messages d'erreur plus visibles */
 .error-message {
   color: hsl(var(--destructive));
