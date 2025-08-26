@@ -187,7 +187,7 @@ function App() {
                           </ProtectedRoute>
                         } />
                         <Route path="/settings/storage" element={
-                          <ProtectedRoute>
+                          <ProtectedRoute requireRole="ADMIN">
                             <HybridStorageSettingsPage />
                           </ProtectedRoute>
                         } />
