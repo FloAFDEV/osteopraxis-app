@@ -190,9 +190,9 @@ textarea:focus-visible {
 		--success: 142 71% 45%;
 		--success-foreground: 240 17% 98%;
 
-		/* Warning Colors */
-		--warning: 38 92% 50%;
-		--warning-foreground: 240 17% 98%;
+		/* Warning Colors - Amber/Yellow theme */
+		--warning: 45 93% 47%;
+		--warning-foreground: 26 83% 14%;
 
 		/* Ring & Focus */
 		--ring: 247 85% 60%;
@@ -250,9 +250,9 @@ textarea:focus-visible {
 		--success: 142 71% 50%;
 		--success-foreground: 240 10% 8%;
 
-		/* Dark Warning Colors */
-		--warning: 38 92% 55%;
-		--warning-foreground: 240 10% 8%;
+		/* Dark Warning Colors - Amber/Yellow theme */
+		--warning: 48 96% 53%;
+		--warning-foreground: 26 83% 14%;
 
 		/* Dark Ring & Focus */
 		--ring: 247 85% 65%;

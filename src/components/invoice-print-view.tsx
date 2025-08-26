@@ -66,18 +66,27 @@ export const InvoicePrintView = ({
 	};
 
 	return (
-		<div className="bg-white p-4 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-screen print:p-2">
+		<div className="bg-white p-4 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-screen print:p-2 relative">
+			{/* Filigrane démo */}
+			{!patient?.email || (patient?.email && patient.email.includes('demo')) ? (
+				<div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+					<div className="transform -rotate-45 text-gray-200 font-bold text-6xl opacity-30 select-none">
+						MODE DÉMO
+					</div>
+				</div>
+			) : null}
+			
 			{/* Partie haute */}
-			<div className="flex-1">
+			<div className="flex-1 relative z-20">
 				{/* En-tête */}
 				<div className="flex justify-between items-start mb-16">
 					{/* Colonne gauche : titre + logo + infos */}
 					<div>
-						{/* Ligne titre + logo */}
-						<div className="flex items-center gap-4 mb-2 mt-6">
-							<h1 className="text-2xl font-extrabold text-emerald-700">
-								{cabinet?.name || "PatientHub"}
-							</h1>
+					{/* Ligne titre + logo */}
+					<div className="flex items-center gap-4 mb-2 mt-6">
+						<h1 className="text-2xl font-extrabold text-emerald-700">
+							{cabinet?.name || "PatientHub"}
+						</h1>
 							{cabinet?.logoUrl && (
 								<img
 									src={cabinet.logoUrl}
@@ -88,10 +97,10 @@ export const InvoicePrintView = ({
 							)}
 						</div>
 
-						{/* Infos pro */}
-						<p className="text-gray-700 font-medium">
-							{osteopath?.professional_title || "Ostéopathe D.O."}
-						</p>
+					{/* Infos pro */}
+					<p className="text-gray-700 font-medium">
+						{osteopath?.name ? `${osteopath.name} - ${osteopath?.professional_title || "Ostéopathe D.O."}` : "Ostéopathe D.O."}
+					</p>
 						<p className="text-gray-600 mt-1">
 							{cabinet ? (
 								<>
