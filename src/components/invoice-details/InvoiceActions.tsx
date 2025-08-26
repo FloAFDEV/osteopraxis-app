@@ -1,11 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { Download, Printer, Trash2 } from "lucide-react";
+import { Download, Edit, Printer, Trash2 } from "lucide-react";
 
 interface InvoiceActionsProps {
   onDelete?: () => void;
   onPrint?: () => void;
   onDownload?: () => void;
+  onEdit?: () => void;
   isDeleteModalOpen: boolean;
   setIsDeleteModalOpen: (open: boolean) => void;
   isMobile: boolean;
@@ -15,12 +16,25 @@ export const InvoiceActions = ({
   onDelete,
   onPrint,
   onDownload,
+  onEdit,
   isDeleteModalOpen,
   setIsDeleteModalOpen,
   isMobile,
 }: InvoiceActionsProps) => (
   <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
     <div className="flex gap-2 ml-auto">
+      {onEdit && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onEdit}
+          title="Modifier"
+          aria-label="Modifier la facture"
+          className="h-10 w-10 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800/60 dark:text-blue-400"
+        >
+          <Edit className="h-5 w-5" />
+        </Button>
+      )}
       {onDelete && (
         <Button
           size="icon"

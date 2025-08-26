@@ -46,6 +46,7 @@ const InvoicesPage = () => {
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [patientDataMap, setPatientDataMap] = useState<Map<number, Patient>>(new Map());
+  const [osteopathDataMap, setOsteopathDataMap] = useState<Map<number, { id: number; name: string }>>(new Map());
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | "ALL" | null>(null);
   const [selectedOsteopathId, setSelectedOsteopathId] = useState<number | "ALL" | null>(null);
   const {
@@ -99,10 +100,12 @@ const InvoicesPage = () => {
   const monthOptions = generateMonthOptions(selectedYear, filteredInvoices);
   const yearOptions = generateYearOptions();
 
-  // Fetch patient data for all invoices
+  // Fetch patient and osteopath data for all invoices
   useEffect(() => {
-    const fetchPatientData = async () => {
+    const fetchRelatedData = async () => {
       if (!invoices || invoices.length === 0) return;
+      
+      // Fetch patient data
       const patientIds = [...new Set(invoices.map(invoice => invoice.patientId))];
       const patientMap = new Map<number, Patient>();
       for (const patientId of patientIds) {
@@ -116,8 +119,23 @@ const InvoicesPage = () => {
         }
       }
       setPatientDataMap(patientMap);
+
+      // Fetch osteopath data
+      const osteopathIds = [...new Set(invoices.map(invoice => invoice.osteopathId).filter(Boolean))];
+      const osteopathMap = new Map<number, { id: number; name: string }>();
+      for (const osteopathId of osteopathIds) {
+        try {
+          const osteopath = await api.getOsteopathById(osteopathId!);
+          if (osteopath) {
+            osteopathMap.set(osteopathId!, { id: osteopath.id, name: osteopath.name });
+          }
+        } catch (error) {
+          console.error(`Error fetching osteopath ${osteopathId}:`, error);
+        }
+      }
+      setOsteopathDataMap(osteopathMap);
     };
-    fetchPatientData();
+    fetchRelatedData();
   }, [invoices]);
 
   // Function to load invoice-related data (patient, osteopath, cabinet)
@@ -256,6 +274,11 @@ const InvoicesPage = () => {
     setIsPreparingPrint(false);
   };
 
+  // Handler for edit invoice
+  const handleEditInvoice = (invoice: Invoice) => {
+    navigate(`/invoices/${invoice.id}/edit`);
+  };
+
   // -- Ajout : composants Selects pour filtrage au-dessus du Card Filters --
   return <>
       {isPreparingPrint && <div className="fixed inset-0 bg-white/80 dark:bg-black/80 flex flex-col items-center justify-center z-50">
@@ -317,10 +340,21 @@ const InvoicesPage = () => {
             // Filter by selected year
             if (year !== selectedYear) return null;
             return <Accordion type="multiple" className="space-y-4" key={year}>
-                      <InvoiceYearGroup year={year} months={months} selectedMonth={selectedMonth} patientDataMap={patientDataMap} onDeleteInvoice={id => {
-                setSelectedInvoiceId(id);
-                setIsDeleteModalOpen(true);
-              }} onPrintInvoice={handlePrintInvoice} onDownloadInvoice={handleDownloadInvoice} onDownloadMonthInvoices={handleDownloadMonthInvoices} />
+                      <InvoiceYearGroup 
+                        year={year} 
+                        months={months} 
+                        selectedMonth={selectedMonth} 
+                        patientDataMap={patientDataMap} 
+                        osteopathDataMap={osteopathDataMap}
+                        onDeleteInvoice={id => {
+                          setSelectedInvoiceId(id);
+                          setIsDeleteModalOpen(true);
+                        }} 
+                        onPrintInvoice={handlePrintInvoice} 
+                        onDownloadInvoice={handleDownloadInvoice} 
+                        onDownloadMonthInvoices={handleDownloadMonthInvoices}
+                        onEditInvoice={handleEditInvoice}
+                      />
                     </Accordion>;
           })}
             </div> : <InvoiceEmptyState hasFilters={searchQuery !== "" || statusFilter !== "ALL" || selectedMonth !== null} />}

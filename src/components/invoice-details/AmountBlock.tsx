@@ -1,4 +1,4 @@
-import { BlurredAmount } from "@/components/ui/blurred-amount";
+
 
 export const AmountBlock = ({
   amount,

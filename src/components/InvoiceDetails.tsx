@@ -18,18 +18,22 @@ interface InvoiceDetailsProps {
 	invoice: Invoice;
 	patient?: Patient;
 	patientName?: string;
+	osteopath?: { id: number; name: string };
 	onDelete?: () => void;
 	onDownload?: () => void;
 	onPrint?: () => void;
+	onEdit?: () => void;
 }
 
 export const InvoiceDetails = ({
 	invoice,
 	patient,
 	patientName,
+	osteopath,
 	onDelete,
 	onDownload,
 	onPrint,
+	onEdit,
 }: InvoiceDetailsProps) => {
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const { isMobile } = useIsMobile();
@@ -96,6 +100,11 @@ export const InvoiceDetails = ({
 							</span>
 						</div>
 						<StyledPatientName patient={patient} patientName={patientName} />
+						{osteopath && (
+							<div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+								Praticien : {osteopath.name}
+							</div>
+						)}
 						<StatusBadge status={invoice.paymentStatus} />
 					</div>
 					{/* 🔷 Montant & Date */}
@@ -122,6 +131,7 @@ export const InvoiceDetails = ({
 					onDelete={onDelete}
 					onPrint={onPrint}
 					onDownload={onDownload}
+					onEdit={onEdit}
 					isDeleteModalOpen={isDeleteModalOpen}
 					setIsDeleteModalOpen={setIsDeleteModalOpen}
 					isMobile={isMobile}

@@ -15,20 +15,24 @@ interface InvoiceMonthGroupProps {
 	monthKey: string;
 	monthInvoices: Invoice[];
 	patientDataMap: Map<number, Patient>;
+	osteopathDataMap?: Map<number, { id: number; name: string }>;
 	onDeleteInvoice: (id: number) => void;
 	onPrintInvoice: (invoice: Invoice) => void;
 	onDownloadInvoice: (invoice: Invoice) => void;
 	onDownloadMonthInvoices: (year: string, monthKey: string) => void;
+	onEditInvoice?: (invoice: Invoice) => void;
 }
 
 export const InvoiceMonthGroup = ({
 	monthKey,
 	monthInvoices,
 	patientDataMap,
+	osteopathDataMap,
 	onDeleteInvoice,
 	onPrintInvoice,
 	onDownloadInvoice,
 	onDownloadMonthInvoices,
+	onEditInvoice,
 }: InvoiceMonthGroupProps) => {
 	const year = monthKey.split("-")[0];
 	const monthLabel = format(parseISO(`${monthKey}-01`), "MMMM yyyy", {
@@ -77,11 +81,13 @@ export const InvoiceMonthGroup = ({
 									patient={patientDataMap.get(
 										invoice.patientId
 									)}
+									osteopath={osteopathDataMap?.get(invoice.osteopathId || 0)}
 									onDelete={() => onDeleteInvoice(invoice.id)}
 									onPrint={() => onPrintInvoice(invoice)}
 									onDownload={() =>
 										onDownloadInvoice(invoice)
 									}
+									onEdit={onEditInvoice ? () => onEditInvoice(invoice) : undefined}
 								/>
 							</div>
 						</div>

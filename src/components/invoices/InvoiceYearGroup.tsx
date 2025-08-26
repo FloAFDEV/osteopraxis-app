@@ -8,10 +8,12 @@ interface InvoiceYearGroupProps {
   months: Record<string, Invoice[]>;
   selectedMonth: string | null;
   patientDataMap: Map<number, Patient>;
+  osteopathDataMap?: Map<number, { id: number; name: string }>;
   onDeleteInvoice: (id: number) => void;
   onPrintInvoice: (invoice: Invoice) => void;
   onDownloadInvoice: (invoice: Invoice) => void;
   onDownloadMonthInvoices: (year: string, monthKey: string) => void;
+  onEditInvoice?: (invoice: Invoice) => void;
 }
 
 export const InvoiceYearGroup = ({
@@ -19,10 +21,12 @@ export const InvoiceYearGroup = ({
   months,
   selectedMonth,
   patientDataMap,
+  osteopathDataMap,
   onDeleteInvoice,
   onPrintInvoice,
   onDownloadInvoice,
   onDownloadMonthInvoices,
+  onEditInvoice,
 }: InvoiceYearGroupProps) => {
   return (
     <div className="space-y-4">
@@ -44,10 +48,12 @@ export const InvoiceYearGroup = ({
             monthKey={monthKey}
             monthInvoices={monthInvoices}
             patientDataMap={patientDataMap}
+            osteopathDataMap={osteopathDataMap}
             onDeleteInvoice={onDeleteInvoice}
             onPrintInvoice={onPrintInvoice}
             onDownloadInvoice={onDownloadInvoice}
             onDownloadMonthInvoices={onDownloadMonthInvoices}
+            onEditInvoice={onEditInvoice}
           />
         ))}
     </div>
