@@ -12,7 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { format, parseISO, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, Download, Filter, Search, X } from "lucide-react";
-import { InvoiceExportButtons } from "./InvoiceExportButtons";
+import { InvoiceUnifiedExportButton } from "./InvoiceUnifiedExportButton";
 import { Invoice, Patient, Osteopath, Cabinet } from "@/types";
 import React from "react";
 
@@ -38,6 +38,7 @@ interface InvoiceFiltersProps {
   setSelectedOsteopathId: (osteoId: number | "ALL" | null) => void;
   cabinets: Cabinet[];
   osteopaths: Osteopath[];
+  osteopathDataMap: Map<number, Osteopath>;
 }
 
 export const InvoiceFilters = (props: InvoiceFiltersProps) => {
@@ -216,27 +217,17 @@ export const InvoiceFilters = (props: InvoiceFiltersProps) => {
               </SelectContent>
             </Select>
 
-            <Button
-              onClick={props.onDownloadAll}
-              variant="outline"
-              size={isMobile ? "sm" : "default"}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50"
-            >
-              <span className="flex items-center gap-2">
-                <Download className="h-4 w-4 text-primary" />
-                Télécharger le PDF{" "}
-                {props.selectedMonth ? "mensuel" : "annuel"}
-              </span>
-            </Button>
-
-            <InvoiceExportButtons
+            <InvoiceUnifiedExportButton
               selectedYear={props.selectedYear}
               selectedMonth={props.selectedMonth}
               invoices={props.invoices}
               patientDataMap={props.patientDataMap}
+              osteopathDataMap={props.osteopathDataMap}
               selectedCabinetId={props.selectedCabinetId}
               selectedOsteopathId={props.selectedOsteopathId}
               cabinets={props.cabinets}
+              osteopaths={props.osteopaths}
+              onDownloadAllPDF={props.onDownloadAll}
             />
           </div>
         </div>

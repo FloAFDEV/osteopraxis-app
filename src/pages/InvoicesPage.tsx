@@ -46,7 +46,7 @@ const InvoicesPage = () => {
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [patientDataMap, setPatientDataMap] = useState<Map<number, Patient>>(new Map());
-  const [osteopathDataMap, setOsteopathDataMap] = useState<Map<number, { id: number; name: string }>>(new Map());
+  const [osteopathDataMap, setOsteopathDataMap] = useState<Map<number, Osteopath>>(new Map());
   const [selectedCabinetId, setSelectedCabinetId] = useState<number | "ALL" | null>(null);
   const [selectedOsteopathId, setSelectedOsteopathId] = useState<number | "ALL" | null>(null);
   const {
@@ -122,12 +122,12 @@ const InvoicesPage = () => {
 
       // Fetch osteopath data
       const osteopathIds = [...new Set(invoices.map(invoice => invoice.osteopathId).filter(Boolean))];
-      const osteopathMap = new Map<number, { id: number; name: string }>();
+      const osteopathMap = new Map<number, Osteopath>();
       for (const osteopathId of osteopathIds) {
         try {
           const osteopath = await api.getOsteopathById(osteopathId!);
           if (osteopath) {
-            osteopathMap.set(osteopathId!, { id: osteopath.id, name: osteopath.name });
+            osteopathMap.set(osteopathId!, osteopath);
           }
         } catch (error) {
           console.error(`Error fetching osteopath ${osteopathId}:`, error);
@@ -345,7 +345,7 @@ const InvoicesPage = () => {
           </div>
 
           {/* Filters avec toutes les props nécessaires */}
-          <InvoiceFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} statusFilter={statusFilter} setStatusFilter={setStatusFilter} selectedYear={selectedYear} setSelectedYear={setSelectedYear} selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} onDownloadAll={handleDownloadAllInvoices} invoiceYears={yearOptions} monthOptions={monthOptions} invoices={invoices || []} patientDataMap={patientDataMap} osteopath={osteopath} selectedCabinetId={selectedCabinetId} setSelectedCabinetId={setSelectedCabinetId} selectedOsteopathId={selectedOsteopathId} setSelectedOsteopathId={setSelectedOsteopathId} cabinets={cabinets} osteopaths={osteopaths} />
+          <InvoiceFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} statusFilter={statusFilter} setStatusFilter={setStatusFilter} selectedYear={selectedYear} setSelectedYear={setSelectedYear} selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} onDownloadAll={handleDownloadAllInvoices} invoiceYears={yearOptions} monthOptions={monthOptions} invoices={invoices || []} patientDataMap={patientDataMap} osteopath={osteopath} selectedCabinetId={selectedCabinetId} setSelectedCabinetId={setSelectedCabinetId} selectedOsteopathId={selectedOsteopathId} setSelectedOsteopathId={setSelectedOsteopathId} cabinets={cabinets} osteopaths={osteopaths} osteopathDataMap={osteopathDataMap} />
           {/* Content */}
           {invoicesLoading ? <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
