@@ -11,7 +11,7 @@ interface InvoiceDateInputProps {
 export function InvoiceDateInput({ control, isSubmitting }: InvoiceDateInputProps) {
   return (
     <div>
-      <Label htmlFor="date-input" className="block text-sm mb-1">Date de la facture</Label>
+      <Label htmlFor="date-input" className="block text-sm mb-1">Date de la note d'honoraires</Label>
       <Controller
         control={control}
         name="date"

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,13 +21,13 @@ import { InvoiceOsteopathInput } from "./invoice-form/InvoiceOsteopathInput";
 import { InvoiceCabinetInput } from "./invoice-form/InvoiceCabinetInput";
 
 const schema = z.object({
-  date: z.string().nonempty("Date requise"),
+  date: z.string().nonempty("Date de la note d'honoraires requise"),
   amount: z
-    .number({ invalid_type_error: "Champ obligatoire" })
-    .min(0, "Le montant ne peut pas être négatif"),
+    .number({ required_error: "Le montant est requis" })
+    .min(0.01, "Le montant doit être supérieur à 0"),
   notes: z.string().optional(),
-  paymentMethod: z.string().optional(),
-  paymentStatus: z.string().optional(),
+  paymentMethod: z.string().nonempty("Le mode de paiement est requis"),
+  paymentStatus: z.string().nonempty("Le statut de paiement est requis"),
   tvaExoneration: z.boolean().default(true),
   tvaMotif: z.string().optional(),
   osteopathId: z.number({ required_error: "Émetteur requis" }),
@@ -90,7 +90,22 @@ export function InvoiceForm({
       toast.error("Veuillez sélectionner l'émetteur (ostéopathe).");
       return;
     }
-    // Suppression de la vérification stricte de doublons pour permettre la recréation après suppression
+    if (!data.date) {
+      toast.error("Veuillez saisir la date de la note d'honoraires.");
+      return;
+    }
+    if (!data.amount || data.amount <= 0) {
+      toast.error("Veuillez saisir un montant valide.");
+      return;
+    }
+    if (!data.paymentMethod) {
+      toast.error("Le mode de paiement est requis.");
+      return;
+    }
+    if (!data.paymentStatus) {
+      toast.error("Le statut de paiement est requis.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -109,15 +124,15 @@ export function InvoiceForm({
       };
       if (isEditing && invoice) {
         await api.updateInvoice(invoice.id, invoiceData);
-        toast.success("Facture / Note d'honoraires mise à jour !");
+        toast.success("Note d'honoraires mise à jour !");
         onUpdate?.();
       } else {
         await api.createInvoice(invoiceData as any);
-        toast.success("Facture / Note d'honoraires créée !");
+        toast.success("Note d'honoraires créée !");
         onCreate?.();
       }
     } catch (e) {
-      toast.error("Erreur lors de l’enregistrement de la facture.");
+      toast.error("Erreur lors de l'enregistrement de la note d'honoraires.");
       console.error(e);
     }
     setIsSubmitting(false);
@@ -126,7 +141,7 @@ export function InvoiceForm({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
       <h2 className="text-lg font-semibold mb-2">
-        Note d’honoraire
+        Note d'honoraire
       </h2>
       {/* Émetteur (ostéopathe) */}
       <InvoiceOsteopathInput control={form.control} isSubmitting={isSubmitting} />
@@ -168,7 +183,7 @@ export function InvoiceForm({
             Exonération de TVA
           </Label>
         </div>
-        {/* Si pas d’exonération → motif obligatoire */}
+        {/* Si pas d'exonération → motif obligatoire */}
         {!tvaExoneration && (
           <div className="mt-2">
             <Label htmlFor="tva-motif" className="block text-xs mb-1">Motif</Label>
@@ -176,7 +191,7 @@ export function InvoiceForm({
               id="tva-motif"
               {...form.register("tvaMotif")}
               disabled={isSubmitting || tvaExoneration}
-              placeholder="Renseigner le motif d’application de la TVA"
+              placeholder="Renseigner le motif d'application de la TVA"
             />
           </div>
         )}
