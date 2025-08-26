@@ -99,36 +99,36 @@ export const InvoicePrintView = ({
 
 					{/* Infos pro */}
 					<p className="text-gray-700 font-medium">
-						{osteopath?.name ? `${osteopath.name} - ${osteopath?.professional_title || "Ostéopathe D.O."}` : "Ostéopathe D.O."}
+						{osteopath?.name ? `${osteopath.name} - ` : ""}{osteopath?.professional_title || "Ostéopathe D.O."}
 					</p>
-						<p className="text-gray-600 mt-1">
-							{cabinet ? (
-								<>
-									{cabinet.address}
-									<br />
-									{cabinet.phone && (
-										<>
-											{cabinet.phone}
-											<br />
-										</>
-									)}
-									{cabinet.email && (
-										<>
-											{cabinet.email}
-											<br />
-										</>
-									)}
-								</>
-							) : (
-								<>
-									123 Rue de la Santé
-									<br />
-									75001 Paris, France
-									<br />
-									Tél: 01 23 45 67 89
-								</>
-							)}
-						</p>
+					<p className="text-gray-600 mt-1">
+						{cabinet ? (
+							<>
+								{cabinet.address}
+								<br />
+								{cabinet.phone && (
+									<>
+										{cabinet.phone}
+										<br />
+									</>
+								)}
+								{cabinet.email && (
+									<>
+										{cabinet.email}
+										<br />
+									</>
+								)}
+							</>
+						) : (
+							<>
+								123 Rue de la Santé
+								<br />
+								75001 Paris, France
+								<br />
+								Tél: 01 23 45 67 89
+							</>
+						)}
+					</p>
 
 						{/* Infos administratives */}
 						<div className="text-gray-600 mt-2 text-sm space-y-1">
