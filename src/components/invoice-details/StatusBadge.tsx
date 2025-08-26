@@ -3,11 +3,12 @@ import clsx from "clsx";
 
 export const StatusBadge = ({ status }: { status: string }) => {
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toUpperCase()) {
       case "PAID":
         return "bg-green-200/60 text-green-900 dark:bg-green-900/80 dark:text-green-200 border-green-300 dark:border-green-700";
       case "PENDING":
         return "bg-yellow-100/80 text-yellow-900 dark:bg-yellow-900/70 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700";
+      case "CANCELLED":
       case "CANCELED":
         return "bg-red-100/90 text-red-900 dark:bg-red-900/70 dark:text-red-300 border-red-200 dark:border-red-800";
       default:
@@ -16,11 +17,12 @@ export const StatusBadge = ({ status }: { status: string }) => {
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
+    switch (status.toUpperCase()) {
       case "PAID":
         return "Payée";
       case "PENDING":
         return "En attente";
+      case "CANCELLED":
       case "CANCELED":
         return "Annulée";
       default:

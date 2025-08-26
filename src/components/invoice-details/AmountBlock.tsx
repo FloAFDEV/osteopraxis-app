@@ -20,7 +20,7 @@ export const AmountBlock = ({
         Montant
       </div>
       <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-        <BlurredAmount amount={amount} currency="€" />
+        {formatAmount(amount)} €
       </div>
       <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
         {tvaMotif ||

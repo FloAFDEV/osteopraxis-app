@@ -90,19 +90,7 @@ export function InvoiceForm({
       toast.error("Veuillez sélectionner l'émetteur (ostéopathe).");
       return;
     }
-    // Vérification d'existence d'une facture pour ce rendez-vous (pour éviter les doublons)
-    if (appointment?.id && !isEditing) {
-      try {
-        const existingInvoices = await api.getInvoicesByAppointmentId(appointment.id);
-        if (existingInvoices && existingInvoices.length > 0) {
-          toast.error("Une facture existe déjà pour ce rendez-vous. Impossible de créer un doublon.");
-          return;
-        }
-      } catch (error) {
-        console.warn("Erreur lors de la vérification des factures existantes:", error);
-        // Continue quand même en cas d'erreur de vérification
-      }
-    }
+    // Suppression de la vérification stricte de doublons pour permettre la recréation après suppression
 
     setIsSubmitting(true);
 
