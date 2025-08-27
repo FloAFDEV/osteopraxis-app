@@ -2,14 +2,38 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { TranslatedSelect } from "@/components/ui/translated-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
+import { useState, useEffect } from "react";
+import { api } from "@/services/api";
+import { Cabinet } from "@/types";
 
 interface IdentityTabProps {
     form: UseFormReturn<PatientFormValues>;
+    selectedCabinetId?: number | null;
 }
 
-export const IdentityTab = ({ form }: IdentityTabProps) => {
+export const IdentityTab = ({ form, selectedCabinetId }: IdentityTabProps) => {
+    const [availableCabinets, setAvailableCabinets] = useState<Cabinet[]>([]);
+
+    useEffect(() => {
+        const loadCabinets = async () => {
+            try {
+                const cabinets = await api.getCabinets();
+                setAvailableCabinets(cabinets || []);
+                
+                // Si selectedCabinetId est fourni et le champ n'a pas de valeur, le définir
+                if (selectedCabinetId && !form.getValues("cabinetId")) {
+                    form.setValue("cabinetId", selectedCabinetId);
+                }
+            } catch (error) {
+                console.error("Erreur lors du chargement des cabinets:", error);
+            }
+        };
+        loadCabinets();
+    }, [selectedCabinetId, form]);
+
     return (
         <Card>
             <CardContent className="space-y-4 mt-6">
@@ -47,6 +71,40 @@ export const IdentityTab = ({ form }: IdentityTabProps) => {
                         )}
                     />
                 </div>
+
+                {/* Cabinet selection */}
+                <FormField
+                    control={form.control}
+                    name="cabinetId"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Cabinet</FormLabel>
+                            <FormControl>
+                                <Select
+                                    value={field.value?.toString() || ""}
+                                    onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sélectionner un cabinet" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableCabinets.map((cabinet) => (
+                                            <SelectItem key={cabinet.id} value={cabinet.id.toString()}>
+                                                {cabinet.name}
+                                                {cabinet.address && (
+                                                    <span className="text-sm text-muted-foreground ml-2">
+                                                        - {cabinet.address}
+                                                    </span>
+                                                )}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField

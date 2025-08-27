@@ -310,7 +310,7 @@ export function PatientForm({
 							</div>
 
 							<TabsContent value="identity">
-								<IdentityTab form={form} />
+								<IdentityTab form={form} selectedCabinetId={selectedCabinetId} />
 							</TabsContent>
 
 							<TabsContent value="family-social">
