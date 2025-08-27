@@ -20,6 +20,14 @@ export const patientService = {
       console.log('🎭 Mode démo: Filtrage des données Patient pour ne montrer que les données démo');
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      
+      // S'assurer qu'une session démo existe
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
+      
       await delay(200);
       return demoLocalStorage.getPatients();
     }
@@ -51,6 +59,14 @@ export const patientService = {
     if (isDemoMode) {
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      
+      // S'assurer qu'une session démo existe
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
+      
       await delay(150);
       return demoLocalStorage.getPatientById(id);
     }
@@ -80,6 +96,13 @@ export const patientService = {
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
       await delay(200);
+      
+      // S'assurer qu'une session démo existe avant d'ajouter un patient
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
       
       // Assurer les valeurs par défaut pour le mode démo
       const demoPatientData = {
@@ -143,6 +166,14 @@ export const patientService = {
       console.log('🎭 Mise à jour patient en session démo locale');
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      
+      // S'assurer qu'une session démo existe
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
+      
       await delay(150);
       return demoLocalStorage.updatePatient(patient.id, patient);
     }
@@ -178,6 +209,14 @@ export const patientService = {
       console.log('🎭 Suppression patient en session démo locale');
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      
+      // S'assurer qu'une session démo existe
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
+      
       await delay(120);
       return demoLocalStorage.deletePatient(id);
     }

@@ -21,6 +21,14 @@ export const invoiceService = {
       console.log('🎭 Mode démo: Filtrage des données Invoice pour ne montrer que les données démo');
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      
+      // S'assurer qu'une session démo existe
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
+      
       return demoLocalStorage.getInvoices();
     }
 
