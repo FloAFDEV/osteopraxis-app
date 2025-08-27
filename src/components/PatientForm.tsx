@@ -12,13 +12,15 @@ import getPatientSchema from "@/utils/patient-form-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { AdditionalFieldsTab } from "./patient-form/AdditionalFieldsTab";
-import { ContactTab } from "./patient-form/ContactTab";
-import { ExaminationsTab } from "./patient-form/ExaminationsTab";
-import { GeneralTab } from "./patient-form/GeneralTab";
-import { MedicalTab } from "./patient-form/MedicalTab";
-import { PediatricTab } from "./patient-form/PediatricTab";
-import { SpecializedFieldsTab } from "./patient-form/SpecializedFieldsTab";
+import { IdentityTab } from "./patient-form/IdentityTab";
+import { FamilySocialTab } from "./patient-form/FamilySocialTab";
+import { MedicalProfileTab } from "./patient-form/MedicalProfileTab";
+import { MedicalHistoryTab } from "./patient-form/MedicalHistoryTab";
+import { ClinicalExaminationTab } from "./patient-form/ClinicalExaminationTab";
+import { SpecializedSpheresTab } from "./patient-form/SpecializedSpheresTab";
+import { PediatricSpecializedTab } from "./patient-form/PediatricSpecializedTab";
+import { SupplementaryTab } from "./patient-form/SupplementaryTab";
+import { WeightTrackingTab } from "./patient-form/WeightTrackingTab";
 import { PatientRelationshipsTab } from "./patient-form/PatientRelationshipsTab";
 import { PatientFormProps, PatientFormValues } from "./patient-form/types";
 import { api } from "@/services/api";
@@ -32,7 +34,7 @@ export function PatientForm({
 	selectedCabinetId,
 	isLoading = false,
 }: PatientFormProps) {
-	const [activeTab, setActiveTab] = useState("general");
+	const [activeTab, setActiveTab] = useState("identity");
 	const [childrenAgesInput, setChildrenAgesInput] = useState(
 		patient?.childrenAges ? patient.childrenAges.join(", ") : ""
 	);
@@ -240,16 +242,17 @@ export function PatientForm({
 	};
 
 	const tabs = [
-		{ id: "general", label: "Général", icon: "👤" },
-		{ id: "contact", label: "Contact", icon: "📞" },
-		{ id: "medical", label: "Médical", icon: "🏥" },
-		{ id: "examinations", label: "Examens", icon: "🔬" },
+		{ id: "identity", label: "Identité", icon: "👤" },
+		{ id: "family-social", label: "Famille & Social", icon: "👥" },
+		{ id: "medical-profile", label: "Médical", icon: "🏥" },
+		{ id: "medical-history", label: "Antécédents", icon: "📋" },
+		{ id: "clinical-examination", label: "Examens cliniques", icon: "🔬" },
+		{ id: "specialized-spheres", label: "Sphères spéc.", icon: "🩺" },
 		...(isChild
-			? [{ id: "pediatric", label: "Pédiatrie", icon: "👶" }]
+			? [{ id: "pediatric-specialized", label: "Pédiatrie", icon: "👶" }]
 			: []),
-		{ id: "additional", label: "Supplémentaire", icon: "📋" },
-		{ id: "specialized", label: "Sphères spéc.", icon: "🩺" },
-		{ id: "relationships", label: "Famille", icon: "👪" },
+		{ id: "supplementary", label: "Supplémentaire", icon: "📄" },
+		{ id: "weight-tracking", label: "Suivi", icon: "📏" },
 	];
 
 	return (
@@ -276,68 +279,63 @@ export function PatientForm({
 						className="space-y-6"
 					>
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
-					<TabsList className="grid w-full grid-cols-7 lg:grid-cols-7">
+					<TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 gap-1">
 						{tabs.map((tab) => (
-									<TabsTrigger
-										key={tab.id}
-										value={tab.id}
-										className="text-xs"
-									>
-										<span className="hidden sm:inline">
-											{tab.icon}
-										</span>
-										<span className="ml-1">
-											{tab.label}
-										</span>
-									</TabsTrigger>
-								))}
-							</TabsList>
+							<TabsTrigger
+								key={tab.id}
+								value={tab.id}
+								className="text-xs px-2 py-2"
+							>
+								<span className="hidden sm:inline mr-1">
+									{tab.icon}
+								</span>
+								<span className="text-[10px] sm:text-xs">
+									{tab.label}
+								</span>
+							</TabsTrigger>
+						))}
+					</TabsList>
 
-							<TabsContent value="general">
-								<GeneralTab
+							<TabsContent value="identity">
+								<IdentityTab form={form} />
+							</TabsContent>
+
+							<TabsContent value="family-social">
+								<FamilySocialTab
 									form={form}
 									childrenAgesInput={childrenAgesInput}
 									setChildrenAgesInput={setChildrenAgesInput}
-									currentCabinetId={currentCabinetId}
-									setCurrentCabinetId={setCurrentCabinetId}
 								/>
 							</TabsContent>
 
-							<TabsContent value="contact">
-								<ContactTab form={form} emailRequired={false} />
+							<TabsContent value="medical-profile">
+								<MedicalProfileTab form={form} isChild={isChild} />
 							</TabsContent>
 
-							<TabsContent value="medical">
-								<MedicalTab form={form} isChild={isChild} />
+							<TabsContent value="medical-history">
+								<MedicalHistoryTab form={form} isChild={isChild} />
 							</TabsContent>
 
-							<TabsContent value="examinations">
-								<ExaminationsTab form={form} />
+							<TabsContent value="clinical-examination">
+								<ClinicalExaminationTab form={form} />
+							</TabsContent>
+
+							<TabsContent value="specialized-spheres">
+								<SpecializedSpheresTab form={form} />
 							</TabsContent>
 
 							{isChild && (
-								<TabsContent value="pediatric">
-									<PediatricTab form={form} />
+								<TabsContent value="pediatric-specialized">
+									<PediatricSpecializedTab form={form} />
 								</TabsContent>
 							)}
 
-							<TabsContent value="additional">
-								<AdditionalFieldsTab
-									form={form}
-									isChild={isChild}
-								/>
+							<TabsContent value="supplementary">
+								<SupplementaryTab form={form} />
 							</TabsContent>
 
-							<TabsContent value="specialized">
-								<SpecializedFieldsTab form={form} />
-							</TabsContent>
-
-							<TabsContent value="relationships">
-								<PatientRelationshipsTab 
-									form={form} 
-									patientId={patient?.id}
-									availablePatients={availablePatients}
-								/>
+							<TabsContent value="weight-tracking">
+								<WeightTrackingTab form={form} />
 							</TabsContent>
 						</Tabs>
 

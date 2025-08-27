@@ -1,0 +1,186 @@
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { TranslatedSelect } from "@/components/ui/translated-select";
+import { UseFormReturn } from "react-hook-form";
+import { PatientFormValues } from "./types";
+
+interface IdentityTabProps {
+    form: UseFormReturn<PatientFormValues>;
+}
+
+export const IdentityTab = ({ form }: IdentityTabProps) => {
+    return (
+        <Card>
+            <CardContent className="space-y-4 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Prénom
+                                    <span className="text-red-500">*</span>
+                                </FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Prénom" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Nom
+                                    <span className="text-red-500">*</span>
+                                </FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Nom" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Genre</FormLabel>
+                                <FormControl>
+                                    <TranslatedSelect
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        enumType="Gender"
+                                        placeholder="Sélectionner un genre"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="birthDate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Date de naissance</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="date"
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
+                                        placeholder="JJ/MM/AAAA"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Adresse</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Adresse complète" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Ville</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Ville" {...field} value={field.value || ""} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="postalCode"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Code postal</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Code postal" {...field} value={field.value || ""} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Pays</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Pays" {...field} value={field.value || ""} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Téléphone</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Téléphone"
+                                        {...field}
+                                        pattern="^[0-9+]*$"
+                                        title="Entrez uniquement des chiffres et le signe '+'"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Email (optionnel)"
+                                        {...field}
+                                        value={field.value || ""}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
