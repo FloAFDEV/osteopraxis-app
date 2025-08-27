@@ -105,7 +105,11 @@ const ImmediateAppointmentPage = () => {
                 Démarrer une séance avec:{" "}
                 <span className="font-semibold">{patient.firstName} {patient.lastName}</span>?
               </p>
-              <Button className="mt-4" onClick={handleStartAppointment}>
+              <Button 
+                className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors" 
+                onClick={handleStartAppointment}
+                aria-label="Démarrer une séance immédiate avec le patient sélectionné"
+              >
                 Démarrer la Séance Immédiate
               </Button>
             </div>
@@ -114,7 +118,11 @@ const ImmediateAppointmentPage = () => {
               <p className="text-lg">
                 Aucun patient trouvé. Veuillez créer un patient pour démarrer une séance.
               </p>
-              <Button className="mt-4" onClick={handleCreatePatient}>
+              <Button 
+                className="mt-4 bg-secondary text-secondary-foreground hover:bg-secondary/90 focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-colors" 
+                onClick={handleCreatePatient}
+                aria-label="Créer un nouveau patient pour démarrer une séance"
+              >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Créer un Nouveau Patient
               </Button>

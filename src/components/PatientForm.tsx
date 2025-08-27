@@ -357,12 +357,6 @@ export function PatientForm({
 								type="submit"
 								disabled={isLoading}
 								className="min-w-[120px]"
-								onClick={() => {
-									console.log("🔘 Bouton Enregistrer cliqué");
-									console.log("🔘 Form errors:", form.formState.errors);
-									console.log("🔘 Form isValid:", form.formState.isValid);
-									console.log("🔘 Form values:", form.getValues());
-								}}
 							>
 								{isLoading
 									? "Enregistrement..."
