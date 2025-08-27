@@ -242,17 +242,17 @@ export function PatientForm({
 	};
 
 	const tabs = [
-		{ id: "identity", label: "Identité", icon: "👤" },
-		{ id: "family-social", label: "Famille & Social", icon: "👥" },
-		{ id: "medical-profile", label: "Médical", icon: "🏥" },
-		{ id: "medical-history", label: "Antécédents", icon: "📋" },
-		{ id: "clinical-examination", label: "Examens cliniques", icon: "🔬" },
-		{ id: "specialized-spheres", label: "Sphères spéc.", icon: "🩺" },
+		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: "👤" },
+		{ id: "family-social", label: "Famille & Social", shortLabel: "Famille", icon: "👥" },
+		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: "🏥" },
+		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: "📋" },
+		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: "🔬" },
+		{ id: "specialized-spheres", label: "Sphères spéc.", shortLabel: "Spécialisé", icon: "🩺" },
 		...(isChild
-			? [{ id: "pediatric-specialized", label: "Pédiatrie", icon: "👶" }]
+			? [{ id: "pediatric-specialized", label: "Pédiatrie", shortLabel: "Pédiatrie", icon: "👶" }]
 			: []),
-		{ id: "supplementary", label: "Supplémentaire", icon: "📄" },
-		{ id: "weight-tracking", label: "Suivi", icon: "📏" },
+		{ id: "supplementary", label: "Supplémentaire", shortLabel: "Notes", icon: "📄" },
+		{ id: "weight-tracking", label: "Suivi", shortLabel: "Suivi", icon: "📏" },
 	];
 
 	return (
@@ -279,22 +279,41 @@ export function PatientForm({
 						className="space-y-6"
 					>
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
-					<TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 gap-1">
-						{tabs.map((tab) => (
-							<TabsTrigger
-								key={tab.id}
-								value={tab.id}
-								className="text-xs px-2 py-2"
-							>
-								<span className="hidden sm:inline mr-1">
-									{tab.icon}
-								</span>
-								<span className="text-[10px] sm:text-xs">
-									{tab.label}
-								</span>
-							</TabsTrigger>
-						))}
-					</TabsList>
+					{/* Desktop navigation */}
+					<div className="hidden md:block sticky top-0 z-10 bg-background border-b">
+						<TabsList className="flex w-full justify-start gap-2 p-2 h-auto bg-transparent">
+							{tabs.map((tab) => (
+								<TabsTrigger
+									key={tab.id}
+									value={tab.id}
+									className="flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-md hover:bg-muted"
+								>
+									<span className="text-base">{tab.icon}</span>
+									<span>{tab.label}</span>
+								</TabsTrigger>
+							))}
+						</TabsList>
+					</div>
+
+					{/* Mobile navigation */}
+					<div className="md:hidden sticky top-0 z-10 bg-background border-b">
+						<div className="p-4">
+							<TabsList className="flex overflow-x-auto gap-2 w-full justify-start bg-transparent scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+								{tabs.map((tab) => (
+									<TabsTrigger
+										key={tab.id}
+										value={tab.id}
+										className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-md hover:bg-muted whitespace-nowrap min-w-[70px]"
+									>
+										<span className="text-lg">{tab.icon}</span>
+										<span className="text-[10px] leading-tight text-center">
+											{tab.shortLabel || tab.label}
+										</span>
+									</TabsTrigger>
+								))}
+							</TabsList>
+						</div>
+					</div>
 
 							<TabsContent value="identity">
 								<IdentityTab form={form} />
