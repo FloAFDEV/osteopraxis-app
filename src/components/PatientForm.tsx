@@ -354,29 +354,9 @@ export function PatientForm({
 
 						<div className="flex justify-end gap-2 pt-6 border-t">
 							<Button
-								type="button"
+								type="submit"
 								disabled={isLoading}
 								className="min-w-[120px]"
-								onClick={async () => {
-									console.log("🔘 Bouton Enregistrer cliqué");
-									console.log("🔘 Form errors:", JSON.stringify(form.formState.errors, null, 2));
-									console.log("🔘 Form isValid:", form.formState.isValid);
-									console.log("🔘 Form values:", JSON.stringify(form.getValues(), null, 2));
-									
-									// Afficher les erreurs de validation de manière lisible
-									Object.keys(form.formState.errors).forEach(field => {
-										console.log(`❌ Erreur ${field}:`, form.formState.errors[field]?.message);
-									});
-									
-									// Forcer la soumission même si le formulaire n'est pas valide
-									const formData = form.getValues();
-									if (formData.firstName && formData.lastName) {
-										console.log("🚀 Forçage de la soumission avec données minimales");
-										await handleSubmit(formData);
-									} else {
-										console.log("❌ Prénom et nom requis");
-									}
-								}}
 							>
 								{isLoading
 									? "Enregistrement..."
