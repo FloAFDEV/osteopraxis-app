@@ -7,6 +7,7 @@ import { differenceInYears, parseISO } from "date-fns";
 import { Activity, Baby, Calendar, Mail, MapPin, Phone, Ruler, User, Users, Weight, Briefcase, Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { PatientQuickActions } from "@/components/patients/PatientQuickActions";
+import { usePatientDisplayInfo } from "@/hooks/usePatientDisplayInfo";
 interface PatientCardProps {
   patient: Patient;
   compact?: boolean;
@@ -16,6 +17,7 @@ export function PatientCard({
   compact = false
 }: PatientCardProps) {
   const navigate = useNavigate();
+  const { displayName, displayEmail, isDemoPatient } = usePatientDisplayInfo(patient);
 
   // Calcul exact de l'âge en années
   const age = patient.birthDate ? differenceInYears(new Date(), parseISO(patient.birthDate)) : null;
@@ -57,13 +59,13 @@ export function PatientCard({
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							<Avatar className={`${avatarStyle.background} h-10 w-10`}>
-								{patient.avatarUrl ? <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} /> : <AvatarFallback className={avatarStyle.background}>
+								{patient.avatarUrl ? <AvatarImage src={patient.avatarUrl} alt={displayName} /> : <AvatarFallback className={avatarStyle.background}>
 										{avatarStyle.icon}
 									</AvatarFallback>}
 							</Avatar>
 							<div className="flex-1 min-w-0">
 								<h3 className="font-semibold text-lg leading-tight truncate">
-									{patient.lastName} {patient.firstName}
+									{displayName}
 								</h3>
 								<div className="flex items-center gap-2 mt-1">
 									{age !== null && <span className="text-sm text-gray-500">
@@ -86,13 +88,13 @@ export function PatientCard({
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
 						<Avatar className={`${avatarStyle.background} h-12 w-12 transition-transform group-hover:scale-105`}>
-							{patient.avatarUrl ? <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} /> : <AvatarFallback className={avatarStyle.background}>
+							{patient.avatarUrl ? <AvatarImage src={patient.avatarUrl} alt={displayName} /> : <AvatarFallback className={avatarStyle.background}>
 									{avatarStyle.icon}
 								</AvatarFallback>}
 						</Avatar>
 						<div>
 							<h3 className="font-semibold text-xl leading-tight mb-1">
-								{patient.lastName} {patient.firstName}
+								{displayName}
 							</h3>
 							<div className="flex items-center gap-2 flex-wrap">
 								{age !== null && <span className="text-sm text-gray-500">
@@ -120,8 +122,8 @@ export function PatientCard({
 						<div className="space-y-1 text-sm">
 							{patient.email && <div className="flex items-center text-gray-700 dark:text-gray-300">
 									<Mail className="h-3 w-3 mr-2 text-green-600 flex-shrink-0" />
-									<a href={`mailto:${patient.email}`} className="hover:underline hover:text-green-800 dark:hover:text-green-300 transition-colors truncate" onClick={e => e.stopPropagation()}>
-										{patient.email}
+									<a href={`mailto:${isDemoPatient ? '#' : patient.email}`} className="hover:underline hover:text-green-800 dark:hover:text-green-300 transition-colors truncate" onClick={e => e.stopPropagation()}>
+										{displayEmail}
 									</a>
 								</div>}
 							{patient.phone && <div className="flex items-center text-gray-700 dark:text-gray-300">

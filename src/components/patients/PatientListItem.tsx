@@ -14,6 +14,7 @@ import {
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PatientOwnershipBadge } from "./PatientOwnershipBadge";
+import { usePatientDisplayInfo } from "@/hooks/usePatientDisplayInfo";
 
 interface PatientListItemProps {
 	patient: Patient;
@@ -21,6 +22,7 @@ interface PatientListItemProps {
 
 const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 	const navigate = useNavigate();
+	const { displayName, displayEmail, isDemoPatient } = usePatientDisplayInfo(patient);
 	const age = patient.birthDate
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
@@ -64,7 +66,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 							{patient.avatarUrl ? (
 								<AvatarImage
 									src={patient.avatarUrl}
-									alt={`${patient.firstName} ${patient.lastName}`}
+									alt={displayName}
 								/>
 							) : (
 								<AvatarFallback
@@ -81,7 +83,7 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 									to={`/patients/${patient.id}`}
 									className="hover:underline"
 								>
-									{patient.lastName} {patient.firstName}
+									{displayName}
 								</Link>
 								{age !== null && (
 									<span className="text-sm text-gray-400">
@@ -104,10 +106,10 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 									<span className="flex items-center text-gray-700 dark:text-gray-200">
 										<Mail className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
 										<a
-											href={`mailto:${patient.email}`}
+											href={`mailto:${isDemoPatient ? '#' : patient.email}`}
 											className="hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
 										>
-											{patient.email}
+											{displayEmail}
 										</a>
 									</span>
 								)}

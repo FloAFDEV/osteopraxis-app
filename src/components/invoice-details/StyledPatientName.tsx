@@ -1,6 +1,7 @@
 
 import { Patient } from "@/types";
 import { format } from "date-fns";
+import { getPatientDisplayName } from "@/hooks/usePatientDisplayInfo";
 
 export const StyledPatientName = ({
   patient,
@@ -29,7 +30,7 @@ export const StyledPatientName = ({
               : "⚧️"}
           </span>
           <span>
-            {patient.firstName} {patient.lastName}
+            {getPatientDisplayName(patient)}
           </span>
         </div>
         {patient.birthDate && (
