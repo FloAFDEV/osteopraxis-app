@@ -135,9 +135,16 @@ class DemoLocalStorageService {
     if (!data) throw new Error('Aucune session démo active');
 
     const now = new Date().toISOString();
+    const tempId = this.generateTempId();
+    
+    // Générer un email technique uniquement si aucun email n'est fourni
+    // Cela conserve les données saisies par l'utilisateur
+    const email = patient.email || `patient-${Date.now()}-${tempId}@temp.local`;
+    
     const newPatient: Patient = {
       ...patient,
-      id: this.generateTempId(),
+      id: tempId,
+      email: email,
       createdAt: now,
       updatedAt: now
     };
@@ -403,41 +410,9 @@ class DemoLocalStorageService {
       throw new Error('Aucune session démo active pour le seeding');
     }
 
-    // Ajouter quelques patients de test avec les champs essentiels
-    const demoPatients = [
-      {
-        firstName: 'Marie',
-        lastName: 'Dupont',
-        email: 'marie.dupont@demo.com',
-        phone: '06 12 34 56 78',
-        gender: 'FEMALE' as const,
-        osteopathId: 999,
-        cabinetId: 1,
-        // Champs requis
-        hasVisionCorrection: false,
-        isDeceased: false,
-        isSmoker: false
-      } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>,
-      {
-        firstName: 'Jean',
-        lastName: 'Martin',
-        email: 'jean.martin@demo.com',
-        phone: '06 98 76 54 32',
-        gender: 'MALE' as const,
-        osteopathId: 999,
-        cabinetId: 1,
-        // Champs requis
-        hasVisionCorrection: false,
-        isDeceased: false,
-        isSmoker: false
-      } as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>
-    ];
-
-    demoPatients.forEach(patient => {
-      this.addPatient(patient);
-    });
-
-    console.log('🎭 Données démo seedées avec succès');
+    // En mode démo, on commence avec une liste vide
+    // Les patients seront ajoutés par l'utilisateur avec ses propres données
+    console.log('🎭 Session démo initialisée (liste vide, prête pour les données utilisateur)');
   }
 }
 
