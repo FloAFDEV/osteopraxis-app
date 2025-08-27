@@ -359,9 +359,14 @@ export function PatientForm({
 								className="min-w-[120px]"
 								onClick={() => {
 									console.log("🔘 Bouton Enregistrer cliqué");
-									console.log("🔘 Form errors:", form.formState.errors);
+									console.log("🔘 Form errors:", JSON.stringify(form.formState.errors, null, 2));
 									console.log("🔘 Form isValid:", form.formState.isValid);
-									console.log("🔘 Form values:", form.getValues());
+									console.log("🔘 Form values:", JSON.stringify(form.getValues(), null, 2));
+									
+									// Afficher les erreurs de validation de manière lisible
+									Object.keys(form.formState.errors).forEach(field => {
+										console.log(`❌ Erreur ${field}:`, form.formState.errors[field]?.message);
+									});
 								}}
 							>
 								{isLoading
