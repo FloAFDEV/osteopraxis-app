@@ -15,7 +15,7 @@ interface PatientDisplayInfo {
 export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
   return useMemo(() => {
     // Détection d'un patient démo par email technique
-    const isDemoPatient = patient.email?.endsWith('@temp.local') || false;
+    const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
     
     if (isDemoPatient) {
       // Extraire un identifiant court de l'email pour générer un alias unique
@@ -24,7 +24,7 @@ export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
       
       return {
         displayName: `Patient Démo #${shortId}`,
-        displayEmail: `demo-${shortId}@exemple.local`,
+        displayEmail: '', // Ne pas afficher d'email factice
         isDemoPatient: true,
       };
     }
@@ -44,7 +44,7 @@ export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
  * @returns Le nom à afficher (alias si patient démo)
  */
 export const getPatientDisplayName = (patient: Patient): string => {
-  const isDemoPatient = patient.email?.endsWith('@temp.local') || false;
+  const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
   
   if (isDemoPatient) {
     const emailMatch = patient.email?.match(/patient-(\d+)-(\d+)@temp\.local/);
@@ -58,15 +58,14 @@ export const getPatientDisplayName = (patient: Patient): string => {
 /**
  * Fonction utilitaire pour obtenir l'email d'affichage d'un patient
  * @param patient - Le patient
- * @returns L'email à afficher (alias si patient démo)
+ * @returns L'email à afficher (vide si patient démo)
  */
 export const getPatientDisplayEmail = (patient: Patient): string => {
-  const isDemoPatient = patient.email?.endsWith('@temp.local') || false;
+  const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
   
   if (isDemoPatient) {
-    const emailMatch = patient.email?.match(/patient-(\d+)-(\d+)@temp\.local/);
-    const shortId = emailMatch ? emailMatch[2].slice(-4) : Math.random().toString(36).slice(-4);
-    return `demo-${shortId}@exemple.local`;
+    // Ne pas afficher d'email pour les patients démo
+    return '';
   }
 
   return patient.email || '';

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQueryClient } from "@tanstack/react-query";
 
 const NewPatientPage = () => {
 	const [loading, setLoading] = useState(false);
@@ -16,6 +17,7 @@ const NewPatientPage = () => {
 	const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
 	const navigate = useNavigate();
 	const { user, isAuthenticated } = useAuth();
+	const queryClient = useQueryClient();
 
 	useEffect(() => {
 		const fetchCabinetInfo = async () => {
@@ -171,6 +173,11 @@ const NewPatientPage = () => {
 				console.error("❌ Patient créé sans ID:", newPatient);
 				throw new Error("Le patient n'a pas été créé correctement - ID manquant");
 			}
+
+			// Invalider les queries pour mettre à jour la liste des patients
+			queryClient.invalidateQueries({
+				queryKey: ['patients']
+			});
 
 			console.log("🎉 Affichage du toast de succès");
 			toast.success(
