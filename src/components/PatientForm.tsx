@@ -281,12 +281,12 @@ export function PatientForm({
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
 							<div className="sticky top-0 z-10 bg-background border-b mb-6">
 								<TabsList className="w-full h-auto p-2 bg-muted/30 rounded-lg">
-									<div className="hidden lg:grid lg:grid-cols-8 xl:grid-cols-9 gap-1 w-full">
+									<div className="hidden lg:flex lg:justify-between lg:items-center w-full gap-2">
 										{tabs.map((tab) => (
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium min-h-[60px] data-[state=active]:bg-background data-[state=active]:shadow-sm"
+												className="flex flex-col items-center gap-1 px-3 py-3 text-xs font-medium min-h-[60px] data-[state=active]:bg-background data-[state=active]:shadow-sm flex-1 max-w-[140px]"
 											>
 												<span className="text-lg">{tab.icon}</span>
 												<span className="text-center leading-tight">{tab.shortLabel}</span>
