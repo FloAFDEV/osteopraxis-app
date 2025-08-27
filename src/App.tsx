@@ -56,6 +56,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 
+import { PatientHubInitialization } from "@/services/hybrid-data-adapter/app-initialization";
+import { useEffect } from "react";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -64,6 +67,28 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+/**
+ * Composant d'initialisation PatientHub
+ * Configure automatiquement le stockage HDS (local pour production, éphémère pour démo)
+ */
+function PatientHubInitializer() {
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        await PatientHubInitialization.initializeApp();
+        console.log('🏥 PatientHub prêt - Stockage HDS configuré');
+      } catch (error) {
+        console.error('❌ Erreur initialisation PatientHub:', error);
+        // L'application continue de fonctionner même en cas d'erreur
+      }
+    };
+
+    initializeApp();
+  }, []);
+
+  return null; // Composant invisible
+}
 
 function App() {
   return (
@@ -76,6 +101,8 @@ function App() {
                 <DemoProvider>
                   <Router>
                     <AuthProvider>
+                      {/* Initialisation PatientHub avec stockage HDS */}
+                      <PatientHubInitializer />
                       <SecurityHeaders />
                       <SkipToContent />
                       <div id="main-content" className="min-h-screen bg-background">

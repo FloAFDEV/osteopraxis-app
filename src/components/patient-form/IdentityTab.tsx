@@ -23,8 +23,12 @@ export const IdentityTab = ({ form, selectedCabinetId }: IdentityTabProps) => {
                 const cabinets = await api.getCabinets();
                 setAvailableCabinets(cabinets || []);
                 
-                // Si selectedCabinetId est fourni et le champ n'a pas de valeur, le définir
-                if (selectedCabinetId && !form.getValues("cabinetId")) {
+                // UX intelligente pour cabinet unique
+                if (cabinets && cabinets.length === 1) {
+                    // Cabinet unique : sélection automatique
+                    form.setValue("cabinetId", cabinets[0].id);
+                } else if (selectedCabinetId && !form.getValues("cabinetId")) {
+                    // Cabinet présélectionné
                     form.setValue("cabinetId", selectedCabinetId);
                 }
             } catch (error) {
@@ -72,40 +76,76 @@ export const IdentityTab = ({ form, selectedCabinetId }: IdentityTabProps) => {
                     />
                 </div>
 
-                {/* Cabinet selection */}
-                <FormField
-                    control={form.control}
-                    name="cabinetId"
-                    render={({ field }) => (
-                        <FormItem>
+                {/* Cabinet selection - UX améliorée */}
+                {availableCabinets.length > 1 ? (
+                    <FormField
+                        control={form.control}
+                        name="cabinetId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Cabinet</FormLabel>
+                                <FormControl>
+                                    <Select
+                                        value={field.value?.toString() || ""}
+                                        onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Sélectionner un cabinet" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableCabinets.map((cabinet) => (
+                                                <SelectItem key={cabinet.id} value={cabinet.id.toString()}>
+                                                    {cabinet.name}
+                                                    {cabinet.address && (
+                                                        <span className="text-sm text-muted-foreground ml-2">
+                                                            - {cabinet.address}
+                                                        </span>
+                                                    )}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                ) : availableCabinets.length === 1 ? (
+                    <div className="grid grid-cols-1">
+                        <div className="space-y-2">
                             <FormLabel>Cabinet</FormLabel>
-                            <FormControl>
-                                <Select
-                                    value={field.value?.toString() || ""}
-                                    onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Sélectionner un cabinet" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableCabinets.map((cabinet) => (
-                                            <SelectItem key={cabinet.id} value={cabinet.id.toString()}>
-                                                {cabinet.name}
-                                                {cabinet.address && (
-                                                    <span className="text-sm text-muted-foreground ml-2">
-                                                        - {cabinet.address}
-                                                    </span>
-                                                )}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
+                            <div className="flex items-center p-3 border border-input bg-muted/50 rounded-md">
+                                <div className="flex-1">
+                                    <p className="font-medium">{availableCabinets[0].name}</p>
+                                    {availableCabinets[0].address && (
+                                        <p className="text-sm text-muted-foreground">
+                                            {availableCabinets[0].address}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="text-xs text-muted-foreground bg-primary/10 px-2 py-1 rounded">
+                                    Cabinet unique
+                                </div>
+                            </div>
+                        </div>
+                        {/* Hidden field pour la valeur */}
+                        <FormField
+                            control={form.control}
+                            name="cabinetId"
+                            render={({ field }) => (
+                                <input 
+                                    type="hidden" 
+                                    {...field} 
+                                    value={availableCabinets[0].id} 
+                                />
+                            )}
+                        />
+                    </div>
+                ) : (
+                    <div className="text-sm text-muted-foreground p-3 border border-dashed rounded-md">
+                        Aucun cabinet disponible
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
