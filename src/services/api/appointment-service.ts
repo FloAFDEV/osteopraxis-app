@@ -68,6 +68,18 @@ export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
     console.log("appointmentService.getAppointments: Starting");
     
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Mode démo: Filtrage des données Appointment pour ne montrer que les données démo');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      await delay(200);
+      return demoLocalStorage.getAppointments();
+    }
+    
     if (USE_SUPABASE) {
       try {
         // CORRECTION: Éviter les appels multiples en vérifiant d'abord les permissions
@@ -220,6 +232,28 @@ export const appointmentService = {
       reason: XSSProtection.sanitizeString(appointmentData?.reason),
       notes: XSSProtection.sanitizeString(appointmentData?.notes),
     };
+
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Création rendez-vous en session démo locale');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      await delay(200);
+      
+      // Assurer les valeurs par défaut pour le mode démo
+      const demoAppointmentData = {
+        ...sanitized,
+        osteopathId: 999, // ID factice pour le mode démo
+        cabinetId: sanitized.cabinetId || 1, // Cabinet démo par défaut
+        notificationSent: sanitized.notificationSent ?? false,
+        status: sanitized.status || 'SCHEDULED'
+      };
+      
+      return demoLocalStorage.addAppointment(demoAppointmentData);
+    }
 
     if (USE_SUPABASE) {
       try {

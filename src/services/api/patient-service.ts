@@ -12,7 +12,19 @@ export const setDemoContext = (context: any) => {
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    // Démo: données locales éphémères
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Mode démo: Filtrage des données Patient pour ne montrer que les données démo');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      await delay(200);
+      return demoLocalStorage.getPatients();
+    }
+
+    // Fallback vers ancien contexte démo si présent
     if (demoContext?.isDemoMode) {
       await delay(300);
       return [...demoContext.demoData.patients];
@@ -32,7 +44,18 @@ export const patientService = {
       return undefined;
     }
 
-    // Démo: données locales éphémères
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      await delay(150);
+      return demoLocalStorage.getPatientById(id);
+    }
+
+    // Fallback vers ancien contexte démo si présent
     if (demoContext?.isDemoMode) {
       await delay(200);
       return demoContext.demoData.patients.find((patient: any) => patient.id === id);
@@ -48,7 +71,30 @@ export const patientService = {
   },
 
   async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-    // Démo: données locales éphémères
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Création patient en session démo locale');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      await delay(200);
+      
+      // Assurer les valeurs par défaut pour le mode démo
+      const demoPatientData = {
+        ...patient,
+        osteopathId: 999, // ID factice pour le mode démo
+        cabinetId: patient.cabinetId || 1, // Cabinet démo par défaut
+        hasVisionCorrection: patient.hasVisionCorrection ?? false,
+        isDeceased: patient.isDeceased ?? false,
+        isSmoker: patient.isSmoker ?? false
+      };
+      
+      return demoLocalStorage.addPatient(demoPatientData);
+    }
+
+    // Fallback vers ancien contexte démo si présent
     if (demoContext?.isDemoMode) {
       await delay(200);
       const now = new Date().toISOString();
@@ -89,7 +135,19 @@ export const patientService = {
       throw new Error("ID patient invalide pour la mise à jour");
     }
 
-    // Démo: mise à jour locale éphémère
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Mise à jour patient en session démo locale');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      await delay(150);
+      return demoLocalStorage.updatePatient(patient.id, patient);
+    }
+
+    // Fallback vers ancien contexte démo si présent
     if (demoContext?.isDemoMode) {
       await delay(150);
       demoContext.updateDemoPatient(patient.id, { ...patient, updatedAt: new Date().toISOString() });
@@ -112,7 +170,19 @@ export const patientService = {
       return false;
     }
 
-    // Démo: suppression locale éphémère
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Suppression patient en session démo locale');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      await delay(120);
+      return demoLocalStorage.deletePatient(id);
+    }
+
+    // Fallback vers ancien contexte démo si présent
     if (demoContext?.isDemoMode) {
       await delay(120);
       if (demoContext.deleteDemoPatient) {

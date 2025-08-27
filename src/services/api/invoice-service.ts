@@ -13,7 +13,18 @@ export const setDemoContext = (context: any) => {
 
 export const invoiceService = {
   async getInvoices(): Promise<Invoice[]> {
-    // Démo: données locales éphémères
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Mode démo: Filtrage des données Invoice pour ne montrer que les données démo');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      return demoLocalStorage.getInvoices();
+    }
+
+    // Fallback vers ancien contexte démo si présent
     if (demoContext?.isDemoMode) {
       return [...demoContext.demoData.invoices];
     }
@@ -99,7 +110,34 @@ export const invoiceService = {
   },
 
   async createInvoice(invoiceData: Partial<Invoice> & { osteopathId?: number }): Promise<Invoice> {
-    // Démo: données éphémères
+    // Vérifier d'abord le mode démo éphémère local
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      console.log('🎭 Création facture en session démo locale');
+      // Mode démo éphémère: utiliser le stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      
+      // Assurer les valeurs par défaut pour le mode démo
+      const demoInvoiceData = {
+        amount: invoiceData.amount ?? 0,
+        paymentStatus: (invoiceData.paymentStatus ?? "PENDING") as PaymentStatus,
+        date: (invoiceData.date as any) ?? new Date().toISOString(),
+        notes: invoiceData.notes ?? null,
+        paymentMethod: invoiceData.paymentMethod ?? null,
+        patientId: invoiceData.patientId!,
+        appointmentId: invoiceData.appointmentId ?? null,
+        osteopathId: 999, // ID factice pour le mode démo
+        cabinetId: invoiceData.cabinetId ?? 1, // Cabinet démo par défaut
+        tvaExoneration: true,
+        tvaMotif: 'TVA non applicable - Article 261-4-1° du CGI'
+      };
+      
+      return demoLocalStorage.addInvoice(demoInvoiceData);
+    }
+
+    // Fallback vers ancien contexte démo si présent
     if (demoContext?.isDemoMode) {
       const now = new Date().toISOString();
       const nextId = Math.max(0, ...demoContext.demoData.invoices.map((i: Invoice) => i.id)) + 1;

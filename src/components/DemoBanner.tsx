@@ -10,24 +10,61 @@ export const DemoBanner = () => {
   const { user } = useAuth();
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [isTemporaryDemo, setIsTemporaryDemo] = useState(false);
+  const [sessionStats, setSessionStats] = useState<any>(null);
 
   useEffect(() => {
-    if (user?.email && DemoService.isDemoUser(user.email)) {
-      const session = DemoService.getCurrentDemoSession();
-      if (session) {
-        setIsTemporaryDemo(true);
-        setRemainingTime(session.remainingTime);
+    const checkDemoSession = async () => {
+      try {
+        // Vérifier d'abord le mode démo éphémère local
+        const { isDemoSession } = await import('@/utils/demo-detection');
+        const isDemoMode = await isDemoSession();
         
-        const interval = setInterval(() => {
-          const currentSession = DemoService.getCurrentDemoSession();
-          if (currentSession) {
-            setRemainingTime(currentSession.remainingTime);
-          }
-        }, 1000);
+        if (isDemoMode) {
+          const { demoLocalStorage } = await import('@/services/demo-local-storage');
+          const stats = demoLocalStorage.getSessionStats();
+          setSessionStats(stats);
+          setIsTemporaryDemo(true);
+          setRemainingTime(stats.timeRemaining);
+          
+          const interval = setInterval(() => {
+            const currentStats = demoLocalStorage.getSessionStats();
+            setSessionStats(currentStats);
+            setRemainingTime(currentStats.timeRemaining);
+            
+            // Si la session a expiré, nettoyer
+            if (currentStats.timeRemaining <= 0) {
+              demoLocalStorage.clearSession();
+              setIsTemporaryDemo(false);
+              window.location.reload();
+            }
+          }, 1000);
 
-        return () => clearInterval(interval);
+          return () => clearInterval(interval);
+        }
+        
+        // Fallback vers ancienne méthode si pas de session locale
+        if (user?.email && DemoService.isDemoUser(user.email)) {
+          const session = DemoService.getCurrentDemoSession();
+          if (session) {
+            setIsTemporaryDemo(true);
+            setRemainingTime(session.remainingTime);
+            
+            const interval = setInterval(() => {
+              const currentSession = DemoService.getCurrentDemoSession();
+              if (currentSession) {
+                setRemainingTime(currentSession.remainingTime);
+              }
+            }, 1000);
+
+            return () => clearInterval(interval);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification de la session démo:', error);
       }
-    }
+    };
+
+    checkDemoSession();
   }, [user]);
 
   const formatTime = (ms: number): string => {
@@ -47,7 +84,7 @@ export const DemoBanner = () => {
             </span>
             <span className="ml-2 text-blue-100">
               {isTemporaryDemo 
-                ? `Données isolées pour votre test • Expire dans ${formatTime(remainingTime)}`
+                ? `Session isolée • ${sessionStats?.patientsCount || 0} patients • Expire dans ${formatTime(remainingTime)}`
                 : 'Toutes les données sont fictives et les modifications ne sont pas sauvegardées'
               }
             </span>
