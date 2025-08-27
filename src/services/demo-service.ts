@@ -18,54 +18,35 @@ export class DemoService {
     return `demo-${sessionId}@patienthub.com`;
   }
 
-  // Créer un compte démo temporaire unique
+  // Créer une session démo locale éphémère
   static async createDemoAccount(): Promise<{ email: string; password: string; sessionId: string }> {
     try {
-      const demoEmail = this.generateDemoEmail();
-      const sessionId = demoEmail.split('-')[1].split('@')[0];
-      const expiresAt = new Date(Date.now() + this.DEMO_SESSION_DURATION);
-
-      console.log(`🎭 Création compte démo temporaire: ${demoEmail}`);
-
-      // Créer le compte temporaire
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      console.log('🎭 Création d\'une session démo éphémère locale...');
+      
+      const { demoLocalStorage } = await import('./demo-local-storage');
+      
+      // Créer une nouvelle session locale éphémère
+      const session = demoLocalStorage.createSession();
+      console.log(`🎭 Session démo locale créée: ${session.sessionId}`);
+      
+      // Seed avec des données démo de base
+      demoLocalStorage.seedDemoData();
+      
+      // Générer des identifiants factices (pour compatibilité avec l'interface)
+      const demoEmail = `demo-${session.sessionId}@patienthub.com`;
+      const demoPassword = `demo${session.sessionId}`;
+      
+      console.log(`✅ Session démo éphémère prête: ${session.sessionId}`);
+      
+      return {
         email: demoEmail,
-        password: this.DEMO_PASSWORD,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            first_name: 'Dr. Demo',
-            last_name: `Session-${sessionId}`,
-            role: 'OSTEOPATH',
-            is_demo: true,
-            session_id: sessionId
-          }
-        }
-      });
-
-      if (signUpError) {
-        console.error('Erreur création compte démo temporaire:', signUpError);
-        throw signUpError;
-      }
-
-      if (signUpData.user) {
-        // Créer le profil ostéopathe temporaire avec données éphémères
-        await this.seedTemporaryDemoData(signUpData.user.id, sessionId, expiresAt);
-        await supabase.auth.signOut();
-        
-        // Stocker les infos de session
-        localStorage.setItem('demo-session', JSON.stringify({
-          email: demoEmail,
-          sessionId,
-          expiresAt: expiresAt.toISOString(),
-          createdAt: new Date().toISOString()
-        }));
-      }
-
-      return { email: demoEmail, password: this.DEMO_PASSWORD, sessionId };
+        password: demoPassword,
+        sessionId: session.sessionId
+      };
+      
     } catch (error) {
-      console.error('Erreur lors de la création du compte démo temporaire:', error);
-      throw error;
+      console.error('❌ Erreur lors de la création de la session démo:', error);
+      throw new Error(`Impossible de créer la session démo: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   }
 
@@ -94,12 +75,9 @@ export class DemoService {
 
   // Vérifier si la session démo actuelle est expirée
   static isSessionExpired(): boolean {
-    const session = localStorage.getItem('demo-session');
-    if (!session) return true;
-    
     try {
-      const { expiresAt } = JSON.parse(session);
-      return new Date(expiresAt) < new Date();
+      const { demoLocalStorage } = require('./demo-local-storage');
+      return !demoLocalStorage.isSessionActive();
     } catch {
       return true;
     }
@@ -107,19 +85,27 @@ export class DemoService {
 
   // Obtenir les infos de la session démo actuelle
   static getCurrentDemoSession(): { email: string; sessionId: string; expiresAt: string; remainingTime: number } | null {
-    const session = localStorage.getItem('demo-session');
-    if (!session) return null;
-    
     try {
-      const sessionData = JSON.parse(session);
-      const expiresAt = new Date(sessionData.expiresAt);
-      const remainingTime = Math.max(0, expiresAt.getTime() - Date.now());
+      const { demoLocalStorage } = require('./demo-local-storage');
+      const session = demoLocalStorage.getCurrentSession();
+      
+      if (!session) return null;
+      
+      const remainingTime = new Date(session.expiresAt).getTime() - Date.now();
+      
+      if (remainingTime <= 0) {
+        demoLocalStorage.clearSession();
+        return null;
+      }
       
       return {
-        ...sessionData,
+        email: `demo-${session.sessionId}@patienthub.com`,
+        sessionId: session.sessionId,
+        expiresAt: session.expiresAt.toISOString(),
         remainingTime
       };
-    } catch {
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la session démo:', error);
       return null;
     }
   }
@@ -448,20 +434,29 @@ export class DemoService {
 // Hook pour la gestion de l'authentification démo temporaire
 export function useDemoAuth() {
   const loginDemo = async () => {
-    // Créer un nouveau compte démo temporaire unique
-    const { email, password } = await DemoService.createDemoAccount();
+    // Créer une session démo locale (pas d'authentification Supabase)
+    const credentials = await DemoService.createDemoAccount();
+    console.log('🎭 Session démo locale prête, connexion factice...');
     
-    // Se connecter avec le compte temporaire
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    return data;
+    // Retourner des données factices pour simuler une connexion
+    return {
+      user: {
+        id: `demo-${credentials.sessionId}`,
+        email: credentials.email,
+        user_metadata: {
+          is_demo_user: true,
+          session_id: credentials.sessionId
+        }
+      },
+      session: {
+        access_token: `demo-token-${credentials.sessionId}`,
+        refresh_token: `demo-refresh-${credentials.sessionId}`,
+        user: {
+          id: `demo-${credentials.sessionId}`,
+          email: credentials.email
+        }
+      }
+    };
   };
 
   return {

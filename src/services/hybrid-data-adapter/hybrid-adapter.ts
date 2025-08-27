@@ -45,12 +45,13 @@ export class HybridDataAdapter {
         const { isDemoSession } = await import('@/utils/demo-detection');
         const isDemoMode = await isDemoSession();
         
-        // En mode démo : Utiliser le stockage cloud
+        // En mode démo : Utiliser le stockage local éphémère (pas Supabase)
         if (isDemoMode) {
-          console.log(`🎭 Mode démo - Stockage cloud pour ${entityName}`);
-          const cloudAdapter = this.cloudAdapters.get(entityName);
-          if (cloudAdapter) return cloudAdapter;
-          throw new HybridStorageError(`❌ Aucun adaptateur cloud pour ${entityName} en mode démo`, DataLocation.CLOUD, 'getAdapter');
+          console.log(`🎭 Mode démo - Stockage local éphémère pour ${entityName}`);
+          // Retourner un adaptateur local spécial pour le mode démo
+          const demoAdapter = await this.getDemoLocalAdapter(entityName);
+          if (demoAdapter) return demoAdapter;
+          throw new HybridStorageError(`❌ Aucun adaptateur démo local pour ${entityName}`, DataLocation.LOCAL, 'getAdapter');
         }
         
         // Mode connecté : OBLIGATOIREMENT stockage local pour données HDS
@@ -209,5 +210,93 @@ export class HybridDataAdapter {
   async restoreFromBackup(backupPath: string, password: string): Promise<boolean> {
     // À implémenter : import et déchiffrement
     return true;
+  }
+
+  /**
+   * Crée un adaptateur local spécial pour le mode démo
+   */
+  private async getDemoLocalAdapter(entityName: string): Promise<DataAdapter<any> | null> {
+    const { demoLocalStorage } = await import('@/services/demo-local-storage');
+    
+    // Vérifier qu'une session démo est active
+    if (!demoLocalStorage.isSessionActive()) {
+      console.warn(`🎭 Aucune session démo active pour ${entityName}`);
+      return null;
+    }
+
+    // Créer un adaptateur dynamique pour cette entité
+    const adapter: DataAdapter<any> = {
+      getLocation: () => DataLocation.LOCAL,
+      isAvailable: () => Promise.resolve(true),
+      async getAll() {
+        switch (entityName) {
+          case 'patients':
+            return demoLocalStorage.getPatients();
+          case 'appointments':
+            return demoLocalStorage.getAppointments();
+          case 'invoices':
+            return demoLocalStorage.getInvoices();
+          default:
+            return [];
+        }
+      },
+
+      async getById(id: number | string) {
+        const numId = typeof id === 'string' ? parseInt(id) : id;
+        switch (entityName) {
+          case 'patients':
+            return demoLocalStorage.getPatientById(numId);
+          case 'appointments':
+            return demoLocalStorage.getAppointments().find(a => a.id === numId) || null;
+          case 'invoices':
+            return demoLocalStorage.getInvoices().find(i => i.id === numId) || null;
+          default:
+            return null;
+        }
+      },
+
+      async create(data: any) {
+        switch (entityName) {
+          case 'patients':
+            return demoLocalStorage.addPatient(data);
+          case 'appointments':
+            return demoLocalStorage.addAppointment(data);
+          case 'invoices':
+            return demoLocalStorage.addInvoice(data);
+          default:
+            throw new Error(`Création non supportée pour ${entityName} en mode démo`);
+        }
+      },
+
+      async update(id: number | string, data: any) {
+        const numId = typeof id === 'string' ? parseInt(id) : id;
+        switch (entityName) {
+          case 'patients':
+            return demoLocalStorage.updatePatient(numId, data);
+          case 'appointments':
+            return demoLocalStorage.updateAppointment(numId, data);
+          case 'invoices':
+            return demoLocalStorage.updateInvoice(numId, data);
+          default:
+            throw new Error(`Mise à jour non supportée pour ${entityName} en mode démo`);
+        }
+      },
+
+      async delete(id: number | string) {
+        const numId = typeof id === 'string' ? parseInt(id) : id;
+        switch (entityName) {
+          case 'patients':
+            return demoLocalStorage.deletePatient(numId);
+          case 'appointments':
+            return demoLocalStorage.deleteAppointment(numId);
+          case 'invoices':
+            return demoLocalStorage.deleteInvoice(numId);
+          default:
+            return false;
+        }
+      }
+    };
+
+    return adapter;
   }
 }
