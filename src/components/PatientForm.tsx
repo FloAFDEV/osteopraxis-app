@@ -279,41 +279,35 @@ export function PatientForm({
 						className="space-y-6"
 					>
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
-					{/* Desktop navigation */}
-					<div className="hidden md:block sticky top-0 z-10 bg-background border-b">
-						<TabsList className="flex w-full justify-start gap-2 p-2 h-auto bg-transparent">
-							{tabs.map((tab) => (
-								<TabsTrigger
-									key={tab.id}
-									value={tab.id}
-									className="flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-md hover:bg-muted"
-								>
-									<span className="text-base">{tab.icon}</span>
-									<span>{tab.label}</span>
-								</TabsTrigger>
-							))}
-						</TabsList>
-					</div>
-
-					{/* Mobile navigation */}
-					<div className="md:hidden sticky top-0 z-10 bg-background border-b">
-						<div className="p-4">
-							<TabsList className="flex overflow-x-auto gap-2 w-full justify-start bg-transparent scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-								{tabs.map((tab) => (
-									<TabsTrigger
-										key={tab.id}
-										value={tab.id}
-										className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-md hover:bg-muted whitespace-nowrap min-w-[70px]"
-									>
-										<span className="text-lg">{tab.icon}</span>
-										<span className="text-[10px] leading-tight text-center">
-											{tab.shortLabel || tab.label}
-										</span>
-									</TabsTrigger>
-								))}
-							</TabsList>
-						</div>
-					</div>
+							<div className="sticky top-0 z-10 bg-background border-b mb-6">
+								<TabsList className="w-full h-auto p-2 bg-muted/30 rounded-lg">
+									<div className="hidden lg:grid lg:grid-cols-8 xl:grid-cols-9 gap-1 w-full">
+										{tabs.map((tab) => (
+											<TabsTrigger
+												key={tab.id}
+												value={tab.id}
+												className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium min-h-[60px] data-[state=active]:bg-background data-[state=active]:shadow-sm"
+											>
+												<span className="text-lg">{tab.icon}</span>
+												<span className="text-center leading-tight">{tab.shortLabel}</span>
+											</TabsTrigger>
+										))}
+									</div>
+									
+									<div className="lg:hidden flex overflow-x-auto gap-1 w-full scrollbar-none">
+										{tabs.map((tab) => (
+											<TabsTrigger
+												key={tab.id}
+												value={tab.id}
+												className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium min-w-[65px] whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm"
+											>
+												<span className="text-base">{tab.icon}</span>
+												<span className="text-[10px] text-center leading-tight">{tab.shortLabel}</span>
+											</TabsTrigger>
+										))}
+									</div>
+								</TabsList>
+							</div>
 
 							<TabsContent value="identity">
 								<IdentityTab form={form} />
