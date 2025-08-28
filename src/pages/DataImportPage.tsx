@@ -51,34 +51,45 @@ const DataImportPage = () => {
 		setImportResult(null);
 	};
 
-	const downloadTemplate = async () => {
+	const downloadTemplate = () => {
 		// Créer un fichier Excel template avec les champs réels de la table Patient
-		const { downloadExcelFile } = await import('@/services/export/excel-migration');
-		
-		const templateData = [
-			// Headers - champs essentiels du formulaire patient
-			[
-				'firstName', 'lastName', 'email', 'phone', 'birthDate', 
-				'address', 'city', 'postalCode', 'country', 'allergies', 
-				'surgicalHistory', 'traumaHistory', 'currentTreatment', 
-				'physicalActivity', 'notes'
-			],
-			// Exemple de données 
-			[
-				'Jean', 'Dupont', 'jean.dupont@email.com', '0123456789', '1980-01-15',
-				'123 Rue de la Paix', 'Paris', '75001', 'France', 'Aucune', 
-				'Appendicectomie 2015', 'Chute vélo 2018', 'Aucun', 
-				'Course à pied 2x/semaine', 'Patient régulier'
-			],
-			[
-				'Marie', 'Martin', 'marie.martin@email.com', '0987654321', '1990-05-20',
-				'456 Avenue des Champs', 'Lyon', '69000', 'France', 'Aspirine', 
-				'Aucune', 'Entorse cheville', 'Doliprane si besoin', 
-				'Yoga, natation', 'Migraines fréquentes'
-			]
-		];
+		import('xlsx').then((XLSX) => {
+			const templateData = [
+				// Headers - champs essentiels du formulaire patient
+				[
+					'firstName', 'lastName', 'email', 'phone', 'birthDate', 
+					'address', 'allergies', 'surgicalHistory', 'traumaHistory', 
+					'currentTreatment', 'physicalActivity', 'notes'
+				],
+				// Exemple de données 
+				[
+					'Jean', 'Dupont', 'jean.dupont@email.com', '0123456789', '1980-01-15',
+					'123 Rue de la Paix, 75001 Paris', 'Aucune', 'Appendicectomie 2015', 'Chute vélo 2018', 
+					'Aucun', 'Course à pied 2x/semaine', 'Patient régulier'
+				],
+				[
+					'Marie', 'Martin', 'marie.martin@email.com', '0987654321', '1990-05-20',
+					'456 Avenue des Champs, 69000 Lyon', 'Aspirine', 'Aucune', 'Entorse cheville',
+					'Doliprane si besoin', 'Yoga, natation', 'Migraines fréquentes'
+				]
+			];
 
-		await downloadExcelFile(templateData, "modele-import-patients.xlsx", "Patients");
+			const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+			
+			// Ajuster la largeur des colonnes
+			const colWidths = [
+				{ wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 12 },
+				{ wch: 35 }, { wch: 20 }, { wch: 25 }, { wch: 25 }, 
+				{ wch: 25 }, { wch: 20 }, { wch: 30 }
+			];
+			worksheet['!cols'] = colWidths;
+
+			const workbook = XLSX.utils.book_new();
+			XLSX.utils.book_append_sheet(workbook, worksheet, "Patients");
+			
+			// Télécharger le fichier
+			XLSX.writeFile(workbook, "modele-import-patients.xlsx");
+		});
 	};
 
 	return (
