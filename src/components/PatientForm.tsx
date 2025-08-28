@@ -90,6 +90,9 @@ export function PatientForm({
 				? new Date(patient.birthDate).toISOString().split("T")[0]
 				: null,
 			address: patient?.address || "",
+			city: (patient as any)?.city || "",
+			postalCode: (patient as any)?.postalCode || "",
+			country: (patient as any)?.country || "",
 
 			// Informations personnelles
 			gender: patient?.gender || null,
@@ -241,9 +244,9 @@ export function PatientForm({
 		}
 	};
 
-	const tabs = [
+		const tabs = [
 		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: "👤" },
-		{ id: "family-social", label: "Famille & Social", shortLabel: "Famille", icon: "👥" },
+		{ id: "family-social", label: "Contact & Social", shortLabel: "Contact", icon: "📞" },
 		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: "🏥" },
 		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: "📋" },
 		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: "🔬" },
@@ -253,6 +256,7 @@ export function PatientForm({
 			: []),
 		{ id: "supplementary", label: "Supplémentaire", shortLabel: "Notes", icon: "📄" },
 		{ id: "weight-tracking", label: "Suivi", shortLabel: "Suivi", icon: "📏" },
+		...(patient?.id ? [{ id: "relationships", label: "Relations familiales", shortLabel: "Famille", icon: "👥" }] : []),
 	];
 
 	return (
@@ -350,6 +354,16 @@ export function PatientForm({
 							<TabsContent value="weight-tracking">
 								<WeightTrackingTab form={form} />
 							</TabsContent>
+
+							{patient?.id && (
+								<TabsContent value="relationships">
+									<PatientRelationshipsTab
+										form={form}
+										patientId={patient.id}
+										availablePatients={availablePatients}
+									/>
+								</TabsContent>
+							)}
 						</Tabs>
 
 						<div className="flex justify-end gap-2 pt-6 border-t">

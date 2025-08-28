@@ -1,22 +1,42 @@
 
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 import type { ImportData } from '@/types/import';
 
 export const parseExcelFile = async (file: File): Promise<ImportData> => {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
 		
-		reader.onload = (e) => {
+		reader.onload = async (e) => {
 			try {
-				const data = new Uint8Array(e.target?.result as ArrayBuffer);
-				const workbook = XLSX.read(data, { type: 'array' });
+				const buffer = e.target?.result as ArrayBuffer;
+				const workbook = new ExcelJS.Workbook();
+				await workbook.xlsx.load(buffer);
 				
 				// Prendre la première feuille
-				const firstSheetName = workbook.SheetNames[0];
-				const worksheet = workbook.Sheets[firstSheetName];
+				const worksheet = workbook.worksheets[0];
 				
-				// Convertir en JSON avec headers
-				const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][];
+				if (!worksheet) {
+					throw new Error("Aucune feuille trouvée dans le fichier Excel");
+				}
+				
+				const jsonData: string[][] = [];
+				
+				worksheet.eachRow((row, rowNumber) => {
+					const rowData: string[] = [];
+					row.eachCell((cell, colNumber) => {
+						// Convertir toutes les valeurs en string
+						const value = cell.value;
+						if (value === null || value === undefined) {
+							rowData[colNumber - 1] = '';
+						} else if (typeof value === 'object' && 'richText' in value) {
+							// Gérer le texte riche
+							rowData[colNumber - 1] = value.richText?.map((rt: any) => rt.text).join('') || '';
+						} else {
+							rowData[colNumber - 1] = String(value);
+						}
+					});
+					jsonData.push(rowData);
+				});
 				
 				if (jsonData.length === 0) {
 					throw new Error("Le fichier Excel est vide");

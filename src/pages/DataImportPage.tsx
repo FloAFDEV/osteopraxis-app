@@ -51,45 +51,69 @@ const DataImportPage = () => {
 		setImportResult(null);
 	};
 
-	const downloadTemplate = () => {
-		// Créer un fichier Excel template avec les champs réels de la table Patient
-		import('xlsx').then((XLSX) => {
-			const templateData = [
-				// Headers - champs essentiels du formulaire patient
-				[
-					'firstName', 'lastName', 'email', 'phone', 'birthDate', 
-					'address', 'allergies', 'surgicalHistory', 'traumaHistory', 
-					'currentTreatment', 'physicalActivity', 'notes'
-				],
-				// Exemple de données 
-				[
-					'Jean', 'Dupont', 'jean.dupont@email.com', '0123456789', '1980-01-15',
-					'123 Rue de la Paix, 75001 Paris', 'Aucune', 'Appendicectomie 2015', 'Chute vélo 2018', 
-					'Aucun', 'Course à pied 2x/semaine', 'Patient régulier'
-				],
-				[
-					'Marie', 'Martin', 'marie.martin@email.com', '0987654321', '1990-05-20',
-					'456 Avenue des Champs, 69000 Lyon', 'Aspirine', 'Aucune', 'Entorse cheville',
-					'Doliprane si besoin', 'Yoga, natation', 'Migraines fréquentes'
-				]
+	const downloadTemplate = async () => {
+		try {
+			// Créer un fichier Excel template avec les champs réels de la table Patient
+			const ExcelJS = await import('exceljs');
+			const workbook = new ExcelJS.Workbook();
+			const worksheet = workbook.addWorksheet("Patients");
+
+			// Headers - champs essentiels du formulaire patient
+			const headers = [
+				'firstName', 'lastName', 'email', 'phone', 'birthDate', 
+				'address', 'allergies', 'surgicalHistory', 'traumaHistory', 
+				'currentTreatment', 'physicalActivity', 'notes'
 			];
 
-			const worksheet = XLSX.utils.aoa_to_sheet(templateData);
-			
+			// Exemples de données 
+			const exampleData = [
+				['Jean', 'Dupont', 'jean.dupont@email.com', '0123456789', '1980-01-15',
+				'123 Rue de la Paix, 75001 Paris', 'Aucune', 'Appendicectomie 2015', 'Chute vélo 2018', 
+				'Aucun', 'Course à pied 2x/semaine', 'Patient régulier'],
+				['Marie', 'Martin', 'marie.martin@email.com', '0987654321', '1990-05-20',
+				'456 Avenue des Champs, 69000 Lyon', 'Aspirine', 'Aucune', 'Entorse cheville',
+				'Doliprane si besoin', 'Yoga, natation', 'Migraines fréquentes']
+			];
+
+			// Ajouter les headers
+			worksheet.addRow(headers);
+			// Ajouter les données d'exemple
+			exampleData.forEach(row => worksheet.addRow(row));
+
 			// Ajuster la largeur des colonnes
-			const colWidths = [
-				{ wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 12 },
-				{ wch: 35 }, { wch: 20 }, { wch: 25 }, { wch: 25 }, 
-				{ wch: 25 }, { wch: 20 }, { wch: 30 }
-			];
-			worksheet['!cols'] = colWidths;
+			const colWidths = [15, 15, 25, 15, 12, 35, 20, 25, 25, 25, 20, 30];
+			worksheet.columns.forEach((column, index) => {
+				if (column) {
+					column.width = colWidths[index] || 15;
+				}
+			});
 
-			const workbook = XLSX.utils.book_new();
-			XLSX.utils.book_append_sheet(workbook, worksheet, "Patients");
-			
+			// Styliser les headers
+			const headerRow = worksheet.getRow(1);
+			headerRow.font = { bold: true };
+			headerRow.fill = {
+				type: 'pattern',
+				pattern: 'solid',
+				fgColor: { argb: 'FFE6F3FF' }
+			};
+
 			// Télécharger le fichier
-			XLSX.writeFile(workbook, "modele-import-patients.xlsx");
-		});
+			const buffer = await workbook.xlsx.writeBuffer();
+			const blob = new Blob([buffer], {
+				type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+			});
+			
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = "modele-import-patients.xlsx";
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error('Erreur lors de la création du template:', error);
+		}
 	};
 
 	return (

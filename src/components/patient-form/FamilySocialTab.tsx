@@ -123,13 +123,13 @@ export const FamilySocialTab = ({ form, childrenAgesInput, setChildrenAgesInput 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
-                        name="relationship_type"
+                        name="city"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Type de relation</FormLabel>
+                                <FormLabel>Ville</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="Type de relation"
+                                        placeholder="Ville de résidence"
                                         {...field}
                                         value={field.value || ""}
                                     />
@@ -140,13 +140,13 @@ export const FamilySocialTab = ({ form, childrenAgesInput, setChildrenAgesInput 
                     />
                     <FormField
                         control={form.control}
-                        name="relationship_other"
+                        name="postalCode"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Autres relations</FormLabel>
+                                <FormLabel>Code postal</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="Autres informations relationnelles"
+                                        placeholder="Code postal"
                                         {...field}
                                         value={field.value || ""}
                                     />
@@ -155,6 +155,72 @@ export const FamilySocialTab = ({ form, childrenAgesInput, setChildrenAgesInput 
                             </FormItem>
                         )}
                     />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Pays</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Pays de résidence"
+                                        {...field}
+                                        value={field.value || ""}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email personnel</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        placeholder="email@exemple.com"
+                                        {...field}
+                                        value={field.value || ""}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Téléphone</FormLabel>
+                            <FormControl>
+                                <Input
+                                    placeholder="Numéro de téléphone"
+                                    {...field}
+                                    value={field.value || ""}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <div className="border-t pt-4 mt-4">
+                    <h3 className="text-lg font-semibold mb-4 text-foreground">
+                        Relations familiales
+                    </h3>
+                    <div className="text-sm text-muted-foreground mb-4">
+                        Les relations familiales sont gérées dans un onglet dédié une fois le patient créé.
+                        Vous pourrez alors lier ce patient à d'autres membres de sa famille.
+                    </div>
                 </div>
             </CardContent>
         </Card>
