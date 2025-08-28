@@ -12,8 +12,7 @@ import getPatientSchema from "@/utils/patient-form-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { IdentityTab } from "./patient-form/IdentityTab";
-import { FamilySocialTab } from "./patient-form/FamilySocialTab";
+import { UnifiedIdentityTab } from "./patient-form/UnifiedIdentityTab";
 import { MedicalProfileTab } from "./patient-form/MedicalProfileTab";
 import { MedicalHistoryTab } from "./patient-form/MedicalHistoryTab";
 import { ClinicalExaminationTab } from "./patient-form/ClinicalExaminationTab";
@@ -244,9 +243,8 @@ export function PatientForm({
 		}
 	};
 
-		const tabs = [
+	const tabs = [
 		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: "👤" },
-		{ id: "family-social", label: "Contact & Social", shortLabel: "Contact", icon: "📞" },
 		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: "🏥" },
 		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: "📋" },
 		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: "🔬" },
@@ -314,12 +312,9 @@ export function PatientForm({
 							</div>
 
 							<TabsContent value="identity">
-								<IdentityTab form={form} selectedCabinetId={selectedCabinetId} />
-							</TabsContent>
-
-							<TabsContent value="family-social">
-								<FamilySocialTab
-									form={form}
+								<UnifiedIdentityTab 
+									form={form} 
+									selectedCabinetId={selectedCabinetId}
 									childrenAgesInput={childrenAgesInput}
 									setChildrenAgesInput={setChildrenAgesInput}
 								/>
