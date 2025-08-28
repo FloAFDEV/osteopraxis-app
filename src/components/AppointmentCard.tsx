@@ -47,10 +47,11 @@ export function AppointmentCard({
 		: false;
 
 	// Récupérer les factures existantes pour ce rendez-vous
-	const { data: existingInvoices } = useQuery({
+	const { data: existingInvoices, refetch: refetchInvoices } = useQuery({
 		queryKey: ["invoices", "appointment", appointment.id],
 		queryFn: () => api.getInvoicesByAppointmentId(appointment.id),
 		enabled: appointment.status === "COMPLETED",
+		staleTime: 0, // Toujours refetch pour s'assurer d'avoir les données les plus récentes
 	});
 
 	const existingInvoice = existingInvoices?.[0];
@@ -58,6 +59,10 @@ export function AppointmentCard({
 	const handleStatusChange = async (status: AppointmentStatus) => {
 		if (onStatusChange) {
 			await onStatusChange(appointment.id, status);
+			// Refetch invoices si le statut devient COMPLETED
+			if (status === "COMPLETED") {
+				await refetchInvoices();
+			}
 		}
 	};
 
