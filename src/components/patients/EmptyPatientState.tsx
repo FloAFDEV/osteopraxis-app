@@ -36,11 +36,7 @@ const EmptyPatientState: React.FC<EmptyPatientStateProps> = ({
 							</Button>
 						)}
 
-						<Button
-							asChild
-							variant="outline"
-							className="border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-						>
+						<Button asChild variant="outline">
 							<Link to="/patients/new">
 								<Plus className="mr-2 h-4 w-4" /> Créer un
 								nouveau patient
