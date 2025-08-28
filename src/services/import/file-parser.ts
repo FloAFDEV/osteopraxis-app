@@ -1,59 +1,34 @@
-
-import * as XLSX from 'xlsx';
+import { readExcelFile } from '../export/excel-migration';
 import type { ImportData } from '@/types/import';
 
 export const parseExcelFile = async (file: File): Promise<ImportData> => {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
+	try {
+		const excelData = await readExcelFile(file);
 		
-		reader.onload = (e) => {
-			try {
-				const data = new Uint8Array(e.target?.result as ArrayBuffer);
-				const workbook = XLSX.read(data, { type: 'array' });
-				
-				// Prendre la première feuille
-				const firstSheetName = workbook.SheetNames[0];
-				const worksheet = workbook.Sheets[firstSheetName];
-				
-				// Convertir en JSON avec headers
-				const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][];
-				
-				if (jsonData.length === 0) {
-					throw new Error("Le fichier Excel est vide");
-				}
-				
-				const [headers, ...rows] = jsonData;
-				
-				if (!headers || headers.length === 0) {
-					throw new Error("Aucun en-tête trouvé dans le fichier");
-				}
-				
-				// Nettoyer les données (supprimer les lignes vides)
-				const cleanRows = rows.filter(row => 
-					row && row.some(cell => cell !== undefined && cell !== null && cell !== '')
-				);
-				
-				resolve({
-					fileName: file.name,
-					fileType: 'excel',
-					headers: headers.map(h => String(h || '')),
-					rows: cleanRows.map(row => 
-						headers.map((_, index) => String(row[index] || ''))
-					),
-					totalRows: cleanRows.length
-				});
-				
-			} catch (error) {
-				reject(new Error(`Erreur lors de l'analyse du fichier Excel: ${error instanceof Error ? error.message : 'Erreur inconnue'}`));
-			}
+		if (excelData.headers.length === 0 || excelData.rows.length === 0) {
+			throw new Error("Le fichier Excel est vide");
+		}
+
+		// Convertir les données au format ImportData
+		const stringRows = excelData.rows.map(row => 
+			row.map(cell => String(cell || ''))
+		);
+		
+		// Nettoyer les données (supprimer les lignes vides)
+		const cleanRows = stringRows.filter(row => 
+			row && row.some(cell => cell !== undefined && cell !== null && cell !== '')
+		);
+		
+		return {
+			fileName: file.name,
+			fileType: 'excel',
+			headers: excelData.headers,
+			rows: cleanRows,
+			totalRows: cleanRows.length
 		};
-		
-		reader.onerror = () => {
-			reject(new Error("Erreur lors de la lecture du fichier"));
-		};
-		
-		reader.readAsArrayBuffer(file);
-	});
+	} catch (error) {
+		throw new Error(`Erreur lors du parsing Excel: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+	}
 };
 
 export const parseCSVFile = async (file: File): Promise<ImportData> => {
