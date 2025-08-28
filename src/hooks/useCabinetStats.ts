@@ -135,6 +135,14 @@ export function useCabinetStats(selectedCabinetId: number | null) {
             : "Aucune séance prévue";
 
         // Assembler toutes les données pour le tableau de bord
+        // Calcul du revenu moyen par RDV en utilisant les données existantes
+        const paidInvoicesWithAppointment = filteredInvoices.filter(
+          invoice => invoice.paymentStatus === "PAID" && invoice.appointmentId
+        );
+        const averageRevenuePerAppointment = paidInvoicesWithAppointment.length > 0 
+          ? paidInvoicesWithAppointment.reduce((sum, invoice) => sum + invoice.amount, 0) / paidInvoicesWithAppointment.length
+          : 0;
+
         const finalDashboardData = {
           totalPatients: filteredPatients.length,
           ...demographics,
@@ -143,6 +151,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
           nextAppointment: formattedNextAppointment,
           monthlyGrowth: monthlyGrowthData,
           ...revenueMetrics,
+          averageRevenuePerAppointment,
           weeklyAppointments: [0, 0, 0, 0, 0, 0, 0],
           completedAppointments: filteredAppointments.filter(
             (a) => a.status === "COMPLETED"

@@ -312,13 +312,15 @@ export function calculateRevenueMetrics(invoices: Invoice[], currentYear: number
   const currentMonthEnd = new Date(currentYear, currentMonth + 1, 0);
   const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
   const lastMonthEnd = new Date(currentYear, currentMonth, 0);
+  
+  // Filtrer uniquement les factures payées
+  const paidInvoices = invoices.filter(invoice => invoice.paymentStatus === "PAID");
 
   // Revenus de ce mois (factures payées)
-  const revenueThisMonth = invoices
+  const revenueThisMonth = paidInvoices
     .filter((invoice) => {
       const invoiceDate = new Date(invoice.date);
       return (
-        invoice.paymentStatus === "PAID" &&
         invoiceDate >= currentMonthStart &&
         invoiceDate <= currentMonthEnd
       );
@@ -326,13 +328,38 @@ export function calculateRevenueMetrics(invoices: Invoice[], currentYear: number
     .reduce((sum, invoice) => sum + invoice.amount, 0);
 
   // Revenus du mois dernier
-  const revenueLastMonth = invoices
+  const revenueLastMonth = paidInvoices
     .filter((invoice) => {
       const invoiceDate = new Date(invoice.date);
       return (
-        invoice.paymentStatus === "PAID" &&
         invoiceDate >= lastMonthStart &&
         invoiceDate <= lastMonthEnd
+      );
+    })
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+  // Revenus de l'année en cours
+  const currentYearStart = new Date(currentYear, 0, 1);
+  const currentYearEnd = new Date(currentYear, 11, 31);
+  const revenueThisYear = paidInvoices
+    .filter((invoice) => {
+      const invoiceDate = new Date(invoice.date);
+      return (
+        invoiceDate >= currentYearStart &&
+        invoiceDate <= currentYearEnd
+      );
+    })
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+  // Revenus de l'année dernière
+  const lastYearStart = new Date(currentYear - 1, 0, 1);
+  const lastYearEnd = new Date(currentYear - 1, 11, 31);
+  const revenueLastYear = paidInvoices
+    .filter((invoice) => {
+      const invoiceDate = new Date(invoice.date);
+      return (
+        invoiceDate >= lastYearStart &&
+        invoiceDate <= lastYearEnd
       );
     })
     .reduce((sum, invoice) => sum + invoice.amount, 0);
@@ -355,11 +382,10 @@ export function calculateRevenueMetrics(invoices: Invoice[], currentYear: number
     const month = date.getMonth();
     const year = date.getFullYear();
 
-    const monthRevenue = invoices
+    const monthRevenue = paidInvoices
       .filter((invoice) => {
         const invoiceDate = new Date(invoice.date);
         return (
-          invoice.paymentStatus === "PAID" &&
           invoiceDate.getMonth() === month &&
           invoiceDate.getFullYear() === year
         );
@@ -374,10 +400,26 @@ export function calculateRevenueMetrics(invoices: Invoice[], currentYear: number
     ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100)
     : revenueThisMonth > 0 ? 100 : 0;
 
+  // Tendance annuelle 
+  const annualTrend = revenueLastYear > 0
+    ? Math.round(((revenueThisYear - revenueLastYear) / revenueLastYear) * 100)
+    : revenueThisYear > 0 ? 100 : 0;
+
+  // Calcul du revenu moyen par RDV facturé et réalisé
+  // Ne considérer que les factures payées avec appointmentId valide
+  const paidInvoicesWithAppointment = paidInvoices.filter(invoice => invoice.appointmentId);
+  const averageRevenuePerAppointment = paidInvoicesWithAppointment.length > 0 
+    ? paidInvoicesWithAppointment.reduce((sum, invoice) => sum + invoice.amount, 0) / paidInvoicesWithAppointment.length
+    : 0;
+
   return {
     revenueThisMonth,
     revenueLastMonth,
+    revenueThisYear,
+    revenueLastYear,
     revenueTrend,
+    annualTrend,
+    averageRevenuePerAppointment,
     pendingInvoices,
     pendingAmount,
     monthlyRevenue,

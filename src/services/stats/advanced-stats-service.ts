@@ -74,7 +74,7 @@ export class AdvancedStatsService {
     ]);
 
     // Calculer les statistiques
-    const revenue = this.calculateRevenueStats(invoices, thisMonth, lastMonth, thisYear, lastYear);
+    const revenue = this.calculateRevenueStats(invoices, appointments, thisMonth, lastMonth, thisYear, lastYear);
     const noShow = this.calculateNoShowStats(appointments, patients, thisMonth, lastMonth);
     const activity = this.calculateActivityStats(appointments);
     const patientStats = this.calculatePatientStats(patients, appointments, invoices);
@@ -107,21 +107,25 @@ export class AdvancedStatsService {
 
   private calculateRevenueStats(
     invoices: Invoice[], 
+    appointments: Appointment[],
     thisMonth: any, 
     lastMonth: any, 
     thisYear: any, 
     lastYear: any
   ) {
-    const thisMonthInvoices = invoices.filter(inv => 
+    // Filtrer uniquement les factures payées
+    const paidInvoices = invoices.filter(inv => inv.paymentStatus === "PAID");
+    
+    const thisMonthInvoices = paidInvoices.filter(inv => 
       isWithinInterval(new Date(inv.date), { start: thisMonth.start, end: thisMonth.end })
     );
-    const lastMonthInvoices = invoices.filter(inv => 
+    const lastMonthInvoices = paidInvoices.filter(inv => 
       isWithinInterval(new Date(inv.date), { start: lastMonth.start, end: lastMonth.end })
     );
-    const thisYearInvoices = invoices.filter(inv => 
+    const thisYearInvoices = paidInvoices.filter(inv => 
       isWithinInterval(new Date(inv.date), { start: thisYear.start, end: thisYear.end })
     );
-    const lastYearInvoices = invoices.filter(inv => 
+    const lastYearInvoices = paidInvoices.filter(inv => 
       isWithinInterval(new Date(inv.date), { start: lastYear.start, end: lastYear.end })
     );
 
@@ -130,12 +134,28 @@ export class AdvancedStatsService {
     const thisYearRevenue = thisYearInvoices.reduce((sum, inv) => sum + inv.amount, 0);
     const lastYearRevenue = lastYearInvoices.reduce((sum, inv) => sum + inv.amount, 0);
 
-    // Calcul mensuel pour les 12 derniers mois
+    // Calculer les RDV facturés et réalisés (COMPLETED)
+    const completedAppointments = appointments.filter(apt => 
+      apt.status === "COMPLETED"
+    );
+    
+    // Trouver les factures correspondant aux RDV réalisés
+    const paidCompletedAppointments = completedAppointments.filter(apt => 
+      paidInvoices.some(inv => inv.appointmentId === apt.id)
+    );
+    
+    // Calcul du revenu moyen par RDV facturé et réalisé
+    const totalPaidRevenue = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+    const averagePerAppointment = paidCompletedAppointments.length > 0 
+      ? totalPaidRevenue / paidCompletedAppointments.length 
+      : 0;
+
+    // Calcul mensuel pour les 12 derniers mois (factures payées uniquement)
     const monthlyBreakdown = [];
     for (let i = 11; i >= 0; i--) {
       const monthStart = startOfMonth(subMonths(new Date(), i));
       const monthEnd = endOfMonth(subMonths(new Date(), i));
-      const monthInvoices = invoices.filter(inv => 
+      const monthInvoices = paidInvoices.filter(inv => 
         isWithinInterval(new Date(inv.date), { start: monthStart, end: monthEnd })
       );
       
@@ -153,7 +173,7 @@ export class AdvancedStatsService {
       lastYear: lastYearRevenue,
       monthlyTrend: lastMonthRevenue > 0 ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0,
       yearlyTrend: lastYearRevenue > 0 ? ((thisYearRevenue - lastYearRevenue) / lastYearRevenue) * 100 : 0,
-      averagePerAppointment: invoices.length > 0 ? invoices.reduce((sum, inv) => sum + inv.amount, 0) / invoices.length : 0,
+      averagePerAppointment,
       monthlyBreakdown
     };
   }

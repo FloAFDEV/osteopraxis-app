@@ -20,7 +20,7 @@ import {
 	Filter,
 	Euro,
 } from "lucide-react";
-import { BlurredNumber } from "@/components/ui/blurred-amount";
+import { BlurredNumber, BlurredAmount } from "@/components/ui/blurred-amount";
 import { PrivacyToggle } from "@/components/ui/privacy-toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
@@ -163,7 +163,7 @@ export function DashboardStats({
 			</div>
 
 			{/* Cartes de statistiques */}
-			<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+			<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-8">
 				<StatCard
 					title="Patients totaux"
 					value={data.totalPatients}
@@ -210,7 +210,7 @@ export function DashboardStats({
 				<StatCard
 					title="Revenus ce mois"
 					value={
-						<BlurredNumber number={data.revenueThisMonth} suffix="€" />
+						<BlurredAmount amount={data.revenueThisMonth} />
 					}
 					description={
 						data.revenueTrend !== undefined
@@ -222,6 +222,34 @@ export function DashboardStats({
 							: `${data.pendingInvoices} factures en attente`
 					}
 					color="text-emerald-500"
+					icon={<Euro />}
+				/>
+
+				<StatCard
+					title="Revenu annuel"
+					value={
+						<BlurredAmount amount={data.revenueThisYear || 0} />
+					}
+					description={
+						data.annualTrend !== undefined
+							? data.annualTrend > 0
+								? `+${data.annualTrend}% vs année dernière`
+								: data.annualTrend < 0
+								? `${data.annualTrend}% vs année dernière`
+								: "Stable vs année dernière"
+							: "Revenus depuis janvier"
+					}
+					color="text-blue-500"
+					icon={<TrendingUp />}
+				/>
+
+				<StatCard
+					title="Revenu moyen / RDV"
+					value={
+						<BlurredAmount amount={data.averageRevenuePerAppointment || 0} />
+					}
+					description="Par consultation facturée"
+					color="text-purple-500"
 					icon={<Euro />}
 				/>
 

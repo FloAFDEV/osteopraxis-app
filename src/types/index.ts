@@ -298,7 +298,11 @@ export interface DashboardData {
 	childrenCount?: number;
 	revenueThisMonth: number;
 	revenueLastMonth?: number;
+	revenueThisYear?: number;
+	revenueLastYear?: number;
 	revenueTrend?: number;
+	annualTrend?: number;
+	averageRevenuePerAppointment?: number;
 	pendingInvoices: number;
 	pendingAmount?: number;
 	weeklyAppointments: number[];
