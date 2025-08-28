@@ -57,7 +57,6 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({
 							<Button
 								onClick={onRefresh}
 								variant="outline"
-								className="w-auto hover:bg-slate-200 dark:hover:bg-slate-700"
 								disabled={isRefreshing}
 							>
 								<RefreshCw
