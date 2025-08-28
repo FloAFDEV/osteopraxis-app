@@ -4,6 +4,7 @@ import { generateHeaderSection } from "./sections/header-generator";
 import { generateTableSection } from "./sections/table-generator";
 import { generateFooterSection } from "./sections/footer-generator";
 import { translatePaymentStatus } from "./utils/format-utils";
+import { exportSecurity } from "@/utils/export-utils";
 
 /**
  * Génère l’export comptable pour une combinaison ostéopathe + cabinet + période.
@@ -76,7 +77,10 @@ export async function generateAccountingExport(
     );
   }
 
-  const buffer = await workbook.xlsx.writeBuffer();
+  // Sécuriser le workbook (ajouter des avertissements en mode démo)
+  const securedWorkbook = await exportSecurity.secureExcel(workbook);
+  
+  const buffer = await securedWorkbook.xlsx.writeBuffer();
   return new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });

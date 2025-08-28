@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Quote, QuoteItem, CreateQuotePayload, QuoteStatus } from "@/types";
+import { exportSecurity } from "@/utils/export-utils";
 
 export const quoteService = {
 	async getQuotes(): Promise<Quote[]> {
@@ -71,12 +72,17 @@ export const quoteService = {
 	},
 
 	async createQuote(quoteData: CreateQuotePayload): Promise<Quote> {
+		// Générer un numéro de devis sécurisé selon le mode (démo ou connecté)
+		const secureQuoteNumber = await exportSecurity.generateSecureQuoteNumber();
 		const { items, ...quote } = quoteData;
 
-		// Créer le devis
+		// Créer le devis avec numéro sécurisé
 		const { data: newQuote, error: quoteError } = await supabase
 			.from('Quote')
-			.insert(quote)
+			.insert({
+				...quote,
+				quoteNumber: secureQuoteNumber
+			})
 			.select()
 			.single();
 

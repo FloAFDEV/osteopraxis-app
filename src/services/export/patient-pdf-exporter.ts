@@ -4,6 +4,7 @@ import html2canvas from "html2canvas";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Appointment, Invoice, Cabinet, Osteopath } from "@/types";
+import { exportSecurity } from "@/utils/export-utils";
 
 type Patient = Tables<"Patient">;
 
@@ -337,10 +338,24 @@ export class PatientPDFExporter {
 
 		this.addFooter();
 
+		// Générer le PDF et le sécuriser
+		const pdfBytes = this.pdf.output('arraybuffer');
+		const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes));
+		
 		const fileName = `dossier_${patient.firstName}_${
 			patient.lastName
 		}_${format(new Date(), "yyyy-MM-dd")}.pdf`;
-		this.pdf.save(fileName);
+		
+		// Créer un blob sécurisé et le télécharger
+		const blob = new Blob([securedPdfBytes], { type: 'application/pdf' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = fileName;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
 	}
 
 	async exportFromHTML(
@@ -368,7 +383,21 @@ export class PatientPDFExporter {
 			pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 			heightLeft -= pageHeight;
 		}
-		pdf.save(filename);
+		
+		// Sécuriser le PDF avant sauvegarde
+		const pdfBytes = pdf.output('arraybuffer');
+		const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes));
+		
+		// Créer un blob sécurisé et le télécharger
+		const blob = new Blob([securedPdfBytes], { type: 'application/pdf' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
 	}
 
 	async exportPatient(
