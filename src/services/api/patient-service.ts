@@ -77,22 +77,10 @@ export const patientService = {
       return demoContext.demoData.patients.find((patient: any) => patient.id === id);
     }
 
-    // Utilisateur connecté: UNIQUEMENT stockage hybride HDS (local persistant prioritaire)
+    // Utilisateur connecté: UNIQUEMENT stockage hybride HDS
     if (USE_SUPABASE) {
-      try {
-        console.log(`🔍 Recherche patient ${id} dans le stockage hybride...`);
-        const res = await hybridDataManager.getById<Patient>('patients', id);
-        if (res) {
-          console.log(`✅ Patient ${id} trouvé dans le stockage hybride`);
-          return res;
-        } else {
-          console.warn(`⚠️ Patient ${id} non trouvé dans le stockage hybride`);
-          return undefined;
-        }
-      } catch (error) {
-        console.error(`❌ Erreur lors de la recherche du patient ${id}:`, error);
-        throw new Error(`Patient ${id} non trouvé`);
-      }
+      const res = await hybridDataManager.getById<Patient>('patients', id);
+      return res || undefined;
     }
 
     return undefined;

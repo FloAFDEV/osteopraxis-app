@@ -3,7 +3,7 @@
  * Les données sont isolées par session et disparaissent à la fermeture du navigateur
  */
 
-import { Patient, Appointment, Invoice, Cabinet } from '@/types';
+import { Patient, Appointment, Invoice } from '@/types';
 import { nanoid } from 'nanoid';
 
 export interface DemoSession {
@@ -17,7 +17,6 @@ export interface DemoLocalData {
   patients: Patient[];
   appointments: Appointment[];
   invoices: Invoice[];
-  cabinets: Cabinet[];
   session: DemoSession;
 }
 
@@ -46,8 +45,7 @@ class DemoLocalStorageService {
     const initialData: Omit<DemoLocalData, 'session'> = {
       patients: [],
       appointments: [],
-      invoices: [],
-      cabinets: []
+      invoices: []
     };
     
     sessionStorage.setItem(this.getDataKey(sessionId), JSON.stringify(initialData));
@@ -366,38 +364,6 @@ class DemoLocalStorageService {
   }
 
   /**
-   * Gestion des cabinets en mode démo
-   */
-  getCabinets(): Cabinet[] {
-    const data = this.getSessionData();
-    return data?.cabinets || [];
-  }
-
-  getCabinetById(id: number): Cabinet | undefined {
-    const cabinets = this.getCabinets();
-    return cabinets.find(c => c.id === id);
-  }
-
-  addCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Cabinet {
-    const data = this.getSessionData();
-    if (!data) throw new Error('Aucune session démo active');
-
-    const now = new Date().toISOString();
-    const newCabinet: Cabinet = {
-      ...cabinet,
-      id: this.generateTempId(),
-      createdAt: now,
-      updatedAt: now
-    };
-
-    data.cabinets.push(newCabinet);
-    this.saveSessionData(data);
-    
-    console.log(`🎭 Cabinet ajouté en session démo:`, newCabinet);
-    return newCabinet;
-  }
-
-  /**
    * Récupère les statistiques de la session
    */
   getSessionStats(): {
@@ -405,7 +371,6 @@ class DemoLocalStorageService {
     patientsCount: number;
     appointmentsCount: number;
     invoicesCount: number;
-    cabinetCount: number;
     expiresAt: Date | null;
     timeRemaining: number;
   } {
@@ -417,7 +382,6 @@ class DemoLocalStorageService {
       patientsCount: data?.patients.length || 0,
       appointmentsCount: data?.appointments.length || 0,
       invoicesCount: data?.invoices.length || 0,
-      cabinetCount: data?.cabinets.length || 0,
       expiresAt: session?.expiresAt ? new Date(session.expiresAt) : null,
       timeRemaining: session ? new Date(session.expiresAt).getTime() - Date.now() : 0
     };
@@ -446,33 +410,9 @@ class DemoLocalStorageService {
       throw new Error('Aucune session démo active pour le seeding');
     }
 
-    const data = this.getSessionData();
-    if (!data) {
-      throw new Error('Aucune session démo active pour le seeding');
-    }
-
-    // Créer un cabinet de démo par défaut
-    const demoCabinet: Cabinet = {
-      id: this.generateTempId(),
-      name: 'Cabinet Ostéopathique Démo',
-      address: '123 Rue de la Santé',
-      city: 'Paris',
-      postalCode: '75000',
-      phone: '01 23 45 67 89',
-      email: 'contact@cabinet-demo.fr',
-      siret: null,
-      iban: null,
-      bic: null,
-      country: 'France',
-      osteopathId: 534, // ID de l'ostéopathe démo
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    data.cabinets.push(demoCabinet);
-    this.saveSessionData(data);
-    
-    console.log('🎭 Session démo initialisée avec cabinet par défaut:', demoCabinet);
+    // En mode démo, on commence avec une liste vide
+    // Les patients seront ajoutés par l'utilisateur avec ses propres données
+    console.log('🎭 Session démo initialisée (liste vide, prête pour les données utilisateur)');
   }
 }
 

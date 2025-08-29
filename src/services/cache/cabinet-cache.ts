@@ -24,15 +24,6 @@ class CabinetCacheService {
    * Récupérer tous les cabinets avec cache intelligent
    */
   async getCabinets(): Promise<Cabinet[]> {
-    // Vérifier le mode démo en premier
-    const { isDemoSession } = await import('@/utils/demo-detection');
-    const isDemoMode = await isDemoSession();
-    
-    if (isDemoMode) {
-      const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      return demoLocalStorage.getCabinets();
-    }
-    
     const cacheKey = 'all_cabinets';
     const cached = this.cache.get(cacheKey);
     const now = Date.now();
@@ -74,15 +65,6 @@ class CabinetCacheService {
    * Récupérer un cabinet par ID
    */
   async getCabinetById(id: number): Promise<Cabinet | undefined> {
-    // Vérifier le mode démo
-    const { isDemoSession } = await import('@/utils/demo-detection');
-    const isDemoMode = await isDemoSession();
-    
-    if (isDemoMode) {
-      const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      return demoLocalStorage.getCabinetById(id);
-    }
-    
     // Essayer d'abord dans le cache global
     const allCabinets = this.cache.get('all_cabinets');
     if (allCabinets?.data) {

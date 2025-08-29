@@ -50,17 +50,9 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
 
   console.log('🔍 ProtectedRoute - isDemoUser:', isDemoUser);
 
-  // Pour les utilisateurs réels : utiliser le provider hybride avec configuration automatique
+  // Pour les utilisateurs réels : utiliser le provider hybride
   if (!isDemoUser) {
     console.log('🔧 Utilisateur réel - Utilisation provider hybride');
-    
-    // Vérifier si le stockage nécessite une configuration
-    if (!status?.isConfigured) {
-      console.log('⚙️ Stockage non configuré, affichage setup');
-      return <HybridStorageSetup />;
-    }
-    
-    // Si configuré mais verrouillé, le HybridStorageProvider gèrera l'unlock
     return <HybridStorageProvider>{children}</HybridStorageProvider>;
   }
 

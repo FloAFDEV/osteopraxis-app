@@ -235,28 +235,14 @@ const AppointmentsPage = () => {
 	// Nouveau handler pour la mise à jour de statut via badge
 	const handleStatusChange = async (appointmentId: number, status: AppointmentStatus) => {
 		try {
-			// Mise à jour optimiste - mettre à jour immédiatement l'interface
-			await refetchAppointments();
-			
 			// Utiliser l'API pour mettre à jour le statut
 			await api.updateAppointmentStatus(appointmentId, status);
-			
-			// Message de succès avec information sur les actions possibles
-			if (status === "COMPLETED") {
-				toast.success("Séance marquée comme terminée - Vous pouvez maintenant créer une note d'honoraire", {
-					duration: 4000,
-				});
-			} else {
-				toast.success("Statut mis à jour avec succès");
-			}
-			
-			// Refresh final pour s'assurer de la cohérence
+			toast.success("Statut mis à jour avec succès");
+			// Refresh data
 			await refetchAppointments();
 		} catch (error) {
 			console.error("Error updating appointment status:", error);
 			toast.error("Erreur lors de la mise à jour du statut");
-			// En cas d'erreur, forcer le refresh pour revenir à l'état cohérent
-			await refetchAppointments();
 		}
 	};
 

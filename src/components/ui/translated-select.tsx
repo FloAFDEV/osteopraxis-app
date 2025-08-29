@@ -8,7 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getEnumOptions } from "@/utils/patient-form-helpers";
-import { useCabinets } from "@/hooks/useCabinets";
+import { useEffect, useState } from "react";
+import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 
 interface TranslatedSelectProps {
@@ -28,7 +29,27 @@ export const TranslatedSelect = ({
   disabled = false,
   className,
 }: TranslatedSelectProps) => {
-  const { data: cabinets = [], isLoading: loading } = useCabinets();
+  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Récupération des cabinets si nécessaire
+  useEffect(() => {
+    const fetchCabinets = async () => {
+      if (enumType === 'Cabinet') {
+        setLoading(true);
+        try {
+          const cabinetsList = await api.getCabinets();
+          setCabinets(cabinetsList);
+        } catch (error) {
+          console.error("Erreur lors du chargement des cabinets:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchCabinets();
+  }, [enumType]);
 
   // Obtention des options selon le type d'énumération
   const getOptions = () => {

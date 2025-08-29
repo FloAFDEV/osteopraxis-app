@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
 import { useCabinets } from "@/hooks/useCabinets";
-import { useDemo } from "@/contexts/DemoContext";
 
 interface CabinetSelectorProps {
   form: UseFormReturn<PatientFormValues>;
@@ -20,19 +19,12 @@ interface CabinetSelectorProps {
 
 export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: CabinetSelectorProps) => {
   const { data: cabinets = [], isLoading: loading } = useCabinets();
-  const { isDemoMode, demoData } = useDemo();
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
 
   useEffect(() => {
     if (cabinets.length > 0) {
-      // En mode demo, sélection automatique du cabinet de demo
-      if (isDemoMode && demoData.cabinets.length > 0 && !selectedCabinetId) {
-        const demoCabinet = demoData.cabinets[0];
-        setSelectedCabinet(demoCabinet);
-        onCabinetChange(demoCabinet.id.toString());
-        form.setValue('cabinetId', demoCabinet.id);
-      } else if (!isDemoMode && !selectedCabinetId) {
-        // Configuration automatique du premier cabinet en mode connecté
+      // Configuration automatique du premier cabinet
+      if (!selectedCabinetId) {
         const firstCabinet = cabinets[0];
         setSelectedCabinet(firstCabinet);
         onCabinetChange(firstCabinet.id.toString());
@@ -43,7 +35,7 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
         setSelectedCabinet(cabinet || null);
       }
     }
-  }, [cabinets, selectedCabinetId, onCabinetChange, form, isDemoMode, demoData.cabinets]);
+  }, [cabinets, selectedCabinetId, onCabinetChange, form]);
 
   const handleCabinetChange = (value: string) => {
     const cabinet = cabinets.find(c => c.id === parseInt(value));
