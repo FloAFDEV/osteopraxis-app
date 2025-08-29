@@ -15,6 +15,13 @@ const DashboardPage = () => {
   useEffect(() => {
     console.log("DashboardPage - Vérification du profil utilisateur:", user);
     
+    // Pour les utilisateurs démo, rediriger vers la page d'accueil
+    if (user && (user.email === 'demo@patienthub.com' || user.email?.startsWith('demo-'))) {
+      console.log("🔄 Redirection vers dashboard");
+      navigate("/");
+      return;
+    }
+    
     // Ne rediriger que si l'utilisateur est connecté mais n'a pas d'osteopathId
     if (user && !user.osteopathId) {
       console.log("Utilisateur sans profil ostéopathe détecté, redirection vers la configuration");

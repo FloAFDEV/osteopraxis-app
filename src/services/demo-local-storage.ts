@@ -446,9 +446,33 @@ class DemoLocalStorageService {
       throw new Error('Aucune session démo active pour le seeding');
     }
 
-    // En mode démo, on commence avec une liste vide
-    // Les patients seront ajoutés par l'utilisateur avec ses propres données
-    console.log('🎭 Session démo initialisée (liste vide, prête pour les données utilisateur)');
+    const data = this.getSessionData();
+    if (!data) {
+      throw new Error('Aucune session démo active pour le seeding');
+    }
+
+    // Créer un cabinet de démo par défaut
+    const demoCabinet: Cabinet = {
+      id: this.generateTempId(),
+      name: 'Cabinet Ostéopathique Démo',
+      address: '123 Rue de la Santé',
+      city: 'Paris',
+      postalCode: '75000',
+      phone: '01 23 45 67 89',
+      email: 'contact@cabinet-demo.fr',
+      siret: null,
+      iban: null,
+      bic: null,
+      country: 'France',
+      osteopathId: 534, // ID de l'ostéopathe démo
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    data.cabinets.push(demoCabinet);
+    this.saveSessionData(data);
+    
+    console.log('🎭 Session démo initialisée avec cabinet par défaut:', demoCabinet);
   }
 }
 
