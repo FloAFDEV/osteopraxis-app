@@ -9,7 +9,8 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { CabinetFormProps, cabinetFormSchema, CabinetFormValues } from "./types";
+import { CabinetFormProps, createCabinetFormSchema, CabinetFormValues } from "./types";
+import { isDemoSession } from "@/utils/demo-detection";
 import { CabinetInfoFields } from "./CabinetInfoFields";
 import { BillingInfoFields } from "./BillingInfoFields";
 import { ImageFields } from "./ImageFields";
@@ -31,8 +32,17 @@ export function CabinetForm({
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [previewLogoUrl, setPreviewLogoUrl] = useState<string | null>(null);
   const [currentStampUrl, setCurrentStampUrl] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
+    // Vérifier le mode démo
+    const checkDemoMode = async () => {
+      const demoMode = await isDemoSession();
+      setIsDemoMode(demoMode);
+    };
+    
+    checkDemoMode();
+    
     // Initialiser les prévisualisations d'image avec les valeurs par défaut
     if (defaultValues?.imageUrl) {
       setPreviewImageUrl(defaultValues.imageUrl);
@@ -68,7 +78,7 @@ export function CabinetForm({
   }, [isEditing, osteopathId, defaultValues]);
 
   const form = useForm<CabinetFormValues>({
-    resolver: zodResolver(cabinetFormSchema),
+    resolver: zodResolver(createCabinetFormSchema(isDemoMode)),
     defaultValues: {
       name: defaultValues?.name || "",
       address: defaultValues?.address || "",

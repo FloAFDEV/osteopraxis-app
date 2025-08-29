@@ -16,6 +16,16 @@ export const cabinetService = {
   getCabinetById: (id: number) => cabinetCache.getCabinetById(id),
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
+    // Vérifier le mode démo
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    
+    if (isDemoMode) {
+      // Mode démo : stockage local temporaire
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      return demoLocalStorage.addCabinet(cabinet);
+    }
+    
     if (USE_SUPABASE) {
       try {
         const newCabinet = await supabaseCabinetService.createCabinet(cabinet);

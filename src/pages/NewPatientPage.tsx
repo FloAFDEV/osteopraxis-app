@@ -70,9 +70,9 @@ const NewPatientPage = () => {
 				return;
 			}
 
-			// Vérifier qu'un cabinet est sélectionné
+			// Vérifier qu'un cabinet est sélectionné - OBLIGATOIRE
 			if (!patientData.cabinetId && !selectedCabinetId) {
-				toast.error("Veuillez sélectionner un cabinet");
+				toast.error("⚠️ Vous devez d'abord créer un cabinet avant d'ajouter un patient. Rendez-vous dans la section 'Cabinets' pour en créer un.");
 				setLoading(false);
 				return;
 			}
