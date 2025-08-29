@@ -5,7 +5,7 @@ import { cabinetService } from "./cabinet-service";
 import { osteopathService } from "./osteopath-service";
 import { invoiceService } from "./invoice-service";
 import { authService } from "./auth-service";
-import { apiPatientRelationshipService } from "./patient-relationship-service";
+import { demoPatientRelationshipService } from "./demo-patient-relationship-service";
 
 // Export des services principaux
 export const api = {
@@ -59,11 +59,11 @@ export const api = {
   deleteInvoice: invoiceService.deleteInvoice,
 
   // Patient Relationships
-  getPatientRelationships: apiPatientRelationshipService.getPatientRelationships,
-  getAllPatientRelationships: apiPatientRelationshipService.getAllPatientRelationships,
-  createPatientRelationship: apiPatientRelationshipService.createPatientRelationship,
-  updatePatientRelationship: apiPatientRelationshipService.updatePatientRelationship,
-  deletePatientRelationship: apiPatientRelationshipService.deletePatientRelationship,
+  getPatientRelationships: demoPatientRelationshipService.getPatientRelationships,
+  getAllPatientRelationships: demoPatientRelationshipService.getAllPatientRelationships,
+  createPatientRelationship: demoPatientRelationshipService.createPatientRelationship,
+  updatePatientRelationship: demoPatientRelationshipService.updatePatientRelationship,
+  deletePatientRelationship: demoPatientRelationshipService.deletePatientRelationship,
 
   // Auth
   login: authService.login,
