@@ -57,6 +57,21 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
       }
       
       console.log('🔧 Utilisateur réel - Initialisation stockage natif obligatoire...');
+
+      // Nettoyer les données démo persistantes en mode connecté
+      try {
+        console.log('🧹 Nettoyage données démo en mode connecté...');
+        sessionStorage.clear();
+        const { getPersistentLocalStorage } = await import('@/services/storage/persistent-local-storage');
+        const storage = await getPersistentLocalStorage();
+        await storage.clear('patients');
+        await storage.clear('appointments');
+        await storage.clear('invoices');
+        await storage.clear('cabinets');
+        console.log('✅ Données démo nettoyées');
+      } catch (cleanupError) {
+        console.warn('⚠️ Erreur nettoyage données démo:', cleanupError);
+      }
       
       // Vérifier le support du stockage natif
       const support = nativeStorageManager.checkSupport();
@@ -66,23 +81,37 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
         throw new Error(`❌ CONFORMITÉ HDS IMPOSSIBLE: ${support.details.join(', ')}`);
       }
       
-      // Vérifier si déjà configuré
-      const isConfigured = nativeStorageManager.isConfiguredFromStorage();
+      // Vérifier si déjà configuré et tenter une configuration automatique
+      const autoConfigured = await nativeStorageManager.autoConfigureIfExists();
       
-      if (!isConfigured) {
-        console.log('⚙️ Stockage natif non configuré - Configuration requise');
+      if (autoConfigured) {
+        console.log('🔄 Configuration automatique réussie - Déverrouillage requis');
         setStatus({
-          isConfigured: false,
+          isConfigured: true,
           isUnlocked: false,
-          localAvailable: false,
+          localAvailable: true,
           cloudAvailable: true,
           entitiesCount: {},
           totalSize: 0
         });
       } else {
-        console.log('✅ Stockage natif déjà configuré');
-        const storageStatus = await loadStatus();
-        console.log('📊 Statut stockage:', storageStatus);
+        const isConfigured = nativeStorageManager.isConfiguredFromStorage();
+        
+        if (!isConfigured) {
+          console.log('⚙️ Stockage natif non configuré - Configuration requise');
+          setStatus({
+            isConfigured: false,
+            isUnlocked: false,
+            localAvailable: false,
+            cloudAvailable: true,
+            entitiesCount: {},
+            totalSize: 0
+          });
+        } else {
+          console.log('✅ Stockage natif déjà configuré');
+          const storageStatus = await loadStatus();
+          console.log('📊 Statut stockage:', storageStatus);
+        }
       }
       
       console.log('🎉 INITIALISATION RÉUSSIE: Stockage natif opérationnel');

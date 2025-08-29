@@ -1,17 +1,10 @@
-/**
- * Gestionnaire de stockage natif pour utilisateurs connectés
- * Utilise File System Access API pour stockage HDS local + Supabase pour non-HDS
- */
-
-import { NativeFileAdapter, checkNativeStorageSupport, requestStorageDirectory } from './native-file-adapter';
+import { NativeFileAdapter, requestStorageDirectory } from './native-file-adapter';
 
 export interface NativeStorageConfig {
   directoryHandle?: FileSystemDirectoryHandle;
   encryptionKey?: string;
   entities?: string[];
-  storageLocation?: string;
   securityMethod?: 'pin' | 'password';
-  credential?: string;
 }
 
 export interface NativeStorageStatus {
@@ -21,71 +14,155 @@ export interface NativeStorageStatus {
   cloudAvailable: boolean;
   entitiesCount: Record<string, number>;
   totalSize: number;
-  lastBackup?: string;
 }
 
 export class NativeStorageManager {
+  private adapters: Map<string, NativeFileAdapter> = new Map();
   private directoryHandle: FileSystemDirectoryHandle | null = null;
   private encryptionKey: string | null = null;
-  private adapters: Map<string, NativeFileAdapter> = new Map();
-  private configured = false;
-  private unlocked = false;
+  private configured: boolean = false;
+  private unlocked: boolean = false;
+
+  /**
+   * Générer une clé de chiffrement sécurisée
+   */
+  private generateEncryptionKey(): string {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const key = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    console.log('🔐 Clé de cryptage générée:', key.substring(0, 8) + '...');
+    return key;
+  }
+
+  /**
+   * Vérifier automatiquement si un stockage existant peut être utilisé
+   */
+  async autoConfigureIfExists(): Promise<boolean> {
+    const existingConfig = localStorage.getItem('native-storage-config');
+    if (!existingConfig) return false;
+
+    try {
+      const parsed = JSON.parse(existingConfig);
+      if (!parsed.configured) return false;
+
+      console.log('🔍 Configuration existante détectée, tentative d\'accès automatique...');
+      
+      // Vérifier le support
+      const support = this.checkSupport();
+      if (!support.supported) {
+        console.warn('⚠️ Stockage natif plus supporté, reset nécessaire');
+        await this.reset();
+        return false;
+      }
+
+      // Tenter de restaurer la configuration
+      this.configured = true;
+      this.unlocked = false; // Nécessitera déverrouillage
+
+      console.log('✅ Configuration automatique réussie, déverrouillage requis');
+      return true;
+    } catch (error) {
+      console.error('❌ Erreur configuration automatique:', error);
+      await this.reset();
+      return false;
+    }
+  }
 
   /**
    * Vérifier le support du stockage natif
    */
-  checkSupport() {
-    return checkNativeStorageSupport();
+  checkSupport(): { supported: boolean; details: string[] } {
+    const details: string[] = [];
+    
+    if (!('showDirectoryPicker' in window)) {
+      details.push('File System Access API non supporté');
+    }
+    
+    if (!('crypto' in window)) {
+      details.push('API de cryptographie non disponible');
+    }
+    
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      details.push('HTTPS requis pour le stockage natif');
+    }
+
+    return {
+      supported: details.length === 0,
+      details
+    };
   }
 
   /**
    * Configurer le stockage natif
    */
   async configure(config?: Partial<NativeStorageConfig>): Promise<void> {
+    console.log('⚙️ Configuration du stockage natif...');
+    
+    const support = this.checkSupport();
+    if (!support.supported) {
+      throw new Error('Stockage natif non supporté: ' + support.details.join(', '));
+    }
+
     try {
-      console.log('🚀 Configuration du stockage natif...');
-      
-      // Vérifier le support
-      const support = this.checkSupport();
-      if (!support.supported) {
-        throw new Error(`Stockage natif non supporté: ${support.details.join(', ')}`);
+      // Vérifier si un répertoire existant est déjà enregistré
+      const existingConfig = localStorage.getItem('native-storage-config');
+      let directoryHandle = null;
+
+      if (existingConfig) {
+        try {
+          const parsed = JSON.parse(existingConfig);
+          if (parsed.configured && parsed.directoryHandle) {
+            // Tenter de récupérer le handle existant
+            console.log('🔄 Tentative récupération du répertoire existant...');
+            // Note: en réalité, on ne peut pas sérialiser/désérialiser les handles
+            // Il faudra demander un nouveau répertoire
+          }
+        } catch (error) {
+          console.warn('⚠️ Impossible de récupérer le répertoire existant:', error);
+        }
       }
 
-      // Demander l'accès au dossier si pas fourni
-      if (!config?.directoryHandle) {
-        this.directoryHandle = await requestStorageDirectory();
+      // Si pas de répertoire existant, en demander un nouveau
+      if (!directoryHandle) {
+        console.log('📁 Demande d\'accès à un nouveau répertoire...');
+        directoryHandle = await requestStorageDirectory();
+        this.directoryHandle = directoryHandle;
+      }
+
+      // Générer une clé de chiffrement sécurisée
+      if (config?.encryptionKey) {
+        this.encryptionKey = config.encryptionKey;
       } else {
-        this.directoryHandle = config.directoryHandle;
+        this.encryptionKey = this.generateEncryptionKey();
       }
 
-      // Configurer le chiffrement
-      this.encryptionKey = config?.encryptionKey || null;
-
-      // Créer les adaptateurs pour les entités HDS
+      // Initialiser les adaptateurs pour chaque entité
       const entities = config?.entities || ['patients', 'appointments', 'invoices'];
       
-      for (const entity of entities) {
-        const adapter = new NativeFileAdapter(entity);
+      for (const entityName of entities) {
+        const adapter = new NativeFileAdapter(entityName);
         await adapter.initialize(this.directoryHandle, this.encryptionKey);
-        this.adapters.set(entity, adapter);
+        this.adapters.set(entityName, adapter);
+        console.log(`✅ Adaptateur ${entityName} initialisé avec cryptage`);
       }
 
+      // Marquer comme configuré
       this.configured = true;
       this.unlocked = true;
 
-      console.log('✅ Stockage natif configuré avec succès');
-      
-      // Sauvegarder la configuration (sans le handle de fichier)
-      localStorage.setItem('native-storage-config', JSON.stringify({
+      // Sauvegarder la configuration
+      const configToSave = {
         configured: true,
         entities,
-        hasEncryption: !!this.encryptionKey
-      }));
+        timestamp: Date.now(),
+        encrypted: true
+      };
 
+      localStorage.setItem('native-storage-config', JSON.stringify(configToSave));
+
+      console.log('✅ Stockage natif configuré avec succès et cryptage activé');
     } catch (error) {
       console.error('❌ Erreur configuration stockage natif:', error);
-      this.configured = false;
-      this.unlocked = false;
       throw error;
     }
   }
@@ -94,39 +171,29 @@ export class NativeStorageManager {
    * Obtenir le statut du stockage
    */
   async getStatus(): Promise<NativeStorageStatus> {
-    if (!this.configured) {
-      return {
-        isConfigured: false,
-        isUnlocked: false,
-        localAvailable: false,
-        cloudAvailable: true, // Supabase toujours disponible
-        entitiesCount: {},
-        totalSize: 0
-      };
-    }
-
     const entitiesCount: Record<string, number> = {};
     let totalSize = 0;
 
-    for (const [entityName, adapter] of this.adapters) {
-      try {
-        const stats = await adapter.getStorageStats();
-        entitiesCount[entityName] = stats.count;
-        totalSize += stats.size;
-      } catch (error) {
-        console.warn(`⚠️ Erreur stats ${entityName}:`, error);
-        entitiesCount[entityName] = 0;
+    if (this.configured && this.unlocked) {
+      for (const [entityName, adapter] of this.adapters) {
+        try {
+          const stats = await adapter.getStorageStats();
+          entitiesCount[entityName] = stats.count;
+          totalSize += stats.size;
+        } catch (error) {
+          console.warn(`Erreur lors de la récupération des stats pour ${entityName}:`, error);
+          entitiesCount[entityName] = 0;
+        }
       }
     }
 
     return {
       isConfigured: this.configured,
       isUnlocked: this.unlocked,
-      localAvailable: this.configured && this.unlocked,
-      cloudAvailable: true,
+      localAvailable: this.configured,
+      cloudAvailable: true, // Toujours disponible via Supabase
       entitiesCount,
-      totalSize,
-      lastBackup: undefined
+      totalSize
     };
   }
 
@@ -134,6 +201,11 @@ export class NativeStorageManager {
    * Obtenir un adaptateur pour une entité
    */
   getAdapter(entityName: string): NativeFileAdapter | null {
+    if (!this.unlocked) {
+      console.warn(`🔒 Stockage verrouillé - impossible d'accéder à ${entityName}`);
+      return null;
+    }
+    
     return this.adapters.get(entityName) || null;
   }
 

@@ -72,6 +72,28 @@ class LocalPatientAdapter implements DataAdapter<any> {
     }
   }
 
+  private async isDemoMode(): Promise<boolean> {
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    return await isDemoSession();
+  }
+
+  private async clearDemoDataIfConnected(): Promise<void> {
+    const isDemo = await this.isDemoMode();
+    if (!isDemo) {
+      // En mode connecté, nettoyer toutes les données démo persistantes
+      console.log('🧹 Nettoyage données démo en mode connecté');
+      try {
+        await realPersistentStorage.clear('patients');
+        await realPersistentStorage.clear('appointments');
+        await realPersistentStorage.clear('invoices');
+        await realPersistentStorage.clear('cabinets');
+        sessionStorage.clear(); // Nettoyer aussi sessionStorage
+      } catch (error) {
+        console.warn('⚠️ Erreur nettoyage données démo:', error);
+      }
+    }
+  }
+
   getLocation(): DataLocation {
     return DataLocation.LOCAL;
   }
@@ -91,9 +113,20 @@ class LocalPatientAdapter implements DataAdapter<any> {
   }
 
   async getAll(): Promise<any[]> {
+    // Nettoyer les données démo si en mode connecté
+    await this.clearDemoDataIfConnected();
+
     if (this.fallbackToMemory) {
-      console.warn('⚠️ Mode stockage persistant: utilisation IndexedDB pour les patients');
-      return await realPersistentStorage.getAll('patients');
+      // Fallback final vers IndexedDB persistant SEULEMENT en mode démo
+      const isDemo = await this.isDemoMode();
+      if (isDemo) {
+        console.warn('⚠️ Mode stockage persistant démo: utilisation IndexedDB pour les patients');
+        return await realPersistentStorage.getAll('patients');
+      }
+      
+      // En mode connecté sans stockage natif configuré, retourner vide
+      console.log('⚠️ Aucun stockage local configuré en mode connecté');
+      return [];
     }
     
     try {
@@ -101,25 +134,41 @@ class LocalPatientAdapter implements DataAdapter<any> {
     } catch (error) {
       console.error('Error getting all patients from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return await realPersistentStorage.getAll('patients');
+      
+      const isDemo = await this.isDemoMode();
+      if (isDemo) {
+        return await realPersistentStorage.getAll('patients');
+      }
+      return [];
     }
   }
 
   async getById(id: number | string): Promise<any | null> {
+    // Nettoyer les données démo si en mode connecté
+    await this.clearDemoDataIfConnected();
+
     if (this.fallbackToMemory) {
-      console.log(`🔍 Recherche patient ${id} dans IndexedDB persistant...`);
-      const result = await realPersistentStorage.getById('patients', String(id));
-      
-      if (!result) {
-        console.warn(`⚠️ Patient ${id} non trouvé dans IndexedDB`);
-        // Lister tous les patients pour débugger
-        const allPatients = await realPersistentStorage.getAll('patients');
-        console.log(`📋 ${allPatients.length} patients disponibles en IndexedDB:`, allPatients.map(p => ({ id: p.id, name: `${p.firstName} ${p.lastName}` })));
-      } else {
-        console.log(`✅ Patient ${id} trouvé en IndexedDB:`, { id: result.id, name: `${result.firstName} ${result.lastName}` });
+      // Fallback final vers IndexedDB persistant SEULEMENT en mode démo
+      const isDemo = await this.isDemoMode();
+      if (isDemo) {
+        console.log(`🔍 Recherche patient ${id} dans IndexedDB persistant (mode démo)...`);
+        const result = await realPersistentStorage.getById('patients', String(id));
+        
+        if (!result) {
+          console.warn(`⚠️ Patient ${id} non trouvé dans IndexedDB`);
+          // Lister tous les patients pour débugger
+          const allPatients = await realPersistentStorage.getAll('patients');
+          console.log(`📋 ${allPatients.length} patients disponibles en IndexedDB:`, allPatients.map(p => ({ id: p.id, name: `${p.firstName} ${p.lastName}` })));
+        } else {
+          console.log(`✅ Patient ${id} trouvé en IndexedDB:`, { id: result.id, name: `${result.firstName} ${result.lastName}` });
+        }
+        
+        return result;
       }
-      
-      return result;
+
+      // En mode connecté sans stockage natif configuré
+      console.log(`⚠️ Aucun stockage local configuré pour rechercher patient ${id} en mode connecté`);
+      return null;
     }
     
     try {
@@ -127,7 +176,12 @@ class LocalPatientAdapter implements DataAdapter<any> {
     } catch (error) {
       console.error('Error getting patient by ID from local storage, falling back to IndexedDB:', error);
       this.fallbackToMemory = true;
-      return await realPersistentStorage.getById('patients', String(id));
+      
+      const isDemo = await this.isDemoMode();
+      if (isDemo) {
+        return await realPersistentStorage.getById('patients', String(id));
+      }
+      return null;
     }
   }
 

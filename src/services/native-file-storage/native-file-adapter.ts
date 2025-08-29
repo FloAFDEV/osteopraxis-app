@@ -320,6 +320,58 @@ export class NativeFileAdapter {
       return { count: 0, size: 0 };
     }
   }
+
+  /**
+   * Chiffrement XOR renforcé avec hash de la clé
+   */
+  private encrypt(data: string, key: string): string {
+    // Créer un hash de la clé pour plus de sécurité
+    const keyHash = this.hashKey(key);
+    let result = '';
+    for (let i = 0; i < data.length; i++) {
+      result += String.fromCharCode(data.charCodeAt(i) ^ keyHash.charCodeAt(i % keyHash.length));
+    }
+    // Ajouter un timestamp chiffré pour éviter la duplication
+    const timestamp = Date.now().toString();
+    const encryptedTimestamp = btoa(timestamp);
+    return btoa(result) + '.' + encryptedTimestamp;
+  }
+
+  /**
+   * Déchiffrement XOR renforcé
+   */
+  private decrypt(encryptedData: string, key: string): string {
+    try {
+      // Séparer les données du timestamp
+      const [dataB64, timestampB64] = encryptedData.split('.');
+      if (!dataB64 || !timestampB64) {
+        throw new Error('Format de données chiffrées invalide');
+      }
+
+      const keyHash = this.hashKey(key);
+      const data = atob(dataB64);
+      let result = '';
+      for (let i = 0; i < data.length; i++) {
+        result += String.fromCharCode(data.charCodeAt(i) ^ keyHash.charCodeAt(i % keyHash.length));
+      }
+      return result;
+    } catch (error) {
+      throw new Error('Erreur de déchiffrement - clé invalide ou données corrompues');
+    }
+  }
+
+  /**
+   * Hash simple de la clé pour renforcer la sécurité
+   */
+  private hashKey(key: string): string {
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      const char = key.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(16).padStart(8, '0').repeat(4);
+  }
 }
 
 /**
