@@ -163,30 +163,6 @@ export const authService = {
   async checkAuth(): Promise<AuthState> {
     console.log("authService.checkAuth appelé");
     
-    // Vérifier d'abord le mode démo éphémère local
-    const { isDemoSession } = await import('@/utils/demo-detection');
-    const isDemoMode = await isDemoSession();
-    
-    if (isDemoMode) {
-      console.log('🎭 Mode démo: Retour état d\'authentification factice');
-      // Mode démo éphémère: retourner un état d'auth factice
-      await delay(50);
-      return {
-        user: {
-          id: "demo-user",
-          email: "demo@patienthub.com",
-          firstName: "Démo",
-          lastName: "Utilisateur",
-          role: "OSTEOPATH",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          osteopathId: 999
-        },
-        isAuthenticated: true,
-        token: "demo-token"
-      };
-    }
-    
     if (USE_SUPABASE) {
       try {
         console.log("Utilisation de supabaseAuthService.checkAuth");

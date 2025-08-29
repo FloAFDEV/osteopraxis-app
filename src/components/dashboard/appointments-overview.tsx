@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
-import { getPatientDisplayName } from "@/hooks/usePatientDisplayInfo";
 import { Appointment, DashboardData } from "@/types";
 import {
 	differenceInYears,
@@ -216,7 +215,7 @@ export function AppointmentsOverview({
 						}`}
 					>
 						{patient
-							? getPatientDisplayName(patient)
+							? `${patient.firstName} ${patient.lastName}`
 							: `Patient #${appointment.patientId}`}
 						{isChild(patient) && (
 							<Baby className="h-5 w-5 text-emerald-400 ml-1">

@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Appointment, Patient } from "@/types";
-import { getPatientDisplayName } from "@/hooks/usePatientDisplayInfo";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
@@ -121,7 +120,7 @@ export const AppointmentCard = memo(({
 
   const patientName = useMemo(() => 
     patient 
-      ? getPatientDisplayName(patient)
+      ? `${patient.firstName} ${patient.lastName}`
       : `Patient #${appointment.patientId}`,
     [patient, appointment.patientId]
   );

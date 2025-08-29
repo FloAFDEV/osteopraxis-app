@@ -153,29 +153,6 @@ export const appointmentService = {
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     console.log(`appointmentService.getAppointmentsByPatientId: Starting for patient ${patientId}`);
     
-    // Vérifier d'abord le mode démo éphémère local
-    const { isDemoSession } = await import('@/utils/demo-detection');
-    const isDemoMode = await isDemoSession();
-    
-    if (isDemoMode) {
-      console.log('🎭 Mode démo - Stockage local éphémère pour appointments');
-      // Mode démo éphémère: utiliser le stockage local temporaire
-      const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      
-      // S'assurer qu'une session démo existe
-      if (!demoLocalStorage.isSessionActive()) {
-        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
-        demoLocalStorage.createSession();
-        demoLocalStorage.seedDemoData();
-      }
-      
-      await delay(150);
-      const allAppointments = demoLocalStorage.getAppointments();
-      const result = allAppointments.filter(a => a.patientId === patientId);
-      console.log(`appointmentService.getAppointmentsByPatientId: Found ${result.length} appointments for patient ${patientId}`);
-      return result;
-    }
-    
     if (USE_SUPABASE) {
       try {
         const allAppointments = await hybridDataManager.get<Appointment>('appointments');
