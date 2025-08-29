@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
+import { isDemoUser } from "@/utils/demo-detection";
 
 interface UnifiedIdentityTabProps {
     form: UseFormReturn<PatientFormValues>;
@@ -26,6 +28,7 @@ export const UnifiedIdentityTab = ({
     setChildrenAgesInput 
 }: UnifiedIdentityTabProps) => {
     const [availableCabinets, setAvailableCabinets] = useState<Cabinet[]>([]);
+    const { user } = useAuth();
 
     useEffect(() => {
         const loadCabinets = async () => {
@@ -33,8 +36,14 @@ export const UnifiedIdentityTab = ({
                 const cabinets = await api.getCabinets();
                 setAvailableCabinets(cabinets || []);
                 
-                // UX intelligente pour cabinet unique
-                if (cabinets && cabinets.length === 1) {
+                // En mode démo : remplir automatiquement le cabinet par défaut
+                const isDemo = isDemoUser(user);
+                if (isDemo && cabinets && cabinets.length > 0) {
+                    // Mode démo : sélectionner automatiquement le premier cabinet
+                    const demoCabinet = cabinets[0];
+                    console.log('🎭 Mode démo - Cabinet automatiquement sélectionné:', demoCabinet);
+                    form.setValue("cabinetId", demoCabinet.id);
+                } else if (cabinets && cabinets.length === 1) {
                     // Cabinet unique : sélection automatique
                     form.setValue("cabinetId", cabinets[0].id);
                 } else if (selectedCabinetId && !form.getValues("cabinetId")) {
@@ -43,10 +52,38 @@ export const UnifiedIdentityTab = ({
                 }
             } catch (error) {
                 console.error("Erreur lors du chargement des cabinets:", error);
+                
+                // En mode démo, créer un cabinet par défaut si aucun disponible
+                const isDemo = isDemoUser(user);
+                if (isDemo) {
+                    const defaultCabinet: Cabinet = {
+                        id: 1,
+                        name: "Cabinet Démo",
+                        address: "123 Rue de la Santé, 75000 Paris",
+                        city: "Paris",
+                        postalCode: "75000",
+                        osteopathId: 999,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        phone: "01 23 45 67 89",
+                        email: "contact@cabinet-demo.fr",
+                        siret: null,
+                        iban: null,
+                        bic: null,
+                        country: "France",
+                        logoUrl: null,
+                        imageUrl: null,
+                        professionalProfileId: null,
+                        tenant_id: null
+                    };
+                    setAvailableCabinets([defaultCabinet]);
+                    form.setValue("cabinetId", defaultCabinet.id);
+                    console.log('🎭 Mode démo - Cabinet par défaut créé:', defaultCabinet);
+                }
             }
         };
         loadCabinets();
-    }, [selectedCabinetId, form]);
+    }, [selectedCabinetId, form, user]);
 
     return (
         <Card>

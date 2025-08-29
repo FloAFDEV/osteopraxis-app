@@ -73,34 +73,28 @@ export class HybridDataManager {
         // - Données HDS sensibles : Stockage local OBLIGATOIRE
         console.log('👤 Utilisateur connecté - Configuration stockage hybride (conformité HDS)');
         
-        // Test des permissions Supabase d'abord
+        // FORCE le stockage local OBLIGATOIRE pour les données HDS sensibles
+        console.log('🛠️ FORCER stockage local persistant pour données HDS sensibles...');
+        const localAdapters = await initializeLocalAdapters();
+        this.adapter.registerLocalAdapter('patients', localAdapters.patients);
+        this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
+        this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
+        console.log('✅ Stockage local PERSISTANT configuré pour données HDS');
+        
+        // Test des permissions Supabase pour données non-sensibles
         try {
           await supabase.from('User').select('*').limit(1);
           
-          // Données non-sensibles HDS -> Toujours Supabase si permissions OK
+          // Données non-sensibles HDS -> Supabase si permissions OK
           this.adapter.registerCloudAdapter('quotes', cloudAdapters.quotes);
           this.adapter.registerCloudAdapter('consultations', cloudAdapters.consultations);
           this.adapter.registerCloudAdapter('medicalDocuments', cloudAdapters.medicalDocuments);
           this.adapter.registerCloudAdapter('treatmentHistory', cloudAdapters.treatmentHistory);
           this.adapter.registerCloudAdapter('patientRelationships', cloudAdapters.patientRelationships);
-          
-          // Données HDS sensibles -> Stockage local obligatoire
-          console.log('🛠️ Initialisation du stockage local pour données HDS...');
-          const localAdapters = await initializeLocalAdapters();
-          this.adapter.registerLocalAdapter('patients', localAdapters.patients);
-          this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
-          this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-          console.log('✅ Stockage local configuré pour données HDS');
+          console.log('✅ Stockage cloud configuré pour données non-sensibles');
         } catch (permissionError) {
-          console.error('❌ Erreur Supabase:', permissionError);
-          
-          // Même en cas d'erreur Supabase, initialiser le stockage local pour HDS
-          console.log('🛠️ Initialisation stockage local (fallback)...');
-          const localAdapters = await initializeLocalAdapters();
-          this.adapter.registerLocalAdapter('patients', localAdapters.patients);
-          this.adapter.registerLocalAdapter('appointments', localAdapters.appointments);
-          this.adapter.registerLocalAdapter('invoices', localAdapters.invoices);
-          console.log('✅ Stockage local HDS configuré malgré erreur Supabase');
+          console.error('❌ Erreur permissions Supabase:', permissionError);
+          console.log('⚠️ Mode stockage local uniquement (pas de cloud pour non-sensibles)');
         }
       } else {
         // MODE DÉMO: Toutes les données en Supabase éphémère
