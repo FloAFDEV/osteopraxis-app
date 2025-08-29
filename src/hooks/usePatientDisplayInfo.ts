@@ -14,13 +14,15 @@ interface PatientDisplayInfo {
  */
 export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
   return useMemo(() => {
-    // Détection d'un patient démo par email technique
-    const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
+    // Détection d'un patient démo par email technique OU mode démo général
+    const isDemoPatient = patient.email?.endsWith('@temp.local') || 
+                         patient.email?.endsWith('@exemple.local') || 
+                         patient.osteopathId === 999 || // ID factice démo
+                         false;
     
     if (isDemoPatient) {
-      // Extraire un identifiant court de l'email pour générer un alias unique
-      const emailMatch = patient.email?.match(/patient-(\d+)-(\d+)@temp\.local/);
-      const shortId = emailMatch ? emailMatch[2].slice(-4) : Math.random().toString(36).slice(-4);
+      // Extraire un identifiant court de l'ID patient pour générer un alias unique
+      const shortId = patient.id.toString().slice(-4);
       
       return {
         displayName: `Patient Démo #${shortId}`,
@@ -35,7 +37,7 @@ export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
       displayEmail: patient.email || '',
       isDemoPatient: false,
     };
-  }, [patient.firstName, patient.lastName, patient.email]);
+  }, [patient.id, patient.firstName, patient.lastName, patient.email, patient.osteopathId]);
 };
 
 /**
@@ -44,11 +46,13 @@ export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
  * @returns Le nom à afficher (alias si patient démo)
  */
 export const getPatientDisplayName = (patient: Patient): string => {
-  const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
+  const isDemoPatient = patient.email?.endsWith('@temp.local') || 
+                       patient.email?.endsWith('@exemple.local') || 
+                       patient.osteopathId === 999 || // ID factice démo
+                       false;
   
   if (isDemoPatient) {
-    const emailMatch = patient.email?.match(/patient-(\d+)-(\d+)@temp\.local/);
-    const shortId = emailMatch ? emailMatch[2].slice(-4) : Math.random().toString(36).slice(-4);
+    const shortId = patient.id.toString().slice(-4);
     return `Patient Démo #${shortId}`;
   }
 
@@ -61,7 +65,10 @@ export const getPatientDisplayName = (patient: Patient): string => {
  * @returns L'email à afficher (vide si patient démo)
  */
 export const getPatientDisplayEmail = (patient: Patient): string => {
-  const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
+  const isDemoPatient = patient.email?.endsWith('@temp.local') || 
+                       patient.email?.endsWith('@exemple.local') || 
+                       patient.osteopathId === 999 || // ID factice démo
+                       false;
   
   if (isDemoPatient) {
     // Ne pas afficher d'email pour les patients démo

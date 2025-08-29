@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Appointment, Patient } from "@/types";
+import { getPatientDisplayName } from "@/hooks/usePatientDisplayInfo";
 import {
   format,
   startOfMonth,
@@ -208,7 +209,7 @@ export function MonthlyScheduleView({
                               </div>
                               <div className="truncate">
                                 {patient 
-                                  ? `${patient.firstName} ${patient.lastName}`
+                                  ? getPatientDisplayName(patient)
                                   : `Patient #${appointment.patientId}`
                                 }
                               </div>

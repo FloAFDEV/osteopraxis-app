@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Appointment, AppointmentStatus, Patient } from "@/types";
+import { getPatientDisplayName } from "@/hooks/usePatientDisplayInfo";
 import {
 	formatAppointmentDate,
 	formatAppointmentTime,
@@ -98,7 +99,7 @@ export function AppointmentCard({
 									to={`/patients/${patient.id}`}
 									className="hover:text-primary transition-colors"
 								>
-									{patient.firstName} {patient.lastName}
+									{getPatientDisplayName(patient)}
 								</Link>
 							) : (
 								`Patient #${appointment.patientId}`
