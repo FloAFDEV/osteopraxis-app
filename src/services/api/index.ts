@@ -5,7 +5,7 @@ import { cabinetService } from "./cabinet-service";
 import { osteopathService } from "./osteopath-service";
 import { invoiceService } from "./invoice-service";
 import { authService } from "./auth-service";
-import patientRelationshipService from "../supabase-api/patient-relationship-service";
+import { apiPatientRelationshipService } from "./patient-relationship-service";
 
 // Export des services principaux
 export const api = {
@@ -59,11 +59,11 @@ export const api = {
   deleteInvoice: invoiceService.deleteInvoice,
 
   // Patient Relationships
-  getPatientRelationships: patientRelationshipService.getPatientRelationships,
-  getAllPatientRelationships: patientRelationshipService.getAllPatientRelationships,
-  createPatientRelationship: patientRelationshipService.createPatientRelationship,
-  updatePatientRelationship: patientRelationshipService.updatePatientRelationship,
-  deletePatientRelationship: patientRelationshipService.deletePatientRelationship,
+  getPatientRelationships: apiPatientRelationshipService.getPatientRelationships,
+  getAllPatientRelationships: apiPatientRelationshipService.getAllPatientRelationships,
+  createPatientRelationship: apiPatientRelationshipService.createPatientRelationship,
+  updatePatientRelationship: apiPatientRelationshipService.updatePatientRelationship,
+  deletePatientRelationship: apiPatientRelationshipService.deletePatientRelationship,
 
   // Auth
   login: authService.login,
