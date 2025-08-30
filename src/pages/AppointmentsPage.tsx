@@ -74,12 +74,16 @@ const AppointmentsPage = () => {
 		error: appointmentsError,
 		refetch: refetchAppointments
 	} = useQuery({
-		queryKey: ["appointments", user?.osteopathId],
+		queryKey: ["appointments", user?.osteopathId, isDemoMode],
 		queryFn: async () => {
+			// En mode démo, ne pas vérifier l'osteopathId
+			if (isDemoMode) {
+				return await api.getAppointments();
+			}
 			if (!user?.osteopathId) return [];
 			return await api.getAppointments();
 		},
-		enabled: !!user?.osteopathId && isAuthenticated,
+		enabled: isDemoMode || (!!user?.osteopathId && isAuthenticated),
 		refetchOnWindowFocus: false,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 		gcTime: 1000 * 60 * 30, // 30 minutes
@@ -91,12 +95,16 @@ const AppointmentsPage = () => {
 		isLoading: patientsLoading,
 		error: patientsError,
 	} = useQuery({
-		queryKey: ["patients", user?.osteopathId],
+		queryKey: ["patients", user?.osteopathId, isDemoMode],
 		queryFn: async () => {
+			// En mode démo, ne pas vérifier l'osteopathId
+			if (isDemoMode) {
+				return await api.getPatients();
+			}
 			if (!user?.osteopathId) return [];
 			return await api.getPatients();
 		},
-		enabled: !!user?.osteopathId && isAuthenticated,
+		enabled: isDemoMode || (!!user?.osteopathId && isAuthenticated),
 		refetchOnWindowFocus: false,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 		gcTime: 1000 * 60 * 30, // 30 minutes
