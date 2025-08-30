@@ -60,7 +60,7 @@ export function AppointmentStatusBadge({ status }: AppointmentStatusBadgeProps) 
 	};
 
 	return (
-		<Badge className={getStatusBadgeColor(status)}>
+		<Badge className={`text-white ${getStatusBadgeColor(status)}`}>
 			<span className="flex items-center">
 				{getStatusIcon(status)}
 				{getStatusLabel(status)}

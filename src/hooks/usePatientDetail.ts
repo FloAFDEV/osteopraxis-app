@@ -116,12 +116,15 @@ export function usePatientDetail(patientId: number) {
       (oldAppointments: Appointment[] = []) => [...oldAppointments, newAppointment]
     );
     
-    // Invalidate to get the real data from server
-    setTimeout(() => {
-      queryClient.invalidateQueries({
-        queryKey: ['appointments', 'patient', patientId]
-      });
-    }, 100);
+    // Invalidate immediately pour rafraîchir les onglets
+    queryClient.invalidateQueries({
+      queryKey: ['appointments', 'patient', patientId]
+    });
+    
+    // Aussi invalider les listes générales d'appointments
+    queryClient.invalidateQueries({
+      queryKey: ['appointments']
+    });
   };
 
   // New function to update patient data optimistically

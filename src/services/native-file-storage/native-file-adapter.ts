@@ -329,6 +329,20 @@ export function checkNativeStorageSupport(): { supported: boolean; details: stri
   const details: string[] = [];
   let supported = true;
 
+  // Vérifier si nous sommes dans un iframe cross-origin
+  try {
+    if (window.self !== window.top) {
+      details.push('❌ File System Access API non disponible dans un iframe');
+      supported = false;
+      return { supported, details };
+    }
+  } catch (e) {
+    // Si on ne peut pas accéder à window.top, on est probablement dans un iframe cross-origin
+    details.push('❌ File System Access API non disponible dans un iframe cross-origin');
+    supported = false;
+    return { supported, details };
+  }
+
   if (!('showDirectoryPicker' in window)) {
     details.push('❌ File System Access API non supportée');
     supported = false;
