@@ -66,13 +66,19 @@ class DemoLocalStorageService {
       
       // Vérifier si la session a expiré
       if (new Date() > new Date(session.expiresAt)) {
-        this.clearSession();
+        // Nettoyer directement sans appeler clearSession() pour éviter la boucle infinie
+        const dataKey = this.getDataKey(session.sessionId);
+        sessionStorage.removeItem(dataKey);
+        sessionStorage.removeItem(this.SESSION_KEY);
+        console.log('🎭 Session démo expirée et nettoyée');
         return null;
       }
 
       return session;
     } catch (error) {
       console.error('Erreur lors de la récupération de la session démo:', error);
+      // En cas d'erreur, nettoyer les données corrompues
+      sessionStorage.removeItem(this.SESSION_KEY);
       return null;
     }
   }

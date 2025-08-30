@@ -21,6 +21,7 @@ import { Activity, Edit, MessageSquare, FileText, ExternalLink } from "lucide-re
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { OptimizedAppointmentStatusDropdown } from "./OptimizedAppointmentStatusDropdown";
+import { useEffect, useState } from "react";
 
 interface AppointmentHistoryTabProps {
 	appointments: Appointment[];
@@ -68,6 +69,17 @@ export function AppointmentHistoryTab({
 	setViewMode,
 	invoices,
 }: AppointmentHistoryTabProps) {
+	const [refreshKey, setRefreshKey] = useState(0);
+
+	useEffect(() => {
+		const handleAppointmentCreated = () => {
+			setRefreshKey(prev => prev + 1);
+		};
+
+		window.addEventListener('appointment-created', handleAppointmentCreated);
+		return () => window.removeEventListener('appointment-created', handleAppointmentCreated);
+	}, []);
+
 	return (
 		<div className="bg-white dark:bg-gray-800 p-3 border rounded-md shadow space-y-4 mt-6">
 			<div className="flex justify-between items-center mb-4">

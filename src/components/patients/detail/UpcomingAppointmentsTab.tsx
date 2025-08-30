@@ -7,6 +7,7 @@ import { fr } from "date-fns/locale";
 import { Calendar, Edit, X } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
 import { OptimizedAppointmentStatusDropdown } from "./OptimizedAppointmentStatusDropdown";
+import { useEffect, useState } from "react";
 
 interface UpcomingAppointmentsTabProps {
 	patient: Patient;
@@ -21,6 +22,17 @@ export function UpcomingAppointmentsTab({
 	onCancelAppointment,
 	onStatusChange
 }: UpcomingAppointmentsTabProps) {
+	const [refreshKey, setRefreshKey] = useState(0);
+
+	useEffect(() => {
+		const handleAppointmentCreated = () => {
+			setRefreshKey(prev => prev + 1);
+		};
+
+		window.addEventListener('appointment-created', handleAppointmentCreated);
+		return () => window.removeEventListener('appointment-created', handleAppointmentCreated);
+	}, []);
+
 	return (
 		<div className="space-y-4 mt-6">
 			{appointments.length === 0 ? (

@@ -221,18 +221,13 @@ const PatientDetailPage = () => {
 		// Optimistic update - add the appointment immediately to the UI
 		if (newAppointment) {
 			addAppointmentOptimistically(newAppointment);
-			// Forcer un re-render des stats et des onglets
-			setTimeout(() => {
-				// Invalider toutes les queries liées aux appointments
-				const queryClient = (window as any).__QUERY_CLIENT__;
-				if (queryClient) {
-					queryClient.invalidateQueries({
-						queryKey: ['appointments']
-					});
-				}
-			}, 50);
 		}
 		toast.success("Séance créée avec succès");
+		
+		// Force immediate re-render of tabs by triggering state update
+		setTimeout(() => {
+			window.dispatchEvent(new CustomEvent('appointment-created', { detail: newAppointment }));
+		}, 100);
 	};
 
 	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
