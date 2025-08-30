@@ -18,13 +18,10 @@ export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
     const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
     
     if (isDemoPatient) {
-      // Extraire un identifiant court de l'email pour générer un alias unique
-      const emailMatch = patient.email?.match(/patient-(\d+)-(\d+)@temp\.local/);
-      const shortId = emailMatch ? emailMatch[2].slice(-4) : Math.random().toString(36).slice(-4);
-      
+      // Afficher le vrai nom du patient même en mode démo
       return {
-        displayName: `Patient Démo #${shortId}`,
-        displayEmail: '', // Ne pas afficher d'email factice
+        displayName: `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || 'Patient',
+        displayEmail: '', // Ne pas afficher d'email technique
         isDemoPatient: true,
       };
     }
@@ -44,14 +41,7 @@ export const usePatientDisplayInfo = (patient: Patient): PatientDisplayInfo => {
  * @returns Le nom à afficher (alias si patient démo)
  */
 export const getPatientDisplayName = (patient: Patient): string => {
-  const isDemoPatient = patient.email?.endsWith('@temp.local') || patient.email?.endsWith('@exemple.local') || false;
-  
-  if (isDemoPatient) {
-    const emailMatch = patient.email?.match(/patient-(\d+)-(\d+)@temp\.local/);
-    const shortId = emailMatch ? emailMatch[2].slice(-4) : Math.random().toString(36).slice(-4);
-    return `Patient Démo #${shortId}`;
-  }
-
+  // Toujours afficher le vrai nom du patient
   return `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || 'Patient';
 };
 
