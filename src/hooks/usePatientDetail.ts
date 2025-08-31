@@ -4,9 +4,11 @@ import { api } from '@/services/api';
 import { Appointment, AppointmentStatus, Patient, Invoice } from '@/types';
 import { invoiceService } from '@/services/api/invoice-service';
 import { PatientFormValues } from '@/components/patient-form/types';
+import { useDemo } from '@/contexts/DemoContext';
 
 export function usePatientDetail(patientId: number) {
   const queryClient = useQueryClient();
+  const { isDemoMode } = useDemo();
 
   // Patient detail - logs sécurisés
 
@@ -16,7 +18,7 @@ export function usePatientDetail(patientId: number) {
     isLoading: patientLoading, 
     error: patientError 
   } = useQuery({
-    queryKey: ['patient', patientId],
+    queryKey: ['patient', patientId, isDemoMode],
     queryFn: async () => {
       const result = await api.getPatientById(patientId);
       if (!result) {
@@ -27,7 +29,7 @@ export function usePatientDetail(patientId: number) {
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
     retry: 3,
-    enabled: !!patientId && patientId > 0,
+    enabled: isDemoMode || (!!patientId && patientId > 0),
   });
 
   // Appointments with moderate stale time
@@ -36,13 +38,13 @@ export function usePatientDetail(patientId: number) {
     isLoading: appointmentsLoading,
     error: appointmentsError
   } = useQuery({
-    queryKey: ['appointments', 'patient', patientId],
+    queryKey: ['appointments', 'patient', patientId, isDemoMode],
     queryFn: async () => {
       const result = await api.getAppointmentsByPatientId(patientId);
       return result;
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    enabled: !!patient,
+    enabled: isDemoMode || !!patient,
     retry: 3,
   });
 
@@ -52,14 +54,14 @@ export function usePatientDetail(patientId: number) {
     isLoading: invoicesLoading,
     error: invoicesError
   } = useQuery({
-    queryKey: ['invoices', 'patient', patientId],
+    queryKey: ['invoices', 'patient', patientId, isDemoMode],
     queryFn: async () => {
       // ✅ Factures patient récupérées
       const result = await invoiceService.getInvoicesByPatientId(patientId);
       return result;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !!patient,
+    enabled: isDemoMode || !!patient,
     retry: 3,
   });
 
