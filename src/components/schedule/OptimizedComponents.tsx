@@ -31,7 +31,10 @@ export const GoogleEventCard = memo(({
         <div className="font-medium">{eventStartTime}</div>
         <div className="truncate">{event.summary}</div>
         {event.matched_patient_name && (
-          <div className="text-green-700 text-xs">👤 {event.matched_patient_name}</div>
+          <div className="text-green-700 text-xs flex items-center gap-1">
+            <User className="h-3 w-3" />
+            {event.matched_patient_name}
+          </div>
         )}
       </div>
     );

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Key, Shield, Eye, EyeOff } from "lucide-react";
+import { Lock, Key, Shield, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -85,7 +85,10 @@ export const ProfileSecuritySettings: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium">Statut du compte</Label>
-              <p className="text-sm text-green-600">✅ Compte vérifié</p>
+              <p className="text-sm text-green-600 flex items-center gap-1">
+                <CheckCircle className="h-4 w-4" />
+                Compte vérifié
+              </p>
             </div>
           </div>
         </CardContent>

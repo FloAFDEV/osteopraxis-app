@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { Separator } from "@/components/ui/separator";
+import { User, MapPin, Hospital, Users, Briefcase } from "lucide-react";
 
 interface UnifiedIdentityTabProps {
     form: UseFormReturn<PatientFormValues>;
@@ -54,7 +55,8 @@ export const UnifiedIdentityTab = ({
                 {/* Section 1: Informations personnelles */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">👤 Informations personnelles</CardTitle>
+                        <User className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">Informations personnelles</CardTitle>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -137,7 +139,8 @@ export const UnifiedIdentityTab = ({
                 {/* Section 2: Adresse et contact */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">📍 Adresse et contact</CardTitle>
+                        <MapPin className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">Adresse et contact</CardTitle>
                     </div>
 
                     <FormField
@@ -242,7 +245,8 @@ export const UnifiedIdentityTab = ({
                 {/* Section 3: Cabinet */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">🏥 Cabinet médical</CardTitle>
+                        <Hospital className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">Cabinet médical</CardTitle>
                     </div>
 
                     {availableCabinets.length > 1 ? (
@@ -319,7 +323,8 @@ export const UnifiedIdentityTab = ({
                 {/* Section 4: Situation familiale */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">👨‍👩‍👧‍👦 Situation familiale</CardTitle>
+                        <Users className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">Situation familiale</CardTitle>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -404,7 +409,8 @@ export const UnifiedIdentityTab = ({
                 {/* Section 5: Profession et emploi */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">💼 Profession et emploi</CardTitle>
+                        <Briefcase className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">Profession et emploi</CardTitle>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

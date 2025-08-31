@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { useSQLiteTest } from '../../hooks/useSQLiteTest';
+import { BarChart3, Cloud, Lock, AlertTriangle } from 'lucide-react';
 
 export function SQLiteDiagnostic() {
   const { loading: sqliteLoading, result: sqliteResult, runTest: runSQLiteTest } = useSQLiteTest();
@@ -83,7 +84,10 @@ export function SQLiteDiagnostic() {
 
       <Card>
         <CardHeader>
-          <CardTitle>📊 Classification des Données (Planifiée)</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Classification des Données (Planifiée)
+          </CardTitle>
           <CardDescription>
             Répartition future des données selon l'architecture hybride
           </CardDescription>
@@ -91,7 +95,10 @@ export function SQLiteDiagnostic() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-semibold mb-2 text-primary">☁️ Données Cloud (Supabase)</h4>
+              <h4 className="font-semibold mb-2 text-primary flex items-center gap-1">
+                <Cloud className="h-4 w-4" />
+                Données Cloud (Supabase)
+              </h4>
               <ul className="text-sm space-y-1">
                 <li>• Authentification (auth.users)</li>
                 <li>• Utilisateurs (User)</li>
@@ -102,7 +109,10 @@ export function SQLiteDiagnostic() {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-2 text-secondary">🔒 Données Locales (SQLite)</h4>
+              <h4 className="font-semibold mb-2 text-secondary flex items-center gap-1">
+                <Lock className="h-4 w-4" />
+                Données Locales (SQLite)
+              </h4>
               <ul className="text-sm space-y-1">
                 <li>• Patients (données personnelles)</li>
                 <li>• Rendez-vous (Appointment)</li>
@@ -118,7 +128,10 @@ export function SQLiteDiagnostic() {
 
       <Card>
         <CardHeader>
-          <CardTitle>⚠️ Informations importantes</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Informations importantes
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p>• <strong>OPFS</strong> : Stockage persistant dans le navigateur (Chrome/Edge 86+, Firefox 111+)</p>
