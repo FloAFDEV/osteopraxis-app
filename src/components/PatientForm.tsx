@@ -281,17 +281,23 @@ export function PatientForm({
 						className="space-y-6"
 					>
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
-							<div className="sticky top-0 z-10 bg-background border-b mb-6">
-								<TabsList className="w-full h-auto p-2 bg-muted/30 rounded-lg">
+							<div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b mb-6 transition-all duration-200">
+								<TabsList className="w-full h-auto p-2 bg-gradient-to-r from-muted/20 to-muted/30 dark:from-muted/30 dark:to-muted/40 rounded-lg border border-border/50 shadow-sm">
 									<div className="hidden lg:flex lg:justify-between lg:items-center w-full gap-2">
 										{tabs.map((tab) => (
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="flex flex-col items-center gap-1 px-3 py-3 text-xs font-medium min-h-[60px] data-[state=active]:bg-background data-[state=active]:shadow-sm flex-1 max-w-[140px]"
+												className="group flex flex-col items-center gap-1 px-3 py-3 text-xs font-medium min-h-[60px] flex-1 max-w-[140px] 
+													rounded-md transition-all duration-200 ease-out
+													text-muted-foreground dark:text-muted-foreground
+													hover:text-foreground hover:bg-background/80 hover:shadow-md hover:scale-105 hover:-translate-y-0.5
+													dark:hover:bg-background/90 dark:hover:text-foreground
+													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/20
+													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
-												<span className="text-lg">{tab.icon}</span>
-												<span className="text-center leading-tight">{tab.shortLabel}</span>
+												<span className="text-lg transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110">{tab.icon}</span>
+												<span className="text-center leading-tight transition-colors duration-200">{tab.shortLabel}</span>
 											</TabsTrigger>
 										))}
 									</div>
@@ -301,10 +307,16 @@ export function PatientForm({
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium min-w-[65px] whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm"
+												className="group flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium min-w-[65px] whitespace-nowrap
+													rounded-md transition-all duration-200 ease-out
+													text-muted-foreground dark:text-muted-foreground
+													hover:text-foreground hover:bg-background/80 hover:shadow-md hover:scale-105
+													dark:hover:bg-background/90 dark:hover:text-foreground
+													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/20
+													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
-												<span className="text-base">{tab.icon}</span>
-												<span className="text-[10px] text-center leading-tight">{tab.shortLabel}</span>
+												<span className="text-base transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110">{tab.icon}</span>
+												<span className="text-[10px] text-center leading-tight transition-colors duration-200">{tab.shortLabel}</span>
 											</TabsTrigger>
 										))}
 									</div>
