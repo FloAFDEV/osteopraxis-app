@@ -136,7 +136,7 @@ export function CabinetForm({
           await api.updateOsteopath(osteopathId, osteopathUpdateData);
         }
         
-        toast.success("✅ Cabinet mis à jour avec succès");
+        toast.success("Cabinet mis à jour avec succès");
       } else {
         // Create new cabinet
         const newCabinet = await api.createCabinet(cabinetData as Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>);
@@ -155,7 +155,7 @@ export function CabinetForm({
           await api.updateOsteopath(newCabinet.osteopathId, osteopathUpdateData);
         }
         
-        toast.success("✅ Cabinet créé avec succès");
+        toast.success("Cabinet créé avec succès");
       }
       
       // Si un callback de succès est fourni, l'appeler après un court délai

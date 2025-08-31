@@ -35,6 +35,7 @@ import {
 	TrendingUp, 
 	Users 
 } from "lucide-react";
+import { appIcons } from "@/components/ui/app-icons";
 
 export function PatientForm({
 	patient,
@@ -255,17 +256,17 @@ export function PatientForm({
 	};
 
 	const tabs = [
-		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: User },
-		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: Hospital },
-		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: ClipboardList },
-		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: Microscope },
-		{ id: "specialized-spheres", label: "Sphères spéc.", shortLabel: "Spécialisé", icon: Stethoscope },
+		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: appIcons.identity },
+		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: appIcons.medical },
+		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: appIcons.history },
+		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: appIcons.examination },
+		{ id: "specialized-spheres", label: "Sphères spéc.", shortLabel: "Spécialisé", icon: appIcons.specialized },
 		...(isChild
-			? [{ id: "pediatric-specialized", label: "Pédiatrie", shortLabel: "Pédiatrie", icon: Baby }]
+			? [{ id: "pediatric-specialized", label: "Pédiatrie", shortLabel: "Pédiatrie", icon: appIcons.pediatric }]
 			: []),
-		{ id: "supplementary", label: "Supplémentaire", shortLabel: "Notes", icon: FileText },
-		{ id: "weight-tracking", label: "Suivi", shortLabel: "Suivi", icon: TrendingUp },
-		...(patient?.id ? [{ id: "relationships", label: "Relations familiales", shortLabel: "Famille", icon: Users }] : []),
+		{ id: "supplementary", label: "Supplémentaire", shortLabel: "Notes", icon: appIcons.notes },
+		{ id: "weight-tracking", label: "Suivi", shortLabel: "Suivi", icon: appIcons.tracking },
+		...(patient?.id ? [{ id: "relationships", label: "Relations familiales", shortLabel: "Famille", icon: appIcons.family }] : []),
 	];
 
 	return (

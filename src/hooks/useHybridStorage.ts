@@ -100,7 +100,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
       
     } catch (error) {
       console.error('❌ ÉCHEC INITIALISATION STOCKAGE NATIF:', error);
-      toast.error('❌ ERREUR CRITIQUE: Impossible d\'initialiser le stockage local sécurisé');
+      toast.error('ERREUR CRITIQUE: Impossible d\'initialiser le stockage local sécurisé');
       
       // En cas d'échec, mettre un statut d'erreur
       setStatus({

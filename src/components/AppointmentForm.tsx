@@ -211,10 +211,10 @@ export function AppointmentForm({
 			// For force updates, we might need to temporarily disable the trigger
 			// This is a simplified approach - in production you might want more sophisticated handling
 			await api.updateAppointment(appointmentId, appointmentData as any);
-			toast.success("✅ Séance mise à jour avec succès");
+			toast.success("Séance mise à jour avec succès");
 		} else {
 			await api.createAppointment(appointmentData as any);
-			toast.success("✅ Séance créée avec succès");
+			toast.success("Séance créée avec succès");
 		}
 	};
 
@@ -235,7 +235,7 @@ export function AppointmentForm({
 
 			// Vérifier que l'heure est entre 8h et 20h
 			if (hours < 8 || hours >= 20) {
-				toast.error("⚠️ Les séances doivent être prises entre 8h et 20h");
+				toast.error("Les séances doivent être prises entre 8h et 20h");
 				return;
 			}
 			dateTime.setHours(hours, minutes);
@@ -280,7 +280,7 @@ export function AppointmentForm({
 					requestedDate: new Date(data.date).toISOString()
 				});
 				
-				toast.warning(`⚠️ Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`);
+				toast.warning(`Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`);
 			} else if (errorObj.message?.includes("créneau horaire")) {
 				// Cas d'erreur de conflit sans détails
 				const selectedPatient = patients.find(p => p.id === data.patientId);

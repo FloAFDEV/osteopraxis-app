@@ -44,7 +44,7 @@ export function useRetryableRequest<T extends any[], R>(
         setState({ loading: false, error: null, retryCount: attempt });
         
         if (showToasts && attempt > 0) {
-          toast.success(`✅ Requête réussie après ${attempt} tentative(s)`);
+          toast.success(`Requête réussie après ${attempt} tentative(s)`);
         }
         
         return result;
@@ -55,7 +55,7 @@ export function useRetryableRequest<T extends any[], R>(
           setState(prev => ({ ...prev, retryCount: attempt + 1 }));
           
           if (showToasts) {
-            toast.warning(`⚠️ Tentative ${attempt + 1}/${maxRetries + 1} échouée. Nouvelle tentative dans ${delay}ms...`);
+            toast.warning(`Tentative ${attempt + 1}/${maxRetries + 1} échouée. Nouvelle tentative dans ${delay}ms...`);
           }
           
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -64,7 +64,7 @@ export function useRetryableRequest<T extends any[], R>(
           setState({ loading: false, error: lastError, retryCount: attempt });
           
           if (showToasts) {
-            toast.error(`❌ Échec après ${maxRetries + 1} tentatives: ${lastError.message}`);
+            toast.error(`Échec après ${maxRetries + 1} tentatives: ${lastError.message}`);
           }
           
           throw lastError;
