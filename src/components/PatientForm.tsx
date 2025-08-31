@@ -24,6 +24,17 @@ import { PatientRelationshipsTab } from "./patient-form/PatientRelationshipsTab"
 import { PatientFormProps, PatientFormValues } from "./patient-form/types";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
+import { 
+	User, 
+	Hospital, 
+	ClipboardList, 
+	Microscope, 
+	Stethoscope, 
+	Baby, 
+	FileText, 
+	TrendingUp, 
+	Users 
+} from "lucide-react";
 
 export function PatientForm({
 	patient,
@@ -244,17 +255,17 @@ export function PatientForm({
 	};
 
 	const tabs = [
-		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: "👤" },
-		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: "🏥" },
-		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: "📋" },
-		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: "🔬" },
-		{ id: "specialized-spheres", label: "Sphères spéc.", shortLabel: "Spécialisé", icon: "🩺" },
+		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: User },
+		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: Hospital },
+		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: ClipboardList },
+		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: Microscope },
+		{ id: "specialized-spheres", label: "Sphères spéc.", shortLabel: "Spécialisé", icon: Stethoscope },
 		...(isChild
-			? [{ id: "pediatric-specialized", label: "Pédiatrie", shortLabel: "Pédiatrie", icon: "👶" }]
+			? [{ id: "pediatric-specialized", label: "Pédiatrie", shortLabel: "Pédiatrie", icon: Baby }]
 			: []),
-		{ id: "supplementary", label: "Supplémentaire", shortLabel: "Notes", icon: "📄" },
-		{ id: "weight-tracking", label: "Suivi", shortLabel: "Suivi", icon: "📏" },
-		...(patient?.id ? [{ id: "relationships", label: "Relations familiales", shortLabel: "Famille", icon: "👥" }] : []),
+		{ id: "supplementary", label: "Supplémentaire", shortLabel: "Notes", icon: FileText },
+		{ id: "weight-tracking", label: "Suivi", shortLabel: "Suivi", icon: TrendingUp },
+		...(patient?.id ? [{ id: "relationships", label: "Relations familiales", shortLabel: "Famille", icon: Users }] : []),
 	];
 
 	return (
@@ -296,7 +307,7 @@ export function PatientForm({
 													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/20
 													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
-												<span className="text-lg transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110">{tab.icon}</span>
+												<tab.icon className="w-5 h-5 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110" />
 												<span className="text-center leading-tight transition-colors duration-200">{tab.shortLabel}</span>
 											</TabsTrigger>
 										))}
@@ -315,7 +326,7 @@ export function PatientForm({
 													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/20
 													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
-												<span className="text-base transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110">{tab.icon}</span>
+												<tab.icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110" />
 												<span className="text-[10px] text-center leading-tight transition-colors duration-200">{tab.shortLabel}</span>
 											</TabsTrigger>
 										))}
