@@ -92,17 +92,29 @@ export class AdvancedStatsService {
   private async getAppointments(osteopathId: number) {
     // Utiliser la couche API (hybride: local -> cloud si nécessaire)
     const all = await import("@/services/api").then(m => m.api.getAppointments());
-    return all.filter((a: any) => a.osteopathId === osteopathId);
+    // En mode démo, inclure les données avec osteopathId 999 (démo local) et l'ID réel
+    return all.filter((a: any) => 
+      a.osteopathId === osteopathId || 
+      (a.osteopathId === 999 && (osteopathId === 534 || osteopathId === 999))
+    );
   }
 
   private async getInvoices(osteopathId: number) {
     const all = await import("@/services/api").then(m => m.api.getInvoices());
-    return all.filter((i: any) => i.osteopathId === osteopathId);
+    // En mode démo, inclure les données avec osteopathId 999 (démo local) et l'ID réel
+    return all.filter((i: any) => 
+      i.osteopathId === osteopathId || 
+      (i.osteopathId === 999 && (osteopathId === 534 || osteopathId === 999))
+    );
   }
 
   private async getPatients(osteopathId: number) {
     const all = await import("@/services/api").then(m => m.api.getPatients());
-    return all.filter((p: any) => p.osteopathId === (osteopathId as any));
+    // En mode démo, inclure les données avec osteopathId 999 (démo local) et l'ID réel
+    return all.filter((p: any) => 
+      p.osteopathId === osteopathId || 
+      (p.osteopathId === 999 && (osteopathId === 534 || osteopathId === 999))
+    );
   }
 
   private calculateRevenueStats(
