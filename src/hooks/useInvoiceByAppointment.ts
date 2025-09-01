@@ -22,7 +22,34 @@ export function useInvoiceByAppointment(appointmentId: number | null) {
       setError(null);
       try {
         const invoices = await invoiceService.getInvoicesByAppointmentId(appointmentId);
-        setInvoice(invoices.length > 0 ? invoices[0] : null);
+        const invoiceData = invoices.length > 0 ? invoices[0] : null;
+        
+        // En mode démo, ajouter des données fictives d'ostéopathe avec tampon
+        if (invoiceData && (invoiceData.osteopathId === 999 || window.location.hostname === 'localhost')) {
+          // Importer le tampon de démo
+          const demoStampUrl = await import('@/assets/demo-stamp.png').then(module => module.default);
+          
+          // Ajouter les données démo
+          (invoiceData as any).osteopath = {
+            id: 999,
+            name: 'Dr. Marie DUBOIS',
+            professional_title: 'Ostéopathe D.O.',
+            rpps_number: '12345678901',
+            siret: '12345678901234',
+            stampUrl: demoStampUrl
+          };
+          
+          (invoiceData as any).cabinet = {
+            id: 1,
+            name: 'Cabinet Ostéopathique Démo',
+            address: '123 Rue de la Santé, 75000 Paris',
+            phone: '01.23.45.67.89',
+            email: 'contact@cabinet-demo.fr',
+            logoUrl: null
+          };
+        }
+        
+        setInvoice(invoiceData);
       } catch (err: any) {
         setError(err.message || "Erreur lors du chargement de la facture");
         setInvoice(null);
