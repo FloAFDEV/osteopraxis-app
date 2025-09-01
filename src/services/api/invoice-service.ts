@@ -127,6 +127,13 @@ export const invoiceService = {
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
       
+      // S'assurer qu'une session démo existe
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Aucune session démo active pour la facture, création d\'une nouvelle session');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
+      
       // Assurer les valeurs par défaut pour le mode démo
       const demoInvoiceData = {
         amount: invoiceData.amount ?? 0,
@@ -142,7 +149,10 @@ export const invoiceService = {
         tvaMotif: 'TVA non applicable - Article 261-4-1° du CGI'
       };
       
-      return demoLocalStorage.addInvoice(demoInvoiceData);
+      console.log('🎭 Création facture avec données:', demoInvoiceData);
+      const createdInvoice = demoLocalStorage.addInvoice(demoInvoiceData);
+      console.log('🎭 Facture créée en mode démo:', createdInvoice);
+      return createdInvoice;
     }
 
     // Fallback vers ancien contexte démo si présent

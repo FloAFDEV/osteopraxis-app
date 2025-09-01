@@ -115,18 +115,23 @@ export function InvoiceForm({
     setIsSubmitting(true);
 
     try {
+      // En mode démo, s'assurer qu'un osteopathId est défini
+      const finalOsteopathId = data.osteopathId || 999; // ID démo par défaut
+      
       const invoiceData: Partial<Invoice> = {
         ...data,
         date: data.date ? new Date(data.date).toISOString() : undefined,
         patientId: patient.id,
         appointmentId: appointment?.id,
-        osteopathId: data.osteopathId,
+        osteopathId: finalOsteopathId,
         cabinetId: cabinetId ?? appointment?.cabinetId ?? patient.cabinetId ?? null,
         tvaExoneration: data.tvaExoneration,
         tvaMotif: data.tvaExoneration
           ? "TVA non applicable - Article 261-4-1° du CGI"
           : data.tvaMotif || "",
       };
+      
+      console.log('🔍 Données facture avant envoi:', invoiceData);
       if (isEditing && invoice) {
         await api.updateInvoice(invoice.id, invoiceData);
         toast.success("Note d'honoraires mise à jour !");

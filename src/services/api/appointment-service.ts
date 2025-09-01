@@ -77,15 +77,19 @@ export const appointmentService = {
       // Mode démo éphémère: utiliser le stockage local temporaire
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
       
-      // S'assurer qu'une session démo existe
-      if (!demoLocalStorage.isSessionActive()) {
+      // S'assurer qu'une session démo existe, sinon la créer
+      let session = demoLocalStorage.getCurrentSession();
+      if (!session) {
         console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
-        demoLocalStorage.createSession();
+        session = demoLocalStorage.createSession();
         demoLocalStorage.seedDemoData();
       }
       
+      console.log('🎭 Session démo active:', session.sessionId);
       await delay(200);
-      return demoLocalStorage.getAppointments();
+      const appointments = demoLocalStorage.getAppointments();
+      console.log('🎭 Rendez-vous récupérés:', appointments.length);
+      return appointments;
     }
     
     if (USE_SUPABASE) {
