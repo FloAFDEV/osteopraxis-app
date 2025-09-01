@@ -348,13 +348,20 @@ const PatientDetailPage = () => {
 							colorClass="text-purple-500"
 						/>
 						<PatientStat
-							title="En cours de traitement"
-							value={patient.currentTreatment ? "Oui" : "Non"}
-							icon={<Stethoscope className="h-5 w-5" />}
+							title="Prochaine séance"
+							value={
+								upcomingAppointments[0]
+									? format(
+											new Date(upcomingAppointments[0].date),
+											"dd/MM/yyyy"
+									  )
+									: "Aucune"
+							}
+							icon={<Calendar className="h-5 w-5" />}
 							colorClass="text-emerald-500"
 						/>
 						<PatientStat
-							title="Dernière Séance"
+							title="Dernière séance"
 							value={
 								pastAppointments[0]
 									? format(

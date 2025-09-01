@@ -255,39 +255,57 @@ export const InvoicePrintView = ({
 					</table>
 				</div>
 			</div>
-			{/* Signature/tampon de l'ostéopathe */}
-			{osteopath && (
-				<div className="flex-1 flex justify-end">
-					<div className="text-center">
-						<p className="text-sm text-gray-600 mb-2">
-							Signature et cachet du praticien
-						</p>
-						{osteopath.stampUrl ? (
-							<div className="max-h-[120px] max-w-[200px] mx-auto">
-								<img
-									src={osteopath.stampUrl}
-									alt="Signature/Tampon professionnel"
-									className="max-h-[120px] w-auto object-contain"
-									onError={(e) => {
-										const target = e.target as HTMLImageElement;
-										target.style.display = "none";
-									}}
-								/>
-							</div>
-						) : (
-							<div className="border-2 border-dashed border-gray-300 rounded-lg p-8 min-h-[120px] min-w-[200px] flex items-center justify-center mx-auto">
-								<p className="text-gray-400 text-sm text-center">
-									Signature<br />
-									{osteopath.professional_title || "Ostéopathe D.O."}
-								</p>
-							</div>
-						)}
-						<p className="text-sm text-gray-600 mt-2 font-medium">
-							{osteopath.name}
-						</p>
+			{/* Section signature/tampon et logo */}
+			<div className="flex justify-between items-start mt-6">
+				{/* Logo du cabinet en bas si disponible */}
+				{cabinet?.logoUrl && (
+					<div className="flex-1">
+						<img
+							src={cabinet.logoUrl}
+							alt="Logo du cabinet"
+							className="max-h-[100px] w-auto object-contain"
+							onError={(e) => {
+								const target = e.target as HTMLImageElement;
+								target.style.display = "none";
+							}}
+						/>
 					</div>
-				</div>
-			)}
+				)}
+				
+				{/* Signature/tampon de l'ostéopathe */}
+				{osteopath && (
+					<div className="flex-1 flex justify-end">
+						<div className="text-center">
+							<p className="text-sm text-gray-600 mb-2">
+								Signature et cachet du praticien
+							</p>
+							{osteopath.stampUrl ? (
+								<div className="max-h-[120px] max-w-[200px] mx-auto">
+									<img
+										src={osteopath.stampUrl}
+										alt="Signature/Tampon professionnel"
+										className="max-h-[120px] w-auto object-contain"
+										onError={(e) => {
+											const target = e.target as HTMLImageElement;
+											target.style.display = "none";
+										}}
+									/>
+								</div>
+							) : (
+								<div className="border-2 border-dashed border-gray-300 rounded-lg p-8 min-h-[120px] min-w-[200px] flex items-center justify-center mx-auto">
+									<p className="text-gray-400 text-sm text-center">
+										Signature<br />
+										{osteopath.professional_title || "Ostéopathe D.O."}
+									</p>
+								</div>
+							)}
+							<p className="text-sm text-gray-600 mt-2 font-medium">
+								{osteopath.name}
+							</p>
+						</div>
+					</div>
+				)}
+			</div>
 			{/* Footer Mentions */}
 			<footer className="pt-6 mt-auto border-t border-gray-200">
 				<h3 className="font-medium text-emerald-700 mb-2">
