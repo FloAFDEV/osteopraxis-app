@@ -29,6 +29,11 @@ export default {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
 				},
+				interactive: {
+					DEFAULT: 'hsl(var(--interactive))',
+					foreground: 'hsl(var(--interactive-foreground))',
+					hover: 'hsl(var(--interactive-hover))'
+				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'

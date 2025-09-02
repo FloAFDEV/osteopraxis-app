@@ -169,17 +169,22 @@ textarea:focus-visible {
 		--border: 240 8% 90%;
 		--input: 240 8% 90%;
 
-		/* Primary Colors - Modern Blue/Purple */
-		--primary: 247 85% 60%;
+		/* Primary Colors - Violet conservé comme accent */
+		--primary: 257 75% 60%;
 		--primary-foreground: 240 17% 98%;
-		--primary-variant: 257 75% 65%;
+		--primary-variant: 267 70% 65%;
 
-		/* Secondary Colors */
-		--secondary: 247 20% 95%;
-		--secondary-foreground: 247 85% 35%;
+		/* Interactive Colors - Bleu moderne professionnel */
+		--interactive: 217 91% 60%;
+		--interactive-foreground: 240 17% 98%;
+		--interactive-hover: 217 91% 55%;
 
-		/* Accent Colors */
-		--accent: 257 75% 65%;
+		/* Secondary Colors - Neutres sobres */
+		--secondary: 240 8% 92%;
+		--secondary-foreground: 240 10% 25%;
+
+		/* Accent Colors - Violet pour détails */
+		--accent: 257 75% 60%;
 		--accent-foreground: 240 17% 98%;
 
 		/* Destructive Colors */
@@ -190,20 +195,22 @@ textarea:focus-visible {
 		--success: 142 71% 45%;
 		--success-foreground: 240 17% 98%;
 
-		/* Warning Colors - Amber/Yellow theme */
+		/* Warning Colors */
 		--warning: 45 93% 47%;
 		--warning-foreground: 26 83% 14%;
 
 		/* Ring & Focus */
-		--ring: 247 85% 60%;
+		--ring: 217 91% 60%;
 
 		/* Gradients */
 		--gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-variant)));
+		--gradient-interactive: linear-gradient(135deg, hsl(var(--interactive)), hsl(var(--interactive-hover)));
 		--gradient-background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
 
 		/* Shadows */
-		--shadow-primary: 0 10px 30px -10px hsl(var(--primary) / 0.3);
-		--shadow-card: 0 4px 20px -4px hsl(var(--primary) / 0.1);
+		--shadow-primary: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+		--shadow-interactive: 0 10px 30px -10px hsl(var(--interactive) / 0.3);
+		--shadow-card: 0 4px 20px -4px hsl(var(--interactive) / 0.08);
 
 		--radius: 0.75rem;
 	}
@@ -229,17 +236,22 @@ textarea:focus-visible {
 		--border: 240 8% 20%;
 		--input: 240 8% 20%;
 
-		/* Dark Primary Colors */
-		--primary: 247 85% 65%;
+		/* Dark Primary Colors - Violet conservé comme accent */
+		--primary: 257 75% 65%;
 		--primary-foreground: 240 10% 8%;
-		--primary-variant: 257 75% 70%;
+		--primary-variant: 267 70% 70%;
 
-		/* Dark Secondary Colors */
+		/* Dark Interactive Colors - Bleu moderne professionnel */
+		--interactive: 217 91% 65%;
+		--interactive-foreground: 240 10% 8%;
+		--interactive-hover: 217 91% 60%;
+
+		/* Dark Secondary Colors - Neutres sobres */
 		--secondary: 240 8% 15%;
-		--secondary-foreground: 247 85% 65%;
+		--secondary-foreground: 240 6% 75%;
 
-		/* Dark Accent Colors */
-		--accent: 257 75% 70%;
+		/* Dark Accent Colors - Violet pour détails */
+		--accent: 257 75% 65%;
 		--accent-foreground: 240 10% 8%;
 
 		/* Dark Destructive Colors */
@@ -250,12 +262,12 @@ textarea:focus-visible {
 		--success: 142 71% 50%;
 		--success-foreground: 240 10% 8%;
 
-		/* Dark Warning Colors - Amber/Yellow theme */
+		/* Dark Warning Colors */
 		--warning: 48 96% 53%;
 		--warning-foreground: 26 83% 14%;
 
 		/* Dark Ring & Focus */
-		--ring: 247 85% 65%;
+		--ring: 217 91% 65%;
 
 		--radius: 0.75rem;
 	}

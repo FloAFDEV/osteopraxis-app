@@ -328,18 +328,20 @@ export default function LandingPage() {
 								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
 								asChild
 							>
-								<Link to="/demo" className="flex items-center gap-2">
-									<Play className="h-4 w-4" />
-									Essayer la démo interactive
+								<Link to="/register" className="flex items-center gap-2">
+									Créer mon compte
 								</Link>
 							</Button>
 							<Button
-								variant="outline"
+								variant="primary"
 								size="lg"
 								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
 								asChild
 							>
-								<Link to="/register">Créer mon compte</Link>
+								<Link to="/demo" className="flex items-center gap-2">
+									<Play className="h-4 w-4" />
+									Essayer la démo interactive
+								</Link>
 							</Button>
 						</div>
 
@@ -926,18 +928,18 @@ export default function LandingPage() {
 							asChild
 							className="text-lg px-8"
 						>
+							<Link to="/register">Créer mon compte</Link>
+						</Button>
+						<Button
+							size="lg"
+							variant="primary"
+							asChild
+							className="text-lg px-8"
+						>
 							<Link to="/demo" className="flex items-center gap-2">
 								<Play className="h-4 w-4" />
 								Essayer la démo
 							</Link>
-						</Button>
-						<Button
-							size="lg"
-							variant="outline"
-							asChild
-							className="text-lg px-8"
-						>
-							<Link to="/register">Créer mon compte</Link>
 						</Button>
 					</div>
 					<p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
