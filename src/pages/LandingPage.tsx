@@ -199,7 +199,7 @@ export default function LandingPage() {
 						<Button
 							asChild
 							size="sm"
-							className="whitespace-nowrap text-white"
+							className="whitespace-nowrap text-white"variant="primary"
 						>
 							<Link to="/demo">Essayer la démo</Link>
 						</Button>
@@ -211,7 +211,7 @@ export default function LandingPage() {
 							<Button
 								asChild
 								size="sm"
-								className="whitespace-nowrap"
+								className="whitespace-nowrap"variant="primary"
 							>
 								<Link to="/demo">Essayer la démo</Link>
 							</Button>
@@ -280,7 +280,7 @@ export default function LandingPage() {
 									Connexion
 								</Link>
 								<div className="pt-2 md:hidden">
-									<Button asChild className="w-full">
+									<Button asChild className="w-full" variant="primary">
 										<Link
 											to="/demo"
 											onClick={() =>
