@@ -153,9 +153,9 @@ export default function LandingPage() {
 					<div className="flex justify-between items-center py-3 md:py-4 min-h-[60px]">
 						<h1 className="text-xl sm:text-3xl font-extrabold tracking-tight flex-shrink-0">
 							<span className="text-foreground">Patient</span>
-							<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-								Hub
-							</span>
+			<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+				Hub
+			</span>
 						</h1>
 
 					{/* Desktop Navigation */}
@@ -311,37 +311,38 @@ export default function LandingPage() {
 
 						<h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 text-slate-900 dark:text-white leading-tight">
 							<span className="text-foreground">Patient</span>
-							<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-								Hub
-							</span>
+			<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+				Hub
+			</span>
 						</h1>
 
-						<p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
-							La plateforme tout-en-un pour gérer votre cabinet :
-							dossiers patients, rendez-vous, facturation et
-							statistiques en un seul endroit.
-						</p>
+		<p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
+			Gérez dossiers patients, rendez-vous, facturation et 
+			statistiques dans un seul outil.
+		</p>
 
-						<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
-							<Button
-								size="lg"
-								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
-								asChild
-							>
-								<Link to="/demo" className="flex items-center gap-2">
-									<Play className="h-4 w-4" />
-									Essayer la démo interactive
-								</Link>
-							</Button>
-							<Button
-								variant="outline"
-								size="lg"
-								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
-								asChild
-							>
-								<Link to="/register">Créer mon compte</Link>
-							</Button>
-						</div>
+		<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
+			<Button
+				size="lg"
+				className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-primary hover:bg-primary/90 text-primary-foreground"
+				asChild
+			>
+				<Link to="/register" className="flex items-center gap-2">
+					Créer mon compte
+				</Link>
+			</Button>
+			<Button
+				variant="outline"
+				size="lg"
+				className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-accent text-accent hover:bg-accent/10"
+				asChild
+			>
+				<Link to="/demo" className="flex items-center gap-2">
+					<Play className="h-4 w-4" />
+					Essayer la démo interactive
+				</Link>
+			</Button>
+		</div>
 
 						<div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-500 dark:text-slate-400 px-4">
 							<span className="flex items-center gap-2">
@@ -364,30 +365,30 @@ export default function LandingPage() {
 								{
 									icon: Calendar,
 									label: "Rendez-vous",
-									color: "text-blue-600",
+									color: "text-primary",
 								},
 								{
 									icon: Users,
 									label: "Patients",
-									color: "text-purple-600",
+									color: "text-accent",
 								},
 								{
 									icon: FileText,
 									label: "Facturation",
-									color: "text-pink-600",
+									color: "text-primary",
 								},
 								{
 									icon: BarChart3,
 									label: "Statistiques",
-									color: "text-indigo-600",
+									color: "text-accent",
 								},
 							].map(({ icon: Icon, label, color }, i) => (
 								<div
 									key={i}
-									className="flex flex-col items-center p-4 sm:p-6 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 hover:scale-105 transition-transform duration-300"
+									className="flex flex-col items-center p-4 sm:p-6 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 hover:scale-105 transition-transform duration-300 shadow-lg shadow-primary/5 hover:shadow-primary/15"
 								>
 									<Icon
-										className={`h-6 w-6 sm:h-8 sm:w-8 mb-2 ${color}`}
+										className={`h-6 w-6 sm:h-8 sm:w-8 mb-2 ${color} stroke-[1.5]`}
 									/>
 									<span className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 text-center">
 										{label}
@@ -523,10 +524,10 @@ export default function LandingPage() {
 						{features.map((feature, index) => (
 							<Card
 								key={index}
-								className="h-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-border/50 hover:border-primary/30"
+								className="h-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-border/50 hover:border-primary/30 shadow-sm"
 							>
 								<CardContent className="p-6">
-									<feature.icon className="h-12 w-12 text-primary mb-4" />
+									<feature.icon className="h-12 w-12 text-primary mb-4 stroke-[1.5]" />
 									<h3 className="text-xl font-semibold mb-2 text-foreground">
 										{feature.title}
 									</h3>
@@ -924,20 +925,20 @@ export default function LandingPage() {
 						<Button
 							size="lg"
 							asChild
-							className="text-lg px-8"
+							className="text-lg px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
 						>
-							<Link to="/demo" className="flex items-center gap-2">
-								<Play className="h-4 w-4" />
-								Essayer la démo
-							</Link>
+							<Link to="/register">Créer mon compte</Link>
 						</Button>
 						<Button
 							size="lg"
 							variant="outline"
 							asChild
-							className="text-lg px-8"
+							className="text-lg px-8 border-accent text-accent hover:bg-accent/10"
 						>
-							<Link to="/register">Créer mon compte</Link>
+							<Link to="/demo" className="flex items-center gap-2">
+								<Play className="h-4 w-4" />
+								Essayer la démo
+							</Link>
 						</Button>
 					</div>
 					<p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
@@ -953,9 +954,9 @@ export default function LandingPage() {
 						<div>
 							<h1 className="text-xl font-extrabold tracking-tight mb-4">
 								<span className="text-foreground">Patient</span>
-								<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-									Hub
-								</span>
+				<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+					Hub
+				</span>
 							</h1>
 							<p className="text-muted-foreground">
 								La solution complète pour gérer vos patients et
