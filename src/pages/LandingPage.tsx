@@ -317,10 +317,9 @@ export default function LandingPage() {
 						</h1>
 
 						<p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
-							La plateforme tout-en-un pour gérer votre cabinet :
-							dossiers patients, rendez-vous, facturation et
-							statistiques en un seul endroit.
-						</p>
+  Concentrez-vous sur vos patients, pas sur l’administratif. Gérez rendez-vous, dossiers, facturation et statistiques en toute simplicité, depuis une seule plateforme.
+</p>
+
 
 						<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
 							<Button
