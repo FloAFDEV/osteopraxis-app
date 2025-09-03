@@ -163,8 +163,8 @@ export function Layout({ children }: LayoutProps) {
   >
     <Avatar className="h-8 w-8 transition-transform duration-150 group-hover:scale-110">
       <AvatarFallback 
-        className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-semibold"
-      >
+      className="bg-gradient-to-r from-indigo-600 to-indigo-800 font-semibold transition-colors duration-150 text-white group-hover:text-amber-300"
+>
         {getInitials()}
       </AvatarFallback>
     </Avatar>
