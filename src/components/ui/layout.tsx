@@ -240,12 +240,13 @@ export function Layout({ children }: LayoutProps) {
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
-									onClick={handleLogout}
-									className="text-destructive focus:text-destructive cursor-pointer"
-								>
-									<LogOut className="mr-2 h-4 w-4" />
-									<span>Déconnexion</span>
-								</DropdownMenuItem>
+  onClick={handleLogout}
+  className="text-destructive cursor-pointer hover:bg-red-600 hover:text-white focus:text-destructive"
+>
+  <LogOut className="mr-2 h-4 w-4" />
+  <span>Déconnexion</span>
+</DropdownMenuItem>
+
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</nav>
