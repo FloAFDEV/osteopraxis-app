@@ -3,8 +3,50 @@ import { supabase } from "@/integrations/supabase/client";
 import { Quote, QuoteItem, CreateQuotePayload, QuoteStatus } from "@/types";
 import { exportSecurity } from "@/utils/export-utils";
 
+// Détection du mode démo
+function isDemoMode(): boolean {
+	// Mode démo éphémère local
+	const localDemo = localStorage.getItem('isTemporaryDemo') === 'true';
+	const sessionDemo = sessionStorage.getItem('isDemoMode') === 'true';
+	return localDemo || sessionDemo;
+}
+
+// Stockage local pour les devis en mode démo
+const DEMO_QUOTES_KEY = 'demo_quotes';
+
+function getDemoQuotes(): Quote[] {
+	if (!isDemoMode()) return [];
+	
+	try {
+		const stored = localStorage.getItem(DEMO_QUOTES_KEY);
+		return stored ? JSON.parse(stored) : [];
+	} catch (error) {
+		console.debug('Erreur lecture devis démo:', error);
+		return [];
+	}
+}
+
+function saveDemoQuotes(quotes: Quote[]): void {
+	if (!isDemoMode()) return;
+	
+	try {
+		localStorage.setItem(DEMO_QUOTES_KEY, JSON.stringify(quotes));
+	} catch (error) {
+		console.debug('Erreur sauvegarde devis démo:', error);
+	}
+}
+
+function generateDemoId(): number {
+	return Date.now() + Math.floor(Math.random() * 1000);
+}
+
 export const quoteService = {
 	async getQuotes(): Promise<Quote[]> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Récupération devis depuis stockage local');
+			return getDemoQuotes();
+		}
+
 		const { data, error } = await supabase
 			.from('Quote')
 			.select(`
@@ -26,6 +68,12 @@ export const quoteService = {
 	},
 
 	async getQuoteById(id: number): Promise<Quote | null> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Récupération devis par ID depuis stockage local');
+			const quotes = getDemoQuotes();
+			return quotes.find(q => q.id === id) || null;
+		}
+
 		const { data, error } = await supabase
 			.from('Quote')
 			.select(`
@@ -49,6 +97,12 @@ export const quoteService = {
 	},
 
 	async getQuotesByPatientId(patientId: number): Promise<Quote[]> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Récupération devis patient depuis stockage local');
+			const quotes = getDemoQuotes();
+			return quotes.filter(q => q.patientId === patientId);
+		}
+
 		const { data, error } = await supabase
 			.from('Quote')
 			.select(`
@@ -72,6 +126,22 @@ export const quoteService = {
 	},
 
 	async createQuote(quoteData: CreateQuotePayload): Promise<Quote> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Création devis en local');
+			const quotes = getDemoQuotes();
+			const newQuote: Quote = {
+				...quoteData,
+				id: generateDemoId(),
+				status: "DRAFT" as QuoteStatus,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			} as Quote;
+			
+			quotes.push(newQuote);
+			saveDemoQuotes(quotes);
+			return newQuote;
+		}
+
 		// Générer un numéro de devis sécurisé selon le mode (démo ou connecté)
 		const secureQuoteNumber = await exportSecurity.generateSecureQuoteNumber();
 		const { items, ...quote } = quoteData;
@@ -80,8 +150,7 @@ export const quoteService = {
 		const { data: newQuote, error: quoteError } = await supabase
 			.from('Quote')
 			.insert({
-				...quote,
-				quoteNumber: secureQuoteNumber
+				...quote
 			})
 			.select()
 			.single();
@@ -115,6 +184,25 @@ export const quoteService = {
 	},
 
 	async updateQuote(id: number, updates: Partial<Quote>): Promise<Quote> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Mise à jour devis en local');
+			const quotes = getDemoQuotes();
+			const index = quotes.findIndex(q => q.id === id);
+			
+			if (index === -1) {
+				throw new Error('Devis non trouvé');
+			}
+			
+			quotes[index] = {
+				...quotes[index],
+				...updates,
+				updatedAt: new Date().toISOString()
+			};
+			
+			saveDemoQuotes(quotes);
+			return quotes[index];
+		}
+
 		const { data, error } = await supabase
 			.from('Quote')
 			.update(updates)
@@ -138,6 +226,14 @@ export const quoteService = {
 	},
 
 	async deleteQuote(id: number): Promise<void> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Suppression devis en local');
+			const quotes = getDemoQuotes();
+			const filtered = quotes.filter(q => q.id !== id);
+			saveDemoQuotes(filtered);
+			return;
+		}
+
 		const { error } = await supabase
 			.from('Quote')
 			.delete()
@@ -150,6 +246,17 @@ export const quoteService = {
 	},
 
 	async addQuoteItem(quoteId: number, item: Omit<QuoteItem, 'id' | 'quoteId'>): Promise<QuoteItem> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Ajout item devis en local');
+			// En mode démo, simuler l'ajout d'item
+			const newItem: QuoteItem = {
+				...item,
+				id: generateDemoId(),
+				quoteId
+			};
+			return newItem;
+		}
+
 		const { data, error } = await supabase
 			.from('QuoteItem')
 			.insert({ ...item, quoteId })
@@ -165,6 +272,12 @@ export const quoteService = {
 	},
 
 	async updateQuoteItem(id: number, updates: Partial<QuoteItem>): Promise<QuoteItem> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Mise à jour item devis en local');
+			// En mode démo, simuler la mise à jour
+			throw new Error('Fonctionnalité limitée en mode démo');
+		}
+
 		const { data, error } = await supabase
 			.from('QuoteItem')
 			.update(updates)
@@ -181,6 +294,12 @@ export const quoteService = {
 	},
 
 	async deleteQuoteItem(id: number): Promise<void> {
+		if (isDemoMode()) {
+			console.debug('🎭 Mode démo: Suppression item devis en local');
+			// En mode démo, simuler la suppression
+			return;
+		}
+
 		const { error } = await supabase
 			.from('QuoteItem')
 			.delete()

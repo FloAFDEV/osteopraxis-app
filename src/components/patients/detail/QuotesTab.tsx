@@ -31,9 +31,15 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 	const [viewQuote, setViewQuote] = useState<Quote | null>(null);
 	const [editQuote, setEditQuote] = useState<Quote | null>(null);
 	const [sendQuote, setSendQuote] = useState<Quote | null>(null);
+	
+	// Détection du mode démo
+	const isDemoMode = localStorage.getItem('isTemporaryDemo') === 'true' || 
+	                   sessionStorage.getItem('isDemoMode') === 'true';
+
 	useEffect(() => {
 		loadQuotes();
 	}, [patient.id]);
+
 	const loadQuotes = async () => {
 		try {
 			setLoading(true);
@@ -41,7 +47,10 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 			setQuotes(data);
 		} catch (error) {
 			console.error("Error loading quotes:", error);
-			toast.error("Erreur lors du chargement des devis");
+			// En mode démo, ne pas afficher d'erreur technique à l'utilisateur
+			if (!isDemoMode) {
+				toast.error("Erreur lors du chargement des devis");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -50,6 +59,16 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 		setShowCreateForm(false);
 		loadQuotes();
 	};
+
+	const handleCreateQuote = () => {
+		if (isDemoMode) {
+			toast.info("📋 Fonctionnalité limitée en mode démo", {
+				description: "La création de devis génère des documents factices non exploitables"
+			});
+		}
+		setShowCreateForm(true);
+	};
+
 	const handleViewQuote = (quote: Quote) => {
 		setViewQuote(quote);
 	};
@@ -124,13 +143,22 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 					Devis pour {patient.firstName} {patient.lastName}
 				</h3>
 				<Button
-					className="flex items-center gap-2"
-					onClick={() => setShowCreateForm(true)}
+					className={`flex items-center gap-2 ${isDemoMode ? 'opacity-75' : ''}`}
+					onClick={handleCreateQuote}
+					variant={isDemoMode ? "outline" : "default"}
 				>
 					<Plus className="h-4 w-4" />
-					Nouveau devis
+					{isDemoMode ? "Nouveau devis (Démo)" : "Nouveau devis"}
 				</Button>
 			</div>
+
+			{isDemoMode && (
+				<div className="mx-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-md">
+					<p className="text-sm text-orange-700 dark:text-orange-300">
+						⚠️ <strong>Mode démo :</strong> Les devis créés sont fictifs et non exploitables en dehors de la démonstration.
+					</p>
+				</div>
+			)}
 
 			{showCreateForm && (
 				<QuoteCreateForm
@@ -145,10 +173,13 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 					<CardContent className="py-8 text-center">
 						<FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
 						<h3 className="text-lg font-medium mb-2">
-							Aucun devis
+							Aucun devis disponible
 						</h3>
 						<p className="text-muted-foreground mb-4">
-							Aucun devis n'a encore été créé pour ce patient.
+							{isDemoMode 
+								? "Aucun devis n'a été créé en mode démonstration."
+								: "Aucun devis n'a encore été créé pour ce patient."
+							}
 						</p>
 					</CardContent>
 				</Card>
