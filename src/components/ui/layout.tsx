@@ -37,45 +37,10 @@ interface LayoutProps {
 	children: React.ReactNode;
 }
 
-// Données de remplacement et fonctions pour simuler le contexte d'authentification et les autres composants manquants
-function useAuth() {
-	const [user, setUser] = React.useState({
-		firstName: "John",
-		lastName: "Doe",
-		email: "john.doe@example.com",
-	});
-	const isAdmin = true;
-	const logout = () => {
-		console.log("Logout simulated.");
-		setUser(null);
-	};
-	return { user, logout, isAdmin };
-}
-
-function CurrentDateTimeDisplay() {
-	return <div className="text-sm text-gray-500">22/05/2024 10:30</div>;
-}
-
-function DemoIndicator() {
-	return (
-		<span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-			Mode Démo
-		</span>
-	);
-}
-
-function ThemeToggle() {
-	return (
-		<Button variant="ghost" className="rounded-full">
-			Thème
-		</Button>
-	);
-}
-
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	const { user, logout, isAdmin } = useAuth();
-	const isDemoMode = false; // Désactivé car le service a été retiré
+	const isDemoMode = React.useMemo(() => user?.email ? DemoService.isDemoUser(user.email) : false, [user?.email]);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -191,25 +156,25 @@ export function Layout({ children }: LayoutProps) {
 
 						<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-  <Button
-    variant="ghost"
-    size="sm"
-    className="ml-2 p-0 group hover:bg-transparent focus-visible:ring-0 focus-visible:outline-none"
-  >
-    <Avatar className="h-8 w-8 transition-transform duration-150 group-hover:scale-110">
-      <AvatarFallback 
-        className="
-    bg-gradient-to-r from-indigo-600 to-indigo-800
-    text-white font-semibold
-    transition-all duration-150
-    group-hover:bg-transparent
-    group-hover:text-amber-300
-  "
+  <Button
+    variant="ghost"
+    size="sm"
+    className="ml-2 p-0 group hover:bg-transparent focus-visible:ring-0 focus-visible:outline-none"
+  >
+    <Avatar className="h-8 w-8 transition-transform duration-150 group-hover:scale-110">
+      <AvatarFallback 
+        className="
+    bg-gradient-to-r from-indigo-600 to-indigo-800
+    text-white font-semibold
+    transition-colors duration-150
+    group-hover:text-amber-300
+    group-hover:bg-transparent
+  "
 >
-        {getInitials()}
-      </AvatarFallback>
-    </Avatar>
-  </Button>
+        {getInitials()}
+      </AvatarFallback>
+    </Avatar>
+  </Button>
 </DropdownMenuTrigger>
 
 							<DropdownMenuContent align="end" className="w-56">
@@ -225,14 +190,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/invoices"
-										className={({ isActive }) =>
-											cn(
-												"flex items-center cursor-pointer p-2 rounded-md transition-colors",
-												isActive
-													? "bg-muted"
-													: "hover:bg-muted"
-											)
-										}
+										className="flex items-center cursor-pointer"
 									>
 										<FileText className="mr-2 h-4 w-4 text-amber-500" />
 										<span>Notes d'honoraires</span>
@@ -242,14 +200,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings"
-										className={({ isActive }) =>
-											cn(
-												"flex items-center cursor-pointer p-2 rounded-md transition-colors",
-												isActive
-													? "bg-muted"
-													: "hover:bg-muted"
-											)
-										}
+										className="flex items-center cursor-pointer"
 									>
 										<Settings className="mr-2 h-4 w-4 text-blue-500" />
 										<span>Paramètres</span>
@@ -258,14 +209,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings/cabinet"
-										className={({ isActive }) =>
-											cn(
-												"flex items-center cursor-pointer p-2 rounded-md transition-colors",
-												isActive
-													? "bg-muted"
-													: "hover:bg-muted"
-											)
-										}
+										className="flex items-center cursor-pointer"
 									>
 										<Building className="mr-2 h-4 w-4 text-green-500" />
 										<span>Paramètres du cabinet</span>
@@ -279,14 +223,7 @@ export function Layout({ children }: LayoutProps) {
 										<DropdownMenuItem asChild>
 											<NavLink
 												to="/admin"
-												className={({ isActive }) =>
-													cn(
-														"flex items-center cursor-pointer p-2 rounded-md transition-colors",
-														isActive
-															? "bg-muted"
-															: "hover:bg-muted"
-													)
-												}
+												className="flex items-center cursor-pointer"
 											>
 												<Shield className="mr-2 h-4 w-4 text-red-500" />
 												<span>Administration</span>
@@ -295,14 +232,7 @@ export function Layout({ children }: LayoutProps) {
 										<DropdownMenuItem asChild>
 											<NavLink
 												to="/admin/dashboard"
-												className={({ isActive }) =>
-													cn(
-														"flex items-center cursor-pointer p-2 rounded-md transition-colors",
-														isActive
-															? "bg-muted"
-															: "hover:bg-muted"
-													)
-												}
+												className="flex items-center cursor-pointer"
 											>
 												<Shield className="mr-2 h-4 w-4 text-red-500" />
 												<span>Dashboard Admin</span>
@@ -316,11 +246,11 @@ export function Layout({ children }: LayoutProps) {
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
-  onClick={handleLogout}
-  className="text-destructive cursor-pointer hover:bg-red-600 hover:text-white focus:text-destructive"
+  onClick={handleLogout}
+  className="text-destructive cursor-pointer hover:bg-red-600 hover:text-white focus:text-destructive"
 >
-  <LogOut className="mr-2 h-4 w-4" />
-  <span>Déconnexion</span>
+  <LogOut className="mr-2 h-4 w-4" />
+  <span>Déconnexion</span>
 </DropdownMenuItem>
 
 							</DropdownMenuContent>
