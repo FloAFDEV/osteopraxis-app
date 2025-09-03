@@ -40,13 +40,13 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['appointments', 'patient', patientId, isDemoMode],
     queryFn: async () => {
-      console.log(`Fetching appointments for patient ${patientId} in demo mode: ${isDemoMode}`);
+      console.log(`✅ Fetching appointments for patient ${patientId} in demo mode: ${isDemoMode}`);
       const result = await api.getAppointmentsByPatientId(patientId);
-      console.log(`Found ${result?.length || 0} appointments for patient ${patientId}:`, result);
+      console.log(`✅ Found ${result?.length || 0} appointments for patient ${patientId}:`, result);
       return result || [];
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    enabled: !!patientId && patientId > 0,
+    enabled: isDemoMode || (!!patientId && patientId > 0),
     retry: 3,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
