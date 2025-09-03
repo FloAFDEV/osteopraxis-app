@@ -22,25 +22,28 @@ export function ThemeToggle() {
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={toggleTheme}
-      className="relative w-9 h-9 p-0 rounded-full border border-border transition-colors 
-                 hover:bg-accent dark:hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-violet-500"
-      aria-label="Changer le thème"
-    >
-      {/* Lune : visible en clair */}
-      <Moon
-        className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-300 text-gray-500 hover:text-white dark:-rotate-90 dark:scale-0"
-      />
+  <Button
+  variant="ghost"
+  size="sm"
+  onClick={toggleTheme}
+  className="group relative w-9 h-9 p-0 rounded-full border border-border transition-colors 
+             hover:bg-accent dark:hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-violet-500"
+  aria-label="Changer le thème"
+>
+  {/* Lune : visible en clair */}
+  <Moon
+    className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-300 text-gray-500 
+               group-hover:text-white dark:-rotate-90 dark:scale-0"
+  />
 
-      {/* Soleil : visible en dark */}
-      <Sun
-        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-300 text-violet-400 dark:text-blue-400 dark:rotate-0 dark:scale-100"
-      />
+  {/* Soleil : visible en dark */}
+  <Sun
+    className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-300 
+               text-violet-400 dark:text-blue-400 dark:rotate-0 dark:scale-100 group-hover:text-white"
+  />
 
-      <span className="sr-only">Basculer le thème</span>
-    </Button>
+  <span className="sr-only">Basculer le thème</span>
+</Button>
+
   );
 }
