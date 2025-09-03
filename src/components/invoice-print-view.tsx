@@ -84,7 +84,7 @@ const getPaymentStatusLabel = (status?: string) => {
 					<div>
 					{/* Ligne titre + logo */}
 					<div className="flex items-center gap-4 mb-2 mt-6">
-						<h1 className="text-2xl font-extrabold text-emerald-700">
+						<h1 className="text-2xl font-extrabold text-indigo-700">
 							{cabinet?.name || "PatientHub"}
 						</h1>
 							{cabinet?.logoUrl && (
@@ -152,7 +152,7 @@ const getPaymentStatusLabel = (status?: string) => {
 
 					{/* Colonne droite : info facture */}
 					<div className="text-right mt-6">
-						<h2 className="text-lg font-medium text-emerald-700 mb-1">
+						<h2 className="text-lg font-medium text-indigo-700 mb-1">
 							NOTE D'HONORAIRES
 						</h2>
 						<p className="font-medium text-emerald-600">
@@ -167,10 +167,10 @@ const getPaymentStatusLabel = (status?: string) => {
 				{/* Infos patient + paiement */}
 				<div className="grid grid-cols-2 gap-8 mb-6">
 					<div>
-						<h3 className="font-medium text-emerald-700 mb-3">
+						<h3 className="font-medium text-indigo-700 mb-3">
 							Facturer à:
 						</h3>
-						<div className="border-l-4 border-emerald-200 pl-4 break-words">
+						<div className="border-l-4 border-gray-300 pl-4 break-words">
 							<p className="font-medium text-gray-800 text-lg mb-2">
 								{getPatientName()}
 							</p>
@@ -197,7 +197,7 @@ const getPaymentStatusLabel = (status?: string) => {
 						</div>
 					</div>
 					<div className="text-right">
-						<h3 className="font-medium text-emerald-700 mb-3">
+						<h3 className="font-medium text-indigo-700 mb-3">
 							Mode de règlement:
 						</h3>
 						<p className="font-medium text-gray-800">
@@ -220,34 +220,34 @@ const getPaymentStatusLabel = (status?: string) => {
 				</div>
 
 				{/* Tableau prestations */}
-				<div className="rounded-lg border border-emerald-200 overflow-hidden mb-6">
+				<div className="rounded-lg border border-gray-300 overflow-hidden mb-6">
 					<table className="w-full">
 						<thead>
 							<tr className="bg-gray-100">
-								<th className="py-3 px-4 text-left text-emerald-700 font-semibold">
+								<th className="py-3 px-4 text-left text-indigo-700 font-semibold">
 									Désignation
 								</th>
-								<th className="py-3 px-4 text-right text-emerald-700 font-semibold">
+								<th className="py-3 px-4 text-right text-indigo-700 font-semibold">
 									Montant
 								</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr className="border-t border-emerald-200">
+							<tr className="border-t border-gray-300">
 								<td className="py-4 px-4 text-gray-700">
 									Consultation d'ostéopathie
 								</td>
-								<td className="py-4 px-4 text-right text-emerald-700 font-bold">
+								<td className="py-4 px-4 text-right text-indigo-700 font-bold">
 									{formatAmount(invoice.amount)}
 								</td>
 							</tr>
 						</tbody>
 						<tfoot>
-							<tr className="border-t border-emerald-200 bg-emerald-50/50">
-								<td className="py-2 px-2 text-right text-emerald-700 font-medium">
+							<tr className="border-t border-gray-300 bg-gray-50/50">
+								<td className="py-2 px-2 text-right text-indigo-700 font-medium">
 									Total
 								</td>
-								<td className="py-2 px-2 text-right text-emerald-700 font-bold">
+								<td className="py-2 px-2 text-right text-indigo-700 font-bold">
 									{formatAmount(invoice.amount)}
 								</td>
 							</tr>
@@ -308,7 +308,7 @@ const getPaymentStatusLabel = (status?: string) => {
 			</div>
 			{/* Footer Mentions */}
 			<footer className="pt-6 mt-auto border-t border-gray-200">
-				<h3 className="font-medium text-emerald-700 mb-2">
+				<h3 className="font-medium text-indigo-700 mb-2">
 					Mentions obligatoires:
 				</h3>
 				<p className="text-gray-700 mb-3 font-medium">
