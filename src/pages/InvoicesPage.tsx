@@ -326,7 +326,7 @@ const InvoicesPage = () => {
                 Notes d'honoraires
               </span>
             </h1>
-            <Button onClick={() => navigate("/invoices/new")} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 hover:text-white text-slate-950">
+            <Button onClick={() => navigate("/invoices/new")} className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 hover:text-white text-slate-950">
               <Plus className="h-5 w-5" />
               Créer une note d'honoraire
             </Button>
