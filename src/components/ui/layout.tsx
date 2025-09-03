@@ -155,19 +155,22 @@ export function Layout({ children }: LayoutProps) {
 						<ThemeToggle />
 
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="ghost"
-									size="sm"
-									className="ml-2 p-0 group hover:bg-transparent focus-visible:ring-0 focus-visible:outline-none"
-								>
-									<Avatar className="h-8 w-8 transition-transform duration-150 group-hover:scale-110">
-										<AvatarFallback className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-primary-foreground">
-											{getInitials()}
-										</AvatarFallback>
-									</Avatar>
-								</Button>
-							</DropdownMenuTrigger>
+						<DropdownMenuTrigger asChild>
+  <Button
+    variant="ghost"
+    size="sm"
+    className="ml-2 p-0 group hover:bg-transparent focus-visible:ring-0 focus-visible:outline-none"
+  >
+    <Avatar className="h-8 w-8 transition-transform duration-150 group-hover:scale-110">
+      <AvatarFallback 
+        className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-semibold"
+      >
+        {getInitials()}
+      </AvatarFallback>
+    </Avatar>
+  </Button>
+</DropdownMenuTrigger>
+
 							<DropdownMenuContent align="end" className="w-56">
 								<DropdownMenuLabel>
 									Mon compte
