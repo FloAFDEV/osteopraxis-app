@@ -52,18 +52,18 @@ export const InvoicePrintView = ({
 		return `Patient #${invoice.patientId}`;
 	};
 
-	const getPaymentStatusLabel = (status?: string) => {
-		switch (status) {
-			case "PAID":
-				return { label: "ACQUITTÉE", color: "text-green-600" };
-			case "PENDING":
-				return { label: "EN ATTENTE", color: "text-yellow-600" };
-			case "CANCELED":
-				return { label: "ANNULÉE", color: "text-red-600" };
-			default:
-				return { label: "INCONNU", color: "text-gray-500" };
-		}
-	};
+const getPaymentStatusLabel = (status?: string) => {
+	switch (status) {
+		case "PAID":
+			return { label: "ACQUITTÉE", color: "text-indigo-600" };
+		case "PENDING":
+			return { label: "EN ATTENTE", color: "text-amber-600" };
+		case "CANCELED":
+			return { label: "ANNULÉE", color: "text-rose-600" };
+		default:
+			return { label: "INCONNU", color: "text-gray-500" };
+	}
+};
 
 	return (
 		<div className="bg-white p-4 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-screen print:p-2 relative">
