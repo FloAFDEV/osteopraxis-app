@@ -1,7 +1,18 @@
 
 import { Badge } from "@/components/ui/badge";
 import { AppointmentStatus } from "@/types";
-import { AlertCircle, Calendar, Check, Clock, X } from "lucide-react";
+import { 
+	AlertCircle, 
+	Calendar, 
+	Check, 
+	Clock, 
+	X, 
+	UserCheck,
+	CircleCheck,
+	CircleX,
+	Ban,
+	RotateCcw
+} from "lucide-react";
 
 interface AppointmentStatusBadgeProps {
 	status: AppointmentStatus;
@@ -28,17 +39,17 @@ export function AppointmentStatusBadge({ status }: AppointmentStatusBadgeProps) 
 	const getStatusIcon = (status: AppointmentStatus) => {
 		switch (status) {
 			case "SCHEDULED":
-				return <Clock className="h-3 w-3 mr-1" />;
-			case "COMPLETED":
-				return <Check className="h-3 w-3 mr-1" />;
-			case "CANCELED":
-				return <X className="h-3 w-3 mr-1" />;
-			case "RESCHEDULED":
 				return <Calendar className="h-3 w-3 mr-1" />;
+			case "COMPLETED":
+				return <CircleCheck className="h-3 w-3 mr-1" />;
+			case "CANCELED":
+				return <Ban className="h-3 w-3 mr-1" />;
+			case "RESCHEDULED":
+				return <RotateCcw className="h-3 w-3 mr-1" />;
 			case "NO_SHOW":
-				return <AlertCircle className="h-3 w-3 mr-1" />;
+				return <CircleX className="h-3 w-3 mr-1" />;
 			default:
-				return null;
+				return <Clock className="h-3 w-3 mr-1" />;
 		}
 	};
 

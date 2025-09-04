@@ -184,6 +184,10 @@ const NewPatientPage = () => {
 				`Patient ${newPatient.firstName} ${newPatient.lastName} ajouté avec succès`
 			);
 
+			// Invalider les queries pour mettre à jour la liste des patients
+			queryClient.invalidateQueries({ queryKey: ['patients'] });
+			queryClient.invalidateQueries({ queryKey: ['patients', user.osteopathId] });
+
 			console.log("🔄 Navigation vers la fiche patient:", `/patients/${newPatient.id}`);
 			// Navigation immédiate sans délai pour éviter les problèmes de synchronisation
 			navigate(`/patients/${newPatient.id}`);

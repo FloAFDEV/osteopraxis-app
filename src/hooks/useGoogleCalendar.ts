@@ -171,7 +171,9 @@ export function useGoogleCalendar(): GoogleCalendarIntegration {
       return data;
     },
     onSuccess: (data) => {
+      // Invalider les queries pour mettre à jour les événements
       queryClient.invalidateQueries({ queryKey: ['google-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
       toast.success(`${data?.eventsProcessed || 0} événements synchronisés`);
     },
     onError: (error) => {

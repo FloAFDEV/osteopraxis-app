@@ -257,9 +257,11 @@ export function AppointmentForm({
 
 			await performUpdate(appointmentData);
 
-			if (onSuccess) {
+			// Invalider les queries pour synchroniser les données
+			if (typeof onSuccess === 'function') {
 				onSuccess();
 			} else {
+				// Si pas de callback, naviguer vers la liste
 				setTimeout(() => {
 					navigate("/appointments");
 				}, 500);

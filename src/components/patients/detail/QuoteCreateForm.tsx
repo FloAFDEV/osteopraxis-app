@@ -19,7 +19,7 @@ import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentO
 
 interface QuoteCreateFormProps {
   patient: Patient;
-  onSuccess: () => void;
+  onSuccess: (newQuote?: any) => void;
   onCancel: () => void;
 }
 
@@ -105,9 +105,9 @@ export function QuoteCreateForm({ patient, onSuccess, onCancel }: QuoteCreateFor
       };
 
       // ✅ Création devis sécurisée
-      await quoteService.createQuote(quoteData);
+      const newQuote = await quoteService.createQuote(quoteData);
       toast.success("Devis créé avec succès");
-      onSuccess();
+      onSuccess(newQuote);
     } catch (error) {
       console.error('Error creating quote:', error);
       toast.error("Erreur lors de la création du devis");

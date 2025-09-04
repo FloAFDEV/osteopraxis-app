@@ -14,10 +14,7 @@ import {
   Mail,
   MapPin,
   Phone,
-  Ruler,
-  Weight,
   Heart,
-  Scissors,
   Bone,
   CheckCircle,
   XCircle,
@@ -49,6 +46,21 @@ import {
   Home,
   ArrowLeft,
   ArrowRight,
+  Send,
+  Star,
+  Copy,
+  Printer,
+  Download as FileDownload,
+  UserCheck,
+  CircleCheck,
+  CircleX,
+  CircleAlert,
+  Ban,
+  Pause,
+  Play,
+  FastForward,
+  RotateCcw,
+  Filter as FilterIcon,
   LucideIcon
 } from "lucide-react";
 
@@ -59,15 +71,19 @@ export type AppIconType =
   | "pediatric" | "notes" | "tracking" | "family"
   // Icônes d'état/feedback
   | "success" | "error" | "warning" | "info" | "loading" | "target"
+  | "approved" | "rejected" | "pending" | "cancelled" | "draft"
   // Icônes médicales
   | "heart" | "bone" | "activity" | "alert" | "baby" | "stethoscope"
   // Icônes de contact
   | "email" | "phone" | "address" | "occupation"
   // Icônes d'action
   | "save" | "edit" | "delete" | "view" | "add" | "search" | "filter"
-  | "refresh" | "upload" | "download" | "settings"
+  | "refresh" | "upload" | "download" | "settings" | "send" | "copy"
+  | "print" | "export" | "star" | "favorite"
   // Icônes de navigation
-  | "home" | "back" | "forward" | "up" | "down" | "left" | "right";
+  | "home" | "back" | "forward" | "up" | "down" | "left" | "right"
+  // Icônes de statut de rendez-vous
+  | "scheduled" | "confirmed" | "completed" | "missed" | "rescheduled";
 
 // Mapping des icônes d'application vers les icônes Lucide
 export const appIcons: Record<AppIconType, LucideIcon> = {
@@ -83,12 +99,17 @@ export const appIcons: Record<AppIconType, LucideIcon> = {
   family: Users,
   
   // États/feedback
-  success: CheckCircle,
-  error: XCircle,
-  warning: AlertCircle,
+  success: CircleCheck,
+  error: CircleX,
+  warning: CircleAlert,
   info: Info,
   loading: Clock,
   target: Target,
+  approved: CheckCircle,
+  rejected: Ban,
+  pending: Clock,
+  cancelled: XCircle,
+  draft: Edit,
   
   // Médicales
   heart: Heart,
@@ -111,11 +132,17 @@ export const appIcons: Record<AppIconType, LucideIcon> = {
   view: Eye,
   add: Plus,
   search: Search,
-  filter: Filter,
+  filter: FilterIcon,
   refresh: RefreshCw,
   upload: Upload,
   download: Download,
   settings: Settings,
+  send: Send,
+  copy: Copy,
+  print: Printer,
+  export: FileDownload,
+  star: Star,
+  favorite: Star,
   
   // Navigation
   home: Home,
@@ -124,7 +151,14 @@ export const appIcons: Record<AppIconType, LucideIcon> = {
   up: ChevronUp,
   down: ChevronDown,
   left: ChevronLeft,
-  right: ChevronRight
+  right: ChevronRight,
+  
+  // Statuts de rendez-vous
+  scheduled: Calendar,
+  confirmed: UserCheck,
+  completed: CircleCheck,
+  missed: CircleX,
+  rescheduled: RotateCcw
 };
 
 // Composant utilitaire pour afficher les icônes d'application

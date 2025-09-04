@@ -14,6 +14,8 @@ import {
 	Plus,
 	Send,
 	XCircle,
+	CircleCheck,
+	CircleX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -55,9 +57,15 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 			setLoading(false);
 		}
 	};
-	const handleCreateSuccess = () => {
+	const handleCreateSuccess = (newQuote?: Quote) => {
 		setShowCreateForm(false);
-		loadQuotes();
+		if (newQuote) {
+			// Mise à jour optimiste de l'état local
+			setQuotes(prev => [newQuote, ...prev]);
+		} else {
+			// Fallback: recharger depuis le service
+			loadQuotes();
+		}
 	};
 
 	const handleCreateQuote = () => {
@@ -78,8 +86,14 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 	const handleSendQuote = (quote: Quote) => {
 		setSendQuote(quote);
 	};
-	const handleModalSuccess = () => {
-		loadQuotes();
+	const handleModalSuccess = (updatedQuote?: Quote) => {
+		if (updatedQuote) {
+			// Mise à jour optimiste de l'état local
+			setQuotes(prev => prev.map(q => q.id === updatedQuote.id ? updatedQuote : q));
+		} else {
+			// Fallback: recharger depuis le service
+			loadQuotes();
+		}
 	};
 	const getStatusIcon = (status: string) => {
 		switch (status) {
@@ -88,11 +102,11 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 			case "SENT":
 				return <Send className="h-4 w-4" />;
 			case "ACCEPTED":
-				return <CheckCircle className="h-4 w-4" />;
+				return <CircleCheck className="h-4 w-4" />;
 			case "REJECTED":
-				return <XCircle className="h-4 w-4" />;
+				return <CircleX className="h-4 w-4" />;
 			case "EXPIRED":
-				return <AlertTriangle className="h-4 w-4" />;
+				return <Clock className="h-4 w-4" />;
 			default:
 				return <FileText className="h-4 w-4" />;
 		}
