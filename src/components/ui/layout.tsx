@@ -190,7 +190,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/invoices"
-										className="flex items-center cursor-pointer"
+										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 									>
 										<FileText className="mr-2 h-4 w-4 text-amber-500" />
 										<span>Notes d'honoraires</span>
@@ -200,7 +200,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings"
-										className="flex items-center cursor-pointer"
+										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 									>
 										<Settings className="mr-2 h-4 w-4 text-blue-500" />
 										<span>Paramètres</span>
@@ -209,7 +209,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings/cabinet"
-										className="flex items-center cursor-pointer"
+										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 									>
 										<Building className="mr-2 h-4 w-4 text-green-500" />
 										<span>Paramètres du cabinet</span>
@@ -223,7 +223,7 @@ export function Layout({ children }: LayoutProps) {
 										<DropdownMenuItem asChild>
 											<NavLink
 												to="/admin"
-												className="flex items-center cursor-pointer"
+												className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 											>
 												<Shield className="mr-2 h-4 w-4 text-red-500" />
 												<span>Administration</span>
@@ -232,7 +232,7 @@ export function Layout({ children }: LayoutProps) {
 										<DropdownMenuItem asChild>
 											<NavLink
 												to="/admin/dashboard"
-												className="flex items-center cursor-pointer"
+												className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 											>
 												<Shield className="mr-2 h-4 w-4 text-red-500" />
 												<span>Dashboard Admin</span>
@@ -247,7 +247,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
   onClick={handleLogout}
-  className="text-destructive cursor-pointer hover:bg-red-600 hover:text-white focus:text-destructive"
+  className="text-destructive cursor-pointer hover:bg-red-600 hover:text-white hover:font-bold hover:border hover:border-white/20 hover:shadow-sm rounded-sm focus:text-destructive"
 >
   <LogOut className="mr-2 h-4 w-4" />
   <span>Déconnexion</span>
