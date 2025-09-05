@@ -49,10 +49,9 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 			setQuotes(data);
 		} catch (error) {
 			console.error("Error loading quotes:", error);
-			// En mode démo, ne pas afficher d'erreur technique à l'utilisateur
-			if (!isDemoMode) {
-				toast.error("Erreur lors du chargement des devis");
-			}
+			// En mode démo ou quand il n'y a pas de devis, ne pas afficher d'erreur
+			// Initialiser avec un tableau vide au lieu de montrer une erreur
+			setQuotes([]);
 		} finally {
 			setLoading(false);
 		}
