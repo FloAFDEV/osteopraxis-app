@@ -85,6 +85,8 @@ export class StorageRouter {
             return demoLocalStorage.addAppointment(data) as T;
           case 'invoices':
             return demoLocalStorage.addInvoice(data) as T;
+          case 'cabinets':
+            return demoLocalStorage.addCabinet(data) as T;
           default:
             throw new Error(`Type ${dataType} non supporté en mode démo`);
         }
@@ -94,6 +96,8 @@ export class StorageRouter {
         switch (dataType) {
           case 'patients':
             return demoLocalStorage.getPatientById(Number(id)) as T;
+          case 'cabinets':
+            return demoLocalStorage.getCabinetById(Number(id)) as T;
           default:
             const all = await this.getAll();
             return all.find((item: any) => item.id === id) || null;
@@ -108,6 +112,8 @@ export class StorageRouter {
             return demoLocalStorage.getAppointments() as T[];
           case 'invoices':
             return demoLocalStorage.getInvoices() as T[];
+          case 'cabinets':
+            return demoLocalStorage.getCabinets() as T[];
           default:
             return [];
         }
@@ -121,6 +127,8 @@ export class StorageRouter {
             return demoLocalStorage.updateAppointment(Number(id), updates as any) as T;
           case 'invoices':
             return demoLocalStorage.updateInvoice(Number(id), updates as any) as T;
+          case 'cabinets':
+            return demoLocalStorage.updateCabinet(Number(id), updates as any) as T;
           default:
             throw new Error(`Mise à jour ${dataType} non supportée en mode démo`);
         }
@@ -134,6 +142,8 @@ export class StorageRouter {
             return demoLocalStorage.deleteAppointment(Number(id));
           case 'invoices':
             return demoLocalStorage.deleteInvoice(Number(id));
+          case 'cabinets':
+            return demoLocalStorage.deleteCabinet(Number(id));
           default:
             return true; // Simulation
         }

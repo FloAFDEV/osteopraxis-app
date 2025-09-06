@@ -3,7 +3,7 @@
  * Les données sont isolées par session et disparaissent à la fermeture du navigateur
  */
 
-import { Patient, Appointment, Invoice } from '@/types';
+import { Patient, Appointment, Invoice, Cabinet } from '@/types';
 import { nanoid } from 'nanoid';
 
 export interface DemoSession {
@@ -17,6 +17,7 @@ export interface DemoLocalData {
   patients: Patient[];
   appointments: Appointment[];
   invoices: Invoice[];
+  cabinets: Cabinet[];
   session: DemoSession;
 }
 
@@ -45,7 +46,8 @@ class DemoLocalStorageService {
     const initialData: Omit<DemoLocalData, 'session'> = {
       patients: [],
       appointments: [],
-      invoices: []
+      invoices: [],
+      cabinets: [this.createDemoCabinet()]
     };
     
     sessionStorage.setItem(this.getDataKey(sessionId), JSON.stringify(initialData));
@@ -406,6 +408,68 @@ class DemoLocalStorageService {
    */
   private getDataKey(sessionId: string): string {
     return `${this.DATA_KEY_PREFIX}${sessionId}`;
+  }
+
+  /**
+   * Crée un cabinet démo pré-configuré et attractif
+   */
+  private createDemoCabinet(): Cabinet {
+    const now = new Date().toISOString();
+    return {
+      id: 1,
+      name: "Cabinet de Démonstration",
+      address: "123 Avenue de la Santé",
+      postalCode: "75001",
+      city: "Paris",
+      phone: "01 23 45 67 89",
+      email: "contact@cabinet-demo.fr",
+      siret: "12345678901234",
+      iban: "FR1420041010050500013M02606",
+      bic: "PSSTFRPPPAR",
+      country: "FR",
+      osteopathId: 999,
+      createdAt: now,
+      updatedAt: now
+    };
+  }
+
+  /**
+   * Récupère tous les cabinets (en mode démo: cabinet pré-configuré uniquement)
+   */
+  getCabinets(): Cabinet[] {
+    const data = this.getSessionData();
+    return data?.cabinets || [this.createDemoCabinet()];
+  }
+
+  /**
+   * Récupère un cabinet par ID (en mode démo: seul le cabinet démo est disponible)
+   */
+  getCabinetById(id: number): Cabinet | null {
+    if (id === 1) {
+      return this.createDemoCabinet();
+    }
+    return null;
+  }
+
+  /**
+   * Création de cabinet bloquée en mode démo
+   */
+  addCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Cabinet {
+    throw new Error('🎭 Création de cabinet non autorisée en mode démo. Un cabinet exemple est déjà configuré.');
+  }
+
+  /**
+   * Modification de cabinet bloquée en mode démo
+   */
+  updateCabinet(id: number, updates: Partial<Cabinet>): Cabinet {
+    throw new Error('🎭 Modification de cabinet non autorisée en mode démo. Le cabinet exemple ne peut pas être modifié.');
+  }
+
+  /**
+   * Suppression de cabinet bloquée en mode démo
+   */
+  deleteCabinet(id: number): boolean {
+    throw new Error('🎭 Suppression de cabinet non autorisée en mode démo. Le cabinet exemple ne peut pas être supprimé.');
   }
 
   /**

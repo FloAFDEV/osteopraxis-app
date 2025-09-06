@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Building, Info, Plus, ArrowRight } from "lucide-react";
+import { Building, Info, Plus, ArrowRight, Presentation } from "lucide-react";
+import { isDemoSession } from "@/utils/demo-detection";
 import { Cabinet } from "@/types";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { TranslatedSelect } from "@/components/ui/translated-select";
@@ -20,6 +21,16 @@ interface CabinetSelectorProps {
 export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: CabinetSelectorProps) => {
   const { data: cabinets = [], isLoading: loading } = useCabinets();
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
+  // Vérifier le mode démo
+  useEffect(() => {
+    const checkDemoMode = async () => {
+      const demo = await isDemoSession();
+      setIsDemoMode(demo);
+    };
+    checkDemoMode();
+  }, []);
 
   useEffect(() => {
     if (cabinets.length > 0) {
@@ -73,14 +84,26 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
       />
 
       {selectedCabinet && (
-        <Alert>
-          <Info className="h-4 w-4" />
+        <Alert className={isDemoMode ? "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950" : ""}>
+          {isDemoMode ? <Presentation className="h-4 w-4 text-blue-600" /> : <Info className="h-4 w-4" />}
           <AlertDescription>
-            <strong>Cabinet sélectionné :</strong> {selectedCabinet.name}
+            <div className="flex items-center gap-2 mb-1">
+              <strong>Cabinet sélectionné :</strong> {selectedCabinet.name}
+              {isDemoMode && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  MODE DÉMO
+                </span>
+              )}
+            </div>
             {selectedCabinet.address && (
               <span className="block text-sm text-muted-foreground mt-1">
                 📍 {selectedCabinet.address}
               </span>
+            )}
+            {isDemoMode && (
+              <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                ✨ Cabinet de démonstration pré-configuré (non modifiable)
+              </p>
             )}
           </AlertDescription>
         </Alert>
