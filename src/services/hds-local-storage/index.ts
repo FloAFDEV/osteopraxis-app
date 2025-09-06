@@ -1,10 +1,10 @@
 /**
- * 🏥 Services de stockage local HDS - ARCHITECTURE SIMPLE
+ * 🏥 Services de stockage local HDS
  * 
  * EXCLUSIVEMENT pour le mode connecté - conformité HDS
  * Données sensibles stockées localement sur la machine de l'utilisateur
  * 
- * ✅ SIMPLE: Pas de hybrid manager complexe, juste routage dans les services
+ * ⚠️ SÉPARÉ du mode démo qui utilise localStorage temporaire
  */
 
 import { 
@@ -80,12 +80,11 @@ export async function initializeHDSSystem(): Promise<{
       return result;
     }
 
-    // Initialiser le stockage local HDS directement
-    console.log('🏥 Initialisation directe du stockage HDS local...');
+    // Initialiser le stockage local HDS
     await _initializeHDSStorage();
     result.localStorage = true;
 
-    // Tester l'accès Supabase (optionnel)
+    // Tester l'accès Supabase
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       await supabase.from('User').select('id').limit(1);

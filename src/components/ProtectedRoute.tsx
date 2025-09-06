@@ -2,9 +2,9 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ReactNode } from 'react';
-import { HybridStorageProvider } from '@/contexts/HybridStorageStub';
+import { HybridStorageProvider } from '@/contexts/HybridStorageContext';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
-
+import { HybridStorageSetup } from '@/components/storage/HybridStorageSetup';
 
 interface ProtectedRouteProps {
   children: ReactNode;

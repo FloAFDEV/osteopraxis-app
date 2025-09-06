@@ -57,14 +57,16 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       setError(null);
       
       try {
-        console.log(`📊 Loading cabinet stats - Demo mode: ${isDemoMode}`);
+        // Injecter le contexte démo dans les services API
+        const appointmentService = api.getAppointmentService();
+        const patientService = api.getPatientService();
+        const invoiceService = api.getInvoiceService();
         
-        // En mode démo, éviter complètement HDS et utiliser uniquement Supabase
-        if (isDemoMode) {
-          console.log('📊 Demo mode: Using Supabase only for all data');
-        }
+        appointmentService.setDemoContext({ isDemoMode });
+        patientService.setDemoContext({ isDemoMode });
+        invoiceService.setDemoContext({ isDemoMode });
 
-        // Récupération des données via l'API (routage automatique)
+        // Récupération des données (réelles ou démo selon le contexte)
         const [patientsData, appointmentsData, invoicesData] = await Promise.all([
           api.getPatients(),
           api.getAppointments(),

@@ -22,14 +22,10 @@ export const useOptimizedPatients = (
     refetch,
   } = useQuery({
     queryKey: ['patients', isDemoMode],
-    queryFn: async () => {
-      console.log(`👥 Loading patients - Demo mode: ${isDemoMode}`);
-      
-      // En mode démo, éviter complètement HDS et utiliser uniquement Supabase
-      if (isDemoMode) {
-        console.log('👥 Demo mode: Using Supabase only for patients');
-      }
-      
+    queryFn: () => {
+      // Injecter le contexte démo dans le service API
+      const patientService = api.getPatientService();
+      patientService.setDemoContext({ isDemoMode });
       return api.getPatients();
     },
     staleTime: 1000 * 60 * 5, // 5 minutes

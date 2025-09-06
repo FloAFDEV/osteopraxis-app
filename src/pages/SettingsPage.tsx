@@ -18,6 +18,8 @@ import {
 	Upload,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
+import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog";
 
 
 const SettingsPage = () => {
@@ -162,7 +164,15 @@ const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Dialogs removed - secure USB functionality not available */}
+      {/* Dialogs */}
+      <SecureExportDialog 
+        open={showExportDialog} 
+        onOpenChange={setShowExportDialog} 
+      />
+      <SecureImportDialog 
+        open={showImportDialog} 
+        onOpenChange={setShowImportDialog} 
+      />
     </Layout>
   );
 };

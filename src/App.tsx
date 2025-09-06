@@ -48,15 +48,16 @@ import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
 import NewCabinetPage from "@/pages/NewCabinetPage";
 import EditCabinetPage from "@/pages/EditCabinetPage";
 import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
-
+import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
+import HybridStorageSettingsPage from "@/pages/HybridStorageSettingsPage";
+import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 
-import { initializeHDSSystem } from "@/services/hds-local-storage";
+import { PatientHubInitialization } from "@/services/hybrid-data-adapter/app-initialization";
 import { useEffect } from "react";
-import { StorageRouter } from "@/services/storage-router/storage-router";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,24 +70,14 @@ const queryClient = new QueryClient({
 
 /**
  * Composant d'initialisation PatientHub
- * Configure automatiquement le stockage selon le mode (démo vs connecté)
+ * Configure automatiquement le stockage HDS (local pour production, éphémère pour démo)
  */
 function PatientHubInitializer() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        const decision = StorageRouter.route('patients');
-        console.log(`🏥 PatientHub - Mode détecté: ${decision.reason}`);
-        
-        // Seulement initialiser HDS si on est en mode connecté
-        if (decision.destination === 'local-hds') {
-          console.log('🔧 Mode connecté - Initialisation du stockage HDS local');
-          await initializeHDSSystem();
-        } else {
-          console.log('🎭 Mode démo - Utilisation de Supabase éphémère uniquement');
-        }
-        
-        console.log('🏥 PatientHub prêt');
+        await PatientHubInitialization.initializeApp();
+        console.log('🏥 PatientHub prêt - Stockage HDS configuré');
       } catch (error) {
         console.error('❌ Erreur initialisation PatientHub:', error);
         // L'application continue de fonctionner même en cas d'erreur
@@ -222,6 +213,16 @@ function App() {
                             <CollaborationsSettingsPage />
                           </ProtectedRoute>
                         } />
+                        <Route path="/settings/storage" element={
+                          <ProtectedRoute requireRole="ADMIN">
+                            <HybridStorageSettingsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/admin/storage-diagnostic" element={
+                          <ProtectedRoute requireRole="ADMIN">
+                            <StorageDiagnosticPage />
+                          </ProtectedRoute>
+                        } />
                         {/* Retiré des paramètres pour les praticiens */}
                         <Route path="/help" element={
                           <ProtectedRoute>
@@ -259,6 +260,11 @@ function App() {
                         <Route path="/admin/dashboard" element={
                           <ProtectedRoute>
                             <AdminDashboardPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/admin/tech-debug" element={
+                          <ProtectedRoute>
+                            <AdminTechDebugPage />
                           </ProtectedRoute>
                         } />
                         
