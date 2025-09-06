@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -25,13 +25,19 @@ export default function AppointmentsEmptyState() {
         />
       </svg>
 
-      {/* Illustration */}
-      <img
-        src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
-        alt="Ostéopathe illustration"
-        className="mx-auto mb-8 w-44 h-44 object-cover rounded-full border-8 border-white shadow-lg bg-[#eaf4ef]"
-        loading="lazy"
-      />
+      {/* Illustration avec badge Calendrier */}
+      <div className="relative mx-auto mb-8 w-44 h-44">
+        <img
+          src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
+          alt="Ostéopathe illustration"
+          className="w-44 h-44 object-cover rounded-full border-8 border-white shadow-lg bg-[#eaf4ef]"
+          loading="lazy"
+        />
+        {/* Badge Calendrier */}
+        <div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 rounded-full shadow-md p-2">
+          <Calendar className="h-6 w-6 text-blue-500" />
+        </div>
+      </div>
 
       <h3 className="text-2xl font-semibold text-[#2a585a] dark:text-white mb-2">
         Aucune séance trouvée
