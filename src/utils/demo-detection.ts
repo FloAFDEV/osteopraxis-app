@@ -23,6 +23,13 @@ export const isDemoSession = async (): Promise<boolean> => {
     // Vérifier d'abord la session Supabase pour les anciennes sessions démo
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user && isDemoUser(session.user)) {
+      // Si utilisateur démo Supabase détecté, s'assurer qu'une session locale existe
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      if (!demoLocalStorage.isSessionActive()) {
+        console.log('🎭 Utilisateur démo Supabase détecté, création session locale');
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+      }
       return true;
     }
     
