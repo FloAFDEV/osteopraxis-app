@@ -61,33 +61,23 @@ const SchedulePage = () => {
     loading: appointmentsLoading,
     invalidate: invalidateAppointments
   } = useOptimizedCache('appointments', () => {
-    // Injecter le contexte démo dans les services API
-    const appointmentService = api.getAppointmentService();
-    appointmentService.setDemoContext({
-      isDemoMode
-    });
+    // Les services utilisent maintenant le routeur de stockage automatique
     return api.getAppointments();
   }, {
     ttl: 2 * 60 * 1000,
     enabled: !!user && isAuthenticated
-  } // 2 minutes pour les rendez-vous, seulement si authentifié
-  );
+  });
   const {
     data: cachedPatients,
     loading: patientsLoading,
     invalidate: invalidatePatients
   } = useOptimizedCache('patients', () => {
-    // Injecter le contexte démo dans les services API
-    const patientService = api.getPatientService();
-    patientService.setDemoContext({
-      isDemoMode
-    });
+    // Les services utilisent maintenant le routeur de stockage automatique
     return api.getPatients();
   }, {
     ttl: 10 * 60 * 1000,
     enabled: !!user && isAuthenticated
-  } // 10 minutes pour les patients (changent moins souvent), seulement si authentifié
-  );
+  });
 
   // États locaux mis à jour depuis le cache
   useEffect(() => {
