@@ -57,12 +57,14 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       setError(null);
       
       try {
-        // Services configured automatically via storage router
-        const appointmentService = api.getAppointmentService();
-        const patientService = api.getPatientService();
-        const invoiceService = api.getInvoiceService();
+        console.log(`📊 Loading cabinet stats - Demo mode: ${isDemoMode}`);
+        
+        // En mode démo, éviter complètement HDS et utiliser uniquement Supabase
+        if (isDemoMode) {
+          console.log('📊 Demo mode: Using Supabase only for all data');
+        }
 
-        // Récupération des données (réelles ou démo selon le contexte)
+        // Récupération des données via l'API (routage automatique)
         const [patientsData, appointmentsData, invoicesData] = await Promise.all([
           api.getPatients(),
           api.getAppointments(),

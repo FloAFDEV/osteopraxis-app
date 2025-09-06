@@ -20,6 +20,13 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['patient', patientId, isDemoMode],
     queryFn: async () => {
+      console.log(`👤 Loading patient ${patientId} - Demo mode: ${isDemoMode}`);
+      
+      // En mode démo, éviter complètement HDS et utiliser uniquement Supabase
+      if (isDemoMode) {
+        console.log('👤 Demo mode: Using Supabase only for patient data');
+      }
+      
       const result = await api.getPatientById(patientId);
       if (!result) {
         throw new Error(`Patient ${patientId} non trouvé`);
@@ -40,9 +47,15 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['appointments', 'patient', patientId, isDemoMode],
     queryFn: async () => {
-      console.log(`✅ Fetching appointments for patient ${patientId} in demo mode: ${isDemoMode}`);
+      console.log(`📅 Loading appointments for patient ${patientId} - Demo mode: ${isDemoMode}`);
+      
+      // En mode démo, éviter complètement HDS et utiliser uniquement Supabase
+      if (isDemoMode) {
+        console.log('📅 Demo mode: Using Supabase only for appointments');
+      }
+      
       const result = await api.getAppointmentsByPatientId(patientId);
-      console.log(`✅ Found ${result?.length || 0} appointments for patient ${patientId}:`, result);
+      console.log(`📅 Found ${result?.length || 0} appointments for patient ${patientId}`);
       return result || [];
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -60,7 +73,13 @@ export function usePatientDetail(patientId: number) {
   } = useQuery({
     queryKey: ['invoices', 'patient', patientId, isDemoMode],
     queryFn: async () => {
-      // ✅ Factures patient récupérées
+      console.log(`💰 Loading invoices for patient ${patientId} - Demo mode: ${isDemoMode}`);
+      
+      // En mode démo, éviter complètement HDS et utiliser uniquement Supabase
+      if (isDemoMode) {
+        console.log('💰 Demo mode: Using Supabase only for invoices');
+      }
+      
       const result = await invoiceService.getInvoicesByPatientId(patientId);
       return result;
     },

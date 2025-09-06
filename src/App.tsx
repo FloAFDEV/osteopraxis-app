@@ -56,6 +56,7 @@ import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 import { initializeHDSSystem } from "@/services/hds-local-storage";
 import { useEffect } from "react";
+import { StorageRouter } from "@/services/storage-router/storage-router";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,14 +69,24 @@ const queryClient = new QueryClient({
 
 /**
  * Composant d'initialisation PatientHub
- * Configure automatiquement le stockage HDS (local pour production, éphémère pour démo)
+ * Configure automatiquement le stockage selon le mode (démo vs connecté)
  */
 function PatientHubInitializer() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        await initializeHDSSystem();
-        console.log('🏥 PatientHub prêt - Stockage HDS configuré');
+        const decision = StorageRouter.route('patients');
+        console.log(`🏥 PatientHub - Mode détecté: ${decision.reason}`);
+        
+        // Seulement initialiser HDS si on est en mode connecté
+        if (decision.destination === 'local-hds') {
+          console.log('🔧 Mode connecté - Initialisation du stockage HDS local');
+          await initializeHDSSystem();
+        } else {
+          console.log('🎭 Mode démo - Utilisation de Supabase éphémère uniquement');
+        }
+        
+        console.log('🏥 PatientHub prêt');
       } catch (error) {
         console.error('❌ Erreur initialisation PatientHub:', error);
         // L'application continue de fonctionner même en cas d'erreur
