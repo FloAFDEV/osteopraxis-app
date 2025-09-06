@@ -19,7 +19,27 @@ const EmptyPatientState: React.FC<EmptyPatientStateProps> = ({
     <Card className="w-full">
       <CardContent className="pt-6">
         <div className="text-center py-16 rounded-lg border border-dashed bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative overflow-hidden">
-          {/* Illustration circulaire avec badge Users */}
+          {/* Vagues en fond */}
+          <svg
+            viewBox="0 0 600 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute left-0 bottom-0 w-full h-36 pointer-events-none"
+            aria-hidden="true"
+          >
+            <path
+              d="M0 40 Q 150 70 300 30 Q 450 -10 600 40 V120H0Z"
+              fill="#B8DDD7"
+              fillOpacity="0.33"
+            />
+            <path
+              d="M0 90 Q 180 120 300 100 Q 510 70 600 100 V120H0Z"
+              fill="#A2C6CB"
+              fillOpacity="0.20"
+            />
+          </svg>
+
+          {/* Logo circulaire avec badge Users */}
           <div className="relative mx-auto mb-8 w-28 h-28">
             <img
               src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
