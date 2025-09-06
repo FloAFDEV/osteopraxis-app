@@ -15,7 +15,7 @@ const EmptyPatientState: React.FC<EmptyPatientStateProps> = ({
   onClearFilter,
 }) => {
   return (
-    <div className="text-center py-16 rounded-lg mt-8 bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative overflow-hidden w-full max-w-xl mx-auto">
+    <div className="text-center py-8 rounded-lg mt-8 bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative overflow-hidden w-full max-w-xl mx-auto">
       {/* Background wave SVG full-width */}
       <svg
         viewBox="0 0 1440 160"
