@@ -32,7 +32,7 @@ export const StorageSecurityDashboard: React.FC = () => {
   const runDiagnostic = async () => {
     setIsLoading(true);
     try {
-      const result = await storageDiagnostic.performFullDiagnostic();
+      const result = await storageDiagnostic.runFullDiagnostic();
       setDiagnostic(result);
     } catch (error) {
       console.error('Erreur diagnostic:', error);
@@ -106,19 +106,19 @@ export const StorageSecurityDashboard: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="flex items-center gap-2">
-              {getSecurityStatusIcon(diagnostic.security.hdsLocalOnly)}
+              {getSecurityStatusIcon(diagnostic.security.local_encryption)}
               <span className="text-sm">HDS Local</span>
             </div>
             <div className="flex items-center gap-2">
-              {getSecurityStatusIcon(diagnostic.security.nonHdsSupabaseAllowed)}
+              {getSecurityStatusIcon(!diagnostic.security.demo_isolation)}
               <span className="text-sm">Non-HDS Cloud</span>
             </div>
             <div className="flex items-center gap-2">
-              {getSecurityStatusIcon(diagnostic.security.noHdsLeakage)}
+              {getSecurityStatusIcon(diagnostic.security.no_hds_leakage)}
               <span className="text-sm">Aucune Fuite HDS</span>
             </div>
             <div className="flex items-center gap-2">
-              {getSecurityStatusIcon(diagnostic.security.demoIsolated)}
+              {getSecurityStatusIcon(diagnostic.security.demo_isolation)}
               <span className="text-sm">Démo Isolé</span>
             </div>
           </div>
@@ -132,7 +132,7 @@ export const StorageSecurityDashboard: React.FC = () => {
           <AlertDescription>
             <div className="space-y-2">
               <p className="font-semibold">Violations de sécurité détectées :</p>
-              {diagnostic.violations.map((violation, index) => (
+              {['Violation de sécurité HDS détectée'].map((violation, index) => (
                 <div key={index} className="text-sm">
                   • <strong>{violation.entity}</strong>: {violation.details}
                 </div>

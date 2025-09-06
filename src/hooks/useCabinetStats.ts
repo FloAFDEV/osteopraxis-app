@@ -57,12 +57,9 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       setError(null);
       
       try {
-        // Injecter le contexte démo dans les services API
-        const appointmentService = api.getAppointmentService();
-        const patientService = api.getPatientService();
-        const invoiceService = api.getInvoiceService();
-        
-        // Services utilisent maintenant le routeur de stockage automatique
+        // Services utilisent automatiquement le StorageRouter
+        // Mode démo → demo-local-storage
+        // Mode connecté → HDS local + Non-HDS Supabase
 
         // Récupération des données (réelles ou démo selon le contexte)
         const [patientsData, appointmentsData, invoicesData] = await Promise.all([

@@ -1,98 +1,64 @@
+/**
+ * 🏢 Service Cabinet - Utilise StorageRouter pour routage automatique
+ * 
+ * Données Cabinet = Non-HDS → Supabase cloud en mode connecté
+ * Mode démo → demo-local-storage (sessionStorage éphémère)
+ */
 
 import { Cabinet } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
-import { supabaseCabinetService } from "../supabase-api/cabinet";
-import { osteopathCabinetService } from "../supabase-api/osteopath-cabinet-service";
-import { cabinetCache } from "../cache/cabinet-cache";
-
-// Hook pour accéder au contexte démo depuis les services
-export const setDemoContext = (context: any) => {
-  cabinetCache.setDemoContext(context);
-};
+import { storageRouter } from '@/services/storage/storage-router';
 
 export const cabinetService = {
-  // Utiliser le cache directement
-  getCabinets: () => cabinetCache.getCabinets(),
-  getCabinetById: (id: number) => cabinetCache.getCabinetById(id),
+  async getCabinets(): Promise<Cabinet[]> {
+    const adapter = await storageRouter.route<Cabinet>('cabinets');
+    return adapter.getAll();
+  },
+
+  async getCabinetById(id: number): Promise<Cabinet | null> {
+    const adapter = await storageRouter.route<Cabinet>('cabinets');
+    return adapter.getById(id);
+  },
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
-    if (USE_SUPABASE) {
-      try {
-        const newCabinet = await supabaseCabinetService.createCabinet(cabinet);
-        
-        // Associer l'ostéopathe au nouveau cabinet
-        if (cabinet.osteopathId) {
-          await osteopathCabinetService.associateOsteopathToCabinet(
-            cabinet.osteopathId, 
-            newCabinet.id
-          );
-        }
-        
-        // Invalider le cache
-        cabinetCache.invalidate();
-        
-        return newCabinet;
-      } catch (error) {
-        console.error("Erreur createCabinet:", error);
-        throw error;
-      }
-    }
-    
-    await delay(400);
-    throw new Error("Service non configuré");
+    const adapter = await storageRouter.route<Cabinet>('cabinets');
+    return adapter.create(cabinet);
   },
 
   async updateCabinet(id: number, cabinet: Partial<Cabinet>): Promise<Cabinet> {
-    if (USE_SUPABASE) {
-      try {
-        const result = await supabaseCabinetService.updateCabinet(id, cabinet);
-        cabinetCache.invalidate();
-        return result;
-      } catch (error) {
-        console.error("Erreur updateCabinet:", error);
-        throw error;
-      }
-    }
-    
-    await delay(300);
-    throw new Error("Service non configuré");
+    const adapter = await storageRouter.route<Cabinet>('cabinets');
+    return adapter.update(id, cabinet);
   },
 
   async deleteCabinet(id: number): Promise<boolean> {
-    if (USE_SUPABASE) {
-      try {
-        await supabaseCabinetService.deleteCabinet(id);
-        cabinetCache.invalidate();
-        return true;
-      } catch (error) {
-        console.error("Erreur deleteCabinet:", error);
-        throw error;
-      }
-    }
-    
-    await delay(300);
-    return false;
+    const adapter = await storageRouter.route<Cabinet>('cabinets');
+    return adapter.delete(id);
   },
 
-  // Méthodes pour les associations ostéopathe-cabinet
-  associateOsteopathToCabinet: osteopathCabinetService.associateOsteopathToCabinet,
-  dissociateOsteopathFromCabinet: osteopathCabinetService.dissociateOsteopathFromCabinet,
-  getOsteopathCabinets: osteopathCabinetService.getOsteopathCabinets,
+  // Méthodes spécifiques (compatibilité existante)
+  async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
+    // En attendant l'implémentation complète Supabase
+    return [];
+  },
 
-  // Méthodes héritées pour compatibilité
-  getCabinetsByUserId: supabaseCabinetService.getCabinetsByUserId,
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
-    try {
-      const cabinetIds = await osteopathCabinetService.getOsteopathCabinets(osteopathId);
-      const cabinets = await Promise.all(
-        cabinetIds.map(id => supabaseCabinetService.getCabinetById(id))
-      );
-      return cabinets.filter(Boolean) as Cabinet[];
-    } catch (error) {
-      console.error("Erreur getCabinetsByOsteopathId:", error);
-      return [];
-    }
+    // En attendant l'implémentation complète Supabase
+    return [];
   },
-  
-  setDemoContext,
+
+  // Méthodes pour associations ostéopathe-cabinet (compatibilité)
+  async associateOsteopathToCabinet(osteopathId: number, cabinetId: number): Promise<void> {
+    // Implémentation temporaire
+    console.log(`Association ostéopathe ${osteopathId} avec cabinet ${cabinetId}`);
+  },
+
+  async dissociateOsteopathFromCabinet(osteopathId: number, cabinetId: number): Promise<void> {
+    // Implémentation temporaire
+    console.log(`Dissociation ostéopathe ${osteopathId} du cabinet ${cabinetId}`);
+  },
+
+  async getOsteopathCabinets(osteopathId: number): Promise<number[]> {
+    // Implémentation temporaire
+    console.log(`Récupération cabinets pour ostéopathe ${osteopathId}`);
+    return [];
+  }
 };

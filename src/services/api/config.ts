@@ -7,8 +7,8 @@ export const DELAY = 300;
 // Fonction utilitaire pour simuler un délai d'API
 export const delay = (ms: number = DELAY) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Active l'utilisation de Supabase au lieu de l'API simulée
-export const USE_SUPABASE = true;
+// Configuration supprimée - Architecture hybride avec StorageRouter
+// USE_SUPABASE remplacé par le routage automatique HDS/Non-HDS
 
 // Les headers par défaut pour les appels API
 export const DEFAULT_HEADERS = {

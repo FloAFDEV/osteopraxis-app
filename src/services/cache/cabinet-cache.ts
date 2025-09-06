@@ -14,11 +14,7 @@ class CabinetCacheService {
   private cache = new Map<string, CacheEntry>();
   private readonly TTL = 5 * 60 * 1000; // 5 minutes
   private activeFetches = new Map<string, Promise<Cabinet[]>>();
-  private demoContext: any = null;
-
-  setDemoContext(context: any) {
-    this.demoContext = context;
-  }
+  // setDemoContext supprimé - Architecture hybride avec StorageRouter
 
   /**
    * Récupérer tous les cabinets avec cache intelligent
@@ -95,13 +91,7 @@ class CabinetCacheService {
    * Appel direct à Supabase (pas de boucle)
    */
   private async fetchFromSupabase(): Promise<Cabinet[]> {
-    // Mode démo
-    if (this.demoContext?.isDemoMode) {
-      await this.delay(200);
-      return [...this.demoContext.demoData.cabinets];
-    }
-    
-    // Appel direct à Supabase
+    // Appel direct à Supabase - Mode démo géré par StorageRouter
     return await supabaseCabinetService.getCabinets();
   }
 
