@@ -19,23 +19,23 @@ const EmptyPatientState: React.FC<EmptyPatientStateProps> = ({
     <Card className="w-full">
       <CardContent className="pt-6">
         <div className="text-center py-16 rounded-lg border border-dashed bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative overflow-hidden">
-          {/* Vagues en fond */}
+          {/* Vagues full-width */}
           <svg
-            viewBox="0 0 600 120"
-            fill="none"
+            viewBox="0 0 1440 160"
+            preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-0 bottom-0 w-full h-36 pointer-events-none"
+            className="absolute left-0 bottom-0 w-full h-40 pointer-events-none"
             aria-hidden="true"
           >
             <path
-              d="M0 40 Q 150 70 300 30 Q 450 -10 600 40 V120H0Z"
+              d="M0,64 C360,120 1080,0 1440,64 L1440,160 L0,160Z"
               fill="#B8DDD7"
               fillOpacity="0.33"
             />
             <path
-              d="M0 90 Q 180 120 300 100 Q 510 70 600 100 V120H0Z"
+              d="M0,96 C480,160 960,32 1440,96 L1440,160 L0,160Z"
               fill="#A2C6CB"
-              fillOpacity="0.20"
+              fillOpacity="0.2"
             />
           </svg>
 
