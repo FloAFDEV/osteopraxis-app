@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import React from "react";
@@ -26,7 +26,7 @@ export default function AppointmentsEmptyState() {
         />
       </svg>
 
-      {/* Logo circulaire avec badge icône */}
+      {/* Logo circulaire avec badge Calendar */}
       <div className="relative mx-auto mb-8 w-44 h-44">
         <img
           src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
@@ -34,7 +34,7 @@ export default function AppointmentsEmptyState() {
           className="w-44 h-44 object-cover rounded-full border-8 border-white shadow-lg bg-[#eaf4ef]"
         />
         <div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 rounded-full shadow-md p-2">
-          <Plus className="h-6 w-6 text-blue-500" />
+          <Calendar className="h-6 w-6 text-blue-500" />
         </div>
       </div>
 
