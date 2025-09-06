@@ -1,12 +1,12 @@
-import { Plus } from "lucide-react";
+import { Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import React from "react";
 
 export default function AppointmentsEmptyState() {
   return (
-    <div className="text-center py-16 rounded-lg mt-8 bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative overflow-hidden w-full max-w-xl mx-auto">
-      {/* Background wave SVG full-width */}
+    <div className="text-center py-16 rounded-lg mt-8 bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative overflow-hidden w-full max-w-xl mx-auto min-h-[520px]">
+      {/* Vagues full-width */}
       <svg
         viewBox="0 0 1440 160"
         preserveAspectRatio="none"
@@ -26,7 +26,7 @@ export default function AppointmentsEmptyState() {
         />
       </svg>
 
-      {/* Logo circulaire avec badge icône */}
+      {/* Logo + badge Calendar */}
       <div className="relative mx-auto mb-8 w-44 h-44">
         <img
           src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
@@ -34,7 +34,7 @@ export default function AppointmentsEmptyState() {
           className="w-44 h-44 object-cover rounded-full border-8 border-white shadow-lg bg-[#eaf4ef]"
         />
         <div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 rounded-full shadow-md p-2">
-          <Plus className="h-6 w-6 text-blue-500" />
+          <Calendar className="h-6 w-6 text-blue-500" />
         </div>
       </div>
 
