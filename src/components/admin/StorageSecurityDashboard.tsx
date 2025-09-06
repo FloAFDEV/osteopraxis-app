@@ -126,17 +126,15 @@ export const StorageSecurityDashboard: React.FC = () => {
       </Card>
 
       {/* Violations de sécurité */}
-      {diagnostic.violations.length > 0 && (
+      {!diagnostic.security.no_hds_leakage && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="space-y-2">
               <p className="font-semibold">Violations de sécurité détectées :</p>
-              {['Violation de sécurité HDS détectée'].map((violation, index) => (
-                <div key={index} className="text-sm">
-                  • <strong>{violation.entity}</strong>: {violation.details}
-                </div>
-              ))}
+              <div className="text-sm">
+                • <strong>HDS Security</strong>: Fuite potentielle de données sensibles détectée
+              </div>
             </div>
           </AlertDescription>
         </Alert>
@@ -165,15 +163,15 @@ export const StorageSecurityDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Type de stockage:</span>
                     <div className="flex items-center gap-2">
-                      {getStorageTypeIcon(diagnostic.services.hds.storageType)}
+                      {getStorageTypeIcon('Local sécurisé')}
                       <span className="text-sm font-medium">
-                        {diagnostic.services.hds.storageType}
+                        Local sécurisé
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Accessibilité:</span>
-                    {diagnostic.services.hds.accessible ? (
+                    {diagnostic.tests.hds_local_write_read ? (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     ) : (
                       <XCircle className="h-4 w-4 text-red-500" />
@@ -182,7 +180,7 @@ export const StorageSecurityDashboard: React.FC = () => {
                   <div className="mt-3">
                     <p className="text-sm font-medium mb-2">Entités concernées:</p>
                     <div className="flex flex-wrap gap-1">
-                      {diagnostic.services.hds.entities.map((entity) => (
+                      {diagnostic.routing.hds_to_local.map((entity) => (
                         <Badge key={entity} variant="destructive" className="text-xs">
                           {entity}
                         </Badge>
@@ -206,15 +204,15 @@ export const StorageSecurityDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Type de stockage:</span>
                     <div className="flex items-center gap-2">
-                      {getStorageTypeIcon(diagnostic.services.nonHds.storageType)}
+                      {getStorageTypeIcon('Cloud Supabase')}
                       <span className="text-sm font-medium">
-                        {diagnostic.services.nonHds.storageType}
+                        Cloud Supabase
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Accessibilité:</span>
-                    {diagnostic.services.nonHds.accessible ? (
+                    {diagnostic.tests.nonhds_cloud_write_read ? (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     ) : (
                       <XCircle className="h-4 w-4 text-red-500" />
@@ -223,7 +221,7 @@ export const StorageSecurityDashboard: React.FC = () => {
                   <div className="mt-3">
                     <p className="text-sm font-medium mb-2">Entités concernées:</p>
                     <div className="flex flex-wrap gap-1">
-                      {diagnostic.services.nonHds.entities.map((entity) => (
+                      {diagnostic.routing.nonhds_to_supabase.map((entity) => (
                         <Badge key={entity} variant="secondary" className="text-xs">
                           {entity}
                         </Badge>
@@ -321,11 +319,21 @@ export const StorageSecurityDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {diagnostic.recommendations.map((rec, index) => (
-                  <Alert key={index} variant={rec.includes('CRITIQUE') ? 'destructive' : 'default'}>
-                    <AlertDescription>{rec}</AlertDescription>
+                {!diagnostic.security.no_hds_leakage && (
+                  <Alert variant="destructive">
+                    <AlertDescription>🚨 CRITIQUE: Fuite possible de données HDS vers Supabase</AlertDescription>
                   </Alert>
-                ))}
+                )}
+                {diagnostic.mode === 'demo' && !diagnostic.security.demo_isolation && (
+                  <Alert variant="default">
+                    <AlertDescription>⚠️ Mode démo non isolé</AlertDescription>
+                  </Alert>
+                )}
+                {diagnostic.performance.cloud_latency > 5000 && (
+                  <Alert variant="default">
+                    <AlertDescription>⚠️ Latence cloud élevée</AlertDescription>
+                  </Alert>
+                )}
               </div>
             </CardContent>
           </Card>
