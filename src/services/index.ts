@@ -60,9 +60,9 @@ export const api = {
 		const { appointmentService } = await import("./api/appointment-service");
 		return appointmentService.createAppointment(appointment);
 	},
-	updateAppointment: async (id: number, appointment: any) => {
+	updateAppointment: async (appointment: any) => {
 		const { appointmentService } = await import("./api/appointment-service");
-		return appointmentService.updateAppointment(id, appointment);
+		return appointmentService.updateAppointment(appointment);
 	},
 	updateAppointmentStatus: async (id: number, status: any) => {
 		const { appointmentService } = await import("./api/appointment-service");

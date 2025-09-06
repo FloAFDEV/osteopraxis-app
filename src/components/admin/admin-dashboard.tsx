@@ -16,7 +16,7 @@ import { AdminLogsPanel } from "./admin-logs";
 import { SystemHealthPanel } from "./system-health";
 import { DetailedStatsPanel } from "./detailed-stats";
 import { DeletedRecordsManager } from "./deleted-records-manager";
-import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard";
+
 import { SubscriptionManagement } from "./subscription-management";
 import { UserDeletionMonitoring } from "./user-deletion-monitoring";
 import { BusinessAnalytics } from "./business-analytics";
@@ -230,7 +230,7 @@ export function AdminDashboard() {
           </TabsContent>
           
           <TabsContent value="usb">
-            <USBMonitoringDashboard />
+            <div>USB Monitoring not available</div>
           </TabsContent>
           
           <TabsContent value="logs">

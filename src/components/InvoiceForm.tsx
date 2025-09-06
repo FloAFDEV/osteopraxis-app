@@ -133,7 +133,13 @@ export function InvoiceForm({
       
       console.log('🔍 Données facture avant envoi:', invoiceData);
       if (isEditing && invoice) {
-        await api.updateInvoice(invoice.id, invoiceData);
+        const completeInvoice: Invoice = { 
+          ...invoice,
+          ...invoiceData,
+          amount: invoiceData.amount || invoice.amount,
+          date: invoiceData.date || invoice.date
+        };
+        await api.updateInvoice(completeInvoice);
         toast.success("Note d'honoraires mise à jour !");
         onUpdate?.();
       } else {

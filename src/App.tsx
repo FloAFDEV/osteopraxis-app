@@ -211,16 +211,6 @@ function App() {
                             <CollaborationsSettingsPage />
                           </ProtectedRoute>
                         } />
-                        <Route path="/settings/storage" element={
-                          <ProtectedRoute requireRole="ADMIN">
-                            <HybridStorageSettingsPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/admin/storage-diagnostic" element={
-                          <ProtectedRoute requireRole="ADMIN">
-                            <StorageDiagnosticPage />
-                          </ProtectedRoute>
-                        } />
                         {/* Retiré des paramètres pour les praticiens */}
                         <Route path="/help" element={
                           <ProtectedRoute>
@@ -258,11 +248,6 @@ function App() {
                         <Route path="/admin/dashboard" element={
                           <ProtectedRoute>
                             <AdminDashboardPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/admin/tech-debug" element={
-                          <ProtectedRoute>
-                            <AdminTechDebugPage />
                           </ProtectedRoute>
                         } />
                         

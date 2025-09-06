@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { nativeStorageManager, type NativeStorageConfig } from '@/services/native-file-storage/native-storage-manager';
-import { LocalStorageSetup } from '@/components/storage/LocalStorageSetup';
-import { StorageUnlockPrompt } from '@/components/storage/StorageUnlockPrompt';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { toast } from 'sonner';
 
@@ -119,20 +117,13 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
 
   if (showSetup) {
     return (
-      <LocalStorageSetup
-        onComplete={configureStorage}
-        onCancel={handleCancel}
-      />
+      <div>Storage setup required</div>
     );
   }
 
   if (showUnlock) {
     return (
-      <StorageUnlockPrompt
-        securityMethod={securityMethod}
-        onUnlock={() => setShowUnlock(false)}
-        onCancel={handleCancel}
-      />
+      <div>Storage unlock required</div>
     );
   }
 

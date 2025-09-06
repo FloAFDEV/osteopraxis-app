@@ -57,14 +57,10 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       setError(null);
       
       try {
-        // Injecter le contexte démo dans les services API
+        // Services configured automatically via storage router
         const appointmentService = api.getAppointmentService();
         const patientService = api.getPatientService();
         const invoiceService = api.getInvoiceService();
-        
-        appointmentService.setDemoContext({ isDemoMode });
-        patientService.setDemoContext({ isDemoMode });
-        invoiceService.setDemoContext({ isDemoMode });
 
         // Récupération des données (réelles ou démo selon le contexte)
         const [patientsData, appointmentsData, invoicesData] = await Promise.all([

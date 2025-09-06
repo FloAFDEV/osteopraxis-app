@@ -52,7 +52,7 @@ export const appointmentService = {
     }
   },
 
-  async getAppointmentById(id: number): Promise<Appointment | undefined> {
+  async getAppointmentById(id: number): Promise<Appointment> {
     const decision = StorageRouter.route('appointments');
     console.log(`📍 Route appointment by ID: ${decision.destination} (${decision.reason})`);
 
@@ -96,7 +96,7 @@ export const appointmentService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.supabaseAppointmentService.updateAppointment(appointment);
+      return supabaseService.updateAppointment(appointment.id, appointment);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       return hdsAppointmentService.updateAppointment(appointment);
@@ -163,27 +163,20 @@ export const appointmentService = {
     return this.getAppointmentsByPatient(patientId);
   },
 
-  async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | undefined> {
+  async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | null> {
     const appointments = await this.getAppointmentsByPatient(patientId);
     const today = new Date().toISOString().split('T')[0];
-    return appointments.find(a => a.date.startsWith(today));
+    return appointments.find(a => a.date.startsWith(today)) || null;
   },
 
-  async updateAppointmentStatus(id: number, status: string): Promise<Appointment | undefined> {
+  async updateAppointmentStatus(id: number, status: string): Promise<Appointment> {
     const appointment = await this.getAppointmentById(id);
-    if (appointment) {
-      return this.updateAppointment({ ...appointment, status } as Appointment);
-    }
-    return undefined;
+    return this.updateAppointment({ ...appointment, status } as Appointment);
   },
 
-  async cancelAppointment(id: number): Promise<boolean> {
+  async cancelAppointment(id: number): Promise<Appointment> {
     const appointment = await this.getAppointmentById(id);
-    if (appointment) {
-      await this.updateAppointment({ ...appointment, status: 'CANCELED' } as Appointment);
-      return true;
-    }
-    return false;
+    return this.updateAppointment({ ...appointment, status: 'CANCELED' } as Appointment);
   }
 };
 

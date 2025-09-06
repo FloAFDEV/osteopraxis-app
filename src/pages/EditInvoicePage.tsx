@@ -51,7 +51,7 @@ const EditInvoicePage = () => {
 
   const handleSubmit = async (updatedInvoice: Invoice) => {
     try {
-      await api.updateInvoice(parseInt(id!), updatedInvoice);
+      await api.updateInvoice(updatedInvoice);
       toast.success('Facture mise à jour avec succès');
       
       // Attendre un peu avant de naviguer pour que le toast s'affiche

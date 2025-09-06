@@ -98,7 +98,7 @@ export function usePatientDetail(patientId: number) {
 
     try {
       // Make the actual API call
-      await api.updateAppointment(appointmentId, { status: newStatus });
+      await api.updateAppointmentStatus(appointmentId, newStatus);
       
       // Invalidate to ensure consistency
       queryClient.invalidateQueries({

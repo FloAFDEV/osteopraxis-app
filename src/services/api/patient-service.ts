@@ -36,7 +36,7 @@ export const patientService = {
     }
   },
 
-  async getPatientById(id: number): Promise<Patient | undefined> {
+  async getPatientById(id: number): Promise<Patient> {
     const decision = StorageRouter.route('patients');
     console.log(`📍 Route patient by ID: ${decision.destination} (${decision.reason})`);
 

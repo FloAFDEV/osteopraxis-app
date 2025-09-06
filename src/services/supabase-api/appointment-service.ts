@@ -379,4 +379,4 @@ export const getAppointmentById = supabaseAppointmentService.getAppointmentById;
 export const createAppointment = supabaseAppointmentService.createAppointment;
 export const updateAppointment = supabaseAppointmentService.updateAppointment;
 export const deleteAppointment = supabaseAppointmentService.deleteAppointment;
-export const getAppointmentsByPatient = supabaseAppointmentService.getAppointmentsByPatient;
+export const getAppointmentsByPatient = supabaseAppointmentService.getAppointmentsByPatientId;

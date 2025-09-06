@@ -23,9 +23,7 @@ export const useOptimizedPatients = (
   } = useQuery({
     queryKey: ['patients', isDemoMode],
     queryFn: () => {
-      // Injecter le contexte démo dans le service API
-      const patientService = api.getPatientService();
-      patientService.setDemoContext({ isDemoMode });
+      // Service configured automatically via storage router
       return api.getPatients();
     },
     staleTime: 1000 * 60 * 5, // 5 minutes

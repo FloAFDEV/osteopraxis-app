@@ -210,7 +210,7 @@ export function AppointmentForm({
 		if (appointmentId) {
 			// For force updates, we might need to temporarily disable the trigger
 			// This is a simplified approach - in production you might want more sophisticated handling
-			await api.updateAppointment(appointmentId, appointmentData as any);
+			await api.updateAppointment({ ...appointmentData, id: appointmentId } as any);
 			toast.success("Séance mise à jour avec succès");
 		} else {
 			await api.createAppointment(appointmentData as any);

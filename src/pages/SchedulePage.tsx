@@ -61,11 +61,7 @@ const SchedulePage = () => {
     loading: appointmentsLoading,
     invalidate: invalidateAppointments
   } = useOptimizedCache('appointments', () => {
-    // Injecter le contexte démo dans les services API
-    const appointmentService = api.getAppointmentService();
-    appointmentService.setDemoContext({
-      isDemoMode
-    });
+    // Service configured automatically via storage router
     return api.getAppointments();
   }, {
     ttl: 2 * 60 * 1000,
@@ -77,11 +73,7 @@ const SchedulePage = () => {
     loading: patientsLoading,
     invalidate: invalidatePatients
   } = useOptimizedCache('patients', () => {
-    // Injecter le contexte démo dans les services API
-    const patientService = api.getPatientService();
-    patientService.setDemoContext({
-      isDemoMode
-    });
+    // Service configured automatically via storage router
     return api.getPatients();
   }, {
     ttl: 10 * 60 * 1000,

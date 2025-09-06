@@ -44,7 +44,7 @@ export const invoiceService = {
     }
   },
 
-  async getInvoiceById(id: number): Promise<Invoice | undefined> {
+  async getInvoiceById(id: number): Promise<Invoice> {
     const decision = StorageRouter.route('invoices');
     console.log(`📍 Route invoice by ID: ${decision.destination} (${decision.reason})`);
 
