@@ -88,10 +88,10 @@ export const invoiceService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.supabaseInvoiceService.updateInvoice(invoice);
+      return supabaseService.supabaseInvoiceService.updateInvoice(invoice.id, invoice);
     } else {
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
-      return hdsInvoiceService.updateInvoice(invoice);
+      return hdsInvoiceService.updateInvoice(invoice.id, invoice);
     }
   },
 

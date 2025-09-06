@@ -99,7 +99,7 @@ export const appointmentService = {
       return supabaseService.updateAppointment(appointment.id, appointment);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
-      return hdsAppointmentService.updateAppointment(appointment);
+      return hdsAppointmentService.updateAppointment(appointment.id, appointment);
     }
   },
 

@@ -97,7 +97,8 @@ export const patientService = {
       }
       
       const { patientService: supabaseService } = await import('@/services/supabase-api/patient-service');
-      return supabaseService.deletePatient(id);
+      const result = await supabaseService.deletePatient(id);
+      return !result.error;
     } else {
       const { hdsPatientService } = await import('@/services/hds-local-storage');
       return hdsPatientService.deletePatient(id);
