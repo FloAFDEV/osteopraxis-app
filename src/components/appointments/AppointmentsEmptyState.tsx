@@ -1,11 +1,12 @@
-import { Plus, Calendar } from "lucide-react";
+
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export default function AppointmentsEmptyState() {
   return (
-    <div className="text-center py-10 rounded-lg mt-8 border border-dashed bg-gray-50 dark:bg-gray-900/30 shadow-sm relative w-full">
-      {/* Background wave SVG full-width */}
+				<div className="text-center py-10 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-dashed">
+      {/* Background wave SVG */}
       <svg
         viewBox="0 0 600 120"
         fill="none"
@@ -24,23 +25,23 @@ export default function AppointmentsEmptyState() {
           fillOpacity="0.20"
         />
       </svg>
-
-      {/* Logo rond avec badge Calendar */}
-      <div className="mb-4 relative w-24 h-24 mx-auto">
-        <div className="absolute inset-0 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-        <Calendar className="h-12 w-12 text-blue-500 absolute inset-0 m-auto" />
-      </div>
-
-      <h3 className="text-xl font-medium mb-2">Aucune séance trouvée</h3>
-      <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto text-base">
-        Commencez par créer une nouvelle séance pour enrichir votre suivi patient.
-        <br />
+      {/* Illustration */}
+      <img
+        src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
+        alt="Ostéopathe illustration"
+        className="mx-auto mb-8 w-44 h-44 object-cover rounded-full border-8 border-white shadow-lg bg-[#eaf4ef]"
+        loading="lazy"
+      />
+      <h3 className="text-2xl font-semibold text-[#2a585a] dark:text-white mb-2">
+        Aucune séance trouvée
+      </h3>
+      <p className="text-muted-foreground mt-2 mb-6 max-w-md mx-auto text-base">
+        Commencez par créer une nouvelle séance pour enrichir votre suivi patient.<br />
         Toutes vos consultations seront affichées ici, organisées avec soin.
       </p>
-
-      <Button asChild variant="outline">
+      <Button asChild>
         <Link to="/appointments/new">
-          <Plus className="mr-2 h-4 w-4" /> Créer une séance
+          <Plus className="mr-2 h-5 w-5" /> Créer une séance
         </Link>
       </Button>
     </div>
