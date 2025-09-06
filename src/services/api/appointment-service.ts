@@ -1,18 +1,8 @@
 import { Appointment } from "@/types";
-import { delay, USE_SUPABASE } from "./config";
-import { supabaseAppointmentService } from "../supabase-api/appointment-service";
-import { AppointmentStatus, CreateAppointmentPayload } from "@/types"; 
-import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
-import { getCurrentOsteopathId } from "../supabase-api/utils/getCurrentOsteopath";
+import { delay } from "./config";
+import { storageRouter } from '../storage/storage-router';
+import { AppointmentStatus } from "@/types"; 
 import { XSSProtection } from "@/services/security/xss-protection";
-import { hdsAppointmentService } from "@/services/hds-local-storage";
-import { supabase } from "@/integrations/supabase/client";
-
-// Hook pour accéder au contexte démo depuis les services
-let demoContext: any = null;
-export const setDemoContext = (context: any) => {
-  demoContext = context;
-};
 
 // Create a custom error class for appointment conflicts
 export class AppointmentConflictError extends Error {
@@ -66,68 +56,14 @@ const appointments: Appointment[] = [
 
 export const appointmentService = {
   async getAppointments(): Promise<Appointment[]> {
-    console.log("appointmentService.getAppointments: Starting");
-    
-    // Vérifier d'abord le mode démo éphémère local
-    const { isDemoSession } = await import('@/utils/demo-detection');
-    const isDemoMode = await isDemoSession();
-    
-    if (isDemoMode) {
-      console.log('🎭 Mode démo: Filtrage des données Appointment pour ne montrer que les données démo');
-      // Mode démo éphémère: utiliser le stockage local temporaire
-      const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      
-      // S'assurer qu'une session démo existe, sinon la créer
-      let session = demoLocalStorage.getCurrentSession();
-      if (!session) {
-        console.log('🎭 Aucune session démo active, création d\'une nouvelle session');
-        session = demoLocalStorage.createSession();
-        demoLocalStorage.seedDemoData();
-      }
-      
-      console.log('🎭 Session démo active:', session.sessionId);
-      await delay(200);
-      const appointments = demoLocalStorage.getAppointments();
-      console.log('🎭 Rendez-vous récupérés:', appointments.length);
-      return appointments;
+    try {
+      const adapter = await storageRouter.route<Appointment>('appointments');
+      await delay(200); // Simulation UI
+      return await adapter.getAll();
+    } catch (error) {
+      console.error('❌ Erreur récupération rendez-vous:', error);
+      return [];
     }
-    
-    if (USE_SUPABASE) {
-      try {
-        // CORRECTION: Éviter les appels multiples en vérifiant d'abord les permissions
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          console.log("No session found, using fallback empty array");
-          return [];
-        }
-
-        console.log("appointmentService.getAppointments: Using HDS storage");
-        const result = await hdsAppointmentService.getAppointments();
-        console.log("appointmentService.getAppointments: HDS returned", result.length, "appointments");
-        return result;
-      } catch (error) {
-        console.error("appointmentService.getAppointments: Hybrid error:", error);
-        // Fallback seulement si c'est une erreur de permissions, pas autre chose
-        if ((error as any)?.code === '42501' || (error as any)?.message?.includes('permission denied')) {
-          console.log("Permission denied, returning empty array to avoid loops");
-          return [];
-        }
-        // En cas d'erreur, utiliser les données démo uniquement si le contexte est disponible
-        if (demoContext?.isDemoMode) {
-          console.log("appointmentService.getAppointments: Fallback to demo context");
-          await delay(300);
-          return [...demoContext.demoData.appointments];
-        }
-        throw error;
-      }
-    }
-
-    // Simulation locale filtrée par osteopathId
-    await delay(300);
-    const osteopathId = 1; // Simulated ID for local testing only
-    const filtered = appointments.filter(appointment => appointment.osteopathId === osteopathId);
-    console.log(`appointmentService.getAppointments: Local mode returned ${filtered.length} appointments`);
-    return filtered;
   },
 
   async getAppointmentById(id: number): Promise<Appointment | undefined> {
@@ -396,6 +332,4 @@ export const appointmentService = {
     return false;
   },
   
-  // Méthode pour injecter le contexte démo
-  setDemoContext,
 };

@@ -62,9 +62,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         const patientService = api.getPatientService();
         const invoiceService = api.getInvoiceService();
         
-        appointmentService.setDemoContext({ isDemoMode });
-        patientService.setDemoContext({ isDemoMode });
-        invoiceService.setDemoContext({ isDemoMode });
+        // Services utilisent maintenant le routeur de stockage automatique
 
         // Récupération des données (réelles ou démo selon le contexte)
         const [patientsData, appointmentsData, invoicesData] = await Promise.all([

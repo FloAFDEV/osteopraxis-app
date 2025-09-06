@@ -1,15 +1,6 @@
-import { Invoice, PaymentStatus } from "@/types";
-import { USE_SUPABASE } from "./config";
-import { supabaseInvoiceService } from "../supabase-api/invoice-service";
-import { getCurrentOsteopathId, isInvoiceOwnedByCurrentOsteopath, isPatientOwnedByCurrentOsteopath } from "../supabase-api/utils/getCurrentOsteopath";
-import { SecurityViolationError } from "./appointment-service";
-import { hdsPatientService } from "@/services/hds-local-storage";
-
-// Hook pour accéder au contexte démo depuis les services
-let demoContext: any = null;
-export const setDemoContext = (context: any) => {
-  demoContext = context;
-};
+import { Invoice } from "@/types";
+import { delay } from "./config";
+import { storageRouter } from '../storage/storage-router';
 
 export const invoiceService = {
   async getInvoices(): Promise<Invoice[]> {
@@ -274,6 +265,4 @@ export const invoiceService = {
     });
   },
   
-  // Méthode pour injecter le contexte démo
-  setDemoContext,
 };
