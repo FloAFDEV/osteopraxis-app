@@ -372,3 +372,11 @@ export const supabaseAppointmentService = {
 		}
 	},
 };
+
+// Fonctions exportées individuellement pour compatibilité
+export const getAppointments = supabaseAppointmentService.getAppointments;
+export const getAppointmentById = supabaseAppointmentService.getAppointmentById;
+export const createAppointment = supabaseAppointmentService.createAppointment;
+export const updateAppointment = supabaseAppointmentService.updateAppointment;
+export const deleteAppointment = supabaseAppointmentService.deleteAppointment;
+export const getAppointmentsByPatient = supabaseAppointmentService.getAppointmentsByPatient;

@@ -87,8 +87,8 @@ export const invoiceService = {
         return demoContext.invoiceService.updateInvoice(invoice);
       }
       
-      const { invoiceService: supabaseService } = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.updateInvoice(invoice);
+      const supabaseService = await import('@/services/supabase-api/invoice-service');
+      return supabaseService.supabaseInvoiceService.updateInvoice(invoice);
     } else {
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
       return hdsInvoiceService.updateInvoice(invoice);
@@ -104,8 +104,8 @@ export const invoiceService = {
         return demoContext.invoiceService.deleteInvoice(id);
       }
       
-      const { invoiceService: supabaseService } = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.deleteInvoice(id);
+      const supabaseService = await import('@/services/supabase-api/invoice-service');
+      return supabaseService.supabaseInvoiceService.deleteInvoice(id);
     } else {
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
       return hdsInvoiceService.deleteInvoice(id);
@@ -122,8 +122,8 @@ export const invoiceService = {
         return allInvoices.filter((i: Invoice) => i.patientId === patientId);
       }
       
-      const { invoiceService: supabaseService } = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.getInvoicesByPatient(patientId);
+      const supabaseService = await import('@/services/supabase-api/invoice-service');
+      return supabaseService.supabaseInvoiceService.getInvoicesByPatientId(patientId);
     } else {
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
       const allInvoices = await hdsInvoiceService.getInvoices();
@@ -141,8 +141,8 @@ export const invoiceService = {
         return allInvoices.filter((i: Invoice) => i.osteopathId === osteopathId);
       }
       
-      const { invoiceService: supabaseService } = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.getInvoices(); // Supabase filtre déjà par ostéopathe
+      const supabaseService = await import('@/services/supabase-api/invoice-service');
+      return supabaseService.supabaseInvoiceService.getInvoices(); // Supabase filtre déjà par ostéopathe
     } else {
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
       const allInvoices = await hdsInvoiceService.getInvoices();

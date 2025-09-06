@@ -62,7 +62,7 @@ export const appointmentService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.getAppointmentById(id);
+      return supabaseService.supabaseAppointmentService.getAppointmentById(id);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       return hdsAppointmentService.getAppointmentById(id);
@@ -79,7 +79,7 @@ export const appointmentService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.createAppointment(appointment);
+      return supabaseService.supabaseAppointmentService.createAppointment(appointment);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       return hdsAppointmentService.createAppointment(appointment);
@@ -96,7 +96,7 @@ export const appointmentService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.updateAppointment(appointment);
+      return supabaseService.supabaseAppointmentService.updateAppointment(appointment);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       return hdsAppointmentService.updateAppointment(appointment);
@@ -113,7 +113,7 @@ export const appointmentService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.deleteAppointment(id);
+      return supabaseService.supabaseAppointmentService.deleteAppointment(id);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       return hdsAppointmentService.deleteAppointment(id);
@@ -131,7 +131,7 @@ export const appointmentService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.getAppointmentsByPatient(patientId);
+      return supabaseService.supabaseAppointmentService.getAppointmentsByPatientId(patientId);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       const allAppointments = await hdsAppointmentService.getAppointments();
@@ -150,7 +150,7 @@ export const appointmentService = {
       }
       
       const supabaseService = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.getAppointments(); // Supabase filtre déjà par ostéopathe
+      return supabaseService.supabaseAppointmentService.getAppointments(); // Supabase filtre déjà par ostéopathe
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       const allAppointments = await hdsAppointmentService.getAppointments();
@@ -186,5 +186,13 @@ export const appointmentService = {
     return false;
   }
 };
+
+// Fonctions exportées individuellement pour compatibilité
+export const getAppointments = appointmentService.getAppointments;
+export const getAppointmentById = appointmentService.getAppointmentById;
+export const createAppointment = appointmentService.createAppointment;
+export const updateAppointment = appointmentService.updateAppointment;
+export const deleteAppointment = appointmentService.deleteAppointment;
+export const getAppointmentsByPatient = appointmentService.getAppointmentsByPatient;
 
 export default appointmentService;

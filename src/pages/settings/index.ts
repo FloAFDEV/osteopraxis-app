@@ -2,4 +2,3 @@
 export { default as SettingsPage } from '../SettingsPage';
 export { default as OsteopathProfilePage } from '../OsteopathProfilePage';
 export { default as OsteopathSettingsPage } from '../OsteopathSettingsPage';
-export { default as HybridStorageSettingsPage } from '../HybridStorageSettingsPage';
