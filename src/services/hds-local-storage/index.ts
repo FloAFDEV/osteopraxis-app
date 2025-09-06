@@ -23,6 +23,13 @@ export { _initializeHDSStorage as initializeHDSStorage };
 export { _hdsPatientService as hdsPatientService };
 export type { HDSPatientService };
 
+// Importer et exporter les nouveaux services
+import { hdsInvoiceService } from './hds-invoice-service';
+import { hdsAppointmentService } from './hds-appointment-service';
+
+export { hdsInvoiceService };
+export { hdsAppointmentService };
+
 // Configuration HDS
 export const HDS_CONFIG = {
   // Version du schéma de données HDS

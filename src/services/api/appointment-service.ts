@@ -5,7 +5,7 @@ import { AppointmentStatus, CreateAppointmentPayload } from "@/types";
 import { createAppointmentPayload } from "../supabase-api/appointment-adapter";
 import { getCurrentOsteopathId } from "../supabase-api/utils/getCurrentOsteopath";
 import { XSSProtection } from "@/services/security/xss-protection";
-import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
+import { hdsAppointmentService } from "@/services/hds-local-storage";
 import { supabase } from "@/integrations/supabase/client";
 
 // Hook pour accéder au contexte démo depuis les services
@@ -101,9 +101,9 @@ export const appointmentService = {
           return [];
         }
 
-        console.log("appointmentService.getAppointments: Using Hybrid storage");
-        const result = await hybridDataManager.get<Appointment>('appointments');
-        console.log("appointmentService.getAppointments: Hybrid returned", result.length, "appointments");
+        console.log("appointmentService.getAppointments: Using HDS storage");
+        const result = await hdsAppointmentService.getAppointments();
+        console.log("appointmentService.getAppointments: HDS returned", result.length, "appointments");
         return result;
       } catch (error) {
         console.error("appointmentService.getAppointments: Hybrid error:", error);
@@ -135,7 +135,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        const result = await hybridDataManager.getById<Appointment>('appointments', id);
+        const result = await hdsAppointmentService.getAppointmentById(id);
         console.log(`appointmentService.getAppointmentById: Hybrid result for ID ${id}:`, result);
         return result || undefined;
       } catch (error) {
@@ -159,7 +159,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        const allAppointments = await hybridDataManager.get<Appointment>('appointments');
+        const allAppointments = await hdsAppointmentService.getAppointments();
         const result = allAppointments.filter(a => a.patientId === patientId);
         console.log(`appointmentService.getAppointmentsByPatientId: Found ${result.length} appointments for patient ${patientId}`);
         return result;
@@ -184,7 +184,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        const allAppointments = await hybridDataManager.get<Appointment>('appointments');
+        const allAppointments = await hdsAppointmentService.getAppointments();
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
@@ -269,7 +269,7 @@ export const appointmentService = {
 
     if (USE_SUPABASE) {
       try {
-        const created = await hybridDataManager.create<Appointment>('appointments', sanitized);
+        const created = await hdsAppointmentService.createAppointment(sanitized);
         console.log("appointmentService.createAppointment: Hybrid result:", created);
         return created;
       } catch (error) {
@@ -318,7 +318,7 @@ export const appointmentService = {
 
     if (USE_SUPABASE) {
       try {
-        const result = await hybridDataManager.update<Appointment>('appointments', id, sanitizedUpdate);
+        const result = await hdsAppointmentService.updateAppointment(id, sanitizedUpdate);
         console.log(`appointmentService.updateAppointment: Hybrid result for ID ${id}:`, result);
         return result;
       } catch (error) {
@@ -354,7 +354,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        const result = await hybridDataManager.update<Appointment>('appointments', id, { status: 'CANCELED' } as Partial<Appointment>);
+        const result = await hdsAppointmentService.updateAppointment(id, { status: 'CANCELED' } as Partial<Appointment>);
         console.log(`appointmentService.cancelAppointment: Hybrid result for ID ${id}:`, result);
         return result;
       } catch (error) {
@@ -371,7 +371,7 @@ export const appointmentService = {
     
     if (USE_SUPABASE) {
       try {
-        await hybridDataManager.delete('appointments', id);
+        await hdsAppointmentService.deleteAppointment(id);
         console.log(`appointmentService.deleteAppointment: Hybrid success for ID ${id}`);
         return true;
       } catch (error) {

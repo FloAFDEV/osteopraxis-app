@@ -3,7 +3,7 @@ import { USE_SUPABASE } from "./config";
 import { supabaseInvoiceService } from "../supabase-api/invoice-service";
 import { getCurrentOsteopathId, isInvoiceOwnedByCurrentOsteopath, isPatientOwnedByCurrentOsteopath } from "../supabase-api/utils/getCurrentOsteopath";
 import { SecurityViolationError } from "./appointment-service";
-import { hybridDataManager } from "@/services/hybrid-data-adapter/hybrid-manager";
+import { hdsPatientService } from "@/services/hds-local-storage";
 
 // Hook pour accéder au contexte démo depuis les services
 let demoContext: any = null;
@@ -39,9 +39,11 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        return await hybridDataManager.get<Invoice>('invoices');
+        // En mode connecté, utiliser le service HDS local pour les factures
+        const { hdsInvoiceService } = await import('@/services/hds-local-storage');
+        return await hdsInvoiceService.getInvoices();
       } catch (error) {
-        console.error("Erreur Hybrid getInvoices:", error);
+        console.error("Erreur HDS getInvoices:", error);
         throw error;
       }
     }
@@ -61,10 +63,11 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const res = await hybridDataManager.getById<Invoice>('invoices', id);
+        const { hdsInvoiceService } = await import('@/services/hds-local-storage');
+        const res = await hdsInvoiceService.getInvoiceById(id);
         return res || undefined;
       } catch (error) {
-        console.error("Erreur Hybrid getInvoiceById:", error);
+        console.error("Erreur HDS getInvoiceById:", error);
         throw error;
       }
     }
@@ -84,10 +87,10 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const all = await hybridDataManager.get<Invoice>('invoices');
-        return all.filter(inv => inv.patientId === patientId);
+        const { hdsInvoiceService } = await import('@/services/hds-local-storage');
+        return await hdsInvoiceService.getInvoicesByPatientId(patientId);
       } catch (error) {
-        console.error("Erreur Hybrid getInvoicesByPatientId:", error);
+        console.error("Erreur HDS getInvoicesByPatientId:", error);
         throw error;
       }
     }
@@ -107,10 +110,10 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const all = await hybridDataManager.get<Invoice>('invoices');
-        return all.filter(inv => inv.appointmentId === appointmentId);
+        const { hdsInvoiceService } = await import('@/services/hds-local-storage');
+        return await hdsInvoiceService.getInvoicesByAppointmentId(appointmentId);
       } catch (error) {
-        console.error("Erreur Hybrid getInvoicesByAppointmentId:", error);
+        console.error("Erreur HDS getInvoicesByAppointmentId:", error);
         throw error;
       }
     }
@@ -181,14 +184,15 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
+        const { hdsInvoiceService } = await import('@/services/hds-local-storage');
         let dataToSend = { ...invoiceData } as any;
         if (!dataToSend.osteopathId) {
           dataToSend.osteopathId = await getCurrentOsteopathId();
         }
-        const created = await hybridDataManager.create<Invoice>('invoices', dataToSend as Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>);
+        const created = await hdsInvoiceService.createInvoice(dataToSend);
         return created;
       } catch (error) {
-        console.error("Erreur Hybrid createInvoice:", error);
+        console.error("Erreur HDS createInvoice:", error);
         throw error;
       }
     }
@@ -212,14 +216,15 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
+        const { hdsInvoiceService } = await import('@/services/hds-local-storage');
         let dataToSend = { ...invoiceData } as any;
         if (!dataToSend.osteopathId) {
           dataToSend.osteopathId = await getCurrentOsteopathId();
         }
-        const updated = await hybridDataManager.update<Invoice>('invoices', id, dataToSend);
+        const updated = await hdsInvoiceService.updateInvoice(id, dataToSend);
         return updated;
       } catch (error) {
-        console.error("Erreur Hybrid updateInvoice:", error);
+        console.error("Erreur HDS updateInvoice:", error);
         throw error;
       }
     }
@@ -242,10 +247,11 @@ export const invoiceService = {
 
     if (USE_SUPABASE) {
       try {
-        const ok = await hybridDataManager.delete('invoices', id);
+        const { hdsInvoiceService } = await import('@/services/hds-local-storage');
+        const ok = await hdsInvoiceService.deleteInvoice(id);
         return ok;
       } catch (error) {
-        console.error("Erreur Hybrid deleteInvoice:", error);
+        console.error("Erreur HDS deleteInvoice:", error);
         throw error;
       }
     }
