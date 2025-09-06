@@ -1,30 +1,38 @@
-
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export default function AppointmentsEmptyState() {
   return (
-    <div className="text-center py-16 rounded-lg mt-8 border border-dashed bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative">
+    <div className="text-center py-16 rounded-lg mt-8 border border-dashed bg-gradient-to-br from-[#fafdffee] via-[#eaf4eedd] to-[#f5fafafd] dark:from-[#19272dff] dark:to-[#2e474aff] shadow-sm relative overflow-hidden">
       {/* Background wave SVG */}
       <svg
-        viewBox="0 0 600 120"
-        fill="none"
+        viewBox="0 0 1440 160"
+        preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="absolute left-0 bottom-0 w-full h-36 pointer-events-none"
+        className="absolute left-0 bottom-0 w-full h-40 pointer-events-none"
         aria-hidden="true"
       >
+        <defs>
+          <linearGradient id="waveGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#B8DDD7" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#A2C6CB" stopOpacity="0.2" />
+          </linearGradient>
+        </defs>
+
+        {/* Première vague (claire) */}
         <path
-          d="M0 40 Q 150 70 300 30 Q 450 -10 600 40 V120H0Z"
-          fill="#B8DDD7"
-          fillOpacity="0.33"
+          d="M0,64 C360,120 1080,0 1440,64 L1440,160 L0,160Z"
+          fill="url(#waveGradient)"
         />
+        {/* Deuxième vague (plus subtile en arrière-plan) */}
         <path
-          d="M0 90 Q 180 120 300 100 Q 510 70 600 100 V120H0Z"
-          fill="#A2C6CB"
-          fillOpacity="0.20"
+          d="M0,96 C480,160 960,32 1440,96 L1440,160 L0,160Z"
+          fill="url(#waveGradient)"
+          opacity="0.6"
         />
       </svg>
+
       {/* Illustration */}
       <img
         src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
@@ -32,6 +40,7 @@ export default function AppointmentsEmptyState() {
         className="mx-auto mb-8 w-44 h-44 object-cover rounded-full border-8 border-white shadow-lg bg-[#eaf4ef]"
         loading="lazy"
       />
+
       <h3 className="text-2xl font-semibold text-[#2a585a] dark:text-white mb-2">
         Aucune séance trouvée
       </h3>
