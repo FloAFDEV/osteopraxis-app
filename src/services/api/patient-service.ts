@@ -27,8 +27,8 @@ export const patientService = {
       }
       
       // Import dynamique Supabase
-      const { patientService: supabaseService } = await import('@/services/supabase-api/patient-service');
-      return supabaseService.getPatients();
+      const supabaseService = await import('@/services/supabase-api/patient-service');
+      return supabaseService.patientService.getPatients();
     } else {
       // Mode connecté : utiliser LocalHDS
       const { hdsPatientService } = await import('@/services/hds-local-storage');

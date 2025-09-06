@@ -35,8 +35,8 @@ export const invoiceService = {
       }
       
       // Import dynamique Supabase
-      const { invoiceService: supabaseService } = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.getInvoices();
+      const supabaseService = await import('@/services/supabase-api/invoice-service');
+      return supabaseService.supabaseInvoiceService.getInvoices();
     } else {
       // Mode connecté : utiliser LocalHDS
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
@@ -53,8 +53,8 @@ export const invoiceService = {
         return demoContext.invoiceService.getInvoiceById(id);
       }
       
-      const { invoiceService: supabaseService } = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.getInvoiceById(id);
+      const supabaseService = await import('@/services/supabase-api/invoice-service');
+      return supabaseService.supabaseInvoiceService.getInvoiceById(id);
     } else {
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
       return hdsInvoiceService.getInvoiceById(id);
@@ -70,8 +70,8 @@ export const invoiceService = {
         return demoContext.invoiceService.createInvoice(invoice);
       }
       
-      const { invoiceService: supabaseService } = await import('@/services/supabase-api/invoice-service');
-      return supabaseService.createInvoice(invoice);
+      const supabaseService = await import('@/services/supabase-api/invoice-service');
+      return supabaseService.supabaseInvoiceService.createInvoice(invoice);
     } else {
       const { hdsInvoiceService } = await import('@/services/hds-local-storage');
       return hdsInvoiceService.createInvoice(invoice);
@@ -148,6 +148,16 @@ export const invoiceService = {
       const allInvoices = await hdsInvoiceService.getInvoices();
       return allInvoices.filter(i => i.osteopathId === osteopathId);
     }
+  },
+
+  // Méthodes complémentaires pour compatibilité existante
+  async getInvoicesByPatientId(patientId: number): Promise<Invoice[]> {
+    return this.getInvoicesByPatient(patientId);
+  },
+
+  async getInvoicesByAppointmentId(appointmentId: number): Promise<Invoice[]> {
+    const allInvoices = await this.getInvoices();
+    return allInvoices.filter(i => i.appointmentId === appointmentId);
   }
 };
 

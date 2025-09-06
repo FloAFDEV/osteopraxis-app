@@ -56,7 +56,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 
-import { PatientHubInitialization } from "@/services/hybrid-data-adapter/app-initialization";
+import { initializeHDSSystem } from "@/services/hds-local-storage";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -76,7 +76,7 @@ function PatientHubInitializer() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        await PatientHubInitialization.initializeApp();
+        await initializeHDSSystem();
         console.log('🏥 PatientHub prêt - Stockage HDS configuré');
       } catch (error) {
         console.error('❌ Erreur initialisation PatientHub:', error);

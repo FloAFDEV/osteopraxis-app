@@ -43,8 +43,8 @@ export const appointmentService = {
       }
       
       // Import dynamique Supabase
-      const { appointmentService: supabaseService } = await import('@/services/supabase-api/appointment-service');
-      return supabaseService.getAppointments();
+      const supabaseService = await import('@/services/supabase-api/appointment-service');
+      return supabaseService.supabaseAppointmentService.getAppointments();
     } else {
       // Mode connecté : utiliser LocalHDS
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
@@ -61,7 +61,7 @@ export const appointmentService = {
         return demoContext.appointmentService.getAppointmentById(id);
       }
       
-      const { appointmentService: supabaseService } = await import('@/services/supabase-api/appointment-service');
+      const supabaseService = await import('@/services/supabase-api/appointment-service');
       return supabaseService.getAppointmentById(id);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
@@ -78,7 +78,7 @@ export const appointmentService = {
         return demoContext.appointmentService.createAppointment(appointment);
       }
       
-      const { appointmentService: supabaseService } = await import('@/services/supabase-api/appointment-service');
+      const supabaseService = await import('@/services/supabase-api/appointment-service');
       return supabaseService.createAppointment(appointment);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
@@ -95,7 +95,7 @@ export const appointmentService = {
         return demoContext.appointmentService.updateAppointment(appointment);
       }
       
-      const { appointmentService: supabaseService } = await import('@/services/supabase-api/appointment-service');
+      const supabaseService = await import('@/services/supabase-api/appointment-service');
       return supabaseService.updateAppointment(appointment);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
@@ -112,7 +112,7 @@ export const appointmentService = {
         return demoContext.appointmentService.deleteAppointment(id);
       }
       
-      const { appointmentService: supabaseService } = await import('@/services/supabase-api/appointment-service');
+      const supabaseService = await import('@/services/supabase-api/appointment-service');
       return supabaseService.deleteAppointment(id);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
@@ -130,7 +130,7 @@ export const appointmentService = {
         return allAppointments.filter((a: Appointment) => a.patientId === patientId);
       }
       
-      const { appointmentService: supabaseService } = await import('@/services/supabase-api/appointment-service');
+      const supabaseService = await import('@/services/supabase-api/appointment-service');
       return supabaseService.getAppointmentsByPatient(patientId);
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
@@ -149,13 +149,41 @@ export const appointmentService = {
         return allAppointments.filter((a: Appointment) => a.osteopathId === osteopathId);
       }
       
-      const { appointmentService: supabaseService } = await import('@/services/supabase-api/appointment-service');
+      const supabaseService = await import('@/services/supabase-api/appointment-service');
       return supabaseService.getAppointments(); // Supabase filtre déjà par ostéopathe
     } else {
       const { hdsAppointmentService } = await import('@/services/hds-local-storage');
       const allAppointments = await hdsAppointmentService.getAppointments();
       return allAppointments.filter(a => a.osteopathId === osteopathId);
     }
+  },
+
+  // Méthodes complémentaires pour compatibilité existante
+  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
+    return this.getAppointmentsByPatient(patientId);
+  },
+
+  async getTodayAppointmentForPatient(patientId: number): Promise<Appointment | undefined> {
+    const appointments = await this.getAppointmentsByPatient(patientId);
+    const today = new Date().toISOString().split('T')[0];
+    return appointments.find(a => a.date.startsWith(today));
+  },
+
+  async updateAppointmentStatus(id: number, status: string): Promise<Appointment | undefined> {
+    const appointment = await this.getAppointmentById(id);
+    if (appointment) {
+      return this.updateAppointment({ ...appointment, status } as Appointment);
+    }
+    return undefined;
+  },
+
+  async cancelAppointment(id: number): Promise<boolean> {
+    const appointment = await this.getAppointmentById(id);
+    if (appointment) {
+      await this.updateAppointment({ ...appointment, status: 'CANCELED' } as Appointment);
+      return true;
+    }
+    return false;
   }
 };
 
