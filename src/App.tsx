@@ -51,6 +51,7 @@ import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
 import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 import HybridStorageSettingsPage from "@/pages/HybridStorageSettingsPage";
 import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
+import TestingDashboardPage from "@/pages/TestingDashboardPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
@@ -221,6 +222,11 @@ function App() {
                         <Route path="/admin/storage-diagnostic" element={
                           <ProtectedRoute requireRole="ADMIN">
                             <StorageDiagnosticPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/admin/testing" element={
+                          <ProtectedRoute requireRole="ADMIN">
+                            <TestingDashboardPage />
                           </ProtectedRoute>
                         } />
                         {/* Retiré des paramètres pour les praticiens */}
