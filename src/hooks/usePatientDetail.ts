@@ -45,11 +45,11 @@ export function usePatientDetail(patientId: number) {
       console.log(`✅ Found ${result?.length || 0} appointments for patient ${patientId}:`, result);
       return result || [];
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 30 * 1000, // 30 secondes pour temps réel
     enabled: isDemoMode || (!!patientId && patientId > 0),
     retry: 3,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Activer pour synchronisation
   });
 
   // Invoices with longer stale time

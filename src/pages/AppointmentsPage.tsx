@@ -44,6 +44,8 @@ import { toast } from "sonner";
 import { useDemo } from "@/contexts/DemoContext";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOptimizedAppointments } from "@/hooks/useOptimizedAppointments";
+import { useVirtualization } from "@/hooks/usePerformanceOptimization";
 
 import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
@@ -67,52 +69,18 @@ const AppointmentsPage = () => {
 		number | undefined
 	>(undefined);
 
-	// Récupération des rendez-vous optimisée
+	// Utilisation du hook optimisé pour les performances et temps réel
 	const {
-		data: appointments = [],
-		isLoading: appointmentsLoading,
-		error: appointmentsError,
-		refetch: refetchAppointments
-	} = useQuery({
-		queryKey: ["appointments", user?.osteopathId, isDemoMode],
-		queryFn: async () => {
-			// En mode démo, ne pas vérifier l'osteopathId
-			if (isDemoMode) {
-				return await api.getAppointments();
-			}
-			if (!user?.osteopathId) return [];
-			return await api.getAppointments();
-		},
-		enabled: isDemoMode || (!!user?.osteopathId && isAuthenticated),
-		refetchOnWindowFocus: false,
-		staleTime: 1000 * 60 * 5, // 5 minutes
-		gcTime: 1000 * 60 * 30, // 30 minutes
-	});
-
-	// Récupération des patients optimisée
-	const {
-		data: patients = [],
-		isLoading: patientsLoading,
-		error: patientsError,
-	} = useQuery({
-		queryKey: ["patients", user?.osteopathId, isDemoMode],
-		queryFn: async () => {
-			// En mode démo, ne pas vérifier l'osteopathId
-			if (isDemoMode) {
-				return await api.getPatients();
-			}
-			if (!user?.osteopathId) return [];
-			return await api.getPatients();
-		},
-		enabled: isDemoMode || (!!user?.osteopathId && isAuthenticated),
-		refetchOnWindowFocus: false,
-		staleTime: 1000 * 60 * 5, // 5 minutes
-		gcTime: 1000 * 60 * 30, // 30 minutes
-	});
-
-	// Loading state combiné
-	const loading = appointmentsLoading || patientsLoading;
-	const error = appointmentsError || patientsError;
+		appointments,
+		patients,
+		isLoading: loading,
+		error,
+		updateAppointmentStatusOptimistically,
+		addAppointmentOptimistically,
+		refetchAppointments,
+		metrics,
+		optimizations
+	} = useOptimizedAppointments();
 
 	const [searchQuery, setSearchQuery] = useState("");
 
@@ -240,19 +208,8 @@ const AppointmentsPage = () => {
 		}
 	};
 
-	// Nouveau handler pour la mise à jour de statut via badge
-	const handleStatusChange = async (appointmentId: number, status: AppointmentStatus) => {
-		try {
-			// Utiliser l'API pour mettre à jour le statut
-			await api.updateAppointmentStatus(appointmentId, status);
-			toast.success("Statut mis à jour avec succès");
-			// Refresh data
-			await refetchAppointments();
-		} catch (error) {
-			console.error("Error updating appointment status:", error);
-			toast.error("Erreur lors de la mise à jour du statut");
-		}
-	};
+	// Handler optimisé pour la mise à jour de statut avec temps réel
+	const handleStatusChange = updateAppointmentStatusOptimistically;
 
 	// --- Data Preparation for Rendering ---
 	const filteredAppointments = getFilteredAppointments();
