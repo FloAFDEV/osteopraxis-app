@@ -7,6 +7,11 @@ import { supabase } from '@/integrations/supabase/client';
 export const isDemoUser = (user: any): boolean => {
   if (!user) return false;
   
+  // ✅ ADMIN FORCER EN MODE CONNECTÉ - Jamais en mode démo
+  if (user.role === 'ADMIN' || user.user_metadata?.role === 'ADMIN') {
+    return false;
+  }
+  
   return user.email === 'demo@patienthub.com' || 
          user.email?.startsWith('demo-') ||
          user.id === '999' || // ID factice pour démo
@@ -32,6 +37,13 @@ export const isDemoSession = async (): Promise<boolean> => {
     
     // 2️⃣ Vérifier la session Supabase seulement si pas de session locale
     const { data: { session } } = await supabase.auth.getSession();
+    
+    // ✅ ADMIN TOUJOURS EN MODE CONNECTÉ
+    if (session?.user?.role === 'ADMIN' || session?.user?.user_metadata?.role === 'ADMIN') {
+      console.log('👑 Utilisateur ADMIN détecté - Mode connecté forcé');
+      return false;
+    }
+    
     if (session?.user && isDemoUser(session.user)) {
       console.log('🎭 Utilisateur démo Supabase détecté, création session locale EXCLUSIVE');
       
