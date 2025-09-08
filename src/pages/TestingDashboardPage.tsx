@@ -10,7 +10,7 @@ export default function TestingDashboardPage() {
   const { user } = useAuth();
 
   // Vérifier les permissions admin
-  const isAdmin = user?.email?.includes('admin');
+  const isAdmin = user?.role === 'ADMIN' || user?.email?.includes('admin');
 
   if (!isAdmin) {
     return (
