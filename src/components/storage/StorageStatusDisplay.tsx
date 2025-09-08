@@ -84,12 +84,12 @@ export const StorageStatusDisplay: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Stockage local</span>
-                <Badge variant={status?.localAvailable ? "default" : "destructive"}>
-                  {status?.localAvailable ? "Actif" : "Inactif"}
+                <Badge variant={status?.physicalStorageAvailable ? "default" : "destructive"}>
+                  {status?.physicalStorageAvailable ? "Actif" : "Inactif"}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                {status?.localAvailable 
+                {status?.physicalStorageAvailable 
                   ? "✅ Données sensibles stockées localement (conforme HDS)"
                   : "❌ Stockage local indisponible - Conformité HDS compromise"
                 }
@@ -98,16 +98,16 @@ export const StorageStatusDisplay: React.FC = () => {
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Cloud className="h-4 w-4 text-blue-500" />
-                <span className="text-sm font-medium">Stockage cloud</span>
-                <Badge variant={status?.cloudAvailable ? "default" : "secondary"}>
-                  {status?.cloudAvailable ? "Disponible" : "Indisponible"}
+                <Lock className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">Chiffrement</span>
+                <Badge variant={status?.isUnlocked ? "default" : "secondary"}>
+                  {status?.isUnlocked ? "Déverrouillé" : "Verrouillé"}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                {status?.cloudAvailable 
-                  ? "☁️ Données non-sensibles synchronisées"
-                  : "⚠️ Mode hors-ligne uniquement"
+                {status?.isUnlocked 
+                  ? "🔓 Accès sécurisé autorisé (AES-256)"
+                  : "🔒 Authentification requise"
                 }
               </p>
             </div>
@@ -118,7 +118,7 @@ export const StorageStatusDisplay: React.FC = () => {
 
 
       {/* Alertes de conformité */}
-      {!status?.localAvailable && (
+      {!status?.physicalStorageAvailable && (
         <Card className="border-destructive">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">

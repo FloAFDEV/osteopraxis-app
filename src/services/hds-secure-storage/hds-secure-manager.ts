@@ -278,7 +278,8 @@ export class HDSSecureManager {
           if (oldData.length > 0) {
             const secureStorage = this.getSecureStorage(migration.entity);
             if (secureStorage) {
-              await secureStorage.saveRecords(oldData);
+              // Sauvegarder les données avec le bon typage
+              await secureStorage.saveRecords(oldData as any[]);
               result.migrated[migration.entity] = oldData.length;
               console.log(`✅ ${oldData.length} enregistrements ${migration.entity} migrés`);
             }

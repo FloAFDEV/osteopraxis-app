@@ -5,6 +5,7 @@ import { Layout } from '@/components/ui/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Settings, Download, Upload } from 'lucide-react';
 import { StorageStatusDisplay } from '@/components/storage/StorageStatusDisplay';
+import { StorageTestPanel } from '@/components/testing/StorageTestPanel';
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
 import { toast } from 'sonner';
@@ -61,7 +62,8 @@ const HybridStorageSettingsPage: React.FC = () => {
           <HDSComplianceIndicator />
 
           {/* Affichage du statut en temps réel */}
-          <StorageStatusDisplay />
+        <StorageStatusDisplay />
+        <StorageTestPanel />
 
           {/* Actions de gestion */}
           <Card>
