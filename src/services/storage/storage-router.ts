@@ -152,7 +152,8 @@ export class StorageRouter {
   }
 
   /**
-   * Adapter pour les données HDS (stockage local persistant)
+   * Adapter pour les données HDS (stockage local sécurisé exclusivement)
+   * 🚨 JAMAIS de Supabase pour les données HDS - Violation de sécurité
    */
   private async getLocalHDSAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
     // Vérification de sécurité stricte
@@ -160,39 +161,40 @@ export class StorageRouter {
       throw new Error(`🚨 Tentative d'accès HDS pour donnée non-HDS: ${dataType}`);
     }
 
-    const { hdsPatientService, hdsAppointmentService, hdsInvoiceService } = 
-      await import('@/services/hds-local-storage');
+    // NOUVEAU: Utiliser les services HDS sécurisés (stockage local EXCLUSIF)
+    const { hdsSecurePatientService, hdsSecureAppointmentService, hdsSecureInvoiceService } = 
+      await import('@/services/hds-secure-storage');
     
     switch (dataType) {
       case 'patients':
         return {
-          create: (data) => hdsPatientService.createPatient(data as any),
-          getById: (id) => hdsPatientService.getPatientById(Number(id)),
-          getAll: () => hdsPatientService.getPatients(),
-          update: (id, updates) => hdsPatientService.updatePatient({ ...updates, id: Number(id) } as any),
-          delete: (id) => hdsPatientService.deletePatient(Number(id))
+          create: (data) => hdsSecurePatientService.createPatient(data as any),
+          getById: (id) => hdsSecurePatientService.getPatientById(Number(id)),
+          getAll: () => hdsSecurePatientService.getPatients(),
+          update: (id, updates) => hdsSecurePatientService.updatePatient({ ...updates, id: Number(id) } as any),
+          delete: (id) => hdsSecurePatientService.deletePatient(Number(id))
         } as StorageAdapter<T>;
         
       case 'appointments':
         return {
-          create: (data) => hdsAppointmentService.createAppointment(data as any),
-          getById: (id) => hdsAppointmentService.getAppointmentById(Number(id)),
-          getAll: () => hdsAppointmentService.getAppointments(),
-          update: (id, updates) => hdsAppointmentService.updateAppointment(Number(id), updates as any),
-          delete: (id) => hdsAppointmentService.deleteAppointment(Number(id))
+          create: (data) => hdsSecureAppointmentService.createAppointment(data as any),
+          getById: (id) => hdsSecureAppointmentService.getAppointmentById(Number(id)),
+          getAll: () => hdsSecureAppointmentService.getAppointments(),
+          update: (id, updates) => hdsSecureAppointmentService.updateAppointment(Number(id), updates as any),
+          delete: (id) => hdsSecureAppointmentService.deleteAppointment(Number(id))
         } as StorageAdapter<T>;
         
       case 'invoices':
         return {
-          create: (data) => hdsInvoiceService.createInvoice(data as any),
-          getById: (id) => hdsInvoiceService.getInvoiceById(Number(id)),
-          getAll: () => hdsInvoiceService.getInvoices(),
-          update: (id, updates) => hdsInvoiceService.updateInvoice(Number(id), { ...updates, id: Number(id) } as any),
-          delete: (id) => hdsInvoiceService.deleteInvoice(Number(id))
+          create: (data) => hdsSecureInvoiceService.createInvoice(data as any),
+          getById: (id) => hdsSecureInvoiceService.getInvoiceById(Number(id)),
+          getAll: () => hdsSecureInvoiceService.getInvoices(),
+          update: (id, updates) => hdsSecureInvoiceService.updateInvoice(Number(id), { ...updates, id: Number(id) } as any),
+          delete: (id) => hdsSecureInvoiceService.deleteInvoice(Number(id))
         } as StorageAdapter<T>;
         
       default:
-        throw new Error(`Service HDS non implémenté pour: ${dataType}`);
+        throw new Error(`Service HDS sécurisé non implémenté pour: ${dataType}`);
     }
   }
 

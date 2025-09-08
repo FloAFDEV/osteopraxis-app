@@ -16,28 +16,45 @@ export const isDemoUser = (user: any): boolean => {
 };
 
 /**
- * Détection du mode démo via la session locale
+ * Détection STRICTE du mode démo - Sécurité renforcée
+ * Empêche tout croisement entre démo et données réelles
  */
 export const isDemoSession = async (): Promise<boolean> => {
   try {
-    // Vérifier d'abord la session Supabase pour les anciennes sessions démo
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user && isDemoUser(session.user)) {
-      // Si utilisateur démo Supabase détecté, s'assurer qu'une session locale existe
-      const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      if (!demoLocalStorage.isSessionActive()) {
-        console.log('🎭 Utilisateur démo Supabase détecté, création session locale');
-        demoLocalStorage.createSession();
-        demoLocalStorage.seedDemoData();
-      }
+    // 1️⃣ PRIORITÉ ABSOLUE: Vérifier la session locale démo
+    const { demoLocalStorage } = await import('@/services/demo-local-storage');
+    const hasLocalDemoSession = demoLocalStorage.isSessionActive();
+    
+    if (hasLocalDemoSession) {
+      console.log('🎭 Session démo locale active détectée');
       return true;
     }
     
-    // Vérifier la session locale éphémère
-    const { demoLocalStorage } = await import('@/services/demo-local-storage');
-    return demoLocalStorage.isSessionActive();
+    // 2️⃣ Vérifier la session Supabase seulement si pas de session locale
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user && isDemoUser(session.user)) {
+      console.log('🎭 Utilisateur démo Supabase détecté, création session locale EXCLUSIVE');
+      
+      // Créer une session locale ET déconnecter de Supabase pour éviter le croisement
+      demoLocalStorage.createSession();
+      demoLocalStorage.seedDemoData();
+      
+      // Déconnexion silencieuse de Supabase pour éviter la contamination
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+        console.log('🔒 Déconnexion Supabase silencieuse pour mode démo pur');
+      } catch (error) {
+        console.warn('⚠️ Erreur déconnexion Supabase:', error);
+      }
+      
+      return true;
+    }
+    
+    // 3️⃣ Mode connecté réel
+    return false;
   } catch (error) {
-    console.error('Error checking demo session:', error);
+    console.error('❌ Erreur détection mode démo:', error);
+    // En cas d'erreur, considérer comme NON-démo par sécurité
     return false;
   }
 };

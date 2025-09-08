@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { nativeStorageManager, type NativeStorageConfig } from '@/services/native-file-storage/native-storage-manager';
-import { LocalStorageSetup } from '@/components/storage/LocalStorageSetup';
+import { hdsSecureManager, type HDSSecureConfig } from '@/services/hds-secure-storage/hds-secure-manager';
+import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { StorageUnlockPrompt } from '@/components/storage/StorageUnlockPrompt';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { toast } from 'sonner';
@@ -60,21 +60,22 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
 
   const configureStorage = async (config: any): Promise<void> => {
     try {
-      // Convertir la config LocalStorageSetup vers NativeStorageConfig
-      const nativeConfig: NativeStorageConfig = {
-        encryptionKey: config.credential,
+      // Nouvelle configuration HDS sécurisée
+      const secureConfig: HDSSecureConfig = {
+        directoryHandle: config.directoryHandle,
+        password: config.password,
         entities: ['patients', 'appointments', 'invoices']
       };
       
-      await nativeStorageManager.configure(nativeConfig);
+      await hdsSecureManager.configure(secureConfig);
       setShowSetup(false);
       setShowUnlock(false);
       await initialize();
       
-      toast.success('Configuration de stockage local réussie !');
+      toast.success('Stockage HDS sécurisé configuré avec succès !');
     } catch (error) {
-      console.error('Storage configuration failed:', error);
-      toast.error('Erreur lors de la configuration du stockage');
+      console.error('Secure storage configuration failed:', error);
+      toast.error('Erreur lors de la configuration du stockage sécurisé');
       throw error;
     }
   };
@@ -119,7 +120,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
 
   if (showSetup) {
     return (
-      <LocalStorageSetup
+      <SecureStorageSetup
         onComplete={configureStorage}
         onCancel={handleCancel}
       />
