@@ -89,7 +89,7 @@ export function usePatientDetail(patientId: number) {
     
     // Immediately update the UI
     queryClient.setQueryData(
-      ['appointments', 'patient', patientId],
+      ['appointments', 'patient', patientId, isDemoMode],
       (oldAppointments: Appointment[] = []) =>
         oldAppointments.map(apt =>
           apt.id === appointmentId ? { ...apt, status: newStatus } : apt
@@ -102,13 +102,13 @@ export function usePatientDetail(patientId: number) {
       
       // Invalidate to ensure consistency
       queryClient.invalidateQueries({
-        queryKey: ['appointments', 'patient', patientId]
+        queryKey: ['appointments', 'patient', patientId, isDemoMode]
       });
     } catch (error) {
       console.error(`usePatientDetail: Error updating appointment ${appointmentId}:`, error);
       // Revert on error
       queryClient.invalidateQueries({
-        queryKey: ['appointments', 'patient', patientId]
+        queryKey: ['appointments', 'patient', patientId, isDemoMode]
       });
       throw error;
     }
@@ -116,15 +116,22 @@ export function usePatientDetail(patientId: number) {
 
   // Optimistic update for new appointments
   const addAppointmentOptimistically = (newAppointment: Appointment) => {
-    // ✅ RDV ajouté
+    console.log('🔄 usePatientDetail: Ajout optimistique du rendez-vous', newAppointment);
+    
+    // ✅ RDV ajouté - mettre à jour immédiatement le cache
     queryClient.setQueryData(
-      ['appointments', 'patient', patientId],
-      (oldAppointments: Appointment[] = []) => [...oldAppointments, newAppointment]
+      ['appointments', 'patient', patientId, isDemoMode],
+      (oldAppointments: Appointment[] = []) => {
+        console.log('📋 Appointments avant ajout:', oldAppointments.length);
+        const updated = [...oldAppointments, newAppointment];
+        console.log('📋 Appointments après ajout:', updated.length);
+        return updated;
+      }
     );
     
     // Invalidate immediately pour rafraîchir les onglets
     queryClient.invalidateQueries({
-      queryKey: ['appointments', 'patient', patientId]
+      queryKey: ['appointments', 'patient', patientId, isDemoMode]
     });
     
     // Aussi invalider les listes générales d'appointments
@@ -164,14 +171,14 @@ export function usePatientDetail(patientId: number) {
     };
 
     // Immediately update the UI
-    queryClient.setQueryData(['patient', patientId], patientUpdate);
+    queryClient.setQueryData(['patient', patientId, isDemoMode], patientUpdate);
 
     try {
       // Make the actual API call
       const updatedPatient = await api.updatePatient(patientUpdate);
       
       // Update with the real data from server
-      queryClient.setQueryData(['patient', patientId], updatedPatient);
+      queryClient.setQueryData(['patient', patientId, isDemoMode], updatedPatient);
       
       // Also invalidate the patients list to keep it in sync
       queryClient.invalidateQueries({
@@ -184,7 +191,7 @@ export function usePatientDetail(patientId: number) {
       console.error(`usePatientDetail: Error updating patient ${patientId}:`, error);
       // Revert on error by invalidating the query
       queryClient.invalidateQueries({
-        queryKey: ['patient', patientId]
+        queryKey: ['patient', patientId, isDemoMode]
       });
       throw error;
     }

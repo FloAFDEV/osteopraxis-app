@@ -71,7 +71,7 @@ interface AppointmentFormProps {
 	appointmentId?: number;
 	patients?: Patient[]; // Ajouté pour NewAppointmentPage
 	isEditing?: boolean;
-	onSuccess?: () => void; // Nouveau prop pour callback de succès
+	onSuccess?: (newAppointment?: any) => void; // Callback de succès avec paramètre optionnel
 }
 
 export function AppointmentForm({
@@ -257,9 +257,22 @@ export function AppointmentForm({
 
 			await performUpdate(appointmentData);
 
+			// Émettre l'événement global pour informer les composants
+			const newAppointmentEvent = { 
+				id: Date.now(), // ID temporaire pour l'événement
+				...appointmentData 
+			};
+			console.log('📋 AppointmentForm: Émission de l\'événement appointment-created', newAppointmentEvent);
+			window.dispatchEvent(new CustomEvent('appointment-created', { 
+				detail: newAppointmentEvent
+			}));
+
 			// Invalider les queries pour synchroniser les données
 			if (typeof onSuccess === 'function') {
-				onSuccess();
+				onSuccess({ 
+					id: Date.now(), // ID temporaire pour l'optimistic update
+					...appointmentData 
+				});
 			} else {
 				// Si pas de callback, naviguer vers la liste
 				setTimeout(() => {

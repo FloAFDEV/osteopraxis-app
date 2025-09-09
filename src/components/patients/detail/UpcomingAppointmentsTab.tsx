@@ -25,7 +25,8 @@ export function UpcomingAppointmentsTab({
 	const [refreshKey, setRefreshKey] = useState(0);
 
 	useEffect(() => {
-		const handleAppointmentCreated = () => {
+		const handleAppointmentCreated = (event: any) => {
+			console.log('📅 UpcomingAppointmentsTab: Événement appointment-created reçu', event.detail);
 			setRefreshKey(prev => prev + 1);
 		};
 

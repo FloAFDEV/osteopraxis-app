@@ -223,11 +223,6 @@ const PatientDetailPage = () => {
 			addAppointmentOptimistically(newAppointment);
 		}
 		toast.success("Séance créée avec succès");
-		
-		// Force immediate re-render of tabs by triggering state update
-		setTimeout(() => {
-			window.dispatchEvent(new CustomEvent('appointment-created', { detail: newAppointment }));
-		}, 100);
 	};
 
 	const handlePatientUpdated = async (updatedData: PatientFormValues) => {
