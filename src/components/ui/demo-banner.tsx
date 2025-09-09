@@ -42,10 +42,12 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
       if (onClearDemo) {
         onClearDemo();
       }
-      // Recharger la page pour revenir en mode connecté
-      window.location.reload();
+      // Rediriger vers la page d'accueil
+      window.location.href = '/';
     } catch (error) {
       console.error('Erreur lors du nettoyage de la session démo:', error);
+      // En cas d'erreur, rediriger quand même vers l'accueil
+      window.location.href = '/';
     }
   };
 
