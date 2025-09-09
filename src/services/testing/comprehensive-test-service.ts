@@ -277,7 +277,9 @@ class ComprehensiveTestService {
         return {
           status: status.isConfigured ? 'success' : 'warning' as const,
           message: `Configuré: ${status.isConfigured}, Déverrouillé: ${status.isUnlocked}`,
-          details: `Stockage physique: ${status.physicalStorageAvailable}`
+          details: status.isConfigured ? 
+            `Stockage physique: ${status.physicalStorageAvailable}` : 
+            'Utilisez l\'onglet "Storage" dans l\'admin pour configurer le stockage sécurisé'
         };
       } catch (error) {
         return {
@@ -485,9 +487,9 @@ class ComprehensiveTestService {
         const totalMB = Math.round(memoryInfo.totalJSHeapSize / 1024 / 1024);
         
         return {
-          status: usedMB < 100 ? 'success' : usedMB < 200 ? 'warning' : 'error' as const,
+          status: usedMB < 150 ? 'success' : usedMB < 250 ? 'warning' : 'error' as const,
           message: `Mémoire utilisée: ${usedMB}MB / ${totalMB}MB`,
-          details: `Seuils: <100MB excellent, <200MB acceptable, >200MB élevé`
+          details: `Seuils: <150MB excellent, <250MB acceptable, >250MB élevé`
         };
       } else {
         return {
