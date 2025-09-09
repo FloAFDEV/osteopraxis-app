@@ -164,28 +164,70 @@ export function AdminDashboard() {
         
         <div className="mb-8">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="mb-8 p-4 bg-card rounded-lg border">
-              <TabsList className="grid w-full h-auto p-2 bg-muted/50" style={{
-                gridTemplateColumns: 'repeat(16, minmax(80px, 1fr))',
-                gap: '4px'
-              }}>
-                <TabsTrigger value="overview" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Vue d'ensemble</TabsTrigger>
-                <TabsTrigger value="stats" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Statistiques</TabsTrigger>
-                <TabsTrigger value="health" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Santé</TabsTrigger>
-                <TabsTrigger value="users" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Utilisateurs</TabsTrigger>
-                <TabsTrigger value="cabinets" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Cabinets</TabsTrigger>
-                <TabsTrigger value="patients" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Patients</TabsTrigger>
-                <TabsTrigger value="subscriptions" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Abonnements</TabsTrigger>
-                <TabsTrigger value="analytics" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Analytics</TabsTrigger>
-                <TabsTrigger value="proactive" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Gestion Pro.</TabsTrigger>
-                <TabsTrigger value="security" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Sécurité</TabsTrigger>
-                <TabsTrigger value="optimization" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Optimisation</TabsTrigger>
-                <TabsTrigger value="monitoring" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Monitoring</TabsTrigger>
-                <TabsTrigger value="deleted" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Supprimés</TabsTrigger>
-                <TabsTrigger value="usb" className="text-xs px-3 py-3 h-auto whitespace-nowrap">USB</TabsTrigger>
-                <TabsTrigger value="logs" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Logs</TabsTrigger>
-                <TabsTrigger value="settings" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Paramètres</TabsTrigger>
-              </TabsList>
+            {/* Navigation principale avec groupes */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {/* Groupe Supervision */}
+                <div className="bg-card rounded-lg border p-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Supervision</div>
+                  <div className="flex gap-1">
+                    <TabsList className="grid grid-cols-2 h-auto p-1 bg-muted/50">
+                      <TabsTrigger value="overview" className="text-sm px-4 py-2">Vue d'ensemble</TabsTrigger>
+                      <TabsTrigger value="health" className="text-sm px-4 py-2">Santé Système</TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
+
+                {/* Groupe Données */}
+                <div className="bg-card rounded-lg border p-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Gestion des Données</div>
+                  <div className="flex gap-1">
+                    <TabsList className="grid grid-cols-4 h-auto p-1 bg-muted/50">
+                      <TabsTrigger value="users" className="text-sm px-4 py-2">Utilisateurs</TabsTrigger>
+                      <TabsTrigger value="cabinets" className="text-sm px-4 py-2">Cabinets</TabsTrigger>
+                      <TabsTrigger value="patients" className="text-sm px-4 py-2">Patients</TabsTrigger>
+                      <TabsTrigger value="deleted" className="text-sm px-4 py-2">Supprimés</TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
+
+                {/* Groupe Analytics */}
+                <div className="bg-card rounded-lg border p-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Analytics & Business</div>
+                  <div className="flex gap-1">
+                    <TabsList className="grid grid-cols-3 h-auto p-1 bg-muted/50">
+                      <TabsTrigger value="stats" className="text-sm px-4 py-2">Statistiques</TabsTrigger>
+                      <TabsTrigger value="analytics" className="text-sm px-4 py-2">Analytics</TabsTrigger>
+                      <TabsTrigger value="subscriptions" className="text-sm px-4 py-2">Abonnements</TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
+
+                {/* Groupe Sécurité & Monitoring */}
+                <div className="bg-card rounded-lg border p-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Sécurité & Monitoring</div>
+                  <div className="flex gap-1">
+                    <TabsList className="grid grid-cols-4 h-auto p-1 bg-muted/50">
+                      <TabsTrigger value="security" className="text-sm px-4 py-2">Sécurité</TabsTrigger>
+                      <TabsTrigger value="monitoring" className="text-sm px-4 py-2">Monitoring</TabsTrigger>
+                      <TabsTrigger value="logs" className="text-sm px-4 py-2">Logs</TabsTrigger>
+                      <TabsTrigger value="usb" className="text-sm px-4 py-2">USB</TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
+
+                {/* Groupe Administration */}
+                <div className="bg-card rounded-lg border p-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Administration</div>
+                  <div className="flex gap-1">
+                    <TabsList className="grid grid-cols-3 h-auto p-1 bg-muted/50">
+                      <TabsTrigger value="proactive" className="text-sm px-4 py-2">Gestion Pro.</TabsTrigger>
+                      <TabsTrigger value="optimization" className="text-sm px-4 py-2">Optimisation</TabsTrigger>
+                      <TabsTrigger value="settings" className="text-sm px-4 py-2">Paramètres</TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <TabsContent value="overview">
