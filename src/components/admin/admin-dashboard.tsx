@@ -159,7 +159,7 @@ export function AdminDashboard() {
         </div>
         
         {/* Accès rapide aux tests */}
-        <div className="flex gap-4 mb-6">
+        <div className="mb-8">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -171,7 +171,7 @@ export function AdminDashboard() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => window.location.href = '/admin/testing'}
+                  onClick={() => window.open('/admin/testing', '_blank')}
                   className="ml-auto"
                 >
                   Ouvrir
@@ -181,90 +181,94 @@ export function AdminDashboard() {
           </Card>
         </div>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:grid-cols-16">
-            <TabsTrigger value="overview" className="text-xs md:text-sm">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs md:text-sm">Statistiques</TabsTrigger>
-            <TabsTrigger value="health" className="text-xs md:text-sm">Santé</TabsTrigger>
-            <TabsTrigger value="users" className="text-xs md:text-sm">Utilisateurs</TabsTrigger>
-            <TabsTrigger value="cabinets" className="text-xs md:text-sm">Cabinets</TabsTrigger>
-            <TabsTrigger value="patients" className="text-xs md:text-sm">Patients</TabsTrigger>
-            <TabsTrigger value="subscriptions" className="text-xs md:text-sm">Abonnements</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-xs md:text-sm">Analytics</TabsTrigger>
-            <TabsTrigger value="proactive" className="text-xs md:text-sm">Gestion Pro.</TabsTrigger>
-            <TabsTrigger value="security" className="text-xs md:text-sm">Sécurité</TabsTrigger>
-            <TabsTrigger value="optimization" className="text-xs md:text-sm">Optimisation</TabsTrigger>
-            <TabsTrigger value="monitoring" className="text-xs md:text-sm">Monitoring</TabsTrigger>
-            <TabsTrigger value="deleted" className="text-xs md:text-sm">Supprimés</TabsTrigger>
-            <TabsTrigger value="usb" className="text-xs md:text-sm">USB</TabsTrigger>
-            <TabsTrigger value="logs" className="text-xs md:text-sm">Logs</TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs md:text-sm">Paramètres</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview">
-            <SystemHealthPanel />
-          </TabsContent>
-          
-          <TabsContent value="stats">
-            <DetailedStatsPanel />
-          </TabsContent>
-          
-          <TabsContent value="health">
-            <SystemHealthPanel />
-          </TabsContent>
-          
-          <TabsContent value="users">
-            <UsersManagement />
-          </TabsContent>
-          
-          <TabsContent value="cabinets">
-            <CabinetsManagement />
-          </TabsContent>
-          
-          <TabsContent value="patients">
-            <PatientsManagement />
-          </TabsContent>
-          
-          <TabsContent value="subscriptions">
-            <SubscriptionManagement />
-          </TabsContent>
-          
-          <TabsContent value="analytics">
-            <BusinessAnalytics />
-          </TabsContent>
-          
-          <TabsContent value="proactive">
-            <ProactiveUserManagement />
-          </TabsContent>
-          
-          <TabsContent value="security">
-            <SecurityCompliance />
-          </TabsContent>
-          
-          <TabsContent value="optimization">
-            <SystemOptimization />
-          </TabsContent>
-          
-          <TabsContent value="monitoring">
-            <UserDeletionMonitoring />
-          </TabsContent>
-          
-          <TabsContent value="deleted">
-            <DeletedRecordsManager />
-          </TabsContent>
-          
-          <TabsContent value="usb">
-            <USBMonitoringDashboard />
-          </TabsContent>
-          
-          <TabsContent value="logs">
-            <AdminLogsPanel />
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <AdminSettingsPanel />
-          </TabsContent>
-        </Tabs>
+        <div className="mb-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <div className="mb-6">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:grid-cols-16 h-auto p-1">
+                <TabsTrigger value="overview" className="text-xs md:text-sm px-2 py-2">Vue d'ensemble</TabsTrigger>
+                <TabsTrigger value="stats" className="text-xs md:text-sm px-2 py-2">Statistiques</TabsTrigger>
+                <TabsTrigger value="health" className="text-xs md:text-sm px-2 py-2">Santé</TabsTrigger>
+                <TabsTrigger value="users" className="text-xs md:text-sm px-2 py-2">Utilisateurs</TabsTrigger>
+                <TabsTrigger value="cabinets" className="text-xs md:text-sm px-2 py-2">Cabinets</TabsTrigger>
+                <TabsTrigger value="patients" className="text-xs md:text-sm px-2 py-2">Patients</TabsTrigger>
+                <TabsTrigger value="subscriptions" className="text-xs md:text-sm px-2 py-2">Abonnements</TabsTrigger>
+                <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">Analytics</TabsTrigger>
+                <TabsTrigger value="proactive" className="text-xs md:text-sm px-2 py-2">Gestion Pro.</TabsTrigger>
+                <TabsTrigger value="security" className="text-xs md:text-sm px-2 py-2">Sécurité</TabsTrigger>
+                <TabsTrigger value="optimization" className="text-xs md:text-sm px-2 py-2">Optimisation</TabsTrigger>
+                <TabsTrigger value="monitoring" className="text-xs md:text-sm px-2 py-2">Monitoring</TabsTrigger>
+                <TabsTrigger value="deleted" className="text-xs md:text-sm px-2 py-2">Supprimés</TabsTrigger>
+                <TabsTrigger value="usb" className="text-xs md:text-sm px-2 py-2">USB</TabsTrigger>
+                <TabsTrigger value="logs" className="text-xs md:text-sm px-2 py-2">Logs</TabsTrigger>
+                <TabsTrigger value="settings" className="text-xs md:text-sm px-2 py-2">Paramètres</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="overview">
+              <SystemHealthPanel />
+            </TabsContent>
+            
+            <TabsContent value="stats">
+              <DetailedStatsPanel />
+            </TabsContent>
+            
+            <TabsContent value="health">
+              <SystemHealthPanel />
+            </TabsContent>
+            
+            <TabsContent value="users">
+              <UsersManagement />
+            </TabsContent>
+            
+            <TabsContent value="cabinets">
+              <CabinetsManagement />
+            </TabsContent>
+            
+            <TabsContent value="patients">
+              <PatientsManagement />
+            </TabsContent>
+            
+            <TabsContent value="subscriptions">
+              <SubscriptionManagement />
+            </TabsContent>
+            
+            <TabsContent value="analytics">
+              <BusinessAnalytics />
+            </TabsContent>
+            
+            <TabsContent value="proactive">
+              <ProactiveUserManagement />
+            </TabsContent>
+            
+            <TabsContent value="security">
+              <SecurityCompliance />
+            </TabsContent>
+            
+            <TabsContent value="optimization">
+              <SystemOptimization />
+            </TabsContent>
+            
+            <TabsContent value="monitoring">
+              <UserDeletionMonitoring />
+            </TabsContent>
+            
+            <TabsContent value="deleted">
+              <DeletedRecordsManager />
+            </TabsContent>
+            
+            <TabsContent value="usb">
+              <USBMonitoringDashboard />
+            </TabsContent>
+            
+            <TabsContent value="logs">
+              <AdminLogsPanel />
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <AdminSettingsPanel />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </AdminLayout>
   );
