@@ -1,10 +1,11 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { HybridStorageProvider } from '@/contexts/HybridStorageContext';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { HybridStorageSetup } from '@/components/storage/HybridStorageSetup';
+import { isDemoSession } from '@/utils/demo-detection';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -15,13 +16,33 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   const { user, isAuthenticated, loading } = useAuth();
   const { status, isLoading: storageLoading } = useHybridStorage();
   const location = useLocation();
+  const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null);
+  const [demoLoading, setDemoLoading] = useState(true);
+
+  // Vérifier le mode démo au montage
+  useEffect(() => {
+    const checkDemo = async () => {
+      try {
+        const demoMode = await isDemoSession();
+        setIsDemoMode(demoMode);
+      } catch (error) {
+        console.error('Erreur vérification mode démo:', error);
+        setIsDemoMode(false);
+      } finally {
+        setDemoLoading(false);
+      }
+    };
+    checkDemo();
+  }, []);
 
   console.log('🔍 ProtectedRoute - User:', user);
   console.log('🔍 ProtectedRoute - Storage status:', status);
   console.log('🔍 ProtectedRoute - Storage loading:', storageLoading);
+  console.log('🔍 ProtectedRoute - Demo mode:', isDemoMode);
+  console.log('🔍 ProtectedRoute - Demo loading:', demoLoading);
 
   // Afficher un loader pendant la vérification d'authentification et stockage
-  if (loading || storageLoading) {
+  if (loading || storageLoading || demoLoading) {
     console.log('⏳ ProtectedRoute - Loading...');
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -30,7 +51,13 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
     );
   }
 
-  // Rediriger vers login si pas authentifié
+  // En mode démo, pas besoin d'authentification Supabase
+  if (isDemoMode) {
+    console.log('🎭 ProtectedRoute - Mode démo actif - Bypass authentification');
+    return <>{children}</>;
+  }
+
+  // Rediriger vers login si pas authentifié (uniquement en mode non-démo)
   if (!isAuthenticated || !user) {
     console.log('🚪 ProtectedRoute - Not authenticated, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
