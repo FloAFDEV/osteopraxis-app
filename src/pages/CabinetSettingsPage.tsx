@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Cabinet } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { BackButton } from "@/components/ui/back-button";
 import { Link } from "react-router-dom";
 
@@ -18,6 +19,7 @@ const CabinetSettingsPage = () => {
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { user } = useAuth();
+  const { isDemoMode } = useDemo();
 
   const form = useForm({
     defaultValues: {
@@ -111,12 +113,19 @@ const CabinetSettingsPage = () => {
             Paramètres du cabinet
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gérez les informations de votre cabinet d'ostéopathie
+            {isDemoMode ? "Informations du cabinet (mode démo)" : "Gérez les informations de votre cabinet d'ostéopathie"}
           </p>
-          <p className="text-sm text-muted-foreground mt-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            💡 <strong>Astuce :</strong> Les informations professionnelles et de facturation se trouvent dans 
-            <strong> Paramètres → Profil & Facturation</strong>.
-          </p>
+          {isDemoMode ? (
+            <p className="text-sm text-muted-foreground mt-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              📝 <strong>Mode démo :</strong> Les paramètres du cabinet sont en lecture seule. 
+              Connectez-vous pour modifier vos informations.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+              💡 <strong>Astuce :</strong> Les informations professionnelles et de facturation se trouvent dans 
+              <strong> Paramètres → Profil & Facturation</strong>.
+            </p>
+          )}
         </div>
 
         {loading ? (
@@ -151,7 +160,12 @@ const CabinetSettingsPage = () => {
                         <FormControl>
                           <div className="relative">
                             <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Nom du cabinet" {...field} />
+                            <Input 
+                              className="pl-10" 
+                              placeholder="Nom du cabinet" 
+                              disabled={isDemoMode}
+                              {...field} 
+                            />
                           </div>
                         </FormControl>
                       </FormItem>
@@ -167,7 +181,12 @@ const CabinetSettingsPage = () => {
                         <FormControl>
                           <div className="relative">
                             <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Adresse complète" {...field} />
+                            <Input 
+                              className="pl-10" 
+                              placeholder="Adresse complète" 
+                              disabled={isDemoMode}
+                              {...field} 
+                            />
                           </div>
                         </FormControl>
                       </FormItem>
@@ -183,7 +202,12 @@ const CabinetSettingsPage = () => {
                         <FormControl>
                           <div className="relative">
                             <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Numéro de téléphone" {...field} />
+                            <Input 
+                              className="pl-10" 
+                              placeholder="Numéro de téléphone" 
+                              disabled={isDemoMode}
+                              {...field} 
+                            />
                           </div>
                         </FormControl>
                       </FormItem>
@@ -199,7 +223,12 @@ const CabinetSettingsPage = () => {
                         <FormControl>
                           <div className="relative">
                             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Email du cabinet" {...field} />
+                            <Input 
+                              className="pl-10" 
+                              placeholder="Email du cabinet" 
+                              disabled={isDemoMode}
+                              {...field} 
+                            />
                           </div>
                         </FormControl>
                       </FormItem>
@@ -218,7 +247,12 @@ const CabinetSettingsPage = () => {
                           <FormControl>
                             <div className="relative">
                               <Image className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input className="pl-10" placeholder="URL de l'image du cabinet" {...field} />
+                              <Input 
+                                className="pl-10" 
+                                placeholder="URL de l'image du cabinet" 
+                                disabled={isDemoMode}
+                                {...field} 
+                              />
                             </div>
                           </FormControl>
                           <FormDescription>
@@ -230,9 +264,10 @@ const CabinetSettingsPage = () => {
                   </div>
                 </div>
 
-                <Button type="submit" className="flex gap-2" disabled={isSaving}>
+                <Button type="submit" className="flex gap-2" disabled={isSaving || isDemoMode}>
                   <Save className="h-4 w-4" />
-                  {isSaving ? "Enregistrement..." : "Enregistrer les modifications"}
+                  {isDemoMode ? "Modification non autorisée (mode démo)" : 
+                   isSaving ? "Enregistrement..." : "Enregistrer les modifications"}
                 </Button>
               </form>
             </Form>
