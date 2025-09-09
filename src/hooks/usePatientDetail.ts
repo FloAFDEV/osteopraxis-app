@@ -18,7 +18,7 @@ export function usePatientDetail(patientId: number) {
     isLoading: patientLoading, 
     error: patientError 
   } = useQuery({
-    queryKey: ['patient', patientId, isDemoMode],
+    queryKey: ['patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],
     queryFn: async () => {
       const result = await api.getPatientById(patientId);
       if (!result) {
@@ -32,24 +32,24 @@ export function usePatientDetail(patientId: number) {
     enabled: isDemoMode || (!!patientId && patientId > 0),
   });
 
-  // Appointments with moderate stale time
+  // Appointments avec isolation stricte par mode
   const { 
     data: appointments = [], 
     isLoading: appointmentsLoading,
     error: appointmentsError
   } = useQuery({
-    queryKey: ['appointments', 'patient', patientId, isDemoMode],
+    queryKey: ['appointments', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],
     queryFn: async () => {
-      console.log(`✅ Fetching appointments for patient ${patientId} in demo mode: ${isDemoMode}`);
+      if (isDemoMode === null) return [];
+      console.log(`📅 Récupération RDV patient ${patientId} en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
       const result = await api.getAppointmentsByPatientId(patientId);
-      console.log(`✅ Found ${result?.length || 0} appointments for patient ${patientId}:`, result);
+      console.log(`✅ ${result?.length || 0} RDV trouvés pour patient ${patientId} en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
       return result || [];
     },
-    staleTime: 30 * 1000, // 30 secondes pour temps réel
-    enabled: isDemoMode || (!!patientId && patientId > 0),
-    retry: 3,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true, // Activer pour synchronisation
+    staleTime: 10 * 1000, // 10 secondes pour des données plus fraîches
+    enabled: isDemoMode !== null && !!patientId && patientId > 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   // Invoices with longer stale time
@@ -58,7 +58,7 @@ export function usePatientDetail(patientId: number) {
     isLoading: invoicesLoading,
     error: invoicesError
   } = useQuery({
-    queryKey: ['invoices', 'patient', patientId, isDemoMode],
+    queryKey: ['invoices', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],
     queryFn: async () => {
       // ✅ Factures patient récupérées
       const result = await invoiceService.getInvoicesByPatientId(patientId);
@@ -89,7 +89,7 @@ export function usePatientDetail(patientId: number) {
     
     // Immediately update the UI
     queryClient.setQueryData(
-      ['appointments', 'patient', patientId, isDemoMode],
+      ['appointments', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],
       (oldAppointments: Appointment[] = []) =>
         oldAppointments.map(apt =>
           apt.id === appointmentId ? { ...apt, status: newStatus } : apt
@@ -102,13 +102,13 @@ export function usePatientDetail(patientId: number) {
       
       // Invalidate to ensure consistency
       queryClient.invalidateQueries({
-        queryKey: ['appointments', 'patient', patientId, isDemoMode]
+        queryKey: ['appointments', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`]
       });
     } catch (error) {
       console.error(`usePatientDetail: Error updating appointment ${appointmentId}:`, error);
       // Revert on error
       queryClient.invalidateQueries({
-        queryKey: ['appointments', 'patient', patientId, isDemoMode]
+        queryKey: ['appointments', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`]
       });
       throw error;
     }
@@ -120,7 +120,7 @@ export function usePatientDetail(patientId: number) {
     
     // ✅ RDV ajouté - mettre à jour immédiatement le cache
     queryClient.setQueryData(
-      ['appointments', 'patient', patientId, isDemoMode],
+      ['appointments', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],
       (oldAppointments: Appointment[] = []) => {
         console.log('📋 Appointments avant ajout:', oldAppointments.length);
         const updated = [...oldAppointments, newAppointment];
@@ -131,7 +131,7 @@ export function usePatientDetail(patientId: number) {
     
     // Invalidate immediately pour rafraîchir les onglets
     queryClient.invalidateQueries({
-      queryKey: ['appointments', 'patient', patientId, isDemoMode]
+      queryKey: ['appointments', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`]
     });
     
     // Aussi invalider les listes générales d'appointments
@@ -171,14 +171,14 @@ export function usePatientDetail(patientId: number) {
     };
 
     // Immediately update the UI
-    queryClient.setQueryData(['patient', patientId, isDemoMode], patientUpdate);
+    queryClient.setQueryData(['patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`], patientUpdate);
 
     try {
       // Make the actual API call
       const updatedPatient = await api.updatePatient(patientUpdate);
       
       // Update with the real data from server
-      queryClient.setQueryData(['patient', patientId, isDemoMode], updatedPatient);
+      queryClient.setQueryData(['patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`], updatedPatient);
       
       // Also invalidate the patients list to keep it in sync
       queryClient.invalidateQueries({
@@ -191,7 +191,7 @@ export function usePatientDetail(patientId: number) {
       console.error(`usePatientDetail: Error updating patient ${patientId}:`, error);
       // Revert on error by invalidating the query
       queryClient.invalidateQueries({
-        queryKey: ['patient', patientId, isDemoMode]
+        queryKey: ['patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`]
       });
       throw error;
     }

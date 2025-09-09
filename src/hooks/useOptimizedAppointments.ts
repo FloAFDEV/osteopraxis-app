@@ -43,7 +43,7 @@ export function useOptimizedAppointments() {
     error: appointmentsError,
     refetch: refetchAppointments
   } = useQuery({
-    queryKey: ['appointments', user?.osteopathId, isDemoMode, 'optimized'],
+    queryKey: ['appointments', user?.osteopathId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`, 'optimized'],
     queryFn: async () => {
       if (isDemoMode) {
         return await api.getAppointments();
@@ -62,7 +62,7 @@ export function useOptimizedAppointments() {
     isLoading: patientsLoading,
     error: patientsError,
   } = useQuery({
-    queryKey: ['patients', user?.osteopathId, isDemoMode, 'optimized'],
+    queryKey: ['patients', user?.osteopathId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`, 'optimized'],
     queryFn: async () => {
       if (isDemoMode) {
         return await api.getPatients();
@@ -84,7 +84,7 @@ export function useOptimizedAppointments() {
     try {
       // Mise à jour optimiste immédiate
       queryClient.setQueryData(
-        ['appointments', user?.osteopathId, isDemoMode, 'optimized'],
+      ['appointments', user?.osteopathId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`, 'optimized'],
         (oldAppointments: Appointment[] = []) =>
           oldAppointments.map(apt =>
             apt.id === appointmentId ? { ...apt, status: newStatus } : apt
@@ -119,13 +119,13 @@ export function useOptimizedAppointments() {
   const addAppointmentOptimistically = (newAppointment: Appointment) => {
     // Mise à jour immédiate de la liste des rendez-vous
     queryClient.setQueryData(
-      ['appointments', user?.osteopathId, isDemoMode, 'optimized'],
+      ['appointments', user?.osteopathId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`, 'optimized'],
       (oldAppointments: Appointment[] = []) => [...oldAppointments, newAppointment]
     );
 
-    // Invalider aussi les queries patient-spécifiques
+    // Invalider aussi les queries patient-spécifiques avec mode
     queryClient.invalidateQueries({
-      queryKey: ['appointments', 'patient', newAppointment.patientId]
+      queryKey: ['appointments', 'patient']
     });
 
     // Invalider toutes les queries d'appointments pour synchronisation complète

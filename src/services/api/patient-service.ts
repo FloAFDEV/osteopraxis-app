@@ -7,7 +7,9 @@ export const patientService = {
     try {
       const adapter = await storageRouter.route<Patient>('patients');
       await delay(200); // Simulation UI
-      return await adapter.getAll();
+      const result = await adapter.getAll();
+      console.log(`📋 PatientService: ${result.length} patients récupérés`);
+      return result;
     } catch (error) {
       console.error('❌ Erreur récupération patients:', error);
       return [];

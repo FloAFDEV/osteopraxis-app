@@ -2,6 +2,7 @@ import { PatientCard } from "@/components/PatientCard";
 import { Card } from "@/components/ui/card";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { api } from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -26,6 +27,7 @@ type SortOption = "name" | "date" | "email" | "gender";
 
 const PatientsPage = () => {
 	const { user } = useAuth();
+	const { isDemoMode } = useDemo();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [sortBy, setSortBy] = useState<SortOption>("name");
@@ -44,12 +46,13 @@ const PatientsPage = () => {
 
 	// Récupérer les cabinets de l'utilisateur
 	const { data: cabinets = [], isLoading: cabinetsLoading } = useQuery({
-		queryKey: ["cabinets", user?.osteopathId],
+		queryKey: ["cabinets", user?.osteopathId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],
 		queryFn: async () => {
 			if (!user?.osteopathId) return [];
+			console.log(`🏢 Récupération cabinets en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
 			return await api.getCabinetsByOsteopathId(user.osteopathId);
 		},
-		enabled: !!user?.osteopathId,
+		enabled: !!user?.osteopathId && isDemoMode !== null,
 		refetchOnWindowFocus: false,
 	});
 
@@ -60,12 +63,15 @@ const PatientsPage = () => {
 		error,
 		refetch,
 	} = useQuery({
-		queryKey: ["patients", user?.osteopathId],
+		queryKey: ["patients", user?.osteopathId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],
 		queryFn: async () => {
 			if (!user?.osteopathId) return [];
-			return await api.getPatients();
+			console.log(`👥 Récupération patients en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
+			const result = await api.getPatients();
+			console.log(`✅ ${result.length} patients récupérés en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
+			return result;
 		},
-		enabled: !!user?.osteopathId,
+		enabled: !!user?.osteopathId && isDemoMode !== null,
 		refetchOnWindowFocus: false,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 		gcTime: 1000 * 60 * 30, // 30 minutes
