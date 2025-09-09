@@ -56,6 +56,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(true); // Start with true during initialization
 	const [error, setError] = useState<string | null>(null);
+	const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false); // Éviter les déconnexions multiples
 	const navigate = useNavigate();
 	
 	// Activer la déconnexion automatique si l'utilisateur est connecté
@@ -116,35 +117,64 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	}, [navigate]);
 
 	const logout = useCallback(async () => {
+		// Empêcher les déconnexions multiples
+		if (isLoggingOut) {
+			console.log('⚠️ Déconnexion déjà en cours, ignorer cette tentative');
+			return;
+		}
+		
+		setIsLoggingOut(true);
 		try {
-			// CORRECTION: Déconnexion plus rapide et fiable
-			// Nettoyer immédiatement l'état local
+			console.log('🔓 Début de la déconnexion');
+			
+			// 1️⃣ Vérifier s'il y a une session demo locale à nettoyer
+			try {
+				const { demoLocalStorage } = await import('@/services/demo-local-storage');
+				if (demoLocalStorage.isSessionActive()) {
+					console.log('🧹 Nettoyage session démo locale');
+					demoLocalStorage.clearSession();
+				}
+			} catch (error) {
+				console.warn('Erreur nettoyage session démo:', error);
+			}
+			
+			// 2️⃣ Déconnexion Supabase seulement si session existe
+			if (session) {
+				console.log('🔓 Déconnexion Supabase');
+				const { error } = await supabase.auth.signOut();
+				if (error) {
+					console.warn('Erreur déconnexion Supabase:', error);
+					// Ne pas bloquer pour cette erreur
+				}
+			} else {
+				console.log('ℹ️ Pas de session Supabase à déconnecter');
+			}
+			
+			// 3️⃣ Nettoyer l'état local
 			setUser(null);
 			setSession(null);
 			setIsAuthenticated(false);
-			setLoading(false);
 			
-			// Naviguer immédiatement
+			console.log('✅ Déconnexion terminée avec succès');
+			toast.success("Déconnexion réussie !");
+			
+			// 4️⃣ Navigation en dernier
 			navigate("/", { replace: true });
-			
-			// Opérations asynchrones en arrière-plan (sans bloquer)
-			supabase.auth.signOut().then(() => {
-				toast.success("Déconnexion réussie !");
-			}).catch((err) => {
-				console.warn("Logout cleanup failed:", err);
-			});
 			
 		} catch (err: any) {
-			console.error("Logout failed", err);
-			// En cas d'échec, forcer la déconnexion
+			console.error("❌ Erreur lors de la déconnexion:", err);
+			
+			// En cas d'échec, forcer la déconnexion locale
 			setUser(null);
 			setSession(null);
 			setIsAuthenticated(false);
-			setLoading(false);
 			navigate("/", { replace: true });
-			toast.error("Déconnexion forcée");
+			toast.error("Déconnexion forcée suite à une erreur");
+		} finally {
+			setLoading(false);
+			setIsLoggingOut(false); // Réinitialiser le flag
 		}
-	}, [navigate]);
+	}, [navigate, session, isLoggingOut]);
 
 	const checkAuth = useCallback(async () => {
 		try {
