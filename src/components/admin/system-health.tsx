@@ -121,63 +121,6 @@ export function SystemHealthPanel() {
 
   return (
     <div className="space-y-6">
-      {/* Score de santé global */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Santé du Système
-            </div>
-            <Button variant="outline" size="sm" onClick={loadHealthMetrics}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualiser
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center mb-6">
-            <div className="relative w-32 h-32">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray={`${healthScore}, 100`}
-                  className="text-green-600 dark:text-green-400"
-                />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-muted-foreground/20"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{healthScore}%</div>
-                  <div className="text-xs text-muted-foreground">Santé</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center mb-4">
-            <h3 className="text-lg font-semibold">
-              {healthScore >= 90 ? "Système en excellente santé" :
-               healthScore >= 70 ? "Système en bonne santé" :
-               healthScore >= 50 ? "Système nécessite une attention" :
-               "Système critique"}
-            </h3>
-            <p className="text-muted-foreground">
-              {metrics.filter(m => m.status === 'healthy').length} sur {metrics.length} métriques sont saines
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Métriques détaillées */}
       <Card>
         <CardHeader>
@@ -265,6 +208,63 @@ export function SystemHealthPanel() {
                 </div>
               </div>
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Score de santé global */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Santé du Système
+            </div>
+            <Button variant="outline" size="sm" onClick={loadHealthMetrics}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualiser
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center mb-6">
+            <div className="relative w-32 h-32">
+              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                <path
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeDasharray={`${healthScore}, 100`}
+                  className="text-green-600 dark:text-green-400"
+                />
+                <path
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-muted-foreground/20"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{healthScore}%</div>
+                  <div className="text-xs text-muted-foreground">Santé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mb-4">
+            <h3 className="text-lg font-semibold">
+              {healthScore >= 90 ? "Système en excellente santé" :
+               healthScore >= 70 ? "Système en bonne santé" :
+               healthScore >= 50 ? "Système nécessite une attention" :
+               "Système critique"}
+            </h3>
+            <p className="text-muted-foreground">
+              {metrics.filter(m => m.status === 'healthy').length} sur {metrics.length} métriques sont saines
+            </p>
           </div>
         </CardContent>
       </Card>
