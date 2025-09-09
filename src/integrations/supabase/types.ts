@@ -1840,6 +1840,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      admin_cleanup_old_logs: {
+        Args: { days_old?: number }
+        Returns: Json
+      }
       admin_deactivate_cabinet: {
         Args: { cabinet_id: number }
         Returns: boolean
@@ -1856,6 +1860,10 @@ export type Database = {
           phone: string
           similarity_score: number
         }[]
+      }
+      admin_generate_usage_report: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       admin_get_cabinets_with_stats: {
         Args: Record<PropertyKey, never>
@@ -1950,6 +1958,10 @@ export type Database = {
           total_revenue: number
         }[]
       }
+      admin_get_storage_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       admin_get_system_health: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2000,6 +2012,10 @@ export type Database = {
           total_patients: number
           total_users: number
         }[]
+      }
+      admin_optimize_performance: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       admin_search_patients: {
         Args: {

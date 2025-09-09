@@ -8,9 +8,14 @@ import {
   BarChart3, 
   Database,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  Trash2,
+  Zap,
+  FileText
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function QuickActionsPanel() {
   const navigate = useNavigate();
@@ -66,6 +71,53 @@ export function QuickActionsPanel() {
         const analyticsTab = document.querySelector('[value="analytics"]');
         if (analyticsTab) {
           (analyticsTab as HTMLElement).click();
+        }
+      }
+    },
+    {
+      title: "Nettoyer les Logs",
+      description: "Supprimer les logs de plus de 30 jours",
+      icon: Trash2,
+      color: "text-orange-600",
+      action: async () => {
+        try {
+          const { data, error } = await supabase.rpc('admin_cleanup_old_logs', { days_old: 30 });
+          if (error) throw error;
+          const result = data as any;
+          toast.success(`${result.deleted_count} logs supprimés`);
+        } catch (error) {
+          toast.error("Erreur lors du nettoyage des logs");
+        }
+      }
+    },
+    {
+      title: "Optimiser Performance",
+      description: "Lancer l'optimisation de la base",
+      icon: Zap,
+      color: "text-green-600",
+      action: async () => {
+        try {
+          const { data, error } = await supabase.rpc('admin_optimize_performance');
+          if (error) throw error;
+          toast.success("Optimisation terminée avec succès");
+        } catch (error) {
+          toast.error("Erreur lors de l'optimisation");
+        }
+      }
+    },
+    {
+      title: "Rapport d'Utilisation",
+      description: "Générer un rapport détaillé",
+      icon: FileText,
+      color: "text-blue-600",
+      action: async () => {
+        try {
+          const { data, error } = await supabase.rpc('admin_generate_usage_report');
+          if (error) throw error;
+          console.log("Rapport généré:", data);
+          toast.success("Rapport d'utilisation généré");
+        } catch (error) {
+          toast.error("Erreur lors de la génération du rapport");
         }
       }
     },
