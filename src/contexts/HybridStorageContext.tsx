@@ -39,9 +39,22 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
   
   useEffect(() => {
     if (!isLoading && status) {
-      if (!status.isConfigured && !skipped) {
-        setShowSetup(true);
-      } else if (status.isConfigured && !status.isUnlocked && !skipped) {
+      // Vérifier si on est en mode démo pour éviter la configuration
+      const checkDemoMode = async () => {
+        try {
+          const { isDemoSession } = await import('@/utils/demo-detection');
+          const demoMode = await isDemoSession();
+          
+          if (demoMode) {
+            console.log('🎭 Mode démo détecté - Pas de configuration stockage nécessaire');
+            return;
+          }
+          
+          // En mode connecté, vérifier la configuration
+          if (!status.isConfigured && !skipped) {
+            console.log('⚙️ Configuration stockage requise');
+            setShowSetup(true);
+          } else if (status.isConfigured && !status.isUnlocked && !skipped) {
         // Charger la méthode de sécurité depuis la configuration
         const config = localStorage.getItem('hybrid-storage-config');
         if (config) {
@@ -53,8 +66,18 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
             setSecurityMethod('password');
           }
         }
-        setShowUnlock(true);
-      }
+            setShowUnlock(true);
+          }
+        } catch (error) {
+          console.error('Erreur vérification mode démo:', error);
+          // En cas d'erreur, procéder comme en mode normal
+          if (!status.isConfigured && !skipped) {
+            setShowSetup(true);
+          }
+        }
+      };
+      
+      checkDemoMode();
     }
   }, [isLoading, status, skipped]);
 

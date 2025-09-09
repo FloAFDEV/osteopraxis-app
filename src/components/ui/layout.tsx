@@ -13,6 +13,7 @@ import { PerformanceMonitor } from "@/components/ui/performance-monitor";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { DemoBanner } from "@/components/ui/demo-banner";
+import { ConfigLaterBanner } from "@/components/ui/config-later-banner";
 import { cn } from "@/lib/utils";
 import {
 	Activity,
@@ -43,6 +44,24 @@ export function Layout({ children }: LayoutProps) {
 	const { user, logout, isAdmin } = useAuth();
 	const { isDemoMode } = useDemo();
 	const queryClient = useQueryClient();
+	const [showConfigBanner, setShowConfigBanner] = React.useState(false);
+
+	// Vérifier si on doit afficher la bannière de configuration
+	React.useEffect(() => {
+		const checkConfigNeed = async () => {
+			if (isDemoMode) return; // Pas de config en mode démo
+			
+			const isSkipped = sessionStorage.getItem('hybrid-storage-skip') === 'true';
+			const hasConfig = localStorage.getItem('hybrid-storage-config');
+			
+			// Afficher la bannière si pas configuré et pas ignoré
+			if (!hasConfig && !isSkipped) {
+				setShowConfigBanner(true);
+			}
+		};
+		
+		checkConfigNeed();
+	}, [isDemoMode]);
 
 	const handleClearDemo = () => {
 		// Nettoyer le cache des queries pour éviter les données résiduelles
@@ -69,17 +88,31 @@ export function Layout({ children }: LayoutProps) {
 
 	return (
 		<div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
-			{/* Banner de mode démo en tout premier si en mode démo */}
-			{isDemoMode && (
-				<div className="sticky top-0 z-50 bg-background border-b">
-					<div className="container px-4">
-						<DemoBanner onClearDemo={handleClearDemo} />
+			{/* Bannières en haut */}
+			<div className="sticky top-0 z-50 bg-background">
+				{/* Banner de mode démo */}
+				{isDemoMode && (
+					<div className="border-b">
+						<div className="container px-4">
+							<DemoBanner onClearDemo={handleClearDemo} />
+						</div>
 					</div>
-				</div>
-			)}
+				)}
+				
+				{/* Banner de configuration recommandée (seulement en mode connecté) */}
+				{!isDemoMode && showConfigBanner && (
+					<div className="border-b">
+						<div className="container px-4">
+							<ConfigLaterBanner 
+								onDismiss={() => setShowConfigBanner(false)}
+							/>
+						</div>
+					</div>
+				)}
+			</div>
 			
 			<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b print:hidden"
-			        style={{ top: isDemoMode ? '80px' : '0' }}>
+			        style={{ top: (isDemoMode || showConfigBanner) ? '80px' : '0' }}>
 				<div className="container flex h-16 items-center justify-between">
 					<div className="flex items-center gap-2">
 						<NavLink

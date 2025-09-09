@@ -50,11 +50,11 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
   };
 
   return (
-    <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
-      <Info className="h-4 w-4 text-amber-600" />
+    <Alert className="border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-100">
+      <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
       <AlertDescription className="flex items-center justify-between w-full">
         <div className="flex items-center gap-3 flex-1">
-          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">
+          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/50 dark:text-amber-200 dark:border-amber-600">
             <Database className="h-3 w-3 mr-1" />
             MODE DÉMO
           </Badge>
@@ -70,7 +70,7 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
           variant="outline"
           size="sm"
           onClick={handleClearDemo}
-          className="border-amber-300 text-amber-800 hover:bg-amber-100 ml-3"
+          className="border-amber-300 text-amber-800 hover:bg-amber-100 ml-3 dark:border-amber-600 dark:text-amber-200 dark:hover:bg-amber-900/50"
         >
           <Trash2 className="h-3 w-3 mr-1" />
           Quitter le mode démo
