@@ -1,13 +1,16 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TestTube, Shield, Zap, Settings, Database, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { TestTube, Shield, Zap, Settings, Database, Users, ArrowLeft } from 'lucide-react';
 import { ComprehensiveTestPanel } from '@/components/testing/ComprehensiveTestPanel';
 import { StorageTestPanel } from '@/components/testing/StorageTestPanel';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function TestingDashboardPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Vérifier les permissions admin
   const isAdmin = user?.role === 'ADMIN' || user?.email?.includes('admin');
@@ -32,15 +35,25 @@ export default function TestingDashboardPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* En-tête */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <TestTube className="h-8 w-8 text-primary" />
-          Tableau de Bord Tests
-        </h1>
-        <p className="text-muted-foreground">
-          Centre de contrôle pour tester et valider toutes les fonctionnalités de l'application.
-        </p>
+      {/* Bouton retour et en-tête */}
+      <div className="flex items-center gap-4">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/admin/dashboard')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour Dashboard
+        </Button>
+        <div className="flex-1 space-y-2">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <TestTube className="h-8 w-8 text-primary" />
+            Tableau de Bord Tests
+          </h1>
+          <p className="text-muted-foreground">
+            Centre de contrôle pour tester et valider toutes les fonctionnalités de l'application.
+          </p>
+        </div>
       </div>
 
       {/* Informations importantes */}
