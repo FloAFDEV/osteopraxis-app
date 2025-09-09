@@ -88,31 +88,30 @@ export function Layout({ children }: LayoutProps) {
 
 	return (
 		<div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
-			{/* Bannières en haut */}
-			<div className="sticky top-0 z-50 bg-background">
-				{/* Banner de mode démo */}
-				{isDemoMode && (
-					<div className="border-b">
-						<div className="container px-4">
-							<DemoBanner onClearDemo={handleClearDemo} />
-						</div>
+			{/* Bannières en haut - fixed pour éviter les conflits */}
+			{isDemoMode && (
+				<div className="fixed top-0 left-0 right-0 z-50 bg-background border-b">
+					<div className="container px-4">
+						<DemoBanner onClearDemo={handleClearDemo} />
 					</div>
-				)}
-				
-				{/* Banner de configuration recommandée (seulement en mode connecté) */}
-				{!isDemoMode && showConfigBanner && (
-					<div className="border-b">
-						<div className="container px-4">
-							<ConfigLaterBanner 
-								onDismiss={() => setShowConfigBanner(false)}
-							/>
-						</div>
+				</div>
+			)}
+			
+			{!isDemoMode && showConfigBanner && (
+				<div className="fixed top-0 left-0 right-0 z-50 bg-background border-b">
+					<div className="container px-4">
+						<ConfigLaterBanner 
+							onDismiss={() => setShowConfigBanner(false)}
+						/>
 					</div>
-				)}
-			</div>
+				</div>
+			)}
 			
 			<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b print:hidden"
-			        style={{ top: (isDemoMode || showConfigBanner) ? '80px' : '0' }}>
+			        style={{ 
+						marginTop: (isDemoMode || showConfigBanner) ? '60px' : '0',
+						top: '0' 
+					}}>
 				<div className="container flex h-16 items-center justify-between">
 					<div className="flex items-center gap-2">
 						<NavLink
