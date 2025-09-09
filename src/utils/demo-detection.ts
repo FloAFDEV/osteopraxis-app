@@ -58,18 +58,13 @@ export const isDemoSession = async (): Promise<boolean> => {
     
     // 3️⃣ Vérifier si c'est un utilisateur démo dans Supabase
     if (session?.user && isDemoUser(session.user)) {
-      console.log('🎭 Utilisateur démo Supabase détecté - Création session locale');
+      console.log('🎭 Utilisateur démo Supabase détecté - Mode démo actif');
       
-      // Créer une session démo locale pour isoler les données
-      demoLocalStorage.createSession();
-      demoLocalStorage.seedDemoData();
-      
-      // Déconnexion silencieuse de Supabase pour forcer le mode démo pur
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-        console.log('🔓 Déconnexion silencieuse de Supabase effectuée');
-      } catch (error) {
-        console.warn('Erreur lors de la déconnexion silencieuse:', error);
+      // Créer une session démo locale si elle n'existe pas déjà
+      if (!demoLocalStorage.isSessionActive()) {
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+        console.log('🎭 Session démo locale créée');
       }
       
       return true;
