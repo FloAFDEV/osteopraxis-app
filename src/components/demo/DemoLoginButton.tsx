@@ -27,18 +27,24 @@ export const DemoLoginButton = ({
     async () => {
       setIsLoading(true);
       try {
-        // Créer un compte démo temporaire unique
-        const { email, password, sessionId } = await DemoService.createDemoAccount();
+        console.log('🎭 Début connexion démo');
         
-        // Se connecter avec le compte démo temporaire
-        await login(email, password);
+        // Créer directement une session demo locale (mode pur)
+        const { demoLocalStorage } = await import('@/services/demo-local-storage');
         
-        toast.success(`Session démo créée (${sessionId})`, {
-          description: "Vos données sont isolées et expireront dans 30 minutes"
-        });
-      } catch (error: any) {
-        console.error("Erreur connexion démo:", error);
-        toast.error(error?.message || "Erreur lors de la création de la session démo");
+        // Créer une session démo locale directement
+        demoLocalStorage.createSession();
+        demoLocalStorage.seedDemoData();
+        
+        console.log('🎭 Session démo locale créée avec succès');
+        toast.success("Mode démo activé !");
+        
+        // Forcer le rechargement pour que la détection de mode fonctionne
+        window.location.href = '/dashboard';
+        
+      } catch (error) {
+        console.error('❌ Erreur connexion démo:', error);
+        toast.error("Erreur lors de l'activation du mode démo");
       } finally {
         setIsLoading(false);
       }

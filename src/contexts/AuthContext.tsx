@@ -56,7 +56,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(true); // Start with true during initialization
 	const [error, setError] = useState<string | null>(null);
-	const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false); // Éviter les déconnexions multiples
 	const navigate = useNavigate();
 	
 	// Activer la déconnexion automatique si l'utilisateur est connecté
@@ -85,7 +84,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	}, []);
 
 	const register = useCallback(async (userData: any) => {
-		setLoading(true);
+			setLoading(true);
 		setError(null);
 		try {
 			const redirectUrl = `${window.location.origin}/`;
@@ -118,12 +117,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 
 	const logout = useCallback(async () => {
 		// Empêcher les déconnexions multiples
-		if (isLoggingOut) {
+		if (loading) {
 			console.log('⚠️ Déconnexion déjà en cours, ignorer cette tentative');
 			return;
 		}
 		
-		setIsLoggingOut(true);
 		try {
 			console.log('🔓 Début de la déconnexion');
 			
@@ -172,9 +170,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			toast.error("Déconnexion forcée suite à une erreur");
 		} finally {
 			setLoading(false);
-			setIsLoggingOut(false); // Réinitialiser le flag
 		}
-	}, [navigate, session, isLoggingOut]);
+	}, [navigate, session]);
 
 	const checkAuth = useCallback(async () => {
 		try {
@@ -411,13 +408,12 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										setSession(session);
 										setIsAuthenticated(true);
 										
-										// Navigation uniquement sur connexion explicite (pas TOKEN_REFRESHED)
-										if (event === 'SIGNED_IN') {
-											setTimeout(() => {
-												navigate("/dashboard", { replace: true });
-												toast.success("Connexion en mode démo réussie !");
-											}, 100);
-										}
+										// Navigation immédiate vers dashboard pour les utilisateurs démo
+										console.log('🎭 Redirection utilisateur démo vers dashboard');
+										setTimeout(() => {
+											navigate("/dashboard", { replace: true });
+											toast.success("Connexion en mode démo réussie !");
+										}, 100);
 									} else {
 										setUser(null);
 									}
