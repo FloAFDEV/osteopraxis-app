@@ -91,8 +91,49 @@ class CabinetCacheService {
    * Appel direct à Supabase (pas de boucle)
    */
   private async fetchFromSupabase(): Promise<Cabinet[]> {
-    // Appel direct à Supabase - Mode démo géré par StorageRouter
-    return await supabaseCabinetService.getCabinets();
+    try {
+      // Utiliser directement l'API Supabase sans passer par le router de stockage
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data, error } = await supabase
+        .from('Cabinet')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Erreur Supabase getCabinets:', error);
+        throw error;
+      }
+
+      // Mapper les données Supabase au type Cabinet avec valeurs par défaut
+      const cabinets: Cabinet[] = (data || []).map((cabinet: any) => ({
+        id: cabinet.id,
+        name: cabinet.name,
+        address: cabinet.address,
+        city: '', // Pas en base pour l'instant
+        postalCode: '', // Pas en base pour l'instant  
+        phone: cabinet.phone,
+        email: cabinet.email,
+        siret: null, // Pas en base pour l'instant
+        iban: null, // Pas en base pour l'instant
+        bic: null, // Pas en base pour l'instant
+        country: 'France', // Valeur par défaut
+        osteopathId: cabinet.osteopathId,
+        createdAt: cabinet.createdAt,
+        updatedAt: cabinet.updatedAt,
+        imageUrl: cabinet.imageUrl,
+        logoUrl: cabinet.logoUrl,
+        professionalProfileId: cabinet.professionalProfileId,
+        tenant_id: cabinet.tenant_id,
+        userId: null, // Pas en base pour l'instant
+        website: null // Pas en base pour l'instant
+      }));
+
+      return cabinets;
+    } catch (error) {
+      console.error('Erreur récupération cabinets:', error);
+      throw error;
+    }
   }
 
   private delay(ms: number): Promise<void> {
