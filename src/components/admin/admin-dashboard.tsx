@@ -6,6 +6,7 @@ import { adminApiService } from "@/services/admin-api-service";
 import { AdminLayout } from "@/components/ui/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { UsersManagement } from "./users-management";
 import { CabinetsManagement } from "./cabinets-management";
@@ -24,7 +25,7 @@ import { ProactiveUserManagement } from "./proactive-user-management";
 import { SecurityCompliance } from "./security-compliance";
 import { SystemOptimization } from "./system-optimization";
 import { 
-  Users, Building, Calendar, RefreshCw, User, ShieldCheck 
+  Users, Building, Calendar, RefreshCw, User, ShieldCheck, TestTube 
 } from "lucide-react";
 
 export function AdminDashboard() {
@@ -157,8 +158,31 @@ export function AdminDashboard() {
           </Card>
         </div>
         
+        {/* Accès rapide aux tests */}
+        <div className="flex gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <TestTube className="h-6 w-6 text-primary" />
+                <div>
+                  <h3 className="font-medium">Suite de Tests</h3>
+                  <p className="text-sm text-muted-foreground">Accéder au tableau de bord de tests</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/admin/testing'}
+                  className="ml-auto"
+                >
+                  Ouvrir
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:grid-cols-16 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:grid-cols-16">
             <TabsTrigger value="overview" className="text-xs md:text-sm">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="stats" className="text-xs md:text-sm">Statistiques</TabsTrigger>
             <TabsTrigger value="health" className="text-xs md:text-sm">Santé</TabsTrigger>
