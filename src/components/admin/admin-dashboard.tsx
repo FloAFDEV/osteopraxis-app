@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { UsersManagement } from "./users-management";
+import { EnhancedUsersManagement } from "./enhanced-users-management";
 import { CabinetsManagement } from "./cabinets-management";
 import { PatientsManagement } from "./patients-management";
 import { AdminSettingsPanel } from "./admin-settings";
@@ -26,6 +27,7 @@ import { SecurityCompliance } from "./security-compliance";
 import { SystemOptimization } from "./system-optimization";
 import { QuickActionsPanel } from "./QuickActionsPanel";
 import { SimpleAdminOverview } from "./simple-admin-overview";
+import { LocalStorageConfiguration } from "./local-storage-configuration";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck, TestTube 
 } from "lucide-react";
@@ -223,11 +225,12 @@ export function AdminDashboard() {
                 <div className="bg-card rounded-lg border p-2">
                   <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Administration</div>
                   <div className="flex gap-1">
-                    <TabsList className="grid grid-cols-4 h-auto p-1 bg-muted/50">
-                      <TabsTrigger value="proactive" className="text-sm px-4 py-2">Gestion Pro.</TabsTrigger>
-                      <TabsTrigger value="optimization" className="text-sm px-4 py-2">Optimisation</TabsTrigger>
-                      <TabsTrigger value="tests" className="text-sm px-4 py-2">Tests</TabsTrigger>
-                      <TabsTrigger value="settings" className="text-sm px-4 py-2">Paramètres</TabsTrigger>
+                    <TabsList className="grid grid-cols-5 h-auto p-1 bg-muted/50">
+                      <TabsTrigger value="proactive" className="text-sm px-3 py-2">Gestion Pro.</TabsTrigger>
+                      <TabsTrigger value="optimization" className="text-sm px-3 py-2">Optimisation</TabsTrigger>
+                      <TabsTrigger value="storage" className="text-sm px-3 py-2">Stockage</TabsTrigger>
+                      <TabsTrigger value="tests" className="text-sm px-3 py-2">Tests</TabsTrigger>
+                      <TabsTrigger value="settings" className="text-sm px-3 py-2">Paramètres</TabsTrigger>
                     </TabsList>
                   </div>
                 </div>
@@ -247,7 +250,7 @@ export function AdminDashboard() {
             </TabsContent>
             
             <TabsContent value="users">
-              <UsersManagement />
+              <EnhancedUsersManagement />
             </TabsContent>
             
             <TabsContent value="cabinets">
@@ -292,6 +295,10 @@ export function AdminDashboard() {
             
             <TabsContent value="logs">
               <AdminLogsPanel />
+            </TabsContent>
+            
+            <TabsContent value="storage">
+              <LocalStorageConfiguration />
             </TabsContent>
             
             <TabsContent value="tests">
