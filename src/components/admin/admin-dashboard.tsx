@@ -24,6 +24,7 @@ import { BusinessAnalytics } from "./business-analytics";
 import { ProactiveUserManagement } from "./proactive-user-management";
 import { SecurityCompliance } from "./security-compliance";
 import { SystemOptimization } from "./system-optimization";
+import { QuickActionsPanel } from "./QuickActionsPanel";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck, TestTube 
 } from "lucide-react";
@@ -158,49 +159,32 @@ export function AdminDashboard() {
           </Card>
         </div>
         
-        {/* Accès rapide aux tests */}
-        <div className="mb-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <TestTube className="h-6 w-6 text-primary" />
-                <div>
-                  <h3 className="font-medium">Suite de Tests</h3>
-                  <p className="text-sm text-muted-foreground">Accéder au tableau de bord de tests</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => window.open('/admin/testing', '_blank')}
-                  className="ml-auto"
-                >
-                  Ouvrir
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Actions rapides */}
+        <QuickActionsPanel />
         
-        <div className="mb-6">
+        <div className="mb-8">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="mb-6">
-              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:grid-cols-16 h-auto p-1">
-                <TabsTrigger value="overview" className="text-xs md:text-sm px-2 py-2">Vue d'ensemble</TabsTrigger>
-                <TabsTrigger value="stats" className="text-xs md:text-sm px-2 py-2">Statistiques</TabsTrigger>
-                <TabsTrigger value="health" className="text-xs md:text-sm px-2 py-2">Santé</TabsTrigger>
-                <TabsTrigger value="users" className="text-xs md:text-sm px-2 py-2">Utilisateurs</TabsTrigger>
-                <TabsTrigger value="cabinets" className="text-xs md:text-sm px-2 py-2">Cabinets</TabsTrigger>
-                <TabsTrigger value="patients" className="text-xs md:text-sm px-2 py-2">Patients</TabsTrigger>
-                <TabsTrigger value="subscriptions" className="text-xs md:text-sm px-2 py-2">Abonnements</TabsTrigger>
-                <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">Analytics</TabsTrigger>
-                <TabsTrigger value="proactive" className="text-xs md:text-sm px-2 py-2">Gestion Pro.</TabsTrigger>
-                <TabsTrigger value="security" className="text-xs md:text-sm px-2 py-2">Sécurité</TabsTrigger>
-                <TabsTrigger value="optimization" className="text-xs md:text-sm px-2 py-2">Optimisation</TabsTrigger>
-                <TabsTrigger value="monitoring" className="text-xs md:text-sm px-2 py-2">Monitoring</TabsTrigger>
-                <TabsTrigger value="deleted" className="text-xs md:text-sm px-2 py-2">Supprimés</TabsTrigger>
-                <TabsTrigger value="usb" className="text-xs md:text-sm px-2 py-2">USB</TabsTrigger>
-                <TabsTrigger value="logs" className="text-xs md:text-sm px-2 py-2">Logs</TabsTrigger>
-                <TabsTrigger value="settings" className="text-xs md:text-sm px-2 py-2">Paramètres</TabsTrigger>
+            <div className="mb-8 p-4 bg-card rounded-lg border">
+              <TabsList className="grid w-full h-auto p-2 bg-muted/50" style={{
+                gridTemplateColumns: 'repeat(16, minmax(80px, 1fr))',
+                gap: '4px'
+              }}>
+                <TabsTrigger value="overview" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Vue d'ensemble</TabsTrigger>
+                <TabsTrigger value="stats" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Statistiques</TabsTrigger>
+                <TabsTrigger value="health" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Santé</TabsTrigger>
+                <TabsTrigger value="users" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Utilisateurs</TabsTrigger>
+                <TabsTrigger value="cabinets" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Cabinets</TabsTrigger>
+                <TabsTrigger value="patients" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Patients</TabsTrigger>
+                <TabsTrigger value="subscriptions" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Abonnements</TabsTrigger>
+                <TabsTrigger value="analytics" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Analytics</TabsTrigger>
+                <TabsTrigger value="proactive" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Gestion Pro.</TabsTrigger>
+                <TabsTrigger value="security" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Sécurité</TabsTrigger>
+                <TabsTrigger value="optimization" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Optimisation</TabsTrigger>
+                <TabsTrigger value="monitoring" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Monitoring</TabsTrigger>
+                <TabsTrigger value="deleted" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Supprimés</TabsTrigger>
+                <TabsTrigger value="usb" className="text-xs px-3 py-3 h-auto whitespace-nowrap">USB</TabsTrigger>
+                <TabsTrigger value="logs" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Logs</TabsTrigger>
+                <TabsTrigger value="settings" className="text-xs px-3 py-3 h-auto whitespace-nowrap">Paramètres</TabsTrigger>
               </TabsList>
             </div>
             
