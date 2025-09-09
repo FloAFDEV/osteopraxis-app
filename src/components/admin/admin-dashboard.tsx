@@ -25,12 +25,15 @@ import { ProactiveUserManagement } from "./proactive-user-management";
 import { SecurityCompliance } from "./security-compliance";
 import { SystemOptimization } from "./system-optimization";
 import { QuickActionsPanel } from "./QuickActionsPanel";
+import { SimpleAdminOverview } from "./simple-admin-overview";
 import { 
   Users, Building, Calendar, RefreshCw, User, ShieldCheck, TestTube 
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function AdminDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -220,9 +223,10 @@ export function AdminDashboard() {
                 <div className="bg-card rounded-lg border p-2">
                   <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Administration</div>
                   <div className="flex gap-1">
-                    <TabsList className="grid grid-cols-3 h-auto p-1 bg-muted/50">
+                    <TabsList className="grid grid-cols-4 h-auto p-1 bg-muted/50">
                       <TabsTrigger value="proactive" className="text-sm px-4 py-2">Gestion Pro.</TabsTrigger>
                       <TabsTrigger value="optimization" className="text-sm px-4 py-2">Optimisation</TabsTrigger>
+                      <TabsTrigger value="tests" className="text-sm px-4 py-2">Tests</TabsTrigger>
                       <TabsTrigger value="settings" className="text-sm px-4 py-2">Paramètres</TabsTrigger>
                     </TabsList>
                   </div>
@@ -231,7 +235,7 @@ export function AdminDashboard() {
             </div>
             
             <TabsContent value="overview">
-              <SystemHealthPanel />
+              <SimpleAdminOverview />
             </TabsContent>
             
             <TabsContent value="stats">
@@ -288,6 +292,31 @@ export function AdminDashboard() {
             
             <TabsContent value="logs">
               <AdminLogsPanel />
+            </TabsContent>
+            
+            <TabsContent value="tests">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TestTube className="h-5 w-5" />
+                    Centre de Tests
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-muted-foreground">
+                      Accédez au tableau de bord de tests complet pour diagnostiquer et valider le système.
+                    </p>
+                    <Button 
+                      onClick={() => navigate('/admin/testing')}
+                      className="flex items-center gap-2"
+                    >
+                      <TestTube className="h-4 w-4" />
+                      Ouvrir le Tableau de Bord Tests
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
             
             <TabsContent value="settings">
