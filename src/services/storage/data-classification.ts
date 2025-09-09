@@ -10,13 +10,13 @@ export type DataType =
   // 🔴 DONNÉES HDS (SENSIBLES) - Stockage local obligatoire
   | 'patients'
   | 'appointments' 
-  | 'invoices'
   | 'medical_records'
   | 'patient_documents'
   | 'appointment_notes'
   | 'billing_data'
   
-  // 🟢 DONNÉES NON-HDS - Stockage Supabase
+  // 🟢 DONNÉES NON-HDS - Stockage Supabase autorisé
+  | 'invoices'      // Factures = données comptables non-HDS
   | 'user_preferences'
   | 'system_settings'
   | 'audit_logs'
@@ -37,7 +37,6 @@ export const DATA_CLASSIFICATION = {
   HDS: [
     'patients',
     'appointments',
-    'invoices',
     'medical_records',
     'patient_documents',
     'appointment_notes',
@@ -46,6 +45,7 @@ export const DATA_CLASSIFICATION = {
   
   // 🟢 NON-HDS - DONNÉES NON SENSIBLES (Supabase autorisé)
   NON_HDS: [
+    'invoices',        // Factures = données comptables non-HDS
     'user_preferences',
     'system_settings',
     'audit_logs',

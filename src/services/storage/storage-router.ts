@@ -209,8 +209,40 @@ export class StorageRouter {
 
     // Import dynamique des services Supabase selon le type
     switch (dataType) {
+      case 'cabinets':
+        const cabinetMethods = await import('@/services/supabase-api/cabinet');
+        return {
+          create: (data) => cabinetMethods.createCabinet(data as any) as unknown as Promise<T>,
+          getById: (id) => cabinetMethods.getCabinetById(Number(id)) as unknown as Promise<T | null>,
+          getAll: () => cabinetMethods.getCabinets() as unknown as Promise<T[]>,
+          update: (id, updates) => cabinetMethods.updateCabinet(Number(id), updates as any) as unknown as Promise<T>,
+          delete: (id) => cabinetMethods.deleteCabinet(Number(id)).then(() => true)
+        } as StorageAdapter<T>;
+        
+      case 'osteopaths':
+        // Utiliser les services existants qui fonctionnent
+        const { osteopathService } = await import('@/services/api/osteopath-service');
+        return {
+          create: (data) => osteopathService.createOsteopath(data as any) as unknown as Promise<T>,
+          getById: (id) => osteopathService.getOsteopathById(Number(id)) as unknown as Promise<T | null>,
+          getAll: () => osteopathService.getOsteopaths() as unknown as Promise<T[]>,
+          update: (id, updates) => osteopathService.updateOsteopath(Number(id), updates as any) as unknown as Promise<T>,
+          delete: (id) => osteopathService.deleteOsteopath?.(Number(id)) ?? Promise.resolve(true)
+        } as StorageAdapter<T>;
+        
+      case 'invoices':
+        // Utiliser les services existants qui fonctionnent  
+        const { invoiceService } = await import('@/services/api/invoice-service');
+        return {
+          create: (data) => invoiceService.createInvoice(data as any) as unknown as Promise<T>,
+          getById: (id) => invoiceService.getInvoiceById(Number(id)) as unknown as Promise<T | null>,
+          getAll: () => invoiceService.getInvoices() as unknown as Promise<T[]>,
+          update: (id, updates) => invoiceService.updateInvoice(Number(id), { ...updates, id: Number(id) } as any) as unknown as Promise<T>,
+          delete: (id) => invoiceService.deleteInvoice(Number(id))
+        } as StorageAdapter<T>;
+        
       case 'users':
-        // Pour l'instant, retourner un mock adapter pour les utilisateurs
+        // Mock pour les utilisateurs
         return {
           create: async (data) => ({ ...data, id: Date.now() } as T),
           getById: async (id) => null,

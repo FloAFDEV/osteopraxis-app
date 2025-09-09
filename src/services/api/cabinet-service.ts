@@ -41,8 +41,13 @@ export const cabinetService = {
   },
 
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
-    // En attendant l'implémentation complète Supabase
-    return [];
+    const adapter = await storageRouter.route<Cabinet>('cabinets');
+    const allCabinets = await adapter.getAll();
+    
+    // Filtrer par ostéopathe ou par associations cabinet-ostéopathe
+    return allCabinets.filter(cabinet => 
+      cabinet.osteopathId === osteopathId
+    );
   },
 
   // Méthodes pour associations ostéopathe-cabinet (compatibilité)
