@@ -11,6 +11,8 @@ import {
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PerformanceMonitor } from "@/components/ui/performance-monitor";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemo } from "@/contexts/DemoContext";
+import { DemoBanner } from "@/components/ui/demo-banner";
 import { cn } from "@/lib/utils";
 import {
 	Activity,
@@ -29,9 +31,8 @@ import {
 } from "lucide-react";
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { CurrentDateTimeDisplay } from "./CurrentDateTimeDisplay";
-import { DemoIndicator } from "@/components/demo/DemoIndicator";
-import { DemoService } from "@/services/demo-service";
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -40,7 +41,13 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	const { user, logout, isAdmin } = useAuth();
-	const isDemoMode = React.useMemo(() => user?.email ? DemoService.isDemoUser(user.email) : false, [user?.email]);
+	const { isDemoMode } = useDemo();
+	const queryClient = useQueryClient();
+
+	const handleClearDemo = () => {
+		// Nettoyer le cache des queries pour éviter les données résiduelles
+		queryClient.clear();
+	};
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -62,7 +69,17 @@ export function Layout({ children }: LayoutProps) {
 
 	return (
 		<div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
-			<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b print:hidden">
+			{/* Banner de mode démo en tout premier si en mode démo */}
+			{isDemoMode && (
+				<div className="sticky top-0 z-50 bg-background border-b">
+					<div className="container px-4">
+						<DemoBanner onClearDemo={handleClearDemo} />
+					</div>
+				</div>
+			)}
+			
+			<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b print:hidden"
+			        style={{ top: isDemoMode ? '80px' : '0' }}>
 				<div className="container flex h-16 items-center justify-between">
 					<div className="flex items-center gap-2">
 						<NavLink
@@ -439,8 +456,7 @@ export function Layout({ children }: LayoutProps) {
 			)}
 
 			<main className="flex-1 container px-4 md:px-6 py-6 print:p-0 print:m-0">
-		{isDemoMode && <DemoIndicator className="mb-4" />}
-		{children}
+				{children}
 			</main>
 
 			<footer className="border-t py-6 bg-muted/30 print:hidden">

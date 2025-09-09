@@ -1,32 +1,53 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Utilitaire centralisé pour détecter si l'utilisateur est en mode démo
- * Évite les incohérences entre les différents composants
+ * Détermine si un utilisateur est un utilisateur démo
  */
-export const isDemoUser = (user: any): boolean => {
+export function isDemoUser(user: any): boolean {
   if (!user) return false;
-  
-  // ✅ ADMIN FORCER EN MODE CONNECTÉ - Jamais en mode démo
+
+  // Un utilisateur avec le rôle ADMIN n'est jamais en mode démo
   if (user.role === 'ADMIN' || user.user_metadata?.role === 'ADMIN') {
     return false;
   }
-  
-  return user.email === 'demo@patienthub.com' || 
-         user.email?.startsWith('demo-') ||
-         user.id === '999' || // ID factice pour démo
-         user.osteopathId === 999 ||
-         user.user_metadata?.is_demo === true ||
-         user.user_metadata?.is_demo_user === true;
-};
+
+  // Vérifier les indicateurs de démo
+  const email = user.email?.toLowerCase();
+  const demoIndicators = [
+    email?.includes('demo'),
+    email?.includes('test'),
+    user.id?.includes('demo'),
+    user.user_metadata?.demo === true,
+    user.user_metadata?.isDemoUser === true,
+  ];
+
+  return demoIndicators.some(indicator => indicator === true);
+}
 
 /**
- * Détection STRICTE du mode démo - Sécurité renforcée
- * Empêche tout croisement entre démo et données réelles
+ * 🔐 Détection intelligente du mode de session avec priorité à l'authentification réelle
  */
 export const isDemoSession = async (): Promise<boolean> => {
   try {
-    // 1️⃣ PRIORITÉ ABSOLUE: Vérifier la session locale démo
+    // 1️⃣ PRIORITÉ ABSOLUE: Vérifier d'abord l'authentification réelle
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Si utilisateur vraiment connecté avec un compte réel, jamais en mode démo
+    if (session?.user && !isDemoUser(session.user)) {
+      console.log('🔐 Utilisateur réellement connecté détecté - Mode connecté forcé');
+      
+      // Nettoyer toute session démo locale existante pour éviter les conflits
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      if (demoLocalStorage.isSessionActive()) {
+        console.log('🧹 Nettoyage session démo locale (utilisateur réel connecté)');
+        demoLocalStorage.clearSession();
+      }
+      
+      return false; // Mode connecté
+    }
+    
+    // 2️⃣ Ensuite vérifier la session locale démo
     const { demoLocalStorage } = await import('@/services/demo-local-storage');
     const hasLocalDemoSession = demoLocalStorage.isSessionActive();
     
@@ -35,38 +56,31 @@ export const isDemoSession = async (): Promise<boolean> => {
       return true;
     }
     
-    // 2️⃣ Vérifier la session Supabase seulement si pas de session locale
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    // ✅ ADMIN TOUJOURS EN MODE CONNECTÉ
-    if (session?.user?.role === 'ADMIN' || session?.user?.user_metadata?.role === 'ADMIN') {
-      console.log('👑 Utilisateur ADMIN détecté - Mode connecté forcé');
-      return false;
-    }
-    
+    // 3️⃣ Vérifier si c'est un utilisateur démo dans Supabase
     if (session?.user && isDemoUser(session.user)) {
-      console.log('🎭 Utilisateur démo Supabase détecté, création session locale EXCLUSIVE');
+      console.log('🎭 Utilisateur démo Supabase détecté - Création session locale');
       
-      // Créer une session locale ET déconnecter de Supabase pour éviter le croisement
+      // Créer une session démo locale pour isoler les données
       demoLocalStorage.createSession();
       demoLocalStorage.seedDemoData();
       
-      // Déconnexion silencieuse de Supabase pour éviter la contamination
+      // Déconnexion silencieuse de Supabase pour forcer le mode démo pur
       try {
         await supabase.auth.signOut({ scope: 'local' });
-        console.log('🔒 Déconnexion Supabase silencieuse pour mode démo pur');
+        console.log('🔓 Déconnexion silencieuse de Supabase effectuée');
       } catch (error) {
-        console.warn('⚠️ Erreur déconnexion Supabase:', error);
+        console.warn('Erreur lors de la déconnexion silencieuse:', error);
       }
       
       return true;
     }
     
-    // 3️⃣ Mode connecté réel
+    // 4️⃣ Aucune session active - mode connecté par défaut
+    console.log('📱 Aucune session démo - Mode connecté');
     return false;
+    
   } catch (error) {
-    console.error('❌ Erreur détection mode démo:', error);
-    // En cas d'erreur, considérer comme NON-démo par sécurité
-    return false;
+    console.error('Erreur lors de la détection de session démo:', error);
+    return false; // En cas d'erreur, mode connecté par défaut
   }
 };

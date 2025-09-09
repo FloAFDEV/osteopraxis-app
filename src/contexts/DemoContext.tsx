@@ -44,8 +44,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     
     checkDemoMode();
     
-    // Vérifier périodiquement les changements de mode (ex: déconnexion)
-    const interval = setInterval(checkDemoMode, 2000);
+    // Vérifier plus fréquemment les changements de mode pour une réactivité immédiate
+    const interval = setInterval(checkDemoMode, 1000);
     
     return () => {
       mounted = false;
