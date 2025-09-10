@@ -37,7 +37,7 @@ const PrivacyPolicyPage = () => {
                     <li>Gestion des dossiers patients et des rendez-vous</li>
                     <li>Accès sécurisé à votre compte et vos données</li>
                     <li>Amélioration continue de la plateforme</li>
-                    <li>Envoi d’informations importantes relatives au service</li>
+                    <li>Envoi d'informations importantes relatives au service</li>
                     <li>Respect des obligations légales et réglementaires</li>
                   </ul>
                 </section>
@@ -45,7 +45,10 @@ const PrivacyPolicyPage = () => {
                 <section>
                   <h2 className="text-2xl font-semibold mb-4">4. Protection des Données Médicales</h2>
                   <p>
-                    AFDEV applique des mesures techniques et organisationnelles rigoureuses afin d’assurer la confidentialité et la sécurité des données de santé, conformément au RGPD et aux exigences du secteur médical.
+                    AFDEV applique des mesures techniques et organisationnelles rigoureuses afin d'assurer la confidentialité et la sécurité des données de santé, conformément au RGPD, au Code de la santé publique français et aux exigences HDS (Hébergement de Données de Santé).
+                  </p>
+                  <p className="mt-2">
+                    Les données de santé sont stockées localement sur votre appareil avec chiffrement AES-256, garantissant leur protection maximale conformément à l'article L.1111-8 du Code de la santé publique.
                   </p>
                 </section>
 
@@ -53,6 +56,9 @@ const PrivacyPolicyPage = () => {
                   <h2 className="text-2xl font-semibold mb-4">5. Conservation des Données</h2>
                   <p>
                     Les données sont conservées uniquement pendant la durée nécessaire à la fourniture du service ou pour répondre aux obligations légales. Vous pouvez à tout moment demander leur suppression, sauf si une obligation légale impose leur conservation.
+                  </p>
+                  <p className="mt-2">
+                    Conformément à l'article R.4127-77 du Code de la santé publique, les dossiers médicaux peuvent être conservés pendant au moins 20 ans après le dernier contact avec le patient.
                   </p>
                 </section>
 
@@ -71,44 +77,68 @@ const PrivacyPolicyPage = () => {
                 <section>
                   <h2 className="text-2xl font-semibold mb-4">7. Vos Droits</h2>
                   <p>
-                    Conformément au RGPD, vous disposez des droits suivants :
+                    Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits suivants :
                   </p>
                   <ul className="list-disc pl-6 mt-2 space-y-2">
-                    <li>Droit d’accès à vos données</li>
-                    <li>Droit de rectification</li>
-                    <li>Droit à l’effacement (droit à l’oubli)</li>
-                    <li>Droit à la limitation du traitement</li>
-                    <li>Droit à la portabilité</li>
-                    <li>Droit d’opposition</li>
+                    <li>Droit d'accès à vos données (Art. 15 RGPD)</li>
+                    <li>Droit de rectification (Art. 16 RGPD)</li>
+                    <li>Droit à l'effacement - droit à l'oubli (Art. 17 RGPD)</li>
+                    <li>Droit à la limitation du traitement (Art. 18 RGPD)</li>
+                    <li>Droit à la portabilité des données (Art. 20 RGPD)</li>
+                    <li>Droit d'opposition (Art. 21 RGPD)</li>
+                    <li>Droit de déposer une réclamation auprès de la CNIL</li>
                   </ul>
                   <p className="mt-2">
-                    Pour exercer ces droits, contactez notre délégué à la protection des données à l’adresse : <a href="mailto:dpo@afdev.fr" className="underline">dpo@afdev.fr</a>.
+                    Pour exercer ces droits, contactez notre délégué à la protection des données à l'adresse : <a href="mailto:dpo@afdev.fr" className="underline">dpo@afdev.fr</a>.
+                  </p>
+                  <p className="mt-2 text-sm">
+                    En cas de non-réponse ou de réponse insatisfaisante sous 30 jours, vous pouvez saisir la CNIL : <a href="https://www.cnil.fr/" className="underline">www.cnil.fr</a>
                   </p>
                 </section>
 
                 <section>
                   <h2 className="text-2xl font-semibold mb-4">8. Sécurité des Données</h2>
                   <p>
-                    AFDEV applique des mesures de sécurité robustes afin de prévenir tout accès non autorisé, perte, altération ou divulgation de vos données. Cela inclut notamment le chiffrement, les contrôles d’accès et les sauvegardes régulières.
+                    AFDEV applique des mesures de sécurité robustes afin de prévenir tout accès non autorisé, perte, altération ou divulgation de vos données. Cela inclut notamment le chiffrement AES-256-GCM, les contrôles d'accès stricts et les sauvegardes sécurisées.
+                  </p>
+                  <p className="mt-2">
+                    Notre architecture de stockage hybride garantit que les données sensibles restent exclusivement sur votre appareil local, conformément aux plus hauts standards de sécurité HDS.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-semibold mb-4">9. Modifications de la Politique</h2>
+                  <h2 className="text-2xl font-semibold mb-4">9. Transferts Internationaux</h2>
                   <p>
-                    Cette politique de confidentialité peut être mise à jour pour refléter les évolutions légales ou fonctionnelles. En cas de changement important, AFDEV vous en informera via la plateforme ou par e-mail.
+                    Les données de santé ne font l'objet d'aucun transfert en dehors de l'Union Européenne. Elles sont stockées exclusivement de manière locale et chiffrée sur votre appareil.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-semibold mb-4">10. Contact</h2>
+                  <h2 className="text-2xl font-semibold mb-4">10. Modifications de la Politique</h2>
                   <p>
-                    Pour toute question relative à cette politique ou à vos données, contactez-nous à l’adresse suivante : <a href="mailto:privacy@afdev.fr" className="underline">privacy@afdev.fr</a>.
+                    Cette politique de confidentialité peut être mise à jour pour refléter les évolutions légales ou fonctionnelles. En cas de changement important, AFDEV vous en informera via la plateforme ou par e-mail avec un préavis de 30 jours minimum.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">11. Contact et DPO</h2>
+                  <p>
+                    Pour toute question relative à cette politique ou à vos données, contactez :
+                  </p>
+                  <ul className="list-disc pl-6 mt-2 space-y-2">
+                    <li>Notre service client : <a href="mailto:privacy@afdev.fr" className="underline">privacy@afdev.fr</a></li>
+                    <li>Notre délégué à la protection des données : <a href="mailto:dpo@afdev.fr" className="underline">dpo@afdev.fr</a></li>
+                  </ul>
+                  <p className="mt-2 text-sm">
+                    AFDEV - Société par actions simplifiée<br />
+                    SIRET : [À compléter lors de la mise en production]<br />
+                    Déclaration CNIL : [À compléter lors de la mise en production]
                   </p>
                 </section>
 
                 <p className="text-sm text-gray-500 pt-6">
-                  Dernière mise à jour : 8 avril 2025
+                  Dernière mise à jour : 10 septembre 2025<br />
+                  Version 2.0 - Conforme RGPD et Code de la santé publique français
                 </p>
               </div>
             </ScrollArea>
