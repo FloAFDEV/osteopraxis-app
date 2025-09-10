@@ -92,6 +92,7 @@ const useGeolocation = () => {
 	});
 
 	const reverseGeocode = useCallback(async (lat: number, lon: number) => {
+		console.log('🔍 Géocodage inverse pour:', lat, lon);
 		try {
 			const apis = [
 				{
@@ -105,11 +106,17 @@ const useGeolocation = () => {
 			];
 			for (const api of apis) {
 				try {
+					console.log('🌐 Appel API géocodage:', api.url);
 					const response = await fetch(api.url);
-					if (!response.ok) continue;
+					if (!response.ok) {
+						console.warn('❌ Réponse API non OK:', response.status);
+						continue;
+					}
 					const data = await response.json();
+					console.log('📦 Données reçues:', data);
 					const city = api.parser(data);
 					if (city) {
+						console.log('🏙️ Ville trouvée:', city);
 						setLocation({
 							city,
 							loading: false,
@@ -118,17 +125,18 @@ const useGeolocation = () => {
 						return;
 					}
 				} catch (error) {
-					console.warn(`API ${api.url} failed:`, error);
+					console.warn(`❌ API ${api.url} failed:`, error);
 					continue;
 				}
 			}
+			console.warn('⚠️ Aucune ville trouvée - Fallback vers Paris');
 			setLocation({
 				city: "Paris",
 				loading: false,
 				geolocationEnabled: false,
 			});
 		} catch (error) {
-			console.warn("All geocoding APIs failed:", error);
+			console.warn("❌ Erreur globale géocodage:", error);
 			setLocation({
 				city: "Paris",
 				loading: false,
@@ -138,19 +146,25 @@ const useGeolocation = () => {
 	}, []);
 
 	const toggleGeolocation = useCallback(() => {
+		console.log('🗺️ Toggle géolocalisation appelé - État actuel:', geolocationEnabled);
 		const newState = !geolocationEnabled;
+		console.log('🗺️ Nouvel état:', newState);
+		
 		setGeolocationEnabled(newState);
 		
 		try {
 			localStorage.setItem('patienthub-geolocation-enabled', String(newState));
+			console.log('💾 État sauvegardé dans localStorage:', newState);
 		} catch (error) {
-			console.warn('Erreur lors de la sauvegarde de la préférence:', error);
+			console.warn('❌ Erreur lors de la sauvegarde de la préférence:', error);
 		}
 
 		if (newState) {
+			console.log('🌍 Activation de la géolocalisation...');
 			// Activer la géolocalisation
-			setLocation({ loading: true, geolocationEnabled: true });
+			setLocation(prev => ({ ...prev, loading: true, geolocationEnabled: true }));
 		} else {
+			console.log('🏙️ Désactivation - retour à Paris');
 			// Désactiver la géolocalisation - retour à Paris
 			setLocation({
 				city: "Paris",
@@ -161,8 +175,11 @@ const useGeolocation = () => {
 	}, [geolocationEnabled]);
 
 	useEffect(() => {
+		console.log('🔄 useEffect géolocalisation - État:', geolocationEnabled);
+		
 		// Si géolocalisation désactivée, utiliser Paris
 		if (!geolocationEnabled) {
+			console.log('🏙️ Géolocalisation désactivée - Utilisation de Paris');
 			setLocation({
 				city: "Paris",
 				loading: false,
@@ -172,7 +189,10 @@ const useGeolocation = () => {
 		}
 
 		// Si géolocalisation activée, demander la position
+		console.log('🌍 Géolocalisation activée - Vérification des permissions...');
+		
 		if (!navigator.geolocation) {
+			console.warn('❌ Géolocalisation non supportée par le navigateur');
 			setLocation({
 				city: "Paris",
 				loading: false,
@@ -181,7 +201,8 @@ const useGeolocation = () => {
 			return;
 		}
 
-		setLocation({ loading: true, geolocationEnabled: true });
+		console.log('📍 Demande de position géographique...');
+		setLocation(prev => ({ ...prev, loading: true, geolocationEnabled: true }));
 
 		const options = {
 			enableHighAccuracy: false,
@@ -191,18 +212,33 @@ const useGeolocation = () => {
 
 		navigator.geolocation.getCurrentPosition(
 			(position) => {
+				console.log('✅ Position obtenue:', position.coords.latitude, position.coords.longitude);
 				reverseGeocode(
 					position.coords.latitude,
 					position.coords.longitude
 				);
 			},
 			(error) => {
-				console.warn("Geolocation error:", error.message);
+				console.warn("❌ Erreur géolocalisation:", error.message, error.code);
+				if (error.code === 1) {
+					console.warn("🚫 Permission refusée par l'utilisateur");
+				} else if (error.code === 2) {
+					console.warn("📡 Position indisponible");
+				} else if (error.code === 3) {
+					console.warn("⏰ Timeout de géolocalisation");
+				}
 				setLocation({
 					city: "Paris",
 					loading: false,
 					geolocationEnabled: false,
 				});
+				// Désactiver automatiquement en cas d'erreur
+				setGeolocationEnabled(false);
+				try {
+					localStorage.setItem('patienthub-geolocation-enabled', 'false');
+				} catch (e) {
+					console.warn('Erreur sauvegarde après échec:', e);
+				}
 			},
 			options
 		);
