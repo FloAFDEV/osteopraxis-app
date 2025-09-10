@@ -24,10 +24,21 @@ export function isDemoUser(user: any): boolean {
   return demoIndicators.some(indicator => indicator === true);
 }
 
+// ⚡ Cache pour éviter les appels répétitifs et les boucles infinies
+let demoSessionCache: { result: boolean; timestamp: number } | null = null;
+const CACHE_DURATION = 2000; // 2 secondes de cache
+
 /**
  * 🔐 Détection intelligente du mode de session avec priorité à l'authentification réelle
+ * ⚡ OPTIMISÉ : Cache le résultat pour éviter les boucles infinies
  */
 export const isDemoSession = async (): Promise<boolean> => {
+  // Vérifier le cache d'abord pour éviter les appels répétitifs
+  const now = Date.now();
+  if (demoSessionCache && (now - demoSessionCache.timestamp) < CACHE_DURATION) {
+    return demoSessionCache.result;
+  }
+
   try {
     // 1️⃣ PRIORITÉ ABSOLUE: Vérifier d'abord l'authentification réelle
     const { supabase } = await import('@/integrations/supabase/client');
@@ -35,7 +46,10 @@ export const isDemoSession = async (): Promise<boolean> => {
     
     // Si utilisateur vraiment connecté avec un compte réel, jamais en mode démo
     if (session?.user && !isDemoUser(session.user)) {
-      console.log('🔐 Utilisateur réellement connecté détecté - Mode connecté forcé');
+      // Log seulement si le cache était différent
+      if (!demoSessionCache || demoSessionCache.result !== false) {
+        console.log('🔐 Utilisateur réellement connecté détecté - Mode connecté forcé');
+      }
       
       // Nettoyer toute session démo locale existante pour éviter les conflits
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
@@ -44,7 +58,9 @@ export const isDemoSession = async (): Promise<boolean> => {
         demoLocalStorage.clearSession();
       }
       
-      return false; // Mode connecté
+      const result = false;
+      demoSessionCache = { result, timestamp: now };
+      return result;
     }
     
     // 2️⃣ Ensuite vérifier la session locale démo
@@ -52,13 +68,21 @@ export const isDemoSession = async (): Promise<boolean> => {
     const hasLocalDemoSession = demoLocalStorage.isSessionActive();
     
     if (hasLocalDemoSession) {
-      console.log('🎭 Session démo locale active détectée');
-      return true;
+      // Log seulement si le cache était différent pour éviter le spam
+      if (!demoSessionCache || demoSessionCache.result !== true) {
+        console.log('🎭 Session démo locale active détectée');
+      }
+      const result = true;
+      demoSessionCache = { result, timestamp: now };
+      return result;
     }
     
     // 3️⃣ Vérifier si c'est un utilisateur démo dans Supabase
     if (session?.user && isDemoUser(session.user)) {
-      console.log('🎭 Utilisateur démo Supabase détecté - Mode démo actif');
+      // Log seulement si ce n'est pas déjà en cache
+      if (!demoSessionCache || demoSessionCache.result !== true) {
+        console.log('🎭 Utilisateur démo Supabase détecté - Mode démo actif');
+      }
       
       // Créer une session démo locale si elle n'existe pas déjà
       if (!demoLocalStorage.isSessionActive()) {
@@ -67,15 +91,30 @@ export const isDemoSession = async (): Promise<boolean> => {
         console.log('🎭 Session démo locale créée');
       }
       
-      return true;
+      const result = true;
+      demoSessionCache = { result, timestamp: now };
+      return result;
     }
     
     // 4️⃣ Aucune session active - mode connecté par défaut
-    console.log('📱 Aucune session démo - Mode connecté');
-    return false;
+    if (!demoSessionCache || demoSessionCache.result !== false) {
+      console.log('📱 Aucune session démo - Mode connecté');
+    }
+    const result = false;
+    demoSessionCache = { result, timestamp: now };
+    return result;
     
   } catch (error) {
     console.error('Erreur lors de la détection de session démo:', error);
-    return false; // En cas d'erreur, mode connecté par défaut
+    const result = false;
+    demoSessionCache = { result, timestamp: now };
+    return result;
   }
+};
+
+/**
+ * Force le vidage du cache - utile pour les tests ou changements d'état
+ */
+export const clearDemoSessionCache = (): void => {
+  demoSessionCache = null;
 };
