@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Database, Trash2, Info } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DemoBannerProps {
   onClearDemo?: () => void;
@@ -10,6 +11,7 @@ interface DemoBannerProps {
 
 export function DemoBanner({ onClearDemo }: DemoBannerProps) {
   const [remainingTime, setRemainingTime] = useState<string>("");
+  const { logout } = useAuth();
 
   useEffect(() => {
     const updateRemainingTime = async () => {
@@ -37,17 +39,33 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
 
   const handleClearDemo = async () => {
     try {
+      console.log('🗑️ Quitter le mode démo - Début du processus');
+      
+      // 1️⃣ Nettoyer la session démo locale
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
       demoLocalStorage.clearSession();
+      console.log('✅ Session démo locale nettoyée');
+      
+      // 2️⃣ Appeler le callback si fourni (pour nettoyer les queries)
       if (onClearDemo) {
         onClearDemo();
+        console.log('✅ Callback onClearDemo exécuté');
       }
-      // Rediriger vers la page d'accueil
-      window.location.href = '/';
+      
+      // 3️⃣ Déconnexion complète via le contexte d'authentification
+      console.log('🔓 Déconnexion utilisateur...');
+      await logout();
+      
     } catch (error) {
-      console.error('Erreur lors du nettoyage de la session démo:', error);
-      // En cas d'erreur, rediriger quand même vers l'accueil
-      window.location.href = '/';
+      console.error('❌ Erreur lors du nettoyage de la session démo:', error);
+      // En cas d'erreur, forcer la déconnexion et redirection
+      try {
+        await logout();
+      } catch (logoutError) {
+        console.error('❌ Erreur lors de la déconnexion forcée:', logoutError);
+        // En dernier recours, redirection manuelle
+        window.location.href = '/';
+      }
     }
   };
 
