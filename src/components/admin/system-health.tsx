@@ -135,7 +135,7 @@ export function SystemHealthPanel() {
                   <div>
                     <h4 className="font-medium text-foreground">{metric.metric_name}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Dernière mise à jour: {new Date(metric.last_updated).toLocaleString()}
+                      Dernière mise à jour: {new Date(metric.last_updated).toLocaleString('fr-FR')}
                     </p>
                   </div>
                 </div>
