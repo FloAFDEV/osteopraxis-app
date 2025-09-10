@@ -27,8 +27,8 @@ export async function addProfessionalWatermark(
     const { width, height } = page.getSize();
     
     if (isDemo) {
-      // Filigrane de démonstration (mode démo)
-      const demoText = '⚠ MODE DÉMO — DONNÉES FICTIVES / NON VALABLES ⚠';
+      // Filigrane de démonstration (mode démo) - Texte ASCII uniquement
+      const demoText = '[!] MODE DEMO - DONNEES FICTIVES / NON VALABLES [!]';
       const fontSize = Math.min(width, height) * 0.06;
       
       page.drawText(demoText, {
@@ -49,7 +49,7 @@ export async function addProfessionalWatermark(
         opacity: 0.25,
       });
       
-      page.drawText('DOCUMENT DE DÉMONSTRATION', {
+      page.drawText('DOCUMENT DE DEMONSTRATION', {
         x: width * 0.1,
         y: height * 0.1,
         size: fontSize * 0.6,
@@ -58,10 +58,10 @@ export async function addProfessionalWatermark(
         opacity: 0.4,
       });
     } else {
-      // Filigrane professionnel (mode connecté)
+      // Filigrane professionnel (mode connecté) - Texte ASCII uniquement
       const currentDate = new Date().toLocaleDateString('fr-FR');
-      const confidentialText = 'DOCUMENT CONFIDENTIEL – NE PAS DIFFUSER';
-      const exportText = `Exporté par ${osteopathName || 'Praticien'} le ${currentDate}`;
+      const confidentialText = 'DOCUMENT CONFIDENTIEL - NE PAS DIFFUSER';
+      const exportText = `Exporte par ${osteopathName || 'Praticien'} le ${currentDate}`;
       
       const fontSize = Math.min(width, height) * 0.03; // Plus discret
       
@@ -122,7 +122,7 @@ export async function addWatermarkExcel(
       
       // Ajouter le message d'avertissement
       const warningCell = worksheet.getCell('A1');
-      warningCell.value = '⚠ ATTENTION : DONNÉES DE DÉMONSTRATION - NON VALABLES POUR USAGE RÉEL ⚠';
+      warningCell.value = '[!] ATTENTION : DONNEES DE DEMONSTRATION - NON VALABLES POUR USAGE REEL [!]';
       warningCell.font = { 
         bold: true, 
         color: { argb: 'FFFF0000' }, // Rouge
@@ -143,7 +143,7 @@ export async function addWatermarkExcel(
   } else {
     // Mode connecté : ajouter un filigrane discret
     const currentDate = new Date().toLocaleDateString('fr-FR');
-    const exportInfo = `Exporté par ${osteopathName || 'Praticien'} le ${currentDate}`;
+    const exportInfo = `Exporte par ${osteopathName || 'Praticien'} le ${currentDate}`;
     
     workbook.eachSheet((worksheet) => {
       // Ajouter une ligne discrète en bas avec les informations d'export
@@ -160,24 +160,24 @@ export async function addWatermarkExcel(
   
   if (isDemo) {
     // Créer une feuille README avec les avertissements
-    const readmeSheet = workbook.addWorksheet('⚠ README - MODE DÉMO ⚠');
+    const readmeSheet = workbook.addWorksheet('[!] README - MODE DEMO [!]');
   
   const warnings = [
-    '⚠ AVERTISSEMENT IMPORTANT ⚠',
+    '[!] AVERTISSEMENT IMPORTANT [!]',
     '',
     'Ce document a été généré en MODE DÉMONSTRATION.',
     '',
-    '• Toutes les données contenues sont FICTIVES',
-    '• Ce document n\'a AUCUNE valeur légale ou comptable',
-    '• Il ne peut être utilisé comme justificatif officiel',
-    '• Les patients et transactions sont générés automatiquement',
+      '• Toutes les donnees contenues sont FICTIVES',
+      '• Ce document n\'a AUCUNE valeur legale ou comptable',
+      '• Il ne peut etre utilise comme justificatif officiel',
+      '• Les patients et transactions sont generes automatiquement',
     '',
-    'Pour obtenir des documents officiels :',
-    '1. Créez un compte utilisateur réel',
-    '2. Saisissez vos véritables données patients',
-    '3. Générez les exports depuis votre compte authentifié',
+      'Pour obtenir des documents officiels :',
+      '1. Creez un compte utilisateur reel',
+      '2. Saisissez vos veritables donnees patients',
+      '3. Generez les exports depuis votre compte authentifie',
     '',
-    'PatientHub - Logiciel de gestion pour ostéopathes'
+    'PatientHub - Logiciel de gestion pour osteopathes'
   ];
   
   warnings.forEach((text, index) => {
