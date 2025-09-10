@@ -3,10 +3,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Edit3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MapPin, Clock } from "lucide-react";
 
 const timeZone = "Europe/Paris";
 
@@ -14,7 +11,7 @@ interface LocationInfo {
 	city?: string;
 	loading: boolean;
 	error?: string;
-	isCustom?: boolean;
+	geolocationEnabled: boolean;
 }
 
 interface FlipDigitProps {
@@ -81,14 +78,16 @@ const TimeSegment: React.FC<TimeSegmentProps> = ({ hours, minutes }) => {
 const useGeolocation = () => {
 	const [location, setLocation] = useState<LocationInfo>({
 		loading: false,
+		geolocationEnabled: false,
 	});
 	
-	// Gérer la ville personnalisée depuis localStorage
-	const [customCity, setCustomCity] = useState<string>(() => {
+	// Gérer l'état de la géolocalisation depuis localStorage
+	const [geolocationEnabled, setGeolocationEnabled] = useState<boolean>(() => {
 		try {
-			return localStorage.getItem('patienthub-custom-city') || '';
+			const saved = localStorage.getItem('patienthub-geolocation-enabled');
+			return saved === 'true';
 		} catch {
-			return '';
+			return false; // Désactivé par défaut
 		}
 	});
 
@@ -103,10 +102,6 @@ const useGeolocation = () => {
 						data.address?.village ||
 						data.address?.municipality,
 				},
-				{
-					url: `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=demo`,
-					parser: (data: any) => data[0]?.name,
-				},
 			];
 			for (const api of apis) {
 				try {
@@ -118,6 +113,7 @@ const useGeolocation = () => {
 						setLocation({
 							city,
 							loading: false,
+							geolocationEnabled: true,
 						});
 						return;
 					}
@@ -129,59 +125,63 @@ const useGeolocation = () => {
 			setLocation({
 				city: "Paris",
 				loading: false,
+				geolocationEnabled: false,
 			});
 		} catch (error) {
 			console.warn("All geocoding APIs failed:", error);
 			setLocation({
+				city: "Paris",
 				loading: false,
-				error: "Localisation indisponible",
+				geolocationEnabled: false,
 			});
 		}
 	}, []);
 
-	const updateCustomCity = useCallback((newCity: string) => {
+	const toggleGeolocation = useCallback(() => {
+		const newState = !geolocationEnabled;
+		setGeolocationEnabled(newState);
+		
 		try {
-			if (newCity.trim()) {
-				localStorage.setItem('patienthub-custom-city', newCity.trim());
-				setCustomCity(newCity.trim());
-				setLocation({
-					city: newCity.trim(),
-					loading: false,
-					isCustom: true,
-				});
-			} else {
-				localStorage.removeItem('patienthub-custom-city');
-				setCustomCity('');
-				// Revenir à la géolocalisation
-				setLocation({ loading: true });
-			}
+			localStorage.setItem('patienthub-geolocation-enabled', String(newState));
 		} catch (error) {
-			console.warn('Erreur lors de la sauvegarde de la ville:', error);
+			console.warn('Erreur lors de la sauvegarde de la préférence:', error);
 		}
-	}, []);
+
+		if (newState) {
+			// Activer la géolocalisation
+			setLocation({ loading: true, geolocationEnabled: true });
+		} else {
+			// Désactiver la géolocalisation - retour à Paris
+			setLocation({
+				city: "Paris",
+				loading: false,
+				geolocationEnabled: false,
+			});
+		}
+	}, [geolocationEnabled]);
 
 	useEffect(() => {
-		// Si une ville personnalisée existe, l'utiliser
-		if (customCity) {
+		// Si géolocalisation désactivée, utiliser Paris
+		if (!geolocationEnabled) {
 			setLocation({
-				city: customCity,
+				city: "Paris",
 				loading: false,
-				isCustom: true,
+				geolocationEnabled: false,
 			});
 			return;
 		}
 
+		// Si géolocalisation activée, demander la position
 		if (!navigator.geolocation) {
 			setLocation({
 				city: "Paris",
 				loading: false,
+				geolocationEnabled: false,
 			});
 			return;
 		}
 
-		setLocation({
-			loading: true,
-		});
+		setLocation({ loading: true, geolocationEnabled: true });
 
 		const options = {
 			enableHighAccuracy: false,
@@ -201,22 +201,21 @@ const useGeolocation = () => {
 				setLocation({
 					city: "Paris",
 					loading: false,
+					geolocationEnabled: false,
 				});
 			},
 			options
 		);
-	}, [reverseGeocode, customCity]);
+	}, [reverseGeocode, geolocationEnabled]);
 
-	return { location, updateCustomCity };
+	return { location, toggleGeolocation };
 };
 
 export function AdvancedDateTimeDisplay() {
 	const [now, setNow] = useState<Date>(() =>
 		toZonedTime(new Date(), timeZone)
 	);
-	const { location, updateCustomCity } = useGeolocation();
-	const [editingCity, setEditingCity] = useState(false);
-	const [tempCity, setTempCity] = useState("");
+	const { location, toggleGeolocation } = useGeolocation();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -244,21 +243,6 @@ export function AdvancedDateTimeDisplay() {
 		};
 	}, [now]);
 
-	const handleCityEdit = () => {
-		setTempCity(location.city || "Paris");
-		setEditingCity(true);
-	};
-
-	const handleCitySave = () => {
-		updateCustomCity(tempCity);
-		setEditingCity(false);
-	};
-
-	const handleCityCancel = () => {
-		setTempCity("");
-		setEditingCity(false);
-	};
-
 	const LocationBadge = () => {
 		if (location.loading) {
 			return (
@@ -281,60 +265,37 @@ export function AdvancedDateTimeDisplay() {
 
 		if (location.city) {
 			return (
-				<Popover open={editingCity} onOpenChange={setEditingCity}>
-					<PopoverTrigger asChild>
-						<motion.button
-							initial={{
-								opacity: 0,
-								y: -10,
-							}}
-							animate={{
-								opacity: 1,
-								y: 0,
-							}}
-							onClick={handleCityEdit}
-							className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer group"
-						>
-							<MapPin className="h-3 w-3" />
-							<span>{location.city}</span>
-							<Edit3 className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-						</motion.button>
-					</PopoverTrigger>
-					<PopoverContent className="w-64 p-3">
-						<div className="space-y-3">
-							<h4 className="font-medium text-sm">Modifier la ville</h4>
-							<Input
-								value={tempCity}
-								onChange={(e) => setTempCity(e.target.value)}
-								placeholder="Nom de la ville"
-								onKeyDown={(e) => {
-									if (e.key === 'Enter') handleCitySave();
-									if (e.key === 'Escape') handleCityCancel();
-								}}
-								autoFocus
-							/>
-							<div className="flex gap-2">
-								<Button size="sm" onClick={handleCitySave} className="flex-1">
-									Valider
-								</Button>
-								<Button size="sm" variant="outline" onClick={handleCityCancel}>
-									Annuler
-								</Button>
-							</div>
-							<p className="text-xs text-muted-foreground">
-								Laissez vide pour utiliser la géolocalisation automatique
-							</p>
-						</div>
-					</PopoverContent>
-				</Popover>
+				<motion.button
+					initial={{
+						opacity: 0,
+						y: -10,
+					}}
+					animate={{
+						opacity: 1,
+						y: 0,
+					}}
+					onClick={toggleGeolocation}
+					className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer group"
+					title={location.geolocationEnabled ? "Cliquer pour désactiver la géolocalisation" : "Cliquer pour activer la géolocalisation"}
+				>
+					<MapPin className={`h-3 w-3 ${location.geolocationEnabled ? 'text-green-600' : 'text-gray-500'}`} />
+					<span>{location.city}</span>
+					{location.geolocationEnabled && (
+						<div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+					)}
+				</motion.button>
 			);
 		}
 
 		return (
-			<div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground">
+			<button
+				onClick={toggleGeolocation}
+				className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground hover:bg-muted/70 transition-colors cursor-pointer"
+				title="Cliquer pour activer la géolocalisation"
+			>
 				<Clock className="h-3 w-3" />
-				<span>Heure de Paris</span>
-			</div>
+				<span>Paris (cliquer pour localiser)</span>
+			</button>
 		);
 	};
 
@@ -368,9 +329,7 @@ export function CompactAdvancedDateTime() {
 	const [now, setNow] = useState<Date>(() =>
 		toZonedTime(new Date(), timeZone)
 	);
-	const { location, updateCustomCity } = useGeolocation();
-	const [editingCity, setEditingCity] = useState(false);
-	const [tempCity, setTempCity] = useState("");
+	const { location, toggleGeolocation } = useGeolocation();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -398,21 +357,6 @@ export function CompactAdvancedDateTime() {
 		[now]
 	);
 
-	const handleCityEdit = () => {
-		setTempCity(location.city || "Paris");
-		setEditingCity(true);
-	};
-
-	const handleCitySave = () => {
-		updateCustomCity(tempCity);
-		setEditingCity(false);
-	};
-
-	const handleCityCancel = () => {
-		setTempCity("");
-		setEditingCity(false);
-	};
-
 	return (
 		<motion.div
 			initial={{
@@ -429,44 +373,17 @@ export function CompactAdvancedDateTime() {
 				"HH:mm"
 			)} - Timezone: Europe/Paris`}
 		>
-			<Popover open={editingCity} onOpenChange={setEditingCity}>
-				<PopoverTrigger asChild>
-					<button
-						onClick={handleCityEdit}
-						className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer group"
-					>
-						<Clock className="h-4 w-4" />
-						<span className="text-xs">{location.city || "Paris"}</span>
-						<Edit3 className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-					</button>
-				</PopoverTrigger>
-				<PopoverContent className="w-64 p-3">
-					<div className="space-y-3">
-						<h4 className="font-medium text-sm">Modifier la ville</h4>
-						<Input
-							value={tempCity}
-							onChange={(e) => setTempCity(e.target.value)}
-							placeholder="Nom de la ville"
-							onKeyDown={(e) => {
-								if (e.key === 'Enter') handleCitySave();
-								if (e.key === 'Escape') handleCityCancel();
-							}}
-							autoFocus
-						/>
-						<div className="flex gap-2">
-							<Button size="sm" onClick={handleCitySave} className="flex-1">
-								Valider
-							</Button>
-							<Button size="sm" variant="outline" onClick={handleCityCancel}>
-								Annuler
-							</Button>
-						</div>
-						<p className="text-xs text-muted-foreground">
-							Laissez vide pour utiliser la géolocalisation automatique
-						</p>
-					</div>
-				</PopoverContent>
-			</Popover>
+			<button
+				onClick={toggleGeolocation}
+				className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer group"
+				title={location.geolocationEnabled ? "Cliquer pour désactiver la géolocalisation" : "Cliquer pour activer la géolocalisation"}
+			>
+				<Clock className="h-4 w-4" />
+				<span className="text-xs">{location.city || "Paris"}</span>
+				{location.geolocationEnabled && (
+					<div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-1" />
+				)}
+			</button>
 
 			<div className="flex items-center gap-1">
 				<span className="text-xs text-muted-foreground">
