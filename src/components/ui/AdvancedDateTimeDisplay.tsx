@@ -220,19 +220,25 @@ const useGeolocation = () => {
 			},
 			(error) => {
 				console.warn("❌ Erreur géolocalisation:", error.message, error.code);
+				let errorMessage = "";
 				if (error.code === 1) {
 					console.warn("🚫 Permission refusée par l'utilisateur");
+					errorMessage = "Permission géolocalisation refusée";
 				} else if (error.code === 2) {
-					console.warn("📡 Position indisponible");
+					console.warn("📡 Position indisponible (normal en environnement de développement)");
+					errorMessage = "Position indisponible - Utilisation de Paris par défaut";
 				} else if (error.code === 3) {
 					console.warn("⏰ Timeout de géolocalisation");
+					errorMessage = "Timeout géolocalisation";
 				}
+				
+				// Toujours retourner à Paris en cas d'erreur
 				setLocation({
 					city: "Paris",
 					loading: false,
 					geolocationEnabled: false,
 				});
-				// Désactiver automatiquement en cas d'erreur
+				// Désactiver automatiquement en cas d'erreur persistante
 				setGeolocationEnabled(false);
 				try {
 					localStorage.setItem('patienthub-geolocation-enabled', 'false');
@@ -311,8 +317,12 @@ export function AdvancedDateTimeDisplay() {
 						y: 0,
 					}}
 					onClick={toggleGeolocation}
-					className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer group"
-					title={location.geolocationEnabled ? "Cliquer pour désactiver la géolocalisation" : "Cliquer pour activer la géolocalisation"}
+					className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer group ${
+						location.geolocationEnabled 
+							? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100' 
+							: 'bg-primary/10 text-primary hover:bg-primary/20'
+					}`}
+					title={location.geolocationEnabled ? "Géolocalisation activée - Cliquer pour désactiver" : "Géolocalisation désactivée - Cliquer pour réessayer"}
 				>
 					<MapPin className={`h-3 w-3 ${location.geolocationEnabled ? 'text-green-600' : 'text-gray-500'}`} />
 					<span>{location.city}</span>
@@ -326,11 +336,11 @@ export function AdvancedDateTimeDisplay() {
 		return (
 			<button
 				onClick={toggleGeolocation}
-				className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground hover:bg-muted/70 transition-colors cursor-pointer"
-				title="Cliquer pour activer la géolocalisation"
+				className="flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 hover:bg-amber-100 transition-colors cursor-pointer"
+				title="Géolocalisation indisponible dans cet environnement - Cliquer pour réessayer"
 			>
 				<Clock className="h-3 w-3" />
-				<span>Paris (cliquer pour localiser)</span>
+				<span>Paris (géoloc. indisponible)</span>
 			</button>
 		);
 	};
