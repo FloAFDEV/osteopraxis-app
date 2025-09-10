@@ -7,11 +7,17 @@ import { isDemoSession } from '@/utils/demo-detection';
  */
 
 /**
- * Ajoute un filigrane de démonstration sur un PDF
+ * Ajoute un filigrane professionnel sur un PDF
  * @param pdfBytes Le PDF original en bytes
+ * @param osteopathName Nom de l'ostéopathe
+ * @param isDemo Mode démonstration ou non
  * @returns Le PDF avec filigrane en bytes
  */
-export async function addWatermarkDemo(pdfBytes: Uint8Array): Promise<Uint8Array> {
+export async function addProfessionalWatermark(
+  pdfBytes: Uint8Array, 
+  osteopathName?: string, 
+  isDemo: boolean = false
+): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   
@@ -20,81 +26,141 @@ export async function addWatermarkDemo(pdfBytes: Uint8Array): Promise<Uint8Array
   pages.forEach((page) => {
     const { width, height } = page.getSize();
     
-    // Texte de filigrane
-    const watermarkText = '⚠ MODE DÉMO — DONNÉES FICTIVES / NON VALABLES ⚠';
-    
-    // Calculer la taille de police adaptée à la page
-    const fontSize = Math.min(width, height) * 0.06;
-    
-    // Ajouter le filigrane en diagonal (sans rotation car problème de typage)
-    page.drawText(watermarkText, {
-      x: width * 0.2,
-      y: height * 0.5,
-      size: fontSize,
-      font: helveticaFont,
-      color: rgb(1, 0, 0), // Rouge
-      opacity: 0.3,
-    });
-    
-    // Ajouter un second filigrane en diagonal à une autre position
-    page.drawText(watermarkText, {
-      x: width * 0.1,
-      y: height * 0.7,
-      size: fontSize * 0.8,
-      font: helveticaFont,
-      color: rgb(1, 0, 0), // Rouge
-      opacity: 0.25,
-    });
-    
-    // Ajouter un second filigrane plus petit en bas
-    page.drawText('DOCUMENT DE DÉMONSTRATION', {
-      x: width * 0.1,
-      y: height * 0.1,
-      size: fontSize * 0.6,
-      font: helveticaFont,
-      color: rgb(1, 0, 0),
-      opacity: 0.4,
-    });
+    if (isDemo) {
+      // Filigrane de démonstration (mode démo)
+      const demoText = '⚠ MODE DÉMO — DONNÉES FICTIVES / NON VALABLES ⚠';
+      const fontSize = Math.min(width, height) * 0.06;
+      
+      page.drawText(demoText, {
+        x: width * 0.2,
+        y: height * 0.5,
+        size: fontSize,
+        font: helveticaFont,
+        color: rgb(1, 0, 0), // Rouge
+        opacity: 0.3,
+      });
+      
+      page.drawText(demoText, {
+        x: width * 0.1,
+        y: height * 0.7,
+        size: fontSize * 0.8,
+        font: helveticaFont,
+        color: rgb(1, 0, 0), // Rouge
+        opacity: 0.25,
+      });
+      
+      page.drawText('DOCUMENT DE DÉMONSTRATION', {
+        x: width * 0.1,
+        y: height * 0.1,
+        size: fontSize * 0.6,
+        font: helveticaFont,
+        color: rgb(1, 0, 0),
+        opacity: 0.4,
+      });
+    } else {
+      // Filigrane professionnel (mode connecté)
+      const currentDate = new Date().toLocaleDateString('fr-FR');
+      const confidentialText = 'DOCUMENT CONFIDENTIEL – NE PAS DIFFUSER';
+      const exportText = `Exporté par ${osteopathName || 'Praticien'} le ${currentDate}`;
+      
+      const fontSize = Math.min(width, height) * 0.03; // Plus discret
+      
+      // Filigrane principal en diagonale
+      const centerX = width / 2;
+      const centerY = height / 2;
+      
+      // Répétition du filigrane principal
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 2; j++) {
+          const x = (width / 4) * (i + 1);
+          const y = (height / 3) * (j + 1);
+          
+          page.drawText(confidentialText, {
+            x: x - confidentialText.length * 2,
+            y: y,
+            size: fontSize,
+            font: helveticaFont,
+            color: rgb(0.8, 0.8, 0.8), // Gris clair
+            opacity: 0.25,
+          });
+        }
+      }
+      
+      // Filigrane avec informations d'export en bas de page
+      page.drawText(exportText, {
+        x: width * 0.1,
+        y: height * 0.05,
+        size: fontSize * 0.8,
+        font: helveticaFont,
+        color: rgb(0.7, 0.7, 0.7), // Gris
+        opacity: 0.3,
+      });
+    }
   });
   
   return await pdfDoc.save();
 }
 
 /**
- * Ajoute un avertissement de démonstration à un workbook Excel
+ * Ajoute un filigrane (démo ou professionnel) à un workbook Excel
  * @param workbook Le workbook Excel original
+ * @param osteopathName Nom de l'ostéopathe
+ * @param isDemo Mode démonstration ou non
  * @returns Le workbook modifié
  */
-export async function addWatermarkDemoExcel(workbook: ExcelJS.Workbook): Promise<ExcelJS.Workbook> {
-  // Ajouter un message d'avertissement sur chaque feuille existante
-  workbook.eachSheet((worksheet) => {
-    // Insérer une ligne en haut
-    worksheet.insertRow(1, []);
-    worksheet.insertRow(1, []);
+export async function addWatermarkExcel(
+  workbook: ExcelJS.Workbook, 
+  osteopathName?: string, 
+  isDemo: boolean = false
+): Promise<ExcelJS.Workbook> {
+  if (isDemo) {
+    // Mode démo : ajouter des avertissements visibles
+    workbook.eachSheet((worksheet) => {
+      // Insérer une ligne en haut
+      worksheet.insertRow(1, []);
+      worksheet.insertRow(1, []);
+      
+      // Ajouter le message d'avertissement
+      const warningCell = worksheet.getCell('A1');
+      warningCell.value = '⚠ ATTENTION : DONNÉES DE DÉMONSTRATION - NON VALABLES POUR USAGE RÉEL ⚠';
+      warningCell.font = { 
+        bold: true, 
+        color: { argb: 'FFFF0000' }, // Rouge
+        size: 14 
+      };
+      warningCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFFFE6E6' } // Fond rouge clair
+      };
+      
+      // Fusionner sur plusieurs colonnes pour visibilité
+      worksheet.mergeCells('A1:H1');
+      
+      // Ajuster la hauteur de la ligne
+      worksheet.getRow(1).height = 25;
+    });
+  } else {
+    // Mode connecté : ajouter un filigrane discret
+    const currentDate = new Date().toLocaleDateString('fr-FR');
+    const exportInfo = `Exporté par ${osteopathName || 'Praticien'} le ${currentDate}`;
     
-    // Ajouter le message d'avertissement
-    const warningCell = worksheet.getCell('A1');
-    warningCell.value = '⚠ ATTENTION : DONNÉES DE DÉMONSTRATION - NON VALABLES POUR USAGE RÉEL ⚠';
-    warningCell.font = { 
-      bold: true, 
-      color: { argb: 'FFFF0000' }, // Rouge
-      size: 14 
-    };
-    warningCell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFFFE6E6' } // Fond rouge clair
-    };
-    
-    // Fusionner sur plusieurs colonnes pour visibilité
-    worksheet.mergeCells('A1:H1');
-    
-    // Ajuster la hauteur de la ligne
-    worksheet.getRow(1).height = 25;
-  });
+    workbook.eachSheet((worksheet) => {
+      // Ajouter une ligne discrète en bas avec les informations d'export
+      const lastRow = worksheet.rowCount + 2;
+      const exportCell = worksheet.getCell(`A${lastRow}`);
+      exportCell.value = `Document confidentiel - ${exportInfo}`;
+      exportCell.font = { 
+        italic: true, 
+        color: { argb: 'FF888888' }, // Gris
+        size: 9 
+      };
+    });
+  }
   
-  // Créer une feuille README avec les avertissements
-  const readmeSheet = workbook.addWorksheet('⚠ README - MODE DÉMO ⚠');
+  if (isDemo) {
+    // Créer une feuille README avec les avertissements
+    const readmeSheet = workbook.addWorksheet('⚠ README - MODE DÉMO ⚠');
   
   const warnings = [
     '⚠ AVERTISSEMENT IMPORTANT ⚠',
@@ -127,8 +193,9 @@ export async function addWatermarkDemoExcel(workbook: ExcelJS.Workbook): Promise
     }
   });
   
-  // Ajuster la largeur des colonnes
-  readmeSheet.getColumn('A').width = 60;
+    // Ajuster la largeur des colonnes
+    readmeSheet.getColumn('A').width = 60;
+  }
   
   return workbook;
 }
@@ -185,31 +252,23 @@ export class ExportSecurityService {
   /**
    * Sécurise un PDF selon le mode détecté
    * @param pdfBytes Le PDF original
-   * @returns Le PDF sécurisé (avec filigrane si démo)
+   * @param osteopathName Nom de l'ostéopathe (optionnel)
+   * @returns Le PDF sécurisé avec filigrane approprié
    */
-  async securePDF(pdfBytes: Uint8Array): Promise<Uint8Array> {
+  async securePDF(pdfBytes: Uint8Array, osteopathName?: string): Promise<Uint8Array> {
     const isDemo = await this.detectDemoMode();
-    
-    if (isDemo) {
-      return await addWatermarkDemo(pdfBytes);
-    }
-    
-    return pdfBytes;
+    return await addProfessionalWatermark(pdfBytes, osteopathName, isDemo);
   }
   
   /**
    * Sécurise un Excel selon le mode détecté
    * @param workbook Le workbook original
-   * @returns Le workbook sécurisé (avec avertissements si démo)
+   * @param osteopathName Nom de l'ostéopathe (optionnel)
+   * @returns Le workbook sécurisé avec filigrane approprié
    */
-  async secureExcel(workbook: ExcelJS.Workbook): Promise<ExcelJS.Workbook> {
+  async secureExcel(workbook: ExcelJS.Workbook, osteopathName?: string): Promise<ExcelJS.Workbook> {
     const isDemo = await this.detectDemoMode();
-    
-    if (isDemo) {
-      return await addWatermarkDemoExcel(workbook);
-    }
-    
-    return workbook;
+    return await addWatermarkExcel(workbook, osteopathName, isDemo);
   }
   
   /**

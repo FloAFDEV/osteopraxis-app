@@ -340,7 +340,8 @@ export class PatientPDFExporter {
 
 		// Générer le PDF et le sécuriser
 		const pdfBytes = this.pdf.output('arraybuffer');
-		const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes));
+		const osteopathName = osteopath?.name;
+		const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes), osteopathName);
 		
 		const fileName = `dossier_${patient.firstName}_${
 			patient.lastName

@@ -7,17 +7,17 @@ import ExcelJS from 'exceljs';
  */
 export function useExportSecurity() {
   /**
-   * Sécurise un PDF (ajoute un filigrane en mode démo)
+   * Sécurise un PDF (ajoute un filigrane professionnel ou démo selon le mode)
    */
-  const securePDF = useCallback(async (pdfBytes: Uint8Array): Promise<Uint8Array> => {
-    return await exportSecurity.securePDF(pdfBytes);
+  const securePDF = useCallback(async (pdfBytes: Uint8Array, osteopathName?: string): Promise<Uint8Array> => {
+    return await exportSecurity.securePDF(pdfBytes, osteopathName);
   }, []);
 
   /**
-   * Sécurise un Excel (ajoute des avertissements en mode démo)
+   * Sécurise un Excel (ajoute un filigrane professionnel ou démo selon le mode)
    */
-  const secureExcel = useCallback(async (workbook: ExcelJS.Workbook): Promise<ExcelJS.Workbook> => {
-    return await exportSecurity.secureExcel(workbook);
+  const secureExcel = useCallback(async (workbook: ExcelJS.Workbook, osteopathName?: string): Promise<ExcelJS.Workbook> => {
+    return await exportSecurity.secureExcel(workbook, osteopathName);
   }, []);
 
   /**
