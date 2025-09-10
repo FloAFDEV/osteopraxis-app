@@ -3,17 +3,25 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, Clock, Edit3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 const timeZone = "Europe/Paris";
+
 interface LocationInfo {
 	city?: string;
 	loading: boolean;
 	error?: string;
+	isCustom?: boolean;
 }
+
 interface FlipDigitProps {
 	value: string;
 	label: string;
 }
+
 const FlipDigit: React.FC<FlipDigitProps> = ({ value, label }) => {
 	return (
 		<div
@@ -42,7 +50,7 @@ const FlipDigit: React.FC<FlipDigitProps> = ({ value, label }) => {
 					style={{
 						transformOrigin: "center center",
 					}}
-					className="inline-block text-lg"
+					className="inline-block text-xl font-mono font-semibold tabular-nums"
 				>
 					{value}
 				</motion.span>
@@ -50,27 +58,40 @@ const FlipDigit: React.FC<FlipDigitProps> = ({ value, label }) => {
 		</div>
 	);
 };
+
 interface TimeSegmentProps {
 	hours: string;
 	minutes: string;
 }
+
 const TimeSegment: React.FC<TimeSegmentProps> = ({ hours, minutes }) => {
 	return (
 		<div
 			role="timer"
 			aria-live="polite"
-			className="flex items-center gap-1 text-lg"
+			className="flex items-center gap-1 text-xl font-mono"
 		>
 			<FlipDigit value={hours} label="heures" />
-			<span className="animate-pulse text-muted-foreground">:</span>
+			<span className="animate-pulse text-muted-foreground font-bold">:</span>
 			<FlipDigit value={minutes} label="minutes" />
 		</div>
 	);
 };
+
 const useGeolocation = () => {
 	const [location, setLocation] = useState<LocationInfo>({
 		loading: false,
 	});
+	
+	// Gérer la ville personnalisée depuis localStorage
+	const [customCity, setCustomCity] = useState<string>(() => {
+		try {
+			return localStorage.getItem('patienthub-custom-city') || '';
+		} catch {
+			return '';
+		}
+	});
+
 	const reverseGeocode = useCallback(async (lat: number, lon: number) => {
 		try {
 			const apis = [
@@ -106,7 +127,7 @@ const useGeolocation = () => {
 				}
 			}
 			setLocation({
-				city: "Région Toulouse",
+				city: "Paris",
 				loading: false,
 			});
 		} catch (error) {
@@ -117,22 +138,57 @@ const useGeolocation = () => {
 			});
 		}
 	}, []);
+
+	const updateCustomCity = useCallback((newCity: string) => {
+		try {
+			if (newCity.trim()) {
+				localStorage.setItem('patienthub-custom-city', newCity.trim());
+				setCustomCity(newCity.trim());
+				setLocation({
+					city: newCity.trim(),
+					loading: false,
+					isCustom: true,
+				});
+			} else {
+				localStorage.removeItem('patienthub-custom-city');
+				setCustomCity('');
+				// Revenir à la géolocalisation
+				setLocation({ loading: true });
+			}
+		} catch (error) {
+			console.warn('Erreur lors de la sauvegarde de la ville:', error);
+		}
+	}, []);
+
 	useEffect(() => {
-		if (!navigator.geolocation) {
+		// Si une ville personnalisée existe, l'utiliser
+		if (customCity) {
 			setLocation({
+				city: customCity,
 				loading: false,
-				error: "Géolocalisation non supportée",
+				isCustom: true,
 			});
 			return;
 		}
+
+		if (!navigator.geolocation) {
+			setLocation({
+				city: "Paris",
+				loading: false,
+			});
+			return;
+		}
+
 		setLocation({
 			loading: true,
 		});
+
 		const options = {
 			enableHighAccuracy: false,
 			timeout: 10000,
 			maximumAge: 300000,
 		};
+
 		navigator.geolocation.getCurrentPosition(
 			(position) => {
 				reverseGeocode(
@@ -143,26 +199,32 @@ const useGeolocation = () => {
 			(error) => {
 				console.warn("Geolocation error:", error.message);
 				setLocation({
+					city: "Paris",
 					loading: false,
-					error: "Permission refusée",
 				});
 			},
 			options
 		);
-	}, [reverseGeocode]);
-	return location;
+	}, [reverseGeocode, customCity]);
+
+	return { location, updateCustomCity };
 };
+
 export function AdvancedDateTimeDisplay() {
 	const [now, setNow] = useState<Date>(() =>
 		toZonedTime(new Date(), timeZone)
 	);
-	const location = useGeolocation();
+	const { location, updateCustomCity } = useGeolocation();
+	const [editingCity, setEditingCity] = useState(false);
+	const [tempCity, setTempCity] = useState("");
+
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setNow(toZonedTime(new Date(), timeZone));
 		}, 1000);
 		return () => clearInterval(interval);
 	}, []);
+
 	const dateDisplay = useMemo(
 		() =>
 			format(now, "PPPP", {
@@ -170,6 +232,7 @@ export function AdvancedDateTimeDisplay() {
 			}),
 		[now]
 	);
+
 	const timeComponents = useMemo(() => {
 		const timeStr = format(now, "HH:mm", {
 			locale: fr,
@@ -180,6 +243,22 @@ export function AdvancedDateTimeDisplay() {
 			minutes,
 		};
 	}, [now]);
+
+	const handleCityEdit = () => {
+		setTempCity(location.city || "Paris");
+		setEditingCity(true);
+	};
+
+	const handleCitySave = () => {
+		updateCustomCity(tempCity);
+		setEditingCity(false);
+	};
+
+	const handleCityCancel = () => {
+		setTempCity("");
+		setEditingCity(false);
+	};
+
 	const LocationBadge = () => {
 		if (location.loading) {
 			return (
@@ -199,24 +278,58 @@ export function AdvancedDateTimeDisplay() {
 				</motion.div>
 			);
 		}
+
 		if (location.city) {
 			return (
-				<motion.div
-					initial={{
-						opacity: 0,
-						y: -10,
-					}}
-					animate={{
-						opacity: 1,
-						y: 0,
-					}}
-					className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium"
-				>
-					<MapPin className="h-3 w-3" />
-					<span>{location.city}</span>
-				</motion.div>
+				<Popover open={editingCity} onOpenChange={setEditingCity}>
+					<PopoverTrigger asChild>
+						<motion.button
+							initial={{
+								opacity: 0,
+								y: -10,
+							}}
+							animate={{
+								opacity: 1,
+								y: 0,
+							}}
+							onClick={handleCityEdit}
+							className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer group"
+						>
+							<MapPin className="h-3 w-3" />
+							<span>{location.city}</span>
+							<Edit3 className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+						</motion.button>
+					</PopoverTrigger>
+					<PopoverContent className="w-64 p-3">
+						<div className="space-y-3">
+							<h4 className="font-medium text-sm">Modifier la ville</h4>
+							<Input
+								value={tempCity}
+								onChange={(e) => setTempCity(e.target.value)}
+								placeholder="Nom de la ville"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter') handleCitySave();
+									if (e.key === 'Escape') handleCityCancel();
+								}}
+								autoFocus
+							/>
+							<div className="flex gap-2">
+								<Button size="sm" onClick={handleCitySave} className="flex-1">
+									Valider
+								</Button>
+								<Button size="sm" variant="outline" onClick={handleCityCancel}>
+									Annuler
+								</Button>
+							</div>
+							<p className="text-xs text-muted-foreground">
+								Laissez vide pour utiliser la géolocalisation automatique
+							</p>
+						</div>
+					</PopoverContent>
+				</Popover>
 			);
 		}
+
 		return (
 			<div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground">
 				<Clock className="h-3 w-3" />
@@ -224,6 +337,7 @@ export function AdvancedDateTimeDisplay() {
 			</div>
 		);
 	};
+
 	return (
 		<motion.div
 			initial={{
@@ -249,17 +363,22 @@ export function AdvancedDateTimeDisplay() {
 		</motion.div>
 	);
 }
+
 export function CompactAdvancedDateTime() {
 	const [now, setNow] = useState<Date>(() =>
 		toZonedTime(new Date(), timeZone)
 	);
-	const location = useGeolocation();
+	const { location, updateCustomCity } = useGeolocation();
+	const [editingCity, setEditingCity] = useState(false);
+	const [tempCity, setTempCity] = useState("");
+
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setNow(toZonedTime(new Date(), timeZone));
 		}, 1000);
 		return () => clearInterval(interval);
 	}, []);
+
 	const timeComponents = useMemo(() => {
 		const timeStr = format(now, "HH:mm", {
 			locale: fr,
@@ -270,6 +389,7 @@ export function CompactAdvancedDateTime() {
 			minutes,
 		};
 	}, [now]);
+
 	const dateDisplay = useMemo(
 		() =>
 			format(now, "PPPP 'à'", {
@@ -277,6 +397,22 @@ export function CompactAdvancedDateTime() {
 			}),
 		[now]
 	);
+
+	const handleCityEdit = () => {
+		setTempCity(location.city || "Paris");
+		setEditingCity(true);
+	};
+
+	const handleCitySave = () => {
+		updateCustomCity(tempCity);
+		setEditingCity(false);
+	};
+
+	const handleCityCancel = () => {
+		setTempCity("");
+		setEditingCity(false);
+	};
+
 	return (
 		<motion.div
 			initial={{
@@ -293,19 +429,55 @@ export function CompactAdvancedDateTime() {
 				"HH:mm"
 			)} - Timezone: Europe/Paris`}
 		>
-			<div className="flex items-center gap-1 text-muted-foreground">
-				<Clock className="h-4 w-4" />
-				<span className="text-xs">{location.city || "Paris"}</span>
-			</div>
+			<Popover open={editingCity} onOpenChange={setEditingCity}>
+				<PopoverTrigger asChild>
+					<button
+						onClick={handleCityEdit}
+						className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer group"
+					>
+						<Clock className="h-4 w-4" />
+						<span className="text-xs">{location.city || "Paris"}</span>
+						<Edit3 className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+					</button>
+				</PopoverTrigger>
+				<PopoverContent className="w-64 p-3">
+					<div className="space-y-3">
+						<h4 className="font-medium text-sm">Modifier la ville</h4>
+						<Input
+							value={tempCity}
+							onChange={(e) => setTempCity(e.target.value)}
+							placeholder="Nom de la ville"
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') handleCitySave();
+								if (e.key === 'Escape') handleCityCancel();
+							}}
+							autoFocus
+						/>
+						<div className="flex gap-2">
+							<Button size="sm" onClick={handleCitySave} className="flex-1">
+								Valider
+							</Button>
+							<Button size="sm" variant="outline" onClick={handleCityCancel}>
+								Annuler
+							</Button>
+						</div>
+						<p className="text-xs text-muted-foreground">
+							Laissez vide pour utiliser la géolocalisation automatique
+						</p>
+					</div>
+				</PopoverContent>
+			</Popover>
 
 			<div className="flex items-center gap-1">
 				<span className="text-xs text-muted-foreground">
 					{dateDisplay}
 				</span>
-				<TimeSegment
-					hours={timeComponents.hours}
-					minutes={timeComponents.minutes}
-				/>
+				<div className="flex items-center gap-1 font-mono font-semibold tabular-nums">
+					<TimeSegment
+						hours={timeComponents.hours}
+						minutes={timeComponents.minutes}
+					/>
+				</div>
 			</div>
 		</motion.div>
 	);
