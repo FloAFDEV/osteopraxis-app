@@ -221,7 +221,14 @@ export class StorageRouter {
         return {
           create: (data) => cabinetMethods.createCabinet(data as any) as unknown as Promise<T>,
           getById: (id) => cabinetMethods.getCabinetById(Number(id)) as unknown as Promise<T | null>,
-          getAll: () => cabinetMethods.getCabinets() as unknown as Promise<T[]>,
+          getAll: async () => {
+            try {
+              return await cabinetMethods.getCabinets() as unknown as Promise<T[]>;
+            } catch (error) {
+              console.warn('⚠️ Erreur récupération cabinets Supabase, fallback données vides:', error);
+              return [] as T[];
+            }
+          },
           update: (id, updates) => cabinetMethods.updateCabinet(Number(id), updates as any) as unknown as Promise<T>,
           delete: (id) => cabinetMethods.deleteCabinet(Number(id)).then(() => true)
         } as StorageAdapter<T>;
