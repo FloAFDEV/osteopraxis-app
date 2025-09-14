@@ -36,8 +36,13 @@ export const cabinetService = {
 
   // Méthodes spécifiques (compatibilité existante)
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
-    // En attendant l'implémentation complète Supabase
-    return [];
+    // Utiliser le StorageRouter pour récupérer tous les cabinets
+    const adapter = await storageRouter.route<Cabinet>('cabinets');
+    const allCabinets = await adapter.getAll();
+    
+    // En mode connecté, filtrer par utilisateur si nécessaire
+    // En mode démo, retourner tous les cabinets démo
+    return allCabinets;
   },
 
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {
