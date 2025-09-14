@@ -223,10 +223,43 @@ export class StorageRouter {
           getById: (id) => cabinetMethods.getCabinetById(Number(id)) as unknown as Promise<T | null>,
           getAll: async () => {
             try {
-              return await cabinetMethods.getCabinets() as unknown as Promise<T[]>;
+              console.log('🔧 Tentative récupération cabinets via Supabase...');
+              const result = await cabinetMethods.getCabinets() as unknown as Promise<T[]>;
+              console.log('✅ Cabinets récupérés avec succès:', result);
+              return result;
             } catch (error) {
-              console.warn('⚠️ Erreur récupération cabinets Supabase, fallback données vides:', error);
-              return [] as T[];
+              console.error('❌ Erreur récupération cabinets Supabase:', error);
+              
+              // Import dynamique du service de toast pour notification utilisateur
+              try {
+                const { toast } = await import('sonner');
+                toast.error('Impossible de charger les cabinets', {
+                  description: 'Un cabinet temporaire a été créé pour vous permettre de continuer.'
+                });
+              } catch (toastError) {
+                console.warn('Impossible d\'afficher la notification:', toastError);
+              }
+              
+              // Fallback avec cabinet temporaire par défaut
+              const defaultCabinet = {
+                id: 999999,
+                name: 'Cabinet Temporaire',
+                address: 'Configuration en cours...',
+                city: '',
+                postalCode: '',
+                country: 'France',
+                phone: '',
+                email: '',
+                siret: '',
+                iban: null,
+                bic: null,
+                osteopathId: 1,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              } as T;
+              
+              console.log('🆘 Fallback: cabinet temporaire créé:', defaultCabinet);
+              return [defaultCabinet];
             }
           },
           update: (id, updates) => cabinetMethods.updateCabinet(Number(id), updates as any) as unknown as Promise<T>,
