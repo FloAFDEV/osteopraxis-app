@@ -374,17 +374,37 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										updated_at: userData.updated_at,
 									};
 									setUser(userWithRole);
-					// Navigation après connexion réussie
-					if (event === 'SIGNED_IN') {
-						// Redirection uniquement lors d'une nouvelle connexion
-						if (userWithRole.role === "ADMIN") {
-							navigate("/admin/dashboard", { replace: true });
-							console.log("🔄 Redirection vers admin dashboard");
-						} else {
-							navigate("/dashboard", { replace: true });
-							console.log("🔄 Redirection vers dashboard");
-						}
-					}
+									
+									// Navigation après connexion réussie
+									if (event === 'SIGNED_IN') {
+										// Redirection uniquement lors d'une nouvelle connexion
+										if (userWithRole.role === "ADMIN") {
+											navigate("/admin/dashboard", { replace: true });
+											console.log("🔄 Redirection vers admin dashboard");
+										} else {
+											navigate("/dashboard", { replace: true });
+											console.log("🔄 Redirection vers dashboard");
+										}
+									}
+								} else if (!error || error.code !== 'PGRST116') {
+									// Si pas de données utilisateur mais pas d'erreur critique, créer un utilisateur basique
+									const basicUser: User = {
+										id: session.user.id,
+										email: session.user.email || '',
+										firstName: session.user.user_metadata?.first_name || '',
+										lastName: session.user.user_metadata?.last_name || '',
+										role: 'OSTEOPATH',
+										osteopathId: null,
+										created_at: new Date().toISOString(),
+										updated_at: new Date().toISOString(),
+									};
+									setUser(basicUser);
+									
+									// Navigation après connexion réussie
+									if (event === 'SIGNED_IN') {
+										navigate("/dashboard", { replace: true });
+										console.log("🔄 Redirection vers dashboard (utilisateur basique)");
+									}
 								} else {
 									// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
 									const isDemoUser = session.user.email === 'demo@patienthub.com' || 
