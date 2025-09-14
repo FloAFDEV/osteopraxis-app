@@ -3,6 +3,7 @@ import { Cabinet } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export async function getCabinets(): Promise<Cabinet[]> {
+  console.log('🔍 [getCabinets] === DÉBUT ===');
   try {
     console.log('🔍 [getCabinets] Début récupération cabinets via client Supabase...');
     

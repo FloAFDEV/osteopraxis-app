@@ -53,6 +53,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
 
   useEffect(() => {
     const loadCabinetStats = async () => {
+      console.log('📊 [useCabinetStats] === DÉBUT CHARGEMENT ===', { selectedCabinetId });
       setLoading(true);
       setError(null);
       
@@ -66,11 +67,21 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         let patientsData, appointmentsData, invoicesData;
         
         try {
-          [patientsData, appointmentsData, invoicesData] = await Promise.all([
+          console.log('📡 [useCabinetStats] Début Promise.all...');
+          
+          // Ajouter un timeout pour éviter l'attente infinie en mode iframe
+          const timeout = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout: Chargement trop long (mode iframe?)')), 5000);
+          });
+          
+          const dataPromise = Promise.all([
             api.getPatients(),
             api.getAppointments(),
             api.getInvoices(),
           ]);
+          
+          const result = await Promise.race([dataPromise, timeout]);
+          [patientsData, appointmentsData, invoicesData] = result;
         } catch (storageError) {
           console.warn('⚠️ Erreur de stockage détectée (mode preview):', storageError);
           
