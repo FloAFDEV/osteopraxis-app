@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
 import { useState, useEffect } from "react";
-import { api } from "@/services/api";
 import { Cabinet } from "@/types";
+import { useCabinets } from "@/hooks/useCabinets";
 import { Separator } from "@/components/ui/separator";
 import { User, MapPin, Hospital, Users, Briefcase } from "lucide-react";
 
@@ -26,28 +26,18 @@ export const UnifiedIdentityTab = ({
     childrenAgesInput, 
     setChildrenAgesInput 
 }: UnifiedIdentityTabProps) => {
-    const [availableCabinets, setAvailableCabinets] = useState<Cabinet[]>([]);
+    const { data: availableCabinets = [], isLoading: cabinetsLoading } = useCabinets();
 
     useEffect(() => {
-        const loadCabinets = async () => {
-            try {
-                const cabinets = await api.getCabinets();
-                setAvailableCabinets(cabinets || []);
-                
-                // UX intelligente pour cabinet unique
-                if (cabinets && cabinets.length === 1) {
-                    // Cabinet unique : sélection automatique
-                    form.setValue("cabinetId", cabinets[0].id);
-                } else if (selectedCabinetId && !form.getValues("cabinetId")) {
-                    // Cabinet présélectionné
-                    form.setValue("cabinetId", selectedCabinetId);
-                }
-            } catch (error) {
-                console.error("Erreur lors du chargement des cabinets:", error);
-            }
-        };
-        loadCabinets();
-    }, [selectedCabinetId, form]);
+        // UX intelligente pour cabinet unique
+        if (availableCabinets && availableCabinets.length === 1) {
+            // Cabinet unique : sélection automatique
+            form.setValue("cabinetId", availableCabinets[0].id);
+        } else if (selectedCabinetId && !form.getValues("cabinetId")) {
+            // Cabinet présélectionné
+            form.setValue("cabinetId", selectedCabinetId);
+        }
+    }, [availableCabinets, selectedCabinetId, form]);
 
     return (
         <Card>

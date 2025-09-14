@@ -2,8 +2,9 @@ import { PatientForm } from "@/components/PatientForm";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/services/api";
 import { Patient, Cabinet } from "@/types";
+import { useCabinetById } from "@/hooks/useCabinets";
+import { api } from "@/services/api";
 import { ArrowLeft, Loader2, UserPlus, Building } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,43 +15,20 @@ import { useQueryClient } from "@tanstack/react-query";
 const NewPatientPage = () => {
 	const [loading, setLoading] = useState(false);
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
-	const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
 	const navigate = useNavigate();
 	const { user, isAuthenticated } = useAuth();
 	const queryClient = useQueryClient();
 
+	// Récupérer le cabinet sélectionné depuis localStorage
 	useEffect(() => {
-		const fetchCabinetInfo = async () => {
-			// Récupérer le cabinet sélectionné depuis localStorage
-			const storedCabinetId = localStorage.getItem("selectedCabinetId");
-			if (storedCabinetId) {
-				const cabinetId = Number(storedCabinetId);
-				setSelectedCabinetId(cabinetId);
-				
-				// Utiliser le cache si possible pour éviter un appel API supplémentaire
-				try {
-					const cacheKey = `cabinet_${cabinetId}`;
-					const cachedCabinet = sessionStorage.getItem(cacheKey);
-					
-					if (cachedCabinet) {
-						// Utiliser le cabinet en cache
-						setSelectedCabinet(JSON.parse(cachedCabinet));
-					} else {
-						// Récupérer depuis l'API en cas de cache manquant
-						const cabinet = await api.getCabinetById(cabinetId);
-						if (cabinet) {
-							setSelectedCabinet(cabinet);
-							sessionStorage.setItem(cacheKey, JSON.stringify(cabinet));
-						}
-					}
-				} catch (error) {
-					console.error("Erreur lors de la récupération du cabinet:", error);
-				}
-			}
-		};
-		
-		fetchCabinetInfo();
+		const storedCabinetId = localStorage.getItem("selectedCabinetId");
+		if (storedCabinetId) {
+			setSelectedCabinetId(Number(storedCabinetId));
+		}
 	}, []);
+
+	// Utiliser le hook pour récupérer le cabinet
+	const { data: selectedCabinet } = useCabinetById(selectedCabinetId || 0);
 
 	if (!isAuthenticated || !user) {
 		toast.error("Vous devez être connecté pour ajouter un patient");
