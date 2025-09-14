@@ -67,23 +67,20 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         let patientsData, appointmentsData, invoicesData;
         
         try {
-          [patientsData, appointmentsData, invoicesData] = await Promise.all([
-            api.getPatients(),
-            api.getAppointments(),
-            api.getInvoices(),
+          // Essayer de charger les données HDS (patients, RDV) - peuvent échouer en iframe
+          [patientsData, appointmentsData] = await Promise.all([
+            api.getPatients().catch(() => []),
+            api.getAppointments().catch(() => []),
           ]);
-        } catch (storageError) {
-          console.warn('⚠️ Erreur de stockage détectée (mode preview):', storageError);
           
-          // Si erreur de stockage (ex: HDS non disponible en iframe), utiliser données vides
-          if (storageError.message?.includes('HDS') || storageError.message?.includes('secure storage')) {
-            console.log('🔄 Fallback vers données vides en raison de l\'indisponibilité du stockage sécurisé');
-            patientsData = [];
-            appointmentsData = [];
-            invoicesData = [];
-          } else {
-            throw storageError; // Re-lancer si ce n'est pas une erreur de stockage
-          }
+          // Charger les factures (non-HDS) séparément car toujours disponibles
+          invoicesData = await api.getInvoices();
+          
+        } catch (storageError) {
+          console.warn('⚠️ Erreur de stockage détectée, utilisation de données vides:', storageError);
+          patientsData = [];
+          appointmentsData = [];
+          invoicesData = [];
         }
 
         // Filtrer les données par cabinet si sélectionné
