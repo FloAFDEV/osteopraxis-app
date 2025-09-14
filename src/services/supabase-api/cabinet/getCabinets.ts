@@ -4,59 +4,38 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function getCabinets(): Promise<Cabinet[]> {
   try {
-    console.log('🔍 [getCabinets] Début récupération cabinets...');
+    console.log('🔍 [getCabinets] Début récupération cabinets via client Supabase...');
     
-    // Récupérer le token d'authentification
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      console.warn("❌ [getCabinets] Aucune session active");
-      
-      // Fallback avec cabinet par défaut en cas d'absence de session
-      const defaultCabinet: Cabinet = {
-        id: 999998,
-        name: 'Cabinet Par Défaut',
-        address: 'Veuillez vous connecter pour accéder à vos cabinets',
-        city: '',
-        postalCode: '',
-        country: 'France',
-        phone: '',
-        email: '',
-        siret: '',
-        iban: null,
-        bic: null,
-        osteopathId: 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      console.log('🆘 [getCabinets] Fallback: cabinet par défaut sans session:', defaultCabinet);
-      return [defaultCabinet];
+    const { data: cabinets, error } = await supabase
+      .from('Cabinet')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('❌ [getCabinets] Erreur Supabase:', error);
+      throw error;
     }
 
-    console.log('✅ [getCabinets] Session active trouvée');
+    // Transformer les données Supabase vers le type Cabinet
+    const formattedCabinets: Cabinet[] = (cabinets || []).map(cabinet => ({
+      id: cabinet.id,
+      name: cabinet.name,
+      address: cabinet.address || '',
+      city: '', // TODO: ajouter city dans la table si nécessaire
+      postalCode: '', // TODO: ajouter postalCode dans la table si nécessaire
+      country: 'France',
+      phone: cabinet.phone || '',
+      email: cabinet.email || '',
+      siret: '', // TODO: ajouter siret dans la table si nécessaire
+      iban: null, // TODO: ajouter iban dans la table si nécessaire
+      bic: null, // TODO: ajouter bic dans la table si nécessaire
+      osteopathId: cabinet.osteopathId,
+      createdAt: cabinet.createdAt,
+      updatedAt: cabinet.updatedAt
+    }));
 
-    // Appeler la fonction Edge sécurisée
-    const response = await fetch(`https://jpjuvzpqfirymtjwnier.supabase.co/functions/v1/cabinet`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`
-      }
-    });
-
-    console.log(`📡 [getCabinets] Réponse Edge Function: ${response.status}`);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Erreur de parsing JSON' }));
-      const errorMessage = errorData.error || `Erreur HTTP ${response.status}`;
-      console.error('❌ [getCabinets] Erreur Edge Function:', errorMessage);
-      throw new Error(errorMessage);
-    }
-
-    const responseData = await response.json();
-    const cabinets = responseData.data || [];
-    
-    console.log(`✅ [getCabinets] Succès: ${cabinets.length} cabinet(s) récupéré(s)`);
-    return cabinets;
+    console.log(`✅ [getCabinets] Succès: ${formattedCabinets.length} cabinet(s) récupéré(s)`);
+    return formattedCabinets;
   } catch (error) {
     console.error("❌ [getCabinets] Erreur finale:", error);
     
