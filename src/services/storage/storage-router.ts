@@ -48,20 +48,18 @@ export class StorageRouter {
       return this.getDemoAdapter<T>(dataType);
     }
 
-    // 2️⃣ Détecter l'environnement iframe (preview)
+    // 2️⃣ PRIORITÉ : Environnement iframe (preview) - pour TOUTES les données
     const isIframeEnvironment = window.self !== window.top;
+    if (isIframeEnvironment) {
+      console.warn(`🔍 Mode Preview détecté pour "${dataType}" → Adapter iframe`);
+      return this.getIframeFallbackAdapter<T>(dataType);
+    }
     
-    // 3️⃣ Mode connecté : Router selon classification HDS/Non-HDS
+    // 3️⃣ Mode connecté normal : Router selon classification HDS/Non-HDS
     const classification = getDataClassification(dataType);
     
     switch (classification) {
       case 'HDS':
-        // En environnement iframe, utiliser le fallback Supabase avec avertissement
-        if (isIframeEnvironment) {
-          console.warn(`⚠️ Mode Preview détecté pour données HDS "${dataType}" → Fallback Supabase temporaire`);
-          return this.getIframeFallbackAdapter<T>(dataType);
-        }
-        
         console.log(`🔴 Données HDS "${dataType}" → Stockage local persistant sécurisé`);
         validateHDSSecurityPolicy(dataType, 'local');
         return this.getLocalHDSAdapter<T>(dataType);
