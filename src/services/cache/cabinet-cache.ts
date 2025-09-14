@@ -1,9 +1,10 @@
 /**
  * Service de cache simple et performant pour les cabinets
+ * Utilise le StorageRouter pour respecter tous les modes (démo, local HDS, iframe)
  */
 
 import { Cabinet } from '@/types';
-import { supabaseCabinetService } from '../supabase-api/cabinet';
+import { storageRouter } from '../storage/storage-router';
 
 interface CacheEntry {
   data: Cabinet[];
@@ -35,8 +36,8 @@ class CabinetCacheService {
       return activePromise;
     }
 
-    // Créer une nouvelle requête - DIRECTEMENT vers Supabase pour éviter la boucle
-    const promise = this.fetchFromSupabase();
+    // Créer une nouvelle requête via le StorageRouter pour respecter tous les modes
+    const promise = this.fetchFromStorageRouter();
     this.activeFetches.set(cacheKey, promise);
 
     try {
@@ -70,9 +71,10 @@ class CabinetCacheService {
       }
     }
 
-    // Sinon charger directement depuis Supabase
+    // Sinon charger via le StorageRouter
     try {
-      return await supabaseCabinetService.getCabinetById(id);
+      const cabinetAdapter = await storageRouter.route<Cabinet>('cabinets');
+      return await cabinetAdapter.getById(id);
     } catch (error) {
       console.error(`Erreur récupération cabinet ${id}:`, error);
       throw error;
@@ -88,50 +90,14 @@ class CabinetCacheService {
   }
 
   /**
-   * Appel direct à Supabase (pas de boucle)
+   * Récupération via le StorageRouter (respecte tous les modes)
    */
-  private async fetchFromSupabase(): Promise<Cabinet[]> {
+  private async fetchFromStorageRouter(): Promise<Cabinet[]> {
     try {
-      // Utiliser directement l'API Supabase sans passer par le router de stockage
-      const { supabase } = await import('@/integrations/supabase/client');
-      
-      const { data, error } = await supabase
-        .from('Cabinet')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        console.error('Erreur Supabase getCabinets:', error);
-        throw error;
-      }
-
-      // Mapper les données Supabase au type Cabinet avec valeurs par défaut
-      const cabinets: Cabinet[] = (data || []).map((cabinet: any) => ({
-        id: cabinet.id,
-        name: cabinet.name,
-        address: cabinet.address,
-        city: '', // Pas en base pour l'instant
-        postalCode: '', // Pas en base pour l'instant  
-        phone: cabinet.phone,
-        email: cabinet.email,
-        siret: null, // Pas en base pour l'instant
-        iban: null, // Pas en base pour l'instant
-        bic: null, // Pas en base pour l'instant
-        country: 'France', // Valeur par défaut
-        osteopathId: cabinet.osteopathId,
-        createdAt: cabinet.createdAt,
-        updatedAt: cabinet.updatedAt,
-        imageUrl: cabinet.imageUrl,
-        logoUrl: cabinet.logoUrl,
-        professionalProfileId: cabinet.professionalProfileId,
-        tenant_id: cabinet.tenant_id,
-        userId: null, // Pas en base pour l'instant
-        website: null // Pas en base pour l'instant
-      }));
-
-      return cabinets;
+      const cabinetAdapter = await storageRouter.route<Cabinet>('cabinets');
+      return await cabinetAdapter.getAll();
     } catch (error) {
-      console.error('Erreur récupération cabinets:', error);
+      console.error('Erreur récupération cabinets via StorageRouter:', error);
       throw error;
     }
   }
