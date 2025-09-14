@@ -62,11 +62,28 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         // Mode connecté → HDS local + Non-HDS Supabase
 
         // Récupération des données (réelles ou démo selon le contexte)
-        const [patientsData, appointmentsData, invoicesData] = await Promise.all([
-          api.getPatients(),
-          api.getAppointments(),
-          api.getInvoices(),
-        ]);
+        // Avec gestion d'erreur gracieuse pour l'environnement iframe
+        let patientsData, appointmentsData, invoicesData;
+        
+        try {
+          [patientsData, appointmentsData, invoicesData] = await Promise.all([
+            api.getPatients(),
+            api.getAppointments(),
+            api.getInvoices(),
+          ]);
+        } catch (storageError) {
+          console.warn('⚠️ Erreur de stockage détectée (mode preview):', storageError);
+          
+          // Si erreur de stockage (ex: HDS non disponible en iframe), utiliser données vides
+          if (storageError.message?.includes('HDS') || storageError.message?.includes('secure storage')) {
+            console.log('🔄 Fallback vers données vides en raison de l\'indisponibilité du stockage sécurisé');
+            patientsData = [];
+            appointmentsData = [];
+            invoicesData = [];
+          } else {
+            throw storageError; // Re-lancer si ce n'est pas une erreur de stockage
+          }
+        }
 
         // Filtrer les données par cabinet si sélectionné
         let filteredPatients = patientsData || [];
