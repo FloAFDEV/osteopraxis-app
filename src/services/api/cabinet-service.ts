@@ -21,12 +21,24 @@ export const cabinetService = {
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     const adapter = await storageRouter.route<Cabinet>('cabinets');
-    return adapter.create(cabinet);
+    const result = await adapter.create(cabinet);
+    
+    // Invalider le cache pour que les nouveaux données soient visibles immédiatement
+    const { cabinetCache } = await import('@/services/cache/cabinet-cache');
+    cabinetCache.invalidate();
+    
+    return result;
   },
 
   async updateCabinet(id: number, cabinet: Partial<Cabinet>): Promise<Cabinet> {
     const adapter = await storageRouter.route<Cabinet>('cabinets');
-    return adapter.update(id, cabinet);
+    const result = await adapter.update(id, cabinet);
+    
+    // Invalider le cache pour que les modifications soient visibles immédiatement
+    const { cabinetCache } = await import('@/services/cache/cabinet-cache');
+    cabinetCache.invalidate();
+    
+    return result;
   },
 
   async deleteCabinet(id: number): Promise<boolean> {

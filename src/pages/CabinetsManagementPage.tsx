@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
+import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
 import {
 	ArrowLeft,
 	Building2,
@@ -220,6 +221,13 @@ const CabinetsManagementPage = () => {
 					</div>
 				</div>
 				<div className="container mx-auto px-6 py-8">
+					{/* Message de bienvenue pour nouveaux utilisateurs */}
+					<WelcomeMessage 
+						hasCabinets={cabinets.length > 0}
+						hasPatients={false} // TODO: Ajouter le check des patients si nécessaire
+						userName={user?.firstName}
+					/>
+
 					{cabinets.length === 0 ? (
 						<div className="max-w-md mx-auto">
 							<Card className="text-center border-2 border-dashed border-teal-200 dark:border-teal-800 bg-white dark:bg-gray-800 shadow-sm">

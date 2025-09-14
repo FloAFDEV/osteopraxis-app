@@ -90,6 +90,14 @@ class CabinetCacheService {
   }
 
   /**
+   * Invalider et recharger immédiatement
+   */
+  async invalidateAndRefetch(): Promise<Cabinet[]> {
+    this.invalidate();
+    return this.getCabinets();
+  }
+
+  /**
    * Récupération via le StorageRouter (respecte tous les modes)
    */
   private async fetchFromStorageRouter(): Promise<Cabinet[]> {
