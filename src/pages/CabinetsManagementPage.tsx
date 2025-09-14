@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
+import { useCabinets } from "@/hooks/useCabinets";
 import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
 import {
 	ArrowLeft,
@@ -39,8 +40,7 @@ import { toast } from "sonner";
 const CabinetsManagementPage = () => {
 	const navigate = useNavigate();
 	const { user } = useAuth();
-	const [cabinets, setCabinets] = useState<Cabinet[]>([]);
-	const [loading, setLoading] = useState(true);
+	const { data: cabinets = [], isLoading: loading, invalidateAndRefetch } = useCabinets();
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [cabinetToDelete, setCabinetToDelete] = useState<Cabinet | null>(
 		null
@@ -56,7 +56,8 @@ const CabinetsManagementPage = () => {
 		if (!cabinetToDelete) return;
 		try {
 			await api.deleteCabinet(cabinetToDelete.id);
-			setCabinets(cabinets.filter((c) => c.id !== cabinetToDelete.id));
+			// Invalider et recharger les données via le hook
+			await invalidateAndRefetch();
 			toast.success("Cabinet supprimé avec succès");
 		} catch (error) {
 			console.error("Erreur lors de la suppression du cabinet:", error);
@@ -112,14 +113,13 @@ const CabinetsManagementPage = () => {
 	};
 
 	useEffect(() => {
-		const fetchCabinets = async () => {
-			try {
-				const cabinetData = await api.getCabinets();
-				setCabinets(cabinetData);
+		const fetchOsteopathData = async () => {
+			if (!cabinets?.length) return;
 
+			try {
 				// Fetch osteopath data for each cabinet to get billing information
 				const osteopathIds = [
-					...new Set(cabinetData.map((c) => c.osteopathId)),
+					...new Set(cabinets.map((c) => c.osteopathId)),
 				];
 				const osteopathInfo: Record<number, any> = {};
 				for (const id of osteopathIds) {
@@ -131,18 +131,13 @@ const CabinetsManagementPage = () => {
 				setOsteopathData(osteopathInfo);
 			} catch (error) {
 				console.error(
-					"Erreur lors de la récupération des cabinets:",
+					"Erreur lors de la récupération des données ostéopathes:",
 					error
 				);
-				toast.error(
-					"Impossible de charger les cabinets. Veuillez réessayer."
-				);
-			} finally {
-				setLoading(false);
 			}
 		};
-		fetchCabinets();
-	}, []);
+		fetchOsteopathData();
+	}, [cabinets]);
 
 	if (loading) {
 		return (
