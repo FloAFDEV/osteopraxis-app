@@ -48,11 +48,20 @@ export class StorageRouter {
       return this.getDemoAdapter<T>(dataType);
     }
 
-    // 2️⃣ Mode connecté : Router selon classification HDS/Non-HDS
+    // 2️⃣ Détecter l'environnement iframe (preview)
+    const isIframeEnvironment = window.self !== window.top;
+    
+    // 3️⃣ Mode connecté : Router selon classification HDS/Non-HDS
     const classification = getDataClassification(dataType);
     
     switch (classification) {
       case 'HDS':
+        // En environnement iframe, utiliser le fallback Supabase avec avertissement
+        if (isIframeEnvironment) {
+          console.warn(`⚠️ Mode Preview détecté pour données HDS "${dataType}" → Fallback Supabase temporaire`);
+          return this.getIframeFallbackAdapter<T>(dataType);
+        }
+        
         console.log(`🔴 Données HDS "${dataType}" → Stockage local persistant sécurisé`);
         validateHDSSecurityPolicy(dataType, 'local');
         return this.getLocalHDSAdapter<T>(dataType);
@@ -257,10 +266,21 @@ export class StorageRouter {
   }
 
   /**
+   * Adapter spécial pour l'environnement iframe (fallback temporaire)
+   * ⚠️ UTILISE SUPABASE TEMPORAIREMENT pour les données HDS en mode preview
+   */
+  private async getIframeFallbackAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
+    console.warn(`🚨 AVERTISSEMENT SÉCURITÉ: Fallback Supabase pour "${dataType}" en mode preview`);
+    
+    // Utiliser les mêmes services que pour les données Non-HDS mais avec avertissement
+    return this.getSupabaseAdapter<T>(dataType);
+  }
+
+  /**
    * Méthode de diagnostic pour vérifier la configuration
    */
   async diagnose(): Promise<{
-    mode: 'demo' | 'connected';
+    mode: 'demo' | 'connected' | 'iframe_preview';
     hdsServices: string[];
     nonHdsServices: string[];
     security: {
@@ -268,18 +288,21 @@ export class StorageRouter {
       nonHdsSupabaseOnly: boolean;
       noHdsLeakage: boolean;
     };
+    isIframeEnvironment: boolean;
   }> {
     const isDemoMode = await isDemoSession();
+    const isIframeEnvironment = window.self !== window.top;
     
     return {
-      mode: isDemoMode ? 'demo' : 'connected',
+      mode: isDemoMode ? 'demo' : (isIframeEnvironment ? 'iframe_preview' : 'connected'),
       hdsServices: ['patients', 'appointments', 'invoices'],
       nonHdsServices: ['osteopaths', 'cabinets', 'users'],
       security: {
-        hdsLocalOnly: !isDemoMode, // En mode connecté, HDS doit être local
+        hdsLocalOnly: !isDemoMode && !isIframeEnvironment, // En mode connecté non-iframe, HDS doit être local
         nonHdsSupabaseOnly: !isDemoMode, // En mode connecté, Non-HDS peut aller sur Supabase
-        noHdsLeakage: true // Aucune donnée HDS ne peut fuiter vers Supabase
-      }
+        noHdsLeakage: !isIframeEnvironment // Pas de fuite HDS sauf en mode iframe (preview)
+      },
+      isIframeEnvironment
     };
   }
 }
