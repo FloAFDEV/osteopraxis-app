@@ -44,7 +44,6 @@ export class StorageRouter {
     // 1️⃣ PRIORITÉ ABSOLUE : Mode démo
     const isDemoMode = await isDemoSession();
     if (isDemoMode) {
-      console.log(`🎭 Mode démo détecté pour ${dataType} → demo-local-storage`);
       return this.getDemoAdapter<T>(dataType);
     }
 
@@ -54,7 +53,6 @@ export class StorageRouter {
     // 🔥 PRIORITÉ : Environnement iframe (preview) - SEULEMENT pour données HDS
     const isIframeEnvironment = window.self !== window.top;
     if (isIframeEnvironment && classification === 'HDS') {
-      console.warn(`🔍 Mode Preview détecté pour données HDS "${dataType}" → Adapter iframe`);
       return this.getIframeFallbackAdapter<T>(dataType);
     }
     
@@ -62,12 +60,10 @@ export class StorageRouter {
     
     switch (classification) {
       case 'HDS':
-        console.log(`🔴 Données HDS "${dataType}" → Stockage local persistant sécurisé`);
         validateHDSSecurityPolicy(dataType, 'local');
         return this.getLocalHDSAdapter<T>(dataType);
         
       case 'NON_HDS':
-        console.log(`🟢 Données Non-HDS "${dataType}" → Supabase cloud`);
         validateHDSSecurityPolicy(dataType, 'supabase');
         return this.getSupabaseAdapter<T>(dataType);
         

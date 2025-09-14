@@ -116,58 +116,33 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	}, [navigate]);
 
 	const logout = useCallback(async () => {
-		// Empêcher les déconnexions multiples
-		if (loading) {
-			console.log('⚠️ Déconnexion déjà en cours, ignorer cette tentative');
-			return;
-		}
-		
 		try {
-			console.log('🔓 Début de la déconnexion');
+			setLoading(true);
 			
-			// 1️⃣ Vérifier s'il y a une session demo locale à nettoyer
-			try {
-				const { demoLocalStorage } = await import('@/services/demo-local-storage');
-				if (demoLocalStorage.isSessionActive()) {
-					console.log('🧹 Nettoyage session démo locale');
-					demoLocalStorage.clearSession();
-				}
-			} catch (error) {
-				console.warn('Erreur nettoyage session démo:', error);
-			}
-			
-			// 2️⃣ Déconnexion Supabase seulement si session existe
+			// Déconnexion Supabase
 			if (session) {
-				console.log('🔓 Déconnexion Supabase');
 				const { error } = await supabase.auth.signOut();
 				if (error) {
 					console.warn('Erreur déconnexion Supabase:', error);
-					// Ne pas bloquer pour cette erreur
 				}
-			} else {
-				console.log('ℹ️ Pas de session Supabase à déconnecter');
 			}
 			
-			// 3️⃣ Nettoyer l'état local
+			// Nettoyer l'état local
 			setUser(null);
 			setSession(null);
 			setIsAuthenticated(false);
 			
-			console.log('✅ Déconnexion terminée avec succès');
 			toast.success("Déconnexion réussie !");
-			
-			// 4️⃣ Navigation en dernier
 			navigate("/", { replace: true });
 			
 		} catch (err: any) {
-			console.error("❌ Erreur lors de la déconnexion:", err);
-			
-			// En cas d'échec, forcer la déconnexion locale
+			console.error("Erreur lors de la déconnexion:", err);
+			// Forcer la déconnexion locale en cas d'erreur
 			setUser(null);
 			setSession(null);
 			setIsAuthenticated(false);
 			navigate("/", { replace: true });
-			toast.error("Déconnexion forcée suite à une erreur");
+			toast.error("Déconnexion forcée");
 		} finally {
 			setLoading(false);
 		}
