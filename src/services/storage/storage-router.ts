@@ -48,15 +48,17 @@ export class StorageRouter {
       return this.getDemoAdapter<T>(dataType);
     }
 
-    // 2️⃣ PRIORITÉ : Environnement iframe (preview) - pour TOUTES les données
+    // 2️⃣ Mode connecté normal : Router selon classification HDS/Non-HDS
+    const classification = getDataClassification(dataType);
+    
+    // 🔥 PRIORITÉ : Environnement iframe (preview) - SEULEMENT pour données HDS
     const isIframeEnvironment = window.self !== window.top;
-    if (isIframeEnvironment) {
-      console.warn(`🔍 Mode Preview détecté pour "${dataType}" → Adapter iframe`);
+    if (isIframeEnvironment && classification === 'HDS') {
+      console.warn(`🔍 Mode Preview détecté pour données HDS "${dataType}" → Adapter iframe`);
       return this.getIframeFallbackAdapter<T>(dataType);
     }
     
-    // 3️⃣ Mode connecté normal : Router selon classification HDS/Non-HDS
-    const classification = getDataClassification(dataType);
+    // 3️⃣ Pour les données Non-HDS en iframe, continuer normalement vers Supabase
     
     switch (classification) {
       case 'HDS':
