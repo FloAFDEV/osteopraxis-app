@@ -265,47 +265,40 @@ export class StorageRouter {
 
   /**
    * Adapter spécial pour l'environnement iframe (fallback preview mode)
-   * 🔒 Données HDS → Données vides/par défaut (sécurité)
-   * 🌐 Données Non-HDS → Supabase (normal)
+   * 🔒 TOUTES les données → Données vides/par défaut (mode preview)
+   * Évite les erreurs Supabase d'authentification en mode iframe
    */
   private async getIframeFallbackAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
-    console.warn(`🔍 Mode Preview détecté pour "${dataType}"`);
+    console.warn(`🔍 Mode Preview détecté pour "${dataType}" → Données vides (pas d'auth Supabase)`);
     
-    // Pour les données HDS : utiliser des données vides/par défaut (sécurité stricte)
-    if (isHDSData(dataType)) {
-      console.warn(`🔒 Données HDS "${dataType}" → Données vides en mode preview (sécurité)`);
+    // Retourner des données vides pour TOUS les types de données en mode iframe
+    // Cela évite les erreurs d'authentification Supabase qui causent le spinner infini
+    return {
+      async create(data: any): Promise<T> {
+        console.warn(`⚠️ Création ${dataType} ignorée en mode preview`);
+        return { ...data, id: Date.now() } as T;
+      },
       
-      return {
-        async create(data: any): Promise<T> {
-          console.warn(`⚠️ Création ${dataType} ignorée en mode preview`);
-          return { ...data, id: Date.now() } as T;
-        },
-        
-        async getById(id: string | number): Promise<T | null> {
-          console.warn(`⚠️ Lecture ${dataType} vide en mode preview`);
-          return null;
-        },
-        
-        async getAll(): Promise<T[]> {
-          console.warn(`⚠️ Liste ${dataType} vide en mode preview`);
-          return [];
-        },
-        
-        async update(id: string | number, updates: Partial<T>): Promise<T> {
-          console.warn(`⚠️ Mise à jour ${dataType} ignorée en mode preview`);
-          return { ...updates, id } as T;
-        },
-        
-        async delete(id: string | number): Promise<boolean> {
-          console.warn(`⚠️ Suppression ${dataType} ignorée en mode preview`);
-          return true;
-        }
-      };
-    }
-    
-    // Pour les données Non-HDS : utiliser Supabase normalement
-    console.log(`🌐 Données Non-HDS "${dataType}" → Supabase en mode preview`);
-    return this.getSupabaseAdapter<T>(dataType);
+      async getById(id: string | number): Promise<T | null> {
+        console.warn(`⚠️ Lecture ${dataType} vide en mode preview`);
+        return null;
+      },
+      
+      async getAll(): Promise<T[]> {
+        console.warn(`⚠️ Liste ${dataType} vide en mode preview`);
+        return [];
+      },
+      
+      async update(id: string | number, updates: Partial<T>): Promise<T> {
+        console.warn(`⚠️ Mise à jour ${dataType} ignorée en mode preview`);
+        return { ...updates, id } as T;
+      },
+      
+      async delete(id: string | number): Promise<boolean> {
+        console.warn(`⚠️ Suppression ${dataType} ignorée en mode preview`);
+        return true;
+      }
+    };
   }
 
   /**
