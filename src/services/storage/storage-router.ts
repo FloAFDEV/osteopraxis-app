@@ -266,13 +266,47 @@ export class StorageRouter {
   }
 
   /**
-   * Adapter spécial pour l'environnement iframe (fallback temporaire)
-   * ⚠️ UTILISE SUPABASE TEMPORAIREMENT pour les données HDS en mode preview
+   * Adapter spécial pour l'environnement iframe (fallback preview mode)
+   * 🔒 Données HDS → Données vides/par défaut (sécurité)
+   * 🌐 Données Non-HDS → Supabase (normal)
    */
   private async getIframeFallbackAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
-    console.warn(`🚨 AVERTISSEMENT SÉCURITÉ: Fallback Supabase pour "${dataType}" en mode preview`);
+    console.warn(`🔍 Mode Preview détecté pour "${dataType}"`);
     
-    // Utiliser les mêmes services que pour les données Non-HDS mais avec avertissement
+    // Pour les données HDS : utiliser des données vides/par défaut (sécurité stricte)
+    if (isHDSData(dataType)) {
+      console.warn(`🔒 Données HDS "${dataType}" → Données vides en mode preview (sécurité)`);
+      
+      return {
+        async create(data: any): Promise<T> {
+          console.warn(`⚠️ Création ${dataType} ignorée en mode preview`);
+          return { ...data, id: Date.now() } as T;
+        },
+        
+        async getById(id: string | number): Promise<T | null> {
+          console.warn(`⚠️ Lecture ${dataType} vide en mode preview`);
+          return null;
+        },
+        
+        async getAll(): Promise<T[]> {
+          console.warn(`⚠️ Liste ${dataType} vide en mode preview`);
+          return [];
+        },
+        
+        async update(id: string | number, updates: Partial<T>): Promise<T> {
+          console.warn(`⚠️ Mise à jour ${dataType} ignorée en mode preview`);
+          return { ...updates, id } as T;
+        },
+        
+        async delete(id: string | number): Promise<boolean> {
+          console.warn(`⚠️ Suppression ${dataType} ignorée en mode preview`);
+          return true;
+        }
+      };
+    }
+    
+    // Pour les données Non-HDS : utiliser Supabase normalement
+    console.log(`🌐 Données Non-HDS "${dataType}" → Supabase en mode preview`);
     return this.getSupabaseAdapter<T>(dataType);
   }
 
