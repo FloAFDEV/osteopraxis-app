@@ -74,15 +74,15 @@ export function Dashboard() {
 			{/* Header Image Banner */}
 			<DashboardHeader />
 
-			{/* Avertissement de sécurité en mode iframe/preview */}
-			{storageMode === 'iframe_preview' && (
+			{/* Avertissement de stockage en mode connecté */}
+			{storageMode === 'connected' && (
 				<Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
 					<AlertTriangle className="h-4 w-4 text-orange-600" />
 					<AlertDescription className="text-orange-800 dark:text-orange-200">
 						<div className="flex items-center justify-between">
 							<div>
-								<strong>Mode Prévisualisation</strong> - Les données sensibles utilisent temporairement Supabase. 
-								Pour la sécurité complète, configurez le stockage local sécurisé.
+								<strong>Stockage Supabase</strong> - Vos données sont stockées sur Supabase. 
+								Pour une sécurité maximale, configurez le stockage local sécurisé.
 							</div>
 							<Button
 								variant="outline"
