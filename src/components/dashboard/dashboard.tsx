@@ -9,6 +9,7 @@ import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
 import { useCabinetStats } from "@/hooks/useCabinetStats";
+import { useDemo } from "@/contexts/DemoContext";
 
 export function Dashboard() {
 	const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -21,11 +22,19 @@ export function Dashboard() {
 	// Debug des états de chargement
 	console.log('🔧 Dashboard: authLoading:', authLoading, 'useCabinetStats loading:', loading);
 
-	// Afficher un état de chargement si l'auth est en cours ou si les données se chargent
-	if (authLoading || loading) {
+	// En mode connecté, forcer l'affichage du dashboard même si loading=true
+	// car les données Non-HDS sont suffisantes pour afficher le dashboard
+	const { isDemoMode } = useDemo();
+	
+	// Ne bloquer l'affichage que si on est en mode démo ET que les données se chargent
+	// ou si l'auth est vraiment en cours (première connexion)
+	if (isDemoMode && (authLoading || loading)) {
 		console.log('🔧 Dashboard: Showing LoadingState due to:', { authLoading, loading });
 		return <LoadingState />;
 	}
+	
+	// En mode connecté, afficher le dashboard même avec loading=true
+	// (les données HDS se chargeront en arrière-plan)
 
 	// Si pas authentifié, afficher un message approprié
 	if (!isAuthenticated || !user) {
