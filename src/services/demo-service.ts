@@ -183,7 +183,7 @@ export class DemoService {
         await this.createTemporaryInvoices(patients, osteopath.id, cabinet.id, expiresAt);
       }
 
-      console.log(`✅ Données temporaires créées pour session ${sessionId}, expire le ${expiresAt.toLocaleString('fr-FR')}`);
+      console.log(`✅ Données temporaires créées pour session ${sessionId}, expire le ${expiresAt.toLocaleString()}`);
     } catch (error) {
       console.error('Erreur lors de la création des données temporaires:', error);
     }

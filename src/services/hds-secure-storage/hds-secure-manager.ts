@@ -33,11 +33,6 @@ export class HDSSecureManager {
   private configured = false;
   private unlocked = false;
 
-  constructor() {
-    // Restaurer l'état configuré depuis localStorage
-    this.restoreConfigurationState();
-  }
-
   /**
    * Vérifier le support du stockage sécurisé
    */
@@ -342,24 +337,6 @@ export class HDSSecureManager {
       return parsed.configured === true;
     } catch {
       return false;
-    }
-  }
-
-  /**
-   * Restaurer l'état de configuration depuis localStorage
-   */
-  private restoreConfigurationState(): void {
-    try {
-      const config = localStorage.getItem('hds-secure-config');
-      if (config) {
-        const parsed = JSON.parse(config);
-        if (parsed.configured === true) {
-          this.configured = true;
-          console.log('🔄 État de configuration HDS sécurisé restauré depuis localStorage');
-        }
-      }
-    } catch (error) {
-      console.warn('⚠️ Impossible de restaurer l\'état de configuration:', error);
     }
   }
 }

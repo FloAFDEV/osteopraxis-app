@@ -444,7 +444,7 @@ export function EnhancedUsersManagement() {
                       <td className="p-3">{getRoleBadge(user.role)}</td>
                       <td className="p-3">{getStatusBadge(user)}</td>
                       <td className="p-3">
-                        {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                        {new Date(user.created_at).toLocaleDateString()}
                       </td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">

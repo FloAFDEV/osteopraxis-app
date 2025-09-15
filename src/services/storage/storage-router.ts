@@ -44,26 +44,21 @@ export class StorageRouter {
     // 1️⃣ PRIORITÉ ABSOLUE : Mode démo
     const isDemoMode = await isDemoSession();
     if (isDemoMode) {
+      console.log(`🎭 Mode démo détecté pour ${dataType} → demo-local-storage`);
       return this.getDemoAdapter<T>(dataType);
     }
 
-    // 2️⃣ Mode connecté normal : Router selon classification HDS/Non-HDS
+    // 2️⃣ Mode connecté : Router selon classification HDS/Non-HDS
     const classification = getDataClassification(dataType);
-    
-    // 🔥 PRIORITÉ : Environnement iframe (preview) - SEULEMENT pour données HDS
-    const isIframeEnvironment = window.self !== window.top;
-    if (isIframeEnvironment && classification === 'HDS') {
-      return this.getIframeFallbackAdapter<T>(dataType);
-    }
-    
-    // 3️⃣ Pour les données Non-HDS en iframe, continuer normalement vers Supabase
     
     switch (classification) {
       case 'HDS':
+        console.log(`🔴 Données HDS "${dataType}" → Stockage local persistant sécurisé`);
         validateHDSSecurityPolicy(dataType, 'local');
         return this.getLocalHDSAdapter<T>(dataType);
         
       case 'NON_HDS':
+        console.log(`🟢 Données Non-HDS "${dataType}" → Supabase cloud`);
         validateHDSSecurityPolicy(dataType, 'supabase');
         return this.getSupabaseAdapter<T>(dataType);
         
@@ -219,47 +214,7 @@ export class StorageRouter {
         return {
           create: (data) => cabinetMethods.createCabinet(data as any) as unknown as Promise<T>,
           getById: (id) => cabinetMethods.getCabinetById(Number(id)) as unknown as Promise<T | null>,
-          getAll: async () => {
-            try {
-              console.log('🔧 Tentative récupération cabinets via Supabase...');
-              const result = await cabinetMethods.getCabinets() as unknown as Promise<T[]>;
-              console.log('✅ Cabinets récupérés avec succès:', result);
-              return result;
-            } catch (error) {
-              console.error('❌ Erreur récupération cabinets Supabase:', error);
-              
-              // Import dynamique du service de toast pour notification utilisateur
-              try {
-                const { toast } = await import('sonner');
-                toast.error('Impossible de charger les cabinets', {
-                  description: 'Un cabinet temporaire a été créé pour vous permettre de continuer.'
-                });
-              } catch (toastError) {
-                console.warn('Impossible d\'afficher la notification:', toastError);
-              }
-              
-              // Fallback avec cabinet temporaire par défaut
-              const defaultCabinet = {
-                id: 999999,
-                name: 'Cabinet Temporaire',
-                address: 'Configuration en cours...',
-                city: '',
-                postalCode: '',
-                country: 'France',
-                phone: '',
-                email: '',
-                siret: '',
-                iban: null,
-                bic: null,
-                osteopathId: 1,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-              } as T;
-              
-              console.log('🆘 Fallback: cabinet temporaire créé:', defaultCabinet);
-              return [defaultCabinet];
-            }
-          },
+          getAll: () => cabinetMethods.getCabinets() as unknown as Promise<T[]>,
           update: (id, updates) => cabinetMethods.updateCabinet(Number(id), updates as any) as unknown as Promise<T>,
           delete: (id) => cabinetMethods.deleteCabinet(Number(id)).then(() => true)
         } as StorageAdapter<T>;
@@ -302,48 +257,10 @@ export class StorageRouter {
   }
 
   /**
-   * Adapter spécial pour l'environnement iframe (fallback preview mode)
-   * 🔒 TOUTES les données → Données vides/par défaut (mode preview)
-   * Évite les erreurs Supabase d'authentification en mode iframe
-   */
-  private async getIframeFallbackAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
-    console.warn(`🔍 Mode Preview détecté pour "${dataType}" → Données vides (pas d'auth Supabase)`);
-    
-    // Retourner des données vides pour TOUS les types de données en mode iframe
-    // Cela évite les erreurs d'authentification Supabase qui causent le spinner infini
-    return {
-      async create(data: any): Promise<T> {
-        console.warn(`⚠️ Création ${dataType} ignorée en mode preview`);
-        return { ...data, id: Date.now() } as T;
-      },
-      
-      async getById(id: string | number): Promise<T | null> {
-        console.warn(`⚠️ Lecture ${dataType} vide en mode preview`);
-        return null;
-      },
-      
-      async getAll(): Promise<T[]> {
-        console.warn(`⚠️ Liste ${dataType} vide en mode preview`);
-        return [];
-      },
-      
-      async update(id: string | number, updates: Partial<T>): Promise<T> {
-        console.warn(`⚠️ Mise à jour ${dataType} ignorée en mode preview`);
-        return { ...updates, id } as T;
-      },
-      
-      async delete(id: string | number): Promise<boolean> {
-        console.warn(`⚠️ Suppression ${dataType} ignorée en mode preview`);
-        return true;
-      }
-    };
-  }
-
-  /**
    * Méthode de diagnostic pour vérifier la configuration
    */
   async diagnose(): Promise<{
-    mode: 'demo' | 'connected' | 'iframe_preview';
+    mode: 'demo' | 'connected';
     hdsServices: string[];
     nonHdsServices: string[];
     security: {
@@ -351,21 +268,18 @@ export class StorageRouter {
       nonHdsSupabaseOnly: boolean;
       noHdsLeakage: boolean;
     };
-    isIframeEnvironment: boolean;
   }> {
     const isDemoMode = await isDemoSession();
-    const isIframeEnvironment = window.self !== window.top;
     
     return {
-      mode: isDemoMode ? 'demo' : (isIframeEnvironment ? 'iframe_preview' : 'connected'),
+      mode: isDemoMode ? 'demo' : 'connected',
       hdsServices: ['patients', 'appointments', 'invoices'],
       nonHdsServices: ['osteopaths', 'cabinets', 'users'],
       security: {
-        hdsLocalOnly: !isDemoMode && !isIframeEnvironment, // En mode connecté non-iframe, HDS doit être local
+        hdsLocalOnly: !isDemoMode, // En mode connecté, HDS doit être local
         nonHdsSupabaseOnly: !isDemoMode, // En mode connecté, Non-HDS peut aller sur Supabase
-        noHdsLeakage: !isIframeEnvironment // Pas de fuite HDS sauf en mode iframe (preview)
-      },
-      isIframeEnvironment
+        noHdsLeakage: true // Aucune donnée HDS ne peut fuiter vers Supabase
+      }
     };
   }
 }

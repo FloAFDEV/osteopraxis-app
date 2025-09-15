@@ -13,14 +13,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { BackButton } from "@/components/ui/back-button";
 import { Link } from "react-router-dom";
-import { useCabinets } from "@/hooks/useCabinets";
 
 const CabinetSettingsPage = () => {
+  const [loading, setLoading] = useState(true);
   const [cabinet, setCabinet] = useState<Cabinet | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { user } = useAuth();
   const { isDemoMode } = useDemo();
-  const { data: cabinets, isLoading: loading, error } = useCabinets();
 
   const form = useForm({
     defaultValues: {
@@ -33,29 +32,43 @@ const CabinetSettingsPage = () => {
   });
 
   useEffect(() => {
-    if (error) {
-      console.error("Error fetching cabinets:", error);
-      toast.error("Impossible de charger les informations du cabinet.");
-      return;
-    }
+    const fetchCabinet = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
 
-    if (!loading && cabinets && cabinets.length > 0) {
-      // Prendre le premier cabinet trouvé
-      const primaryCabinet = cabinets[0];
-      console.log("Cabinet principal trouvé:", primaryCabinet);
-      setCabinet(primaryCabinet);
-      
-      form.reset({
-        name: primaryCabinet.name || "",
-        address: primaryCabinet.address || "",
-        phone: primaryCabinet.phone || "",
-        email: primaryCabinet.email || "",
-        imageUrl: primaryCabinet.imageUrl || ""
-      });
-    } else if (!loading) {
-      console.log("Aucun cabinet trouvé");
-    }
-  }, [cabinets, loading, error, form]);
+      try {
+        // ✅ Chargement cabinets utilisateur
+        
+        const cabinets = await api.getCabinetsByUserId(user.id);
+        console.log("Cabinets récupérés:", cabinets);
+        
+        if (cabinets && cabinets.length > 0) {
+          const primaryCabinet = cabinets[0];
+          console.log("Cabinet principal trouvé:", primaryCabinet);
+          setCabinet(primaryCabinet);
+          
+          form.reset({
+            name: primaryCabinet.name || "",
+            address: primaryCabinet.address || "",
+            phone: primaryCabinet.phone || "",
+            email: primaryCabinet.email || "",
+            imageUrl: primaryCabinet.imageUrl || ""
+          });
+        } else {
+          console.log("Aucun cabinet trouvé pour l'utilisateur");
+        }
+      } catch (error) {
+        console.error("Error fetching cabinet:", error);
+        toast.error("Impossible de charger les informations du cabinet.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCabinet();
+  }, [form, user]);
 
   const onSubmit = async (data: { 
     name: string; 

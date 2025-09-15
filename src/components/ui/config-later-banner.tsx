@@ -17,7 +17,7 @@ export function ConfigLaterBanner({ onConfigureNow, onDismiss }: ConfigLaterBann
     if (onConfigureNow) {
       onConfigureNow();
     } else {
-      navigate('/admin/dashboard');
+      navigate('/settings/storage');
     }
   };
 

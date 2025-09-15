@@ -1,10 +1,9 @@
 /**
  * Service de cache simple et performant pour les cabinets
- * Utilise le StorageRouter pour respecter tous les modes (démo, local HDS, iframe)
  */
 
 import { Cabinet } from '@/types';
-import { storageRouter } from '../storage/storage-router';
+import { supabaseCabinetService } from '../supabase-api/cabinet';
 
 interface CacheEntry {
   data: Cabinet[];
@@ -36,8 +35,8 @@ class CabinetCacheService {
       return activePromise;
     }
 
-    // Créer une nouvelle requête via le StorageRouter pour respecter tous les modes
-    const promise = this.fetchFromStorageRouter();
+    // Créer une nouvelle requête - DIRECTEMENT vers Supabase pour éviter la boucle
+    const promise = this.fetchFromSupabase();
     this.activeFetches.set(cacheKey, promise);
 
     try {
@@ -71,10 +70,9 @@ class CabinetCacheService {
       }
     }
 
-    // Sinon charger via le StorageRouter
+    // Sinon charger directement depuis Supabase
     try {
-      const cabinetAdapter = await storageRouter.route<Cabinet>('cabinets');
-      return await cabinetAdapter.getById(id);
+      return await supabaseCabinetService.getCabinetById(id);
     } catch (error) {
       console.error(`Erreur récupération cabinet ${id}:`, error);
       throw error;
@@ -90,46 +88,51 @@ class CabinetCacheService {
   }
 
   /**
-   * Invalider et recharger immédiatement
+   * Appel direct à Supabase (pas de boucle)
    */
-  async invalidateAndRefetch(): Promise<Cabinet[]> {
-    this.invalidate();
-    return this.getCabinets();
-  }
-
-  /**
-   * Récupération via le StorageRouter (respecte tous les modes)
-   */
-  private async fetchFromStorageRouter(): Promise<Cabinet[]> {
+  private async fetchFromSupabase(): Promise<Cabinet[]> {
     try {
-      const cabinetAdapter = await storageRouter.route<Cabinet>('cabinets');
-      const result = await cabinetAdapter.getAll();
+      // Utiliser directement l'API Supabase sans passer par le router de stockage
+      const { supabase } = await import('@/integrations/supabase/client');
       
-      console.log(`✅ Cabinets récupérés avec succès:`, result);
-      return result;
+      const { data, error } = await supabase
+        .from('Cabinet')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Erreur Supabase getCabinets:', error);
+        throw error;
+      }
+
+      // Mapper les données Supabase au type Cabinet avec valeurs par défaut
+      const cabinets: Cabinet[] = (data || []).map((cabinet: any) => ({
+        id: cabinet.id,
+        name: cabinet.name,
+        address: cabinet.address,
+        city: '', // Pas en base pour l'instant
+        postalCode: '', // Pas en base pour l'instant  
+        phone: cabinet.phone,
+        email: cabinet.email,
+        siret: null, // Pas en base pour l'instant
+        iban: null, // Pas en base pour l'instant
+        bic: null, // Pas en base pour l'instant
+        country: 'France', // Valeur par défaut
+        osteopathId: cabinet.osteopathId,
+        createdAt: cabinet.createdAt,
+        updatedAt: cabinet.updatedAt,
+        imageUrl: cabinet.imageUrl,
+        logoUrl: cabinet.logoUrl,
+        professionalProfileId: cabinet.professionalProfileId,
+        tenant_id: cabinet.tenant_id,
+        userId: null, // Pas en base pour l'instant
+        website: null // Pas en base pour l'instant
+      }));
+
+      return cabinets;
     } catch (error) {
-      console.error('❌ [CabinetCache] Erreur récupération cabinets via StorageRouter:', error);
-      
-      // Fallback de dernière chance
-      const fallbackCabinet: Cabinet = {
-        id: 999996,
-        name: 'Cabinet Cache Fallback',
-        address: 'Erreur de cache - Données temporaires',
-        city: '',
-        postalCode: '',
-        country: 'France',
-        phone: '',
-        email: '',
-        siret: '',
-        iban: null,
-        bic: null,
-        osteopathId: 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      console.log('🆘 [CabinetCache] Fallback de dernière chance:', fallbackCabinet);
-      return [fallbackCabinet];
+      console.error('Erreur récupération cabinets:', error);
+      throw error;
     }
   }
 

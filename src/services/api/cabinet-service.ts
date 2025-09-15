@@ -21,24 +21,12 @@ export const cabinetService = {
 
   async createCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cabinet> {
     const adapter = await storageRouter.route<Cabinet>('cabinets');
-    const result = await adapter.create(cabinet);
-    
-    // Invalider le cache pour que les nouveaux données soient visibles immédiatement
-    const { cabinetCache } = await import('@/services/cache/cabinet-cache');
-    cabinetCache.invalidate();
-    
-    return result;
+    return adapter.create(cabinet);
   },
 
   async updateCabinet(id: number, cabinet: Partial<Cabinet>): Promise<Cabinet> {
     const adapter = await storageRouter.route<Cabinet>('cabinets');
-    const result = await adapter.update(id, cabinet);
-    
-    // Invalider le cache pour que les modifications soient visibles immédiatement
-    const { cabinetCache } = await import('@/services/cache/cabinet-cache');
-    cabinetCache.invalidate();
-    
-    return result;
+    return adapter.update(id, cabinet);
   },
 
   async deleteCabinet(id: number): Promise<boolean> {
@@ -48,13 +36,8 @@ export const cabinetService = {
 
   // Méthodes spécifiques (compatibilité existante)
   async getCabinetsByUserId(userId: string): Promise<Cabinet[]> {
-    // Utiliser le StorageRouter pour récupérer tous les cabinets
-    const adapter = await storageRouter.route<Cabinet>('cabinets');
-    const allCabinets = await adapter.getAll();
-    
-    // En mode connecté, filtrer par utilisateur si nécessaire
-    // En mode démo, retourner tous les cabinets démo
-    return allCabinets;
+    // En attendant l'implémentation complète Supabase
+    return [];
   },
 
   async getCabinetsByOsteopathId(osteopathId: number): Promise<Cabinet[]> {

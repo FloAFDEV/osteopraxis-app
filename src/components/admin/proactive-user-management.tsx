@@ -488,7 +488,7 @@ L'équipe"
                           <h4 className="font-medium">{notification.title}</h4>
                           <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
                           <p className="text-xs text-muted-foreground mt-2">
-                            {new Date(notification.created_at).toLocaleString('fr-FR')}
+                            {new Date(notification.created_at).toLocaleString()}
                           </p>
                         </div>
                       </div>

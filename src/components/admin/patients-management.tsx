@@ -121,7 +121,7 @@ export function PatientsManagement() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR');
+    return new Date(dateString).toLocaleDateString();
   };
 
   const groupedDuplicates = duplicates.reduce((acc, duplicate) => {

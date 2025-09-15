@@ -53,7 +53,6 @@ export function useCabinetStats(selectedCabinetId: number | null) {
 
   useEffect(() => {
     const loadCabinetStats = async () => {
-      console.log('📊 [useCabinetStats] === DÉBUT CHARGEMENT ===', { selectedCabinetId });
       setLoading(true);
       setError(null);
       
@@ -63,25 +62,11 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         // Mode connecté → HDS local + Non-HDS Supabase
 
         // Récupération des données (réelles ou démo selon le contexte)
-        // Avec gestion d'erreur gracieuse pour l'environnement iframe
-        let patientsData, appointmentsData, invoicesData;
-        
-        try {
-          // Essayer de charger les données HDS (patients, RDV) - peuvent échouer en iframe
-          [patientsData, appointmentsData] = await Promise.all([
-            api.getPatients().catch(() => []),
-            api.getAppointments().catch(() => []),
-          ]);
-          
-          // Charger les factures (non-HDS) séparément car toujours disponibles
-          invoicesData = await api.getInvoices();
-          
-        } catch (storageError) {
-          console.warn('⚠️ Erreur de stockage détectée, utilisation de données vides:', storageError);
-          patientsData = [];
-          appointmentsData = [];
-          invoicesData = [];
-        }
+        const [patientsData, appointmentsData, invoicesData] = await Promise.all([
+          api.getPatients(),
+          api.getAppointments(),
+          api.getInvoices(),
+        ]);
 
         // Filtrer les données par cabinet si sélectionné
         let filteredPatients = patientsData || [];

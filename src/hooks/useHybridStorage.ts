@@ -77,7 +77,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
         return;
       }
       
-      // Vérifier si déjà configuré depuis localStorage
+      // Vérifier si déjà configuré
       const isConfigured = hdsSecureManager.isConfiguredFromStorage();
       
       if (!isConfigured) {
@@ -91,14 +91,9 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
           integrityStatus: {}
         });
       } else {
-        console.log('✅ Stockage HDS sécurisé déjà configuré - Chargement du statut');
+        console.log('✅ Stockage HDS sécurisé déjà configuré');
         const storageStatus = await loadStatus();
         console.log('📊 Statut stockage sécurisé:', storageStatus);
-        
-        // Si configuré mais verrouillé, afficher le prompt de déverrouillage
-        if (storageStatus && storageStatus.isConfigured && !storageStatus.isUnlocked) {
-          console.log('🔒 Stockage configuré mais verrouillé - Déverrouillage requis');
-        }
       }
       
       console.log('🎉 INITIALISATION RÉUSSIE: Stockage HDS sécurisé opérationnel');

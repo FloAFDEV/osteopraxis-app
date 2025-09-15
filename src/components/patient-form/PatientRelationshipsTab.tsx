@@ -127,7 +127,7 @@ export function PatientRelationshipsTab({ form, patientId, availablePatients }: 
                       {relationship.relationship_type}
                       {relationship.related_patient?.birthDate && (
                         <span className="ml-2">
-                          (né(e) le {new Date(relationship.related_patient.birthDate).toLocaleDateString('fr-FR')})
+                          (né(e) le {new Date(relationship.related_patient.birthDate).toLocaleDateString()})
                         </span>
                       )}
                     </div>

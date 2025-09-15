@@ -13,7 +13,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -70,39 +69,36 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background dark:bg-gradient-to-br dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-950 to-slate-900">
       {/* Left section - Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 md:p-12">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-4xl font-extrabold tracking-tight">
-            <span className="text-foreground">Patient</span>
+            <span className="text-white">Patient</span>
             <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
               Hub
             </span>
           </h1>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <BackButton to="/" />
-          </div>
+          <BackButton to="/" />
         </div>
 
         <div className="flex-grow flex items-center justify-center">
           <div className="w-full max-w-md space-y-8">
             <div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
                 Votre espace dédié aux ostéopathes
               </h2>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-gray-400 text-lg">
                 Connectez-vous pour consulter vos dossiers.
               </p>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-2 mb-6 bg-muted">
-                <TabsTrigger value="password" className="text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground">
+              <TabsList className="grid grid-cols-2 mb-6 bg-gray-900">
+                <TabsTrigger value="password" className="bg-gray-600 hover:bg-gray-500 text-zinc-100">
                   Mot de passe
                 </TabsTrigger>
-                <TabsTrigger value="magiclink" className="text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground">
+                <TabsTrigger value="magiclink" className="bg-gray-600 hover:bg-gray-500 text-zinc-100">
                   Magic Link
                 </TabsTrigger>
               </TabsList>
@@ -116,12 +112,12 @@ const LoginPage = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-foreground">Email :</FormLabel>
+                          <FormLabel className="text-gray-300">Email :</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                               <Input
-                                className="pl-10 bg-background border-input text-foreground"
+                                className="pl-10 bg-[#161b22] border-gray-700 text-white"
                                 placeholder="votre@email.com"
                                 {...field}
                               />
@@ -137,20 +133,20 @@ const LoginPage = () => {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-foreground">Mot de passe :</FormLabel>
+                          <FormLabel className="text-gray-300">Mot de passe :</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                               <Input
                                 type={showPassword ? "text" : "password"}
-                                className="pl-10 pr-10 bg-background border-input text-foreground"
+                                className="pl-10 pr-10 bg-[#161b22] border-gray-700 text-white"
                                 placeholder="Votre mot de passe"
                                 {...field}
                               />
                               <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-2.5 h-6 w-6 text-muted-foreground hover:text-foreground transition"
+                                className="absolute right-3 top-2.5 h-6 w-6 text-gray-400 hover:text-gray-200 transition"
                                 tabIndex={-1}
                                 aria-label={showPassword ? "Cacher le mot de passe" : "Afficher le mot de passe"}
                               >
@@ -183,12 +179,12 @@ const LoginPage = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-foreground">Email :</FormLabel>
+                          <FormLabel className="text-gray-300">Email :</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                               <Input
-                                className="pl-10 bg-background border-input text-foreground"
+                                className="pl-10 bg-[#161b22] border-gray-700 text-white"
                                 placeholder="votre@email.com"
                                 {...field}
                               />
@@ -208,16 +204,16 @@ const LoginPage = () => {
                     </Button>
                   </form>
                 </Form>
-                <div className="text-center text-sm text-muted-foreground mt-4">
+                <div className="text-center text-sm text-gray-400 mt-4">
                   <p>Un lien de connexion sécurisé sera envoyé à votre adresse email.</p>
                 </div>
               </TabsContent>
             </Tabs>
 
             <div className="text-center">
-              <p className="text-muted-foreground">
+              <p className="text-gray-400">
                 Pas encore de compte ?{" "}
-                <Link to="/register" className="text-primary hover:underline">
+                <Link to="/register" className="text-blue-400 hover:underline">
                   S'inscrire
                 </Link>
               </p>
@@ -225,7 +221,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <div className="mt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-8 text-center text-sm text-gray-500">
           <p>
             La plateforme conçue pour faciliter la gestion des données médicales.
             <br />
@@ -242,7 +238,7 @@ const LoginPage = () => {
           alt="Colonne vertébrale"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent dark:from-[#0d1117]/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 to-transparent"></div>
       </div>
     </div>
   );

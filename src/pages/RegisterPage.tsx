@@ -14,7 +14,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Info, Lock, User, UserPlus } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -119,10 +118,10 @@ const RegisterPage = () => {
 
   if (registrationSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-card border border-border rounded-xl shadow-xl">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0d1117]">
+        <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 md:p-12 bg-[#161b22] border border-gray-700 rounded-xl shadow-xl">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-6">
+            <h1 className="text-3xl font-bold text-white mb-6">
               Inscription réussie !
             </h1>
             <div className="flex justify-center mb-6">
@@ -130,26 +129,26 @@ const RegisterPage = () => {
                 <User className="h-10 w-10 text-green-400" />
               </div>
             </div>
-            <p className="text-foreground mb-6">
+            <p className="text-gray-300 mb-6">
               Votre compte a été créé avec succès.
               {validInvitation && (
-                <span className="block mt-2 text-primary">
+                <span className="block mt-2 text-blue-300">
                   Vous allez être redirigé vers la configuration avec votre invitation pour{" "}
                   {validInvitation.cabinetName}.
                 </span>
               )}
             </p>
             <div className="flex justify-center mb-4">
-              <div className="bg-primary/20 rounded-full px-4 py-2">
-                <span className="text-primary font-semibold">
+              <div className="bg-blue-500/20 rounded-full px-4 py-2">
+                <span className="text-blue-300 font-semibold">
                   Redirection dans {redirectCountdown}s...
                 </span>
               </div>
             </div>
             <div className="animate-pulse mb-6 flex justify-center">
-              <div className="bg-primary/30 rounded-full h-2 w-24"></div>
+              <div className="bg-blue-500/30 rounded-full h-2 w-24"></div>
             </div>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-gray-400 text-sm">
               Si vous n'êtes pas redirigé automatiquement,
               <button
                 onClick={() =>
@@ -157,7 +156,7 @@ const RegisterPage = () => {
                     ? `/profile/setup?invitation=${validInvitation.code}`
                     : returnTo)
                 }
-                className="text-primary hover:underline ml-1"
+                className="text-blue-400 hover:underline ml-1"
               >
                 cliquez ici
               </button>
@@ -169,36 +168,33 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background dark:bg-gradient-to-br dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-950 to-slate-900">
       {/* Left section - Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 md:p-12">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-4xl font-extrabold tracking-tight">
-            <span className="text-foreground">Patient</span>
+            <span className="text-white">Patient</span>
             <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
               Hub
             </span>
           </h1>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <BackButton to="/" />
-          </div>
+          <BackButton to="/" />
         </div>
 
         <div className="flex-grow flex items-center justify-center">
           <div className="w-full max-w-md space-y-8">
             <div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
                 Créez votre compte
               </h2>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-gray-400 text-lg">
                 Rejoignez PatientHub pour gérer vos patients efficacement.
               </p>
             </div>
 
             {(initialInvitationCode || form.watch("invitationCode")) && (
-              <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
-                <h3 className="text-primary font-medium mb-3">
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                <h3 className="text-blue-400 font-medium mb-3">
                   Invitation Cabinet
                 </h3>
                 <InvitationCodeInput
@@ -211,15 +207,15 @@ const RegisterPage = () => {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
+                <div className="w-full border-t border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-background text-primary">Inscription</span>
+                <span className="px-2 bg-[#0d1117] text-blue-400">Inscription</span>
               </div>
             </div>
 
             {registerError && (
-              <Alert className="bg-destructive/10 border border-destructive/50 text-destructive">
+              <Alert className="bg-red-500/10 border border-red-500/50 text-red-500">
                 <Info className="h-4 w-4" />
                 <AlertTitle>Erreur</AlertTitle>
                 <AlertDescription>{registerError}</AlertDescription>
@@ -233,20 +229,20 @@ const RegisterPage = () => {
                     control={form.control}
                     name="firstName"
                     render={({ field }) => (
-                       <FormItem className="flex-1">
-                         <FormLabel className="text-foreground">Prénom</FormLabel>
-                         <FormControl>
-                           <div className="relative">
-                             <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                             <Input
-                               className="pl-10 bg-background border-input text-foreground"
-                               placeholder="Prénom"
-                               {...field}
-                             />
-                           </div>
-                         </FormControl>
-                         <FormMessage />
-                       </FormItem>
+                      <FormItem className="flex-1">
+                        <FormLabel className="text-gray-300">Prénom</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            <Input
+                              className="pl-10 bg-[#161b22] border-gray-700 text-white"
+                              placeholder="Prénom"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
 
@@ -254,20 +250,20 @@ const RegisterPage = () => {
                     control={form.control}
                     name="lastName"
                     render={({ field }) => (
-                       <FormItem className="flex-1">
-                         <FormLabel className="text-foreground">Nom</FormLabel>
-                         <FormControl>
-                           <div className="relative">
-                             <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                             <Input
-                               className="pl-10 bg-background border-input text-foreground"
-                               placeholder="Nom"
-                               {...field}
-                             />
-                           </div>
-                         </FormControl>
-                         <FormMessage />
-                       </FormItem>
+                      <FormItem className="flex-1">
+                        <FormLabel className="text-gray-300">Nom</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            <Input
+                              className="pl-10 bg-[#161b22] border-gray-700 text-white"
+                              placeholder="Nom"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
                 </div>
@@ -276,20 +272,20 @@ const RegisterPage = () => {
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                     <FormItem>
-                       <FormLabel className="text-foreground">Email</FormLabel>
-                       <FormControl>
-                         <div className="relative">
-                           <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                           <Input
-                             className="pl-10 bg-background border-input text-foreground"
-                             placeholder="votre@email.com"
-                             {...field}
-                           />
-                         </div>
-                       </FormControl>
-                       <FormMessage />
-                     </FormItem>
+                    <FormItem>
+                      <FormLabel className="text-gray-300">Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                          <Input
+                            className="pl-10 bg-[#161b22] border-gray-700 text-white"
+                            placeholder="votre@email.com"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
 
@@ -297,21 +293,21 @@ const RegisterPage = () => {
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                     <FormItem>
-                       <FormLabel className="text-foreground">Mot de passe</FormLabel>
-                       <FormControl>
-                         <div className="relative">
-                           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                           <Input
-                             type="password"
-                             className="pl-10 bg-background border-input text-foreground"
-                             placeholder="Votre mot de passe"
-                             {...field}
-                           />
-                         </div>
-                       </FormControl>
-                       <FormMessage />
-                     </FormItem>
+                    <FormItem>
+                      <FormLabel className="text-gray-300">Mot de passe</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                          <Input
+                            type="password"
+                            className="pl-10 bg-[#161b22] border-gray-700 text-white"
+                            placeholder="Votre mot de passe"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
 
@@ -319,21 +315,21 @@ const RegisterPage = () => {
                   control={form.control}
                   name="confirmPassword"
                   render={({ field }) => (
-                     <FormItem>
-                       <FormLabel className="text-foreground">Confirmez le mot de passe</FormLabel>
-                       <FormControl>
-                         <div className="relative">
-                           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                           <Input
-                             type="password"
-                             className="pl-10 bg-background border-input text-foreground"
-                             placeholder="Confirmer votre mot de passe"
-                             {...field}
-                           />
-                         </div>
-                       </FormControl>
-                       <FormMessage />
-                     </FormItem>
+                    <FormItem>
+                      <FormLabel className="text-gray-300">Confirmez le mot de passe</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                          <Input
+                            type="password"
+                            className="pl-10 bg-[#161b22] border-gray-700 text-white"
+                            placeholder="Confirmer votre mot de passe"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
 
@@ -345,20 +341,20 @@ const RegisterPage = () => {
                   {isLoading ? "Création en cours..." : "S'inscrire"}
                 </Button>
 
-                 <div className="text-center">
-                   <p className="text-muted-foreground">
-                     Déjà inscrit ?{" "}
-                     <Link to="/login" className="text-primary hover:underline">
-                       Se connecter
-                     </Link>
-                   </p>
-                 </div>
+                <div className="text-center">
+                  <p className="text-gray-400">
+                    Déjà inscrit ?{" "}
+                    <Link to="/login" className="text-blue-400 hover:underline">
+                      Se connecter
+                    </Link>
+                  </p>
+                </div>
               </form>
             </Form>
           </div>
         </div>
 
-        <div className="mt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-8 text-center text-sm text-gray-500">
           <p>
             La plateforme conçue pour faciliter la gestion des données médicales.
             <br />
@@ -375,7 +371,7 @@ const RegisterPage = () => {
           alt="Colonne vertébrale"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent dark:from-[#0d1117]/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 to-transparent"></div>
       </div>
     </div>
   );

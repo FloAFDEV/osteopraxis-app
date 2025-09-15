@@ -134,7 +134,7 @@ export function UserDeletionMonitoring() {
       Email: user.email,
       Nom: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
       Rôle: user.role,
-      "Date de suppression": new Date(user.deleted_at).toLocaleDateString('fr-FR'),
+      "Date de suppression": new Date(user.deleted_at).toLocaleDateString(),
       "Supprimé par": user.deleted_by || "Système"
     }));
 
@@ -243,7 +243,7 @@ export function UserDeletionMonitoring() {
                           {user.first_name} {user.last_name} • {user.role}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Supprimé le {new Date(user.deleted_at).toLocaleDateString('fr-FR')}
+                          Supprimé le {new Date(user.deleted_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>

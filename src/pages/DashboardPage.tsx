@@ -4,40 +4,23 @@ import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
 import { DemoGuide } from "@/components/demo/DemoGuide";
-import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { isDemoSession } from "@/utils/demo-detection";
-import { useCabinets } from "@/hooks/useCabinets";
 
 const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: cabinets, isLoading: cabinetsLoading } = useCabinets();
   
-  // Vérifier si l'utilisateur connecté normal a besoin de configurer son profil
+  // Vérifier si l'utilisateur a besoin de configurer son profil
   useEffect(() => {
-    const checkUserProfile = async () => {
-      console.log("DashboardPage - Vérification du profil utilisateur:", user);
-      
-      // Vérifier si on est en mode démo
-      const isDemo = await isDemoSession();
-      
-      // Seulement pour les utilisateurs connectés NON-démo
-      if (user && !isDemo && !user.osteopathId) {
-        console.log("Utilisateur connecté normal sans profil ostéopathe détecté, redirection vers la configuration");
-        navigate("/osteopath-profile");
-      } else {
-        console.log("Utilisateur avec profil ostéopathe, en mode démo, ou non connecté:", { 
-          osteopathId: user?.osteopathId, 
-          isDemo,
-          userEmail: user?.email 
-        });
-      }
-    };
+    console.log("DashboardPage - Vérification du profil utilisateur:", user);
     
-    if (user) {
-      checkUserProfile();
+    // Ne rediriger que si l'utilisateur est connecté mais n'a pas d'osteopathId
+    if (user && !user.osteopathId) {
+      console.log("Utilisateur sans profil ostéopathe détecté, redirection vers la configuration");
+      navigate("/osteopath-profile");
+    } else {
+      console.log("Utilisateur avec profil ostéopathe ou non connecté:", user?.osteopathId);
     }
   }, [user, navigate]);
 
@@ -48,16 +31,6 @@ const DashboardPage = () => {
         className="p-3 md:p-6 rounded-xl animate-fade-in"
       >
         <DemoGuide />
-        
-        {/* Message de bienvenue pour nouveaux utilisateurs */}
-        {!cabinetsLoading && (
-          <WelcomeMessage 
-            hasCabinets={!!(cabinets && cabinets.length > 0)}
-            hasPatients={false} // TODO: Ajouter le check des patients quand nécessaire
-            userName={user?.firstName}
-          />
-        )}
-        
         <Dashboard />
       </GradientBackground>
     </Layout>

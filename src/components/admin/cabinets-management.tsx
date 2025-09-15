@@ -271,11 +271,11 @@ export function CabinetsManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Créé le</label>
-                      <p>{new Date(selectedCabinet.created_at).toLocaleDateString('fr-FR')}</p>
+                      <p>{new Date(selectedCabinet.created_at).toLocaleDateString()}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Modifié le</label>
-                      <p>{new Date(selectedCabinet.updated_at).toLocaleDateString('fr-FR')}</p>
+                      <p>{new Date(selectedCabinet.updated_at).toLocaleDateString()}</p>
                     </div>
                   </div>
                 </div>

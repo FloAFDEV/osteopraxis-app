@@ -18,8 +18,6 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
-import { useCabinets } from "@/hooks/useCabinets";
-import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
 import {
 	ArrowLeft,
 	Building2,
@@ -40,7 +38,8 @@ import { toast } from "sonner";
 const CabinetsManagementPage = () => {
 	const navigate = useNavigate();
 	const { user } = useAuth();
-	const { data: cabinets = [], isLoading: loading, invalidateAndRefetch } = useCabinets();
+	const [cabinets, setCabinets] = useState<Cabinet[]>([]);
+	const [loading, setLoading] = useState(true);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [cabinetToDelete, setCabinetToDelete] = useState<Cabinet | null>(
 		null
@@ -56,8 +55,7 @@ const CabinetsManagementPage = () => {
 		if (!cabinetToDelete) return;
 		try {
 			await api.deleteCabinet(cabinetToDelete.id);
-			// Invalider et recharger les données via le hook
-			await invalidateAndRefetch();
+			setCabinets(cabinets.filter((c) => c.id !== cabinetToDelete.id));
 			toast.success("Cabinet supprimé avec succès");
 		} catch (error) {
 			console.error("Erreur lors de la suppression du cabinet:", error);
@@ -113,13 +111,14 @@ const CabinetsManagementPage = () => {
 	};
 
 	useEffect(() => {
-		const fetchOsteopathData = async () => {
-			if (!cabinets?.length) return;
-
+		const fetchCabinets = async () => {
 			try {
+				const cabinetData = await api.getCabinets();
+				setCabinets(cabinetData);
+
 				// Fetch osteopath data for each cabinet to get billing information
 				const osteopathIds = [
-					...new Set(cabinets.map((c) => c.osteopathId)),
+					...new Set(cabinetData.map((c) => c.osteopathId)),
 				];
 				const osteopathInfo: Record<number, any> = {};
 				for (const id of osteopathIds) {
@@ -131,13 +130,18 @@ const CabinetsManagementPage = () => {
 				setOsteopathData(osteopathInfo);
 			} catch (error) {
 				console.error(
-					"Erreur lors de la récupération des données ostéopathes:",
+					"Erreur lors de la récupération des cabinets:",
 					error
 				);
+				toast.error(
+					"Impossible de charger les cabinets. Veuillez réessayer."
+				);
+			} finally {
+				setLoading(false);
 			}
 		};
-		fetchOsteopathData();
-	}, [cabinets]);
+		fetchCabinets();
+	}, []);
 
 	if (loading) {
 		return (
@@ -216,13 +220,6 @@ const CabinetsManagementPage = () => {
 					</div>
 				</div>
 				<div className="container mx-auto px-6 py-8">
-					{/* Message de bienvenue pour nouveaux utilisateurs */}
-					<WelcomeMessage 
-						hasCabinets={cabinets.length > 0}
-						hasPatients={false} // TODO: Ajouter le check des patients si nécessaire
-						userName={user?.firstName}
-					/>
-
 					{cabinets.length === 0 ? (
 						<div className="max-w-md mx-auto">
 							<Card className="text-center border-2 border-dashed border-teal-200 dark:border-teal-800 bg-white dark:bg-gray-800 shadow-sm">

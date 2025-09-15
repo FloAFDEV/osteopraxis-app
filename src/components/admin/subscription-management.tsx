@@ -138,7 +138,7 @@ export function SubscriptionManagement() {
       Statut: sub.subscribed ? "Actif" : "Inactif",
       Plan: sub.subscription_tier || "Gratuit",
       "Date de fin": sub.subscription_end || "N/A",
-      "Date de création": new Date(sub.created_at).toLocaleDateString('fr-FR')
+      "Date de création": new Date(sub.created_at).toLocaleDateString()
     }));
 
     const csv = [
@@ -296,7 +296,7 @@ export function SubscriptionManagement() {
                   <div>
                     <p className="font-medium">{subscriber.email}</p>
                     <p className="text-sm text-muted-foreground">
-                      Créé le {new Date(subscriber.created_at).toLocaleDateString('fr-FR')}
+                      Créé le {new Date(subscriber.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export function SubscriptionManagement() {
                   
                   {subscriber.subscription_end && (
                     <div className="text-sm text-muted-foreground">
-                      Expire le {new Date(subscriber.subscription_end).toLocaleDateString('fr-FR')}
+                      Expire le {new Date(subscriber.subscription_end).toLocaleDateString()}
                     </div>
                   )}
                   
