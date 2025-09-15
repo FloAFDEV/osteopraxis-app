@@ -103,7 +103,12 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       } catch (err) {
         console.error("Erreur lors du chargement des statistiques du cabinet:", err);
         setError("Impossible de charger les statistiques. Veuillez réessayer plus tard.");
+        // En mode connecté, s'assurer que loading est false même en cas d'erreur
+        if (!isDemoMode) {
+          setLoading(false);
+        }
       } finally {
+        // Demo mode loading état géré ici comme avant
         if (isDemoMode) {
           setLoading(false);
         }
