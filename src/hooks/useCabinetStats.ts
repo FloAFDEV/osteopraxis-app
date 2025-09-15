@@ -56,6 +56,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
       // Vérifier le mode démo une seule fois au début de la fonction
       const currentIsDemoMode = isDemoMode;
       
+      console.log('🔧 useCabinetStats: Starting data load, isDemoMode:', currentIsDemoMode);
       setLoading(true);
       setError(null);
       
@@ -81,12 +82,14 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         let invoicesData = [];
         try {
           invoicesData = await api.getInvoices();
+          console.log('🔧 useCabinetStats: Non-HDS data loaded, count:', invoicesData.length);
         } catch (error) {
           console.error("Erreur chargement factures (Non-HDS):", error);
         }
 
         // Afficher le dashboard immédiatement avec les données disponibles
         processAllData([], [], invoicesData);
+        console.log('🔧 useCabinetStats: Setting loading to false after Non-HDS data');
         setLoading(false);
 
         // Étape 2 : Données HDS en arrière-plan
@@ -108,6 +111,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         setError("Impossible de charger les statistiques. Veuillez réessayer plus tard.");
       } finally {
         // S'assurer que loading est false dans tous les cas
+        console.log('🔧 useCabinetStats: Finally block - setting loading to false');
         setLoading(false);
       }
     };

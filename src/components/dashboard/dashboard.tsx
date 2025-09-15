@@ -18,8 +18,12 @@ export function Dashboard() {
 	// Utiliser le hook personnalisé pour les statistiques par cabinet
 	const { dashboardData, allPatients, loading, error } = useCabinetStats(selectedCabinetId);
 
+	// Debug des états de chargement
+	console.log('🔧 Dashboard: authLoading:', authLoading, 'useCabinetStats loading:', loading);
+
 	// Afficher un état de chargement si l'auth est en cours ou si les données se chargent
 	if (authLoading || loading) {
+		console.log('🔧 Dashboard: Showing LoadingState due to:', { authLoading, loading });
 		return <LoadingState />;
 	}
 

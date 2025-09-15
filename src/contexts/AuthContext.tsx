@@ -261,6 +261,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			setSession(null);
 			setIsAuthenticated(false);
 		} finally {
+			console.log('🔧 AuthContext: checkAuth finally - setting loading to false');
 			setLoading(false);
 		}
 	}, []);
@@ -426,6 +427,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 									setIsAuthenticated(false);
 								}
 							} finally {
+								console.log('🔧 AuthContext: onAuthStateChange finally - setting loading to false');
 								if (mounted) setLoading(false);
 							}
 						})();
@@ -435,6 +437,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 					setUser(null);
 					setSession(null);
 					setIsAuthenticated(false);
+					console.log('🔧 AuthContext: onAuthStateChange - no session, setting loading to false');
 					if (mounted) setLoading(false);
 				}
 			}
