@@ -61,12 +61,26 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         // Mode démo → demo-local-storage
         // Mode connecté → HDS local + Non-HDS Supabase
 
-        // Récupération des données (réelles ou démo selon le contexte)
-        const [patientsData, appointmentsData, invoicesData] = await Promise.all([
-          api.getPatients(),
-          api.getAppointments(),
-          api.getInvoices(),
-        ]);
+        // Récupération des données Non-HDS (toujours depuis Supabase)
+        let invoicesData = [];
+        try {
+          invoicesData = await api.getInvoices();
+        } catch (error) {
+          console.error("Erreur chargement factures (Non-HDS):", error);
+        }
+
+        // Récupération des données HDS (peut échouer en iframe)
+        let patientsData = [];
+        let appointmentsData = [];
+        try {
+          [patientsData, appointmentsData] = await Promise.all([
+            api.getPatients(),
+            api.getAppointments(),
+          ]);
+        } catch (error) {
+          console.warn("Données HDS non disponibles (mode iframe):", error);
+          // Continuer avec des tableaux vides pour permettre l'affichage du dashboard
+        }
 
         // Filtrer les données par cabinet si sélectionné
         let filteredPatients = patientsData || [];
