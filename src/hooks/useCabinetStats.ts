@@ -53,6 +53,9 @@ export function useCabinetStats(selectedCabinetId: number | null) {
 
   useEffect(() => {
     const loadCabinetStats = async () => {
+      // Vérifier le mode démo une seule fois au début de la fonction
+      const currentIsDemoMode = isDemoMode;
+      
       setLoading(true);
       setError(null);
       
@@ -62,7 +65,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         // Mode connecté → HDS local + Non-HDS Supabase
 
         // En mode démo, charger toutes les données en une fois (logique inchangée)
-        if (isDemoMode) {
+        if (currentIsDemoMode) {
           const [patientsData, appointmentsData, invoicesData] = await Promise.all([
             api.getPatients(),
             api.getAppointments(), 
@@ -104,12 +107,12 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         console.error("Erreur lors du chargement des statistiques du cabinet:", err);
         setError("Impossible de charger les statistiques. Veuillez réessayer plus tard.");
         // En mode connecté, s'assurer que loading est false même en cas d'erreur
-        if (!isDemoMode) {
+        if (!currentIsDemoMode) {
           setLoading(false);
         }
       } finally {
         // Demo mode loading état géré ici comme avant
-        if (isDemoMode) {
+        if (currentIsDemoMode) {
           setLoading(false);
         }
       }
@@ -206,7 +209,7 @@ export function useCabinetStats(selectedCabinetId: number | null) {
     };
 
     loadCabinetStats();
-  }, [selectedCabinetId, isDemoMode]);
+  }, [selectedCabinetId]);
 
   return {
     dashboardData,
