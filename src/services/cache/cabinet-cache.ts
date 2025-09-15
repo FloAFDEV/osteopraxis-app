@@ -101,13 +101,11 @@ class CabinetCacheService {
    * Récupération via le StorageRouter (respecte tous les modes)
    */
   private async fetchFromStorageRouter(): Promise<Cabinet[]> {
-    console.log('🔧 [CabinetCache] === DÉBUT fetchFromStorageRouter ===');
     try {
-      console.log('🔧 [CabinetCache] Récupération via StorageRouter...');
       const cabinetAdapter = await storageRouter.route<Cabinet>('cabinets');
       const result = await cabinetAdapter.getAll();
       
-      console.log(`✅ [CabinetCache] StorageRouter a retourné ${result.length} cabinet(s)`);
+      console.log(`✅ Cabinets récupérés avec succès:`, result);
       return result;
     } catch (error) {
       console.error('❌ [CabinetCache] Erreur récupération cabinets via StorageRouter:', error);
