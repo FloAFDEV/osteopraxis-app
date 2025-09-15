@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppointmentsOverview } from "./appointments-overview";
 import { ConsultationsChart } from "./consultations-chart";
 import { DashboardContent } from "./dashboard-content";
@@ -9,32 +9,40 @@ import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
 import { useCabinetStats } from "@/hooks/useCabinetStats";
-import { useDemo } from "@/contexts/DemoContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Shield, AlertTriangle, ExternalLink } from "lucide-react";
+import { storageRouter } from "@/services/storage/storage-router";
 
 export function Dashboard() {
 	const { user, isAuthenticated, loading: authLoading } = useAuth();
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedCabinetName, setSelectedCabinetName] = useState<string | undefined>(undefined);
+	const [storageMode, setStorageMode] = useState<'demo' | 'connected' | 'iframe_preview' | null>(null);
 	
 	// Utiliser le hook personnalisé pour les statistiques par cabinet
 	const { dashboardData, allPatients, loading, error } = useCabinetStats(selectedCabinetId);
 
-	// Debug des états de chargement
-	console.log('🔧 Dashboard: authLoading:', authLoading, 'useCabinetStats loading:', loading);
+	// Vérifier le mode de stockage pour afficher les avertissements appropriés
+	useEffect(() => {
+		const checkStorageMode = async () => {
+			try {
+				const diagnosis = await storageRouter.diagnose();
+				setStorageMode(diagnosis.mode);
+			} catch (error) {
+				console.error('Erreur lors du diagnostic de stockage:', error);
+			}
+		};
+		
+		if (isAuthenticated && !authLoading) {
+			checkStorageMode();
+		}
+	}, [isAuthenticated, authLoading]);
 
-	// En mode connecté, forcer l'affichage du dashboard même si loading=true
-	// car les données Non-HDS sont suffisantes pour afficher le dashboard
-	const { isDemoMode } = useDemo();
-	
-	// Ne bloquer l'affichage que si on est en mode démo ET que les données se chargent
-	// ou si l'auth est vraiment en cours (première connexion)
-	if (isDemoMode && (authLoading || loading)) {
-		console.log('🔧 Dashboard: Showing LoadingState due to:', { authLoading, loading });
+	// Afficher un état de chargement si l'auth est en cours ou si les données se chargent
+	if (authLoading || loading) {
 		return <LoadingState />;
 	}
-	
-	// En mode connecté, afficher le dashboard même avec loading=true
-	// (les données HDS se chargeront en arrière-plan)
 
 	// Si pas authentifié, afficher un message approprié
 	if (!isAuthenticated || !user) {
@@ -65,6 +73,31 @@ export function Dashboard() {
 		<div className="space-y-8 p-4 sm:p-6 lg:p-8">
 			{/* Header Image Banner */}
 			<DashboardHeader />
+
+			{/* Avertissement de sécurité en mode iframe/preview */}
+			{storageMode === 'iframe_preview' && (
+				<Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
+					<AlertTriangle className="h-4 w-4 text-orange-600" />
+					<AlertDescription className="text-orange-800 dark:text-orange-200">
+						<div className="flex items-center justify-between">
+							<div>
+								<strong>Mode Prévisualisation</strong> - Les données sensibles utilisent temporairement Supabase. 
+								Pour la sécurité complète, configurez le stockage local sécurisé.
+							</div>
+							<Button
+								variant="outline"
+								size="sm"
+								className="ml-4 border-orange-300 text-orange-700 hover:bg-orange-100"
+								onClick={() => window.open('/admin/dashboard', '_blank')}
+							>
+								<Shield className="h-4 w-4 mr-2" />
+								Configurer le stockage
+								<ExternalLink className="h-3 w-3 ml-1" />
+							</Button>
+						</div>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			{/* Main content with integrated cabinet selector */}
 			<div className="animate-fade-in">

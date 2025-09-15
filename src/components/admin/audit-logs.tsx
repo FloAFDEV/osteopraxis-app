@@ -72,7 +72,7 @@ export function AuditLogsPanel() {
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    {new Date(log.created_at).toLocaleString()}
+                    {new Date(log.created_at).toLocaleString('fr-FR')}
                   </div>
                 </div>
                 

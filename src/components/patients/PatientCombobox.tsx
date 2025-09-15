@@ -48,7 +48,7 @@ export function PatientCombobox({
             {selected
               ? `${selected.lastName} ${selected.firstName} — ${
                   selected.birthDate
-                    ? new Date(selected.birthDate).toLocaleDateString()
+                    ? new Date(selected.birthDate).toLocaleDateString('fr-FR')
                     : ""
                 }`
               : placeholder}
@@ -73,7 +73,7 @@ export function PatientCombobox({
                 <span>
                   {patient.lastName} {patient.firstName}
                   {patient.birthDate &&
-                    <> — <span className="text-xs text-gray-500">{new Date(patient.birthDate).toLocaleDateString()}</span></>
+                    <> — <span className="text-xs text-gray-500">{new Date(patient.birthDate).toLocaleDateString('fr-FR')}</span></>
                   }
                 </span>
               </CommandItem>

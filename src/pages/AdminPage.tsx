@@ -55,7 +55,7 @@ const AdminPage = () => {
           firstName: user.first_name || "Non défini",
           lastName: user.last_name || "Non défini",
           role: user.role,
-          createdAt: new Date(user.created_at).toLocaleDateString(),
+          createdAt: new Date(user.created_at).toLocaleDateString('fr-FR'),
           osteopathId: user.osteopathId
         }));
         

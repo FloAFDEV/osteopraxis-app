@@ -16,7 +16,6 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    let initialCheckDone = false;
     
     const checkDemoMode = async () => {
       try {
@@ -32,12 +31,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
             queryClient.clear(); // Vider complètement le cache pour éviter les fuites de données
           }
           
-          // Déblocage immédiat du loading après la première détection
-          if (!initialCheckDone) {
-            console.log('🔧 DemoContext: Initial check completed, setIsLoading(false)');
-            setIsLoading(false);
-            initialCheckDone = true;
-          }
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Erreur lors de la détection du mode demo:', error);
@@ -48,21 +42,16 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       }
     };
     
-    // Check immédiat
     checkDemoMode();
     
-    // Vérifications moins fréquentes pour éviter les re-rendus constants
-    const interval = setInterval(() => {
-      if (initialCheckDone) {
-        checkDemoMode();
-      }
-    }, 5000); // Réduit de 1s à 5s
+    // Vérifier plus fréquemment les changements de mode pour une réactivité immédiate
+    const interval = setInterval(checkDemoMode, 1000);
     
     return () => {
       mounted = false;
       clearInterval(interval);
     };
-  }, [queryClient]); // Retirer isDemoMode des dépendances pour éviter les boucles
+  }, [isDemoMode, queryClient]);
 
   if (isLoading) {
     return (

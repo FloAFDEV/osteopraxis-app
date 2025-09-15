@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/services/api";
 import { Cabinet } from "@/types";
 import { toast } from "sonner";
+import { useCabinets } from "@/hooks/useCabinets";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -27,6 +28,7 @@ export function CabinetForm({
 }: CabinetFormProps) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { invalidateAndRefetch } = useCabinets();
   const [osteopathData, setOsteopathData] = useState<any>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [previewLogoUrl, setPreviewLogoUrl] = useState<string | null>(null);
@@ -137,6 +139,9 @@ export function CabinetForm({
         }
         
         toast.success("Cabinet mis à jour avec succès");
+        
+        // Forcer le rechargement des cabinets
+        await invalidateAndRefetch();
       } else {
         // Create new cabinet
         const newCabinet = await api.createCabinet(cabinetData as Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>);
@@ -155,7 +160,10 @@ export function CabinetForm({
           await api.updateOsteopath(newCabinet.osteopathId, osteopathUpdateData);
         }
         
-        toast.success("Cabinet créé avec succès");
+        toast.success("✅ Cabinet créé avec succès ! Rechargement...");
+        
+        // Forcer le rechargement immédiat des cabinets
+        await invalidateAndRefetch();
       }
       
       // Si un callback de succès est fourni, l'appeler après un court délai

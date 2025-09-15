@@ -33,6 +33,18 @@ function setCachedData(key: string, data: any) {
   }
 }
 
+function invalidateListCache(authId: string) {
+  const listCacheKey = `cabinets_list_${authId}`;
+  cache.delete(listCacheKey);
+  console.log(`🗑️ [CabinetEdgeFunction] Cache liste invalidé pour l'utilisateur ${authId}`);
+}
+
+function invalidateCabinetCache(cabinetId: string, authId: string) {
+  const cacheKey = `cabinet_${cabinetId}_${authId}`;
+  cache.delete(cacheKey);
+  console.log(`🗑️ [CabinetEdgeFunction] Cache cabinet ${cabinetId} invalidé pour l'utilisateur ${authId}`);
+}
+
 async function verifyUserAndGetIdentity(req: Request): Promise<{ identity: any; supabaseClient: any; message?: string }> {
   const authHeader = req.headers.get("Authorization");
   
@@ -229,6 +241,10 @@ serve(async (req: Request) => {
 
         if (insertError) throw insertError;
 
+        // Invalider le cache de la liste après création
+        invalidateListCache(identity.authId);
+        console.log(`✅ [CabinetEdgeFunction] Cabinet créé avec succès: ${newCabinet.id}`);
+
         return new Response(JSON.stringify({ data: newCabinet }), {
           status: 201,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -287,6 +303,11 @@ serve(async (req: Request) => {
 
         if (updateError) throw updateError;
 
+        // Invalider les caches après modification
+        invalidateListCache(identity.authId);
+        invalidateCabinetCache(cabinetId, identity.authId);
+        console.log(`✅ [CabinetEdgeFunction] Cabinet modifié avec succès: ${cabinetId}`);
+
         return new Response(JSON.stringify({ data: updatedCabinet }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -325,6 +346,11 @@ serve(async (req: Request) => {
           .eq("osteopathId", identity.osteopathId);
 
         if (deleteError) throw deleteError;
+
+        // Invalider les caches après suppression
+        invalidateListCache(identity.authId);
+        invalidateCabinetCache(cabinetId, identity.authId);
+        console.log(`✅ [CabinetEdgeFunction] Cabinet supprimé avec succès: ${cabinetId}`);
 
         return new Response(JSON.stringify({ data: { id: cabinetId } }), {
           status: 200,

@@ -4,16 +4,21 @@ import { fr } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Clock } from "lucide-react";
+
 const timeZone = "Europe/Paris";
+
 interface LocationInfo {
 	city?: string;
 	loading: boolean;
 	error?: string;
+	geolocationEnabled: boolean;
 }
+
 interface FlipDigitProps {
 	value: string;
 	label: string;
 }
+
 const FlipDigit: React.FC<FlipDigitProps> = ({ value, label }) => {
 	return (
 		<div
@@ -42,7 +47,7 @@ const FlipDigit: React.FC<FlipDigitProps> = ({ value, label }) => {
 					style={{
 						transformOrigin: "center center",
 					}}
-					className="inline-block text-lg"
+					className="inline-block text-xl font-mono font-semibold tabular-nums"
 				>
 					{value}
 				</motion.span>
@@ -50,28 +55,44 @@ const FlipDigit: React.FC<FlipDigitProps> = ({ value, label }) => {
 		</div>
 	);
 };
+
 interface TimeSegmentProps {
 	hours: string;
 	minutes: string;
 }
+
 const TimeSegment: React.FC<TimeSegmentProps> = ({ hours, minutes }) => {
 	return (
 		<div
 			role="timer"
 			aria-live="polite"
-			className="flex items-center gap-1 text-lg"
+			className="flex items-center gap-1 text-xl font-mono"
 		>
 			<FlipDigit value={hours} label="heures" />
-			<span className="animate-pulse text-muted-foreground">:</span>
+			<span className="animate-pulse text-muted-foreground font-bold">:</span>
 			<FlipDigit value={minutes} label="minutes" />
 		</div>
 	);
 };
+
 const useGeolocation = () => {
 	const [location, setLocation] = useState<LocationInfo>({
 		loading: false,
+		geolocationEnabled: false,
 	});
+	
+	// Gérer l'état de la géolocalisation depuis localStorage
+	const [geolocationEnabled, setGeolocationEnabled] = useState<boolean>(() => {
+		try {
+			const saved = localStorage.getItem('patienthub-geolocation-enabled');
+			return saved === 'true';
+		} catch {
+			return false; // Désactivé par défaut
+		}
+	});
+
 	const reverseGeocode = useCallback(async (lat: number, lon: number) => {
+		console.log('🔍 Géocodage inverse pour:', lat, lon);
 		try {
 			const apis = [
 				{
@@ -82,87 +103,169 @@ const useGeolocation = () => {
 						data.address?.village ||
 						data.address?.municipality,
 				},
-				{
-					url: `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=demo`,
-					parser: (data: any) => data[0]?.name,
-				},
 			];
 			for (const api of apis) {
 				try {
+					console.log('🌐 Appel API géocodage:', api.url);
 					const response = await fetch(api.url);
-					if (!response.ok) continue;
+					if (!response.ok) {
+						console.warn('❌ Réponse API non OK:', response.status);
+						continue;
+					}
 					const data = await response.json();
+					console.log('📦 Données reçues:', data);
 					const city = api.parser(data);
 					if (city) {
+						console.log('🏙️ Ville trouvée:', city);
 						setLocation({
 							city,
 							loading: false,
+							geolocationEnabled: true,
 						});
 						return;
 					}
 				} catch (error) {
-					console.warn(`API ${api.url} failed:`, error);
+					console.warn(`❌ API ${api.url} failed:`, error);
 					continue;
 				}
 			}
+			console.warn('⚠️ Aucune ville trouvée - Fallback vers Paris');
 			setLocation({
-				city: "Région Toulouse",
+				city: "Paris",
 				loading: false,
+				geolocationEnabled: false,
 			});
 		} catch (error) {
-			console.warn("All geocoding APIs failed:", error);
+			console.warn("❌ Erreur globale géocodage:", error);
 			setLocation({
+				city: "Paris",
 				loading: false,
-				error: "Localisation indisponible",
+				geolocationEnabled: false,
 			});
 		}
 	}, []);
-	useEffect(() => {
-		if (!navigator.geolocation) {
+
+	const toggleGeolocation = useCallback(() => {
+		console.log('🗺️ Toggle géolocalisation appelé - État actuel:', geolocationEnabled);
+		const newState = !geolocationEnabled;
+		console.log('🗺️ Nouvel état:', newState);
+		
+		setGeolocationEnabled(newState);
+		
+		try {
+			localStorage.setItem('patienthub-geolocation-enabled', String(newState));
+			console.log('💾 État sauvegardé dans localStorage:', newState);
+		} catch (error) {
+			console.warn('❌ Erreur lors de la sauvegarde de la préférence:', error);
+		}
+
+		if (newState) {
+			console.log('🌍 Activation de la géolocalisation...');
+			// Activer la géolocalisation
+			setLocation(prev => ({ ...prev, loading: true, geolocationEnabled: true }));
+		} else {
+			console.log('🏙️ Désactivation - retour à Paris');
+			// Désactiver la géolocalisation - retour à Paris
 			setLocation({
+				city: "Paris",
 				loading: false,
-				error: "Géolocalisation non supportée",
+				geolocationEnabled: false,
+			});
+		}
+	}, [geolocationEnabled]);
+
+	useEffect(() => {
+		console.log('🔄 useEffect géolocalisation - État:', geolocationEnabled);
+		
+		// Si géolocalisation désactivée, utiliser Paris
+		if (!geolocationEnabled) {
+			console.log('🏙️ Géolocalisation désactivée - Utilisation de Paris');
+			setLocation({
+				city: "Paris",
+				loading: false,
+				geolocationEnabled: false,
 			});
 			return;
 		}
-		setLocation({
-			loading: true,
-		});
+
+		// Si géolocalisation activée, demander la position
+		console.log('🌍 Géolocalisation activée - Vérification des permissions...');
+		
+		if (!navigator.geolocation) {
+			console.warn('❌ Géolocalisation non supportée par le navigateur');
+			setLocation({
+				city: "Paris",
+				loading: false,
+				geolocationEnabled: false,
+			});
+			return;
+		}
+
+		console.log('📍 Demande de position géographique...');
+		setLocation(prev => ({ ...prev, loading: true, geolocationEnabled: true }));
+
 		const options = {
 			enableHighAccuracy: false,
 			timeout: 10000,
 			maximumAge: 300000,
 		};
+
 		navigator.geolocation.getCurrentPosition(
 			(position) => {
+				console.log('✅ Position obtenue:', position.coords.latitude, position.coords.longitude);
 				reverseGeocode(
 					position.coords.latitude,
 					position.coords.longitude
 				);
 			},
 			(error) => {
-				console.warn("Geolocation error:", error.message);
+				console.warn("❌ Erreur géolocalisation:", error.message, error.code);
+				let errorMessage = "";
+				if (error.code === 1) {
+					console.warn("🚫 Permission refusée par l'utilisateur");
+					errorMessage = "Permission géolocalisation refusée";
+				} else if (error.code === 2) {
+					console.warn("📡 Position indisponible (normal en environnement de développement)");
+					errorMessage = "Position indisponible - Utilisation de Paris par défaut";
+				} else if (error.code === 3) {
+					console.warn("⏰ Timeout de géolocalisation");
+					errorMessage = "Timeout géolocalisation";
+				}
+				
+				// Toujours retourner à Paris en cas d'erreur
 				setLocation({
+					city: "Paris",
 					loading: false,
-					error: "Permission refusée",
+					geolocationEnabled: false,
 				});
+				// Désactiver automatiquement en cas d'erreur persistante
+				setGeolocationEnabled(false);
+				try {
+					localStorage.setItem('patienthub-geolocation-enabled', 'false');
+				} catch (e) {
+					console.warn('Erreur sauvegarde après échec:', e);
+				}
 			},
 			options
 		);
-	}, [reverseGeocode]);
-	return location;
+	}, [reverseGeocode, geolocationEnabled]);
+
+	return { location, toggleGeolocation };
 };
+
 export function AdvancedDateTimeDisplay() {
 	const [now, setNow] = useState<Date>(() =>
 		toZonedTime(new Date(), timeZone)
 	);
-	const location = useGeolocation();
+	const { location, toggleGeolocation } = useGeolocation();
+
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setNow(toZonedTime(new Date(), timeZone));
 		}, 1000);
 		return () => clearInterval(interval);
 	}, []);
+
 	const dateDisplay = useMemo(
 		() =>
 			format(now, "PPPP", {
@@ -170,6 +273,7 @@ export function AdvancedDateTimeDisplay() {
 			}),
 		[now]
 	);
+
 	const timeComponents = useMemo(() => {
 		const timeStr = format(now, "HH:mm", {
 			locale: fr,
@@ -180,6 +284,7 @@ export function AdvancedDateTimeDisplay() {
 			minutes,
 		};
 	}, [now]);
+
 	const LocationBadge = () => {
 		if (location.loading) {
 			return (
@@ -199,9 +304,10 @@ export function AdvancedDateTimeDisplay() {
 				</motion.div>
 			);
 		}
+
 		if (location.city) {
 			return (
-				<motion.div
+				<motion.button
 					initial={{
 						opacity: 0,
 						y: -10,
@@ -210,20 +316,35 @@ export function AdvancedDateTimeDisplay() {
 						opacity: 1,
 						y: 0,
 					}}
-					className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium"
+					onClick={toggleGeolocation}
+					className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer group ${
+						location.geolocationEnabled 
+							? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100' 
+							: 'bg-primary/10 text-primary hover:bg-primary/20'
+					}`}
+					title={location.geolocationEnabled ? "Géolocalisation activée - Cliquer pour désactiver" : "Géolocalisation désactivée - Cliquer pour réessayer"}
 				>
-					<MapPin className="h-3 w-3" />
+					<MapPin className={`h-3 w-3 ${location.geolocationEnabled ? 'text-green-600' : 'text-gray-500'}`} />
 					<span>{location.city}</span>
-				</motion.div>
+					{location.geolocationEnabled && (
+						<div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+					)}
+				</motion.button>
 			);
 		}
+
 		return (
-			<div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground">
+			<button
+				onClick={toggleGeolocation}
+				className="flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 hover:bg-amber-100 transition-colors cursor-pointer"
+				title="Géolocalisation indisponible dans cet environnement - Cliquer pour réessayer"
+			>
 				<Clock className="h-3 w-3" />
-				<span>Heure de Paris</span>
-			</div>
+				<span>Paris (géoloc. indisponible)</span>
+			</button>
 		);
 	};
+
 	return (
 		<motion.div
 			initial={{
@@ -249,17 +370,20 @@ export function AdvancedDateTimeDisplay() {
 		</motion.div>
 	);
 }
+
 export function CompactAdvancedDateTime() {
 	const [now, setNow] = useState<Date>(() =>
 		toZonedTime(new Date(), timeZone)
 	);
-	const location = useGeolocation();
+	const { location, toggleGeolocation } = useGeolocation();
+
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setNow(toZonedTime(new Date(), timeZone));
 		}, 1000);
 		return () => clearInterval(interval);
 	}, []);
+
 	const timeComponents = useMemo(() => {
 		const timeStr = format(now, "HH:mm", {
 			locale: fr,
@@ -270,6 +394,7 @@ export function CompactAdvancedDateTime() {
 			minutes,
 		};
 	}, [now]);
+
 	const dateDisplay = useMemo(
 		() =>
 			format(now, "PPPP 'à'", {
@@ -277,6 +402,7 @@ export function CompactAdvancedDateTime() {
 			}),
 		[now]
 	);
+
 	return (
 		<motion.div
 			initial={{
@@ -293,19 +419,28 @@ export function CompactAdvancedDateTime() {
 				"HH:mm"
 			)} - Timezone: Europe/Paris`}
 		>
-			<div className="flex items-center gap-1 text-muted-foreground">
+			<button
+				onClick={toggleGeolocation}
+				className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer group"
+				title={location.geolocationEnabled ? "Cliquer pour désactiver la géolocalisation" : "Cliquer pour activer la géolocalisation"}
+			>
 				<Clock className="h-4 w-4" />
 				<span className="text-xs">{location.city || "Paris"}</span>
-			</div>
+				{location.geolocationEnabled && (
+					<div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-1" />
+				)}
+			</button>
 
 			<div className="flex items-center gap-1">
 				<span className="text-xs text-muted-foreground">
 					{dateDisplay}
 				</span>
-				<TimeSegment
-					hours={timeComponents.hours}
-					minutes={timeComponents.minutes}
-				/>
+				<div className="flex items-center gap-1 font-mono font-semibold tabular-nums">
+					<TimeSegment
+						hours={timeComponents.hours}
+						minutes={timeComponents.minutes}
+					/>
+				</div>
 			</div>
 		</motion.div>
 	);

@@ -455,7 +455,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
 
               {status?.lastBackup && (
                 <div className="text-sm text-muted-foreground">
-                  Dernière sauvegarde : {status.lastBackup.toLocaleString()}
+                  Dernière sauvegarde : {status.lastBackup.toLocaleString('fr-FR')}
                 </div>
               )}
             </CardContent>

@@ -343,7 +343,7 @@ export function SecurityCompliance() {
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {new Date(alert.created_at).toLocaleString()}
+                              {new Date(alert.created_at).toLocaleString('fr-FR')}
                             </span>
                           </div>
                         </div>
@@ -391,7 +391,7 @@ export function SecurityCompliance() {
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-muted-foreground">Dernière évaluation</div>
-                    <div className="font-medium">{new Date().toLocaleDateString()}</div>
+                    <div className="font-medium">{new Date().toLocaleDateString('fr-FR')}</div>
                   </div>
                 </div>
               </CardContent>
@@ -421,7 +421,7 @@ export function SecurityCompliance() {
                       ></div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Dernière vérification: {new Date(metric.last_check).toLocaleString()}
+                      Dernière vérification: {new Date(metric.last_check).toLocaleString('fr-FR')}
                     </p>
                   </CardContent>
                 </Card>
@@ -500,7 +500,7 @@ export function SecurityCompliance() {
                         {entry.success ? "Succès" : "Échec"}
                       </Badge>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(entry.created_at).toLocaleString()}
+                        {new Date(entry.created_at).toLocaleString('fr-FR')}
                       </p>
                     </div>
                   </div>

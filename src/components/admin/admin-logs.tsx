@@ -101,7 +101,7 @@ export function AdminLogsPanel() {
     const csvContent = [
       ['Horodatage', 'Niveau', 'Action', 'Table', 'Utilisateur', 'Succès', 'IP', 'Détails'].join(','),
       ...logs.map(log => [
-        new Date(log.log_timestamp).toLocaleString(),
+        new Date(log.log_timestamp).toLocaleString('fr-FR'),
         log.level,
         log.action,
         log.table_name,
@@ -235,7 +235,7 @@ export function AdminLogsPanel() {
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />
-                    {new Date(log.log_timestamp).toLocaleString()}
+                    {new Date(log.log_timestamp).toLocaleString('fr-FR')}
                   </div>
                 </div>
                 

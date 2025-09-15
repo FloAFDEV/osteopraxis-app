@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Database, Trash2, Info } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DemoBannerProps {
   onClearDemo?: () => void;
@@ -10,6 +11,7 @@ interface DemoBannerProps {
 
 export function DemoBanner({ onClearDemo }: DemoBannerProps) {
   const [remainingTime, setRemainingTime] = useState<string>("");
+  const { logout } = useAuth();
 
   useEffect(() => {
     const updateRemainingTime = async () => {
@@ -37,32 +39,33 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
 
   const handleClearDemo = async () => {
     try {
-      console.log('🧹 Début du nettoyage de la session démo');
+      console.log('🗑️ Quitter le mode démo - Début du processus');
       
-      // 1. Déconnecter l'utilisateur de Supabase en premier
-      const { supabase } = await import('@/integrations/supabase/client');
-      await supabase.auth.signOut();
-      console.log('🔐 Déconnexion Supabase effectuée');
-      
-      // 2. Nettoyer la session démo locale
+      // 1️⃣ Nettoyer la session démo locale
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
       demoLocalStorage.clearSession();
-      console.log('🗑️ Session démo locale nettoyée');
+      console.log('✅ Session démo locale nettoyée');
       
+      // 2️⃣ Appeler le callback si fourni (pour nettoyer les queries)
       if (onClearDemo) {
         onClearDemo();
+        console.log('✅ Callback onClearDemo exécuté');
       }
       
-      // 3. Attendre un petit délai pour s'assurer que tout est nettoyé
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // 3️⃣ Déconnexion complète via le contexte d'authentification
+      console.log('🔓 Déconnexion utilisateur...');
+      await logout();
       
-      // 4. Rediriger vers la page d'accueil
-      console.log('🏠 Redirection vers la page d\'accueil');
-      window.location.href = '/';
     } catch (error) {
-      console.error('Erreur lors du nettoyage de la session démo:', error);
-      // En cas d'erreur, rediriger quand même vers l'accueil
-      window.location.href = '/';
+      console.error('❌ Erreur lors du nettoyage de la session démo:', error);
+      // En cas d'erreur, forcer la déconnexion et redirection
+      try {
+        await logout();
+      } catch (logoutError) {
+        console.error('❌ Erreur lors de la déconnexion forcée:', logoutError);
+        // En dernier recours, redirection manuelle
+        window.location.href = '/';
+      }
     }
   };
 

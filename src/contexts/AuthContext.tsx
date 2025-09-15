@@ -116,58 +116,33 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	}, [navigate]);
 
 	const logout = useCallback(async () => {
-		// Empêcher les déconnexions multiples
-		if (loading) {
-			console.log('⚠️ Déconnexion déjà en cours, ignorer cette tentative');
-			return;
-		}
-		
 		try {
-			console.log('🔓 Début de la déconnexion');
+			setLoading(true);
 			
-			// 1️⃣ Vérifier s'il y a une session demo locale à nettoyer
-			try {
-				const { demoLocalStorage } = await import('@/services/demo-local-storage');
-				if (demoLocalStorage.isSessionActive()) {
-					console.log('🧹 Nettoyage session démo locale');
-					demoLocalStorage.clearSession();
-				}
-			} catch (error) {
-				console.warn('Erreur nettoyage session démo:', error);
-			}
-			
-			// 2️⃣ Déconnexion Supabase seulement si session existe
+			// Déconnexion Supabase
 			if (session) {
-				console.log('🔓 Déconnexion Supabase');
 				const { error } = await supabase.auth.signOut();
 				if (error) {
 					console.warn('Erreur déconnexion Supabase:', error);
-					// Ne pas bloquer pour cette erreur
 				}
-			} else {
-				console.log('ℹ️ Pas de session Supabase à déconnecter');
 			}
 			
-			// 3️⃣ Nettoyer l'état local
+			// Nettoyer l'état local
 			setUser(null);
 			setSession(null);
 			setIsAuthenticated(false);
 			
-			console.log('✅ Déconnexion terminée avec succès');
 			toast.success("Déconnexion réussie !");
-			
-			// 4️⃣ Navigation en dernier
 			navigate("/", { replace: true });
 			
 		} catch (err: any) {
-			console.error("❌ Erreur lors de la déconnexion:", err);
-			
-			// En cas d'échec, forcer la déconnexion locale
+			console.error("Erreur lors de la déconnexion:", err);
+			// Forcer la déconnexion locale en cas d'erreur
 			setUser(null);
 			setSession(null);
 			setIsAuthenticated(false);
 			navigate("/", { replace: true });
-			toast.error("Déconnexion forcée suite à une erreur");
+			toast.error("Déconnexion forcée");
 		} finally {
 			setLoading(false);
 		}
@@ -261,7 +236,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			setSession(null);
 			setIsAuthenticated(false);
 		} finally {
-			console.log('🔧 AuthContext: checkAuth finally - setting loading to false');
 			setLoading(false);
 		}
 	}, []);
@@ -375,17 +349,37 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										updated_at: userData.updated_at,
 									};
 									setUser(userWithRole);
-					// Navigation après connexion réussie
-					if (event === 'SIGNED_IN') {
-						// Redirection uniquement lors d'une nouvelle connexion
-						if (userWithRole.role === "ADMIN") {
-							navigate("/admin/dashboard", { replace: true });
-							console.log("🔄 Redirection vers admin dashboard");
-						} else {
-							navigate("/dashboard", { replace: true });
-							console.log("🔄 Redirection vers dashboard");
-						}
-					}
+									
+									// Navigation après connexion réussie
+									if (event === 'SIGNED_IN') {
+										// Redirection uniquement lors d'une nouvelle connexion
+										if (userWithRole.role === "ADMIN") {
+											navigate("/admin/dashboard", { replace: true });
+											console.log("🔄 Redirection vers admin dashboard");
+										} else {
+											navigate("/dashboard", { replace: true });
+											console.log("🔄 Redirection vers dashboard");
+										}
+									}
+								} else if (!error || error.code !== 'PGRST116') {
+									// Si pas de données utilisateur mais pas d'erreur critique, créer un utilisateur basique
+									const basicUser: User = {
+										id: session.user.id,
+										email: session.user.email || '',
+										firstName: session.user.user_metadata?.first_name || '',
+										lastName: session.user.user_metadata?.last_name || '',
+										role: 'OSTEOPATH',
+										osteopathId: null,
+										created_at: new Date().toISOString(),
+										updated_at: new Date().toISOString(),
+									};
+									setUser(basicUser);
+									
+									// Navigation après connexion réussie
+									if (event === 'SIGNED_IN') {
+										navigate("/dashboard", { replace: true });
+										console.log("🔄 Redirection vers dashboard (utilisateur basique)");
+									}
 								} else {
 									// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
 									const isDemoUser = session.user.email === 'demo@patienthub.com' || 
@@ -427,7 +421,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 									setIsAuthenticated(false);
 								}
 							} finally {
-								console.log('🔧 AuthContext: onAuthStateChange finally - setting loading to false');
 								if (mounted) setLoading(false);
 							}
 						})();
@@ -437,7 +430,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 					setUser(null);
 					setSession(null);
 					setIsAuthenticated(false);
-					console.log('🔧 AuthContext: onAuthStateChange - no session, setting loading to false');
 					if (mounted) setLoading(false);
 				}
 			}

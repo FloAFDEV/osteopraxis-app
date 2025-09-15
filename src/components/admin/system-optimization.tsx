@@ -360,12 +360,12 @@ export function SystemOptimization() {
                     <div className="flex items-center space-x-4">
                       {task.lastRun && (
                         <span>
-                          Dernière: {new Date(task.lastRun).toLocaleDateString()}
+                          Dernière: {new Date(task.lastRun).toLocaleDateString('fr-FR')}
                         </span>
                       )}
                       {task.nextRun && (
                         <span>
-                          Prochaine: {new Date(task.nextRun).toLocaleDateString()}
+                          Prochaine: {new Date(task.nextRun).toLocaleDateString('fr-FR')}
                         </span>
                       )}
                     </div>

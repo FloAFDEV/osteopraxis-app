@@ -496,13 +496,13 @@ export function Layout({ children }: LayoutProps) {
 					<p>© 2025 PatientHub. Tous droits réservés.</p>
 					<div className="flex items-center gap-4">
 						<NavLink
-							to="/terms-of-service"
+							to="/terms"
 							className="hover:text-blue-500 transition-colors"
 						>
 							Conditions d&apos;utilisation
 						</NavLink>
 						<NavLink
-							to="/privacy-policy"
+							to="/privacy"
 							className="hover:text-purple-500 transition-colors"
 						>
 							Politique de confidentialité
