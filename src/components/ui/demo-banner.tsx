@@ -37,19 +37,27 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
 
   const handleClearDemo = async () => {
     try {
-      // 1. Nettoyer la session démo locale
-      const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      demoLocalStorage.clearSession();
+      console.log('🧹 Début du nettoyage de la session démo');
       
-      // 2. Déconnecter l'utilisateur de Supabase
+      // 1. Déconnecter l'utilisateur de Supabase en premier
       const { supabase } = await import('@/integrations/supabase/client');
       await supabase.auth.signOut();
+      console.log('🔐 Déconnexion Supabase effectuée');
+      
+      // 2. Nettoyer la session démo locale
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      demoLocalStorage.clearSession();
+      console.log('🗑️ Session démo locale nettoyée');
       
       if (onClearDemo) {
         onClearDemo();
       }
       
-      // 3. Rediriger vers la page d'accueil
+      // 3. Attendre un petit délai pour s'assurer que tout est nettoyé
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // 4. Rediriger vers la page d'accueil
+      console.log('🏠 Redirection vers la page d\'accueil');
       window.location.href = '/';
     } catch (error) {
       console.error('Erreur lors du nettoyage de la session démo:', error);
