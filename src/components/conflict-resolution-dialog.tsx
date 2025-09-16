@@ -86,13 +86,13 @@ export function ConflictResolutionDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+          <AlertDialogTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
             <Clock className="h-5 w-5" />
             Conflit de rendez-vous détecté
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-4">
-            <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
-              <p className="text-amber-800 dark:text-amber-200 font-medium mb-2">
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">
                 Un rendez-vous existe déjà le {formatDateTime(requestedDate)}
               </p>
               

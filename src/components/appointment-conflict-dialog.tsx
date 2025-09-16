@@ -61,7 +61,7 @@ export function AppointmentConflictDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-2xl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+          <AlertDialogTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
             <Clock className="h-5 w-5" />
             Conflit de rendez-vous détecté
           </AlertDialogTitle>
@@ -71,8 +71,8 @@ export function AppointmentConflictDialog({
               <strong>{formatDateTime(conflictInfo.requestedDate)}</strong>.
             </p>
             
-            <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
-              <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-3">Rendez-vous en conflit :</h4>
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-3">Rendez-vous en conflit :</h4>
               {conflictInfo.conflictingAppointments.map((appointment) => (
                 <div key={appointment.id} className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700 space-y-2">
                   <div className="flex items-center justify-between">

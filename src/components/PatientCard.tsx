@@ -139,18 +139,18 @@ export function PatientCard({
 						</div>
 					</div>}
 
-				{(patient.birthDate || patient.occupation) && <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3">
-						<h4 className="font-medium text-sm text-amber-800 dark:text-amber-200 mb-2 flex items-center">
+				{(patient.birthDate || patient.occupation) && <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3">
+						<h4 className="font-medium text-sm text-blue-800 dark:text-blue-200 mb-2 flex items-center">
 							<Calendar className="h-4 w-4 mr-1" />
 							Informations
 						</h4>
 						<div className="space-y-1 text-sm">
 							{patient.birthDate && <div className="flex items-center text-gray-700 dark:text-gray-300">
-									<Calendar className="h-3 w-3 mr-2 text-amber-600 flex-shrink-0" />
+									<Calendar className="h-3 w-3 mr-2 text-blue-600 flex-shrink-0" />
 									{new Date(patient.birthDate).toLocaleDateString("fr-FR")}
 								</div>}
 							{patient.occupation && <div className="flex items-center text-gray-700 dark:text-gray-300">
-									<Briefcase className="h-3 w-3 mr-2 text-amber-600 flex-shrink-0" />
+									<Briefcase className="h-3 w-3 mr-2 text-blue-600 flex-shrink-0" />
 									<span className="truncate italic">{patient.occupation}</span>
 								</div>}
 						</div>
