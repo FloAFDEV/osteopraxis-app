@@ -427,20 +427,11 @@ export async function clearMemoryStorage() {
 }
 
 /**
- * Vérifie si l'application utilise le mode localStorage persistant
+ * Vérifie si l'application utilise le mode localStorage persistant (MODE DÉPRÉCIÉ)
+ * Note: Cette fonction est conservée pour compatibilité mais ne doit plus être utilisée
+ * Les fallbacks localStorage pour HDS ont été supprimés pour sécurité
  */
 export function isUsingMemoryFallback(): boolean {
-  // Vérifier si on a des données dans le localStorage enhanced fallback
-  const hasEnhancedFallback = localStorage.getItem('sqlite-fallback-enhanced');
-  const hasBasicFallback = localStorage.getItem('sqlite-fallback-data');
-  const hasHdsStorage = localStorage.getItem('hds-local-storage');
-  
-  console.log('🔍 Fallback check:', {
-    hasEnhancedFallback: !!hasEnhancedFallback,
-    hasBasicFallback: !!hasBasicFallback,
-    hasHdsStorage: !!hasHdsStorage
-  });
-  
-  // Si on a des données dans localStorage, on utilise le fallback
-  return !!(hasEnhancedFallback || hasBasicFallback || hasHdsStorage);
+  console.warn('⚠️ DÉPRÉCIÉ: isUsingMemoryFallback() - Les fallbacks localStorage HDS ont été supprimés');
+  return false; // Plus de fallback localStorage pour HDS
 }

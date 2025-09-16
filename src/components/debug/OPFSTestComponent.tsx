@@ -158,7 +158,7 @@ export function OPFSTestComponent() {
   const clearFallbackData = () => {
     try {
       clearMemoryStorage();
-      localStorage.removeItem('sqlite-fallback-data');
+      // Note: sqlite-fallback supprimés pour sécurité HDS
       console.log('🧹 Données fallback effacées');
     } catch (error) {
       console.error('❌ Erreur lors de l\'effacement:', error);

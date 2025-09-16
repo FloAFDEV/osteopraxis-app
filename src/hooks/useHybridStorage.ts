@@ -63,17 +63,18 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
       console.log('🔍 Support stockage sécurisé:', support);
       
       if (!support.supported) {
-        // En environnement iframe (preview), simuler un stockage configuré
-        console.warn('⚠️ Stockage sécurisé non supporté (iframe) - Mode simulation');
+        // FAIL FAST: Stockage sécurisé OBLIGATOIRE pour données HDS
+        console.error('❌ ÉCHEC CRITIQUE: Stockage sécurisé HDS NON SUPPORTÉ');
         setStatus({
-          isConfigured: true,
-          isUnlocked: true,
+          isConfigured: false,
+          isUnlocked: false,
           physicalStorageAvailable: false,
           entitiesCount: {},
           totalSize: 0,
           integrityStatus: {}
         });
         setIsLoading(false);
+        toast.error('ERREUR CRITIQUE: Stockage HDS sécurisé non supporté');
         return;
       }
       

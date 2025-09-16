@@ -74,9 +74,9 @@ export class HDSInitialization {
     console.log('🏥 Configuration stockage HDS pour données sensibles...');
     
     try {
-      // Initialiser directement le stockage HDS local
-      const { initializeHDSStorage } = await import('@/services/hds-local-storage');
-      await initializeHDSStorage();
+      // Note: Ancien système HDS local supprimé - utiliser le stockage sécurisé
+      console.warn('⚠️ Initialisation HDS local déprécié - utiliser hds-secure-manager');
+      // Pas d'initialisation automatique - l'utilisateur doit configurer le stockage sécurisé
       
       console.log('✅ Stockage HDS local initialisé avec succès');
       
@@ -118,17 +118,12 @@ export class HDSInitialization {
     let entitiesConfigured: string[] = [];
     
     try {
-      // Vérifier directement le stockage HDS local
-      const { isConnectedMode, diagnoseHDSSystem } = await import('@/services/hds-local-storage');
+      // Note: Ancien diagnostic HDS supprimé - utiliser hds-secure-manager
+      console.warn('⚠️ Diagnostic HDS local déprécié - utiliser hds-secure-manager');
       
-      if (isConnectedMode()) {
-        const hdsStatus = await diagnoseHDSSystem();
-        localStorage = hdsStatus.localStorage.available;
-        
-        if (localStorage) {
-          entitiesConfigured = ['patients', 'appointments', 'invoices'];
-        }
-      }
+      // Pas de diagnostic automatique - dépend du stockage sécurisé configuré
+      localStorage = false;
+      entitiesConfigured = [];
     } catch (error) {
       console.warn('Diagnostic HDS échoué:', error);
     }

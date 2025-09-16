@@ -50,9 +50,9 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
             return;
           }
           
-          // En mode connecté, vérifier la configuration
+          // En mode connecté, vérifier la configuration ou BLOQUER
           if (!status.isConfigured && !skipped) {
-            console.log('⚙️ Configuration stockage requise');
+            console.log('⚙️ Configuration stockage HDS sécurisé OBLIGATOIRE');
             setShowSetup(true);
           } else if (status.isConfigured && !status.isUnlocked && !skipped) {
         // Charger la méthode de sécurité depuis la configuration

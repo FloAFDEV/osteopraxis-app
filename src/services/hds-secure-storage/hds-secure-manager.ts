@@ -264,53 +264,21 @@ export class HDSSecureManager {
 
     console.log('🔄 Migration depuis IndexedDB vers stockage HDS sécurisé...');
 
-    try {
-      // Importer l'ancien gestionnaire IndexedDB
-      const { hdsLocalStorage } = await import('../hds-local-storage/hds-storage-manager');
-      await hdsLocalStorage.initialize(userId, 1);
-
-      // Migrer chaque type d'entité
-      const migrations = [
-        { entity: 'patients', method: () => hdsLocalStorage.getPatients() },
-        { entity: 'appointments', method: () => hdsLocalStorage.getAppointments() },
-        { entity: 'invoices', method: () => hdsLocalStorage.getInvoices() }
-      ];
-
-      for (const migration of migrations) {
-        try {
-          const oldData = await migration.method();
-          
-          if (oldData.length > 0) {
-            const secureStorage = this.getSecureStorage(migration.entity);
-            if (secureStorage) {
-              // Sauvegarder les données avec le bon typage
-              await secureStorage.saveRecords(oldData as any[]);
-              result.migrated[migration.entity] = oldData.length;
-              console.log(`✅ ${oldData.length} enregistrements ${migration.entity} migrés`);
-            }
-          }
-        } catch (error) {
-          const errorMsg = `Erreur migration ${migration.entity}: ${error instanceof Error ? error.message : 'Erreur inconnue'}`;
-          result.errors.push(errorMsg);
-          console.error(`❌ ${errorMsg}`);
-        }
-      }
-
-      // Nettoyer l'ancien stockage après migration réussie
-      if (result.errors.length === 0) {
-        try {
-          await hdsLocalStorage.clearAllData();
-          console.log('🧹 Ancien stockage IndexedDB nettoyé');
-        } catch (error) {
-          result.errors.push('Erreur nettoyage ancien stockage');
-        }
-      }
-
+     try {
+      // Note: Migration depuis l'ancien système supprimée (fallbacks HDS supprimés)
+      console.warn('⚠️ Migration depuis IndexedDB non disponible - fallbacks HDS supprimés pour sécurité');
+      
+      return {
+        migrated: {},
+        errors: ['Migration non disponible - fallbacks HDS supprimés pour sécurité']
+      };
     } catch (error) {
-      result.errors.push(`Erreur accès ancien stockage: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      console.error('❌ Erreur lors de la migration:', error);
+      return {
+        migrated: {},
+        errors: [`Erreur générale de migration: ${error instanceof Error ? error.message : 'Erreur inconnue'}`]
+      };
     }
-
-    return result;
   }
 
   /**

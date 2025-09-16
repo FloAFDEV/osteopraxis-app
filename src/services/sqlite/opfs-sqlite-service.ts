@@ -4,7 +4,6 @@
  */
 
 import type { Database } from 'sql.js';
-import { SQLiteFallbackEnhanced } from './sqlite-fallback-enhanced';
 
 interface SQLiteOPFSConfig {
   dbName: string;
@@ -15,8 +14,6 @@ interface SQLiteOPFSConfig {
 
 export class OPFSSQLiteService {
   private db: Database | null = null;
-  private fallbackService: SQLiteFallbackEnhanced | null = null;
-  private useFallback: boolean = false;
   private opfsRoot: FileSystemDirectoryHandle | null = null;
   private config: SQLiteOPFSConfig;
   private initialized = false;
@@ -40,30 +37,22 @@ export class OPFSSQLiteService {
     
     console.log('🔍 Support navigateur:', { hasStorage, hasGetDirectory, isSecure });
 
-    // Essayer OPFS d'abord, fallback automatique si échec
-    if (hasStorage && hasGetDirectory && isSecure) {
-      try {
-        console.log('🔐 Tentative d\'accès OPFS...');
-        this.opfsRoot = await navigator.storage.getDirectory();
-        await this.loadOrCreateDatabase();
-        await this.createTables();
-        this.initialized = true;
-        console.log('✅ SQLite with OPFS initialized successfully');
-        return;
-      } catch (error) {
-        console.warn('❌ OPFS failed, falling back to localStorage:', error);
-      }
-    } else {
-      console.warn('❌ OPFS not supported, using localStorage fallback');
+    // Essayer OPFS - FAIL FAST si impossible
+    if (!hasStorage || !hasGetDirectory || !isSecure) {
+      throw new Error('OPFS requis: Stockage sécurisé local non disponible');
     }
 
-    // Fallback vers localStorage (toujours disponible)
-    this.useFallback = true;
-    this.fallbackService = new SQLiteFallbackEnhanced();
-    
-    // Les données existantes sont chargées automatiquement par le constructeur
-    this.initialized = true;
-    console.log('✅ SQLite initialized with enhanced localStorage fallback');
+    try {
+      console.log('🔐 Accès OPFS sécurisé...');
+      this.opfsRoot = await navigator.storage.getDirectory();
+      await this.loadOrCreateDatabase();
+      await this.createTables();
+      this.initialized = true;
+      console.log('✅ SQLite with OPFS initialized successfully');
+    } catch (error) {
+      console.error('❌ ÉCHEC CRITIQUE OPFS:', error);
+      throw new Error(`Stockage HDS sécurisé REQUIS: ${error}`);
+    }
   }
 
 
@@ -115,9 +104,8 @@ export class OPFSSQLiteService {
    * Crée les tables nécessaires
    */
   private async createTables(): Promise<void> {
-    if (this.useFallback || !this.db) {
-      console.log('📋 Utilisation du service de fallback - tables déjà créées');
-      return;
+    if (!this.db) {
+      throw new Error('Base de données non initialisée');
     }
 
     const tables = [
@@ -195,16 +183,12 @@ export class OPFSSQLiteService {
   }
 
   /**
-   * Sauvegarde la base de données dans OPFS ou localStorage
+   * Sauvegarde la base de données dans OPFS
    */
   async save(): Promise<void> {
-    if (this.useFallback && this.fallbackService) {
-      // Enhanced fallback gère sa propre persistance automatiquement
-      console.log('💾 Enhanced fallback data auto-saved');
-      return;
+    if (!this.db || !this.opfsRoot) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-
-    if (!this.db || !this.opfsRoot) throw new Error('Database not initialized');
 
     try {
       const dbFileName = `${this.config.dbName}.sqlite`;
@@ -229,11 +213,9 @@ export class OPFSSQLiteService {
    * Exécute une requête SELECT
    */
   query<T = any>(sql: string, params: any[] = []): T[] {
-    if (this.useFallback && this.fallbackService) {
-      return this.fallbackService.query<T>(sql, params);
+    if (!this.db) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-    
-    if (!this.db) throw new Error('Database not initialized');
     
     const stmt = this.db.prepare(sql);
     const result: T[] = [];
@@ -250,11 +232,9 @@ export class OPFSSQLiteService {
    * Exécute une requête INSERT/UPDATE/DELETE
    */
   async run(sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
-    if (this.useFallback && this.fallbackService) {
-      return await this.fallbackService.run(sql, params);
+    if (!this.db) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-    
-    if (!this.db) throw new Error('Database not initialized');
     
     this.db.run(sql, params);
     
@@ -275,11 +255,9 @@ export class OPFSSQLiteService {
    * Démarre une transaction
    */
   beginTransaction(): void {
-    if (this.useFallback && this.fallbackService) {
-      this.fallbackService.beginTransaction();
-      return;
+    if (!this.db) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-    if (!this.db) throw new Error('Database not initialized');
     this.db.run('BEGIN TRANSACTION');
   }
 
@@ -287,11 +265,9 @@ export class OPFSSQLiteService {
    * Valide une transaction
    */
   async commit(): Promise<void> {
-    if (this.useFallback && this.fallbackService) {
-      await this.fallbackService.commit();
-      return;
+    if (!this.db) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-    if (!this.db) throw new Error('Database not initialized');
     this.db.run('COMMIT');
     await this.save();
   }
@@ -300,11 +276,9 @@ export class OPFSSQLiteService {
    * Annule une transaction
    */
   rollback(): void {
-    if (this.useFallback && this.fallbackService) {
-      this.fallbackService.rollback();
-      return;
+    if (!this.db) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-    if (!this.db) throw new Error('Database not initialized');
     this.db.run('ROLLBACK');
   }
 
@@ -312,10 +286,9 @@ export class OPFSSQLiteService {
    * Exporte la base de données
    */
   export(): Uint8Array {
-    if (this.useFallback && this.fallbackService) {
-      return this.fallbackService.export();
+    if (!this.db) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-    if (!this.db) throw new Error('Database not initialized');
     return this.db.export();
   }
 
@@ -333,8 +306,6 @@ export class OPFSSQLiteService {
     
     // Réinitialiser les états
     this.initialized = false;
-    this.useFallback = false;
-    this.fallbackService = null;
     this.opfsRoot = null;
     
     // Relancer l'initialisation
@@ -349,11 +320,9 @@ export class OPFSSQLiteService {
     tables: string[];
     version: string;
   } {
-    if (this.useFallback && this.fallbackService) {
-      return this.fallbackService.getStats();
+    if (!this.db) {
+      throw new Error('Base de données OPFS non initialisée');
     }
-    
-    if (!this.db) throw new Error('Database not initialized');
 
     const tables = this.query<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"

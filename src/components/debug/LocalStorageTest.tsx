@@ -77,34 +77,18 @@ export const LocalStorageTest: React.FC = () => {
 
   const clearStorage = () => {
     clearMemoryStorage();
-    // Aussi vider les autres storages
-    localStorage.removeItem('sqlite-fallback-data');
-    localStorage.removeItem('sqlite-fallback-enhanced');
+    // Note: sqlite-fallback supprimés pour sécurité HDS
     setTestResult('🧹 Stockage local vidé\n');
     toast.info('Stockage local vidé');
   };
 
   const checkStorageStatus = () => {
     const isInFallback = isUsingMemoryFallback();
-    const enhancedData = localStorage.getItem('sqlite-fallback-enhanced');
-    const basicData = localStorage.getItem('sqlite-fallback-data');
-    const hdsData = localStorage.getItem('hds-local-storage');
     
     let status = '📊 État du stockage local:\n';
-    status += `• Mode fallback actif: ${isInFallback ? 'OUI' : 'NON'}\n`;
-    status += `• Données enhanced fallback: ${enhancedData ? 'Présentes' : 'Absentes'}\n`;
-    status += `• Données basic fallback: ${basicData ? 'Présentes' : 'Absentes'}\n`;
-    status += `• Données HDS: ${hdsData ? 'Présentes' : 'Absentes'}\n`;
-    
-    if (enhancedData) {
-      try {
-        const parsed = JSON.parse(enhancedData);
-        const patientCount = parsed.data?.patients ? Object.keys(parsed.data.patients).length : 0;
-        status += `• Patients en localStorage: ${patientCount}\n`;
-      } catch (e) {
-        status += `• Erreur lecture données enhanced\n`;
-      }
-    }
+    status += `• Mode fallback HDS: ${isInFallback ? 'OUI (DÉPRÉCIÉ)' : 'NON'}\n`;
+    status += `• Note: Fallbacks localStorage HDS supprimés pour sécurité\n`;
+    status += `• Stockage HDS sécurisé requis en mode connecté\n`;
     
     setTestResult(status);
   };

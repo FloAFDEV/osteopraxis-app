@@ -235,20 +235,11 @@ class HDSSecurePatientServiceImpl implements HDSSecurePatientService {
     try {
       console.log('🔄 Migration patients depuis ancien stockage IndexedDB...');
       
-      // Importer l'ancien gestionnaire
-      const { hdsLocalStorage } = await import('../hds-local-storage/hds-storage-manager');
-      await hdsLocalStorage.initialize(userId, 1);
-      
-      // Récupérer les anciens patients
-      const oldPatients = await hdsLocalStorage.getPatients();
-      
-      if (oldPatients.length > 0) {
-        const storage = await this.getSecureStorage();
-        await storage.saveRecords(oldPatients);
-        console.log(`✅ ${oldPatients.length} patients migrés vers le stockage HDS sécurisé`);
-      }
-
-      return oldPatients.length;
+      // Note: Migration depuis l'ancien système supprimée (fallbacks HDS supprimés)
+      console.warn('⚠️ Migration depuis IndexedDB non disponible - fallbacks HDS supprimés pour sécurité');
+      // Migration non disponible car anciens systèmes supprimés
+      console.log('⚠️ Migration patients non disponible - fallbacks HDS supprimés pour sécurité');
+      return 0;
     } catch (error) {
       console.error('❌ Erreur migration patients:', error);
       return 0;
