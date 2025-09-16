@@ -10,7 +10,9 @@ import {
   CreditCard, 
   X,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Target,
+  Lightbulb
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDemo } from '@/contexts/DemoContext';
@@ -102,8 +104,9 @@ export const DemoGuide: React.FC = () => {
               <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
-                🎯 Mode Démo Actif
+              <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100 flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Mode Démo Actif
               </h3>
               <p className="text-sm text-amber-700 dark:text-amber-200">
                 Explorez toutes les fonctionnalités avec des données de test
@@ -160,9 +163,9 @@ export const DemoGuide: React.FC = () => {
 
         <div className="mt-4 p-3 bg-amber-100 rounded-lg dark:bg-amber-900/30">
           <div className="flex items-start gap-2">
-            <Play className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0 dark:text-amber-400" />
+            <Lightbulb className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0 dark:text-amber-400" />
             <div className="text-xs text-amber-700 dark:text-amber-200">
-              <strong>💡 Conseil :</strong> Les données créées en mode démo sont temporaires et seront supprimées après 30 minutes. 
+              <strong>Conseil :</strong> Les données créées en mode démo sont temporaires et seront supprimées après 30 minutes. 
               Parfait pour tester sans risque !
             </div>
           </div>

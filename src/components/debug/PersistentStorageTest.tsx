@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Loader, TestTube, BarChart3, Trash2 } from 'lucide-react';
 import { getPersistentLocalStorage } from '@/services/storage/persistent-local-storage';
 import { toast } from 'sonner';
 
@@ -155,21 +156,33 @@ export const PersistentStorageTest: React.FC = () => {
             disabled={loading}
             variant="default"
           >
-            {loading ? '⏳ Test...' : '🧪 Test Persistance Complète'}
+            {loading ? (
+              <>
+                <Loader className="h-4 w-4 mr-2 animate-spin" />
+                Test...
+              </>
+            ) : (
+              <>
+                <TestTube className="h-4 w-4 mr-2" />
+                Test Persistance Complète
+              </>
+            )}
           </Button>
           
           <Button 
             onClick={checkExistingData}
             variant="outline"
           >
-            📊 Vérifier Données
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Vérifier Données
           </Button>
           
           <Button 
             onClick={clearPersistentData}
             variant="destructive"
           >
-            🧹 Effacer Données
+            <Trash2 className="h-4 w-4 mr-2" />
+            Effacer Données
           </Button>
         </div>
         

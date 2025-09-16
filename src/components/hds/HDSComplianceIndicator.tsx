@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Shield, ShieldAlert, ShieldCheck, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Shield, AlertTriangle, TestTube, CheckCircle, ShieldAlert, ShieldCheck, RefreshCw } from 'lucide-react';
 import { HDSInitialization, useHDSStatus } from "@/services/hybrid-data-adapter/hds-initialization";
 
 interface ComplianceStatus {
@@ -86,16 +86,18 @@ export const HDSComplianceIndicator = () => {
 
         {status.mode === 'demo' && (
           <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-            <p className="text-sm text-blue-800">
-              🎭 <strong>Mode démo</strong> : Les données sont éphémères et automatiquement supprimées.
+            <p className="text-sm text-blue-800 flex items-center gap-2">
+              <TestTube className="h-4 w-4" />
+              <strong>Mode démo</strong> : Les données sont éphémères et automatiquement supprimées.
             </p>
           </div>
         )}
 
         {status.mode === 'production' && status.isCompliant && (
           <div className="bg-green-50 border border-green-200 rounded-md p-3">
-            <p className="text-sm text-green-800">
-              ✅ <strong>Stockage local configuré</strong> : Les données sensibles sont stockées localement selon les exigences HDS.
+            <p className="text-sm text-green-800 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              <strong>Stockage local configuré</strong> : Les données sensibles sont stockées localement selon les exigences HDS.
             </p>
           </div>
         )}

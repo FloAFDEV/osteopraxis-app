@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, AlertTriangle, FileX, Users } from 'lucide-react';
+import { Shield, AlertTriangle, FileX, Users, RefreshCw } from 'lucide-react';
 
 interface HDSStorageFailureScreenProps {
   error: string;
@@ -74,8 +74,9 @@ export const HDSStorageFailureScreen: React.FC<HDSStorageFailureScreenProps> = (
             <div className="grid gap-3">
               {/* Retry */}
               {onRetry && (
-                <Button onClick={onRetry} variant="default" className="w-full">
-                  🔄 Réessayer le stockage sécurisé
+                <Button onClick={onRetry} variant="default" className="w-full flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4" />
+                  Réessayer le stockage sécurisé
                 </Button>
               )}
               

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Loader, TestTube, BarChart3, Trash2 } from 'lucide-react';
 import { isUsingMemoryFallback, clearMemoryStorage } from '@/services/hybrid-data-adapter/local-adapters';
 import { getOPFSSQLiteService } from '@/services/sqlite/opfs-sqlite-service';
 import { toast } from 'sonner';
@@ -13,13 +14,13 @@ export const LocalStorageTest: React.FC = () => {
 
   const runCompleteTest = async () => {
     setLoading(true);
-    setTestResult('🔄 Démarrage du test complet...\n');
+    setTestResult('Démarrage du test complet...\n');
     
     try {
       // 1. Test du service OPFS/SQLite
       setTestResult(prev => prev + '1️⃣ Test du service SQLite...\n');
       const service = await getOPFSSQLiteService();
-      setTestResult(prev => prev + `✅ Service SQLite obtenu\n`);
+      setTestResult(prev => prev + `Service SQLite obtenu\n`);
       
       // 2. Test de création d'un patient
       setTestResult(prev => prev + '2️⃣ Test création patient...\n');
@@ -85,7 +86,7 @@ export const LocalStorageTest: React.FC = () => {
   const checkStorageStatus = () => {
     const isInFallback = isUsingMemoryFallback();
     
-    let status = '📊 État du stockage local:\n';
+    let status = 'État du stockage local:\n';
     status += `• Mode fallback HDS: ${isInFallback ? 'OUI (DÉPRÉCIÉ)' : 'NON'}\n`;
     status += `• Note: Fallbacks localStorage HDS supprimés pour sécurité\n`;
     status += `• Stockage HDS sécurisé requis en mode connecté\n`;
@@ -114,21 +115,33 @@ export const LocalStorageTest: React.FC = () => {
             disabled={loading}
             variant="default"
           >
-            {loading ? '⏳ Test en cours...' : '🧪 Test CRUD Complet'}
+            {loading ? (
+              <>
+                <Loader className="h-4 w-4 mr-2 animate-spin" />
+                Test en cours...
+              </>
+            ) : (
+              <>
+                <TestTube className="h-4 w-4 mr-2" />
+                Test CRUD Complet
+              </>
+            )}
           </Button>
           
           <Button 
             onClick={checkStorageStatus}
             variant="outline"
           >
-            📊 État Stockage
+            <BarChart3 className="h-4 w-4 mr-2" />
+            État Stockage
           </Button>
           
           <Button 
             onClick={clearStorage}
             variant="destructive"
           >
-            🧹 Vider Stockage
+            <Trash2 className="h-4 w-4 mr-2" />
+            Vider Stockage
           </Button>
         </div>
         
