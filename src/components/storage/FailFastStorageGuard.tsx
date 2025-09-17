@@ -42,24 +42,11 @@ export const FailFastStorageGuard: React.FC<FailFastStorageGuardProps> = ({ chil
     return <>{children}</>;
   }
 
-  // En mode connecté, FAIL FAST si stockage non disponible
-  if (status && (!status.isConfigured || !status.isUnlocked)) {
-    const error = 'Stockage HDS sécurisé non configuré ou non déverrouillé';
-    
-    return (
-      <HDSStorageFailureScreen
-        error={error}
-        onRetry={() => {
-          initialize();
-        }}
-        onUseDemo={() => {
-          // Forcer le mode démo
-          window.location.href = '/?demo=forced';
-        }}
-      />
-    );
-  }
-
-  // Stockage configuré et déverrouillé - laisser passer
+  // En mode connecté, permettre l'accès au dashboard mais avec informations
+  // Le FailFastStorageGuard devient maintenant un "garde informatif" 
+  // qui n'interrompt plus l'expérience utilisateur
+  
+  // Laisser passer dans tous les cas - les composants individuels 
+  // géreront leurs propres messages d'état HDS
   return <>{children}</>;
 };

@@ -5,6 +5,7 @@ import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
 import { DemoGuide } from "@/components/demo/DemoGuide";
 import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
+import { HDSStatusBanner } from "@/components/storage/HDSStatusBanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { isDemoSession } from "@/utils/demo-detection";
@@ -48,6 +49,9 @@ const DashboardPage = () => {
         className="p-3 md:p-6 rounded-xl animate-fade-in"
       >
         <DemoGuide />
+        
+        {/* Bannière de statut HDS pour utilisateurs connectés */}
+        <HDSStatusBanner />
         
         {/* Message de bienvenue pour nouveaux utilisateurs */}
         {!cabinetsLoading && (

@@ -1,10 +1,8 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ReactNode, useState, useEffect } from 'react';
-import { HybridStorageProvider } from '@/contexts/HybridStorageContext';
-import { useHybridStorage } from '@/hooks/useHybridStorage';
-import { HybridStorageSetup } from '@/components/storage/HybridStorageSetup';
+import { ReactNode } from 'react';
+import { FailFastStorageGuard } from '@/components/storage/FailFastStorageGuard';
 import { isDemoSession } from '@/utils/demo-detection';
 
 interface ProtectedRouteProps {
@@ -14,7 +12,6 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   const { user, isAuthenticated, loading } = useAuth();
-  const { status, isLoading: storageLoading } = useHybridStorage();
   const location = useLocation();
 
   // Afficher un loader pendant la vérification d'authentification
@@ -41,9 +38,9 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
                      user.email?.startsWith('demo-') ||
                      user.osteopathId === 999;
 
-  // Pour les utilisateurs réels : utiliser le provider hybride
+  // Pour les utilisateurs réels : utiliser le garde intelligent (non-bloquant)
   if (!isDemoUser) {
-    return <HybridStorageProvider>{children}</HybridStorageProvider>;
+    return <FailFastStorageGuard>{children}</FailFastStorageGuard>;
   }
 
   // Pour les utilisateurs démo : pas de stockage local requis
