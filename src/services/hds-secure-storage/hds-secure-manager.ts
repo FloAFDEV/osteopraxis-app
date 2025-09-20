@@ -7,8 +7,10 @@
  * EXCLUSIVEMENT pour le mode connecté - JAMAIS de Supabase pour HDS
  */
 
-import { SecureFileStorage } from '../security/secure-file-storage';
+import { EnhancedSecureFileStorage } from '../security/enhanced-secure-storage';
 import { checkNativeStorageSupport, requestStorageDirectory } from '../native-file-storage/native-file-adapter';
+import { persistDirectoryHandle, getPersistedDirectoryHandle, checkPersistenceSupport } from '../native-file-storage/directory-persistence';
+import { checkCryptoSupport, testCrypto } from '@/utils/crypto';
 
 export interface HDSSecureConfig {
   directoryHandle?: FileSystemDirectoryHandle;
@@ -29,7 +31,7 @@ export interface HDSSecureStatus {
 export class HDSSecureManager {
   private directoryHandle: FileSystemDirectoryHandle | null = null;
   private password: string | null = null;
-  private storages: Map<string, SecureFileStorage> = new Map();
+  private storages: Map<string, EnhancedSecureFileStorage> = new Map();
   private configured = false;
   private unlocked = false;
 
@@ -42,7 +44,19 @@ export class HDSSecureManager {
    * Vérifier le support du stockage sécurisé
    */
   checkSupport() {
-    return checkNativeStorageSupport();
+    const nativeSupport = checkNativeStorageSupport();
+    const cryptoSupport = checkCryptoSupport();
+    const persistenceSupport = checkPersistenceSupport();
+    
+    const allDetails = [
+      ...nativeSupport.details,
+      ...cryptoSupport.details,
+      ...persistenceSupport.details
+    ];
+    
+    const supported = nativeSupport.supported && cryptoSupport.supported && persistenceSupport.supported;
+    
+    return { supported, details: allDetails };
   }
 
   /**
@@ -52,10 +66,17 @@ export class HDSSecureManager {
     try {
       console.log('🔐 Configuration du stockage HDS sécurisé...');
       
-      // Vérifier le support
+      // Vérifier le support complet
       const support = this.checkSupport();
       if (!support.supported) {
         throw new Error(`Stockage sécurisé non supporté: ${support.details.join(', ')}`);
+      }
+
+      // Test crypto initial avec le mot de passe
+      console.log('🧪 Test cryptographique initial...');
+      const cryptoTest = await testCrypto(config.password);
+      if (!cryptoTest) {
+        throw new Error('Test cryptographique initial échoué');
       }
 
       // Obtenir l'accès au dossier
@@ -65,13 +86,17 @@ export class HDSSecureManager {
         this.directoryHandle = config.directoryHandle;
       }
 
+      // Persister le directoryHandle
+      await persistDirectoryHandle(this.directoryHandle, 'hds-storage');
+      
       this.password = config.password;
 
       // Créer les adaptateurs sécurisés pour chaque entité HDS
       const entities = config.entities || ['patients', 'appointments', 'invoices'];
       
       for (const entity of entities) {
-        const storage = new SecureFileStorage(entity);
+        console.log(`⚙️ Configuration stockage ${entity}...`);
+        const storage = new EnhancedSecureFileStorage(entity);
         await storage.initialize(this.directoryHandle, this.password);
         this.storages.set(entity, storage);
       }
@@ -81,11 +106,12 @@ export class HDSSecureManager {
 
       console.log('✅ Stockage HDS sécurisé configuré avec succès');
       
-      // Sauvegarder la configuration (sans le mot de passe ni le handle)
+      // Sauvegarder la configuration (sans le mot de passe)
       localStorage.setItem('hds-secure-config', JSON.stringify({
         configured: true,
         entities,
-        configuredAt: new Date().toISOString()
+        configuredAt: new Date().toISOString(),
+        directoryPersisted: true
       }));
 
     } catch (error) {
@@ -141,7 +167,7 @@ export class HDSSecureManager {
   /**
    * Obtenir un adaptateur de stockage sécurisé pour une entité
    */
-  getSecureStorage(entityName: string): SecureFileStorage | null {
+  getSecureStorage(entityName: string): EnhancedSecureFileStorage | null {
     return this.storages.get(entityName) || null;
   }
 
@@ -164,25 +190,54 @@ export class HDSSecureManager {
     }
 
     try {
+      console.log('🔓 Tentative de déverrouillage...');
+      
+      // Vérifier si on a encore le directoryHandle
+      if (!this.directoryHandle) {
+        console.log('📁 Récupération du directoryHandle persisté...');
+        this.directoryHandle = await getPersistedDirectoryHandle('hds-storage');
+        
+        if (!this.directoryHandle) {
+          console.error('❌ DirectoryHandle non trouvé - reconfiguration nécessaire');
+          this.configured = false;
+          return false;
+        }
+      }
+      
+      // Test crypto avec le mot de passe
+      const cryptoTest = await testCrypto(password);
+      if (!cryptoTest) {
+        console.error('❌ Test cryptographique échoué');
+        return false;
+      }
+      
       this.password = password;
       
-      // Tester le déverrouillage en tentant de charger une entité
-      const testEntity = this.storages.keys().next().value;
-      if (testEntity) {
-        const storage = this.storages.get(testEntity);
-        if (storage) {
-          // Réinitialiser avec le nouveau mot de passe
-          await storage.initialize(this.directoryHandle!, password);
-          // Tenter de charger les données pour valider le mot de passe
-          await storage.loadRecords();
-        }
+      // Réinitialiser tous les storages avec le nouveau mot de passe
+      const entities = Array.from(this.storages.keys());
+      this.storages.clear();
+      
+      for (const entity of entities) {
+        console.log(`🔄 Réinitialisation storage ${entity}...`);
+        const storage = new EnhancedSecureFileStorage(entity);
+        await storage.initialize(this.directoryHandle, password);
+        
+        // Test de lecture pour valider le mot de passe
+        await storage.loadRecords();
+        
+        this.storages.set(entity, storage);
       }
 
       this.unlocked = true;
-      console.log('🔓 Stockage HDS sécurisé déverrouillé');
+      console.log('✅ Stockage HDS sécurisé déverrouillé avec succès');
       return true;
     } catch (error) {
       console.error('❌ Erreur déverrouillage:', error);
+      
+      if (error instanceof Error && error.message.includes('password')) {
+        console.error('❌ Mot de passe incorrect');
+      }
+      
       this.password = null;
       this.unlocked = false;
       return false;

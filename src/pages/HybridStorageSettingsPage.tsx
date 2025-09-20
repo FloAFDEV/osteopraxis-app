@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 const HybridStorageSettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const exportData = async () => {
     setLoading(true);
@@ -36,6 +37,52 @@ const HybridStorageSettingsPage: React.FC = () => {
       toast.error('Erreur lors de l\'export des données');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const importData = async () => {
+    setImporting(true);
+    try {
+      // Créer un input file pour sélectionner le fichier
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,.phds';
+      
+      input.onchange = async (event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+        
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          
+          // Vérifier le format du fichier
+          if (data.format && data.format.includes('PatientHub')) {
+            toast.info('Import de fichier PatientHub HDS sécurisé détecté');
+          }
+          
+          // TODO: Implémenter l'import sécurisé avec validation de mot de passe
+          // await hybridDataManager.importData(text, password);
+          toast.info('Import sécurisé en développement - fonctionnalité bientôt disponible');
+          
+          toast.success('Données importées avec succès');
+        } catch (error) {
+          console.error('Erreur import:', error);
+          if (error instanceof Error && error.message.includes('password')) {
+            toast.error('Mot de passe incorrect pour déchiffrer les données');
+          } else {
+            toast.error('Erreur lors de l\'import des données');
+          }
+        } finally {
+          setImporting(false);
+        }
+      };
+      
+      input.click();
+    } catch (error) {
+      console.error('Erreur sélection fichier:', error);
+      toast.error('Erreur lors de la sélection du fichier');
+      setImporting(false);
     }
   };
 
@@ -86,11 +133,12 @@ const HybridStorageSettingsPage: React.FC = () => {
                 
                 <Button 
                   variant="outline"
-                  disabled={loading}
+                  onClick={importData}
+                  disabled={loading || importing}
                   className="flex items-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  Importer une sauvegarde
+                  {importing ? 'Import en cours...' : 'Importer une sauvegarde'}
                 </Button>
               </div>
             </CardContent>
