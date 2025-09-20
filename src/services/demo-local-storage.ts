@@ -455,21 +455,24 @@ class DemoLocalStorageService {
    * Création de cabinet bloquée en mode démo
    */
   addCabinet(cabinet: Omit<Cabinet, 'id' | 'createdAt' | 'updatedAt'>): Cabinet {
-    throw new Error('🎭 Création de cabinet non autorisée en mode démo. Un cabinet exemple est déjà configuré.');
+    console.warn('🎭 Tentative de création de cabinet en mode démo - Opération bloquée');
+    throw new Error('🎭 MODE DÉMO: Création de cabinet non autorisée. Un cabinet exemple est déjà configuré et ne peut pas être modifié.');
   }
 
   /**
    * Modification de cabinet bloquée en mode démo
    */
   updateCabinet(id: number, updates: Partial<Cabinet>): Cabinet {
-    throw new Error('🎭 Modification de cabinet non autorisée en mode démo. Le cabinet exemple ne peut pas être modifié.');
+    console.warn('🎭 Tentative de modification de cabinet en mode démo - Opération bloquée');
+    throw new Error('🎭 MODE DÉMO: Modification de cabinet non autorisée. Le cabinet exemple ne peut pas être modifié.');
   }
 
   /**
    * Suppression de cabinet bloquée en mode démo
    */
   deleteCabinet(id: number): boolean {
-    throw new Error('🎭 Suppression de cabinet non autorisée en mode démo. Le cabinet exemple ne peut pas être supprimé.');
+    console.warn('🎭 Tentative de suppression de cabinet en mode démo - Opération bloquée');
+    throw new Error('🎭 MODE DÉMO: Suppression de cabinet non autorisée. Le cabinet exemple ne peut pas être supprimé.');
   }
 
   /**

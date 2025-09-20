@@ -207,6 +207,12 @@ export class StorageRouter {
    * Adapter pour les données Non-HDS (Supabase cloud)
    */
   private async getSupabaseAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
+    // 🚨 SÉCURITÉ CRITIQUE: JAMAIS de Supabase en mode démo
+    const isDemoMode = await isDemoSession();
+    if (isDemoMode) {
+      throw new Error(`🚨 VIOLATION SÉCURITÉ: Tentative Supabase en mode démo pour: ${dataType}`);
+    }
+
     // Vérification de sécurité stricte
     if (isHDSData(dataType)) {
       throw new Error(`🚨 VIOLATION SÉCURITÉ: Tentative Supabase pour donnée HDS: ${dataType}`);
@@ -220,6 +226,12 @@ export class StorageRouter {
           create: (data) => cabinetMethods.createCabinet(data as any) as unknown as Promise<T>,
           getById: (id) => cabinetMethods.getCabinetById(Number(id)) as unknown as Promise<T | null>,
           getAll: async () => {
+            // ⛔ PROTECTION SUPPLÉMENTAIRE: Double vérification mode démo
+            const isDemoMode = await isDemoSession();
+            if (isDemoMode) {
+              throw new Error('🚨 VIOLATION SÉCURITÉ: Supabase Cabinet appelé en mode démo');
+            }
+
             try {
               console.log('🔧 Tentative récupération cabinets via Supabase...');
               const result = await cabinetMethods.getCabinets() as unknown as Promise<T[]>;
