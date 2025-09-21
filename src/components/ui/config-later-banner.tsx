@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Settings, Shield, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDemo } from "@/contexts/DemoContext";
 
 interface ConfigLaterBannerProps {
   onConfigureNow?: () => void;
@@ -12,6 +13,7 @@ interface ConfigLaterBannerProps {
 export function ConfigLaterBanner({ onConfigureNow, onDismiss }: ConfigLaterBannerProps) {
   const navigate = useNavigate();
   const [dismissed, setDismissed] = useState(false);
+  const { isDemoMode } = useDemo();
 
   const handleConfigureNow = () => {
     if (onConfigureNow) {
@@ -28,7 +30,8 @@ export function ConfigLaterBanner({ onConfigureNow, onDismiss }: ConfigLaterBann
     }
   };
 
-  if (dismissed) return null;
+  // Ne pas afficher en mode démo
+  if (dismissed || isDemoMode) return null;
 
   return (
     <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-100">
