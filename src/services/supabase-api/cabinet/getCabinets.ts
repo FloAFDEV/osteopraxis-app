@@ -5,12 +5,60 @@ import { supabase } from "@/integrations/supabase/client";
 export async function getCabinets(): Promise<Cabinet[]> {
   console.log('🔍 [getCabinets] === DÉBUT ===');
   try {
-    console.log('🔍 [getCabinets] Début récupération cabinets via client Supabase...');
+    console.log('🔍 [getCabinets] Début récupération cabinets multi-tenant...');
     
-    const { data: cabinets, error } = await supabase
+    // Récupérer l'utilisateur connecté
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('❌ Utilisateur non authentifié:', authError);
+      throw new Error('Utilisateur non authentifié');
+    }
+    
+    console.log('👤 Utilisateur connecté:', { id: user.id, email: user.email });
+    
+    // Récupérer l'ostéopathe correspondant
+    const { data: osteopathData, error: osteoError } = await supabase
+      .from('Osteopath')
+      .select('id')
+      .eq('authId', user.id)
+      .single();
+    
+    if (osteoError) {
+      console.error('❌ Ostéopathe non trouvé:', osteoError);
+      throw new Error('Profil ostéopathe non trouvé');
+    }
+    
+    const osteopathId = osteopathData.id;
+    console.log('🩺 Ostéopathe ID:', osteopathId);
+    
+    // Récupérer d'abord les associations cabinet-ostéopathe
+    const { data: associations, error: assocError } = await supabase
+      .from('osteopath_cabinet')
+      .select('cabinet_id')
+      .eq('osteopath_id', osteopathId);
+    
+    if (assocError) {
+      console.warn('⚠️ Erreur récupération associations:', assocError);
+    }
+    
+    const associatedCabinetIds = associations?.map(a => a.cabinet_id) || [];
+    console.log('🔗 Cabinets associés:', associatedCabinetIds);
+    
+    // Construire la requête pour récupérer les cabinets (propriétaire OU associé)
+    let query = supabase
       .from('Cabinet')
-      .select('*')
-      .order('name');
+      .select('*');
+    
+    if (associatedCabinetIds.length > 0) {
+      // Cabinets dont il est propriétaire OU auxquels il est associé
+      query = query.or(`osteopathId.eq.${osteopathId},id.in.(${associatedCabinetIds.join(',')})`);
+    } else {
+      // Seulement les cabinets dont il est propriétaire
+      query = query.eq('osteopathId', osteopathId);
+    }
+    
+    const { data: cabinets, error } = await query.order('name');
 
     if (error) {
       console.error('❌ [getCabinets] Erreur Supabase:', error);
@@ -35,30 +83,21 @@ export async function getCabinets(): Promise<Cabinet[]> {
       updatedAt: cabinet.updatedAt
     }));
 
-    console.log(`✅ [getCabinets] Succès: ${formattedCabinets.length} cabinet(s) récupéré(s)`);
+    console.log(`✅ [getCabinets] Succès multi-tenant: ${formattedCabinets.length} cabinet(s) récupéré(s) pour ostéopathe ${osteopathId}`);
     return formattedCabinets;
   } catch (error) {
     console.error("❌ [getCabinets] Erreur finale:", error);
     
-    // Fallback robuste avec cabinet d'urgence 
-    const emergencyCabinet: Cabinet = {
-      id: 999997,
-      name: 'Cabinet d\'Urgence',
-      address: 'Erreur de chargement - Veuillez réessayer',
-      city: '',
-      postalCode: '',
-      country: 'France',
-      phone: '',
-      email: '',
-      siret: '',
-      iban: null,
-      bic: null,
-      osteopathId: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    // Pour les erreurs d'authentification, retourner un tableau vide
+    if (error instanceof Error && (
+      error.message.includes('non authentifié') || 
+      error.message.includes('not authenticated') ||
+      error.message.includes('JWT')
+    )) {
+      console.log('🔒 Problème d\'authentification - Retour tableau vide');
+      return [];
+    }
     
-    console.log('🚨 [getCabinets] Fallback final: cabinet d\'urgence:', emergencyCabinet);
-    return [emergencyCabinet];
+    throw error; // Propager les autres erreurs
   }
 }

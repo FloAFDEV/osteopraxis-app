@@ -234,42 +234,35 @@ export class StorageRouter {
 
             try {
               console.log('🔧 Tentative récupération cabinets via Supabase...');
-              const result = await cabinetMethods.getCabinets() as unknown as Promise<T[]>;
+              const result = await cabinetMethods.getCabinets() as unknown as T[];
               console.log('✅ Cabinets récupérés avec succès:', result);
               return result;
             } catch (error) {
               console.error('❌ Erreur récupération cabinets Supabase:', error);
               
+              // Retourner un tableau vide au lieu d'un fallback si c'est un problème d'authentification
+              if (error instanceof Error && (
+                error.message.includes('non authentifié') || 
+                error.message.includes('not authenticated') ||
+                error.message.includes('JWT')
+              )) {
+                console.log('🔒 Problème d\'authentification - Retour tableau vide');
+                return [];
+              }
+              
               // Import dynamique du service de toast pour notification utilisateur
               try {
                 const { toast } = await import('sonner');
                 toast.error('Impossible de charger les cabinets', {
-                  description: 'Un cabinet temporaire a été créé pour vous permettre de continuer.'
+                  description: 'Vérifiez votre connexion ou contactez le support.'
                 });
               } catch (toastError) {
                 console.warn('Impossible d\'afficher la notification:', toastError);
               }
               
-              // Fallback avec cabinet temporaire par défaut
-              const defaultCabinet = {
-                id: 999999,
-                name: 'Cabinet Temporaire',
-                address: 'Configuration en cours...',
-                city: '',
-                postalCode: '',
-                country: 'France',
-                phone: '',
-                email: '',
-                siret: '',
-                iban: null,
-                bic: null,
-                osteopathId: 1,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-              } as T;
-              
-              console.log('🆘 Fallback: cabinet temporaire créé:', defaultCabinet);
-              return [defaultCabinet];
+              // Pour les autres erreurs, retourner un tableau vide aussi
+              console.log('📋 Retour tableau vide suite à l\'erreur');
+              return [];
             }
           },
           update: (id, updates) => cabinetMethods.updateCabinet(Number(id), updates as any) as unknown as Promise<T>,
