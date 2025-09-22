@@ -62,37 +62,19 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
       const support = hdsSecureManager.checkSupport();
       console.log('🔍 Support stockage sécurisé:', support);
       
-      // En mode iframe, on utilise le fallback - pas d'erreur bloquante
-      const isIframeEnvironment = window.self !== window.top;
-      
       if (!support.supported) {
-        if (isIframeEnvironment) {
-          console.warn('⚠️ Mode iframe: Stockage sécurisé non supporté - Mode fallback activé');
-          setStatus({
-            isConfigured: false,
-            isUnlocked: false,
-            physicalStorageAvailable: false,
-            entitiesCount: {},
-            totalSize: 0,
-            integrityStatus: {}
-          });
-          setIsLoading(false);
-          return;
-        } else {
-          // FAIL FAST: Stockage sécurisé OBLIGATOIRE pour données HDS en mode non-iframe
-          console.error('❌ ÉCHEC CRITIQUE: Stockage sécurisé HDS NON SUPPORTÉ');
-          setStatus({
-            isConfigured: false,
-            isUnlocked: false,
-            physicalStorageAvailable: false,
-            entitiesCount: {},
-            totalSize: 0,
-            integrityStatus: {}
-          });
-          setIsLoading(false);
-          toast.error('ERREUR CRITIQUE: Stockage HDS sécurisé non supporté');
-          return;
-        }
+        console.error('❌ Stockage sécurisé HDS non supporté sur ce navigateur');
+        setStatus({
+          isConfigured: false,
+          isUnlocked: false,
+          physicalStorageAvailable: false,
+          entitiesCount: {},
+          totalSize: 0,
+          integrityStatus: {}
+        });
+        setIsLoading(false);
+        toast.error('Stockage HDS non supporté - Utilisez Chrome/Edge pour une expérience complète');
+        return;
       }
       
       // Vérifier si déjà configuré depuis localStorage

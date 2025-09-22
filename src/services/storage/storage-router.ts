@@ -50,11 +50,7 @@ export class StorageRouter {
     // 2️⃣ Mode connecté normal : Router selon classification HDS/Non-HDS
     const classification = getDataClassification(dataType);
     
-    // 🔥 PRIORITÉ : Environnement iframe (preview) - SEULEMENT pour données HDS
-    const isIframeEnvironment = window.self !== window.top;
-    if (isIframeEnvironment && classification === 'HDS') {
-      return this.getIframeFallbackAdapter<T>(dataType);
-    }
+    // Pas de fallback iframe pour les données HDS - must have local storage
     
     // 3️⃣ Pour les données Non-HDS en iframe, continuer normalement vers Supabase
     
