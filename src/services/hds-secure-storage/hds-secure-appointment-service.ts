@@ -61,7 +61,11 @@ class HDSSecureAppointmentServiceImpl implements HDSSecureAppointmentService {
       console.log(`📖 ${appointments.length} rendez-vous HDS récupérés depuis le stockage local sécurisé`);
       return appointments;
     } catch (error) {
-      console.error('❌ Erreur récupération rendez-vous HDS sécurisés:', error);
+      if (error instanceof Error && error.message.includes('Stockage HDS sécurisé non configuré')) {
+        console.info('ℹ️ Stockage HDS non configuré - retour des données vides');
+      } else {
+        console.error('❌ Erreur récupération rendez-vous HDS sécurisés:', error);
+      }
       throw error;
     }
   }

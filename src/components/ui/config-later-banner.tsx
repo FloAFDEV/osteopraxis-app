@@ -19,7 +19,9 @@ export function ConfigLaterBanner({ onConfigureNow, onDismiss }: ConfigLaterBann
     if (onConfigureNow) {
       onConfigureNow();
     } else {
-      navigate('/admin/dashboard');
+      // Déclencher la configuration directement
+      sessionStorage.removeItem('hybrid-storage-skip');
+      window.location.reload();
     }
   };
 

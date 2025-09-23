@@ -63,7 +63,11 @@ class HDSSecurePatientServiceImpl implements HDSSecurePatientService {
       console.log(`📖 ${patients.length} patients HDS récupérés depuis le stockage local sécurisé`);
       return patients;
     } catch (error) {
-      console.error('❌ Erreur récupération patients HDS sécurisés:', error);
+      if (error instanceof Error && error.message.includes('Stockage HDS sécurisé non configuré')) {
+        console.info('ℹ️ Stockage HDS non configuré - retour des données vides');
+      } else {
+        console.error('❌ Erreur récupération patients HDS sécurisés:', error);
+      }
       throw error;
     }
   }

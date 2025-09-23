@@ -96,9 +96,12 @@ export const HDSStatusBanner: React.FC = () => {
               configurez le stockage local sécurisé conforme HDS.
             </p>
             <div className="flex gap-2">
-              <Button 
+               <Button 
                 size="sm"
-                onClick={() => navigate('/settings/storage')}
+                onClick={() => {
+                  sessionStorage.removeItem('hybrid-storage-skip');
+                  window.location.reload();
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Settings className="h-4 w-4 mr-1" />
