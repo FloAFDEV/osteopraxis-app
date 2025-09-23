@@ -50,28 +50,28 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
             return;
           }
           
-          // En mode connecté, vérifier la configuration ou BLOQUER
-          if (!status.isConfigured && !skipped) {
-            console.log('⚙️ Configuration stockage HDS sécurisé OBLIGATOIRE');
+          // En mode connecté, proposer la configuration si pas encore fait
+          if (!status.isConfigured && !skipped && status.physicalStorageAvailable !== false) {
+            console.log('⚙️ Configuration stockage HDS sécurisé disponible');
             setShowSetup(true);
           } else if (status.isConfigured && !status.isUnlocked && !skipped) {
-        // Charger la méthode de sécurité depuis la configuration
-        const config = localStorage.getItem('hybrid-storage-config');
-        if (config) {
-          try {
-            const parsedConfig = JSON.parse(config);
-            setSecurityMethod(parsedConfig.securityMethod || 'password');
-          } catch {
-            // Fallback
-            setSecurityMethod('password');
-          }
-        }
+            // Charger la méthode de sécurité depuis la configuration
+            const config = localStorage.getItem('hybrid-storage-config');
+            if (config) {
+              try {
+                const parsedConfig = JSON.parse(config);
+                setSecurityMethod(parsedConfig.securityMethod || 'password');
+              } catch {
+                // Fallback
+                setSecurityMethod('password');
+              }
+            }
             setShowUnlock(true);
           }
         } catch (error) {
           console.error('Erreur vérification mode démo:', error);
           // En cas d'erreur, procéder comme en mode normal
-          if (!status.isConfigured && !skipped) {
+          if (!status.isConfigured && !skipped && status?.physicalStorageAvailable !== false) {
             setShowSetup(true);
           }
         }
@@ -126,7 +126,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     setSkipped(true);
     setShowSetup(false);
     setShowUnlock(false);
-    toast.info("Configuration du stockage local ignorée pour l'instant. Certaines fonctionnalités hors-ligne peuvent être désactivées. Vous pourrez la configurer plus tard dans Paramètres > Stockage.");
+    toast.info("Configuration du stockage local ignorée. L'application fonctionnera avec les données en ligne uniquement. Vous pourrez configurer le stockage local plus tard dans Paramètres > Stockage.");
     try { navigate('/'); } catch {}
   };
   // Affichage conditionnel des modales

@@ -67,10 +67,25 @@ export function useCabinetStats(selectedCabinetId: number | null) {
         let patientsData, appointmentsData, invoicesData;
         
         try {
-          // Essayer de charger les données HDS (patients, RDV) - peuvent échouer en iframe
+          // Essayer de charger les données HDS (patients, RDV) - silencieux si non configuré
           [patientsData, appointmentsData] = await Promise.all([
-            api.getPatients().catch(() => []),
-            api.getAppointments().catch(() => []),
+            api.getPatients().catch((error) => {
+              // Gestion silencieuse pour stockage HDS non configuré
+              if (error.message?.includes('Stockage HDS sécurisé non configuré')) {
+                console.info('ℹ️ Stockage HDS non configuré - données vides utilisées');
+                return [];
+              }
+              console.warn('⚠️ Erreur patients:', error);
+              return [];
+            }),
+            api.getAppointments().catch((error) => {
+              if (error.message?.includes('Stockage HDS sécurisé non configuré')) {
+                console.info('ℹ️ Stockage HDS non configuré - données vides utilisées');
+                return [];
+              }
+              console.warn('⚠️ Erreur appointments:', error);
+              return [];
+            }),
           ]);
           
           // Charger les factures (non-HDS) séparément car toujours disponibles

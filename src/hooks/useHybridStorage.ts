@@ -63,7 +63,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
       console.log('🔍 Support stockage sécurisé:', support);
       
       if (!support.supported) {
-        console.error('❌ Stockage sécurisé HDS non supporté sur ce navigateur');
+        console.warn('⚠️ Stockage sécurisé HDS non supporté sur ce navigateur - Fonctionnalités limitées');
         setStatus({
           isConfigured: false,
           isUnlocked: false,
@@ -73,7 +73,6 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
           integrityStatus: {}
         });
         setIsLoading(false);
-        toast.error('Stockage HDS non supporté - Utilisez Chrome/Edge pour une expérience complète');
         return;
       }
       
