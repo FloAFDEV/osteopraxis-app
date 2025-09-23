@@ -61,10 +61,69 @@ export const cabinetService = {
     const adapter = await storageRouter.route<Cabinet>('cabinets');
     const allCabinets = await adapter.getAll();
     
-    // Filtrer par ostéopathe ou par associations cabinet-ostéopathe
-    return allCabinets.filter(cabinet => 
-      cabinet.osteopathId === osteopathId
-    );
+    // En mode démo, retourner tous les cabinets
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    if (isDemoMode) {
+      return allCabinets;
+    }
+    
+    // En mode connecté, utiliser Supabase pour récupérer les associations réelles
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Récupérer les cabinets possédés directement par l'ostéopathe
+      const { data: ownedCabinets, error: ownedError } = await supabase
+        .from('Cabinet')
+        .select('*')
+        .eq('osteopathId', osteopathId);
+      
+      // Récupérer les cabinets via les associations (osteopath_cabinet)
+      const { data: associations, error: assocError } = await supabase
+        .from('osteopath_cabinet')
+        .select('cabinet_id')
+        .eq('osteopath_id', osteopathId);
+      
+      if (assocError) {
+        console.warn('Erreur récupération associations cabinets:', assocError);
+      }
+      
+      const associatedCabinetIds = associations?.map(a => a.cabinet_id) || [];
+      
+      // Récupérer les cabinets associés
+      let associatedCabinets: Cabinet[] = [];
+      if (associatedCabinetIds.length > 0) {
+        const { data: cabinetsData, error: cabinetsError } = await supabase
+          .from('Cabinet')
+          .select('*')
+          .in('id', associatedCabinetIds);
+        
+        if (!cabinetsError) {
+          associatedCabinets = (cabinetsData as unknown as Cabinet[]) || [];
+        }
+      }
+      
+      // Combiner les cabinets possédés et associés
+      const allOsteopathCabinets = [
+        ...((ownedCabinets as unknown as Cabinet[]) || []),
+        ...associatedCabinets
+      ];
+      
+      // Dédupliquer par ID
+      const uniqueCabinets = allOsteopathCabinets.filter((cabinet, index, self) => 
+        index === self.findIndex(c => c.id === cabinet.id)
+      );
+      
+      console.log(`✅ Récupéré ${uniqueCabinets.length} cabinets pour ostéopathe ${osteopathId}`);
+      return uniqueCabinets;
+      
+    } catch (error) {
+      console.error('Erreur récupération cabinets ostéopathe:', error);
+      // Fallback vers filtrage simple en cas d'erreur
+      return allCabinets.filter(cabinet => 
+        cabinet.osteopathId === osteopathId
+      );
+    }
   },
 
   // Méthodes pour associations ostéopathe-cabinet (compatibilité)
