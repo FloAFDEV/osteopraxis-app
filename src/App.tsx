@@ -49,7 +49,7 @@ import NewCabinetPage from "@/pages/NewCabinetPage";
 import EditCabinetPage from "@/pages/EditCabinetPage";
 import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
 import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
-import HybridStorageSettingsPage from "@/pages/HybridStorageSettingsPage";
+import ConnectedStorageSettingsPage from "@/pages/ConnectedStorageSettingsPage";
 import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
 import TestingDashboardPage from "@/pages/TestingDashboardPage";
 
@@ -216,7 +216,7 @@ function App() {
                         } />
                         <Route path="/settings/storage" element={
                           <ProtectedRoute>
-                            <HybridStorageSettingsPage />
+                            <ConnectedStorageSettingsPage />
                           </ProtectedRoute>
                         } />
                         {/* Routes admin */}

@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { isDemoSession } from "@/utils/demo-detection";
 import { Layout } from "@/components/ui/layout";
 import {
 	Card,
@@ -16,6 +17,7 @@ import {
 	HelpCircle,
 	ChevronRight,
 	Upload,
+	Shield,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
@@ -26,6 +28,12 @@ const SettingsPage = () => {
 	const navigate = useNavigate();
 	const [showExportDialog, setShowExportDialog] = useState(false);
 	const [showImportDialog, setShowImportDialog] = useState(false);
+	const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null);
+
+	// Déterminer le mode (démo ou connecté)
+	useEffect(() => {
+		isDemoSession().then(setIsDemoMode);
+	}, []);
 
 	const settingsOptions = [
 		{
@@ -37,6 +45,16 @@ const SettingsPage = () => {
 			path: "/settings/osteopath",
 			color: "text-blue-500",
 		},
+		// Option stockage HDS uniquement en mode connecté
+		...(isDemoMode === false ? [{
+			id: "storage",
+			title: "Stockage HDS Sécurisé",
+			description:
+				"Configurez le stockage local sécurisé pour vos données médicales",
+			icon: Shield,
+			path: "/settings/storage",
+			color: "text-red-500",
+		}] : []),
 		{
 			id: "import",
 			title: "Import de données",

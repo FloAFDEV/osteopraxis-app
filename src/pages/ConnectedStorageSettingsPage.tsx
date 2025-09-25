@@ -1,3 +1,10 @@
+/**
+ * 🔐 Page de configuration du stockage HDS pour mode connecté UNIQUEMENT
+ * 
+ * Remplace HybridStorageSettingsPage pour le mode connecté
+ * Complètement séparée du mode démo
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,15 +16,29 @@ import { StorageTestPanel } from '@/components/testing/StorageTestPanel';
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { useConnectedStorage } from '@/hooks/useConnectedStorage';
+import { useConnectedCabinetStats } from '@/hooks/useConnectedCabinetStats';
 import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
+import { isDemoSession } from '@/utils/demo-detection';
 import { toast } from 'sonner';
 
-const HybridStorageSettingsPage: React.FC = () => {
+const ConnectedStorageSettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
-  const { status, isLoading, initialize, configure } = useConnectedStorage();
+  const { status, isLoading, initialize } = useConnectedStorage();
+  const cabinetStats = useConnectedCabinetStats();
+
+  // Vérification de sécurité : Rediriger si en mode démo
+  useEffect(() => {
+    isDemoSession().then(isDemoMode => {
+      if (isDemoMode) {
+        console.log('🎭 Mode démo détecté - Redirection vers dashboard');
+        navigate('/dashboard');
+        toast.info('Configuration de stockage non disponible en mode démo');
+      }
+    });
+  }, [navigate]);
 
   useEffect(() => {
     // Vérifier si on doit afficher la configuration
@@ -49,16 +70,16 @@ const HybridStorageSettingsPage: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `patienthub-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `patienthub-hds-backup-${new Date().toISOString().slice(0, 10)}.phds`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      toast.success('Données exportées avec succès');
+      toast.success('Données HDS exportées avec succès');
     } catch (error) {
       console.error('Erreur export:', error);
-      toast.error('Erreur lors de l\'export des données');
+      toast.error('Erreur lors de l\'export des données HDS');
     } finally {
       setLoading(false);
     }
@@ -172,6 +193,34 @@ const HybridStorageSettingsPage: React.FC = () => {
           {/* Indicateur de conformité HDS */}
           <HDSComplianceIndicator />
 
+          {/* Statistiques des cabinets connectés */}
+          {cabinetStats.totalCabinets > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Statistiques des cabinets</CardTitle>
+                <CardDescription>
+                  Vos cabinets connectés (données stockées sur Supabase)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-primary">{cabinetStats.totalCabinets}</p>
+                    <p className="text-sm text-muted-foreground">Total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">{cabinetStats.ownedCabinets}</p>
+                    <p className="text-sm text-muted-foreground">Possédés</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">{cabinetStats.associatedCabinets}</p>
+                    <p className="text-sm text-muted-foreground">Associés</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Affichage du statut en temps réel */}
           <StorageStatusDisplay />
           
@@ -181,9 +230,9 @@ const HybridStorageSettingsPage: React.FC = () => {
           {/* Actions de gestion */}
           <Card>
             <CardHeader>
-              <CardTitle>Gestion des données</CardTitle>
+              <CardTitle>Gestion des données HDS</CardTitle>
               <CardDescription>
-                Exportez et importez vos données locales en toute sécurité
+                Exportez et importez vos données HDS locales en toute sécurité
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -194,7 +243,7 @@ const HybridStorageSettingsPage: React.FC = () => {
                   className="flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Exporter les données
+                  Exporter les données HDS
                 </Button>
                 
                 <Button 
@@ -204,7 +253,7 @@ const HybridStorageSettingsPage: React.FC = () => {
                   className="flex items-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  {importing ? 'Import en cours...' : 'Importer une sauvegarde'}
+                  {importing ? 'Import en cours...' : 'Importer une sauvegarde HDS'}
                 </Button>
               </div>
               
@@ -221,4 +270,4 @@ const HybridStorageSettingsPage: React.FC = () => {
   );
 };
 
-export default HybridStorageSettingsPage;
+export default ConnectedStorageSettingsPage;
