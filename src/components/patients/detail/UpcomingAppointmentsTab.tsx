@@ -22,21 +22,31 @@ export function UpcomingAppointmentsTab({
 	onCancelAppointment,
 	onStatusChange
 }: UpcomingAppointmentsTabProps) {
-	const [refreshKey, setRefreshKey] = useState(0);
+	const [localAppointments, setLocalAppointments] = useState<Appointment[]>(appointments);
+
+	// Sync with props appointments
+	useEffect(() => {
+		setLocalAppointments(appointments);
+	}, [appointments]);
 
 	useEffect(() => {
 		const handleAppointmentCreated = (event: any) => {
 			console.log('📅 UpcomingAppointmentsTab: Événement appointment-created reçu', event.detail);
-			setRefreshKey(prev => prev + 1);
+			const newAppointment = event.detail;
+			
+			// Ajouter immédiatement le nouvel appointment à la liste locale
+			if (newAppointment && newAppointment.patientId === patient.id) {
+				setLocalAppointments(prev => [...prev, newAppointment]);
+			}
 		};
 
 		window.addEventListener('appointment-created', handleAppointmentCreated);
 		return () => window.removeEventListener('appointment-created', handleAppointmentCreated);
-	}, []);
+	}, [patient.id]);
 
 	return (
 		<div className="space-y-4 mt-6">
-			{appointments.length === 0 ? (
+			{localAppointments.length === 0 ? (
 				<div className="text-center py-8">
 					<Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
 					<h3 className="text-xl font-medium">
@@ -51,7 +61,7 @@ export function UpcomingAppointmentsTab({
 				</div>
 			) : (
 				<div className="grid gap-4">
-					{appointments.map((appointment) => (
+					{localAppointments.map((appointment) => (
 						<div key={appointment.id} className="border rounded-lg p-4">
 							<div className="flex justify-between items-center mb-2">
 								<div>
