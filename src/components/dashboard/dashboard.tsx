@@ -69,10 +69,40 @@ export function Dashboard() {
 		setSelectedCabinetName(cabinetName);
 	};
 
+	// Afficher un message si aucune donnée et pas de cabinet
+	const hasNoData = dashboardData.totalPatients === 0 && allPatients.length === 0;
+
 	return (
 		<div className="space-y-8 p-4 sm:p-6 lg:p-8">
 			{/* Header Image Banner */}
 			<DashboardHeader />
+
+			{/* Message de bienvenue si pas de données HDS */}
+			{hasNoData && (
+				<Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+					<Shield className="h-4 w-4 text-blue-600" />
+					<AlertDescription className="text-blue-800 dark:text-blue-200">
+						<div className="space-y-3">
+							<div>
+								<strong>Bienvenue sur PatientHub !</strong>
+								<p className="mt-1 text-sm">
+									Pour commencer à gérer vos patients de manière sécurisée et conforme HDS, 
+									configurez votre stockage local sécurisé.
+								</p>
+							</div>
+							<Button
+								variant="default"
+								size="sm"
+								className="mt-2"
+								onClick={() => window.location.href = '/settings/storage'}
+							>
+								<Shield className="h-4 w-4 mr-2" />
+								Configurer le stockage HDS sécurisé
+							</Button>
+						</div>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			{/* Avertissement de stockage en mode connecté */}
 			{storageMode === 'connected' && (
@@ -88,7 +118,7 @@ export function Dashboard() {
 								variant="outline"
 								size="sm"
 								className="ml-4 border-orange-300 text-orange-700 hover:bg-orange-100"
-								onClick={() => window.open('/admin/dashboard', '_blank')}
+								onClick={() => window.open('/settings/storage', '_blank')}
 							>
 								<Shield className="h-4 w-4 mr-2" />
 								Configurer le stockage
