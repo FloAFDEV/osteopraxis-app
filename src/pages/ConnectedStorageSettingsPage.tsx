@@ -15,6 +15,7 @@ import { StorageStatusDisplay } from '@/components/storage/StorageStatusDisplay'
 import { StorageTestPanel } from '@/components/testing/StorageTestPanel';
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
+import { StorageUnlockPanel } from '@/components/storage/StorageUnlockPanel';
 import { useConnectedStorage } from '@/hooks/useConnectedStorage';
 import { useConnectedCabinetStats } from '@/hooks/useConnectedCabinetStats';
 import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
@@ -26,7 +27,7 @@ const ConnectedStorageSettingsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
-  const { status, isLoading, initialize } = useConnectedStorage();
+  const { status, isLoading, initialize, unlock } = useConnectedStorage();
   const cabinetStats = useConnectedCabinetStats();
 
   // Vérification de sécurité : Rediriger si en mode démo
@@ -43,7 +44,11 @@ const ConnectedStorageSettingsPage: React.FC = () => {
   useEffect(() => {
     // Vérifier si on doit afficher la configuration
     if (!isLoading && status && !status.isConfigured) {
+      console.log('⚙️ Stockage HDS non configuré - Affichage de l\'assistant de configuration');
       setShowSetup(true);
+    } else if (!isLoading && status?.isConfigured && !status.isUnlocked) {
+      console.log('🔒 Stockage HDS verrouillé - Déverrouillage nécessaire');
+      // Le déverrouillage sera demandé via l'interface
     }
   }, [isLoading, status]);
 
@@ -57,6 +62,19 @@ const ConnectedStorageSettingsPage: React.FC = () => {
     } catch (error) {
       console.error('Erreur configuration:', error);
       toast.error('Erreur lors de la configuration');
+    }
+  };
+
+  const handleUnlock = async (password: string): Promise<boolean> => {
+    try {
+      const success = await unlock(password);
+      if (success) {
+        await initialize();
+      }
+      return success;
+    } catch (error) {
+      console.error('Erreur déverrouillage:', error);
+      return false;
     }
   };
 
@@ -188,6 +206,11 @@ const ConnectedStorageSettingsPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Panel de déverrouillage si configuré mais verrouillé */}
+          {!isLoading && status?.isConfigured && !status.isUnlocked && (
+            <StorageUnlockPanel onUnlock={handleUnlock} isLoading={isLoading} />
           )}
 
           {/* Indicateur de conformité HDS */}

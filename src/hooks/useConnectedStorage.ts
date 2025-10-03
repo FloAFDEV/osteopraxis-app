@@ -170,18 +170,22 @@ export const useConnectedStorage = (): UseConnectedStorageReturn => {
     await loadStatus();
   }, [loadStatus]);
 
-  // Initialisation au montage du hook - Une seule fois
+  // Initialisation au montage du hook ET à chaque changement d'utilisateur
   useEffect(() => {
     // Vérifier d'abord qu'on n'est pas en mode démo avant d'initialiser
     isDemoSession().then(isDemoMode => {
-      if (!isDemoMode) {
+      if (!isDemoMode && user) {
+        console.log('🔐 Utilisateur connecté détecté - Initialisation stockage HDS');
         initialize();
-      } else {
+      } else if (isDemoMode) {
         console.log('🎭 Mode démo détecté - Hook connecté ignoré');
+        setIsLoading(false);
+      } else {
+        console.log('⏳ Pas d\'utilisateur - En attente de connexion');
         setIsLoading(false);
       }
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user?.id]); // Dépend de l'utilisateur pour réinitialiser à chaque connexion
 
   return {
     status,
