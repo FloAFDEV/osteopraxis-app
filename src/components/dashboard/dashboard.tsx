@@ -9,6 +9,8 @@ import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
 import { useCabinetStats } from "@/hooks/useCabinetStats";
+import { useConnectedDashboardStats } from "@/hooks/useConnectedDashboardStats";
+import { useDemo } from "@/contexts/DemoContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Shield, AlertTriangle, ExternalLink } from "lucide-react";
@@ -16,12 +18,17 @@ import { storageRouter } from "@/services/storage/storage-router";
 
 export function Dashboard() {
 	const { user, isAuthenticated, loading: authLoading } = useAuth();
+	const { isDemoMode } = useDemo();
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedCabinetName, setSelectedCabinetName] = useState<string | undefined>(undefined);
 	const [storageMode, setStorageMode] = useState<'demo' | 'connected' | 'iframe_preview' | null>(null);
 	
-	// Utiliser le hook personnalisé pour les statistiques par cabinet
-	const { dashboardData, allPatients, loading, error } = useCabinetStats(selectedCabinetId);
+	// Utiliser le bon hook selon le mode
+	const demoStats = useCabinetStats(selectedCabinetId);
+	const connectedStats = useConnectedDashboardStats(selectedCabinetId);
+	
+	// Sélectionner les stats selon le mode
+	const { dashboardData, allPatients, loading, error } = isDemoMode ? demoStats : connectedStats;
 
 	// Vérifier le mode de stockage pour afficher les avertissements appropriés
 	useEffect(() => {

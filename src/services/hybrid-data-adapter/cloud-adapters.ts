@@ -192,6 +192,36 @@ export class CabinetCloudAdapter extends SupabaseAdapter<CabinetRow> {
   constructor() {
     super('Cabinet');
   }
+
+  // Override getAll pour utiliser la logique multi-tenant
+  async getAll(): Promise<CabinetRow[]> {
+    try {
+      // Utiliser la fonction getCabinets qui gère déjà le multi-tenant
+      const { getCabinets } = await import('@/services/supabase-api/cabinet/getCabinets');
+      const cabinets = await getCabinets();
+      
+      // Convertir les Cabinet vers CabinetRow
+      return cabinets.map(cabinet => ({
+        id: cabinet.id,
+        name: cabinet.name,
+        address: cabinet.address,
+        phone: cabinet.phone || null,
+        logoUrl: null,
+        imageUrl: null,
+        email: cabinet.email || null,
+        createdAt: cabinet.createdAt,
+        osteopathId: cabinet.osteopathId,
+        updatedAt: cabinet.updatedAt,
+        professionalProfileId: null,
+        tenant_id: null,
+        is_demo_data: false,
+        demo_expires_at: null
+      })) as CabinetRow[];
+    } catch (error) {
+      console.error('Failed to getAll cabinets with multi-tenant logic:', error);
+      throw error;
+    }
+  }
 }
 
 export class PatientCloudAdapter extends SupabaseAdapter<PatientRow> {
