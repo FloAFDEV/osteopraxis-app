@@ -13,7 +13,7 @@ import { DemoDataManager } from "@/components/demo/DemoDataManager";
 import { DemoSessionTimer } from "@/components/demo/DemoSessionTimer";
 import { SkipToContent } from "@/components/accessibility/SkipToContent";
 import { SecurityHeaders } from "@/components/security/SecurityHeaders";
-import LandingPage from "@/pages/LandingPage";
+import Home from "@/pages/Home";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -111,7 +111,7 @@ function App() {
                       
                       <Routes>
                         {/* Routes publiques */}
-                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/" element={<Home />} />
                         <Route path="/demo" element={<InteractiveDemoPage />} />
                         <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/contact" element={<ContactPage />} />

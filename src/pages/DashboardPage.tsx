@@ -16,31 +16,16 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const { data: cabinets, isLoading: cabinetsLoading } = useCabinets();
   
-  // Vérifier si l'utilisateur connecté normal a besoin de configurer son profil
+  // Log diagnostic simple pour tracer le parcours utilisateur
   useEffect(() => {
-    const checkUserProfile = async () => {
-      console.log("DashboardPage - Vérification du profil utilisateur:", user);
-      
-      // Vérifier si on est en mode démo
-      const isDemo = await isDemoSession();
-      
-      // Seulement pour les utilisateurs connectés NON-démo
-      if (user && !isDemo && !user.osteopathId) {
-        console.log("Utilisateur connecté normal sans profil ostéopathe détecté, redirection vers la configuration");
-        navigate("/osteopath-profile");
-      } else {
-        console.log("Utilisateur avec profil ostéopathe, en mode démo, ou non connecté:", { 
-          osteopathId: user?.osteopathId, 
-          isDemo,
-          userEmail: user?.email 
-        });
-      }
-    };
-    
     if (user) {
-      checkUserProfile();
+      console.log("📊 DashboardPage - Utilisateur connecté:", {
+        email: user.email,
+        osteopathId: user.osteopathId,
+        hasFirstName: !!user.firstName
+      });
     }
-  }, [user, navigate]);
+  }, [user]);
 
   return (
     <Layout>

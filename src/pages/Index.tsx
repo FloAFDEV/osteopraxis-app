@@ -60,6 +60,8 @@ const Index = () => {
       localStorage.setItem(`first-login-wizard-${user.id}`, 'true');
     }
     setShowFirstLogin(false);
+    // Forcer la navigation vers le dashboard pour garantir l'affichage
+    navigate('/dashboard');
   };
 
   // Afficher le wizard pour les nouveaux utilisateurs (pas en mode démo)
