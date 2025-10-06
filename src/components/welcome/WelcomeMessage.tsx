@@ -3,6 +3,7 @@ import { Building, Plus, Users, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
+import { useDemo } from '@/contexts/DemoContext';
 
 interface WelcomeMessageProps {
   hasCabinets: boolean;
@@ -11,6 +12,13 @@ interface WelcomeMessageProps {
 }
 
 export function WelcomeMessage({ hasCabinets, hasPatients, userName }: WelcomeMessageProps) {
+  const { isDemoMode } = useDemo();
+  
+  // Ne pas afficher en mode démo
+  if (isDemoMode) {
+    return null;
+  }
+  
   // Si l'utilisateur a déjà tout configuré, ne pas afficher le message
   if (hasCabinets && hasPatients) {
     return null;
