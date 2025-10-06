@@ -84,8 +84,8 @@ export function Dashboard() {
 			{/* Header Image Banner */}
 			<DashboardHeader />
 
-			{/* Message de bienvenue si pas de données HDS */}
-			{hasNoData && (
+			{/* Message de bienvenue si pas de données HDS - uniquement en mode connecté sans stockage configuré */}
+			{!isDemoMode && hasNoData && storageMode === 'connected' && (
 				<Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
 					<Shield className="h-4 w-4 text-blue-600" />
 					<AlertDescription className="text-blue-800 dark:text-blue-200">
