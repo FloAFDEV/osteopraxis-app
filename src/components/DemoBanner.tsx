@@ -75,34 +75,39 @@ export const DemoBanner = () => {
 
   return (
     <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 shadow-md">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 animate-pulse" />
-          <div>
-            <span className="font-semibold">
+      <div className="container mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="flex items-start md:items-center gap-3 flex-1">
+          <AlertCircle className="h-5 w-5 animate-pulse flex-shrink-0 mt-0.5 md:mt-0" />
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-sm md:text-base">
               {isTemporaryDemo ? 'Session Démo Temporaire' : 'Mode Démonstration'}
-            </span>
-            <span className="ml-2 text-blue-100">
+            </div>
+            <div className="text-xs md:text-sm text-blue-100 mt-1 break-words">
               {isTemporaryDemo 
-                ? `Session isolée • ${sessionStats?.patientsCount || 0} patients • Expire dans ${formatTime(remainingTime)}`
+                ? (
+                  <>
+                    <span className="block md:inline">Session isolée • {sessionStats?.patientsCount || 0} patients</span>
+                    <span className="block md:inline md:ml-2 mt-1 md:mt-0">
+                      <Clock className="h-3 w-3 inline mr-1" />
+                      Expire dans {formatTime(remainingTime)}
+                    </span>
+                  </>
+                )
                 : 'Toutes les données sont fictives et les modifications ne sont pas sauvegardées'
               }
-            </span>
+            </div>
           </div>
-          {isTemporaryDemo && (
-            <Clock className="h-4 w-4 text-blue-200" />
-          )}
         </div>
         
         <Button 
           variant="secondary" 
           size="sm" 
           asChild
-          className="bg-white text-blue-600 hover:bg-blue-50"
+          className="bg-white text-blue-600 hover:bg-blue-50 w-full md:w-auto flex-shrink-0"
         >
-          <Link to="/register" className="flex items-center gap-2">
-            Créer mon compte
-            <ArrowRight className="h-4 w-4" />
+          <Link to="/register" className="flex items-center justify-center gap-2">
+            <span className="text-xs md:text-sm">Créer mon compte</span>
+            <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
           </Link>
         </Button>
       </div>
