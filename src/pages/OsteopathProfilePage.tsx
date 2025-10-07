@@ -4,7 +4,7 @@ import { api } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/ui/layout";
 import { OsteopathProfileForm } from "@/components/osteopath-profile-form";
-import { UserCog, Building, CheckCircle, ArrowRight, Plus } from "lucide-react";
+import { UserCog, Building, CheckCircle, ArrowRight, Plus, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Osteopath, Cabinet } from "@/types";
@@ -12,9 +12,12 @@ import { Button } from "@/components/ui/button";
 import { CabinetForm } from "@/components/cabinet";
 import { FancyLoader } from "@/components/ui/fancy-loader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDemo } from "@/contexts/DemoContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const OsteopathProfilePage = () => {
   const { user, updateUser, loadStoredToken } = useAuth();
+  const { isDemoMode } = useDemo();
   const [loading, setLoading] = useState(true);
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
@@ -211,6 +214,23 @@ const OsteopathProfilePage = () => {
 
   if (loading) {
     return <FancyLoader message="Chargement de votre profil..." />;
+  }
+
+  // Bloquer l'accès en mode démo
+  if (isDemoMode) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto p-6">
+          <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              <strong>Accès restreint en mode démo</strong>
+              <p className="mt-2">La modification du profil n'est pas disponible en mode démonstration pour des raisons de sécurité.</p>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
+    );
   }
 
   return (

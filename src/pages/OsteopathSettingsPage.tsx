@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UserCog } from "lucide-react";
+import { UserCog, AlertTriangle } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,9 +11,12 @@ import { FancyLoader } from "@/components/ui/fancy-loader";
 import { BackButton } from "@/components/ui/back-button";
 import { HelpButton } from "@/components/ui/help-button";
 import { ProfileSecuritySettings } from "@/components/settings/ProfileSecuritySettings";
+import { useDemo } from "@/contexts/DemoContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const OsteopathSettingsPage = () => {
   const { user } = useAuth();
+  const { isDemoMode } = useDemo();
   const [loading, setLoading] = useState(true);
   const [osteopath, setOsteopath] = useState(null);
   const [cabinetLogo, setCabinetLogo] = useState<string | null>(null);
@@ -66,6 +69,24 @@ const OsteopathSettingsPage = () => {
 
   if (loading) {
     return <FancyLoader message="Chargement de votre profil..." />;
+  }
+
+  // Bloquer l'accès en mode démo
+  if (isDemoMode) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto space-y-8">
+          <BackButton to="/settings" />
+          <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              <strong>Accès restreint en mode démo</strong>
+              <p className="mt-2">Les paramètres de profil et de facturation ne sont pas disponibles en mode démonstration pour des raisons de sécurité.</p>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
+    );
   }
 
   return (

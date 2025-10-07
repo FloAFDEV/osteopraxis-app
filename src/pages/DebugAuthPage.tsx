@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import { debugAuthService } from '@/services/debug-auth-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDemo } from '@/contexts/DemoContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 export const DebugAuthPage: React.FC = () => {
+  const { isDemoMode } = useDemo();
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -18,6 +22,21 @@ export const DebugAuthPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Bloquer l'accès en mode démo
+  if (isDemoMode) {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800 dark:text-red-200">
+            <strong>Accès restreint en mode démo</strong>
+            <p className="mt-2">Les outils de débogage d'authentification ne sont pas disponibles en mode démonstration pour des raisons de sécurité.</p>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">

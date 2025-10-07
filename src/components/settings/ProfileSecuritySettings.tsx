@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Key, Shield, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Lock, Key, Shield, Eye, EyeOff, CheckCircle, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemo } from "@/contexts/DemoContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const ProfileSecuritySettings: React.FC = () => {
   const { user } = useAuth();
+  const { isDemoMode } = useDemo();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -63,6 +66,19 @@ export const ProfileSecuritySettings: React.FC = () => {
       [field]: value
     }));
   };
+
+  // Bloquer en mode démo
+  if (isDemoMode) {
+    return (
+      <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+        <AlertTriangle className="h-4 w-4 text-red-600" />
+        <AlertDescription className="text-red-800 dark:text-red-200">
+          <strong>Accès restreint en mode démo</strong>
+          <p className="mt-2">Les paramètres de sécurité ne sont pas disponibles en mode démonstration.</p>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">

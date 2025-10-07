@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AdminLayout } from '@/components/ui/admin-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Database, KeyRound, TestTube } from 'lucide-react';
+import { Database, KeyRound, TestTube, AlertTriangle } from 'lucide-react';
 import { HybridStorageDiagnostic } from '@/components/debug/HybridStorageDiagnostic';
 import { SQLiteDiagnostic } from '@/components/debug/SQLiteDiagnostic';
 import { Input } from '@/components/ui/input';
@@ -10,8 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { untypedSupabase } from '@/integrations/supabase/unsafeClient';
+import { useDemo } from '@/contexts/DemoContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const AdminTechDebugPage: React.FC = () => {
+  const { isDemoMode } = useDemo();
   const [email, setEmail] = useState('');
   const [method, setMethod] = useState<'pin' | 'password'>('pin');
   const [newCredential, setNewCredential] = useState('');
@@ -57,6 +60,23 @@ const AdminTechDebugPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Bloquer l'accès en mode démo
+  if (isDemoMode) {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              <strong>Accès restreint en mode démo</strong>
+              <p className="mt-2">Les outils de débogage technique ne sont pas disponibles en mode démonstration pour des raisons de sécurité.</p>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
