@@ -37,9 +37,11 @@ export class OPFSSQLiteService {
     
     console.log('🔍 Support navigateur:', { hasStorage, hasGetDirectory, isSecure });
 
-    // Essayer OPFS - FAIL FAST si impossible
+    // Essayer OPFS - Retourner un avertissement si impossible, pas une erreur critique
     if (!hasStorage || !hasGetDirectory || !isSecure) {
-      throw new Error('OPFS requis: Stockage sécurisé local non disponible');
+      console.warn('⚠️ OPFS non disponible: Stockage local sécurisé désactivé');
+      console.warn('📋 Configuration requise: Contexte sécurisé (HTTPS) + API File System Access');
+      throw new Error('OPFS non disponible dans cet environnement');
     }
 
     try {
@@ -50,8 +52,8 @@ export class OPFSSQLiteService {
       this.initialized = true;
       console.log('✅ SQLite with OPFS initialized successfully');
     } catch (error) {
-      console.error('❌ ÉCHEC CRITIQUE OPFS:', error);
-      throw new Error(`Stockage HDS sécurisé REQUIS: ${error}`);
+      console.error('❌ Échec initialisation OPFS:', error);
+      throw new Error(`Stockage local non disponible: ${error}`);
     }
   }
 

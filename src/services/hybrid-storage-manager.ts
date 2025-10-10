@@ -94,14 +94,15 @@ class HybridStorageManager {
       
       console.log('✅ Support OPFS vérifié:', opfsStatus.details);
       
-      // FORCER l'initialisation SQLite OPFS même si pas configuré pour tester la disponibilité
-      console.log('🔧 Test forcé d\'initialisation OPFS SQLite...');
+      // TESTER l'initialisation OPFS SQLite pour vérifier la disponibilité
+      console.log('🔧 Test de disponibilité OPFS SQLite...');
       try {
         const { getOPFSSQLiteService } = await import('./sqlite/opfs-sqlite-service');
         await getOPFSSQLiteService();
-        console.log('✅ Service SQLite OPFS initialisé avec succès');
+        console.log('✅ Service SQLite OPFS disponible');
       } catch (sqliteError) {
-        console.error('❌ Échec initialisation SQLite OPFS:', sqliteError);
+        console.warn('⚠️ OPFS SQLite non disponible:', sqliteError);
+        console.log('📋 L\'application fonctionnera en mode cloud uniquement (Supabase)');
         // Ne pas faire échouer l'initialisation complète pour cela
       }
       

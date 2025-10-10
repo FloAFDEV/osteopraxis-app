@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Database, KeyRound, TestTube, AlertTriangle } from 'lucide-react';
 import { HybridStorageDiagnostic } from '@/components/debug/HybridStorageDiagnostic';
-import { SQLiteDiagnostic } from '@/components/debug/SQLiteDiagnostic';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -91,12 +90,9 @@ const AdminTechDebugPage: React.FC = () => {
         </Card>
 
         <Tabs defaultValue="diagnostic" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="diagnostic" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" /> Diagnostic
-            </TabsTrigger>
-            <TabsTrigger value="sqlite" className="flex items-center gap-2">
-              <Database className="w-4 h-4" /> SQLite
             </TabsTrigger>
             <TabsTrigger value="unlock" className="flex items-center gap-2">
               <KeyRound className="w-4 h-4" /> Déblocage stockage
@@ -105,9 +101,6 @@ const AdminTechDebugPage: React.FC = () => {
 
           <TabsContent value="diagnostic">
             <HybridStorageDiagnostic />
-          </TabsContent>
-          <TabsContent value="sqlite">
-            <SQLiteDiagnostic />
           </TabsContent>
           <TabsContent value="unlock">
             <Card>

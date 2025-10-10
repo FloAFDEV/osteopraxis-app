@@ -5,7 +5,6 @@ import { Layout } from '@/components/ui/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Settings, Download, Upload, Shield, Lock, AlertTriangle } from 'lucide-react';
 import { StorageStatusDisplay } from '@/components/storage/StorageStatusDisplay';
-import { StorageTestPanel } from '@/components/testing/StorageTestPanel';
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { useConnectedStorage } from '@/hooks/useConnectedStorage';
@@ -202,9 +201,6 @@ const HybridStorageSettingsPage: React.FC = () => {
 
           {/* Affichage du statut en temps réel */}
           <StorageStatusDisplay />
-          
-          {/* Panel de tests (uniquement si configuré) */}
-          {status?.isConfigured && <StorageTestPanel />}
 
           {/* Actions de gestion */}
           <Card>
