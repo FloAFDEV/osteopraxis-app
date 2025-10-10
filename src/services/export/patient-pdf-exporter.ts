@@ -348,7 +348,7 @@ export class PatientPDFExporter {
 		}_${format(new Date(), "yyyy-MM-dd")}.pdf`;
 		
 		// Créer un blob sécurisé et le télécharger
-		const blob = new Blob([securedPdfBytes], { type: 'application/pdf' });
+		const blob = new Blob([new Uint8Array(securedPdfBytes)], { type: 'application/pdf' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
@@ -390,7 +390,7 @@ export class PatientPDFExporter {
 		const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes));
 		
 		// Créer un blob sécurisé et le télécharger
-		const blob = new Blob([securedPdfBytes], { type: 'application/pdf' });
+		const blob = new Blob([new Uint8Array(securedPdfBytes)], { type: 'application/pdf' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;

@@ -66,7 +66,7 @@ export class SecureCrypto {
     return crypto.subtle.deriveKey(
       {
         name: 'PBKDF2',
-        salt: salt,
+        salt: salt instanceof Uint8Array ? salt.slice(0) : salt,
         iterations: CRYPTO_CONFIG.keyDerivationIterations,
         hash: 'SHA-256'
       },
@@ -92,7 +92,7 @@ export class SecureCrypto {
     const derivedBits = await crypto.subtle.deriveBits(
       {
         name: 'PBKDF2',
-        salt: salt,
+        salt: salt instanceof Uint8Array ? salt.slice(0) : salt,
         iterations: CRYPTO_CONFIG.keyDerivationIterations,
         hash: 'SHA-256'
       },
@@ -130,7 +130,7 @@ export class SecureCrypto {
     const encrypted = await crypto.subtle.encrypt(
       {
         name: 'AES-GCM',
-        iv: iv,
+        iv: iv instanceof Uint8Array ? iv.slice(0) : iv,
         tagLength: CRYPTO_CONFIG.tagLength * 8
       },
       encryptionKey,

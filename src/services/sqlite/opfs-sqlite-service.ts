@@ -201,7 +201,7 @@ export class OPFSSQLiteService {
       const writable = await fileHandle.createWritable();
       
       // Écrire les données
-      await writable.write(data);
+      await writable.write(data.slice(0));
       await writable.close();
       
       console.log('💾 Database saved to OPFS');
