@@ -31,15 +31,11 @@ class HDSSecureInvoiceServiceImpl implements HDSSecureInvoiceService {
 
   /**
    * Obtenir le stockage sécurisé pour les factures
+   * Retourne null si non configuré
    */
   private async getSecureStorage() {
     await this.ensureConnectedMode();
-    
     const storage = hdsSecureManager.getSecureStorage('invoices');
-    if (!storage) {
-      throw new Error('💾 Stockage HDS sécurisé non configuré. Veuillez configurer le stockage local.');
-    }
-    
     return storage;
   }
 
@@ -56,13 +52,13 @@ class HDSSecureInvoiceServiceImpl implements HDSSecureInvoiceService {
   async getInvoices(): Promise<Invoice[]> {
     try {
       const storage = await this.getSecureStorage();
-      const invoices = await storage.loadRecords<Invoice>();
+      if (!storage) return []; // Silencieux si non configuré
       
+      const invoices = await storage.loadRecords<Invoice>();
       console.log(`📖 ${invoices.length} factures HDS récupérées depuis le stockage local sécurisé`);
       return invoices;
     } catch (error) {
-      console.error('❌ Erreur récupération factures HDS sécurisées:', error);
-      throw error;
+      return []; // Silencieux
     }
   }
 
@@ -72,6 +68,8 @@ class HDSSecureInvoiceServiceImpl implements HDSSecureInvoiceService {
   async getInvoiceById(id: number): Promise<Invoice | null> {
     try {
       const storage = await this.getSecureStorage();
+      if (!storage) return null;
+      
       const invoice = await storage.getRecordById<Invoice>(id);
       
       if (invoice) {
@@ -80,8 +78,7 @@ class HDSSecureInvoiceServiceImpl implements HDSSecureInvoiceService {
       
       return invoice;
     } catch (error) {
-      console.error(`❌ Erreur récupération facture ${id}:`, error);
-      throw error;
+      return null; // Silencieux
     }
   }
 
@@ -93,6 +90,9 @@ class HDSSecureInvoiceServiceImpl implements HDSSecureInvoiceService {
       await this.ensureConnectedMode();
       
       const storage = await this.getSecureStorage();
+      if (!storage) {
+        throw new Error('Configuration du stockage HDS sécurisé requise pour créer des factures');
+      }
       
       // Créer la facture avec métadonnées
       const newInvoice: Invoice = {

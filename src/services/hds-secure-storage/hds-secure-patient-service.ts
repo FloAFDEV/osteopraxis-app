@@ -33,16 +33,13 @@ class HDSSecurePatientServiceImpl implements HDSSecurePatientService {
 
   /**
    * Obtenir le stockage sécurisé pour les patients
+   * Retourne null si non configuré (au lieu de throw pour éviter logs d'erreur)
    */
   private async getSecureStorage() {
     await this.ensureConnectedMode();
     
     const storage = hdsSecureManager.getSecureStorage('patients');
-    if (!storage) {
-      throw new Error('💾 Stockage HDS sécurisé non configuré. Veuillez configurer le stockage local.');
-    }
-    
-    return storage;
+    return storage; // Peut être null si non configuré
   }
 
   /**
@@ -58,17 +55,14 @@ class HDSSecurePatientServiceImpl implements HDSSecurePatientService {
   async getPatients(): Promise<Patient[]> {
     try {
       const storage = await this.getSecureStorage();
-      const patients = await storage.loadRecords<Patient>();
+      if (!storage) return []; // Silencieux si non configuré
       
+      const patients = await storage.loadRecords<Patient>();
       console.log(`📖 ${patients.length} patients HDS récupérés depuis le stockage local sécurisé`);
       return patients;
     } catch (error) {
-      if (error instanceof Error && error.message.includes('Stockage HDS sécurisé non configuré')) {
-        console.info('ℹ️ Stockage HDS non configuré - retour des données vides');
-      } else {
-        console.error('❌ Erreur récupération patients HDS sécurisés:', error);
-      }
-      throw error;
+      // Silencieux pour stockage non configuré (situation normale en première connexion)
+      return [];
     }
   }
 
@@ -78,6 +72,8 @@ class HDSSecurePatientServiceImpl implements HDSSecurePatientService {
   async getPatientById(id: number): Promise<Patient | null> {
     try {
       const storage = await this.getSecureStorage();
+      if (!storage) return null;
+      
       const patient = await storage.getRecordById<Patient>(id);
       
       if (patient) {
@@ -86,8 +82,7 @@ class HDSSecurePatientServiceImpl implements HDSSecurePatientService {
       
       return patient;
     } catch (error) {
-      console.error(`❌ Erreur récupération patient ${id}:`, error);
-      throw error;
+      return null; // Silencieux
     }
   }
 
@@ -100,6 +95,9 @@ class HDSSecurePatientServiceImpl implements HDSSecurePatientService {
       await this.ensureConnectedMode();
       
       const storage = await this.getSecureStorage();
+      if (!storage) {
+        throw new Error('Configuration du stockage HDS sécurisé requise pour créer des patients');
+      }
       
       // Créer le patient avec métadonnées
       const newPatient: Patient = {

@@ -26,7 +26,7 @@ export function isDemoUser(user: any): boolean {
 
 // ⚡ Cache pour éviter les appels répétitifs et les boucles infinies
 let demoSessionCache: { result: boolean; timestamp: number } | null = null;
-const CACHE_DURATION = 2000; // 2 secondes de cache
+const CACHE_DURATION = 5000; // 5 secondes de cache pour éviter les appels répétés
 
 /**
  * 🔐 Détection intelligente du mode de session avec priorité à l'authentification réelle

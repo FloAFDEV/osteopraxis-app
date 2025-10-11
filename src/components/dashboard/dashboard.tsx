@@ -8,8 +8,7 @@ import { DashboardStats } from "./dashboard-stats";
 import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
-import { useCabinetStats } from "@/hooks/useCabinetStats";
-import { useConnectedDashboardStats } from "@/hooks/useConnectedDashboardStats";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useDemo } from "@/contexts/DemoContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -23,12 +22,8 @@ export function Dashboard() {
 	const [selectedCabinetName, setSelectedCabinetName] = useState<string | undefined>(undefined);
 	const [storageMode, setStorageMode] = useState<'demo' | 'connected' | 'iframe_preview' | null>(null);
 	
-	// Utiliser le bon hook selon le mode
-	const demoStats = useCabinetStats(selectedCabinetId);
-	const connectedStats = useConnectedDashboardStats(selectedCabinetId);
-	
-	// Sélectionner les stats selon le mode
-	const { dashboardData, allPatients, loading, error } = isDemoMode ? demoStats : connectedStats;
+	// Hook unifié qui gère automatiquement démo vs connecté
+	const { dashboardData, allPatients, loading, error } = useDashboardStats(selectedCabinetId);
 
 	// Vérifier le mode de stockage pour afficher les avertissements appropriés
 	useEffect(() => {

@@ -167,26 +167,23 @@ export class StorageRouter {
     const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
     const status = await hdsSecureManager.getStatus();
     
-    // 🚨 CONFORMITÉ HDS: Si non configuré, BLOQUER complètement l'accès
+    // 🚨 CONFORMITÉ HDS: Si non configuré, retourner adapter vide (silencieux)
     if (!status.isConfigured || !status.isUnlocked) {
-      console.error(`🚨 VIOLATION HDS: Tentative d'accès à ${dataType} sans stockage local configuré`);
-      console.error('📋 RÉGLEMENTATION: Les données de santé ne peuvent PAS transiter par le cloud');
+      // Log debug uniquement (pas d'erreur pour éviter la pollution des logs)
+      console.debug(`ℹ️ Stockage HDS non configuré pour ${dataType} - Données vides retournées`);
       
-      // Retourner un adapter qui bloque toutes les opérations
+      // Retourner un adapter qui bloque les mutations mais permet les lectures vides
       return {
         create: async () => {
-          throw new Error(`🚨 CONFORMITÉ HDS REQUISE: Configurez le stockage local sécurisé pour créer des ${dataType}. Les données de santé ne peuvent pas être stockées dans le cloud.`);
+          throw new Error(`Configuration du stockage HDS sécurisé requise pour créer des ${dataType}`);
         },
         getById: async () => null,
-        getAll: async () => {
-          console.warn(`⚠️ Stockage HDS non configuré - Aucune donnée ${dataType} disponible`);
-          return [];
-        },
+        getAll: async () => [], // Silencieux - pas de warning
         update: async () => {
-          throw new Error(`🚨 CONFORMITÉ HDS REQUISE: Configurez le stockage local sécurisé pour modifier des ${dataType}. Les données de santé ne peuvent pas être stockées dans le cloud.`);
+          throw new Error(`Configuration du stockage HDS sécurisé requise pour modifier des ${dataType}`);
         },
         delete: async () => {
-          throw new Error(`🚨 CONFORMITÉ HDS REQUISE: Configurez le stockage local sécurisé pour supprimer des ${dataType}. Les données de santé ne peuvent pas être stockées dans le cloud.`);
+          throw new Error(`Configuration du stockage HDS sécurisé requise pour supprimer des ${dataType}`);
         }
       } as StorageAdapter<T>;
     }
