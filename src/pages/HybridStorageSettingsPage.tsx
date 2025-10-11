@@ -44,23 +44,24 @@ const HybridStorageSettingsPage: React.FC = () => {
   const exportData = async () => {
     setLoading(true);
     try {
-      const backupData = await hybridDataManager.exportData();
+      // Utiliser l'export consolidé sécurisé via hdsSecureManager
+      const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
       
-      // Créer un blob et déclencher le téléchargement
-      const blob = new Blob([backupData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `patienthub-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      toast.info('Export en cours, veuillez patienter...');
       
-      toast.success('Données exportées avec succès');
+      await hdsSecureManager.exportAllSecure();
+      
+      toast.success('Données exportées avec succès !', {
+        description: 'Sauvegarde complète chiffrée créée. Conservez ce fichier et votre mot de passe en lieu sûr.'
+      });
     } catch (error) {
       console.error('Erreur export:', error);
-      toast.error('Erreur lors de l\'export des données');
+      
+      if (error instanceof Error && error.message.includes('verrouillé')) {
+        toast.error('Stockage verrouillé - déverrouillez-le d\'abord');
+      } else {
+        toast.error('Erreur lors de l\'export des données');
+      }
     } finally {
       setLoading(false);
     }
@@ -76,26 +77,72 @@ const HybridStorageSettingsPage: React.FC = () => {
       
       input.onchange = async (event) => {
         const file = (event.target as HTMLInputElement).files?.[0];
-        if (!file) return;
+        if (!file) {
+          setImporting(false);
+          return;
+        }
         
         try {
           const text = await file.text();
           const data = JSON.parse(text);
           
           // Vérifier le format du fichier
-          if (data.format && data.format.includes('PatientHub')) {
-            toast.info('Import de fichier PatientHub HDS sécurisé détecté');
+          if (!data.format || !data.format.includes('PatientHub')) {
+            toast.error('Format de fichier invalide - doit être une sauvegarde PatientHub');
+            setImporting(false);
+            return;
           }
           
-          // TODO: Implémenter l'import sécurisé avec validation de mot de passe
-          // await hybridDataManager.importData(text, password);
-          toast.info('Import sécurisé en développement - fonctionnalité bientôt disponible');
+          // Demander le mot de passe via un prompt
+          const password = window.prompt('Entrez le mot de passe de déchiffrement de la sauvegarde:');
           
-          toast.success('Données importées avec succès');
+          if (!password) {
+            toast.info('Import annulé');
+            setImporting(false);
+            return;
+          }
+          
+          // Import sécurisé via hdsSecureManager
+          const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
+          
+          toast.info('Import en cours, veuillez patienter...');
+          
+          const result = await hdsSecureManager.importAllSecure(file, password, 'merge');
+          
+          // Afficher le résultat
+          const totalImported = Object.values(result.imported).reduce((sum, count) => sum + count, 0);
+          
+          if (result.errors.length > 0) {
+            console.error('Erreurs d\'import:', result.errors);
+            toast.error(`Import partiel: ${totalImported} enregistrements importés avec ${result.errors.length} erreurs. Consultez la console pour les détails.`);
+          } else if (totalImported > 0) {
+            toast.success(`Import réussi: ${totalImported} enregistrements importés !`);
+            
+            // Afficher les détails par entité
+            const details = Object.entries(result.imported)
+              .map(([entity, count]) => `${entity}: ${count}`)
+              .join(', ');
+            
+            if (details) {
+              toast.info(`Détails: ${details}`);
+            }
+          } else {
+            toast.warning('Aucun enregistrement importé');
+          }
+          
+          if (result.warnings.length > 0) {
+            console.warn('Avertissements d\'import:', result.warnings);
+          }
+          
+          // Rafraîchir le statut
+          await initialize();
+          
         } catch (error) {
           console.error('Erreur import:', error);
-          if (error instanceof Error && error.message.includes('password')) {
+          if (error instanceof Error && (error.message.includes('password') || error.message.includes('decrypt'))) {
             toast.error('Mot de passe incorrect pour déchiffrer les données');
+          } else if (error instanceof Error && error.message.includes('JSON')) {
+            toast.error('Fichier corrompu ou format invalide');
           } else {
             toast.error('Erreur lors de l\'import des données');
           }

@@ -343,6 +343,111 @@ export class EnhancedSecureFileStorage {
   }
 
   /**
+   * Import sécurisé depuis un fichier .phds
+   */
+  async importSecure(file: File, password: string, strategy: 'replace' | 'merge' = 'merge'): Promise<{
+    imported: number;
+    errors: string[];
+    warnings: string[];
+  }> {
+    const result = {
+      imported: 0,
+      errors: [] as string[],
+      warnings: [] as string[]
+    };
+
+    try {
+      console.log(`📥 Import sécurisé ${this.entityName} depuis ${file.name}...`);
+      
+      // Lire et parser le fichier
+      const text = await file.text();
+      const exportData = JSON.parse(text);
+      
+      // Vérifier le format
+      if (!exportData.format || !exportData.format.includes('PatientHub')) {
+        throw new Error('Format de fichier invalide - doit être un fichier PatientHub .phds');
+      }
+      
+      // Vérifier que c'est la bonne entité
+      if (exportData.entity && exportData.entity !== this.entityName) {
+        result.warnings.push(`Entité du fichier (${exportData.entity}) différente de l'entité cible (${this.entityName})`);
+      }
+      
+      // Déchiffrer les données avec le mot de passe fourni
+      const decrypted = await decryptJSON(exportData.data, password);
+      const importedRecords = decrypted.records || [];
+      
+      console.log(`🔓 ${importedRecords.length} enregistrements déchiffrés`);
+      
+      // Charger les enregistrements existants
+      const existingRecords = await this.loadRecords();
+      
+      let finalRecords: any[];
+      
+      if (strategy === 'replace') {
+        // Remplacer complètement
+        finalRecords = importedRecords;
+        result.imported = importedRecords.length;
+        console.log(`🔄 Remplacement complet: ${finalRecords.length} enregistrements`);
+      } else {
+        // Fusionner (mise à jour des existants + ajout des nouveaux)
+        const existingMap = new Map(existingRecords.map((r: any) => [r.id, r]));
+        let updated = 0;
+        let added = 0;
+        
+        for (const record of importedRecords) {
+          if (existingMap.has(record.id)) {
+            existingMap.set(record.id, { ...record, updatedAt: new Date().toISOString() });
+            updated++;
+          } else {
+            existingMap.set(record.id, { ...record, createdAt: new Date().toISOString() });
+            added++;
+          }
+        }
+        
+        finalRecords = Array.from(existingMap.values());
+        result.imported = importedRecords.length;
+        result.warnings.push(`Fusion: ${added} ajoutés, ${updated} mis à jour`);
+        console.log(`🔀 Fusion: ${added} ajoutés, ${updated} mis à jour, ${finalRecords.length} total`);
+      }
+      
+      // Sauvegarder les enregistrements fusionnés/remplacés
+      const payload = { 
+        records: finalRecords,
+        metadata: {
+          entity: this.entityName,
+          count: finalRecords.length,
+          lastSaved: new Date().toISOString(),
+          importedFrom: file.name,
+          importStrategy: strategy
+        }
+      };
+      
+      const encrypted = await encryptJSON(payload, this.password!);
+      await this._atomicWrite(JSON.stringify(encrypted, null, 2));
+      
+      console.log(`✅ Import sécurisé ${this.entityName} réussi: ${result.imported} enregistrements`);
+      
+    } catch (error) {
+      console.error(`❌ Erreur import ${this.entityName}:`, error);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('password') || error.message.includes('decrypt')) {
+          result.errors.push('Mot de passe incorrect pour déchiffrer le fichier');
+        } else if (error.message.includes('JSON')) {
+          result.errors.push('Fichier corrompu ou format invalide');
+        } else {
+          result.errors.push(error.message);
+        }
+      } else {
+        result.errors.push('Erreur inconnue lors de l\'import');
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Vérifier l'intégrité complète
    */
   async verifyIntegrity(): Promise<{

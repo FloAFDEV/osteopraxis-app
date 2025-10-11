@@ -10,7 +10,7 @@
 import { EnhancedSecureFileStorage } from '../security/enhanced-secure-storage';
 import { checkNativeStorageSupport, requestStorageDirectory } from '../native-file-storage/native-file-adapter';
 import { persistDirectoryHandle, getPersistedDirectoryHandle, checkPersistenceSupport } from '../native-file-storage/directory-persistence';
-import { checkCryptoSupport, testCrypto } from '@/utils/crypto';
+import { checkCryptoSupport, testCrypto, encryptJSON, decryptJSON } from '@/utils/crypto';
 
 export interface HDSSecureConfig {
   directoryHandle?: FileSystemDirectoryHandle;
@@ -285,23 +285,175 @@ export class HDSSecureManager {
   }
 
   /**
-   * Exporter toutes les données HDS de façon sécurisée
+   * Exporter toutes les données HDS de façon sécurisée (fichier unique consolidé)
    */
   async exportAllSecure(): Promise<void> {
     if (!this.unlocked) {
       throw new Error('Stockage HDS verrouillé');
     }
 
-    console.log('📦 Export sécurisé de toutes les données HDS...');
+    console.log('📦 Export sécurisé consolidé de toutes les données HDS...');
     
-    for (const [entityName, storage] of this.storages) {
-      try {
-        await storage.exportSecure();
-        console.log(`✅ Export sécurisé ${entityName} réussi`);
-      } catch (error) {
-        console.error(`❌ Erreur export sécurisé ${entityName}:`, error);
+    try {
+      // Collecter toutes les données de toutes les entités
+      const allData: Record<string, any[]> = {};
+      let totalRecords = 0;
+      
+      for (const [entityName, storage] of this.storages) {
+        try {
+          const records = await storage.loadRecords();
+          allData[entityName] = records;
+          totalRecords += records.length;
+          console.log(`✅ ${records.length} enregistrements ${entityName} collectés`);
+        } catch (error) {
+          console.error(`❌ Erreur collecte ${entityName}:`, error);
+          allData[entityName] = [];
+        }
+      }
+      
+      // Créer le fichier consolidé
+      const consolidatedExport = {
+        format: 'PatientHub_Full_Backup_v2',
+        exportedAt: new Date().toISOString(),
+        totalRecords,
+        entities: Object.keys(allData),
+        data: await encryptJSON(allData, this.password!),
+        metadata: {
+          version: '2.0',
+          entityCounts: Object.entries(allData).reduce((acc, [key, val]) => {
+            acc[key] = val.length;
+            return acc;
+          }, {} as Record<string, number>)
+        },
+        instructions: 'Sauvegarde complète PatientHub chiffrée. Import possible uniquement avec le mot de passe correct.'
+      };
+
+      const jsonString = JSON.stringify(consolidatedExport, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      
+      // Export avec File System Access API si disponible
+      if ('showSaveFilePicker' in window) {
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: `patienthub_backup_${new Date().toISOString().split('T')[0]}.phds`,
+          types: [{
+            description: 'Sauvegarde PatientHub HDS Complète',
+            accept: { 'application/json': ['.phds'] }
+          }]
+        });
+        
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        
+        console.log(`✅ Export consolidé réussi: ${totalRecords} enregistrements dans ${Object.keys(allData).length} entités`);
+      } else {
+        // Fallback téléchargement classique
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `patienthub_backup_${new Date().toISOString().split('T')[0]}.phds`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+      
+    } catch (error) {
+      console.error('❌ Erreur export consolidé:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Importer toutes les données HDS depuis une sauvegarde complète
+   */
+  async importAllSecure(file: File, password: string, strategy: 'replace' | 'merge' = 'merge'): Promise<{
+    imported: Record<string, number>;
+    errors: string[];
+    warnings: string[];
+  }> {
+    if (!this.unlocked) {
+      throw new Error('Stockage HDS verrouillé');
+    }
+
+    const result = {
+      imported: {} as Record<string, number>,
+      errors: [] as string[],
+      warnings: [] as string[]
+    };
+
+    try {
+      console.log('📥 Import sécurisé consolidé depuis', file.name);
+      
+      // Lire et parser le fichier
+      const text = await file.text();
+      const backupData = JSON.parse(text);
+      
+      // Vérifier le format
+      if (!backupData.format || !backupData.format.includes('PatientHub')) {
+        throw new Error('Format de fichier invalide - doit être une sauvegarde PatientHub .phds');
+      }
+      
+      // Déchiffrer toutes les données
+      console.log('🔓 Déchiffrement des données...');
+      const decrypted = await decryptJSON(backupData.data, password);
+      
+      // Importer chaque entité
+      for (const [entityName, records] of Object.entries(decrypted)) {
+        const storage = this.storages.get(entityName);
+        
+        if (!storage) {
+          result.warnings.push(`Entité ${entityName} non configurée - ignorée`);
+          continue;
+        }
+        
+        try {
+          console.log(`📥 Import ${entityName}...`);
+          
+          // Créer un fichier temporaire virtuel pour utiliser la méthode importSecure
+          const entityData = {
+            format: 'PatientHub_HDS_Secure_Export_v2',
+            entity: entityName,
+            exportedAt: backupData.exportedAt,
+            recordCount: (records as any[]).length,
+            data: await encryptJSON({ records }, password),
+            instructions: 'Données extraites de sauvegarde complète'
+          };
+          
+          const entityBlob = new Blob([JSON.stringify(entityData)], { type: 'application/json' });
+          const entityFile = new File([entityBlob], `${entityName}.phds`);
+          
+          const importResult = await storage.importSecure(entityFile, password, strategy);
+          
+          result.imported[entityName] = importResult.imported;
+          result.errors.push(...importResult.errors.map(e => `[${entityName}] ${e}`));
+          result.warnings.push(...importResult.warnings.map(w => `[${entityName}] ${w}`));
+          
+          console.log(`✅ Import ${entityName} réussi: ${importResult.imported} enregistrements`);
+          
+        } catch (error) {
+          console.error(`❌ Erreur import ${entityName}:`, error);
+          result.errors.push(`[${entityName}] ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+        }
+      }
+      
+      console.log('✅ Import consolidé terminé');
+      
+    } catch (error) {
+      console.error('❌ Erreur import consolidé:', error);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('password') || error.message.includes('decrypt')) {
+          result.errors.push('Mot de passe incorrect pour déchiffrer la sauvegarde');
+        } else {
+          result.errors.push(error.message);
+        }
+      } else {
+        result.errors.push('Erreur inconnue lors de l\'import');
       }
     }
+
+    return result;
   }
 
   /**
