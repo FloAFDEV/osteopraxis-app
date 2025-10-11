@@ -1,3 +1,8 @@
+/**
+ * Prompt de déverrouillage du stockage HDS sécurisé
+ * Utilise hds-secure-manager
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,10 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Shield, AlertTriangle } from 'lucide-react';
-import { hybridStorageManager } from '@/services/hybrid-storage-manager';
+import { hdsSecureManager } from '@/services/hds-secure-storage/hds-secure-manager';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { untypedSupabase } from '@/integrations/supabase/unsafeClient';
 
 interface StorageUnlockPromptProps {
   securityMethod: 'pin' | 'password';
@@ -26,14 +29,13 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
 
   const maxAttempts = 3;
   const isLocked = attempts >= maxAttempts;
 
   const handleUnlock = async () => {
     if (!credential.trim()) {
-      setError('Veuillez saisir votre ' + (securityMethod === 'pin' ? 'code PIN' : 'mot de passe'));
+      setError('Veuillez saisir votre mot de passe');
       return;
     }
 
@@ -41,7 +43,7 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
     setError(null);
 
     try {
-      const success = await hybridStorageManager.unlockStorage(credential);
+      const success = await hdsSecureManager.unlock(credential);
       
       if (success) {
         toast.success('Stockage déverrouillé avec succès');
@@ -55,7 +57,7 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
           toast.error('Accès bloqué après 3 tentatives');
         } else {
           setError(
-            `${securityMethod === 'pin' ? 'Code PIN' : 'Mot de passe'} incorrect. ` +
+            `Mot de passe incorrect. ` +
             `${maxAttempts - newAttempts} tentative(s) restante(s).`
           );
           setCredential('');
@@ -76,9 +78,9 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir réinitialiser la configuration de stockage ? Toutes les données locales seront perdues.')) {
-      localStorage.removeItem('hybrid-storage-config');
+      await hdsSecureManager.reset();
       window.location.reload();
     }
   };
@@ -92,10 +94,10 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
           </div>
           <div>
             <CardTitle className="text-xl font-semibold">
-              Déverrouillage du stockage
+              Déverrouillage du stockage HDS
             </CardTitle>
             <p className="text-muted-foreground mt-2">
-              Saisissez votre {securityMethod === 'pin' ? 'code PIN' : 'mot de passe'} pour accéder aux données sensibles
+              Saisissez votre mot de passe pour accéder aux données sensibles
             </p>
           </div>
         </CardHeader>
@@ -114,17 +116,16 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
           <div className="space-y-4">
             <div>
               <Label htmlFor="credential" className="text-sm font-medium">
-                {securityMethod === 'pin' ? 'Code PIN' : 'Mot de passe'}
+                Mot de passe
               </Label>
               <Input
                 id="credential"
-                type={securityMethod === 'pin' ? 'text' : 'password'}
-                placeholder={securityMethod === 'pin' ? 'Entrez votre PIN' : 'Entrez votre mot de passe'}
+                type="password"
+                placeholder="Entrez votre mot de passe"
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
                 onKeyPress={handleKeyPress}
                 disabled={isLocked || isUnlocking}
-                maxLength={securityMethod === 'pin' ? 8 : undefined}
                 className="text-center"
                 autoFocus
               />
@@ -192,52 +193,11 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
                 Annuler
               </Button>
             )}
-
-            {/* Lien de déblocage admin */}
-            {!isLocked && (
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  try {
-                    if (!user?.id) {
-                      toast.error('Utilisateur non connecté');
-                      return;
-                    }
-                    const { data, error } = await untypedSupabase
-                      .from('hybrid_storage_unlock_requests')
-                      .select('id, new_credential, method')
-                      .eq('user_id', user.id)
-                      .eq('status', 'pending')
-                      .maybeSingle();
-                    if (error) throw error;
-                    if (!data) {
-                      toast.info('Aucune demande de déblocage trouvée');
-                      return;
-                    }
-                    await hybridStorageManager.applyAdminReset(data.new_credential, data.method as 'pin' | 'password');
-                    // Marquer comme appliquée
-                    await untypedSupabase
-                      .from('hybrid_storage_unlock_requests')
-                      .update({ status: 'applied', applied_at: new Date().toISOString() })
-                      .eq('id', data.id);
-                    toast.success('Nouveau code appliqué');
-                    onUnlock();
-                  } catch (e: any) {
-                    console.error(e);
-                    toast.error(e.message || 'Erreur de déblocage');
-                  }
-                }}
-                className="w-full"
-                size="sm"
-              >
-                J'ai oublié mon code — appliquer le déblocage admin
-              </Button>
-            )}
           </div>
 
           {/* Information de sécurité */}
           <div className="text-xs text-center text-muted-foreground space-y-1">
-            <p>🔒 Vos données sont chiffrées localement avec AES-256</p>
+            <p>🔒 Vos données sont chiffrées localement avec AES-256-GCM</p>
             <p>📋 Conforme aux exigences HDS françaises</p>
           </div>
         </CardContent>

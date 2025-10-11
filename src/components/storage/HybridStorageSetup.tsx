@@ -4,45 +4,50 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, Lock, Database } from 'lucide-react';
-import { hybridStorageManager } from '@/services/hybrid-storage-manager';
+import { hdsSecureManager, type HDSSecureConfig } from '@/services/hds-secure-storage/hds-secure-manager';
+import { requestStorageDirectory } from '@/services/native-file-storage/native-file-adapter';
 import { toast } from 'sonner';
 
 export function HybridStorageSetup() {
   const [isLoading, setIsLoading] = useState(false);
-  const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('pin');
-  const [credential, setCredential] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSetup = async () => {
-    if (!credential) {
-      toast.error('Veuillez saisir un code PIN ou mot de passe');
+    if (!password || !confirmPassword) {
+      toast.error('Veuillez saisir et confirmer le mot de passe');
       return;
     }
 
-    if (securityMethod === 'pin' && credential.length < 4) {
-      toast.error('Le code PIN doit contenir au moins 4 chiffres');
-      return;
-    }
-
-    if (securityMethod === 'password' && credential.length < 6) {
+    if (password.length < 6) {
       toast.error('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Les mots de passe ne correspondent pas');
       return;
     }
 
     setIsLoading(true);
     try {
-      await hybridStorageManager.configureStorage({
-        storageLocation: 'OPFS',
-        securityMethod,
-        credential,
-        encryptionEnabled: true,
-      });
+      // Demander accès au répertoire de stockage
+      const directoryHandle = await requestStorageDirectory();
+      
+      const config: HDSSecureConfig = {
+        directoryHandle,
+        password,
+        entities: ['patients', 'appointments', 'invoices']
+      };
+      
+      await hdsSecureManager.configure(config);
 
       toast.success('Configuration terminée avec succès');
       window.location.reload(); // Rafraîchir pour recharger l'état
       
     } catch (error) {
       console.error('Configuration failed:', error);
-      toast.error('Erreur lors de la configuration du stockage');
+      toast.error('Erreur lors de la configuration du stockage: ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
     } finally {
       setIsLoading(false);
     }
@@ -74,29 +79,28 @@ export function HybridStorageSetup() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="security-method">Méthode de sécurité</Label>
-            <select
-              id="security-method"
-              value={securityMethod}
-              onChange={(e) => setSecurityMethod(e.target.value as 'pin' | 'password')}
-              className="w-full p-2 border rounded-md bg-background"
-            >
-              <option value="pin">Code PIN (4 chiffres minimum)</option>
-              <option value="password">Mot de passe (6 caractères minimum)</option>
-            </select>
+            <Label htmlFor="password">
+              Mot de passe de chiffrement
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Entrez votre mot de passe"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="credential">
-              {securityMethod === 'pin' ? 'Code PIN' : 'Mot de passe'}
+            <Label htmlFor="confirmPassword">
+              Confirmer le mot de passe
             </Label>
             <Input
-              id="credential"
-              type={securityMethod === 'pin' ? 'number' : 'password'}
-              value={credential}
-              onChange={(e) => setCredential(e.target.value)}
-              placeholder={securityMethod === 'pin' ? 'Entrez votre code PIN' : 'Entrez votre mot de passe'}
-              maxLength={securityMethod === 'pin' ? 6 : undefined}
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirmez votre mot de passe"
             />
           </div>
 

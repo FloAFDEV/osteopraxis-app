@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, AlertTriangle, TestTube, CheckCircle, ShieldAlert, ShieldCheck, RefreshCw } from 'lucide-react';
-import { HDSInitialization, useHDSStatus } from "@/services/hybrid-data-adapter/hds-initialization";
+import { hdsSecureManager } from "@/services/hds-secure-storage/hds-secure-manager";
+import { isDemoSession } from "@/utils/demo-detection";
 
 interface ComplianceStatus {
   isCompliant: boolean;
@@ -14,13 +15,28 @@ interface ComplianceStatus {
 export const HDSComplianceIndicator = () => {
   const [status, setStatus] = useState<ComplianceStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const { checkCompliance } = useHDSStatus();
 
   const checkStatus = async () => {
     setLoading(true);
     try {
-      const complianceStatus = await checkCompliance();
-      setStatus(complianceStatus);
+      const isDemoMode = await isDemoSession();
+      const hdsStatus = await hdsSecureManager.getStatus();
+      
+      const issues: string[] = [];
+      
+      if (!isDemoMode && !hdsStatus.isConfigured) {
+        issues.push('Stockage HDS local non configuré');
+      }
+      
+      if (!isDemoMode && hdsStatus.isConfigured && !hdsStatus.isUnlocked) {
+        issues.push('Stockage HDS verrouillé');
+      }
+      
+      setStatus({
+        isCompliant: isDemoMode || (hdsStatus.isConfigured && hdsStatus.isUnlocked),
+        mode: isDemoMode ? 'demo' : 'production',
+        issues
+      });
     } catch (error) {
       console.error('Erreur vérification HDS:', error);
       setStatus({
@@ -36,10 +52,10 @@ export const HDSComplianceIndicator = () => {
   const forceInitialization = async () => {
     setLoading(true);
     try {
-      await HDSInitialization.forceLocalInitialization();
+      console.log('🔄 Rafraîchissement du statut HDS...');
       await checkStatus();
     } catch (error) {
-      console.error('Erreur initialisation forcée:', error);
+      console.error('Erreur rafraîchissement:', error);
     }
   };
 

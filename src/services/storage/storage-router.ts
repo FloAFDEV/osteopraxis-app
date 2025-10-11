@@ -153,9 +153,9 @@ export class StorageRouter {
   }
 
   /**
-   * Adapter pour les données HDS (stockage local sécurisé avec fallback Supabase)
-   * 🎯 Si HDS configuré → Stockage local sécurisé
-   * 📡 Si HDS NON configuré → Fallback temporaire vers Supabase (mode transition)
+   * Adapter pour les données HDS (stockage local sécurisé UNIQUEMENT)
+   * 🎯 RÉGLEMENTATION HDS: Données sensibles OBLIGATOIREMENT en local
+   * 🚨 AUCUN fallback Supabase autorisé pour les données HDS en mode connecté
    */
   private async getLocalHDSAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
     // Vérification de sécurité stricte
@@ -166,17 +166,36 @@ export class StorageRouter {
     // Vérifier si le stockage HDS est configuré
     const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
     const status = await hdsSecureManager.getStatus();
-    const isHDSConfigured = status.isConfigured;
-
-    // Si HDS NON configuré → Fallback Supabase temporaire
-    if (!isHDSConfigured) {
-      console.warn(`⚠️ Stockage HDS non configuré pour ${dataType} - Utilisation temporaire de Supabase`);
-      return this.getSupabaseFallbackForHDS<T>(dataType);
+    
+    // 🚨 CONFORMITÉ HDS: Si non configuré, BLOQUER complètement l'accès
+    if (!status.isConfigured || !status.isUnlocked) {
+      console.error(`🚨 VIOLATION HDS: Tentative d'accès à ${dataType} sans stockage local configuré`);
+      console.error('📋 RÉGLEMENTATION: Les données de santé ne peuvent PAS transiter par le cloud');
+      
+      // Retourner un adapter qui bloque toutes les opérations
+      return {
+        create: async () => {
+          throw new Error(`🚨 CONFORMITÉ HDS REQUISE: Configurez le stockage local sécurisé pour créer des ${dataType}. Les données de santé ne peuvent pas être stockées dans le cloud.`);
+        },
+        getById: async () => null,
+        getAll: async () => {
+          console.warn(`⚠️ Stockage HDS non configuré - Aucune donnée ${dataType} disponible`);
+          return [];
+        },
+        update: async () => {
+          throw new Error(`🚨 CONFORMITÉ HDS REQUISE: Configurez le stockage local sécurisé pour modifier des ${dataType}. Les données de santé ne peuvent pas être stockées dans le cloud.`);
+        },
+        delete: async () => {
+          throw new Error(`🚨 CONFORMITÉ HDS REQUISE: Configurez le stockage local sécurisé pour supprimer des ${dataType}. Les données de santé ne peuvent pas être stockées dans le cloud.`);
+        }
+      } as StorageAdapter<T>;
     }
 
-    // HDS configuré → Utiliser les services HDS sécurisés
+    // HDS configuré ET déverrouillé → Utiliser les services HDS sécurisés
     const { hdsSecurePatientService, hdsSecureAppointmentService, hdsSecureInvoiceService } = 
       await import('@/services/hds-secure-storage');
+    
+    console.log(`✅ Accès HDS sécurisé autorisé pour ${dataType}`);
     
     switch (dataType) {
       case 'patients':
@@ -208,59 +227,6 @@ export class StorageRouter {
         
       default:
         throw new Error(`Service HDS sécurisé non implémenté pour: ${dataType}`);
-    }
-  }
-
-  /**
-   * Fallback Supabase temporaire pour données HDS quand le stockage local n'est pas configuré
-   * ⚠️ MODE TRANSITION UNIQUEMENT - L'utilisateur sera invité à configurer HDS
-   */
-  private async getSupabaseFallbackForHDS<T>(dataType: DataType): Promise<StorageAdapter<T>> {
-    console.log(`📡 Fallback Supabase temporaire pour ${dataType} (HDS non configuré)`);
-    
-    switch (dataType) {
-      case 'patients':
-      case 'appointments':
-        // Pour l'instant, retourner un adapter vide jusqu'à configuration HDS
-        // Cela permet à l'app de fonctionner sans bloquer
-        console.warn(`⚠️ ${dataType} non disponibles (HDS non configuré) - Retour données vides`);
-        return {
-          create: async (data) => {
-            console.warn(`⚠️ Impossible de créer ${dataType} sans HDS configuré`);
-            throw new Error(`Configuration HDS requise pour créer des ${dataType}`);
-          },
-          getById: async () => null,
-          getAll: async () => [],
-          update: async (id, updates) => {
-            console.warn(`⚠️ Impossible de modifier ${dataType} sans HDS configuré`);
-            throw new Error(`Configuration HDS requise pour modifier des ${dataType}`);
-          },
-          delete: async () => {
-            console.warn(`⚠️ Impossible de supprimer ${dataType} sans HDS configuré`);
-            throw new Error(`Configuration HDS requise pour supprimer des ${dataType}`);
-          }
-        } as StorageAdapter<T>;
-        
-      case 'invoices':
-        // Les factures peuvent utiliser Supabase temporairement
-        const { invoiceService } = await import('@/services/api/invoice-service');
-        return {
-          create: (data) => invoiceService.createInvoice(data as any) as unknown as Promise<T>,
-          getById: (id) => invoiceService.getInvoiceById(Number(id)) as unknown as Promise<T | null>,
-          getAll: () => invoiceService.getInvoices() as unknown as Promise<T[]>,
-          update: (id, updates) => invoiceService.updateInvoice(Number(id), { ...updates, id: Number(id) } as any) as unknown as Promise<T>,
-          delete: (id) => invoiceService.deleteInvoice(Number(id))
-        } as StorageAdapter<T>;
-        
-      default:
-        // Retourner un adapter vide pour éviter les erreurs
-        return {
-          create: async (data) => ({ ...data, id: Date.now() } as T),
-          getById: async () => null,
-          getAll: async () => [],
-          update: async (id, updates) => ({ ...updates, id } as T),
-          delete: async () => true
-        } as StorageAdapter<T>;
     }
   }
 

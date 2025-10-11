@@ -54,9 +54,7 @@ import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
-
-
-import { PatientHubInitialization } from "@/services/hybrid-data-adapter/app-initialization";
+import { HybridStorageProvider } from "@/contexts/HybridStorageContext";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -69,26 +67,9 @@ const queryClient = new QueryClient({
 });
 
 /**
- * Composant d'initialisation PatientHub
- * Configure automatiquement le stockage HDS (local pour production, éphémère pour démo)
+ * Note: L'initialisation HDS est maintenant gérée par HybridStorageProvider
+ * Le système hds-secure-storage s'occupe automatiquement du stockage local sécurisé
  */
-function PatientHubInitializer() {
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await PatientHubInitialization.initializeApp();
-        console.log('🏥 PatientHub prêt - Stockage HDS configuré');
-      } catch (error) {
-        console.error('❌ Erreur initialisation PatientHub:', error);
-        // L'application continue de fonctionner même en cas d'erreur
-      }
-    };
-
-    initializeApp();
-  }, []);
-
-  return null; // Composant invisible
-}
 
 function App() {
   return (
@@ -101,10 +82,9 @@ function App() {
                 <DemoProvider>
                   <Router>
                     <AuthProvider>
-                      {/* Initialisation PatientHub avec stockage HDS */}
-                      <PatientHubInitializer />
-                      <SecurityHeaders />
-                      <SkipToContent />
+                      <HybridStorageProvider>
+                        <SecurityHeaders />
+                        <SkipToContent />
                       <div id="main-content" className="min-h-screen bg-background">
                         <DemoDataManager />
                       
@@ -285,8 +265,9 @@ function App() {
                       <PerformanceIndicator />
                       <DemoSessionTimer />
                       <Toaster />
-                    </div>
-                  </AuthProvider>
+                     </div>
+                      </HybridStorageProvider>
+                   </AuthProvider>
                   </Router>
                 </DemoProvider>
               </PrivacyProvider>
