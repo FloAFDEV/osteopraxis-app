@@ -79,15 +79,18 @@ export class HDSSecureManager {
         throw new Error('Test cryptographique initial échoué');
       }
 
-      // Obtenir l'accès au dossier
+      // Utiliser OPFS (Origin Private File System) automatiquement
       if (!config.directoryHandle) {
-        this.directoryHandle = await requestStorageDirectory();
+        console.log('📁 Utilisation de l\'OPFS (Origin Private File System)...');
+        this.directoryHandle = await navigator.storage.getDirectory();
       } else {
         this.directoryHandle = config.directoryHandle;
       }
 
-      // Persister le directoryHandle
-      await persistDirectoryHandle(this.directoryHandle, 'hds-storage');
+      // Persister le directoryHandle (uniquement si c'est un handle externe)
+      if (config.directoryHandle) {
+        await persistDirectoryHandle(this.directoryHandle, 'hds-storage');
+      }
       
       this.password = config.password;
 

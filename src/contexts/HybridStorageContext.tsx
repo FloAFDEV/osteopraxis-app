@@ -83,9 +83,8 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
 
   const configureStorage = async (config: any): Promise<void> => {
     try {
-      // Nouvelle configuration HDS sécurisée
+      // Nouvelle configuration HDS sécurisée avec OPFS automatique
       const secureConfig: HDSSecureConfig = {
-        directoryHandle: config.directoryHandle,
         password: config.password,
         entities: ['patients', 'appointments', 'invoices']
       };

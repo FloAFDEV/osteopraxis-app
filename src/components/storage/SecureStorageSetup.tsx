@@ -22,44 +22,16 @@ interface SecureStorageSetupProps {
 }
 
 interface SecureStorageConfig {
-  directoryHandle?: FileSystemDirectoryHandle;
   password: string;
   confirmPassword: string;
 }
 
 export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComplete, onCancel }) => {
-  const [step, setStep] = useState<'info' | 'folder' | 'password' | 'confirm'>('info');
-  const [directoryHandle, setDirectoryHandle] = useState<FileSystemDirectoryHandle | null>(null);
+  const [step, setStep] = useState<'info' | 'password' | 'confirm'>('info');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [folderPath, setFolderPath] = useState('');
 
-  const handleSelectFolder = async () => {
-    try {
-      if (!('showDirectoryPicker' in window)) {
-        throw new Error('Votre navigateur ne supporte pas l\'accès aux dossiers locaux');
-      }
-
-      const dirHandle = await (window as any).showDirectoryPicker({
-        mode: 'readwrite',
-        startIn: 'documents'
-      });
-
-      setDirectoryHandle(dirHandle);
-      setFolderPath(dirHandle.name);
-      setStep('password');
-      
-      toast.success('Dossier sélectionné avec succès');
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        toast.info('Sélection de dossier annulée');
-      } else {
-        console.error('Erreur sélection dossier:', error);
-        toast.error('Erreur lors de la sélection du dossier');
-      }
-    }
-  };
 
   const validatePassword = (pwd: string): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
@@ -107,9 +79,8 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
     setIsLoading(true);
     
     try {
-      // Appeler le callback parent qui s'occupera de la configuration
+      // OPFS sera utilisé automatiquement - pas besoin de directoryHandle
       await onComplete({
-        directoryHandle: directoryHandle!,
         password,
         confirmPassword
       });
@@ -125,9 +96,8 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
 
   const getStepProgress = () => {
     switch (step) {
-      case 'info': return 25;
-      case 'folder': return 50;
-      case 'password': return 75;
+      case 'info': return 33;
+      case 'password': return 66;
       case 'confirm': return 100;
       default: return 0;
     }
@@ -180,14 +150,14 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-orange-600" />
-                      Importantes
+                      Important
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <ul className="text-sm space-y-1 text-orange-700 dark:text-orange-300">
                       <li>• Mot de passe requis à chaque utilisation</li>
+                      <li>• Stockage automatique dans le navigateur</li>
                       <li>• Sauvegarde régulière recommandée</li>
-                      <li>• Accès dossier requis au démarrage</li>
                       <li>• Perte mot de passe = perte données</li>
                     </ul>
                   </CardContent>
@@ -198,50 +168,8 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                 <Button variant="outline" onClick={onCancel}>
                   Ignorer pour l'instant
                 </Button>
-                <Button onClick={() => setStep('folder')}>
+                <Button onClick={() => setStep('password')}>
                   Configurer le stockage sécurisé
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {step === 'folder' && (
-            <div className="space-y-6">
-              <div className="text-center space-y-4">
-                <FolderOpen className="w-16 h-16 mx-auto text-muted-foreground" />
-                <div>
-                  <h3 className="font-semibold text-lg">Sélection du dossier de stockage</h3>
-                  <p className="text-muted-foreground">
-                    Choisissez un dossier sur votre ordinateur où stocker vos données médicales chiffrées
-                  </p>
-                </div>
-              </div>
-
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Recommandations :</strong>
-                  <br />• Créer un dossier dédié (ex: "PatientHub_HDS")
-                  <br />• Éviter les dossiers synchronisés (Dropbox, OneDrive...)
-                  <br />• Choisir un emplacement que vous pourrez retrouver facilement
-                </AlertDescription>
-              </Alert>
-
-              {folderPath && (
-                <Alert>
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Dossier sélectionné :</strong> {folderPath}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setStep('info')}>
-                  Retour
-                </Button>
-                <Button onClick={handleSelectFolder} disabled={!('showDirectoryPicker' in window)}>
-                  Sélectionner un dossier
                 </Button>
               </div>
             </div>
@@ -316,7 +244,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
               </div>
 
               <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setStep('folder')}>
+                <Button variant="outline" onClick={() => setStep('info')}>
                   Retour
                 </Button>
                 <Button 
@@ -345,8 +273,8 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                 <CardContent className="pt-6">
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="font-medium">Dossier :</span>
-                      <span className="text-sm">{folderPath}</span>
+                      <span className="font-medium">Stockage :</span>
+                      <span className="text-sm">Espace privé du navigateur (OPFS)</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">
