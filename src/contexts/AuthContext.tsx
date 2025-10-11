@@ -10,6 +10,7 @@ import { User } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAutoLogout } from "@/hooks/use-auto-logout";
+import { DEMO_OSTEOPATH_ID } from '@/config/demo-constants';
 import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 
 interface AuthContextProps {
@@ -206,14 +207,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 						// Mode démo - créer un utilisateur virtuel
 						const demoUser: User = {
 							id: session.user.id,
-							email: session.user.email || '',
-							firstName: 'Utilisateur',
-							lastName: 'Démo',
-							role: 'OSTEOPATH',
-							osteopathId: 534, // ID fixe pour le mode démo
-							created_at: new Date().toISOString(),
-							updated_at: new Date().toISOString(),
-						};
+						email: session.user.email || '',
+						firstName: 'Utilisateur',
+						lastName: 'Démo',
+						role: 'OSTEOPATH',
+						osteopathId: DEMO_OSTEOPATH_ID,
+						created_at: new Date().toISOString(),
+						updated_at: new Date().toISOString(),
+					};
 
 						setUser(demoUser);
 						setSession(session);
@@ -391,14 +392,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										// Mode démo - créer un utilisateur virtuel
 										const demoUser: User = {
 											id: session.user.id,
-											email: session.user.email || '',
-											firstName: 'Utilisateur',
-											lastName: 'Démo',
-											role: 'OSTEOPATH',
-											osteopathId: 999, // ID factice pour démo
-											created_at: new Date().toISOString(),
-											updated_at: new Date().toISOString(),
-										};
+										email: session.user.email || '',
+										firstName: 'Utilisateur',
+										lastName: 'Démo',
+										role: 'OSTEOPATH',
+										osteopathId: DEMO_OSTEOPATH_ID,
+										created_at: new Date().toISOString(),
+										updated_at: new Date().toISOString(),
+									};
 										setUser(demoUser);
 										setSession(session);
 										setIsAuthenticated(true);

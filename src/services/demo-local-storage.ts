@@ -5,6 +5,7 @@
 
 import { Patient, Appointment, Invoice, Cabinet } from '@/types';
 import { nanoid } from 'nanoid';
+import { DEMO_OSTEOPATH_ID } from '@/config/demo-constants';
 
 export interface DemoSession {
   sessionId: string;
@@ -427,7 +428,7 @@ class DemoLocalStorageService {
       iban: "FR1420041010050500013M02606",
       bic: "PSSTFRPPPAR",
       country: "FR",
-      osteopathId: 999,
+      osteopathId: DEMO_OSTEOPATH_ID,
       createdAt: now,
       updatedAt: now
     };

@@ -15,10 +15,13 @@ import { StorageStatusDisplay } from '@/components/storage/StorageStatusDisplay'
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { StorageUnlockPanel } from '@/components/storage/StorageUnlockPanel';
-import { useConnectedStorage } from '@/hooks/useConnectedStorage';
+import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { useConnectedCabinetStats } from '@/hooks/useConnectedCabinetStats';
-import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
+import { hdsSecureManager } from '@/services/hds-secure-storage/hds-secure-manager';
 import { isDemoSession } from '@/utils/demo-detection';
+import { SecurityConfirmationDialog } from '@/components/security/SecurityConfirmationDialog';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 const ConnectedStorageSettingsPage: React.FC = () => {
@@ -26,7 +29,12 @@ const ConnectedStorageSettingsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
-  const { status, isLoading, initialize, unlock } = useConnectedStorage();
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [importPassword, setImportPassword] = useState('');
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
+  const { status, isLoading, initialize, unlock } = useHybridStorage();
   const cabinetStats = useConnectedCabinetStats();
 
   // Vérification de sécurité : Rediriger si en mode démo
@@ -77,22 +85,15 @@ const ConnectedStorageSettingsPage: React.FC = () => {
     }
   };
 
-  const exportData = async () => {
+  const handleExportRequest = () => {
+    setShowExportConfirm(true);
+  };
+
+  const confirmExport = async () => {
     setLoading(true);
+    setShowExportConfirm(false);
     try {
-      const backupData = await hybridDataManager.exportData();
-      
-      // Créer un blob et déclencher le téléchargement
-      const blob = new Blob([backupData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `patienthub-hds-backup-${new Date().toISOString().slice(0, 10)}.phds`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
+      await hdsSecureManager.exportAllSecure();
       toast.success('Données HDS exportées avec succès');
     } catch (error) {
       console.error('Erreur export:', error);
@@ -102,49 +103,70 @@ const ConnectedStorageSettingsPage: React.FC = () => {
     }
   };
 
-  const importData = async () => {
+  const handleImportRequest = () => {
+    // Créer un input file pour sélectionner le fichier
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.phds';
+    
+    input.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        setPendingImportFile(file);
+        setShowImportConfirm(true);
+      }
+    };
+    
+    input.click();
+  };
+
+  const confirmImport = async () => {
+    if (!pendingImportFile) return;
+    
+    setShowImportConfirm(false);
+    setShowPasswordDialog(true);
+  };
+
+  const executeImport = async () => {
+    if (!pendingImportFile || !importPassword) {
+      toast.error('Fichier ou mot de passe manquant');
+      return;
+    }
+
     setImporting(true);
+    setShowPasswordDialog(false);
+    
     try {
-      // Créer un input file pour sélectionner le fichier
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json,.phds';
+      const result = await hdsSecureManager.importAllSecure(
+        pendingImportFile, 
+        importPassword, 
+        'merge'
+      );
       
-      input.onchange = async (event) => {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (!file) return;
+      if (result.errors.length === 0) {
+        toast.success(`Import réussi : ${Object.values(result.imported).reduce((a, b) => a + b, 0)} enregistrement(s) importé(s)`);
         
-        try {
-          const text = await file.text();
-          const data = JSON.parse(text);
-          
-          // Vérifier le format du fichier
-          if (data.format && data.format.includes('PatientHub')) {
-            toast.info('Import de fichier PatientHub HDS sécurisé détecté');
-          }
-          
-          // TODO: Implémenter l'import sécurisé avec validation de mot de passe
-          // await hybridDataManager.importData(text, password);
-          toast.info('Import sécurisé en développement - fonctionnalité bientôt disponible');
-          
-          toast.success('Données importées avec succès');
-        } catch (error) {
-          console.error('Erreur import:', error);
-          if (error instanceof Error && error.message.includes('password')) {
-            toast.error('Mot de passe incorrect pour déchiffrer les données');
-          } else {
-            toast.error('Erreur lors de l\'import des données');
-          }
-        } finally {
-          setImporting(false);
+        if (result.warnings.length > 0) {
+          console.warn('Avertissements import:', result.warnings);
+          toast.warning(`${result.warnings.length} avertissement(s) - voir la console`);
         }
-      };
-      
-      input.click();
+        
+        await initialize();
+      } else {
+        toast.error('Échec de l\'import');
+        console.error('Erreurs import:', result.errors);
+      }
     } catch (error) {
-      console.error('Erreur sélection fichier:', error);
-      toast.error('Erreur lors de la sélection du fichier');
+      console.error('Erreur import:', error);
+      if (error instanceof Error && error.message.includes('password')) {
+        toast.error('Mot de passe incorrect pour déchiffrer les données');
+      } else {
+        toast.error('Erreur lors de l\'import des données');
+      }
+    } finally {
       setImporting(false);
+      setImportPassword('');
+      setPendingImportFile(null);
     }
   };
 
@@ -257,8 +279,8 @@ const ConnectedStorageSettingsPage: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <Button 
-                  onClick={exportData}
-                  disabled={loading || !status?.isConfigured}
+                  onClick={handleExportRequest}
+                  disabled={loading || !status?.isConfigured || !status?.isUnlocked}
                   className="flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
@@ -267,8 +289,8 @@ const ConnectedStorageSettingsPage: React.FC = () => {
                 
                 <Button 
                   variant="outline"
-                  onClick={importData}
-                  disabled={loading || importing || !status?.isConfigured}
+                  onClick={handleImportRequest}
+                  disabled={loading || importing || !status?.isConfigured || !status?.isUnlocked}
                   className="flex items-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
@@ -285,6 +307,56 @@ const ConnectedStorageSettingsPage: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Dialogues de confirmation de sécurité */}
+      <SecurityConfirmationDialog
+        open={showExportConfirm}
+        onOpenChange={setShowExportConfirm}
+        onConfirm={confirmExport}
+        title="Confirmer l'export des données HDS"
+        description="Vous êtes sur le point d'exporter toutes vos données sensibles dans un fichier chiffré."
+      />
+
+      <SecurityConfirmationDialog
+        open={showImportConfirm}
+        onOpenChange={setShowImportConfirm}
+        onConfirm={confirmImport}
+        title="Confirmer l'import des données HDS"
+        description="Cette opération va importer et fusionner des données depuis une sauvegarde. Les données existantes seront conservées."
+      />
+
+      {/* Dialogue de saisie du mot de passe */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mot de passe de déchiffrement</DialogTitle>
+            <DialogDescription>
+              Entrez le mot de passe utilisé lors de l'export pour déchiffrer le fichier de sauvegarde.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              type="password"
+              placeholder="Mot de passe"
+              value={importPassword}
+              onChange={(e) => setImportPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && executeImport()}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowPasswordDialog(false);
+              setImportPassword('');
+              setPendingImportFile(null);
+            }}>
+              Annuler
+            </Button>
+            <Button onClick={executeImport} disabled={!importPassword}>
+              Importer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

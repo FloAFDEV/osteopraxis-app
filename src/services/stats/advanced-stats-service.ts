@@ -1,6 +1,7 @@
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, format, subMonths, isWithinInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { Appointment, Invoice, Patient } from "@/types";
+import { DEMO_OSTEOPATH_ID } from '@/config/demo-constants';
 
 export interface AdvancedStats {
   // Statistiques de revenus
@@ -92,28 +93,28 @@ export class AdvancedStatsService {
   private async getAppointments(osteopathId: number) {
     // Utiliser la couche API (hybride: local -> cloud si nécessaire)
     const all = await import("@/services/api").then(m => m.api.getAppointments());
-    // En mode démo, inclure les données avec osteopathId 999 (démo local) et l'ID réel
+    // En mode démo, inclure les données avec osteopathId démo et l'ID réel
     return all.filter((a: any) => 
       a.osteopathId === osteopathId || 
-      (a.osteopathId === 999 && (osteopathId === 534 || osteopathId === 999))
+      (a.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID)
     );
   }
 
   private async getInvoices(osteopathId: number) {
     const all = await import("@/services/api").then(m => m.api.getInvoices());
-    // En mode démo, inclure les données avec osteopathId 999 (démo local) et l'ID réel
+    // En mode démo, inclure les données avec osteopathId démo et l'ID réel
     return all.filter((i: any) => 
       i.osteopathId === osteopathId || 
-      (i.osteopathId === 999 && (osteopathId === 534 || osteopathId === 999))
+      (i.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID)
     );
   }
 
   private async getPatients(osteopathId: number) {
     const all = await import("@/services/api").then(m => m.api.getPatients());
-    // En mode démo, inclure les données avec osteopathId 999 (démo local) et l'ID réel
+    // En mode démo, inclure les données avec osteopathId démo et l'ID réel
     return all.filter((p: any) => 
       p.osteopathId === osteopathId || 
-      (p.osteopathId === 999 && (osteopathId === 534 || osteopathId === 999))
+      (p.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID)
     );
   }
 

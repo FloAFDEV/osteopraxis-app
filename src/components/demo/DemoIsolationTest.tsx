@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, RefreshCw, User, Calendar, FileText } from 'lucide-react';
+import { DEMO_OSTEOPATH_ID, DEMO_CABINET_ID } from '@/config/demo-constants';
 
 interface TestResult {
   name: string;
@@ -197,8 +198,8 @@ export const DemoIsolationTest = () => {
         facial_mask_exam: null,
         fascia_exam: null,
         vascular_exam: null,
-        osteopathId: 999,
-        cabinetId: 1
+        osteopathId: DEMO_OSTEOPATH_ID,
+        cabinetId: DEMO_CABINET_ID
       });
       
       results[4] = {

@@ -19,6 +19,8 @@ import { InvoiceAmountInput } from "./invoice-form/InvoiceAmountInput";
 import { InvoicePaymentFields } from "./invoice-form/InvoicePaymentFields";
 import { InvoiceOsteopathInput } from "./invoice-form/InvoiceOsteopathInput";
 import { InvoiceCabinetInput } from "./invoice-form/InvoiceCabinetInput";
+import { useAuth } from '@/contexts/AuthContext';
+import { DEMO_OSTEOPATH_ID } from '@/config/demo-constants';
 
 const schema = z.object({
   date: z.string().nonempty("Date de la note d'honoraires requise"),
@@ -116,7 +118,7 @@ export function InvoiceForm({
 
     try {
       // En mode démo, s'assurer qu'un osteopathId est défini
-      const finalOsteopathId = data.osteopathId || 999; // ID démo par défaut
+      const finalOsteopathId = data.osteopathId || DEMO_OSTEOPATH_ID;
       
       const invoiceData: Partial<Invoice> = {
         ...data,

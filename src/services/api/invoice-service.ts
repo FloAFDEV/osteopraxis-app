@@ -1,6 +1,7 @@
 import { Invoice, PaymentStatus } from "@/types";
 import { delay } from "./config";
 import { storageRouter } from '../storage/storage-router';
+import { DEMO_OSTEOPATH_ID, DEMO_CABINET_ID } from '@/config/demo-constants';
 
 export const invoiceService = {
   async getInvoices(): Promise<Invoice[]> {
@@ -71,8 +72,8 @@ export const invoiceService = {
         paymentMethod: invoiceData.paymentMethod ?? null,
         patientId: invoiceData.patientId!,
         appointmentId: invoiceData.appointmentId ?? null,
-        osteopathId: invoiceData.osteopathId ?? 999, // ID factice pour le mode démo
-        cabinetId: invoiceData.cabinetId ?? 1, // Cabinet par défaut
+        osteopathId: invoiceData.osteopathId ?? DEMO_OSTEOPATH_ID,
+        cabinetId: invoiceData.cabinetId ?? DEMO_CABINET_ID,
         tvaExoneration: true,
         tvaMotif: 'TVA non applicable - Article 261-4-1° du CGI'
       };

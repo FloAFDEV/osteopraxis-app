@@ -8,7 +8,7 @@ import { StorageStatusDisplay } from '@/components/storage/StorageStatusDisplay'
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { SecurityConfirmationDialog } from '@/components/security/SecurityConfirmationDialog';
-import { useConnectedStorage } from '@/hooks/useConnectedStorage';
+import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
 import { toast } from 'sonner';
 import { useDemo } from '@/contexts/DemoContext';
@@ -23,7 +23,7 @@ const HybridStorageSettingsPage: React.FC = () => {
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
-  const { status, isLoading, initialize, configure } = useConnectedStorage();
+  const { status, isLoading, initialize } = useHybridStorage();
 
   useEffect(() => {
     // Vérifier si on doit afficher la configuration

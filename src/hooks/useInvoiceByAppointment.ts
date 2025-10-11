@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { invoiceService } from "@/services/api/invoice-service";
 import { Invoice } from "@/types";
+import { DEMO_OSTEOPATH_ID } from '@/config/demo-constants';
 
 export function useInvoiceByAppointment(appointmentId: number | null) {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -25,7 +26,7 @@ export function useInvoiceByAppointment(appointmentId: number | null) {
         const invoiceData = invoices.length > 0 ? invoices[0] : null;
         
         // En mode démo, ajouter des données fictives d'ostéopathe avec tampon
-        if (invoiceData && (invoiceData.osteopathId === 999 || window.location.hostname === 'localhost')) {
+        if (invoiceData && (invoiceData.osteopathId === DEMO_OSTEOPATH_ID || window.location.hostname === 'localhost')) {
           // Importer le tampon de démo
           const demoStampUrl = await import('@/assets/demo-stamp.png').then(module => module.default);
           

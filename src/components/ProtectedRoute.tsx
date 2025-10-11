@@ -1,9 +1,8 @@
-
-import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { Navigate, useLocation } from 'react-router-dom';
+import { FailFastStorageGuard } from './storage/FailFastStorageGuard';
+import { DEMO_OSTEOPATH_ID } from '@/config/demo-constants';
 import { ReactNode } from 'react';
-import { FailFastStorageGuard } from '@/components/storage/FailFastStorageGuard';
-import { isDemoSession } from '@/utils/demo-detection';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -36,7 +35,7 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   // Vérifier si c'est un utilisateur démo
   const isDemoUser = user.email === 'demo@patienthub.com' || 
                      user.email?.startsWith('demo-') ||
-                     user.osteopathId === 999;
+                     user.osteopathId === DEMO_OSTEOPATH_ID;
 
   // Pour les utilisateurs réels : utiliser le garde intelligent (non-bloquant)
   if (!isDemoUser) {
