@@ -187,12 +187,28 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                 </div>
               </div>
 
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>⚠️ Attention :</strong> Ce mot de passe est irremplaçable. 
-                  Si vous l'oubliez, vos données seront définitivement perdues.
-                  Notez-le dans un endroit sûr !
+              <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <AlertDescription className="text-red-800 dark:text-red-200">
+                  <p className="font-bold mb-2">⚠️ AVERTISSEMENT CRITIQUE</p>
+                  <ul className="space-y-1 text-sm">
+                    <li>• Ce mot de passe est <strong>irremplaçable et irrécupérable</strong></li>
+                    <li>• En cas d'oubli : <strong>perte définitive de TOUTES vos données HDS</strong></li>
+                    <li>• Aucune assistance technique ne pourra les récupérer</li>
+                    <li>• <strong>Notez-le dans un gestionnaire de mots de passe sécurisé</strong></li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+
+              <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <AlertDescription className="text-blue-800 dark:text-blue-200">
+                  <p className="font-medium mb-1">💡 Bonnes pratiques :</p>
+                  <ul className="space-y-1 text-sm">
+                    <li>• Utilisez un gestionnaire de mots de passe (Bitwarden, 1Password, etc.)</li>
+                    <li>• Exportez régulièrement vos données (recommandé : 1x/mois)</li>
+                    <li>• Le fichier d'export est également chiffré avec ce mot de passe</li>
+                  </ul>
                 </AlertDescription>
               </Alert>
 

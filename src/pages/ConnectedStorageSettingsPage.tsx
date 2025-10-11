@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/ui/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Settings, Download, Upload, Shield, Lock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Settings, Download, Upload, Shield, AlertTriangle, Trash2 } from 'lucide-react';
 import { StorageStatusDisplay } from '@/components/storage/StorageStatusDisplay';
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
@@ -20,8 +20,11 @@ import { useConnectedCabinetStats } from '@/hooks/useConnectedCabinetStats';
 import { hdsSecureManager } from '@/services/hds-secure-storage/hds-secure-manager';
 import { isDemoSession } from '@/utils/demo-detection';
 import { SecurityConfirmationDialog } from '@/components/security/SecurityConfirmationDialog';
+import { ExportReminderDialog } from '@/components/storage/ExportReminderDialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 
 const ConnectedStorageSettingsPage: React.FC = () => {
@@ -32,6 +35,8 @@ const ConnectedStorageSettingsPage: React.FC = () => {
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
   const [importPassword, setImportPassword] = useState('');
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
   const { status, isLoading, initialize, unlock } = useHybridStorage();
@@ -170,6 +175,31 @@ const ConnectedStorageSettingsPage: React.FC = () => {
     }
   };
 
+  const handleResetRequest = () => {
+    setShowResetConfirm(true);
+  };
+
+  const confirmReset = async () => {
+    if (resetConfirmText !== 'SUPPRIMER') {
+      toast.error('Veuillez taper "SUPPRIMER" pour confirmer');
+      return;
+    }
+
+    try {
+      await hdsSecureManager.reset();
+      setShowResetConfirm(false);
+      setResetConfirmText('');
+      toast.success('Stockage HDS réinitialisé avec succès');
+      
+      // Réinitialiser et afficher la configuration
+      await initialize();
+      setShowSetup(true);
+    } catch (error) {
+      console.error('Erreur reset:', error);
+      toast.error('Erreur lors de la réinitialisation du stockage');
+    }
+  };
+
   // Afficher la configuration initiale si nécessaire
   if (showSetup) {
     return (
@@ -305,8 +335,55 @@ const ConnectedStorageSettingsPage: React.FC = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Zone dangereuse - Reset */}
+          {status?.isConfigured && (
+            <Card className="border-red-200 dark:border-red-800">
+              <CardHeader>
+                <CardTitle className="text-red-600 dark:text-red-400">Zone dangereuse</CardTitle>
+                <CardDescription>
+                  Actions irréversibles sur votre stockage HDS
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
+                  <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <AlertDescription className="text-red-800 dark:text-red-200">
+                    <p className="font-bold mb-2">Mot de passe oublié ?</p>
+                    <p className="text-sm">
+                      Si vous avez perdu votre mot de passe, la seule option est de réinitialiser 
+                      complètement le stockage HDS. <strong>Toutes vos données locales seront définitivement perdues</strong>.
+                    </p>
+                    <p className="text-sm mt-2">
+                      Si vous avez un export récent, vous pourrez le réimporter après la réinitialisation 
+                      (à condition de connaître le mot de passe utilisé lors de l'export).
+                    </p>
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex justify-between items-center p-4 border border-red-200 rounded-lg">
+                  <div>
+                    <p className="font-medium">Réinitialiser le stockage HDS</p>
+                    <p className="text-sm text-muted-foreground">
+                      Supprime toutes les données locales et la configuration
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={handleResetRequest}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Réinitialiser
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
+
+      {/* Rappel automatique d'export */}
+      <ExportReminderDialog onExport={handleExportRequest} />
 
       {/* Dialogues de confirmation de sécurité */}
       <SecurityConfirmationDialog
@@ -353,6 +430,72 @@ const ConnectedStorageSettingsPage: React.FC = () => {
             </Button>
             <Button onClick={executeImport} disabled={!importPassword}>
               Importer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialogue de confirmation de reset */}
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Réinitialisation du stockage HDS
+            </DialogTitle>
+            <DialogDescription>
+              Cette action est définitive et irréversible
+            </DialogDescription>
+          </DialogHeader>
+
+          <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200 space-y-2">
+              <p className="font-bold">⚠️ AVERTISSEMENT CRITIQUE</p>
+              <p className="text-sm">Cette action va :</p>
+              <ul className="text-sm list-disc list-inside space-y-1">
+                <li>Supprimer <strong>définitivement</strong> toutes vos données HDS locales</li>
+                <li>Supprimer la configuration du stockage sécurisé</li>
+                <li>Rendre impossible la récupération sans export préalable</li>
+              </ul>
+              <p className="text-sm font-medium mt-2">
+                Les données cloud (cabinets, ostéopathes) ne seront PAS affectées.
+              </p>
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="resetConfirm">
+                Pour confirmer, tapez <code className="bg-muted px-2 py-1 rounded">SUPPRIMER</code>
+              </Label>
+              <Input
+                id="resetConfirm"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                placeholder="Tapez SUPPRIMER"
+                className="font-mono"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowResetConfirm(false);
+                setResetConfirmText('');
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmReset}
+              disabled={resetConfirmText !== 'SUPPRIMER'}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Réinitialiser définitivement
             </Button>
           </DialogFooter>
         </DialogContent>
