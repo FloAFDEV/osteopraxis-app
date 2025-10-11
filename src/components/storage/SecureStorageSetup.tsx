@@ -5,7 +5,7 @@
  * Remplace l'ancienne configuration hybride par une approche 100% sécurisée
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,8 +13,10 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Shield, FolderOpen, Key, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { Shield, FolderOpen, Key, AlertTriangle, CheckCircle, Info, Monitor } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { getExecutionContext } from '@/utils/iframe-detection';
 
 interface SecureStorageSetupProps {
   onComplete: (config: SecureStorageConfig) => Promise<void>;
@@ -31,6 +33,13 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [context, setContext] = useState(() => getExecutionContext());
+  
+  useEffect(() => {
+    setContext(getExecutionContext());
+  }, []);
+  
+  const isPreviewMode = context.isIframe || context.isLovablePreview;
 
 
   const validatePassword = (pwd: string): { valid: boolean; errors: string[] } => {
@@ -110,20 +119,46 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
             <Shield className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Configuration du Stockage HDS Sécurisé</CardTitle>
-          <CardDescription className="text-base">
-            Configuration du stockage local chiffré pour vos données médicales
-          </CardDescription>
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <CardTitle className="text-2xl">Configuration du Stockage HDS Sécurisé</CardTitle>
+              {isPreviewMode && (
+                <Badge variant="secondary" className="gap-1">
+                  <Monitor className="w-3 h-3" />
+                  Preview
+                </Badge>
+              )}
+            </div>
+            <CardDescription className="text-base">
+              {isPreviewMode 
+                ? 'Configuration IndexedDB chiffré (Mode Prévisualisation)'
+                : 'Configuration du stockage local chiffré pour vos données médicales'
+              }
+            </CardDescription>
+          </div>
           <Progress value={getStepProgress()} className="w-full" />
         </CardHeader>
 
         <CardContent className="space-y-6">
           {step === 'info' && (
             <div className="space-y-6">
+              {isPreviewMode && (
+                <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+                  <Monitor className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <AlertDescription className="text-blue-800 dark:text-blue-200">
+                    <p className="font-semibold mb-1">🖼️ Mode Prévisualisation Détecté</p>
+                    <p className="text-sm">
+                      Votre environnement utilisera IndexedDB chiffré (stockage navigateur). 
+                      Après déploiement, l'application utilisera automatiquement le stockage permanent dans un dossier local.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Sécurité maximale :</strong> Vos données médicales seront stockées localement sur votre ordinateur 
+                  <strong>Sécurité maximale :</strong> Vos données médicales seront stockées {isPreviewMode ? 'dans le navigateur' : 'localement sur votre ordinateur'} 
                   avec un chiffrement AES-256-GCM et une signature anti-falsification.
                 </AlertDescription>
               </Alert>
@@ -138,10 +173,11 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   </CardHeader>
                   <CardContent className="pt-0">
                     <ul className="text-sm space-y-1 text-green-700 dark:text-green-300">
-                      <li>• 100% local - Aucune donnée dans le cloud</li>
+                      <li>• {isPreviewMode ? 'Stockage navigateur sécurisé' : '100% local - Aucune donnée dans le cloud'}</li>
                       <li>• Chiffrement AES-256-GCM militaire</li>
                       <li>• Protection anti-falsification HMAC</li>
                       <li>• Conformité HDS garantie</li>
+                      {isPreviewMode && <li>• Passage auto au stockage permanent après déploiement</li>}
                     </ul>
                   </CardContent>
                 </Card>
@@ -156,7 +192,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   <CardContent className="pt-0">
                     <ul className="text-sm space-y-1 text-orange-700 dark:text-orange-300">
                       <li>• Mot de passe requis à chaque utilisation</li>
-                      <li>• Stockage automatique dans le navigateur</li>
+                      <li>• {isPreviewMode ? 'Stockage temporaire dans navigateur' : 'Stockage automatique dans le navigateur'}</li>
                       <li>• Sauvegarde régulière recommandée</li>
                       <li>• Perte mot de passe = perte données</li>
                     </ul>
@@ -290,7 +326,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="font-medium">Stockage :</span>
-                      <span className="text-sm">Espace privé du navigateur (OPFS)</span>
+                      <span className="text-sm">{isPreviewMode ? 'IndexedDB chiffré (Preview)' : 'Espace privé du navigateur (OPFS)'}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">

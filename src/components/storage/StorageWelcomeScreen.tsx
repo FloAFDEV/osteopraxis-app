@@ -3,11 +3,13 @@
  * Remplace le loader pour une meilleure UX
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, CheckCircle, AlertTriangle, ArrowRight, X } from 'lucide-react';
+import { Shield, CheckCircle, AlertTriangle, ArrowRight, X, Monitor } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { getExecutionContext } from '@/utils/iframe-detection';
 
 interface StorageWelcomeScreenProps {
   onConfigure: () => void;
@@ -18,6 +20,14 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
   onConfigure, 
   onSkip 
 }) => {
+  const [context, setContext] = useState(() => getExecutionContext());
+  
+  useEffect(() => {
+    setContext(getExecutionContext());
+  }, []);
+  
+  const isPreviewMode = context.isIframe || context.isLovablePreview;
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <Card className="w-full max-w-3xl shadow-xl">
@@ -26,11 +36,22 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
             <Shield className="w-10 h-10 text-primary-foreground" />
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Bienvenue sur PatientHub
-            </CardTitle>
+            <div className="flex items-center justify-center gap-2">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Bienvenue sur PatientHub
+              </CardTitle>
+              {isPreviewMode && (
+                <Badge variant="secondary" className="gap-1">
+                  <Monitor className="w-3 h-3" />
+                  Preview
+                </Badge>
+              )}
+            </div>
             <CardDescription className="text-lg">
-              Configuration du stockage sécurisé de vos données médicales
+              {isPreviewMode 
+                ? 'Configuration du stockage temporaire chiffré (Mode Prévisualisation)'
+                : 'Configuration du stockage sécurisé de vos données médicales'
+              }
             </CardDescription>
           </div>
         </CardHeader>
@@ -39,10 +60,14 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
           <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
             <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <AlertDescription className="text-blue-800 dark:text-blue-200">
-              <p className="font-semibold mb-2">🔒 Protection maximale de vos données HDS</p>
+              <p className="font-semibold mb-2">
+                {isPreviewMode ? '🖼️ Mode Prévisualisation - Stockage Temporaire' : '🔒 Protection maximale de vos données HDS'}
+              </p>
               <p className="text-sm">
-                Pour respecter la réglementation HDS (Hébergeur de Données de Santé), 
-                nous vous proposons de configurer un stockage local chiffré pour vos données sensibles.
+                {isPreviewMode 
+                  ? 'Votre environnement de prévisualisation utilisera IndexedDB chiffré avec AES-256-GCM. Vos données seront protégées localement. Une fois l\'application déployée, vous bénéficierez du stockage permanent dans un dossier local.'
+                  : 'Pour respecter la réglementation HDS (Hébergeur de Données de Santé), nous vous proposons de configurer un stockage local chiffré pour vos données sensibles.'
+                }
               </p>
             </AlertDescription>
           </Alert>
@@ -52,13 +77,13 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2 text-green-700 dark:text-green-400">
                   <CheckCircle className="w-5 h-5" />
-                  Stockage local sécurisé
+                  {isPreviewMode ? 'Stockage temporaire chiffré' : 'Stockage local sécurisé'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                  <span>100% local - Aucune donnée sensible dans le cloud</span>
+                  <span>{isPreviewMode ? 'Stockage local dans le navigateur' : '100% local - Aucune donnée sensible dans le cloud'}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
@@ -66,12 +91,18 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                  <span>Conformité HDS complète</span>
+                  <span>{isPreviewMode ? 'Protection temporaire des données' : 'Conformité HDS complète'}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
                   <span>Protection anti-falsification</span>
                 </div>
+                {isPreviewMode && (
+                  <div className="flex items-start gap-2 text-blue-600 dark:text-blue-400">
+                    <Monitor className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>Passage automatique au stockage permanent après déploiement</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

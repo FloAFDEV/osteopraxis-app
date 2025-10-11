@@ -11,6 +11,7 @@ import { EnhancedSecureFileStorage } from '../security/enhanced-secure-storage';
 import { checkNativeStorageSupport, requestStorageDirectory } from '../native-file-storage/native-file-adapter';
 import { persistDirectoryHandle, getPersistedDirectoryHandle, checkPersistenceSupport } from '../native-file-storage/directory-persistence';
 import { checkCryptoSupport, testCrypto, encryptJSON, decryptJSON } from '@/utils/crypto';
+import { isInIframe, getExecutionContext } from '@/utils/iframe-detection';
 
 export interface HDSSecureConfig {
   directoryHandle?: FileSystemDirectoryHandle;
@@ -44,9 +45,30 @@ export class HDSSecureManager {
    * Vérifier le support du stockage sécurisé
    */
   checkSupport() {
-    const nativeSupport = checkNativeStorageSupport();
+    const context = getExecutionContext();
     const cryptoSupport = checkCryptoSupport();
     const persistenceSupport = checkPersistenceSupport();
+    
+    // Si on est dans un iframe, on ignore FSA et on utilise IndexedDB
+    if (context.isIframe) {
+      console.log('🖼️ Contexte iframe détecté - Utilisation IndexedDB chiffré');
+      
+      const allDetails = [
+        ...cryptoSupport.details,
+        ...persistenceSupport.details
+      ];
+      
+      const supported = cryptoSupport.supported && persistenceSupport.supported;
+      
+      if (supported) {
+        allDetails.push('✅ IndexedDB chiffré disponible pour iframe');
+      }
+      
+      return { supported, details: allDetails, context };
+    }
+    
+    // Mode normal - FSA prioritaire
+    const nativeSupport = checkNativeStorageSupport();
     
     const allDetails = [
       ...nativeSupport.details,
@@ -56,7 +78,7 @@ export class HDSSecureManager {
     
     const supported = nativeSupport.supported && cryptoSupport.supported && persistenceSupport.supported;
     
-    return { supported, details: allDetails };
+    return { supported, details: allDetails, context };
   }
 
   /**
@@ -64,7 +86,13 @@ export class HDSSecureManager {
    */
   async configure(config: HDSSecureConfig): Promise<void> {
     try {
-      console.log('🔐 Configuration du stockage HDS sécurisé...');
+      const context = getExecutionContext();
+      
+      if (context.isIframe) {
+        console.log('🖼️ Mode iframe détecté - Configuration IndexedDB chiffré...');
+      } else {
+        console.log('🔐 Configuration du stockage HDS sécurisé...');
+      }
       
       // Vérifier le support complet
       const support = this.checkSupport();
@@ -81,7 +109,11 @@ export class HDSSecureManager {
 
       // Utiliser OPFS (Origin Private File System) automatiquement
       if (!config.directoryHandle) {
-        console.log('📁 Utilisation de l\'OPFS (Origin Private File System)...');
+        if (context.isIframe) {
+          console.log('🖼️ Utilisation OPFS dans iframe (IndexedDB backend)...');
+        } else {
+          console.log('📁 Utilisation de l\'OPFS (Origin Private File System)...');
+        }
         this.directoryHandle = await navigator.storage.getDirectory();
       } else {
         this.directoryHandle = config.directoryHandle;

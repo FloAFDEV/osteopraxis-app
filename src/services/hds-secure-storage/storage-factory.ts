@@ -8,6 +8,7 @@
 import { SecureStorageBackend, SecureStorageConfig, SecureStorageType } from './interfaces';
 import { FSASecureStorage } from './fsa-secure-storage';
 import { IndexedDBSecureStorage } from './indexeddb-secure-storage';
+import { isInIframe, getExecutionContext } from '@/utils/iframe-detection';
 
 export class SecureStorageFactory {
   
@@ -15,7 +16,18 @@ export class SecureStorageFactory {
    * Détecter le meilleur backend disponible
    */
   static detectBestBackend(): SecureStorageType {
-    // FSA prioritaire si disponible
+    const context = getExecutionContext();
+    
+    // Si on est dans un iframe, utiliser directement IndexedDB
+    if (context.isIframe) {
+      if ('indexedDB' in window) {
+        console.log('🖼️ Mode iframe - Backend IndexedDB chiffré');
+        return 'IndexedDB';
+      }
+      throw new Error('❌ IndexedDB non disponible dans cet iframe');
+    }
+    
+    // FSA prioritaire si disponible (hors iframe)
     if ('showDirectoryPicker' in window) {
       console.log('🗂️ File System Access détecté - Backend prioritaire');
       return 'FSA';
@@ -28,6 +40,27 @@ export class SecureStorageFactory {
     }
     
     throw new Error('❌ Aucun backend de stockage sécurisé supporté');
+  }
+
+  /**
+   * Obtenir le contexte de stockage
+   */
+  static detectStorageContext(): {
+    isIframe: boolean;
+    hasFileSystemAccess: boolean;
+    hasIndexedDB: boolean;
+    recommendedBackend: SecureStorageType;
+  } {
+    const context = getExecutionContext();
+    const hasFileSystemAccess = 'showDirectoryPicker' in window && !context.isIframe;
+    const hasIndexedDB = 'indexedDB' in window;
+    
+    return {
+      isIframe: context.isIframe,
+      hasFileSystemAccess,
+      hasIndexedDB,
+      recommendedBackend: context.recommendedBackend
+    };
   }
 
   /**

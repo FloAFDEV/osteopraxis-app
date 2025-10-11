@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, XCircle, RefreshCw, HardDrive, Cloud, Shield } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, RefreshCw, HardDrive, Cloud, Shield, Monitor } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { checkOPFSSupport } from '@/services/sqlite/opfs-sqlite-service';
 import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
 import { isUsingMemoryFallback, clearMemoryStorage } from '@/services/hybrid-data-adapter/local-adapters';
+import { getExecutionContext } from '@/utils/iframe-detection';
 import { toast } from 'sonner';
 
 interface DiagnosticResult {
@@ -19,12 +21,26 @@ export default function StorageDiagnosticPage() {
   const [results, setResults] = useState<DiagnosticResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [storageStatus, setStorageStatus] = useState<any>(null);
+  const [executionContext, setExecutionContext] = useState(() => getExecutionContext());
 
   const runDiagnostics = async () => {
     setIsRunning(true);
     const diagnostics: DiagnosticResult[] = [];
+    
+    // Mettre à jour le contexte d'exécution
+    const context = getExecutionContext();
+    setExecutionContext(context);
 
     try {
+      // 0. Diagnostic iframe/preview
+      diagnostics.push({
+        name: 'Environnement d\'exécution',
+        status: context.isIframe ? 'warning' : 'success',
+        message: context.isIframe 
+          ? (context.isLovablePreview ? 'Mode Prévisualisation Lovable détecté' : 'Application dans iframe')
+          : 'Application standalone',
+        details: `Backend recommandé: ${context.recommendedBackend} | FSA disponible: ${context.canUseFSA}`
+      });
       // 1. Vérifier le support OPFS
       const opfsSupported = checkOPFSSupport();
       diagnostics.push({
@@ -163,7 +179,15 @@ export default function StorageDiagnosticPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Diagnostic du Stockage Hybride</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl font-bold">Diagnostic du Stockage Hybride</h1>
+          {executionContext.isIframe && (
+            <Badge variant="secondary" className="gap-1">
+              <Monitor className="w-3 h-3" />
+              Preview Mode
+            </Badge>
+          )}
+        </div>
         <p className="text-muted-foreground">
           Vérifiez la disponibilité et le fonctionnement du système de stockage hybride pour les données HDS.
         </p>
@@ -227,6 +251,11 @@ export default function StorageDiagnosticPage() {
                 <HardDrive className="h-5 w-5" />
                 Stockage Local (HDS)
               </CardTitle>
+              {executionContext.isIframe && (
+                <Badge variant="secondary" className="text-xs">
+                  Mode: {executionContext.recommendedBackend}
+                </Badge>
+              )}
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between">
