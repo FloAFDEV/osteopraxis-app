@@ -107,20 +107,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
     setIsLoading(true);
     
     try {
-      // Utiliser le hook de configuration HDS pour effectuer la vraie configuration
-      const { useHDSConfiguration } = await import('@/hooks/useHDSConfiguration');
-      
-      // Configurer réellement le gestionnaire HDS sécurisé
-      const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
-      
-      console.log('🔧 Configuration effective du stockage HDS sécurisé...');
-      await hdsSecureManager.configure({
-        directoryHandle: directoryHandle!,
-        password,
-        entities: ['patients', 'appointments', 'invoices']
-      });
-      
-      // Appeler le callback parent pour notifier la fin de configuration
+      // Appeler le callback parent qui s'occupera de la configuration
       await onComplete({
         directoryHandle: directoryHandle!,
         password,

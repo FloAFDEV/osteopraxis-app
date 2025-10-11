@@ -51,7 +51,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
           }
           
           // En mode connecté, proposer la configuration si pas encore fait
-          if (!status.isConfigured && !skipped && status.physicalStorageAvailable !== false) {
+          if (!status.isConfigured && !skipped) {
             console.log('⚙️ Configuration stockage HDS sécurisé disponible');
             setShowSetup(true);
           } else if (status.isConfigured && !status.isUnlocked && !skipped) {
@@ -71,7 +71,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
         } catch (error) {
           console.error('Erreur vérification mode démo:', error);
           // En cas d'erreur, procéder comme en mode normal
-          if (!status.isConfigured && !skipped && status?.physicalStorageAvailable !== false) {
+          if (!status.isConfigured && !skipped) {
             setShowSetup(true);
           }
         }
