@@ -81,7 +81,6 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
       };
       
       await hdsSecureManager.configure(secureConfig);
-      setShowUnlock(false);
       await initialize();
       
       toast.success('Stockage HDS sécurisé configuré avec succès !');
