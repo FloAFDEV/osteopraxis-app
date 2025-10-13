@@ -51,6 +51,7 @@ import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
 import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 import ConnectedStorageSettingsPage from "@/pages/ConnectedStorageSettingsPage";
 import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
+import ConfigurationPage from "@/pages/ConfigurationPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
@@ -103,6 +104,11 @@ function App() {
                         <Route path="/register" element={<RegisterPage />} />
 
                         {/* Routes protégées */}
+                        <Route path="/configuration" element={
+                          <ProtectedRoute>
+                            <ConfigurationPage />
+                          </ProtectedRoute>
+                        } />
                         <Route path="/dashboard" element={
                           <ProtectedRoute>
                             <DashboardPage />

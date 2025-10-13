@@ -32,39 +32,32 @@ interface HybridStorageProviderProps {
 
 export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ children }) => {
   const { status, isLoading, initialize, unlock, lock } = useHybridStorage();
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [showSetup, setShowSetup] = useState(false);
   const [showUnlock, setShowUnlock] = useState(false);
   const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('password');
   const navigate = useNavigate();
-  const [skipped, setSkipped] = useState<boolean>(() => sessionStorage.getItem('hybrid-storage-skip') === 'true');
   
   useEffect(() => {
     if (!isLoading && status) {
-      // Vérifier si on est en mode démo pour éviter la configuration
-      const checkDemoMode = async () => {
+      // Vérifier si le stockage est configuré mais verrouillé
+      const checkUnlockNeeded = async () => {
         try {
           const { isDemoSession } = await import('@/utils/demo-detection');
           const demoMode = await isDemoSession();
+          const skipped = sessionStorage.getItem('hybrid-storage-skip') === 'true';
           
           if (demoMode) {
-            console.log('🎭 Mode démo détecté - Pas de configuration stockage nécessaire');
+            console.log('🎭 Mode démo détecté - Pas de déverrouillage nécessaire');
             return;
           }
           
-          // En mode connecté, proposer la configuration si pas encore fait
-          if (!status.isConfigured && !skipped) {
-            console.log('⚙️ Configuration stockage HDS sécurisé disponible');
-            setShowWelcome(true);
-          } else if (status.isConfigured && !status.isUnlocked && !skipped) {
-            // Charger la méthode de sécurité depuis la configuration
+          // Si configuré mais verrouillé, afficher le prompt de déverrouillage
+          if (status.isConfigured && !status.isUnlocked && !skipped) {
             const config = localStorage.getItem('hybrid-storage-config');
             if (config) {
               try {
                 const parsedConfig = JSON.parse(config);
                 setSecurityMethod(parsedConfig.securityMethod || 'password');
               } catch {
-                // Fallback
                 setSecurityMethod('password');
               }
             }
@@ -72,16 +65,12 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
           }
         } catch (error) {
           console.error('Erreur vérification mode démo:', error);
-          // En cas d'erreur, procéder comme en mode normal
-          if (!status.isConfigured && !skipped) {
-            setShowWelcome(true);
-          }
         }
       };
       
-      checkDemoMode();
+      checkUnlockNeeded();
     }
-  }, [isLoading, status, skipped]);
+  }, [isLoading, status]);
 
   const configureStorage = async (config: any): Promise<void> => {
     try {
@@ -92,7 +81,6 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
       };
       
       await hdsSecureManager.configure(secureConfig);
-      setShowSetup(false);
       setShowUnlock(false);
       await initialize();
       
@@ -124,49 +112,10 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
 
   const handleSkip = () => {
     sessionStorage.setItem('hybrid-storage-skip', 'true');
-    setSkipped(true);
-    setShowWelcome(false);
-    setShowSetup(false);
     setShowUnlock(false);
-    toast.info("Configuration du stockage local ignorée. L'application fonctionnera avec les données en ligne uniquement. Vous pourrez configurer le stockage local plus tard dans Paramètres > Stockage.");
-    try { navigate('/'); } catch {}
+    toast.info("Stockage local non déverrouillé. L'application fonctionnera avec les données en ligne uniquement.");
+    try { navigate('/dashboard'); } catch {}
   };
-
-  const handleStartConfiguration = () => {
-    setShowWelcome(false);
-    setShowSetup(true);
-  };
-
-  // Afficher l'écran de bienvenue immédiatement si pas de config et pas de skip
-  if (showWelcome) {
-    return (
-      <StorageWelcomeScreen
-        onConfigure={handleStartConfiguration}
-        onSkip={handleSkip}
-      />
-    );
-  }
-
-  // Pendant le chargement, afficher un loader minimal seulement si nécessaire
-  if (isLoading && !showWelcome && !showSetup && !showUnlock) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto" />
-          <p className="text-muted-foreground">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (showSetup) {
-    return (
-      <SecureStorageSetup
-        onComplete={configureStorage}
-        onCancel={handleSkip}
-      />
-    );
-  }
 
   if (showUnlock) {
     return (
