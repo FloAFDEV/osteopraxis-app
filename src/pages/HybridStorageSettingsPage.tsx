@@ -19,31 +19,11 @@ const HybridStorageSettingsPage: React.FC = () => {
   const { isDemoMode } = useDemo();
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [showSetup, setShowSetup] = useState(false);
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
   const { status, isLoading, initialize } = useHybridStorage();
 
-  useEffect(() => {
-    // Vérifier si on doit afficher la configuration
-    if (!isLoading && status && !status.isConfigured) {
-      setShowSetup(true);
-    }
-  }, [isLoading, status]);
-
-  const handleConfigurationComplete = async (config: any) => {
-    try {
-      // La configuration est déjà effectuée dans SecureStorageSetup
-      // On ne fait que rafraîchir le statut et fermer la configuration
-      await initialize();
-      setShowSetup(false);
-      toast.success('Configuration HDS terminée avec succès !');
-    } catch (error) {
-      console.error('Erreur configuration:', error);
-      toast.error('Erreur lors de la configuration');
-    }
-  };
 
   const handleExportRequest = () => {
     setShowExportConfirm(true);
@@ -198,18 +178,6 @@ const HybridStorageSettingsPage: React.FC = () => {
     );
   }
 
-  // Afficher la configuration initiale si nécessaire
-  if (showSetup) {
-    return (
-      <SecureStorageSetup
-        onComplete={handleConfigurationComplete}
-        onCancel={() => {
-          setShowSetup(false);
-          navigate('/dashboard');
-        }}
-      />
-    );
-  }
 
   return (
     <Layout>
@@ -224,37 +192,33 @@ const HybridStorageSettingsPage: React.FC = () => {
               <ArrowLeft className="h-4 w-4" />
               Retour
             </Button>
-            <div className="flex items-center gap-2">
-              <Settings className="h-6 w-6" />
-              <h1 className="text-2xl font-bold">Stockage HDS Sécurisé</h1>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Settings className="h-6 w-6" />
+                Stockage Local Sécurisé
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Gérez vos données sensibles stockées localement sur votre appareil
+              </p>
             </div>
           </div>
 
           {/* Message d'information si pas configuré */}
           {!isLoading && status && !status.isConfigured && (
-            <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
-                      Stockage HDS non configuré
-                    </p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
-                      Pour une conformité HDS complète, configurez le stockage local sécurisé pour vos données sensibles.
-                    </p>
-                    <Button 
-                      size="sm"
-                      onClick={() => setShowSetup(true)}
-                      className="bg-amber-600 hover:bg-amber-700 text-white"
-                    >
-                      <Shield className="h-4 w-4 mr-1" />
-                      Configurer maintenant
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+              <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <AlertDescription>
+                <strong>Stockage local non configuré</strong>
+                <p className="mt-2">Pour utiliser cette fonctionnalité, configurez d'abord votre stockage local sécurisé.</p>
+                <Button 
+                  size="sm"
+                  onClick={() => navigate('/configuration')}
+                  className="mt-3"
+                >
+                  Aller à la configuration
+                </Button>
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Indicateur de conformité HDS */}
@@ -266,9 +230,10 @@ const HybridStorageSettingsPage: React.FC = () => {
           {/* Actions de gestion */}
           <Card>
             <CardHeader>
-              <CardTitle>Gestion des données</CardTitle>
+              <CardTitle>Sauvegarde et restauration</CardTitle>
               <CardDescription>
-                Exportez et importez vos données locales en toute sécurité
+                Exportez vos données dans un fichier chiffré (.phds) pour les transférer sur un autre appareil ou créer une sauvegarde de sécurité. 
+                Vous pourrez les réimporter en utilisant le même mot de passe.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

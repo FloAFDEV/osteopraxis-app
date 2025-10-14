@@ -59,15 +59,6 @@ const SettingsPage = () => {
 				color: "text-blue-500",
 			},
 			{
-				id: "storage",
-				title: "Stockage HDS Sécurisé",
-				description:
-					"Configurez le stockage local sécurisé pour vos données médicales",
-				icon: Shield,
-				path: "/settings/storage",
-				color: "text-red-500",
-			},
-			{
 				id: "import",
 				title: "Import de données",
 				description:
