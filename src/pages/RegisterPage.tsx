@@ -172,17 +172,15 @@ const RegisterPage = () => {
     <div className="min-h-screen flex flex-col lg:flex-row bg-background dark:bg-gradient-to-br dark:from-slate-950 dark:to-slate-900">
       {/* Left section - Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 md:p-12">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-4xl font-extrabold tracking-tight">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <BackButton to="/" />
+          <h1 className="text-4xl font-extrabold tracking-tight flex-1 text-center">
             <span className="text-foreground">Patient</span>
             <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
               Hub
             </span>
           </h1>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <BackButton to="/" />
-          </div>
+          <ThemeToggle />
         </div>
 
         <div className="flex-grow flex items-center justify-center">
