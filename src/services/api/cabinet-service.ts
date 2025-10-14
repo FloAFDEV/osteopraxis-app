@@ -10,6 +10,15 @@ import { storageRouter } from '@/services/storage/storage-router';
 
 export const cabinetService = {
   async getCabinets(): Promise<Cabinet[]> {
+    // 🚨 SÉCURITÉ: Vérifier le mode démo en amont
+    const { isDemoSession } = await import('@/utils/demo-detection');
+    const isDemoMode = await isDemoSession();
+    if (isDemoMode) {
+      // Forcer le retour du cabinet démo uniquement
+      const { demoLocalStorage } = await import('@/services/demo-local-storage');
+      return demoLocalStorage.getCabinets();
+    }
+    
     const adapter = await storageRouter.route<Cabinet>('cabinets');
     return adapter.getAll();
   },

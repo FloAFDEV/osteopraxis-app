@@ -33,20 +33,30 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
   }, []);
 
   useEffect(() => {
+    if (isDemoMode && cabinets.length > 0) {
+      // 🎭 MODE DÉMO: Forcer la sélection du cabinet démo (ID=1)
+      const demoCabinet = cabinets.find(c => c.id === 1);
+      if (demoCabinet) {
+        setSelectedCabinet(demoCabinet);
+        onCabinetChange('1');
+        form.setValue('cabinetId', 1);
+      }
+      return; // Sortir tôt en mode démo
+    }
+    
+    // Mode connecté : logique normale
     if (cabinets.length > 0) {
-      // Configuration automatique du premier cabinet
       if (!selectedCabinetId) {
         const firstCabinet = cabinets[0];
         setSelectedCabinet(firstCabinet);
         onCabinetChange(firstCabinet.id.toString());
         form.setValue('cabinetId', firstCabinet.id);
       } else {
-        // Trouver le cabinet sélectionné
         const cabinet = cabinets.find(c => c.id === parseInt(selectedCabinetId));
         setSelectedCabinet(cabinet || null);
       }
     }
-  }, [cabinets, selectedCabinetId, onCabinetChange, form]);
+  }, [cabinets, selectedCabinetId, isDemoMode, onCabinetChange, form]);
 
   const handleCabinetChange = (value: string) => {
     const cabinet = cabinets.find(c => c.id === parseInt(value));
@@ -76,7 +86,7 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
                 onValueChange={handleCabinetChange}
                 enumType="Cabinet"
                 placeholder={loading ? "Chargement..." : "Sélectionner un cabinet"}
-                disabled={loading}
+                disabled={loading || isDemoMode}
               />
             </FormControl>
           </FormItem>
@@ -101,8 +111,8 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
               </span>
             )}
             {isDemoMode && (
-              <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
-                ✨ Cabinet de démonstration pré-configuré (non modifiable)
+              <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 font-medium">
+                🔒 Cabinet fixe en mode démo (non modifiable)
               </p>
             )}
           </AlertDescription>

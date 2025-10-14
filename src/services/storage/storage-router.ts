@@ -231,10 +231,16 @@ export class StorageRouter {
    * Adapter pour les données Non-HDS (Supabase cloud)
    */
   private async getSupabaseAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
-    // 🚨 SÉCURITÉ CRITIQUE: JAMAIS de Supabase en mode démo
+    // 🚨 TRIPLE VÉRIFICATION SÉCURITÉ CRITIQUE
     const isDemoMode = await isDemoSession();
     if (isDemoMode) {
       throw new Error(`🚨 VIOLATION SÉCURITÉ: Tentative Supabase en mode démo pour: ${dataType}`);
+    }
+    
+    // Vérification supplémentaire via sessionStorage
+    const demoSession = sessionStorage.getItem('demo_session');
+    if (demoSession) {
+      throw new Error(`🚨 VIOLATION SÉCURITÉ: Session démo détectée mais tentative Supabase pour: ${dataType}`);
     }
 
     // Vérification de sécurité stricte

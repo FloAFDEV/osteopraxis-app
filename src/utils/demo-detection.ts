@@ -70,7 +70,7 @@ export const isDemoSession = async (): Promise<boolean> => {
     if (hasLocalDemoSession) {
       // Log seulement si le cache était différent pour éviter le spam
       if (!demoSessionCache || demoSessionCache.result !== true) {
-        console.log('🎭 Session démo locale active détectée');
+        console.log('🎭 Session démo locale active détectée - Isolation des données activée');
       }
       const result = true;
       demoSessionCache = { result, timestamp: now };
