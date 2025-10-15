@@ -14,11 +14,14 @@ export const cabinetService = {
     const { isDemoSession } = await import('@/utils/demo-detection');
     const isDemoMode = await isDemoSession();
     if (isDemoMode) {
-      // Forcer le retour du cabinet démo uniquement
+      console.log('🎭 [CabinetService] Mode démo → Retour cabinet démo uniquement');
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      return demoLocalStorage.getCabinets();
+      const demoCabinets = demoLocalStorage.getCabinets();
+      console.log(`🎭 [CabinetService] Nombre de cabinets démo: ${demoCabinets.length}`, demoCabinets);
+      return demoCabinets;
     }
     
+    console.log('🔐 [CabinetService] Mode connecté → Utilisation StorageRouter');
     const adapter = await storageRouter.route<Cabinet>('cabinets');
     return adapter.getAll();
   },

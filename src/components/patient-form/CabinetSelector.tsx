@@ -23,11 +23,18 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
 
-  // Vérifier le mode démo
+  // Vérifier le mode démo et invalider le cache si nécessaire
   useEffect(() => {
     const checkDemoMode = async () => {
       const demo = await isDemoSession();
       setIsDemoMode(demo);
+      
+      // 🧹 Invalider le cache en mode démo pour forcer des données fraîches
+      if (demo) {
+        console.log('🧹 [CabinetSelector] Mode démo : invalidation du cache cabinets');
+        const { cabinetCache } = await import('@/services/cache/cabinet-cache');
+        cabinetCache.invalidate();
+      }
     };
     checkDemoMode();
   }, []);
