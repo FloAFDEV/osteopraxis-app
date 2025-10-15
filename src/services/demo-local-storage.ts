@@ -438,8 +438,10 @@ class DemoLocalStorageService {
    * Récupère tous les cabinets (en mode démo: cabinet pré-configuré uniquement)
    */
   getCabinets(): Cabinet[] {
-    const data = this.getSessionData();
-    return data?.cabinets || [this.createDemoCabinet()];
+    // 🚨 SÉCURITÉ CRITIQUE: Toujours retourner UNIQUEMENT le cabinet démo
+    // Ignorer complètement data.cabinets pour éviter toute fuite multi-tenant
+    console.log('🎭 [DemoLocalStorage] Retour du cabinet démo uniquement (ID=1)');
+    return [this.createDemoCabinet()];
   }
 
   /**
