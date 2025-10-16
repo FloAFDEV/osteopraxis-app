@@ -17,6 +17,7 @@ import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { InvoiceEmptyState } from "@/components/invoices/InvoiceEmptyState";
 import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
 import { InvoicePrintWrapper } from "@/components/invoices/InvoicePrintWrapper";
+import { InvoiceDownloadWrapper } from "@/components/invoices/InvoiceDownloadWrapper";
 import { InvoiceYearGroup } from "@/components/invoices/InvoiceYearGroup";
 import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 import { useOsteopaths } from "@/hooks/useOsteopaths";
@@ -40,6 +41,12 @@ const InvoicesPage = () => {
   const [printPatient, setPrintPatient] = useState<Patient | null>(null);
   const [printOsteopath, setPrintOsteopath] = useState<Osteopath | null>(null);
   const [printCabinet, setPrintCabinet] = useState<Cabinet | null>(null);
+
+  // State for download handling (separate from print)
+  const [downloadInvoice, setDownloadInvoice] = useState<Invoice | null>(null);
+  const [downloadPatient, setDownloadPatient] = useState<Patient | null>(null);
+  const [downloadOsteopath, setDownloadOsteopath] = useState<Osteopath | null>(null);
+  const [downloadCabinet, setDownloadCabinet] = useState<Cabinet | null>(null);
 
   // State for print handling
   const [readyToPrint, setReadyToPrint] = useState(false);
@@ -204,19 +211,15 @@ const InvoicesPage = () => {
   };
   const handleDownloadInvoice = async (invoice: Invoice) => {
     try {
-      // Load related data before printing
+      // Load related data before downloading
       const relatedData = await loadInvoiceRelatedData(invoice);
-      setIsPreparingPrint(true);
-      setPrintInvoice(invoice);
-      setPrintPatient(relatedData.patient);
-      setPrintOsteopath(relatedData.osteopath);
-      setPrintCabinet(relatedData.cabinet);
-      setPrintAllInvoices(null);
-      setReadyToPrint(true);
+      setDownloadInvoice(invoice);
+      setDownloadPatient(relatedData.patient);
+      setDownloadOsteopath(relatedData.osteopath);
+      setDownloadCabinet(relatedData.cabinet);
     } catch (error) {
-      console.error("Erreur lors de la préparation de l'impression:", error);
-      toast.error("Erreur lors de la préparation du PDF");
-      setIsPreparingPrint(false);
+      console.error("Erreur lors de la préparation du téléchargement:", error);
+      toast.error("Erreur lors de la préparation du téléchargement");
     }
   };
   const handleDownloadAllInvoices = async () => {
@@ -376,6 +379,20 @@ const InvoicesPage = () => {
         </div>
         {/* Print / Modal etc */}
         <InvoicePrintWrapper printInvoice={printInvoice} printAllInvoices={printAllInvoices} printPatient={printPatient} printOsteopath={printOsteopath} printCabinet={printCabinet} patientDataMap={patientDataMap} selectedYear={selectedYear} selectedMonth={selectedMonth} onPrintComplete={handlePrintComplete} isPreparingPrint={isPreparingPrint} setReadyToPrint={setReadyToPrint} readyToPrint={readyToPrint} />
+
+        {/* Download wrapper (separate from print) */}
+        <InvoiceDownloadWrapper 
+          downloadInvoice={downloadInvoice}
+          downloadPatient={downloadPatient}
+          downloadOsteopath={downloadOsteopath}
+          downloadCabinet={downloadCabinet}
+          onDownloadComplete={() => {
+            setDownloadInvoice(null);
+            setDownloadPatient(null);
+            setDownloadOsteopath(null);
+            setDownloadCabinet(null);
+          }}
+        />
 
         {/* Delete confirmation modal */}
         {isDeleteModalOpen && selectedInvoiceId && <ConfirmDeleteInvoiceModal isOpen={isDeleteModalOpen} invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")} onCancel={() => setIsDeleteModalOpen(false)} onDelete={handleDeleteInvoice} />}

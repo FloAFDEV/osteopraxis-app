@@ -62,13 +62,13 @@ export const InvoiceDetails = ({
 		<>
 			<Card className="min-h-[260px] flex flex-col justify-between border shadow px-4 py-4 transition-all duration-300 bg-white dark:bg-gray-800 relative">
 				<CardContent className="p-0 flex flex-col h-full">
-					{/* 🔷 Icônes Print / Download - top right */}
+				{/* 🔷 Icônes Print / Download - top right */}
 					<div className="absolute top-4 right-4 flex gap-2 z-10">
-						{onDownload && (
+						{onPrint && (
 							<Button
 								size="icon"
 								variant="outline"
-								onClick={onDownload}
+								onClick={onPrint}
 								title="Imprimer"
 								aria-label="Imprimer la note d'honoraire"
 								className="h-9 w-9 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
