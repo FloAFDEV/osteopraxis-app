@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Upload, Lock, Shield, CheckCircle, AlertTriangle, Users, Calendar, FileText, AlertCircle } from "lucide-react";
-import { usbImportService, type ImportOptions, type ImportResult, type ImportConflict, usbValidationService } from "@/services/secure-usb-sharing";
+import { usbImportService, type ImportOptions, type ImportResult, type ImportConflict } from "@/services/secure-usb-sharing";
 import { toast } from "sonner";
 
 interface SecureImportDialogProps {
@@ -35,17 +35,6 @@ export const SecureImportDialog = ({ open, onOpenChange }: SecureImportDialogPro
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validation du fichier
-      const validationReport = await usbValidationService.validateSecureFile(file);
-      
-      if (!validationReport.isValid) {
-        const errorMessages = validationReport.issues
-          .filter(i => i.type === 'error')
-          .map(i => i.message);
-        setErrors(errorMessages);
-        return;
-      }
-
       setSelectedFile(file);
       setErrors([]);
       setStep('options');

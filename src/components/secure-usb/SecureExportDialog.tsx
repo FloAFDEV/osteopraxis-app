@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Download, Lock, Shield, Users, Calendar, FileText, AlertTriangle } from "lucide-react";
-import { usbExportService, type ExportOptions, usbValidationService } from "@/services/secure-usb-sharing";
+import { usbExportService, type ExportOptions } from "@/services/secure-usb-sharing";
 import { toast } from "sonner";
 
 interface SecureExportDialogProps {
@@ -46,22 +46,6 @@ export const SecureExportDialog = ({ open, onOpenChange }: SecureExportDialogPro
     setProgress(0);
 
     try {
-      // Validation avancée des données
-      const validationReport = await usbValidationService.validateExportData(exportOptions);
-      
-      // Afficher les avertissements mais continuer
-      const warnings = validationReport.issues.filter(i => i.type === 'warning');
-      if (warnings.length > 0) {
-        console.warn('Export warnings:', warnings);
-      }
-
-      // Arrêter en cas d'erreurs critiques
-      const criticalErrors = validationReport.issues.filter(i => i.type === 'error');
-      if (criticalErrors.length > 0) {
-        setErrors(criticalErrors.map(e => e.message));
-        return;
-      }
-
       // Simuler le progrès
       const progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 10, 90));

@@ -5,7 +5,6 @@
 
 export { usbExportService, type ExportOptions, type SecureExportData } from './usb-export-service';
 export { usbImportService, type ImportOptions, type ImportResult, type ImportConflict } from './usb-import-service';
-export { usbValidationService, type ValidationReport, type ValidationIssue } from './usb-validation-service';
 export { usbMonitoringService, type USBOperationMetrics, type USBUsageStats } from './usb-monitoring-service';
 
 /**

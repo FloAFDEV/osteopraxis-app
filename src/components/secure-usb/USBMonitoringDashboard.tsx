@@ -20,7 +20,6 @@ import {
   HardDrive
 } from "lucide-react";
 import { usbMonitoringService, type USBUsageStats, type USBOperationMetrics } from "@/services/secure-usb-sharing/usb-monitoring-service";
-import { usbValidationService } from "@/services/secure-usb-sharing/usb-validation-service";
 
 interface USBMonitoringDashboardProps {
   className?: string;
