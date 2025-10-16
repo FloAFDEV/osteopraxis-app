@@ -3,7 +3,7 @@
  * Implémentent l'interface DataAdapter pour le stockage local
  */
 
-import { DataAdapter, DataLocation } from '../hybrid-data-adapter/types';
+import { DataAdapter, DataLocation } from '../storage/types';
 import { browserSQLite } from './browser-sqlite';
 
 /**

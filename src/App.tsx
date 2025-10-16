@@ -50,7 +50,6 @@ import EditCabinetPage from "@/pages/EditCabinetPage";
 import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
 import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 import ConnectedStorageSettingsPage from "@/pages/ConnectedStorageSettingsPage";
-import StorageDiagnosticPage from "@/pages/StorageDiagnosticPage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -204,22 +203,17 @@ function App() {
                             <ConnectedStorageSettingsPage />
                           </ProtectedRoute>
                         } />
-                        {/* Routes admin */}
-                        <Route path="/admin" element={
-                          <ProtectedRoute requireRole="ADMIN">
-                            <AdminDashboardPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/admin/dashboard" element={
-                          <ProtectedRoute requireRole="ADMIN">
-                            <AdminDashboardPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/admin/storage-diagnostic" element={
-                          <ProtectedRoute requireRole="ADMIN">
-                            <StorageDiagnosticPage />
-                          </ProtectedRoute>
-                        } />
+        {/* Routes admin */}
+        <Route path="/admin" element={
+          <ProtectedRoute requireRole="ADMIN">
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute requireRole="ADMIN">
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        } />
                         {/* Retiré des paramètres pour les praticiens */}
                         <Route path="/help" element={
                           <ProtectedRoute>

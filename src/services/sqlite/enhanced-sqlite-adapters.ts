@@ -3,7 +3,7 @@
  * Implémentation complète pour le stockage local sécurisé
  */
 
-import { DataAdapter, DataLocation } from '../hybrid-data-adapter/types';
+import { DataAdapter, DataLocation } from '../storage/types';
 import { getOPFSSQLiteService } from './opfs-sqlite-service';
 
 export class EnhancedSQLiteAdapter<T extends { id?: number; createdAt?: string; updatedAt?: string }> 

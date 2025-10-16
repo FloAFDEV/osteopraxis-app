@@ -1,6 +1,6 @@
 /**
- * Composant de diagnostic pour l'architecture hybride
- * Phase 1: Test et validation de l'infrastructure SQLite + OPFS
+ * Composant de diagnostic pour l'architecture de stockage
+ * Diagnostic du StorageRouter et des différents adapters
  */
 
 import React, { useState } from 'react';
@@ -19,71 +19,87 @@ import {
   XCircle, 
   Clock,
   Zap,
-  ArrowUpDown,
-  TestTube
+  TestTube,
+  Info
 } from "lucide-react";
-import { hybridDataManager, useHybridDataDiagnostic } from "@/services/hybrid-data-adapter";
 import { useSQLiteTest } from "@/hooks/useSQLiteTest";
+import { storageRouter } from '@/services/storage/storage-router';
+import { toast } from 'sonner';
 
 interface DiagnosticResult {
-  cloud: { available: boolean; entities: string[]; latency?: number };
-  local: { available: boolean; entities: string[]; latency?: number };
-  dataClassification: Record<string, string>;
-}
-
-interface SyncResult {
-  success: boolean;
-  migrated: number;
-  errors: string[];
+  mode: string;
+  demo: boolean;
+  hdsConfigured: boolean;
+  hdsUnlocked: boolean;
+  supportsOPFS: boolean;
+  cloudAvailable: boolean;
+  localAvailable: boolean;
+  dataTypes: {
+    name: string;
+    classification: string;
+    location: string;
+  }[];
+  performance?: {
+    cloud: number;
+    local: number;
+  };
 }
 
 export const HybridStorageDiagnostic = () => {
   const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResult | null>(null);
-  const [syncResults, setSyncResults] = useState<Record<string, SyncResult>>({});
   const [isRunningDiagnostic, setIsRunningDiagnostic] = useState(false);
-  const [isRunningSync, setIsRunningSync] = useState(false);
-  const [performanceData, setPerformanceData] = useState<any>(null);
   
-  const { runDiagnostic } = useHybridDataDiagnostic();
   const { loading: sqliteLoading, result: sqliteResult, runTest: runSQLiteTest } = useSQLiteTest();
 
   const handleRunDiagnostic = async () => {
     setIsRunningDiagnostic(true);
     try {
-      const result = await runDiagnostic();
+      // Exécuter le diagnostic du StorageRouter
+      const diagnosis = await storageRouter.diagnose();
       
       // Test de performance
-      const perfTest = await hybridDataManager.performanceTest();
-      setPerformanceData(perfTest);
+      const perfStart = performance.now();
+      await storageRouter.route('patients');
+      const localLatency = performance.now() - perfStart;
+      
+      const cloudPerfStart = performance.now();
+      await storageRouter.route('users');
+      const cloudLatency = performance.now() - cloudPerfStart;
+      
+      // Construire le résultat
+      const dataTypes = [
+        { name: 'Patients', classification: 'HDS', location: diagnosis.mode === 'demo' ? 'Demo Storage' : 'Local Sécurisé' },
+        { name: 'Rendez-vous', classification: 'HDS', location: diagnosis.mode === 'demo' ? 'Demo Storage' : 'Local Sécurisé' },
+        { name: 'Factures', classification: 'HDS', location: diagnosis.mode === 'demo' ? 'Demo Storage' : 'Local Sécurisé' },
+        { name: 'Utilisateurs', classification: 'Non-HDS', location: 'Cloud (Supabase)' },
+        { name: 'Cabinets', classification: 'Non-HDS', location: 'Cloud (Supabase)' },
+        { name: 'Ostéopathes', classification: 'Non-HDS', location: 'Cloud (Supabase)' },
+      ];
+      
+      // Check OPFS support
+      const supportsOPFS = 'storage' in navigator && 'getDirectory' in navigator.storage;
       
       setDiagnosticResult({
-        ...result,
-        cloud: { ...result.cloud, latency: perfTest.cloud.latency },
-        local: { ...result.local, latency: perfTest.local.latency }
+        mode: diagnosis.mode,
+        demo: diagnosis.mode === 'demo',
+        hdsConfigured: diagnosis.security.hdsLocalOnly,
+        hdsUnlocked: diagnosis.security.hdsLocalOnly,
+        supportsOPFS,
+        cloudAvailable: !diagnosis.isIframeEnvironment && diagnosis.mode === 'connected',
+        localAvailable: diagnosis.mode === 'demo' || diagnosis.security.hdsLocalOnly,
+        dataTypes,
+        performance: {
+          cloud: cloudLatency,
+          local: localLatency
+        }
       });
+      
+      toast.success('Diagnostic terminé avec succès');
     } catch (error) {
       console.error('Diagnostic failed:', error);
+      toast.error('Erreur lors du diagnostic');
     } finally {
       setIsRunningDiagnostic(false);
-    }
-  };
-
-  const handleSyncEntity = async (entityName: string) => {
-    setIsRunningSync(true);
-    try {
-      const result = await hybridDataManager.syncCloudToLocal(entityName);
-      setSyncResults(prev => ({ ...prev, [entityName]: result }));
-    } catch (error) {
-      setSyncResults(prev => ({ 
-        ...prev, 
-        [entityName]: { 
-          success: false, 
-          migrated: 0, 
-          errors: [`Sync failed: ${error}`] 
-        } 
-      }));
-    } finally {
-      setIsRunningSync(false);
     }
   };
 
@@ -113,10 +129,10 @@ export const HybridStorageDiagnostic = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="w-5 h-5" />
-            Diagnostic Architecture Hybride
+            Diagnostic Architecture de Stockage
           </CardTitle>
           <CardDescription>
-            Phase 1: Test et validation de l'infrastructure SQLite + OPFS pour le stockage local sécurisé
+            Test et validation du StorageRouter et des différents adapters (Demo, HDS, Cloud)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -153,79 +169,74 @@ export const HybridStorageDiagnostic = () => {
 
       {diagnosticResult && (
         <Tabs defaultValue="status" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="status">Statut</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="classification">Classification</TabsTrigger>
-            <TabsTrigger value="sync">Synchronisation</TabsTrigger>
           </TabsList>
 
           <TabsContent value="status" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Cloud Storage */}
+              {/* Informations générales */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Cloud className="w-5 h-5 text-blue-500" />
-                    Stockage Cloud (Supabase)
-                    {getStatusBadge(diagnosticResult.cloud.available)}
+                    <Info className="w-5 h-5 text-blue-500" />
+                    Mode de Fonctionnement
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">
-                      Entités: {diagnosticResult.cloud.entities.length}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Mode actuel</span>
+                      <Badge variant={diagnosticResult.demo ? "secondary" : "default"}>
+                        {diagnosticResult.mode}
+                      </Badge>
                     </div>
-                    <div className="text-xs space-y-1">
-                      {diagnosticResult.cloud.entities.map(entity => (
-                        <div key={entity} className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          {entity}
-                        </div>
-                      ))}
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Mode Démo</span>
+                      {getStatusBadge(diagnosticResult.demo)}
                     </div>
-                    {diagnosticResult.cloud.latency && (
-                      <div className="flex items-center gap-2 mt-4">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm">
-                          Latence: {diagnosticResult.cloud.latency.toFixed(2)}ms
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">HDS Configuré</span>
+                      {getStatusBadge(diagnosticResult.hdsConfigured)}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">HDS Déverrouillé</span>
+                      {getStatusBadge(diagnosticResult.hdsUnlocked)}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Support OPFS</span>
+                      {getStatusBadge(diagnosticResult.supportsOPFS)}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Local Storage */}
+              {/* Disponibilité des stockages */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <HardDrive className="w-5 h-5 text-green-500" />
-                    Stockage Local (SQLite + OPFS)
-                    {getStatusBadge(diagnosticResult.local.available)}
+                    <Database className="w-5 h-5 text-green-500" />
+                    Disponibilité Stockages
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">
-                      Tables: {diagnosticResult.local.entities.length}
-                    </div>
-                    <div className="text-xs space-y-1">
-                      {diagnosticResult.local.entities.map(entity => (
-                        <div key={entity} className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          {entity}
-                        </div>
-                      ))}
-                    </div>
-                    {diagnosticResult.local.latency && (
-                      <div className="flex items-center gap-2 mt-4">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm">
-                          Latence: {diagnosticResult.local.latency.toFixed(2)}ms
-                        </span>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Cloud className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm">Cloud (Supabase)</span>
                       </div>
-                    )}
+                      {getStatusBadge(diagnosticResult.cloudAvailable)}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <HardDrive className="w-4 h-4 text-green-500" />
+                        <span className="text-sm">Local (HDS/Demo)</span>
+                      </div>
+                      {getStatusBadge(diagnosticResult.localAvailable)}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -233,7 +244,7 @@ export const HybridStorageDiagnostic = () => {
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-4">
-            {performanceData && (
+            {diagnosticResult.performance && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card>
                   <CardHeader>
@@ -246,18 +257,18 @@ export const HybridStorageDiagnostic = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span>Disponibilité</span>
-                        <Badge variant={performanceData.cloud.available ? "default" : "destructive"}>
-                          {performanceData.cloud.available ? "✓" : "✗"}
+                        <Badge variant={diagnosticResult.cloudAvailable ? "default" : "destructive"}>
+                          {diagnosticResult.cloudAvailable ? "✓" : "✗"}
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span>Latence</span>
                         <span className="font-mono text-sm">
-                          {performanceData.cloud.latency.toFixed(2)}ms
+                          {diagnosticResult.performance.cloud.toFixed(2)}ms
                         </span>
                       </div>
                       <Progress 
-                        value={Math.min(100, (1000 - performanceData.cloud.latency) / 10)} 
+                        value={Math.min(100, (1000 - diagnosticResult.performance.cloud) / 10)} 
                         className="h-2"
                       />
                     </div>
@@ -275,18 +286,18 @@ export const HybridStorageDiagnostic = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span>Disponibilité</span>
-                        <Badge variant={performanceData.local.available ? "default" : "destructive"}>
-                          {performanceData.local.available ? "✓" : "✗"}
+                        <Badge variant={diagnosticResult.localAvailable ? "default" : "destructive"}>
+                          {diagnosticResult.localAvailable ? "✓" : "✗"}
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span>Latence</span>
                         <span className="font-mono text-sm">
-                          {performanceData.local.latency.toFixed(2)}ms
+                          {diagnosticResult.performance.local.toFixed(2)}ms
                         </span>
                       </div>
                       <Progress 
-                        value={Math.min(100, (100 - performanceData.local.latency) / 1)} 
+                        value={Math.min(100, (100 - diagnosticResult.performance.local) / 1)} 
                         className="h-2"
                       />
                     </div>
@@ -301,82 +312,26 @@ export const HybridStorageDiagnostic = () => {
               <CardHeader>
                 <CardTitle>Classification des données</CardTitle>
                 <CardDescription>
-                  Répartition des entités entre stockage cloud et local
+                  Répartition des types de données entre stockage cloud et local
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(diagnosticResult.dataClassification).map(([entity, location]) => (
-                    <div key={entity} className="flex items-center justify-between p-3 border rounded">
-                      <span className="font-medium">{entity}</span>
-                      <Badge variant={location === 'cloud' ? "default" : "secondary"}>
-                        {location === 'cloud' ? (
-                          <>
-                            <Cloud className="w-3 h-3 mr-1" />
-                            Cloud
-                          </>
-                        ) : (
-                          <>
-                            <HardDrive className="w-3 h-3 mr-1" />
-                            Local
-                          </>
-                        )}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="sync" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ArrowUpDown className="w-5 h-5" />
-                  Synchronisation Cloud → Local
-                </CardTitle>
-                <CardDescription>
-                  Migration des données depuis Supabase vers SQLite local
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {['patients', 'appointments', 'invoices'].map(entity => (
-                    <div key={entity} className="flex items-center justify-between p-4 border rounded">
-                      <div className="flex items-center gap-3">
-                        <HardDrive className="w-4 h-4" />
-                        <span className="font-medium capitalize">{entity}</span>
+                  {diagnosticResult.dataTypes.map(dataType => (
+                    <div key={dataType.name} className="flex flex-col gap-2 p-3 border rounded">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{dataType.name}</span>
+                        <Badge variant={dataType.classification === 'HDS' ? "destructive" : "default"}>
+                          {dataType.classification}
+                        </Badge>
                       </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {syncResults[entity] && (
-                          <div className="text-sm text-muted-foreground mr-4">
-                            {syncResults[entity].success ? (
-                              <span className="text-green-600">
-                                ✓ {syncResults[entity].migrated} migrés
-                              </span>
-                            ) : (
-                              <span className="text-red-600">
-                                ✗ {syncResults[entity].errors.length} erreurs
-                              </span>
-                            )}
-                          </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        {dataType.location.includes('Local') ? (
+                          <HardDrive className="w-3 h-3" />
+                        ) : (
+                          <Cloud className="w-3 h-3" />
                         )}
-                        
-                        <Button
-                          size="sm"
-                          onClick={() => handleSyncEntity(entity)}
-                          disabled={isRunningSync}
-                          className="flex items-center gap-2"
-                        >
-                          {isRunningSync ? (
-                            <RefreshCw className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3" />
-                          )}
-                          Synchroniser
-                        </Button>
+                        {dataType.location}
                       </div>
                     </div>
                   ))}

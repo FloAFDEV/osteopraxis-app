@@ -9,7 +9,6 @@ import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator'
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { SecurityConfirmationDialog } from '@/components/security/SecurityConfirmationDialog';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
-import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
 import { toast } from 'sonner';
 import { useDemo } from '@/contexts/DemoContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
