@@ -123,6 +123,7 @@ export function InvoiceForm({
       const invoiceData: Partial<Invoice> = {
         ...data,
         date: data.date ? new Date(data.date).toISOString() : undefined,
+        amount: Math.round(data.amount * 100) / 100, // Arrondir à 2 décimales
         patientId: patient.id,
         appointmentId: appointment?.id,
         osteopathId: finalOsteopathId,
