@@ -15,7 +15,6 @@ import { useHybridStorageContext } from "@/contexts/HybridStorageContext";
 const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: cabinets, isLoading: cabinetsLoading } = useCabinets();
   const { isConfigured, isLoading: storageLoading } = useHybridStorageContext();
   const [shouldRedirect, setShouldRedirect] = useState(false);
   
@@ -60,6 +59,9 @@ const DashboardPage = () => {
       </div>
     );
   }
+
+  // ✅ ÉTAPE 1 : Charger les cabinets UNIQUEMENT après validation de la configuration HDS
+  const { data: cabinets, isLoading: cabinetsLoading } = useCabinets();
 
   return (
     <Layout>

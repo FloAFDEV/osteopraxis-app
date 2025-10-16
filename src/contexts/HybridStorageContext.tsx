@@ -80,6 +80,10 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
         entities: ['patients', 'appointments', 'invoices']
       };
       
+      // 🧹 ÉTAPE 2 : Nettoyer les données de sélection précédentes pour éviter les fuites multi-tenant
+      console.log('🧹 [HybridStorage] Nettoyage du localStorage lors de la configuration HDS');
+      localStorage.removeItem('selectedCabinetId');
+      
       await hdsSecureManager.configure(secureConfig);
       await initialize();
       

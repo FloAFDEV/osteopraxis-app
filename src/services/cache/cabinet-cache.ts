@@ -25,8 +25,17 @@ class CabinetCacheService {
     const cached = this.cache.get(cacheKey);
     const now = Date.now();
 
+    // 🔍 ÉTAPE 5 : Logs de diagnostic pour traçabilité
+    console.log('🔍 [CabinetCache] getCabinets() appelé', {
+      hasCachedData: !!cached?.data,
+      cacheAge: cached ? now - cached.timestamp : null,
+      isCacheFresh: cached && (now - cached.timestamp) < this.TTL,
+      timestamp: now
+    });
+
     // Si on a des données fraîches, les retourner immédiatement
     if (cached?.data && (now - cached.timestamp) < this.TTL) {
+      console.log('✅ [CabinetCache] Utilisation du cache (frais) -', cached.data.length, 'cabinet(s)');
       return cached.data;
     }
 

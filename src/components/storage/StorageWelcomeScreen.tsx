@@ -14,11 +14,13 @@ import { getExecutionContext } from '@/utils/iframe-detection';
 interface StorageWelcomeScreenProps {
   onConfigure: () => void;
   onSkip: () => void;
+  isFirstConnection?: boolean;
 }
 
 export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({ 
   onConfigure, 
-  onSkip 
+  onSkip,
+  isFirstConnection = false
 }) => {
   const [context, setContext] = useState(() => getExecutionContext());
   
@@ -57,6 +59,21 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {/* ÉTAPE 4 : Message spécial pour première connexion */}
+          {isFirstConnection && !isPreviewMode && (
+            <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30">
+              <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <AlertDescription className="text-green-800 dark:text-green-200">
+                <p className="font-semibold mb-2">🎉 Première connexion détectée !</p>
+                <p className="text-sm">
+                  Pour garantir la confidentialité de vos données de santé (HDS), 
+                  nous vous recommandons fortement de configurer un stockage local sécurisé.
+                  Cette configuration ne prend que 2 minutes et protégera vos données avec un chiffrement militaire.
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
             <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <AlertDescription className="text-blue-800 dark:text-blue-200">

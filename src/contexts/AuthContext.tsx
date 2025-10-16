@@ -351,17 +351,26 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 									};
 									setUser(userWithRole);
 									
-									// Navigation après connexion réussie
-									if (event === 'SIGNED_IN') {
-										// Redirection uniquement lors d'une nouvelle connexion
-										if (userWithRole.role === "ADMIN") {
-											navigate("/admin/dashboard", { replace: true });
-											console.log("🔄 Redirection vers admin dashboard");
-										} else {
-											navigate("/dashboard", { replace: true });
-											console.log("🔄 Redirection vers dashboard");
-										}
+								// Navigation après connexion réussie
+								if (event === 'SIGNED_IN') {
+									// 🎯 ÉTAPE 3 : Détecter la première connexion et reset le skip
+									const isFirstConnection = !sessionStorage.getItem('user-connected-before');
+									
+									if (isFirstConnection) {
+										console.log('🎉 [AuthContext] Première connexion détectée - Reset configuration HDS');
+										sessionStorage.setItem('user-connected-before', 'true');
+										sessionStorage.removeItem('hybrid-storage-skip'); // Reset le skip pour forcer la config
 									}
+									
+									// Redirection uniquement lors d'une nouvelle connexion
+									if (userWithRole.role === "ADMIN") {
+										navigate("/admin/dashboard", { replace: true });
+										console.log("🔄 Redirection vers admin dashboard");
+									} else {
+										navigate("/dashboard", { replace: true });
+										console.log("🔄 Redirection vers dashboard");
+									}
+								}
 								} else if (!error || error.code !== 'PGRST116') {
 									// Si pas de données utilisateur mais pas d'erreur critique, créer un utilisateur basique
 									const basicUser: User = {
