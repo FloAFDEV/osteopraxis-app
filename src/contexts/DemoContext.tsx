@@ -31,6 +31,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
             queryClient.clear(); // Vider complètement le cache pour éviter les fuites de données
           }
           
+          // 🧹 Invalider le cache cabinets lors du passage en mode démo
+          if (demoDetected && previousMode !== demoDetected) {
+            console.log('🧹 Passage en mode démo - Invalidation du cache cabinets');
+            const { cabinetCache } = await import('@/services/cache/cabinet-cache');
+            cabinetCache.invalidate();
+          }
+          
           setIsLoading(false);
         }
       } catch (error) {

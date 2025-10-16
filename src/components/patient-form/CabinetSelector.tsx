@@ -19,17 +19,15 @@ interface CabinetSelectorProps {
 }
 
 export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: CabinetSelectorProps) => {
-  const { data: cabinets = [], isLoading: loading } = useCabinets();
+  const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null); // null = en cours de détection
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
-  // Vérifier le mode démo et invalider le cache si nécessaire
+  // 🎯 ÉTAPE 1 : Détecter le mode démo en PREMIER
   useEffect(() => {
     const checkDemoMode = async () => {
       const demo = await isDemoSession();
       setIsDemoMode(demo);
       
-      // 🧹 Invalider le cache en mode démo pour forcer des données fraîches
       if (demo) {
         console.log('🧹 [CabinetSelector] Mode démo : invalidation du cache cabinets');
         const { cabinetCache } = await import('@/services/cache/cabinet-cache');
@@ -38,6 +36,19 @@ export const CabinetSelector = ({ form, selectedCabinetId, onCabinetChange }: Ca
     };
     checkDemoMode();
   }, []);
+  
+  // 🎯 ÉTAPE 2 : Charger les cabinets UNIQUEMENT après détection
+  const { data: cabinets = [], isLoading: loading } = useCabinets();
+
+  // 🎯 ÉTAPE 3 : Afficher un loader pendant la détection
+  if (isDemoMode === null) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+        <span className="ml-2 text-sm text-muted-foreground">Détection du mode...</span>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (isDemoMode && cabinets.length > 0) {

@@ -7,7 +7,19 @@ import { cabinetCache } from '@/services/cache/cabinet-cache';
 export function useCabinets() {
   const query = useQuery({
     queryKey: ['cabinets'],
-    queryFn: () => cabinetCache.getCabinets(),
+    queryFn: async () => {
+      // 🚨 SÉCURITÉ: Double vérification avant chargement
+      const { isDemoSession } = await import('@/utils/demo-detection');
+      const isDemoMode = await isDemoSession();
+      
+      if (isDemoMode) {
+        console.log('🎭 [useCabinets] Mode démo détecté - Retour cabinet démo uniquement');
+        const { demoLocalStorage } = await import('@/services/demo-local-storage');
+        return demoLocalStorage.getCabinets();
+      }
+      
+      return cabinetCache.getCabinets();
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
