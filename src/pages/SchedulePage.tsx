@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Layout } from "@/components/ui/layout";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 import { useOptimizedCache } from "@/hooks/useOptimizedCache";
 import { MonthlyScheduleView } from "@/components/schedule/MonthlyScheduleView";
 import { AppointmentModal } from "@/components/AppointmentModal";
@@ -48,12 +47,6 @@ const SchedulePage = () => {
     isDemoMode
   } = useDemo();
   const { user, isAuthenticated } = useAuth();
-
-  // Utiliser le hook pour la mise à jour automatique des statuts
-  useAppointmentStatusUpdate({
-    appointments,
-    onAppointmentsUpdate: setAppointments
-  });
 
   // Utiliser le cache optimisé pour les données
   const {

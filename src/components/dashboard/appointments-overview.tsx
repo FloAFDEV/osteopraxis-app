@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppointmentStatusUpdate } from "@/hooks/useAppointmentStatusUpdate";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Appointment, DashboardData } from "@/types";
@@ -37,16 +36,6 @@ export function AppointmentsOverview({
 	const [loading, setLoading] = useState(true);
 	const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
 	const navigate = useNavigate();
-
-	// Utiliser le hook pour la mise à jour automatique des statuts
-	useAppointmentStatusUpdate({
-		appointments: allAppointments,
-		onAppointmentsUpdate: (updatedAppointments) => {
-			setAllAppointments(updatedAppointments);
-			// Refiltrer les rendez-vous après mise à jour
-			filterAndSetAppointments(updatedAppointments);
-		},
-	});
 
 	const filterAndSetAppointments = (appointmentsData: Appointment[]) => {
 		// Filtrer pour garder seulement les rendez-vous à venir (incluant les COMPLETED)

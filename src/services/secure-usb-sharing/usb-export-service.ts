@@ -1,4 +1,4 @@
-import { hybridDataManager } from '../hybrid-data-adapter/hybrid-manager';
+import { api } from '@/services/api';
 import CryptoJS from 'crypto-js';
 import { getCurrentOsteopathId } from '@/services/supabase-api/utils/getCurrentOsteopath';
 
@@ -54,7 +54,7 @@ export class USBExportService {
 
       // Exporter les patients
       if (options.includePatients) {
-        let patients = await hybridDataManager.get('patients');
+        let patients = await api.getPatients();
         
         // Filtrer par IDs si spécifié
         if (options.patientIds?.length) {
@@ -67,7 +67,7 @@ export class USBExportService {
 
       // Exporter les rendez-vous
       if (options.includeAppointments) {
-        let appointments = await hybridDataManager.get('appointments');
+        let appointments = await api.getAppointments();
         
         // Filtrer par patients et date si spécifié
         if (options.patientIds?.length) {
@@ -90,7 +90,7 @@ export class USBExportService {
 
       // Exporter les factures
       if (options.includeInvoices) {
-        let invoices = await hybridDataManager.get('invoices');
+        let invoices = await api.getInvoices();
         
         // Filtrer par patients si spécifié
         if (options.patientIds?.length) {

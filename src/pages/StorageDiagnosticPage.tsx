@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle, XCircle, RefreshCw, HardDrive, Cloud, Shield,
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { checkOPFSSupport } from '@/services/sqlite/opfs-sqlite-service';
 import { hybridDataManager } from '@/services/hybrid-data-adapter/hybrid-manager';
-import { isUsingMemoryFallback, clearMemoryStorage } from '@/services/hybrid-data-adapter/local-adapters';
+import { clearMemoryStorage } from '@/services/hybrid-data-adapter/local-adapters';
 import { getExecutionContext } from '@/utils/iframe-detection';
 import { toast } from 'sonner';
 
@@ -100,19 +100,6 @@ export default function StorageDiagnosticPage() {
           details: (error as Error).message
         });
       }
-
-      // 4. Vérifier le mode mémoire
-      const usingMemory = isUsingMemoryFallback();
-      diagnostics.push({
-        name: 'Mode de stockage temporaire',
-        status: usingMemory ? 'warning' : 'success',
-        message: usingMemory 
-          ? 'Mode mémoire temporaire actif' 
-          : 'Stockage persistant actif',
-        details: usingMemory 
-          ? 'Les données seront perdues au rechargement de la page'
-          : 'Les données sont sauvegardées de manière persistante'
-      });
 
       // 5. Test de performance
       try {
@@ -327,26 +314,6 @@ export default function StorageDiagnosticPage() {
               <span>• Relations patients</span>
             </div>
           </div>
-
-          {isUsingMemoryFallback() && (
-            <div className="bg-warning/5 border border-warning/20 rounded-lg p-4">
-              <h4 className="font-semibold text-warning mb-2">Mode Récupération Actif</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Le stockage local n'est pas disponible. L'application utilise un stockage temporaire en mémoire.
-              </p>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Limitations :</p>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Données perdues au rechargement de la page</li>
-                  <li>• Non conforme aux exigences HDS</li>
-                  <li>• Fonctionnalités limitées</li>
-                </ul>
-                <Button variant="outline" size="sm" onClick={clearMemoryData}>
-                  Effacer les données temporaires
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

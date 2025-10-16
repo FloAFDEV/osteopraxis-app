@@ -1,4 +1,4 @@
-import { hybridDataManager } from '../hybrid-data-adapter/hybrid-manager';
+import { api } from '@/services/api';
 import CryptoJS from 'crypto-js';
 import type { SecureExportData } from './usb-export-service';
 
@@ -169,7 +169,7 @@ export class USBImportService {
     for (const patient of patients) {
       try {
         // Vérifier si le patient existe déjà (par email ou nom+prénom+date de naissance)
-        const existingPatients = await hybridDataManager.get<any>('patients');
+        const existingPatients = await api.getPatients();
         const existing = existingPatients.find((p: any) => 
           p.email === patient.email || 
           (p.firstName === patient.firstName && 
@@ -182,7 +182,7 @@ export class USBImportService {
             result.skipped++;
             continue;
           } else if (options.conflictResolution === 'overwrite') {
-            await hybridDataManager.update('patients', existing.id, patient);
+            await api.updatePatient({ ...patient, id: existing.id });
             result.imported++;
           } else {
             result.conflicts.push({
@@ -196,7 +196,7 @@ export class USBImportService {
         } else {
           // Supprimer l'ID pour créer un nouveau patient
           const { id, createdAt, updatedAt, ...patientData } = patient;
-          await hybridDataManager.create('patients', patientData);
+          await api.createPatient(patientData);
           result.imported++;
         }
       } catch (error) {
@@ -217,7 +217,7 @@ export class USBImportService {
     for (const appointment of appointments) {
       try {
         // Vérifier les conflits de planning
-        const existingAppointments = await hybridDataManager.get<any>('appointments');
+        const existingAppointments = await api.getAppointments();
         const conflict = existingAppointments.find((a: any) => 
           a.osteopathId === appointment.osteopathId &&
           Math.abs(new Date(a.date).getTime() - new Date(appointment.date).getTime()) < 3600000 // 1 heure
@@ -233,7 +233,7 @@ export class USBImportService {
           result.skipped++;
         } else {
           const { id, createdAt, updatedAt, ...appointmentData } = appointment;
-          await hybridDataManager.create('appointments', appointmentData);
+          await api.createAppointment(appointmentData);
           result.imported++;
         }
       } catch (error) {
@@ -254,7 +254,7 @@ export class USBImportService {
     for (const invoice of invoices) {
       try {
         // Vérifier si la facture existe déjà
-        const existingInvoices = await hybridDataManager.get<any>('invoices');
+        const existingInvoices = await api.getInvoices();
         const existing = existingInvoices.find((i: any) => 
           i.patientId === invoice.patientId &&
           i.date === invoice.date &&
@@ -267,7 +267,7 @@ export class USBImportService {
         }
 
         const { id, createdAt, updatedAt, ...invoiceData } = invoice;
-        await hybridDataManager.create('invoices', invoiceData);
+        await api.createInvoice(invoiceData);
         result.imported++;
       } catch (error) {
         result.errors.push(`Erreur facture ${invoice.date}: ${error}`);

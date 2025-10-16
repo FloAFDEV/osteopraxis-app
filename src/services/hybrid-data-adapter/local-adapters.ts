@@ -425,13 +425,3 @@ export async function clearMemoryStorage() {
   await realPersistentStorage.clear('invoices');
   console.log('🧹 Persistent IndexedDB storage cleared');
 }
-
-/**
- * Vérifie si l'application utilise le mode localStorage persistant (MODE DÉPRÉCIÉ)
- * Note: Cette fonction est conservée pour compatibilité mais ne doit plus être utilisée
- * Les fallbacks localStorage pour HDS ont été supprimés pour sécurité
- */
-export function isUsingMemoryFallback(): boolean {
-  console.warn('⚠️ DÉPRÉCIÉ: isUsingMemoryFallback() - Les fallbacks localStorage HDS ont été supprimés');
-  return false; // Plus de fallback localStorage pour HDS
-}
