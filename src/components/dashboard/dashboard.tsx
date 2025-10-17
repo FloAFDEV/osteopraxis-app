@@ -9,7 +9,7 @@ import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import { useDemo } from "@/contexts/DemoContext";
+import { useStorageMode } from "@/hooks/useStorageMode";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Shield, AlertTriangle, ExternalLink } from "lucide-react";
@@ -17,7 +17,7 @@ import { storageRouter } from "@/services/storage/storage-router";
 
 export function Dashboard() {
 	const { user, isAuthenticated, loading: authLoading } = useAuth();
-	const { isDemoMode } = useDemo();
+	const { isDemoMode } = useStorageMode();
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedCabinetName, setSelectedCabinetName] = useState<string | undefined>(undefined);
 	const [storageMode, setStorageMode] = useState<'demo' | 'connected' | 'iframe_preview' | null>(null);
@@ -41,8 +41,8 @@ export function Dashboard() {
 		}
 	}, [isAuthenticated, authLoading]);
 
-	// Afficher un état de chargement si l'auth est en cours ou si les données se chargent
-	if (authLoading || loading) {
+	// Afficher un état de chargement uniquement si l'auth est en cours
+	if (authLoading) {
 		return <LoadingState />;
 	}
 
@@ -78,9 +78,21 @@ export function Dashboard() {
 		<div className="space-y-8 p-4 sm:p-6 lg:p-8">
 			{/* Header Image Banner */}
 			<DashboardHeader />
+			
+			{/* Skeleton loader pendant le chargement des données */}
+			{loading && (
+				<div className="space-y-4 animate-pulse">
+					<div className="h-32 bg-muted rounded-lg" />
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="h-24 bg-muted rounded-lg" />
+						<div className="h-24 bg-muted rounded-lg" />
+						<div className="h-24 bg-muted rounded-lg" />
+					</div>
+				</div>
+			)}
 
 			{/* Message de bienvenue si pas de données HDS - uniquement en mode connecté sans stockage configuré */}
-			{!isDemoMode && hasNoData && storageMode === 'connected' && (
+			{!loading && !isDemoMode && hasNoData && storageMode === 'connected' && (
 				<Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
 					<Shield className="h-4 w-4 text-blue-600" />
 					<AlertDescription className="text-blue-800 dark:text-blue-200">
@@ -107,7 +119,7 @@ export function Dashboard() {
 			)}
 
 			{/* Avertissement de stockage en mode connecté */}
-			{storageMode === 'connected' && (
+			{!loading && storageMode === 'connected' && (
 				<Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
 					<AlertTriangle className="h-4 w-4 text-orange-600" />
 					<AlertDescription className="text-orange-800 dark:text-orange-200">
@@ -132,35 +144,39 @@ export function Dashboard() {
 			)}
 
 			{/* Main content with integrated cabinet selector */}
-			<div className="animate-fade-in">
-				<DashboardStats 
-					data={dashboardData} 
-					selectedCabinetName={selectedCabinetName}
-					onCabinetChange={handleCabinetChange}
-					selectedCabinetId={selectedCabinetId}
-				/>
-			</div>
-			<div className="animate-fade-in animate-delay-100 lg:col-span-3">
-				<AppointmentsOverview data={dashboardData} />
-			</div>
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-				<div className="animate-fade-in animate-delay-200">
-					<ConsultationsChart data={dashboardData} />
-				</div>
-				<div className="animate-fade-in animate-delay-300">
-					<DemographicsCard
-						patients={allPatients}
-						data={dashboardData}
-					/>
-				</div>
-			</div>
+			{!loading && (
+				<>
+					<div className="animate-fade-in">
+						<DashboardStats 
+							data={dashboardData} 
+							selectedCabinetName={selectedCabinetName}
+							onCabinetChange={handleCabinetChange}
+							selectedCabinetId={selectedCabinetId}
+						/>
+					</div>
+					<div className="animate-fade-in animate-delay-100 lg:col-span-3">
+						<AppointmentsOverview data={dashboardData} />
+					</div>
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+						<div className="animate-fade-in animate-delay-200">
+							<ConsultationsChart data={dashboardData} />
+						</div>
+						<div className="animate-fade-in animate-delay-300">
+							<DemographicsCard
+								patients={allPatients}
+								data={dashboardData}
+							/>
+						</div>
+					</div>
 
-			{/* Analytics Avancées */}
-			<div className="animate-fade-in animate-delay-400">
-				<AdvancedAnalyticsPanel />
-			</div>
+					{/* Analytics Avancées */}
+					<div className="animate-fade-in animate-delay-400">
+						<AdvancedAnalyticsPanel />
+					</div>
 
-			<DashboardContent dashboardData={dashboardData} />
+					<DashboardContent dashboardData={dashboardData} />
+				</>
+			)}
 		</div>
 	);
 }

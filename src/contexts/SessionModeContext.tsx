@@ -9,8 +9,9 @@ interface SessionModeContextType {
 const SessionModeContext = createContext<SessionModeContextType | undefined>(undefined);
 
 export function SessionModeProvider({ children }: { children: ReactNode }) {
+  // ⚡ OPTIMISTE : On démarre en mode connecté (cas le plus courant) pour ne pas bloquer le rendu
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -18,15 +19,14 @@ export function SessionModeProvider({ children }: { children: ReactNode }) {
     const detectOnce = async () => {
       try {
         const result = await isDemoSession();
-        if (mounted) {
+        // Seulement mettre à jour si différent (évite les re-renders inutiles)
+        if (mounted && result !== isDemoMode) {
           setIsDemoMode(result);
-          setIsLoading(false);
         }
       } catch (error) {
         console.error('Erreur détection mode session:', error);
         if (mounted) {
           setIsDemoMode(false); // Fallback mode connecté
-          setIsLoading(false);
         }
       }
     };

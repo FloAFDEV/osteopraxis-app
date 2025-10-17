@@ -61,10 +61,16 @@ export function useDashboardStats(selectedCabinetId: number | null) {
   const { isDemoMode, isLoading: modeLoading } = useStorageMode();
   const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadStats = useCallback(async () => {
+    // ⚡ Éviter les chargements redondants
+    if (loading) {
+      console.log('📊 Chargement déjà en cours, skip');
+      return;
+    }
+    
     console.log('📊 Chargement stats dashboard', {
       mode: isDemoMode ? 'démo' : 'connecté',
       cabinetId: selectedCabinetId,

@@ -26,7 +26,7 @@ export function isDemoUser(user: any): boolean {
 
 // ⚡ Cache pour éviter les appels répétitifs et les boucles infinies
 let demoSessionCache: { result: boolean; timestamp: number } | null = null;
-const CACHE_DURATION = 30000; // 30 secondes de cache pour éviter les appels répétés
+const CACHE_DURATION = 60000; // 1 minute de cache pour éviter les appels répétés
 
 /**
  * 🔐 Détection intelligente du mode de session avec priorité à l'authentification réelle
@@ -39,12 +39,12 @@ export const isDemoSession = async (): Promise<boolean> => {
     return demoSessionCache.result;
   }
 
-  // ⏱️ TIMEOUT de sécurité : 500ms max pour éviter le blocage
+  // ⏱️ TIMEOUT de sécurité : 300ms max pour éviter le blocage
   const timeoutPromise = new Promise<boolean>((resolve) => {
     setTimeout(() => {
-      console.warn('⏱️ Timeout détection mode démo (500ms) - Fallback mode connecté');
+      console.warn('⏱️ Timeout détection mode démo (300ms) - Fallback mode connecté');
       resolve(false);
-    }, 500);
+    }, 300);
   });
 
   const detectionPromise = (async () => {

@@ -32,19 +32,7 @@ const DashboardPage = () => {
     }
   }, [user]);
 
-  // Afficher un loader seulement pendant le chargement initial
-  if (storageLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto" />
-          <p className="text-muted-foreground">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ ÉTAPE 1 : Charger les cabinets UNIQUEMENT après validation de la configuration HDS
+  // ✅ Charger les cabinets (le stockage se configure en arrière-plan)
   const { data: cabinets, isLoading: cabinetsLoading } = useCabinets();
 
   return (
