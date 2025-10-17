@@ -65,7 +65,7 @@ export const HDSStatusBanner: React.FC = () => {
     );
   }
 
-  // Stockage non configuré - message informatif
+  // Stockage non configuré - utilisation du stockage survivant
   return (
     <Card className="mb-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
       <CardContent className="p-4">
@@ -73,11 +73,11 @@ export const HDSStatusBanner: React.FC = () => {
           <AlertTriangle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
-              Stockage HDS sécurisé non configuré
+              Données stockées temporairement
             </p>
             <p className="text-xs text-blue-600 dark:text-blue-400 mb-3 break-words">
-              Pour accéder aux fonctionnalités complètes (patients, rendez-vous, factures), 
-              configurez le stockage local sécurisé conforme HDS.
+              Vos données sont actuellement stockées localement (non chiffré).{' '}
+              <strong>Configurez le stockage HDS sécurisé</strong> pour protéger les données de santé et bénéficier de toutes les fonctionnalités.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
                <Button 
@@ -89,7 +89,7 @@ export const HDSStatusBanner: React.FC = () => {
                 className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
               >
                 <Settings className="h-4 w-4 mr-1" />
-                Configurer maintenant
+                Configurer le stockage sécurisé
               </Button>
               <Button 
                 size="sm" 

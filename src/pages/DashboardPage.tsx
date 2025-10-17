@@ -25,24 +25,8 @@ const DashboardPage = () => {
     isDemoSession().then(setIsDemoMode);
   }, []);
 
-  // Vérifier si on doit rediriger vers la configuration
-  useEffect(() => {
-    const checkStorageConfig = async () => {
-      const isDemo = await isDemoSession();
-      const skipped = localStorage.getItem('hds-storage-skip') === 'true';
-      
-      // Rediriger si pas en mode démo, pas configuré, pas ignoré, et chargement terminé
-      if (!isDemo && !isConfigured && !skipped && !storageLoading) {
-        console.log('📋 Redirection vers /configuration - Stockage non configuré');
-        setShouldRedirect(true);
-        navigate('/configuration', { replace: true });
-      }
-    };
-    
-    if (!storageLoading) {
-      checkStorageConfig();
-    }
-  }, [isConfigured, storageLoading, navigate]);
+  // 🆘 Ne plus rediriger - Utilisation du stockage survivant si non configuré
+  // Le HDSStatusBanner se chargera d'informer et d'inviter à configurer
   
   // Log diagnostic simple pour tracer le parcours utilisateur
   useEffect(() => {
@@ -55,8 +39,8 @@ const DashboardPage = () => {
     }
   }, [user]);
 
-  // Afficher un loader pendant la vérification initiale
-  if (storageLoading || shouldRedirect) {
+  // Afficher un loader seulement pendant le chargement initial
+  if (storageLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 flex items-center justify-center">
         <div className="text-center space-y-4">

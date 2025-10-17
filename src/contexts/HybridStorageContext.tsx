@@ -94,6 +94,45 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
         await loadStatus();
       }
       
+      // 🆘 MIGRATION AUTOMATIQUE DES DONNÉES SURVIVANTES
+      const { survivalStorage } = await import('@/services/storage/survival-storage');
+      if (survivalStorage.hasSurvivalData()) {
+        const stats = survivalStorage.getSurvivalDataStats();
+        console.log('🔄 Migration des données survivantes vers HDS sécurisé:', stats);
+        toast.info(`Migration de ${stats.patients} patients, ${stats.appointments} rendez-vous et ${stats.invoices} factures...`);
+        
+        try {
+          const { hdsSecurePatientService, hdsSecureAppointmentService, hdsSecureInvoiceService } = 
+            await import('@/services/hds-secure-storage');
+          
+          // Migrer patients
+          const patients = survivalStorage.getPatients();
+          for (const patient of patients) {
+            await hdsSecurePatientService.createPatient(patient);
+          }
+          
+          // Migrer appointments
+          const appointments = survivalStorage.getAppointments();
+          for (const appointment of appointments) {
+            await hdsSecureAppointmentService.createAppointment(appointment);
+          }
+          
+          // Migrer invoices
+          const invoices = survivalStorage.getInvoices();
+          for (const invoice of invoices) {
+            await hdsSecureInvoiceService.createInvoice(invoice);
+          }
+          
+          // Nettoyer le stockage survivant
+          survivalStorage.clearSurvivalData();
+          
+          toast.success(`Migration terminée : ${stats.patients} patients, ${stats.appointments} rendez-vous et ${stats.invoices} factures sécurisés !`);
+        } catch (migrationError) {
+          console.error('Erreur lors de la migration:', migrationError);
+          toast.error('Erreur lors de la migration des données. Vos données temporaires sont conservées.');
+        }
+      }
+      
       toast.success('Stockage HDS sécurisé configuré avec succès !');
     } catch (error) {
       console.error('Secure storage configuration failed:', error);

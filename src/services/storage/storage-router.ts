@@ -167,25 +167,44 @@ export class StorageRouter {
     const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
     const status = await hdsSecureManager.getStatus();
     
-    // 🚨 CONFORMITÉ HDS: Si non configuré, retourner adapter vide (silencieux)
+    // 🆘 STOCKAGE SURVIVANT: Si non configuré, utiliser localStorage temporaire
     if (!status.isConfigured || !status.isUnlocked) {
-      // Log debug uniquement (pas d'erreur pour éviter la pollution des logs)
-      console.debug(`ℹ️ Stockage HDS non configuré pour ${dataType} - Données vides retournées`);
+      console.debug(`🆘 Stockage HDS non configuré - Utilisation du stockage survivant pour ${dataType}`);
       
-      // Retourner un adapter qui bloque les mutations mais permet les lectures vides
-      return {
-        create: async () => {
-          throw new Error(`Configuration du stockage HDS sécurisé requise pour créer des ${dataType}`);
-        },
-        getById: async () => null,
-        getAll: async () => [], // Silencieux - pas de warning
-        update: async () => {
-          throw new Error(`Configuration du stockage HDS sécurisé requise pour modifier des ${dataType}`);
-        },
-        delete: async () => {
-          throw new Error(`Configuration du stockage HDS sécurisé requise pour supprimer des ${dataType}`);
-        }
-      } as StorageAdapter<T>;
+      const { survivalStorage } = await import('./survival-storage');
+      
+      // Adapter qui utilise le stockage survivant temporaire
+      switch (dataType) {
+        case 'patients':
+          return {
+            create: async (data) => survivalStorage.savePatient(data),
+            getById: async (id) => survivalStorage.getPatients().find(p => p.id === Number(id)) || null,
+            getAll: async () => survivalStorage.getPatients(),
+            update: async (id, updates) => survivalStorage.updatePatient(Number(id), updates),
+            delete: async (id) => survivalStorage.deletePatient(Number(id))
+          } as StorageAdapter<T>;
+          
+        case 'appointments':
+          return {
+            create: async (data) => survivalStorage.saveAppointment(data),
+            getById: async (id) => survivalStorage.getAppointments().find(a => a.id === Number(id)) || null,
+            getAll: async () => survivalStorage.getAppointments(),
+            update: async (id, updates) => survivalStorage.updateAppointment(Number(id), updates),
+            delete: async (id) => survivalStorage.deleteAppointment(Number(id))
+          } as StorageAdapter<T>;
+          
+        case 'invoices':
+          return {
+            create: async (data) => survivalStorage.saveInvoice(data),
+            getById: async (id) => survivalStorage.getInvoices().find(i => i.id === Number(id)) || null,
+            getAll: async () => survivalStorage.getInvoices(),
+            update: async (id, updates) => survivalStorage.updateInvoice(Number(id), updates),
+            delete: async (id) => survivalStorage.deleteInvoice(Number(id))
+          } as StorageAdapter<T>;
+          
+        default:
+          throw new Error(`Stockage survivant non supporté pour: ${dataType}`);
+      }
     }
 
     // HDS configuré ET déverrouillé → Utiliser les services HDS sécurisés
