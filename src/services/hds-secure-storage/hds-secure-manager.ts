@@ -27,6 +27,7 @@ export interface HDSSecureStatus {
   totalSize: number;
   integrityStatus: Record<string, boolean>;
   lastBackup?: string;
+  lastExportDate?: string;
 }
 
 export class HDSSecureManager {
@@ -189,13 +190,17 @@ export class HDSSecureManager {
       }
     }
 
+    // Récupérer la date du dernier export depuis localStorage
+    const lastExportDate = localStorage.getItem('hds-last-export-date') || undefined;
+
     return {
       isConfigured: this.configured,
       isUnlocked: this.unlocked,
       physicalStorageAvailable: this.configured && this.unlocked,
       entitiesCount,
       totalSize,
-      integrityStatus
+      integrityStatus,
+      lastExportDate
     };
   }
 
@@ -362,6 +367,9 @@ export class HDSSecureManager {
 
       const jsonString = JSON.stringify(consolidatedExport, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
+      
+      // Enregistrer la date du dernier export dans localStorage
+      localStorage.setItem('hds-last-export-date', new Date().toISOString());
       
       // Export avec File System Access API si disponible
       if ('showSaveFilePicker' in window) {

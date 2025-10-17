@@ -6,6 +6,7 @@ import { GradientBackground } from "@/components/ui/gradient-background";
 import { DemoGuide } from "@/components/demo/DemoGuide";
 import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
 import { HDSStatusBanner } from "@/components/storage/HDSStatusBanner";
+import { HDSStatusWidget } from "@/components/dashboard/HDSStatusWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { isDemoSession } from "@/utils/demo-detection";
@@ -17,12 +18,18 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const { isConfigured, isLoading: storageLoading } = useHybridStorageContext();
   const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null);
   
+  // Vérifier le mode démo
+  useEffect(() => {
+    isDemoSession().then(setIsDemoMode);
+  }, []);
+
   // Vérifier si on doit rediriger vers la configuration
   useEffect(() => {
     const checkStorageConfig = async () => {
       const isDemo = await isDemoSession();
-      const skipped = sessionStorage.getItem('hybrid-storage-skip') === 'true';
+      const skipped = localStorage.getItem('hds-storage-skip') === 'true';
       
       // Rediriger si pas en mode démo, pas configuré, pas ignoré, et chargement terminé
       if (!isDemo && !isConfigured && !skipped && !storageLoading) {
@@ -74,6 +81,13 @@ const DashboardPage = () => {
         {/* Bannière de statut HDS pour utilisateurs connectés */}
         <HDSStatusBanner />
         
+        {/* Widget HDS pour utilisateurs connectés */}
+        {!isDemoMode && (
+          <div className="mb-6">
+            <HDSStatusWidget />
+          </div>
+        )}
+
         {/* Message de bienvenue pour nouveaux utilisateurs */}
         {!cabinetsLoading && (
           <WelcomeMessage 

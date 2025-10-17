@@ -27,8 +27,8 @@ const ConfigurationPage = () => {
   }, [isConfigured, isLoading, navigate]);
 
   const handleSkip = () => {
-    sessionStorage.setItem('hybrid-storage-skip', 'true');
-    toast.info("Configuration du stockage local ignorée. L'application fonctionnera avec les données en ligne uniquement.");
+    localStorage.setItem('hds-storage-skip', 'true');
+    toast.info("Configuration reportée. Vous pouvez la lancer depuis Paramètres > Stockage HDS.");
     navigate('/dashboard', { replace: true });
   };
 

@@ -234,25 +234,38 @@ const ConnectedStorageSettingsPage: React.FC = () => {
 
           {/* Message d'information si pas configuré */}
           {!isLoading && status && !status.isConfigured && (
-            <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <Card className="border-primary bg-primary/5">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-6 w-6 text-primary" />
+                  </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
-                      Stockage HDS non configuré
+                    <h3 className="text-lg font-semibold mb-2">
+                      🔒 Activez le stockage HDS sécurisé
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Pour garantir la conformité HDS et protéger vos données sensibles (patients, rendez-vous, factures), 
+                      configurez le stockage local chiffré avec AES-256-GCM.
                     </p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
-                      Pour une conformité HDS complète, configurez le stockage local sécurisé pour vos données sensibles.
-                    </p>
-                    <Button 
-                      size="sm"
-                      onClick={() => setShowSetup(true)}
-                      className="bg-amber-600 hover:bg-amber-700 text-white"
-                    >
-                      <Shield className="h-4 w-4 mr-1" />
-                      Configurer maintenant
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button 
+                        size="lg"
+                        onClick={() => setShowSetup(true)}
+                        className="w-full sm:w-auto"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Configurer maintenant
+                      </Button>
+                      <Button 
+                        size="lg"
+                        variant="outline"
+                        onClick={() => navigate('/help')}
+                        className="w-full sm:w-auto"
+                      >
+                        En savoir plus
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>

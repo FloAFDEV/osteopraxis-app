@@ -59,6 +59,15 @@ const SettingsPage = () => {
 				color: "text-blue-500",
 			},
 			{
+				id: "storage",
+				title: "Stockage HDS Sécurisé",
+				description:
+					"Gérez votre stockage local chiffré et sauvegardes",
+				icon: Shield,
+				path: "/settings/storage",
+				color: "text-primary",
+			},
+			{
 				id: "import",
 				title: "Import de données",
 				description:

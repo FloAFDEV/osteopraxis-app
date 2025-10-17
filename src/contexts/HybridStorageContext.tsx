@@ -45,7 +45,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
         try {
           const { isDemoSession } = await import('@/utils/demo-detection');
           const demoMode = await isDemoSession();
-          const skipped = sessionStorage.getItem('hybrid-storage-skip') === 'true';
+          const skipped = localStorage.getItem('hds-storage-skip') === 'true';
           
           if (demoMode) {
             console.log('🎭 Mode démo détecté - Pas de déverrouillage nécessaire');
@@ -116,9 +116,9 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
   };
 
   const handleSkip = () => {
-    sessionStorage.setItem('hybrid-storage-skip', 'true');
+    localStorage.setItem('hds-storage-skip', 'true');
     setShowUnlock(false);
-    toast.info("Stockage local non déverrouillé. L'application fonctionnera avec les données en ligne uniquement.");
+    toast.info("Configuration du stockage HDS ignorée. Vous pouvez la réactiver depuis Paramètres > Stockage HDS.");
     try { navigate('/dashboard'); } catch {}
   };
 
