@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { hdsSecureManager, type HDSSecureConfig } from '@/services/hds-secure-storage/hds-secure-manager';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { StorageUnlockPrompt } from '@/components/storage/StorageUnlockPrompt';
+import { StoragePasswordRecovery } from '@/components/storage/StoragePasswordRecovery';
 import { StorageWelcomeScreen } from '@/components/storage/StorageWelcomeScreen';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ interface HybridStorageProviderProps {
 export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ children }) => {
   const { status, isLoading, initialize, unlock, lock } = useHybridStorage();
   const [showUnlock, setShowUnlock] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
   const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('password');
   const navigate = useNavigate();
   
@@ -120,12 +122,38 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     try { navigate('/dashboard'); } catch {}
   };
 
+  const handlePasswordForgotten = () => {
+    setShowUnlock(false);
+    setShowRecovery(true);
+  };
+
+  const handleRecoveryComplete = async () => {
+    setShowRecovery(false);
+    await initialize();
+    toast.success('Récupération terminée ! Accès aux données restauré.');
+    try { navigate('/dashboard'); } catch {}
+  };
+
   if (showUnlock) {
     return (
       <StorageUnlockPrompt
         securityMethod={securityMethod}
         onUnlock={() => setShowUnlock(false)}
         onCancel={handleSkip}
+        onPasswordForgotten={handlePasswordForgotten}
+      />
+    );
+  }
+
+  if (showRecovery) {
+    return (
+      <StoragePasswordRecovery
+        isOpen={showRecovery}
+        onClose={() => {
+          setShowRecovery(false);
+          setShowUnlock(true);
+        }}
+        onRecoveryComplete={handleRecoveryComplete}
       />
     );
   }

@@ -524,6 +524,34 @@ export class HDSSecureManager {
   }
 
   /**
+   * Vérifier si le mot de passe d'un backup est correct (SANS importer)
+   */
+  async verifyBackupPassword(file: File, password: string): Promise<boolean> {
+    try {
+      console.log('🔍 Vérification du mot de passe du backup...');
+      
+      // Lire et parser le fichier
+      const text = await file.text();
+      const backupData = JSON.parse(text);
+      
+      // Vérifier le format
+      if (!backupData.format || !backupData.format.includes('PatientHub')) {
+        console.error('❌ Format de fichier invalide');
+        return false;
+      }
+      
+      // Tenter de déchiffrer sans importer
+      await decryptJSON(backupData.data, password);
+      
+      console.log('✅ Mot de passe du backup validé');
+      return true;
+    } catch (error) {
+      console.error('❌ Mot de passe du backup incorrect ou fichier corrompu:', error);
+      return false;
+    }
+  }
+
+  /**
    * Réinitialiser complètement le stockage sécurisé
    */
   async reset(): Promise<void> {

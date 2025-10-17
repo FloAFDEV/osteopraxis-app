@@ -18,13 +18,21 @@ interface StorageUnlockPromptProps {
   securityMethod: 'pin' | 'password';
   onUnlock: () => void;
   onCancel?: () => void;
+  onPasswordForgotten?: () => void;
 }
 
 export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
   securityMethod,
   onUnlock,
-  onCancel
+  onCancel,
+  onPasswordForgotten
 }) => {
+  
+  const resetState = () => {
+    setCredential('');
+    setAttempts(0);
+    setError(null);
+  };
   const [credential, setCredential] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [attempts, setAttempts] = useState(0);
@@ -75,13 +83,6 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isLocked && !isUnlocking) {
       handleUnlock();
-    }
-  };
-
-  const handleReset = async () => {
-    if (window.confirm('Êtes-vous sûr de vouloir réinitialiser la configuration de stockage ? Toutes les données locales seront perdues.')) {
-      await hdsSecureManager.reset();
-      window.location.reload();
     }
   };
 
@@ -171,14 +172,17 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
               <div className="space-y-2">
                 <Button
                   variant="outline"
-                  onClick={handleReset}
+                  onClick={() => {
+                    resetState();
+                    onPasswordForgotten?.();
+                  }}
                   className="w-full"
                   size="sm"
                 >
-                  Réinitialiser la configuration
+                  Mot de passe oublié ?
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">
-                  ⚠️ Cette action supprimera toutes les données locales
+                  💡 Récupérez vos données via une sauvegarde .phds
                 </p>
               </div>
             )}
