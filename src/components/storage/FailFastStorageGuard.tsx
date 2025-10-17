@@ -42,11 +42,17 @@ export const FailFastStorageGuard: React.FC<FailFastStorageGuardProps> = ({ chil
     return <>{children}</>;
   }
 
-  // En mode connecté, permettre l'accès au dashboard mais avec informations
-  // Le FailFastStorageGuard devient maintenant un "garde informatif" 
-  // qui n'interrompt plus l'expérience utilisateur
-  
-  // Laisser passer dans tous les cas - les composants individuels 
-  // géreront leurs propres messages d'état HDS
+  // 🔒 MODE CONNECTÉ : Bloquer si HDS non configuré
+  if (!status.isConfigured || !status.isUnlocked) {
+    console.warn('🚨 Accès bloqué : Configuration HDS obligatoire');
+    return (
+      <HDSStorageFailureScreen 
+        error="Configuration du stockage sécurisé obligatoire pour accéder aux données patients"
+        onRetry={initialize}
+      />
+    );
+  }
+
+  // ✅ HDS configuré ET déverrouillé : Laisser passer
   return <>{children}</>;
 };

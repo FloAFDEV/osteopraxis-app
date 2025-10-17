@@ -167,44 +167,15 @@ export class StorageRouter {
     const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
     const status = await hdsSecureManager.getStatus();
     
-    // 🆘 STOCKAGE SURVIVANT: Si non configuré, utiliser localStorage temporaire
+    // 🔒 BLOCAGE STRICT: Si HDS non configuré, lever une exception
     if (!status.isConfigured || !status.isUnlocked) {
-      console.debug(`🆘 Stockage HDS non configuré - Utilisation du stockage survivant pour ${dataType}`);
-      
-      const { survivalStorage } = await import('./survival-storage');
-      
-      // Adapter qui utilise le stockage survivant temporaire
-      switch (dataType) {
-        case 'patients':
-          return {
-            create: async (data) => survivalStorage.savePatient(data),
-            getById: async (id) => survivalStorage.getPatients().find(p => p.id === Number(id)) || null,
-            getAll: async () => survivalStorage.getPatients(),
-            update: async (id, updates) => survivalStorage.updatePatient(Number(id), updates),
-            delete: async (id) => survivalStorage.deletePatient(Number(id))
-          } as StorageAdapter<T>;
-          
-        case 'appointments':
-          return {
-            create: async (data) => survivalStorage.saveAppointment(data),
-            getById: async (id) => survivalStorage.getAppointments().find(a => a.id === Number(id)) || null,
-            getAll: async () => survivalStorage.getAppointments(),
-            update: async (id, updates) => survivalStorage.updateAppointment(Number(id), updates),
-            delete: async (id) => survivalStorage.deleteAppointment(Number(id))
-          } as StorageAdapter<T>;
-          
-        case 'invoices':
-          return {
-            create: async (data) => survivalStorage.saveInvoice(data),
-            getById: async (id) => survivalStorage.getInvoices().find(i => i.id === Number(id)) || null,
-            getAll: async () => survivalStorage.getInvoices(),
-            update: async (id, updates) => survivalStorage.updateInvoice(Number(id), updates),
-            delete: async (id) => survivalStorage.deleteInvoice(Number(id))
-          } as StorageAdapter<T>;
-          
-        default:
-          throw new Error(`Stockage survivant non supporté pour: ${dataType}`);
-      }
+      console.error(`🚨 ACCÈS REFUSÉ: Configuration HDS obligatoire pour "${dataType}"`);
+      throw new Error(
+        `🚨 ACCÈS REFUSÉ: Configuration HDS obligatoire pour "${dataType}"\n\n` +
+        `Les données de santé ne peuvent être accessibles qu'après configuration ` +
+        `du stockage local sécurisé.\n\n` +
+        `Veuillez configurer le stockage dans Paramètres > Stockage HDS`
+      );
     }
 
     // HDS configuré ET déverrouillé → Utiliser les services HDS sécurisés

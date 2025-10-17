@@ -18,8 +18,8 @@ const DashboardPage = () => {
   const { isConfigured, isLoading: storageLoading } = useHybridStorageContext();
   const { isDemoMode } = useSessionMode();
 
-  // 🆘 Ne plus rediriger - Utilisation du stockage survivant si non configuré
-  // Le HDSStatusBanner se chargera d'informer et d'inviter à configurer
+  // 🔒 Le FailFastStorageGuard bloquera l'accès si HDS non configuré
+  // Conformité HDS stricte : aucun accès aux données sans chiffrement local
   
   // Log diagnostic simple pour tracer le parcours utilisateur
   useEffect(() => {

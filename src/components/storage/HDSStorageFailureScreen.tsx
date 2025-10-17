@@ -36,73 +36,96 @@ export const HDSStorageFailureScreen: React.FC<HDSStorageFailureScreenProps> = (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-destructive" />
+          <div className="mx-auto mb-4 w-16 h-16 bg-blue-50 dark:bg-blue-950/30 rounded-full flex items-center justify-center">
+            <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <CardTitle className="text-2xl">Stockage HDS Sécurisé Requis</CardTitle>
-          <CardDescription>
-            Le stockage local sécurisé est obligatoire pour les données de santé (HDS)
+          <CardTitle className="text-2xl">Configuration du stockage sécurisé HDS</CardTitle>
+          <CardDescription className="text-base mt-2">
+            Pour garantir la conformité avec la réglementation HDS française, 
+            vos données patients doivent être stockées localement de manière sécurisée.
           </CardDescription>
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Détails de l'erreur */}
-          <Alert className="border-destructive bg-destructive/5">
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-            <AlertDescription className="text-destructive">
-              <strong>Erreur technique:</strong> {error}
+          {/* Pourquoi c'est obligatoire */}
+          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+            <AlertTriangle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertDescription className="text-blue-900 dark:text-blue-100">
+              <strong className="block mb-2">Conformité réglementaire</strong>
+              Les données de santé doivent être hébergées selon les normes HDS :
+              <ul className="list-disc ml-6 mt-2 space-y-1">
+                <li>Stockage local chiffré (AES-256-GCM)</li>
+                <li>Aucun transit vers le cloud pour les données sensibles</li>
+                <li>Contrôle total sur vos données</li>
+              </ul>
             </AlertDescription>
           </Alert>
 
-          {/* Explication */}
-          <div className="space-y-4">
+          {/* Étapes de configuration */}
+          <div className="space-y-3">
             <h3 className="font-semibold flex items-center gap-2">
-              <FileX className="h-5 w-5" />
-              Pourquoi ce blocage ?
+              <FileX className="h-5 w-5 text-blue-600" />
+              Configuration en 3 étapes :
             </h3>
-            <ul className="space-y-2 text-sm text-muted-foreground ml-6">
-              <li>• <strong>Conformité HDS:</strong> Les données de santé doivent être stockées localement et chiffrées</li>
-              <li>• <strong>Sécurité maximale:</strong> Aucune donnée sensible ne peut transiter par des serveurs tiers</li>
-              <li>• <strong>Réglementation:</strong> Respect du RGPD et des exigences de l'hébergement de données de santé</li>
-            </ul>
+            <ol className="space-y-3 ml-2">
+              <li className="flex gap-3 items-start">
+                <span className="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-sm font-semibold">1</span>
+                <span>Choisir un dossier de stockage sur votre ordinateur</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-sm font-semibold">2</span>
+                <span>Créer un mot de passe de chiffrement fort (≥12 caractères)</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-sm font-semibold">3</span>
+                <span>Valider - vos données seront automatiquement chiffrées</span>
+              </li>
+            </ol>
           </div>
 
-          {/* Solutions */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">Solutions disponibles:</h3>
-            
-            <div className="grid gap-3">
-              {/* Retry */}
-              {onRetry && (
-                <Button onClick={onRetry} variant="default" className="w-full flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4" />
-                  Réessayer le stockage sécurisé
-                </Button>
-              )}
+          {/* Bouton de configuration */}
+          <Button 
+            onClick={onRetry} 
+            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+            size="lg"
+          >
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Configurer le stockage sécurisé maintenant
+          </Button>
+
+          {/* Alternative mode démo */}
+          {onUseDemo && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Ou</span>
+                </div>
+              </div>
               
-              {/* Mode démo */}
-              <Button onClick={handleUseDemo} variant="outline" className="w-full">
+              <Button onClick={onUseDemo} variant="outline" className="w-full">
                 <Users className="w-4 h-4 mr-2" />
                 Utiliser le mode démo (sans données réelles)
               </Button>
-            </div>
-          </div>
+            </>
+          )}
 
-          {/* Avertissement mode démo */}
-          <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
-            <AlertTriangle className="h-4 w-4 text-orange-600" />
-            <AlertDescription className="text-orange-800 dark:text-orange-200">
-              <strong>Mode démo:</strong> Aucune donnée réelle ne sera sauvegardée. 
-              Idéal pour tester l'application sans traiter de vraies données de patients.
-            </AlertDescription>
-          </Alert>
+          {/* Note sur la sécurité */}
+          <div className="text-center pt-2">
+            <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+              <Shield className="h-4 w-4" />
+              Vos données restent sur votre ordinateur, aucune synchronisation cloud
+            </p>
+          </div>
 
           {/* Informations techniques */}
           <details className="text-sm text-muted-foreground">
-            <summary className="cursor-pointer font-medium mb-2">
+            <summary className="cursor-pointer font-medium mb-2 hover:text-foreground transition-colors">
               Informations techniques
             </summary>
-            <div className="space-y-1 ml-4">
+            <div className="space-y-1 ml-4 text-xs">
               <p>• Stockage requis: File System Access API + OPFS</p>
               <p>• Chiffrement: AES-256-GCM obligatoire</p>
               <p>• Support: Navigateurs modernes uniquement (Chrome, Edge, Firefox récents)</p>
