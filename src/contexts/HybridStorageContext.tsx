@@ -5,6 +5,8 @@ import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { StorageUnlockPrompt } from '@/components/storage/StorageUnlockPrompt';
 import { StoragePasswordRecovery } from '@/components/storage/StoragePasswordRecovery';
 import { StorageWelcomeScreen } from '@/components/storage/StorageWelcomeScreen';
+import { TemporaryStoragePinSetup } from '@/components/storage/TemporaryStoragePinSetup';
+import { TemporaryStoragePinUnlock } from '@/components/storage/TemporaryStoragePinUnlock';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { toast } from 'sonner';
 
@@ -35,25 +37,48 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
   const { status, isLoading, initialize, unlock, lock, loadStatus } = useHybridStorage();
   const [showUnlock, setShowUnlock] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [showPinUnlock, setShowPinUnlock] = useState(false);
   const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('password');
   const navigate = useNavigate();
   
   useEffect(() => {
     if (!isLoading && status) {
-      // Vérifier si le stockage est configuré mais verrouillé
-      const checkUnlockNeeded = async () => {
+      const checkStorageStatus = async () => {
         try {
           const { isDemoSession } = await import('@/utils/demo-detection');
           const demoMode = await isDemoSession();
           const skipped = localStorage.getItem('hds-storage-skip') === 'true';
           
           if (demoMode) {
-            console.log('🎭 Mode démo détecté - Pas de déverrouillage nécessaire');
+            console.log('🎭 Mode démo détecté - Pas de configuration nécessaire');
             return;
           }
           
-          // Si configuré mais verrouillé, afficher le prompt de déverrouillage
-          if (status.isConfigured && !status.isUnlocked && !skipped) {
+          const pinHash = localStorage.getItem('temp-storage-pin-hash');
+          const hdsConfigured = status.isConfigured;
+          
+          // Si HDS pas configuré ET pas de PIN temporaire
+          if (!hdsConfigured && !pinHash && !skipped) {
+            console.log('🔐 Configuration PIN temporaire requise');
+            setShowPinSetup(true);
+            return;
+          }
+          
+          // Si PIN configuré mais pas déverrouillé
+          if (!hdsConfigured && pinHash && !skipped) {
+            const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+            const isUnlocked = await encryptedWorkingStorage.isAvailable();
+            
+            if (!isUnlocked) {
+              console.log('🔓 Déverrouillage PIN requis');
+              setShowPinUnlock(true);
+              return;
+            }
+          }
+          
+          // Si HDS configuré mais verrouillé
+          if (hdsConfigured && !status.isUnlocked && !skipped) {
             const config = localStorage.getItem('hybrid-storage-config');
             if (config) {
               try {
@@ -66,11 +91,11 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
             setShowUnlock(true);
           }
         } catch (error) {
-          console.error('Erreur vérification mode démo:', error);
+          console.error('Erreur vérification stockage:', error);
         }
       };
       
-      checkUnlockNeeded();
+      checkStorageStatus();
     }
   }, [isLoading, status]);
 
@@ -94,7 +119,47 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
         await loadStatus();
       }
       
-      // 🆘 MIGRATION AUTOMATIQUE DES DONNÉES SURVIVANTES
+      // 🔄 MIGRATION AUTOMATIQUE DES DONNÉES TEMPORAIRES CHIFFRÉES
+      const pinHash = localStorage.getItem('temp-storage-pin-hash');
+      if (pinHash) {
+        const pin = prompt('Entrez votre code PIN pour migrer vos données temporaires vers HDS :');
+        if (pin) {
+          try {
+            const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+            await encryptedWorkingStorage.configureWithPin(pin);
+            
+            const tempInfo = await encryptedWorkingStorage.getStorageInfo();
+            const hasData = tempInfo.totalSize > 0;
+            
+            if (hasData) {
+              console.log('📦 Migration des données chiffrées vers HDS...');
+              
+              // Export depuis temporaire
+              const backup = await encryptedWorkingStorage.exportBackup();
+              
+              // Import dans HDS
+              const file = new File([backup], 'temp-migration.hdsbackup');
+              await hdsSecureManager.importAllSecure(file, config.password, 'merge');
+              
+              // Nettoyer le temporaire
+              for (const entity of ['patients', 'appointments', 'invoices']) {
+                const all = await encryptedWorkingStorage.getAll(entity);
+                for (const item of all) {
+                  await encryptedWorkingStorage.delete(entity, (item as any).id);
+                }
+              }
+              
+              localStorage.removeItem('temp-storage-pin-hash');
+              toast.success('Migration terminée - Stockage temporaire supprimé');
+            }
+          } catch (error) {
+            console.error('Erreur migration:', error);
+            toast.error('Erreur lors de la migration. Vos données temporaires sont conservées.');
+          }
+        }
+      }
+      
+      // 🆘 MIGRATION AUTOMATIQUE DES DONNÉES SURVIVANTES (ancien système)
       const { survivalStorage } = await import('@/services/storage/survival-storage');
       if (survivalStorage.hasSurvivalData()) {
         const stats = survivalStorage.getSurvivalDataStats();
@@ -171,12 +236,38 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     setShowRecovery(true);
   };
 
+  const handlePinSetup = async (pin: string) => {
+    try {
+      const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+      await encryptedWorkingStorage.configureWithPin(pin);
+      setShowPinSetup(false);
+      toast.success('Stockage temporaire configuré. Vos données sont chiffrées.');
+      try { navigate('/dashboard'); } catch {}
+    } catch (error) {
+      console.error('Erreur configuration PIN:', error);
+      toast.error('Erreur lors de la configuration');
+    }
+  };
+
   const handleRecoveryComplete = async () => {
     setShowRecovery(false);
     await initialize();
     toast.success('Récupération terminée ! Accès aux données restauré.');
     try { navigate('/dashboard'); } catch {}
   };
+
+  if (showPinSetup) {
+    return <TemporaryStoragePinSetup onComplete={handlePinSetup} />;
+  }
+
+  if (showPinUnlock) {
+    return (
+      <TemporaryStoragePinUnlock
+        onUnlock={() => setShowPinUnlock(false)}
+        onForgot={handlePasswordForgotten}
+      />
+    );
+  }
 
   if (showUnlock) {
     return (

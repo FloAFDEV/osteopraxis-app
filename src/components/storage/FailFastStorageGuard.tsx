@@ -42,17 +42,6 @@ export const FailFastStorageGuard: React.FC<FailFastStorageGuardProps> = ({ chil
     return <>{children}</>;
   }
 
-  // 🔒 MODE CONNECTÉ : Bloquer si HDS non configuré
-  if (!status.isConfigured || !status.isUnlocked) {
-    console.warn('🚨 Accès bloqué : Configuration HDS obligatoire');
-    return (
-      <HDSStorageFailureScreen 
-        error="Configuration du stockage sécurisé obligatoire pour accéder aux données patients"
-        onRetry={initialize}
-      />
-    );
-  }
-
-  // ✅ HDS configuré ET déverrouillé : Laisser passer
+  // ✅ MODE CONNECTÉ : Toujours autoriser (stockage chiffré temporaire disponible)
   return <>{children}</>;
 };

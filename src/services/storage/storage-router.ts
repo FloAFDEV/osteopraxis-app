@@ -167,15 +167,41 @@ export class StorageRouter {
     const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
     const status = await hdsSecureManager.getStatus();
     
-    // 🔒 BLOCAGE STRICT: Si HDS non configuré, lever une exception
+    // 🔐 Stockage chiffré temporaire IndexedDB avec PIN
     if (!status.isConfigured || !status.isUnlocked) {
-      console.error(`🚨 ACCÈS REFUSÉ: Configuration HDS obligatoire pour "${dataType}"`);
-      throw new Error(
-        `🚨 ACCÈS REFUSÉ: Configuration HDS obligatoire pour "${dataType}"\n\n` +
-        `Les données de santé ne peuvent être accessibles qu'après configuration ` +
-        `du stockage local sécurisé.\n\n` +
-        `Veuillez configurer le stockage dans Paramètres > Stockage HDS`
-      );
+      console.warn(`⚠️ HDS non configuré - Utilisation stockage chiffré temporaire pour ${dataType}`);
+      
+      const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+      
+      // Vérifier si le PIN est déjà configuré
+      const pinHash = localStorage.getItem('temp-storage-pin-hash');
+      
+      if (!pinHash) {
+        // Pas de PIN configuré - demander à l'utilisateur
+        throw new Error('PIN_SETUP_REQUIRED');
+      }
+      
+      // Le PIN a déjà été saisi au démarrage - vérifier si configuré
+      const isConfigured = await encryptedWorkingStorage.isAvailable();
+      
+      if (!isConfigured) {
+        throw new Error('PIN_UNLOCK_REQUIRED');
+      }
+      
+      // Activer les sauvegardes automatiques
+      await encryptedWorkingStorage.enableAutoBackup(5);
+      
+      return {
+        create: (data) => encryptedWorkingStorage.save(dataType, { ...data, id: Date.now() } as any),
+        getById: (id) => encryptedWorkingStorage.getById(dataType, id),
+        getAll: () => encryptedWorkingStorage.getAll(dataType),
+        update: async (id, updates) => {
+          const existing = await encryptedWorkingStorage.getById(dataType, id);
+          if (!existing) throw new Error(`${dataType}/${id} introuvable`);
+          return encryptedWorkingStorage.save(dataType, { ...(existing as any), ...(updates as any) });
+        },
+        delete: (id) => encryptedWorkingStorage.delete(dataType, id).then(() => true)
+      } as StorageAdapter<T>;
     }
 
     // HDS configuré ET déverrouillé → Utiliser les services HDS sécurisés

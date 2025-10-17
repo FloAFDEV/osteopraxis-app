@@ -8,6 +8,7 @@ import { DashboardStats } from "./dashboard-stats";
 import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
+import { BackupStatusBanner } from "./BackupStatusBanner";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useStorageMode } from "@/hooks/useStorageMode";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -78,6 +79,9 @@ export function Dashboard() {
 		<div className="space-y-8 p-4 sm:p-6 lg:p-8">
 			{/* Header Image Banner */}
 			<DashboardHeader />
+			
+			{/* Banner de statut de backup temporaire */}
+			{!loading && !isDemoMode && <BackupStatusBanner />}
 			
 			{/* Skeleton loader pendant le chargement des données */}
 			{loading && (

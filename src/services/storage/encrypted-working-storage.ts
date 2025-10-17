@@ -1,0 +1,87 @@
+/**
+ * 🔐 Stockage chiffré temporaire avec code PIN 6 chiffres
+ * 
+ * Extension de IndexedDBSecureStorage avec :
+ * - Configuration via code PIN 6 chiffres
+ * - Sauvegardes automatiques toutes les 5 minutes
+ * - Export/Import de backups chiffrés
+ */
+
+import { IndexedDBSecureStorage } from '@/services/hds-secure-storage/indexeddb-secure-storage';
+import { generateSHA256 } from '@/utils/crypto';
+
+export class EncryptedWorkingStorage extends IndexedDBSecureStorage {
+  private autoBackupInterval: number | null = null;
+  private lastBackupTime: Date | null = null;
+  
+  async configureWithPin(pin: string): Promise<void> {
+    // Vérifier le hash du PIN
+    const storedHash = localStorage.getItem('temp-storage-pin-hash');
+    const currentHash = await generateSHA256(pin);
+    
+    if (storedHash && storedHash !== currentHash) {
+      throw new Error('Code PIN incorrect');
+    }
+    
+    // Si c'est la première fois, stocker le hash
+    if (!storedHash) {
+      localStorage.setItem('temp-storage-pin-hash', currentHash);
+    }
+    
+    // Configurer le stockage avec le PIN comme mot de passe
+    await this.configure({
+      password: pin, // Le PIN est utilisé directement par PBKDF2
+      entities: ['patients', 'appointments', 'invoices']
+    });
+    
+    console.log('✅ Stockage chiffré temporaire configuré avec PIN');
+  }
+  
+  async enableAutoBackup(intervalMinutes = 5): Promise<void> {
+    // Désactiver l'ancien intervalle s'il existe
+    this.disableAutoBackup();
+    
+    this.autoBackupInterval = window.setInterval(async () => {
+      try {
+        console.log('💾 Sauvegarde automatique chiffrée...');
+        const backup = await this.exportBackup();
+        
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `patienthub-backup-${timestamp}.hdsbackup`;
+        
+        // Télécharger automatiquement
+        const url = URL.createObjectURL(backup);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.lastBackupTime = new Date();
+        console.log('✅ Backup auto créé:', filename);
+      } catch (error) {
+        console.error('❌ Erreur backup auto:', error);
+      }
+    }, intervalMinutes * 60 * 1000);
+    
+    console.log(`🕐 Sauvegarde automatique activée (toutes les ${intervalMinutes} minutes)`);
+  }
+  
+  disableAutoBackup(): void {
+    if (this.autoBackupInterval) {
+      clearInterval(this.autoBackupInterval);
+      this.autoBackupInterval = null;
+      console.log('⏹️ Sauvegarde automatique désactivée');
+    }
+  }
+  
+  getBackupStatus() {
+    return {
+      lastBackup: this.lastBackupTime,
+      intervalMinutes: this.autoBackupInterval ? 5 : null,
+      isActive: this.autoBackupInterval !== null
+    };
+  }
+}
+
+export const encryptedWorkingStorage = new EncryptedWorkingStorage();
