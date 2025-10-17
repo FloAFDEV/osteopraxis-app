@@ -26,6 +26,10 @@ export const appointmentService = {
       await delay(200); // Simulation UI
       return await adapter.getAll();
     } catch (error) {
+      if (error instanceof Error && 
+          (error.message === 'PIN_SETUP_REQUIRED' || error.message === 'PIN_UNLOCK_REQUIRED')) {
+        throw error;
+      }
       console.error('❌ Erreur récupération rendez-vous:', error);
       return [];
     }

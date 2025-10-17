@@ -11,6 +11,11 @@ export const patientService = {
       console.log(`📋 PatientService: ${result.length} patients récupérés`);
       return result;
     } catch (error) {
+      // Propager les erreurs PIN pour forcer l'affichage du composant approprié
+      if (error instanceof Error && 
+          (error.message === 'PIN_SETUP_REQUIRED' || error.message === 'PIN_UNLOCK_REQUIRED')) {
+        throw error;
+      }
       console.error('❌ Erreur récupération patients:', error);
       return [];
     }
@@ -27,6 +32,10 @@ export const patientService = {
       const patient = await adapter.getById(id);
       return patient || undefined;
     } catch (error) {
+      if (error instanceof Error && 
+          (error.message === 'PIN_SETUP_REQUIRED' || error.message === 'PIN_UNLOCK_REQUIRED')) {
+        throw error;
+      }
       console.error('❌ Erreur récupération patient:', error);
       return undefined;
     }

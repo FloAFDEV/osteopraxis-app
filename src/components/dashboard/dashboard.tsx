@@ -9,6 +9,8 @@ import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
 import { BackupStatusBanner } from "./BackupStatusBanner";
+import { TemporaryStoragePinSetup } from "@/components/storage/TemporaryStoragePinSetup";
+import { TemporaryStoragePinUnlock } from "@/components/storage/TemporaryStoragePinUnlock";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useStorageMode } from "@/hooks/useStorageMode";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -24,7 +26,7 @@ export function Dashboard() {
 	const [storageMode, setStorageMode] = useState<'demo' | 'connected' | 'iframe_preview' | null>(null);
 	
 	// Hook unifié qui gère automatiquement démo vs connecté
-	const { dashboardData, allPatients, loading, error } = useDashboardStats(selectedCabinetId);
+	const { dashboardData, allPatients, loading, error, pinError, reload } = useDashboardStats(selectedCabinetId);
 
 	// Vérifier le mode de stockage pour afficher les avertissements appropriés
 	useEffect(() => {
@@ -61,6 +63,35 @@ export function Dashboard() {
 	if (user.role === "ADMIN") {
 		window.location.href = "/admin/dashboard";
 		return <LoadingState />;
+	}
+
+	// Afficher le composant PIN approprié si nécessaire
+	if (pinError === 'SETUP') {
+		return (
+			<div className="min-h-screen flex items-center justify-center p-4">
+				<TemporaryStoragePinSetup onComplete={async (pin: string) => {
+					const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+					await encryptedWorkingStorage.configureWithPin(pin);
+					await reload();
+				}} />
+			</div>
+		);
+	}
+
+	if (pinError === 'UNLOCK') {
+		return (
+			<div className="min-h-screen flex items-center justify-center p-4">
+				<TemporaryStoragePinUnlock 
+					onUnlock={async () => {
+						await reload();
+					}}
+					onForgot={() => {
+						localStorage.removeItem('temp-storage-pin-hash');
+						window.location.reload();
+					}}
+				/>
+			</div>
+		);
 	}
 
 	if (error) {

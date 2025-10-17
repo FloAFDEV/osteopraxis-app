@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Lock } from 'lucide-react';
 
 interface TemporaryStoragePinUnlockProps {
-  onUnlock: () => void;
+  onUnlock: () => void | Promise<void>;
   onForgot: () => void;
 }
 

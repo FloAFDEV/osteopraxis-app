@@ -63,6 +63,7 @@ export function useDashboardStats(selectedCabinetId: number | null) {
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pinError, setPinError] = useState<'SETUP' | 'UNLOCK' | null>(null);
   
   // ⚡ Guard pour éviter les appels multiples simultanés
   const isLoadingRef = useRef(false);
@@ -160,6 +161,23 @@ export function useDashboardStats(selectedCabinetId: number | null) {
 
     } catch (err) {
       console.error('❌ Erreur chargement dashboard:', err);
+      
+      // Gérer les erreurs PIN spécifiques
+      if (err instanceof Error) {
+        if (err.message === 'PIN_SETUP_REQUIRED') {
+          setPinError('SETUP');
+          setLoading(false);
+          isLoadingRef.current = false;
+          return;
+        }
+        if (err.message === 'PIN_UNLOCK_REQUIRED') {
+          setPinError('UNLOCK');
+          setLoading(false);
+          isLoadingRef.current = false;
+          return;
+        }
+      }
+      
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
@@ -172,11 +190,12 @@ export function useDashboardStats(selectedCabinetId: number | null) {
     loadStats();
   }, [selectedCabinetId, user?.osteopathId]);
 
-  return {
-    dashboardData,
+  return { 
+    dashboardData, 
     allPatients,
-    loading,
+    loading, 
     error,
+    pinError,
     reload: loadStats
   };
 }
