@@ -12,6 +12,7 @@ interface UseHybridStorageReturn {
   unlock: (credential: string) => Promise<boolean>;
   lock: () => void;
   refresh: () => Promise<void>;
+  loadStatus: () => Promise<HDSSecureStatus | null>;
 }
 
 export const useHybridStorage = (): UseHybridStorageReturn => {
@@ -29,10 +30,12 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
     try {
       const storageStatus = await hdsSecureManager.getStatus();
       setStatus(storageStatus);
+      setIsLoading(false);
       return storageStatus;
     } catch (error) {
       console.error('Failed to load secure storage status:', error);
       toast.error('Erreur lors du chargement du statut de stockage sécurisé');
+      setIsLoading(false);
       return null;
     }
   }, []);
@@ -162,6 +165,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
     initialize,
     unlock,
     lock,
-    refresh
+    refresh,
+    loadStatus
   };
 };

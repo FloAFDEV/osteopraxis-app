@@ -32,7 +32,7 @@ interface HybridStorageProviderProps {
 }
 
 export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ children }) => {
-  const { status, isLoading, initialize, unlock, lock } = useHybridStorage();
+  const { status, isLoading, initialize, unlock, lock, loadStatus } = useHybridStorage();
   const [showUnlock, setShowUnlock] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
   const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('password');
@@ -88,6 +88,11 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
       
       await hdsSecureManager.configure(secureConfig);
       await initialize();
+      
+      // Forcer un refresh pour mettre à jour le statut
+      if (loadStatus) {
+        await loadStatus();
+      }
       
       toast.success('Stockage HDS sécurisé configuré avec succès !');
     } catch (error) {
