@@ -30,36 +30,9 @@ export const HDSStatusBanner: React.FC = () => {
     return null;
   }
 
-  // Stockage configuré et déverrouillé - statut OK
+  // Stockage configuré et déverrouillé - tout va bien, pas de bandeau nécessaire
   if (status?.isConfigured && status?.isUnlocked) {
-    return (
-      <Card className="mb-6 border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
-                  Stockage HDS sécurisé actif
-                </p>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                  Vos données sensibles sont stockées localement et chiffrées
-                </p>
-              </div>
-            </div>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => navigate('/settings/storage')}
-              className="border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/20 flex-shrink-0"
-            >
-              <Settings className="h-4 w-4 mr-1" />
-              Gérer
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   // Stockage configuré mais verrouillé
