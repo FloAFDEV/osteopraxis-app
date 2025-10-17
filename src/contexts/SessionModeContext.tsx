@@ -19,8 +19,9 @@ export function SessionModeProvider({ children }: { children: ReactNode }) {
     const detectOnce = async () => {
       try {
         const result = await isDemoSession();
-        // Seulement mettre à jour si différent (évite les re-renders inutiles)
-        if (mounted && result !== isDemoMode) {
+        // ✅ Toujours mettre à jour le state
+        if (mounted) {
+          console.log('🔍 Détection mode session:', result ? 'DÉMO' : 'CONNECTÉ');
           setIsDemoMode(result);
         }
       } catch (error) {

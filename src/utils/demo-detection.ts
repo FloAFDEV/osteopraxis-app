@@ -8,6 +8,7 @@ export function isDemoUser(user: any): boolean {
 
   // Un utilisateur avec le rôle ADMIN n'est jamais en mode démo
   if (user.role === 'ADMIN' || user.user_metadata?.role === 'ADMIN') {
+    console.log('🔍 isDemoUser - ADMIN détecté, pas démo');
     return false;
   }
 
@@ -21,7 +22,14 @@ export function isDemoUser(user: any): boolean {
     user.user_metadata?.isDemoUser === true,
   ];
 
-  return demoIndicators.some(indicator => indicator === true);
+  const result = demoIndicators.some(indicator => indicator === true);
+  console.log('🔍 isDemoUser - Résultat:', result, {
+    email,
+    userId: user.id,
+    metadata: user.user_metadata
+  });
+
+  return result;
 }
 
 // ⚡ Cache pour éviter les appels répétitifs et les boucles infinies
@@ -53,11 +61,18 @@ export const isDemoSession = async (): Promise<boolean> => {
     const { supabase } = await import('@/integrations/supabase/client');
     const { data: { session } } = await supabase.auth.getSession();
     
+    console.log('🔍 DEBUG isDemoSession - Session:', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userEmail: session?.user?.email,
+      isDemoUser: session?.user ? isDemoUser(session.user) : null
+    });
+    
     // Si utilisateur vraiment connecté avec un compte réel, jamais en mode démo
     if (session?.user && !isDemoUser(session.user)) {
       // Log seulement si le cache était différent
       if (!demoSessionCache || demoSessionCache.result !== false) {
-        console.log('🔐 Utilisateur réellement connecté détecté - Mode connecté forcé');
+        console.log('✅ Utilisateur réellement connecté détecté - Mode connecté forcé');
       }
       
       // Nettoyer toute session démo locale existante pour éviter les conflits
