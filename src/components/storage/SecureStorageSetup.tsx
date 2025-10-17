@@ -121,19 +121,10 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-center gap-2">
-              <CardTitle className="text-2xl">Configuration du Stockage HDS Sécurisé</CardTitle>
-              {isPreviewMode && (
-                <Badge variant="secondary" className="gap-1">
-                  <Monitor className="w-3 h-3" />
-                  Preview
-                </Badge>
-              )}
+              <CardTitle className="text-2xl">Configuration du Stockage Sécurisé</CardTitle>
             </div>
             <CardDescription className="text-base">
-              {isPreviewMode 
-                ? 'Configuration IndexedDB chiffré (Mode Prévisualisation)'
-                : 'Configuration du stockage local chiffré pour vos données médicales'
-              }
+              Protégez vos données médicales avec un <strong>chiffrement AES-256-GCM</strong>
             </CardDescription>
           </div>
           <Progress value={getStepProgress()} className="w-full" />
@@ -142,24 +133,11 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
         <CardContent className="space-y-6">
           {step === 'info' && (
             <div className="space-y-6">
-              {isPreviewMode && (
-                <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
-                  <Monitor className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <AlertDescription className="text-blue-800 dark:text-blue-200">
-                    <p className="font-semibold mb-1">🖼️ Mode Prévisualisation Détecté</p>
-                    <p className="text-sm">
-                      Votre environnement utilisera IndexedDB chiffré (stockage navigateur). 
-                      Après déploiement, l'application utilisera automatiquement le stockage permanent dans un dossier local.
-                    </p>
-                  </AlertDescription>
-                </Alert>
-              )}
-              
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Sécurité maximale :</strong> Vos données médicales seront stockées {isPreviewMode ? 'dans le navigateur' : 'localement sur votre ordinateur'} 
-                  avec un chiffrement AES-256-GCM et une signature anti-falsification.
+                  <strong>Sécurité maximale :</strong> Vos données médicales seront stockées localement sur votre appareil 
+                  avec un <strong>chiffrement AES-256-GCM</strong> et une <strong>signature anti-falsification</strong>.
                 </AlertDescription>
               </Alert>
 
@@ -173,11 +151,10 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   </CardHeader>
                   <CardContent className="pt-0">
                     <ul className="text-sm space-y-1 text-green-700 dark:text-green-300">
-                      <li>• {isPreviewMode ? 'Stockage navigateur sécurisé' : '100% local - Aucune donnée dans le cloud'}</li>
-                      <li>• Chiffrement AES-256-GCM militaire</li>
-                      <li>• Protection anti-falsification HMAC</li>
-                      <li>• Conformité HDS garantie</li>
-                      {isPreviewMode && <li>• Passage auto au stockage permanent après déploiement</li>}
+                      <li>• <strong>100% local</strong> - Aucune donnée dans le cloud</li>
+                      <li>• Chiffrement <strong>AES-256-GCM</strong> militaire</li>
+                      <li>• Protection <strong>anti-falsification</strong> HMAC</li>
+                      <li>• <strong>Conformité HDS</strong> garantie</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -191,10 +168,10 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   </CardHeader>
                   <CardContent className="pt-0">
                     <ul className="text-sm space-y-1 text-orange-700 dark:text-orange-300">
-                      <li>• Mot de passe requis à chaque utilisation</li>
-                      <li>• {isPreviewMode ? 'Stockage temporaire dans navigateur' : 'Stockage automatique dans le navigateur'}</li>
-                      <li>• Sauvegarde régulière recommandée</li>
-                      <li>• Perte mot de passe = perte données</li>
+                      <li>• <strong>Mot de passe requis</strong> à chaque utilisation</li>
+                      <li>• Stockage automatique dans le navigateur</li>
+                      <li>• <strong>Sauvegarde régulière</strong> recommandée</li>
+                      <li>• <strong className="text-destructive">Perte mot de passe = perte données</strong></li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -229,8 +206,8 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   <p className="font-bold mb-2">⚠️ AVERTISSEMENT CRITIQUE</p>
                   <ul className="space-y-1 text-sm">
                     <li>• Ce mot de passe est <strong>irremplaçable et irrécupérable</strong></li>
-                    <li>• En cas d'oubli : <strong>perte définitive de TOUTES vos données HDS</strong></li>
-                    <li>• Aucune assistance technique ne pourra les récupérer</li>
+                    <li>• En cas d'oubli : <strong>perte définitive de TOUTES vos données</strong></li>
+                    <li>• <strong>Aucune assistance technique ne pourra les récupérer</strong></li>
                     <li>• <strong>Notez-le dans un gestionnaire de mots de passe sécurisé</strong></li>
                   </ul>
                 </AlertDescription>
@@ -241,9 +218,9 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                 <AlertDescription className="text-blue-800 dark:text-blue-200">
                   <p className="font-medium mb-1">💡 Bonnes pratiques :</p>
                   <ul className="space-y-1 text-sm">
-                    <li>• Utilisez un gestionnaire de mots de passe (Bitwarden, 1Password, etc.)</li>
-                    <li>• Exportez régulièrement vos données (recommandé : 1x/mois)</li>
-                    <li>• Le fichier d'export est également chiffré avec ce mot de passe</li>
+                    <li>• Utilisez un <strong>gestionnaire de mots de passe</strong> (Bitwarden, 1Password, etc.)</li>
+                    <li>• <strong>Exportez régulièrement</strong> vos données (recommandé : 1x/mois)</li>
+                    <li>• Le fichier d'export est <strong>également chiffré</strong> avec ce mot de passe</li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -326,17 +303,17 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="font-medium">Stockage :</span>
-                      <span className="text-sm">{isPreviewMode ? 'IndexedDB chiffré (Preview)' : 'Espace privé du navigateur (OPFS)'}</span>
+                      <span className="text-sm">Espace privé local du navigateur</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">
                       <span className="font-medium">Chiffrement :</span>
-                      <span className="text-sm text-green-600">AES-256-GCM + HMAC</span>
+                      <span className="text-sm text-green-600"><strong>AES-256-GCM + HMAC</strong></span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">
                       <span className="font-medium">Statut :</span>
-                      <span className="text-sm text-green-600">Prêt à activer</span>
+                      <span className="text-sm text-green-600"><strong>Prêt à activer</strong></span>
                     </div>
                   </div>
                 </CardContent>
