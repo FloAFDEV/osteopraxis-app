@@ -9,7 +9,7 @@
  * - Performance optimale (DRY)
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DashboardData, Patient } from '@/types';
 import { useStorageMode } from './useStorageMode';
 import { useAuth } from '@/contexts/AuthContext';
@@ -63,13 +63,23 @@ export function useDashboardStats(selectedCabinetId: number | null) {
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // ⚡ Guard pour éviter les appels multiples simultanés
+  const isLoadingRef = useRef(false);
 
   const loadStats = useCallback(async () => {
+    // 🛡️ Protection contre les appels simultanés
+    if (isLoadingRef.current) {
+      console.log('⏭️ Chargement déjà en cours, skip');
+      return;
+    }
+
     console.log('📊 Chargement stats dashboard', {
       cabinetId: selectedCabinetId,
       osteopathId: user?.osteopathId 
     });
 
+    isLoadingRef.current = true;
     setLoading(true);
     setError(null);
 
@@ -153,12 +163,14 @@ export function useDashboardStats(selectedCabinetId: number | null) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
+      isLoadingRef.current = false; // ✅ Libérer le guard
     }
   }, [selectedCabinetId, user?.osteopathId]);
 
+  // ⚡ Charger UNE SEULE FOIS au montage ou quand les dépendances changent
   useEffect(() => {
     loadStats();
-  }, [loadStats]);
+  }, [selectedCabinetId, user?.osteopathId]);
 
   return {
     dashboardData,

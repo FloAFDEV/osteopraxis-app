@@ -47,12 +47,12 @@ export const isDemoSession = async (): Promise<boolean> => {
     return demoSessionCache.result;
   }
 
-  // ⏱️ TIMEOUT de sécurité : 300ms max pour éviter le blocage
+  // ⏱️ TIMEOUT de sécurité : 1000ms max pour éviter le blocage
   const timeoutPromise = new Promise<boolean>((resolve) => {
     setTimeout(() => {
-      console.warn('⏱️ Timeout détection mode démo (300ms) - Fallback mode connecté');
+      console.warn('⏱️ Timeout détection mode démo (1000ms) - Fallback mode connecté');
       resolve(false);
-    }, 300);
+    }, 1000);
   });
 
   const detectionPromise = (async () => {
