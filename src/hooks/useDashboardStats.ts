@@ -65,14 +65,7 @@ export function useDashboardStats(selectedCabinetId: number | null) {
   const [error, setError] = useState<string | null>(null);
 
   const loadStats = useCallback(async () => {
-    // ⚡ Éviter les chargements redondants
-    if (loading) {
-      console.log('📊 Chargement déjà en cours, skip');
-      return;
-    }
-    
     console.log('📊 Chargement stats dashboard', {
-      mode: isDemoMode ? 'démo' : 'connecté',
       cabinetId: selectedCabinetId,
       osteopathId: user?.osteopathId 
     });
@@ -161,7 +154,7 @@ export function useDashboardStats(selectedCabinetId: number | null) {
     } finally {
       setLoading(false);
     }
-  }, [selectedCabinetId, user?.osteopathId, isDemoMode]);
+  }, [selectedCabinetId, user?.osteopathId]);
 
   useEffect(() => {
     loadStats();
