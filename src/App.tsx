@@ -55,6 +55,7 @@ import ConfigurationPage from "@/pages/ConfigurationPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 import { HybridStorageProvider } from "@/contexts/HybridStorageContext";
+import { SessionModeProvider } from "@/contexts/SessionModeContext";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -76,13 +77,14 @@ function App() {
     <ErrorBoundary>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <OptimizationProvider>
-              <PrivacyProvider>
-                <DemoProvider>
-                  <Router>
-                    <AuthProvider>
-                      <HybridStorageProvider>
+          <SessionModeProvider>
+            <ThemeProvider>
+              <OptimizationProvider>
+                <PrivacyProvider>
+                  <DemoProvider>
+                    <Router>
+                      <AuthProvider>
+                        <HybridStorageProvider>
                         <SecurityHeaders />
                         <SkipToContent />
                       <div id="main-content" className="min-h-screen bg-background">
@@ -266,13 +268,14 @@ function App() {
                       <DemoSessionTimer />
                       <Toaster />
                      </div>
-                      </HybridStorageProvider>
+                       </HybridStorageProvider>
                    </AuthProvider>
                   </Router>
                 </DemoProvider>
               </PrivacyProvider>
             </OptimizationProvider>
           </ThemeProvider>
+          </SessionModeProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </ErrorBoundary>

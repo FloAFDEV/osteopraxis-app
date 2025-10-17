@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Layout } from "@/components/ui/layout";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import { GradientBackground } from "@/components/ui/gradient-background";
@@ -8,7 +8,7 @@ import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
 import { HDSStatusWidget } from "@/components/dashboard/HDSStatusWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { isDemoSession } from "@/utils/demo-detection";
+import { useSessionMode } from "@/contexts/SessionModeContext";
 import { useCabinets } from "@/hooks/useCabinets";
 import { useHybridStorageContext } from "@/contexts/HybridStorageContext";
 
@@ -16,13 +16,7 @@ const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isConfigured, isLoading: storageLoading } = useHybridStorageContext();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-  const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null);
-  
-  // Vérifier le mode démo
-  useEffect(() => {
-    isDemoSession().then(setIsDemoMode);
-  }, []);
+  const { isDemoMode } = useSessionMode();
 
   // 🆘 Ne plus rediriger - Utilisation du stockage survivant si non configuré
   // Le HDSStatusBanner se chargera d'informer et d'inviter à configurer

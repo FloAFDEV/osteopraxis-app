@@ -65,7 +65,6 @@ export function useDashboardStats(selectedCabinetId: number | null) {
   const [error, setError] = useState<string | null>(null);
 
   const loadStats = useCallback(async () => {
-    // Charger même si mode non déterminé (fallback mode connecté)
     console.log('📊 Chargement stats dashboard', {
       mode: isDemoMode ? 'démo' : 'connecté',
       cabinetId: selectedCabinetId,
@@ -165,7 +164,7 @@ export function useDashboardStats(selectedCabinetId: number | null) {
   return {
     dashboardData,
     allPatients,
-    loading: loading && !modeLoading, // Ne bloquer que si vraiment en train de charger les stats
+    loading,
     error,
     reload: loadStats
   };
