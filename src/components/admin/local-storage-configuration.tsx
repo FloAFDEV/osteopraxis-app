@@ -60,6 +60,13 @@ export function LocalStorageConfiguration() {
       return;
     }
 
+    // Validation de complexité
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || 
+        !/[0-9]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      toast.error('Le mot de passe doit contenir : majuscules, minuscules, chiffres et symboles');
+      return;
+    }
+
     try {
       setLoading(true);
       

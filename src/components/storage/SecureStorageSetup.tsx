@@ -45,8 +45,8 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
   const validatePassword = (pwd: string): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
     
-    if (pwd.length < 12) {
-      errors.push('Le mot de passe doit contenir au moins 12 caractères');
+    if (pwd.length < 8) {
+      errors.push('Le mot de passe doit contenir au moins 8 caractères');
     }
     
     if (!/[A-Z]/.test(pwd)) {
@@ -233,7 +233,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Minimum 12 caractères avec majuscules, chiffres et symboles"
+                    placeholder="Minimum 8 caractères avec majuscules, chiffres et symboles"
                   />
                 </div>
 
@@ -252,8 +252,8 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
                   <div className="text-sm">
                     <p className="font-medium">Exigences du mot de passe :</p>
                     <ul className="space-y-1 mt-2">
-                      <li className={password.length >= 12 ? 'text-green-600' : 'text-red-500'}>
-                        {password.length >= 12 ? '✓' : '✗'} Au moins 12 caractères
+                      <li className={password.length >= 8 ? 'text-green-600' : 'text-red-500'}>
+                        {password.length >= 8 ? '✓' : '✗'} Au moins 8 caractères
                       </li>
                       <li className={/[A-Z]/.test(password) ? 'text-green-600' : 'text-red-500'}>
                         {/[A-Z]/.test(password) ? '✓' : '✗'} Au moins une majuscule
