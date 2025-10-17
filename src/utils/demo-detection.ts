@@ -39,7 +39,16 @@ export const isDemoSession = async (): Promise<boolean> => {
     return demoSessionCache.result;
   }
 
-  try {
+  // ⏱️ TIMEOUT de sécurité : 2 secondes max pour éviter le blocage
+  const timeoutPromise = new Promise<boolean>((resolve) => {
+    setTimeout(() => {
+      console.warn('⏱️ Timeout détection mode démo (2s) - Fallback mode connecté');
+      resolve(false);
+    }, 2000);
+  });
+
+  const detectionPromise = (async () => {
+    try {
     // 1️⃣ PRIORITÉ ABSOLUE: Vérifier d'abord l'authentification réelle
     const { supabase } = await import('@/integrations/supabase/client');
     const { data: { session } } = await supabase.auth.getSession();
@@ -104,12 +113,16 @@ export const isDemoSession = async (): Promise<boolean> => {
     demoSessionCache = { result, timestamp: now };
     return result;
     
-  } catch (error) {
-    console.error('Erreur lors de la détection de session démo:', error);
-    const result = false;
-    demoSessionCache = { result, timestamp: now };
-    return result;
-  }
+    } catch (error) {
+      console.error('Erreur lors de la détection de session démo:', error);
+      return false;
+    }
+  })();
+
+  // Prendre le premier qui répond (détection ou timeout)
+  const result = await Promise.race([detectionPromise, timeoutPromise]);
+  demoSessionCache = { result, timestamp: now };
+  return result;
 };
 
 /**

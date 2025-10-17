@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { isDemoSession } from '@/utils/demo-detection';
 
 export function useStorageMode() {
-  const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState<boolean | null>(false); // Default: mode connecté
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function useStorageMode() {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Erreur détection mode:', error);
+        console.warn('⚠️ Erreur détection mode - Fallback: mode connecté', error);
         if (mounted) {
           setIsDemoMode(false); // Par défaut : mode connecté
           setIsLoading(false);
