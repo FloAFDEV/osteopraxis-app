@@ -92,7 +92,27 @@ export function useDashboardStats(selectedCabinetId: number | null) {
         api.getInvoices()
       ]);
 
-      // Extraire les données ou tableaux vides
+      // ⚠️ VÉRIFIER LES ERREURS PIN EN PRIORITÉ (avant d'extraire les données)
+      for (const result of [patientsData, appointmentsData, invoicesData]) {
+        if (result.status === 'rejected' && result.reason instanceof Error) {
+          if (result.reason.message === 'PIN_SETUP_REQUIRED') {
+            console.log('🔐 Configuration PIN requise');
+            setPinError('SETUP');
+            setLoading(false);
+            isLoadingRef.current = false;
+            return;
+          }
+          if (result.reason.message === 'PIN_UNLOCK_REQUIRED') {
+            console.log('🔓 Déverrouillage PIN requis');
+            setPinError('UNLOCK');
+            setLoading(false);
+            isLoadingRef.current = false;
+            return;
+          }
+        }
+      }
+
+      // Extraire les données ou tableaux vides (seulement si pas d'erreur PIN)
       const patients = patientsData.status === 'fulfilled' ? patientsData.value : [];
       const appointments = appointmentsData.status === 'fulfilled' ? appointmentsData.value : [];
       const invoices = invoicesData.status === 'fulfilled' ? invoicesData.value : [];
