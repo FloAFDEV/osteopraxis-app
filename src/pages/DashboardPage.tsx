@@ -27,10 +27,11 @@ const DashboardPage = () => {
       console.log("📊 DashboardPage - Utilisateur connecté:", {
         email: user.email,
         osteopathId: user.osteopathId,
-        hasFirstName: !!user.firstName
+        hasFirstName: !!user.firstName,
+        isDemoMode // 🔍 DEBUG: Vérifier la détection du mode démo
       });
     }
-  }, [user]);
+  }, [user, isDemoMode]);
 
   // ✅ Charger les cabinets (le stockage se configure en arrière-plan)
   const { data: cabinets, isLoading: cabinetsLoading } = useCabinets();
