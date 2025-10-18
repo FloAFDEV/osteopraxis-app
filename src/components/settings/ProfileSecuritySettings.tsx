@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PinSettings } from "./PinSettings";
 
 export const ProfileSecuritySettings: React.FC = () => {
   const { user } = useAuth();
@@ -228,6 +229,9 @@ export const ProfileSecuritySettings: React.FC = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Modification du code PIN */}
+      <PinSettings />
 
       {/* Sécurité des données locales */}
       <Card>

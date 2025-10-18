@@ -73,6 +73,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 
 			if (error) throw error;
 
+			// ⚡ IMPORTANT: Forcer l'invalidation du cache de détection démo
+			const { clearDemoSessionCache } = await import('@/utils/demo-detection');
+			clearDemoSessionCache();
+			console.log('🔄 Cache de détection démo invalidé après connexion');
+
 			// Session et user seront mis à jour par le listener onAuthStateChange
 			toast.success("Connexion réussie !");
 		} catch (err: any) {

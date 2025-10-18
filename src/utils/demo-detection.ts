@@ -70,10 +70,7 @@ export const isDemoSession = async (): Promise<boolean> => {
     
     // Si utilisateur vraiment connecté avec un compte réel, jamais en mode démo
     if (session?.user && !isDemoUser(session.user)) {
-      // Log seulement si le cache était différent
-      if (!demoSessionCache || demoSessionCache.result !== false) {
-        console.log('✅ Utilisateur réellement connecté détecté - Mode connecté forcé');
-      }
+      console.log('✅ Utilisateur réellement connecté détecté:', session.user.email);
       
       // Nettoyer toute session démo locale existante pour éviter les conflits
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
@@ -83,6 +80,7 @@ export const isDemoSession = async (): Promise<boolean> => {
       }
       
       const result = false;
+      // ⚡ IMPORTANT: Mettre à jour le cache pour éviter la détection démo résiduelle
       demoSessionCache = { result, timestamp: now };
       return result;
     }
