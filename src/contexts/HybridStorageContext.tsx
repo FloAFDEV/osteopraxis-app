@@ -8,6 +8,7 @@ import { StorageWelcomeScreen } from '@/components/storage/StorageWelcomeScreen'
 import { TemporaryStoragePinSetup } from '@/components/storage/TemporaryStoragePinSetup';
 import { TemporaryStoragePinUnlock } from '@/components/storage/TemporaryStoragePinUnlock';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface HybridStorageContextType {
@@ -35,6 +36,7 @@ interface HybridStorageProviderProps {
 
 export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ children }) => {
   const { status, isLoading, initialize, unlock, lock, loadStatus } = useHybridStorage();
+  const { user, loading: authLoading } = useAuth();
   const [showUnlock, setShowUnlock] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
   const [showPinSetup, setShowPinSetup] = useState(false);
@@ -43,12 +45,20 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
   const navigate = useNavigate();
   
   useEffect(() => {
+    // ⏸️ Attendre que l'authentification soit chargée
+    if (authLoading) {
+      console.log('⏳ HybridStorageContext - Attente chargement authentification...');
+      return;
+    }
+
     if (!isLoading && status) {
       const checkStorageStatus = async () => {
         try {
           const { isDemoSession } = await import('@/utils/demo-detection');
           const demoMode = await isDemoSession();
           const skipped = localStorage.getItem('hds-storage-skip') === 'true';
+          
+          console.log('🔍 HybridStorageContext - Check storage:', { demoMode, userEmail: user?.email, skipped });
           
           if (demoMode) {
             console.log('🎭 Mode démo détecté - Pas de configuration nécessaire');
@@ -97,7 +107,7 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
       
       checkStorageStatus();
     }
-  }, [isLoading, status]);
+  }, [authLoading, isLoading, status, user]);
 
   const configureStorage = async (config: any): Promise<void> => {
     try {
