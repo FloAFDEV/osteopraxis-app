@@ -44,19 +44,18 @@ const DashboardPage = () => {
       >
         <DemoGuide />
         
-        {/* Widget HDS pour utilisateurs connectés */}
-        {!isDemoMode && (
-          <div className="mb-6">
-            <HDSStatusWidget />
-          </div>
-        )}
+        {/* Widget HDS - gère déjà l'affichage conditionnel en interne */}
+        <div className="mb-6">
+          <HDSStatusWidget />
+        </div>
 
-        {/* Message de bienvenue pour nouveaux utilisateurs */}
+        {/* Message de bienvenue adapté au contexte */}
         {!cabinetsLoading && (
           <WelcomeMessage 
             hasCabinets={!!(cabinets && cabinets.length > 0)}
-            hasPatients={false} // TODO: Ajouter le check des patients quand nécessaire
+            hasPatients={false}
             userName={user?.firstName}
+            isDemoMode={isDemoMode}
           />
         )}
         

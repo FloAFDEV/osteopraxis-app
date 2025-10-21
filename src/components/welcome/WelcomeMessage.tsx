@@ -9,19 +9,39 @@ interface WelcomeMessageProps {
   hasCabinets: boolean;
   hasPatients: boolean;
   userName?: string;
+  isDemoMode?: boolean;
 }
 
-export function WelcomeMessage({ hasCabinets, hasPatients, userName }: WelcomeMessageProps) {
-  const { isDemoMode } = useDemo();
-  
-  // Ne pas afficher en mode démo
-  if (isDemoMode) {
+export function WelcomeMessage({ hasCabinets, hasPatients, userName, isDemoMode }: WelcomeMessageProps) {
+  // Si l'utilisateur a déjà tout configuré (et pas en démo), ne pas afficher
+  if (!isDemoMode && hasCabinets && hasPatients) {
     return null;
   }
   
-  // Si l'utilisateur a déjà tout configuré, ne pas afficher le message
-  if (hasCabinets && hasPatients) {
-    return null;
+  // Message spécial pour le mode démo
+  if (isDemoMode) {
+    return (
+      <Alert className="mb-8 border-purple-200 bg-purple-50 dark:bg-purple-950/30 dark:border-purple-800">
+        <Building className="h-4 w-4 text-purple-600" />
+        <AlertDescription className="text-purple-800 dark:text-purple-200">
+          <div className="space-y-3">
+            <div>
+              <strong>🎭 Bienvenue en mode démo !</strong>
+            </div>
+            <p className="text-sm">
+              Explorez toutes les fonctionnalités de PatientHub avec des données fictives. 
+              Testez la gestion de patients, les rendez-vous, la facturation et bien plus encore.
+            </p>
+            <Button asChild size="sm" className="w-fit">
+              <Link to="/register" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Créer mon compte gratuitement
+              </Link>
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (

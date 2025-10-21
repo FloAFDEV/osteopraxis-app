@@ -111,8 +111,8 @@ export function Dashboard() {
 			{/* Header Image Banner */}
 			<DashboardHeader />
 			
-			{/* Banner de statut de backup temporaire */}
-			{!loading && !isDemoMode && <BackupStatusBanner />}
+		{/* Banner de statut de backup - uniquement si HDS configuré et données présentes */}
+		{!loading && !isDemoMode && !hasNoData && <BackupStatusBanner />}
 			
 			{/* Skeleton loader pendant le chargement des données */}
 			{loading && (
@@ -126,35 +126,8 @@ export function Dashboard() {
 				</div>
 			)}
 
-			{/* Message de bienvenue si pas de données HDS - uniquement en mode connecté sans stockage configuré */}
-			{!loading && !isDemoMode && hasNoData && storageMode === 'connected' && (
-				<Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
-					<Shield className="h-4 w-4 text-blue-600" />
-					<AlertDescription className="text-blue-800 dark:text-blue-200">
-						<div className="space-y-3">
-							<div>
-								<strong>Bienvenue sur PatientHub !</strong>
-								<p className="mt-1 text-sm">
-									Pour commencer à gérer vos patients de manière sécurisée et conforme HDS, 
-									configurez votre stockage local sécurisé.
-								</p>
-							</div>
-							<Button
-								variant="default"
-								size="sm"
-								className="mt-2"
-								onClick={() => window.location.href = '/settings/storage'}
-							>
-								<Shield className="h-4 w-4 mr-2" />
-								Configurer le stockage HDS sécurisé
-							</Button>
-						</div>
-					</AlertDescription>
-				</Alert>
-			)}
-
-			{/* Avertissement de stockage en mode connecté */}
-			{!loading && storageMode === 'connected' && (
+		{/* Avertissement de stockage en mode connecté - uniquement si utilisateur actif */}
+		{!loading && !hasNoData && storageMode === 'connected' && (
 				<Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
 					<AlertTriangle className="h-4 w-4 text-orange-600" />
 					<AlertDescription className="text-orange-800 dark:text-orange-200">
