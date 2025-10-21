@@ -158,6 +158,13 @@ export class StorageRouter {
    * 🚨 AUCUN fallback Supabase autorisé pour les données HDS en mode connecté
    */
   private async getLocalHDSAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
+    // ⚡ NOUVEAU : Vérifier le mode démo en premier
+    const demoMode = await isDemoSession();
+    if (demoMode) {
+      console.log('🎭 Mode démo détecté dans getLocalHDSAdapter - Redirection vers stockage démo');
+      return this.getDemoAdapter<T>(dataType);
+    }
+
     // Vérification de sécurité stricte
     if (!isHDSData(dataType)) {
       throw new Error(`🚨 Tentative d'accès HDS pour donnée non-HDS: ${dataType}`);
@@ -167,7 +174,7 @@ export class StorageRouter {
     const { hdsSecureManager } = await import('@/services/hds-secure-storage/hds-secure-manager');
     const status = await hdsSecureManager.getStatus();
     
-    // 🔐 Stockage chiffré temporaire IndexedDB avec PIN
+    // 🔐 Stockage chiffré temporaire IndexedDB avec PIN (mode connecté uniquement)
     if (!status.isConfigured || !status.isUnlocked) {
       console.warn(`⚠️ HDS non configuré - Utilisation stockage chiffré temporaire pour ${dataType}`);
       

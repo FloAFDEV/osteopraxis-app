@@ -47,12 +47,21 @@ export const isDemoSession = async (): Promise<boolean> => {
     return demoSessionCache.result;
   }
 
-  // ⏱️ TIMEOUT de sécurité : 1000ms max pour éviter le blocage
+  // ⏱️ TIMEOUT de sécurité : 3000ms max pour attendre la session Supabase
   const timeoutPromise = new Promise<boolean>((resolve) => {
-    setTimeout(() => {
-      console.warn('⏱️ Timeout détection mode démo (1000ms) - Fallback mode connecté');
-      resolve(false);
-    }, 1000);
+    setTimeout(async () => {
+      console.warn('⏱️ Timeout détection mode démo (3000ms) - Vérification localStorage démo');
+      // ⚡ NOUVEAU : Vérifier localStorage démo en dernier recours
+      try {
+        const { demoLocalStorage } = await import('@/services/demo-local-storage');
+        const fallbackDemo = demoLocalStorage.isSessionActive();
+        console.log('🔄 Fallback timeout - Session locale démo:', fallbackDemo);
+        resolve(fallbackDemo);
+      } catch (error) {
+        console.error('❌ Erreur fallback timeout:', error);
+        resolve(false);
+      }
+    }, 3000);
   });
 
   const detectionPromise = (async () => {
