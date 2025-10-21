@@ -113,6 +113,7 @@ export function PatientForm({
 			cabinetId: patient?.cabinetId || selectedCabinetId || null,
 			maritalStatus: patient?.maritalStatus || null,
 			occupation: patient?.occupation || null,
+			job: patient?.occupation || null, // Mapper occupation vers job pour le formulaire
 			hasChildren: patient?.hasChildren || null,
 			childrenAges: patient?.childrenAges || null,
 

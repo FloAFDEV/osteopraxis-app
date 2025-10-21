@@ -89,6 +89,7 @@ const NewPatientPage = () => {
 				osteopathId: user.osteopathId || user.id, // Utilise osteopathId ou id selon ce qui est disponible
 				cabinetId: patientData.cabinetId || selectedCabinetId || 1, // Utiliser le cabinetId du formulaire ou celui sélectionné dans la navbar
 				userId: null, // Requis par le type mais peut être null
+				occupation: patientData.job || patientData.occupation || null, // Mapper job vers occupation
 				// Champs existants requis
 				complementaryExams: patientData.complementaryExams || null,
 				generalSymptoms: patientData.generalSymptoms || null,

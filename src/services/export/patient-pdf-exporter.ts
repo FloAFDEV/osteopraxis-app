@@ -139,6 +139,39 @@ export class PatientPDFExporter {
 		this.currentY += 10;
 	}
 
+	private translateStatus(status: string): string {
+		const translations: Record<string, string> = {
+			'SCHEDULED': 'Programmée',
+			'CONFIRMED': 'Confirmée',
+			'COMPLETED': 'Terminée',
+			'CANCELED': 'Annulée',
+			'NO_SHOW': 'Absent'
+		};
+		return translations[status] || status;
+	}
+
+	private translatePaymentStatus(status: string): string {
+		const translations: Record<string, string> = {
+			'PAID': 'Payée',
+			'PENDING': 'En attente',
+			'UNPAID': 'Non payée',
+			'PARTIAL': 'Partiellement payée',
+			'REFUNDED': 'Remboursée'
+		};
+		return translations[status] || status;
+	}
+
+	private translatePaymentMethod(method: string): string {
+		const translations: Record<string, string> = {
+			'CASH': 'Espèces',
+			'CHECK': 'Chèque',
+			'CARD': 'Carte bancaire',
+			'TRANSFER': 'Virement',
+			'OTHER': 'Autre'
+		};
+		return translations[method] || method;
+	}
+
 	private addSection(title: string) {
 		this.checkPageBreak(20);
 		this.currentY += 4;
@@ -240,26 +273,26 @@ export class PatientPDFExporter {
 
 	private addExaminations(patient: Patient) {
 		this.addSection("EXAMENS CLINIQUES");
-		this.addField("Examen médical", patient.medical_examination);
+		this.addField("Examen médical général", patient.medical_examination);
 		this.addField("Examen crânien", patient.cranial_exam);
-		this.addField("Examen dentaire", patient.dental_exam);
+		this.addField("Examen dentaire et occlusion", patient.dental_exam);
 		this.addField("Examen facial", patient.facial_mask_exam);
-		this.addField("Examen fascia", patient.fascia_exam);
+		this.addField("Examen fascial", patient.fascia_exam);
 		this.addField("Examen vasculaire", patient.vascular_exam);
-		this.addField("Membre supérieur", patient.upper_limb_exam);
-		this.addField("Membre inférieur", patient.lower_limb_exam);
-		this.addField("Épaule", patient.shoulder_exam);
-		this.addField("Scoliose", patient.scoliosis);
+		this.addField("Examen membre supérieur", patient.upper_limb_exam);
+		this.addField("Examen membre inférieur", patient.lower_limb_exam);
+		this.addField("Examen épaule", patient.shoulder_exam);
+		this.addField("Scoliose et posture", patient.scoliosis);
 
 		this.addSection("DIAGNOSTIC ET TRAITEMENT");
-		this.addField("Diagnostic", patient.diagnosis);
+		this.addField("Diagnostic ostéopathique", patient.diagnosis);
 		this.addField("Plan de traitement", patient.treatment_plan);
 		this.addField(
-			"Conclusion consultation",
+			"Conclusion de consultation",
 			patient.consultation_conclusion
 		);
-		this.addField("Examens complémentaires", patient.complementaryExams);
-		this.addField("Notes générales", patient.notes);
+		this.addField("Examens complémentaires prescrits", patient.complementaryExams);
+		this.addField("Notes générales du praticien", patient.notes);
 	}
 
 	async exportPatientComplete(
@@ -293,20 +326,20 @@ export class PatientPDFExporter {
 		}
 
 		if (includeAppointments && appointments.length) {
-			this.addSection("HISTORIQUE DES RENDEZ-VOUS");
+			this.addSection("HISTORIQUE DES SÉANCES");
 			appointments.forEach((a, i) => {
 				this.checkPageBreak(15);
 				this.pdf.setFontSize(12);
 				this.pdf.setFont("helvetica", "bold");
-				this.pdf.text(`RDV ${i + 1}`, this.margin, this.currentY);
+				this.pdf.text(`Séance n°${i + 1}`, this.margin, this.currentY);
 				this.currentY += 6;
 				this.addField(
-					"Date",
+					"Date et heure",
 					format(new Date(a.date), "PPPP 'à' HH:mm", { locale: fr })
 				);
-				this.addField("Motif", a.reason);
-				this.addField("Statut", a.status);
-				this.addField("Notes", a.notes);
+				this.addField("Motif de consultation", a.reason);
+				this.addField("État de la séance", this.translateStatus(a.status));
+				this.addField("Notes de séance", a.notes);
 				this.currentY += 5;
 			});
 		}
@@ -318,12 +351,12 @@ export class PatientPDFExporter {
 				this.checkPageBreak(15);
 				this.pdf.setFontSize(12);
 				this.pdf.setFont("helvetica", "bold");
-				this.pdf.text(`Facture ${i + 1}`, this.margin, this.currentY);
+				this.pdf.text(`Facture n°${i + 1}`, this.margin, this.currentY);
 				this.currentY += 6;
-				this.addField("Date", format(new Date(inv.date), "dd/MM/yyyy"));
-				this.addField("Montant", `${inv.amount} €`);
-				this.addField("Statut", inv.paymentStatus);
-				this.addField("Mode de paiement", inv.paymentMethod);
+				this.addField("Date d'émission", format(new Date(inv.date), "dd/MM/yyyy"));
+				this.addField("Montant TTC", `${inv.amount} €`);
+				this.addField("État du paiement", this.translatePaymentStatus(inv.paymentStatus));
+				this.addField("Moyen de paiement", this.translatePaymentMethod(inv.paymentMethod));
 				total += inv.amount;
 				this.currentY += 5;
 			});
