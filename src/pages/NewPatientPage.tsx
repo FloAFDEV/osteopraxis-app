@@ -2,6 +2,7 @@ import { PatientForm } from "@/components/PatientForm";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHybridStorageContext } from "@/contexts/HybridStorageContext";
 import { Patient, Cabinet } from "@/types";
 import { useCabinetById } from "@/hooks/useCabinets";
 import { api } from "@/services/api";
@@ -17,6 +18,7 @@ const NewPatientPage = () => {
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const navigate = useNavigate();
 	const { user, isAuthenticated } = useAuth();
+	const { showPinSetupModal } = useHybridStorageContext();
 	const queryClient = useQueryClient();
 
 	// Récupérer le cabinet sélectionné depuis localStorage
@@ -171,6 +173,19 @@ const NewPatientPage = () => {
 			navigate(`/patients/${newPatient.id}`);
 		} catch (error) {
 			console.error("❌ Erreur complète dans handleAddPatient:", error);
+			
+			// 🔐 Intercepter la demande de PIN
+			if (error instanceof Error && error.message === 'PIN_SETUP_REQUIRED') {
+				toast.info("Configuration du stockage sécurisé requise pour sauvegarder");
+				showPinSetupModal();
+				return;
+			}
+			
+			if (error instanceof Error && error.message === 'PIN_UNLOCK_REQUIRED') {
+				toast.error("Veuillez déverrouiller votre stockage sécurisé");
+				return;
+			}
+			
 			if (
 				error instanceof Error &&
 				error.message.includes("duplicate key value")

@@ -18,6 +18,7 @@ interface HybridStorageContextType {
   configureStorage: (config: any) => Promise<void>;
   unlockStorage: (credential: string) => Promise<boolean>;
   lockStorage: () => void;
+  showPinSetupModal: () => void;
 }
 
 const HybridStorageContext = createContext<HybridStorageContextType | undefined>(undefined);
@@ -61,19 +62,19 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
           console.log('🔍 HybridStorageContext - Check storage:', { demoMode, userEmail: user?.email, skipped });
           
           if (demoMode) {
-            console.log('🎭 Mode démo détecté - Pas de configuration nécessaire');
+            console.log('🎭 Mode démo détecté - Nettoyage PIN et pas de configuration nécessaire');
+            localStorage.removeItem('temp-storage-pin-hash');
+            localStorage.removeItem('hds-storage-skip');
+            setShowPinSetup(false);
+            setShowPinUnlock(false);
             return;
           }
           
           const pinHash = localStorage.getItem('temp-storage-pin-hash');
           const hdsConfigured = status.isConfigured;
           
-          // Si HDS pas configuré ET pas de PIN temporaire
-          if (!hdsConfigured && !pinHash && !skipped) {
-            console.log('🔐 Configuration PIN temporaire requise');
-            setShowPinSetup(true);
-            return;
-          }
+          // ✅ PIN demandé uniquement à la sauvegarde, pas au démarrage
+          console.log('✅ HDS non configuré - PIN sera demandé à la première sauvegarde si nécessaire');
           
           // Si PIN configuré mais pas déverrouillé
           if (!hdsConfigured && pinHash && !skipped) {
@@ -266,7 +267,14 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     try { navigate('/dashboard'); } catch {}
   };
 
+  // ⚡ Vérification finale anti-PIN en mode démo
   if (showPinSetup) {
+    const isDemoEmail = user?.email === 'demo@patienthub.com' || user?.email?.startsWith('demo-');
+    if (isDemoEmail) {
+      console.log('🚫 Blocage affichage PIN pour utilisateur démo');
+      setShowPinSetup(false);
+      return <>{children}</>;
+    }
     return <TemporaryStoragePinSetup onComplete={handlePinSetup} />;
   }
 
@@ -303,13 +311,18 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     );
   }
 
+  const showPinSetupModal = () => {
+    setShowPinSetup(true);
+  };
+
   const contextValue: HybridStorageContextType = {
     isConfigured: status?.isConfigured || false,
     isUnlocked: status?.isUnlocked || false,
     isLoading,
     configureStorage,
     unlockStorage,
-    lockStorage
+    lockStorage,
+    showPinSetupModal
   };
 
   return (

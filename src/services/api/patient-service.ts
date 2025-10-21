@@ -46,6 +46,11 @@ export const patientService = {
       const adapter = await storageRouter.route<Patient>('patients');
       return await adapter.create(patient);
     } catch (error) {
+      // Propager les erreurs PIN pour forcer l'affichage du composant approprié
+      if (error instanceof Error && 
+          (error.message === 'PIN_SETUP_REQUIRED' || error.message === 'PIN_UNLOCK_REQUIRED')) {
+        throw error;
+      }
       console.error('❌ Erreur création patient:', error);
       throw new Error('❌ Service patient indisponible');
     }
