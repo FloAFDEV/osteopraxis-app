@@ -10,12 +10,19 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, Lock, Settings, AlertCircle, CheckCircle2, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
+import { useStorageMode } from '@/hooks/useStorageMode';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export const HDSStatusWidget: React.FC = () => {
   const navigate = useNavigate();
   const { status, isLoading } = useHybridStorage();
+  const { isDemoMode } = useStorageMode();
+
+  // 🎭 En mode démo, ce widget n'est pas nécessaire
+  if (isDemoMode) {
+    return null;
+  }
 
   if (isLoading) {
     return (
