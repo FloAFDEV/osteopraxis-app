@@ -3,53 +3,83 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   DollarSign, 
   Users, 
-  TrendingUp, 
-  AlertTriangle,
+  TrendingUp,
   Search,
   Filter,
-  Download
+  Download,
+  Crown,
+  Zap,
+  Star
 } from "lucide-react";
 
-interface Subscriber {
-  id: string;
-  email: string;
-  subscribed: boolean;
-  subscription_tier: string | null;
-  subscription_end: string | null;
-  stripe_customer_id: string | null;
-  created_at: string;
-  updated_at: string;
+interface OsteopathSubscription {
+  id: number;
+  name: string;
+  userId: string;
+  authId: string;
+  plan: 'light' | 'full' | 'pro';
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface SubscriptionStats {
-  totalSubscribers: number;
-  activeSubscribers: number;
+  totalOsteopaths: number;
+  lightUsers: number;
+  fullUsers: number;
+  proUsers: number;
   monthlyRevenue: number;
   conversionRate: number;
-  churnRate: number;
-  trialExpiringCount: number;
 }
 
+const PLAN_PRICES = {
+  light: 0,
+  full: 9,
+  pro: 16
+};
+
+const PLAN_LABELS = {
+  light: 'Light',
+  full: 'Full',
+  pro: 'Pro'
+};
+
+const PLAN_COLORS = {
+  light: 'secondary',
+  full: 'default',
+  pro: 'default'
+} as const;
+
+const PLAN_ICONS = {
+  light: Star,
+  full: Zap,
+  pro: Crown
+};
+
 export function SubscriptionManagement() {
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [osteopaths, setOsteopaths] = useState<OsteopathSubscription[]>([]);
   const [stats, setStats] = useState<SubscriptionStats>({
-    totalSubscribers: 0,
-    activeSubscribers: 0,
+    totalOsteopaths: 0,
+    lightUsers: 0,
+    fullUsers: 0,
+    proUsers: 0,
     monthlyRevenue: 0,
-    conversionRate: 0,
-    churnRate: 0,
-    trialExpiringCount: 0
+    conversionRate: 0
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterTier, setFilterTier] = useState("all");
+  const [filterPlan, setFilterPlan] = useState<string>("all");
 
   useEffect(() => {
     loadSubscriptionData();
@@ -59,49 +89,39 @@ export function SubscriptionManagement() {
     try {
       setLoading(true);
       
-      // Charger les abonnés
-      const { data: subscribersData, error: subscribersError } = await supabase
-        .from("subscribers")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Charger tous les ostéopathes avec leur plan
+      const { data: osteopathsData, error: osteopathsError } = await supabase
+        .from("Osteopath")
+        .select("id, name, userId, authId, plan, createdAt, updatedAt")
+        .order("createdAt", { ascending: false });
 
-      if (subscribersError) throw subscribersError;
-      setSubscribers(subscribersData || []);
+      if (osteopathsError) throw osteopathsError;
+      
+      const osteopathsList = osteopathsData || [];
+      setOsteopaths(osteopathsList);
 
       // Calculer les statistiques
-      const total = subscribersData?.length || 0;
-      const active = subscribersData?.filter(s => s.subscribed).length || 0;
+      const total = osteopathsList.length;
+      const lightCount = osteopathsList.filter(o => o.plan === 'light').length;
+      const fullCount = osteopathsList.filter(o => o.plan === 'full').length;
+      const proCount = osteopathsList.filter(o => o.plan === 'pro').length;
       
-      // Revenus mensuels (simulation basée sur les plans)
-      const monthlyRevenue = subscribersData?.reduce((sum, sub) => {
-        if (!sub.subscribed) return sum;
-        switch (sub.subscription_tier) {
-          case 'Premium': return sum + 29.99;
-          case 'Entreprise': return sum + 99.99;
-          default: return sum;
-        }
-      }, 0) || 0;
+      // Revenus mensuels estimés
+      const monthlyRevenue = 
+        (fullCount * PLAN_PRICES.full) + 
+        (proCount * PLAN_PRICES.pro);
 
-      // Calculs de conversion et churn (simulations)
-      const conversionRate = total > 0 ? (active / total) * 100 : 0;
-      const churnRate = Math.random() * 5; // Simulation
-
-      // Abonnements expirant bientôt
-      const now = new Date();
-      const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      const trialExpiring = subscribersData?.filter(sub => {
-        if (!sub.subscription_end) return false;
-        const endDate = new Date(sub.subscription_end);
-        return endDate <= nextWeek && endDate > now;
-      }).length || 0;
+      // Taux de conversion (utilisateurs payants / total)
+      const payingUsers = fullCount + proCount;
+      const conversionRate = total > 0 ? (payingUsers / total) * 100 : 0;
 
       setStats({
-        totalSubscribers: total,
-        activeSubscribers: active,
+        totalOsteopaths: total,
+        lightUsers: lightCount,
+        fullUsers: fullCount,
+        proUsers: proCount,
         monthlyRevenue,
-        conversionRate,
-        churnRate,
-        trialExpiringCount: trialExpiring
+        conversionRate
       });
 
     } catch (error) {
@@ -112,33 +132,33 @@ export function SubscriptionManagement() {
     }
   };
 
-  const toggleSubscription = async (subscriberId: string, currentStatus: boolean) => {
+  const updatePlan = async (osteopathId: number, newPlan: 'light' | 'full' | 'pro') => {
     try {
       const { error } = await supabase
-        .from("subscribers")
+        .from("Osteopath")
         .update({ 
-          subscribed: !currentStatus,
-          updated_at: new Date().toISOString()
+          plan: newPlan,
+          updatedAt: new Date().toISOString()
         })
-        .eq("id", subscriberId);
+        .eq("id", osteopathId);
 
       if (error) throw error;
       
-      toast.success(`Abonnement ${!currentStatus ? "activé" : "suspendu"}`);
+      toast.success(`Plan mis à jour vers ${PLAN_LABELS[newPlan]}`);
       loadSubscriptionData();
     } catch (error) {
-      console.error("Erreur lors de la modification de l'abonnement:", error);
+      console.error("Erreur lors de la modification du plan:", error);
       toast.error("Erreur lors de la modification");
     }
   };
 
-  const exportSubscriberData = () => {
-    const csvData = subscribers.map(sub => ({
-      Email: sub.email,
-      Statut: sub.subscribed ? "Actif" : "Inactif",
-      Plan: sub.subscription_tier || "Gratuit",
-      "Date de fin": sub.subscription_end || "N/A",
-      "Date de création": new Date(sub.created_at).toLocaleDateString('fr-FR')
+  const exportSubscriptionData = () => {
+    const csvData = osteopaths.map(osteo => ({
+      Nom: osteo.name,
+      Plan: PLAN_LABELS[osteo.plan],
+      "Prix mensuel": `${PLAN_PRICES[osteo.plan]}€`,
+      "Date de création": new Date(osteo.createdAt).toLocaleDateString('fr-FR'),
+      "Dernière mise à jour": new Date(osteo.updatedAt).toLocaleDateString('fr-FR')
     }));
 
     const csv = [
@@ -146,22 +166,20 @@ export function SubscriptionManagement() {
       ...csvData.map(row => Object.values(row).join(","))
     ].join("\n");
 
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `subscriptions-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const filteredSubscribers = subscribers.filter(sub => {
-    const matchesSearch = sub.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTier = filterTier === "all" || 
-      (filterTier === "free" && !sub.subscribed) ||
-      (filterTier === "premium" && sub.subscription_tier === "Premium") ||
-      (filterTier === "enterprise" && sub.subscription_tier === "Entreprise");
+  const filteredOsteopaths = osteopaths.filter(osteo => {
+    const matchesSearch = osteo.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPlan = filterPlan === "all" || osteo.plan === filterPlan;
     
-    return matchesSearch && matchesTier;
+    return matchesSearch && matchesPlan;
   });
 
   if (loading) {
@@ -175,8 +193,13 @@ export function SubscriptionManagement() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Gestion des Abonnements</h2>
-        <Button onClick={exportSubscriberData} variant="outline">
+        <div>
+          <h2 className="text-2xl font-bold">Gestion des Plans d'Abonnement</h2>
+          <p className="text-sm text-muted-foreground">
+            Gérez les plans Light, Full et Pro des ostéopathes
+          </p>
+        </div>
+        <Button onClick={exportSubscriptionData} variant="outline">
           <Download className="h-4 w-4 mr-2" />
           Exporter CSV
         </Button>
@@ -186,11 +209,11 @@ export function SubscriptionManagement() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Abonnés</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Ostéopathes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold">{stats.totalSubscribers}</div>
+              <div className="text-2xl font-bold">{stats.totalOsteopaths}</div>
               <Users className="h-4 w-4 text-muted-foreground" />
             </div>
           </CardContent>
@@ -198,12 +221,42 @@ export function SubscriptionManagement() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Actifs</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+              <Star className="h-3 w-3" /> Plan Light
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold text-green-600">{stats.activeSubscribers}</div>
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <div className="text-2xl font-bold text-gray-600">{stats.lightUsers}</div>
+              <Badge variant="secondary">0€/mois</Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+              <Zap className="h-3 w-3" /> Plan Full
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center">
+              <div className="text-2xl font-bold text-blue-600">{stats.fullUsers}</div>
+              <Badge>9€/mois</Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+              <Crown className="h-3 w-3" /> Plan Pro
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center">
+              <div className="text-2xl font-bold text-purple-600">{stats.proUsers}</div>
+              <Badge className="bg-purple-600">16€/mois</Badge>
             </div>
           </CardContent>
         </Card>
@@ -214,7 +267,7 @@ export function SubscriptionManagement() {
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold text-green-600">€{stats.monthlyRevenue.toFixed(0)}</div>
+              <div className="text-2xl font-bold text-green-600">{stats.monthlyRevenue}€</div>
               <DollarSign className="h-4 w-4 text-green-600" />
             </div>
           </CardContent>
@@ -231,30 +284,6 @@ export function SubscriptionManagement() {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Taux Churn</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold text-red-600">{stats.churnRate.toFixed(1)}%</div>
-              <TrendingUp className="h-4 w-4 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Expirant Bientôt</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold text-orange-600">{stats.trialExpiringCount}</div>
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filtres et recherche */}
@@ -262,7 +291,7 @@ export function SubscriptionManagement() {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher par email..."
+            placeholder="Rechercher par nom..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -270,62 +299,93 @@ export function SubscriptionManagement() {
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          <select
-            value={filterTier}
-            onChange={(e) => setFilterTier(e.target.value)}
-            className="border rounded px-3 py-2"
-          >
-            <option value="all">Tous les plans</option>
-            <option value="free">Gratuit</option>
-            <option value="premium">Premium</option>
-            <option value="enterprise">Entreprise</option>
-          </select>
+          <Select value={filterPlan} onValueChange={setFilterPlan}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filtrer par plan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les plans</SelectItem>
+              <SelectItem value="light">Light (0€)</SelectItem>
+              <SelectItem value="full">Full (9€)</SelectItem>
+              <SelectItem value="pro">Pro (16€)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {/* Liste des abonnés */}
+      {/* Liste des ostéopathes */}
       <Card>
         <CardHeader>
-          <CardTitle>Abonnés ({filteredSubscribers.length})</CardTitle>
+          <CardTitle>Ostéopathes ({filteredOsteopaths.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredSubscribers.map((subscriber) => (
-              <div key={subscriber.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div>
-                    <p className="font-medium">{subscriber.email}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Créé le {new Date(subscriber.created_at).toLocaleDateString('fr-FR')}
-                    </p>
+          <div className="space-y-3">
+            {filteredOsteopaths.map((osteopath) => {
+              const PlanIcon = PLAN_ICONS[osteopath.plan];
+              return (
+                <div key={osteopath.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                      <PlanIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{osteopath.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Créé le {new Date(osteopath.createdAt).toLocaleDateString('fr-FR')}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right mr-4">
+                      <div className="text-sm font-medium">
+                        {PLAN_PRICES[osteopath.plan]}€/mois
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {osteopath.plan === 'light' ? 'Gratuit' : 'Payant'}
+                      </div>
+                    </div>
+                    
+                    <Badge variant={PLAN_COLORS[osteopath.plan]} className="min-w-[70px] justify-center">
+                      {PLAN_LABELS[osteopath.plan]}
+                    </Badge>
+                    
+                    <Select
+                      value={osteopath.plan}
+                      onValueChange={(value) => updatePlan(osteopath.id, value as 'light' | 'full' | 'pro')}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">
+                          <div className="flex items-center gap-2">
+                            <Star className="h-3 w-3" />
+                            Light (0€)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="full">
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-3 w-3" />
+                            Full (9€)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="pro">
+                          <div className="flex items-center gap-2">
+                            <Crown className="h-3 w-3" />
+                            Pro (16€)
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-4">
-                  <Badge variant={subscriber.subscribed ? "default" : "secondary"}>
-                    {subscriber.subscription_tier || "Gratuit"}
-                  </Badge>
-                  
-                  {subscriber.subscription_end && (
-                    <div className="text-sm text-muted-foreground">
-                      Expire le {new Date(subscriber.subscription_end).toLocaleDateString('fr-FR')}
-                    </div>
-                  )}
-                  
-                  <Button
-                    size="sm"
-                    variant={subscriber.subscribed ? "destructive" : "default"}
-                    onClick={() => toggleSubscription(subscriber.id, subscriber.subscribed)}
-                  >
-                    {subscriber.subscribed ? "Suspendre" : "Activer"}
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             
-            {filteredSubscribers.length === 0 && (
+            {filteredOsteopaths.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Aucun abonné trouvé
+                Aucun ostéopathe trouvé
               </div>
             )}
           </div>
