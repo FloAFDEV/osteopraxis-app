@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useDemo } from "@/contexts/DemoContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { PlanGuard } from "@/components/plans/PlanGuard";
 
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -213,7 +214,7 @@ const SchedulePage = () => {
   };
 
   // --- JSX Structure ---
-  return <Layout>
+  return <PlanGuard feature="schedule"><Layout>
 			{/* Bouton de retour */}
 			<div className="relative z-10">
 				<div className="flex items-center gap-2 mb-2">
@@ -520,7 +521,7 @@ const SchedulePage = () => {
 				</div>
 			</div>
 
-		</Layout>;
+		</Layout></PlanGuard>;
 };
 
 // DaySchedule Component avec Google Events

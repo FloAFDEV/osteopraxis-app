@@ -26,6 +26,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { InvoiceExportButtons } from "@/components/invoices/InvoiceExportButtons";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Shield } from "lucide-react";
+import { PlanGuard } from "@/components/plans/PlanGuard";
+
 const InvoicesPage = () => {
   const navigate = useNavigate();
   const {
@@ -298,7 +300,7 @@ const InvoicesPage = () => {
   };
 
   // -- Ajout : composants Selects pour filtrage au-dessus du Card Filters --
-  return <>
+  return <PlanGuard feature="invoices"><>
       {isPreparingPrint && <div className="fixed inset-0 bg-white/80 dark:bg-black/80 flex flex-col items-center justify-center z-50">
           <div className="flex gap-2">
             <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
@@ -397,6 +399,7 @@ const InvoicesPage = () => {
         {/* Delete confirmation modal */}
         {isDeleteModalOpen && selectedInvoiceId && <ConfirmDeleteInvoiceModal isOpen={isDeleteModalOpen} invoiceNumber={selectedInvoiceId.toString().padStart(4, "0")} onCancel={() => setIsDeleteModalOpen(false)} onDelete={handleDeleteInvoice} />}
       </Layout>
-    </>;
+    </>
+  </PlanGuard>;
 };
 export default InvoicesPage;

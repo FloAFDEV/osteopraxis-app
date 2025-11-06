@@ -46,6 +46,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOptimizedAppointments } from "@/hooks/useOptimizedAppointments";
 import { useVirtualization } from "@/hooks/usePerformanceOptimization";
+import { PlanGuard } from "@/components/plans/PlanGuard";
 
 import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
@@ -235,7 +236,8 @@ const AppointmentsPage = () => {
 		groupAppointmentsByMonthAndDay(todayAppointments); // Grouping just to get the date key easily
 
 	return (
-		<Layout>
+		<PlanGuard feature="appointments">
+			<Layout>
 			{/* ... keep existing code (header, search, filters) */}
 			<div className="relative z-10">
 				<div className="flex items-center gap-2 mb-2">
@@ -849,6 +851,7 @@ const AppointmentsPage = () => {
 				</DialogContent>
 			</Dialog>
 		</Layout>
+		</PlanGuard>
 	);
 };
 

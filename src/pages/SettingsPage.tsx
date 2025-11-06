@@ -50,6 +50,14 @@ const SettingsPage = () => {
 		]
 		: [
 			{
+				id: "subscription",
+				title: "Plan et abonnement",
+				description: "Gérez votre plan tarifaire et fonctionnalités",
+				icon: Settings,
+				path: "/plan-selection",
+				color: "text-primary",
+			},
+			{
 				id: "profile",
 				title: "Profil & Facturation",
 				description:
