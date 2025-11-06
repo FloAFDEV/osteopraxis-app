@@ -611,12 +611,12 @@ export default function LandingPage() {
 						</p>
 					</div>
 
-					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-						{/* Plan Gratuit */}
+					<div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+						{/* Plan Light */}
 						<Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
 							<CardContent className="p-6">
 								<h3 className="text-2xl font-bold mb-2">
-									Gratuit
+									Light
 								</h3>
 								<p className="text-muted-foreground mb-4">
 									Pour découvrir
@@ -632,39 +632,42 @@ export default function LandingPage() {
 								<ul className="space-y-3 mb-6">
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>Jusqu'à 50 patients</span>
+										<span>Gestion des patients</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>1 cabinet</span>
+										<span>Stockage local sécurisé</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>1 praticien</span>
+										<span>Dossiers médicaux</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Gestion des RDV</span>
+									<li className="flex items-center gap-2 text-muted-foreground">
+										<X className="h-4 w-4" />
+										<span>Rendez-vous</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Dossier médical basique</span>
+									<li className="flex items-center gap-2 text-muted-foreground">
+										<X className="h-4 w-4" />
+										<span>Facturation</span>
 									</li>
 								</ul>
-								<Button className="w-full" asChild>
-									<Link to="/register">Commencer</Link>
+								<Button className="w-full" asChild onClick={() => localStorage.setItem('selected-plan', 'light')}>
+									<Link to="/register?plan=light">Commencer gratuitement</Link>
 								</Button>
 							</CardContent>
 						</Card>
 
-						{/* Plan Essentiel */}
-						<Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
+						{/* Plan Full */}
+						<Card className="relative border-primary scale-105 shadow-lg shadow-primary/20">
+							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+								<Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md">
+									Populaire
+								</Badge>
+							</div>
 							<CardContent className="p-6">
-								<h3 className="text-2xl font-bold mb-2">
-									Essentiel
-								</h3>
+								<h3 className="text-2xl font-bold mb-2">Full</h3>
 								<p className="text-muted-foreground mb-4">
-									Pour les praticiens indépendants
+									Pour les praticiens
 								</p>
 								<div className="mb-6">
 									<span className="text-4xl font-bold">
@@ -677,42 +680,47 @@ export default function LandingPage() {
 								<ul className="space-y-3 mb-6">
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>Jusqu'à 500 patients</span>
+										<span>Tout du plan Light</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>1 cabinet</span>
+										<span>Gestion des rendez-vous</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>1 praticien</span>
+										<span>Planning hebdomadaire</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>Facturation</span>
+										<span>Facturation complète</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>Export comptable PDF</span>
+										<span>Export PDF & Excel</span>
 									</li>
 								</ul>
-								<Button className="w-full" asChild>
-									<Link to="/register">Essai gratuit</Link>
+								<Button className="w-full" asChild onClick={() => localStorage.setItem('selected-plan', 'full')}>
+									<Link to="/register?plan=full">Commencer l'essai</Link>
 								</Button>
 							</CardContent>
 						</Card>
 
 						{/* Plan Pro */}
-						<Card className="relative border-primary scale-105 shadow-lg shadow-primary/20">
+						<Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
 							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-								<Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md">
-									Populaire
+								<Badge
+									variant="secondary"
+									className="bg-accent/20 text-accent border-accent/30"
+								>
+									Équipe
 								</Badge>
 							</div>
 							<CardContent className="p-6">
-								<h3 className="text-2xl font-bold mb-2">Pro</h3>
+								<h3 className="text-2xl font-bold mb-2">
+									Pro
+								</h3>
 								<p className="text-muted-foreground mb-4">
-									Le plus populaire
+									Pour les cabinets
 								</p>
 								<div className="mb-6">
 									<span className="text-4xl font-bold">
@@ -725,15 +733,15 @@ export default function LandingPage() {
 								<ul className="space-y-3 mb-6">
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>Jusqu'à 1000 patients</span>
+										<span>Tout du plan Full</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>2 cabinets</span>
+										<span>Gestion d'équipe</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
-										<span>2 praticiens</span>
+										<span>Multi-praticiens</span>
 									</li>
 									<li className="flex items-center gap-2">
 										<Check className="h-4 w-4 text-primary" />
@@ -744,61 +752,8 @@ export default function LandingPage() {
 										<span>Support prioritaire</span>
 									</li>
 								</ul>
-								<Button className="w-full" asChild>
-									<Link to="/register">Essai gratuit</Link>
-								</Button>
-							</CardContent>
-						</Card>
-
-						{/* Plan Premium */}
-						<Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
-							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-								<Badge
-									variant="secondary"
-									className="bg-accent/20 text-accent border-accent/30"
-								>
-									Entreprise
-								</Badge>
-							</div>
-							<CardContent className="p-6">
-								<h3 className="text-2xl font-bold mb-2">
-									Premium
-								</h3>
-								<p className="text-muted-foreground mb-4">
-									Pour les gros cabinets
-								</p>
-								<div className="mb-6">
-									<span className="text-4xl font-bold">
-										34€
-									</span>
-									<span className="text-muted-foreground">
-										/mois
-									</span>
-								</div>
-								<ul className="space-y-3 mb-6">
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Jusqu'à 3000 patients</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>5 cabinets</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Praticiens illimités</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Partage multi-praticiens</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Accès API</span>
-									</li>
-								</ul>
-								<Button className="w-full" asChild>
-									<Link to="/register">Essai gratuit</Link>
+								<Button className="w-full" asChild onClick={() => localStorage.setItem('selected-plan', 'pro')}>
+									<Link to="/register?plan=pro">Commencer l'essai</Link>
 								</Button>
 							</CardContent>
 						</Card>

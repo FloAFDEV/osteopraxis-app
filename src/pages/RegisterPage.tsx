@@ -47,6 +47,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialInvitationCode = searchParams.get("invitation") || "";
+  const selectedPlan = searchParams.get("plan") || "light"; // Récupérer le plan depuis l'URL
   const returnTo = searchParams.get("returnTo") || "/profile/setup";
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -96,8 +97,8 @@ const RegisterPage = () => {
         if (counter <= 0) {
           clearInterval(countdownInterval);
           const targetUrl = validInvitation?.code
-            ? `/profile/setup?invitation=${validInvitation.code}`
-            : returnTo;
+            ? `/profile/setup?invitation=${validInvitation.code}&plan=${selectedPlan}`
+            : `${returnTo}?plan=${selectedPlan}`;
           navigate(targetUrl);
         }
       }, 1000);
@@ -154,8 +155,8 @@ const RegisterPage = () => {
               <button
                 onClick={() =>
                   navigate(validInvitation?.code
-                    ? `/profile/setup?invitation=${validInvitation.code}`
-                    : returnTo)
+                    ? `/profile/setup?invitation=${validInvitation.code}&plan=${selectedPlan}`
+                    : `${returnTo}?plan=${selectedPlan}`)
                 }
                 className="text-primary hover:underline ml-1"
               >
@@ -192,6 +193,13 @@ const RegisterPage = () => {
               <p className="text-muted-foreground text-lg">
                 Rejoignez PatientHub pour gérer vos patients efficacement.
               </p>
+              {selectedPlan && (
+                <div className="mt-4 inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2">
+                  <span className="text-sm font-medium text-primary">
+                    Plan sélectionné: {selectedPlan === 'light' ? 'Light' : selectedPlan === 'full' ? 'Full' : 'Pro'}
+                  </span>
+                </div>
+              )}
             </div>
 
             {(initialInvitationCode || form.watch("invitationCode")) && (

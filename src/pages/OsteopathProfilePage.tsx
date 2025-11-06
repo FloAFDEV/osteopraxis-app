@@ -30,6 +30,7 @@ const OsteopathProfilePage = () => {
   const [setupProgress, setSetupProgress] = useState(0);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const selectedPlan = (searchParams.get("plan") || "light") as 'light' | 'full' | 'pro';
   
   // Générer un nom par défaut si firstName et lastName sont manquants
   const getDefaultName = useCallback(() => {
@@ -267,10 +268,17 @@ const OsteopathProfilePage = () => {
             <div className="mb-6">
               <div className="flex items-center gap-4">
                 <UserCog className="h-8 w-8 text-amber-500" />
-                <div>
-                  <h1 className="text-3xl font-bold">
-                    {osteopath ? "Modifier votre profil" : "Créer votre profil professionnel"}
-                  </h1>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold">
+                      {osteopath ? "Modifier votre profil" : "Créer votre profil professionnel"}
+                    </h1>
+                    {!osteopath && selectedPlan && (
+                      <span className="inline-flex items-center gap-1 bg-primary/10 border border-primary/30 rounded-full px-3 py-1 text-sm font-medium text-primary">
+                        Plan {selectedPlan === 'light' ? 'Light' : selectedPlan === 'full' ? 'Full' : 'Pro'}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-muted-foreground mt-1">
                     {osteopath 
                       ? "Mettez à jour vos informations professionnelles" 
@@ -285,7 +293,8 @@ const OsteopathProfilePage = () => {
               currentOsteopath={osteopath}
               osteopathId={osteopath?.id} 
               isEditing={!!osteopath} 
-              onSuccess={handleOsteopathSuccess} 
+              onSuccess={handleOsteopathSuccess}
+              selectedPlan={selectedPlan} // Passer le plan sélectionné
             />
           </div>
 

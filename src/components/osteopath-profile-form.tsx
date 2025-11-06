@@ -42,6 +42,7 @@ interface OsteopathProfileFormProps {
   osteopathId?: number;
   isEditing?: boolean;
   onSuccess?: (updatedOsteopath: any) => Promise<void>;
+  selectedPlan?: 'light' | 'full' | 'pro'; // Plan sélectionné par l'utilisateur
 }
 
 export function OsteopathProfileForm({ 
@@ -50,7 +51,8 @@ export function OsteopathProfileForm({
   setCurrentOsteopath,
   osteopathId,
   isEditing = false,
-  onSuccess 
+  onSuccess,
+  selectedPlan = 'light' // Par défaut, le plan Light
 }: OsteopathProfileFormProps) {
   const { user } = useAuth();
 
@@ -130,7 +132,7 @@ export function OsteopathProfileForm({
         ape_code: data.ape_code,
         userId: user?.id || "",
         authId: user?.id || "",
-        plan: 'full' as const,
+        plan: selectedPlan as 'light' | 'full' | 'pro', // Utiliser le plan sélectionné
       };
 
       const newOsteopath = await api.createOsteopath(osteopathData);
