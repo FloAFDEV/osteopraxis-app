@@ -70,14 +70,14 @@ export async function getCabinets(): Promise<Cabinet[]> {
       id: cabinet.id,
       name: cabinet.name,
       address: cabinet.address || '',
-      city: '', // TODO: ajouter city dans la table si nécessaire
-      postalCode: '', // TODO: ajouter postalCode dans la table si nécessaire
-      country: 'France',
+      city: cabinet.city || '',
+      postalCode: cabinet.postalCode || '',
+      country: cabinet.country || 'France',
       phone: cabinet.phone || '',
       email: cabinet.email || '',
-      siret: '', // TODO: ajouter siret dans la table si nécessaire
-      iban: null, // TODO: ajouter iban dans la table si nécessaire
-      bic: null, // TODO: ajouter bic dans la table si nécessaire
+      siret: cabinet.siret || '',
+      iban: cabinet.iban || null,
+      bic: cabinet.bic || null,
       osteopathId: cabinet.osteopathId,
       createdAt: cabinet.createdAt,
       updatedAt: cabinet.updatedAt

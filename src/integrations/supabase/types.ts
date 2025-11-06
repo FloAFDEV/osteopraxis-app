@@ -157,7 +157,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string
@@ -169,7 +169,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id: string
@@ -181,7 +181,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string
@@ -227,9 +227,13 @@ export type Database = {
       Cabinet: {
         Row: {
           address: string
+          bic: string | null
+          city: string | null
+          country: string | null
           createdAt: string
           demo_expires_at: string | null
           email: string | null
+          iban: string | null
           id: number
           imageUrl: string | null
           is_demo_data: boolean | null
@@ -237,15 +241,22 @@ export type Database = {
           name: string
           osteopathId: number
           phone: string | null
+          postalCode: string | null
           professionalProfileId: number | null
+          siret: string | null
           tenant_id: string | null
           updatedAt: string
+          website: string | null
         }
         Insert: {
           address: string
+          bic?: string | null
+          city?: string | null
+          country?: string | null
           createdAt?: string
           demo_expires_at?: string | null
           email?: string | null
+          iban?: string | null
           id?: number
           imageUrl?: string | null
           is_demo_data?: boolean | null
@@ -253,15 +264,22 @@ export type Database = {
           name: string
           osteopathId: number
           phone?: string | null
+          postalCode?: string | null
           professionalProfileId?: number | null
+          siret?: string | null
           tenant_id?: string | null
           updatedAt?: string
+          website?: string | null
         }
         Update: {
           address?: string
+          bic?: string | null
+          city?: string | null
+          country?: string | null
           createdAt?: string
           demo_expires_at?: string | null
           email?: string | null
+          iban?: string | null
           id?: number
           imageUrl?: string | null
           is_demo_data?: boolean | null
@@ -269,9 +287,12 @@ export type Database = {
           name?: string
           osteopathId?: number
           phone?: string | null
+          postalCode?: string | null
           professionalProfileId?: number | null
+          siret?: string | null
           tenant_id?: string | null
           updatedAt?: string
+          website?: string | null
         }
         Relationships: [
           {
@@ -468,7 +489,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           performed_by_osteopath_id: number
           sync_id: string
@@ -478,7 +499,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           performed_by_osteopath_id: number
           sync_id: string
@@ -488,7 +509,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           performed_by_osteopath_id?: number
           sync_id?: string
@@ -1807,7 +1828,7 @@ export type Database = {
           created_at: string
           details: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string | null
         }
@@ -1816,7 +1837,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -1825,7 +1846,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -1836,20 +1857,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      admin_access_with_audit: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      admin_cleanup_old_logs: {
-        Args: { days_old?: number }
-        Returns: Json
-      }
+      admin_access_with_audit: { Args: never; Returns: boolean }
+      admin_cleanup_old_logs: { Args: { days_old?: number }; Returns: Json }
       admin_deactivate_cabinet: {
         Args: { cabinet_id: number }
         Returns: boolean
       }
       admin_find_patient_duplicates: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           birth_date: string
           email: string
@@ -1861,12 +1876,9 @@ export type Database = {
           similarity_score: number
         }[]
       }
-      admin_generate_usage_report: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      admin_generate_usage_report: { Args: never; Returns: Json }
       admin_get_cabinets_with_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_patients_count: number
           address: string
@@ -1930,7 +1942,7 @@ export type Database = {
         }[]
       }
       admin_get_orphan_patients: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           cabinet_id: number
           cabinet_name: string
@@ -1945,7 +1957,7 @@ export type Database = {
         }[]
       }
       admin_get_osteopath_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_patients: number
           avg_revenue_per_appointment: number
@@ -1958,12 +1970,9 @@ export type Database = {
           total_revenue: number
         }[]
       }
-      admin_get_storage_usage: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      admin_get_storage_usage: { Args: never; Returns: Json }
       admin_get_system_health: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           last_updated: string
           metric_name: string
@@ -1996,7 +2005,7 @@ export type Database = {
         }[]
       }
       admin_get_system_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_patients: number
           active_users: number
@@ -2013,10 +2022,7 @@ export type Database = {
           total_users: number
         }[]
       }
-      admin_optimize_performance: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      admin_optimize_performance: { Args: never; Returns: Json }
       admin_search_patients: {
         Args: {
           cabinet_filter?: number
@@ -2043,10 +2049,7 @@ export type Database = {
         Args: { p_osteopath_id: number }
         Returns: boolean
       }
-      auto_optimize_system: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      auto_optimize_system: { Args: never; Returns: number }
       can_access_patient_secure: {
         Args: { patient_id: number }
         Returns: boolean
@@ -2068,38 +2071,20 @@ export type Database = {
         }
         Returns: boolean
       }
-      cleanup_expired_demo_data: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      cleanup_expired_demo_data: { Args: never; Returns: number }
       cleanup_expired_demo_sessions: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           cleaned_appointments: number
           cleaned_patients: number
           cleaned_sessions: number
         }[]
       }
-      cleanup_expired_syncs: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_old_google_calendar_events: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_rate_limits: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      enhanced_cleanup_system: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      generate_invitation_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      cleanup_expired_syncs: { Args: never; Returns: number }
+      cleanup_old_google_calendar_events: { Args: never; Returns: number }
+      cleanup_rate_limits: { Args: never; Returns: undefined }
+      enhanced_cleanup_system: { Args: never; Returns: number }
+      generate_invitation_code: { Args: never; Returns: string }
       generate_recurring_appointments: {
         Args: { p_limit?: number; p_recurring_id: number }
         Returns: number
@@ -2115,22 +2100,16 @@ export type Database = {
           siret: string
         }[]
       }
-      get_current_osteopath_id: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      get_current_osteopath_id: { Args: never; Returns: number }
       get_current_osteopath_id_debug: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           auth_uid: string
           error_message: string
           osteopath_id: number
         }[]
       }
-      get_current_osteopath_id_secure: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      get_current_osteopath_id_secure: { Args: never; Returns: number }
       get_osteopath_cabinets: {
         Args: { osteopath_auth_id: string }
         Returns: {
@@ -2146,14 +2125,10 @@ export type Database = {
           subscription_tier: string
         }[]
       }
-      is_admin: {
-        Args: Record<PropertyKey, never> | { uid: string }
-        Returns: boolean
-      }
-      is_admin_user: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
+      is_admin:
+        | { Args: never; Returns: boolean }
+        | { Args: { uid: string }; Returns: boolean }
+      is_admin_user: { Args: { user_id: string }; Returns: boolean }
       log_audit_action: {
         Args: {
           p_action: string
@@ -2177,16 +2152,10 @@ export type Database = {
         Args: { p_record_id: string; p_table_name: string }
         Returns: boolean
       }
-      scheduled_cleanup: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      secure_cleanup_expired_data: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      scheduled_cleanup: { Args: never; Returns: undefined }
+      secure_cleanup_expired_data: { Args: never; Returns: number }
       security_health_check: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           critical: boolean
           details: string
@@ -2202,18 +2171,9 @@ export type Database = {
         Args: { p_invitation_code: string; p_osteopath_id: number }
         Returns: Json
       }
-      validate_email: {
-        Args: { email: string }
-        Returns: boolean
-      }
-      validate_phone: {
-        Args: { phone: string }
-        Returns: boolean
-      }
-      verify_admin_access: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      validate_email: { Args: { email: string }; Returns: boolean }
+      validate_phone: { Args: { phone: string }; Returns: boolean }
+      verify_admin_access: { Args: never; Returns: boolean }
     }
     Enums: {
       AppointmentStatus:
