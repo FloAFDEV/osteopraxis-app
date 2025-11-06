@@ -27,7 +27,7 @@ export interface StorageDiagnostic {
   };
   tests: {
     demo_write_read: boolean;
-    hds_local_write_read: boolean;
+    hds_secure_write_read: boolean;
     nonhds_cloud_write_read: boolean;
   };
 }
@@ -145,12 +145,12 @@ export class StorageDiagnosticService {
    */
   private async runIntegrationTests(isDemoMode: boolean): Promise<StorageDiagnostic['tests']> {
     const demo_write_read = isDemoMode ? await this.testDemoStorage() : true;
-    const hds_local_write_read = !isDemoMode ? await this.testHDSLocalStorage() : true;
+    const hds_secure_write_read = !isDemoMode ? await this.testHDSSecureStorage() : true;
     const nonhds_cloud_write_read = await this.testNonHDSCloudStorage();
     
     return {
       demo_write_read,
-      hds_local_write_read,
+      hds_secure_write_read,
       nonhds_cloud_write_read
     };
   }
@@ -171,9 +171,9 @@ export class StorageDiagnosticService {
     }
   }
   
-  private async testHDSLocalStorage(): Promise<boolean> {
+  private async testHDSSecureStorage(): Promise<boolean> {
     try {
-      console.log('🧪 Test stockage HDS local...');
+      console.log('🧪 Test stockage HDS sécurisé (AES-256-GCM)...');
       const adapter = await storageRouter.route('patients');
       const testPatient = {
         firstName: 'Test',
@@ -247,9 +247,9 @@ export class StorageDiagnosticService {
       recommendations.push('Vérifier la connexion Supabase');
     }
     
-    if (!diagnostic.tests.hds_local_write_read && diagnostic.mode === 'connected') {
-      issues.push('❌ Stockage local HDS non fonctionnel');
-      recommendations.push('Initialiser le stockage local sécurisé');
+    if (!diagnostic.tests.hds_secure_write_read && diagnostic.mode === 'connected') {
+      issues.push('❌ Stockage local HDS sécurisé non fonctionnel');
+      recommendations.push('Initialiser le stockage local sécurisé (AES-256-GCM)');
     }
     
     return {

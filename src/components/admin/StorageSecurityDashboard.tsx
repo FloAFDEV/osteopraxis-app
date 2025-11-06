@@ -171,7 +171,7 @@ export const StorageSecurityDashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Accessibilité:</span>
-                    {diagnostic.tests.hds_local_write_read ? (
+                    {diagnostic.tests.hds_secure_write_read ? (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     ) : (
                       <XCircle className="h-4 w-4 text-red-500" />
