@@ -247,6 +247,7 @@ export interface Osteopath {
 	siret: string | null;
 	ape_code: string | null;
 	stampUrl?: string;
+	plan: 'light' | 'full' | 'pro';
 	createdAt: string;
 	updatedAt: string;
 }

@@ -867,6 +867,7 @@ export type Database = {
           id: number
           is_demo_data: boolean | null
           name: string
+          plan: Database["public"]["Enums"]["subscription_tier"] | null
           professional_title: string | null
           rpps_number: string | null
           siret: string | null
@@ -882,6 +883,7 @@ export type Database = {
           id?: number
           is_demo_data?: boolean | null
           name: string
+          plan?: Database["public"]["Enums"]["subscription_tier"] | null
           professional_title?: string | null
           rpps_number?: string | null
           siret?: string | null
@@ -897,6 +899,7 @@ export type Database = {
           id?: number
           is_demo_data?: boolean | null
           name?: string
+          plan?: Database["public"]["Enums"]["subscription_tier"] | null
           professional_title?: string | null
           rpps_number?: string | null
           siret?: string | null
@@ -2110,6 +2113,10 @@ export type Database = {
         }[]
       }
       get_current_osteopath_id_secure: { Args: never; Returns: number }
+      get_current_osteopath_plan: {
+        Args: never
+        Returns: Database["public"]["Enums"]["subscription_tier"]
+      }
       get_osteopath_cabinets: {
         Args: { osteopath_auth_id: string }
         Returns: {
@@ -2207,6 +2214,7 @@ export type Database = {
         | "PARTNERED"
       PaymentStatus: "PAID" | "PENDING" | "CANCELED"
       Role: "ADMIN" | "OSTEOPATH"
+      subscription_tier: "light" | "full" | "pro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2368,6 +2376,7 @@ export const Constants = {
       ],
       PaymentStatus: ["PAID", "PENDING", "CANCELED"],
       Role: ["ADMIN", "OSTEOPATH"],
+      subscription_tier: ["light", "full", "pro"],
     },
   },
 } as const

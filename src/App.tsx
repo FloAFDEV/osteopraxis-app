@@ -37,12 +37,14 @@ import NotFound from "@/pages/NotFound";
 import NewPatientPage from "@/pages/NewPatientPage";
 import PricingPage from "@/pages/PricingPage";
 import ContactPage from "@/pages/ContactPage";
+import PlanSelectionPage from "@/pages/PlanSelectionPage";
 import NewInvoicePage from "@/pages/NewInvoicePage";
 import InvoiceDetailPage from "@/pages/InvoiceDetailPage";
 import NewAppointmentPage from "@/pages/NewAppointmentPage";
 import EditPatientPage from "@/pages/EditPatientPage";
 import EditAppointmentPage from "@/pages/EditAppointmentPage";
 import EditInvoicePage from "@/pages/EditInvoicePage";
+import HDSOnboardingWizard from "@/pages/HDSOnboardingWizard";
 
 import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
 import NewCabinetPage from "@/pages/NewCabinetPage";
@@ -150,6 +152,11 @@ function App() {
                             <EditAppointmentPage />
                           </ProtectedRoute>
                         } />
+                        <Route path="/hds-setup" element={
+                          <ProtectedRoute>
+                            <HDSOnboardingWizard />
+                          </ProtectedRoute>
+                        } />
                         <Route path="/schedule" element={
                           <ProtectedRoute>
                             <SchedulePage />
@@ -173,6 +180,11 @@ function App() {
                         <Route path="/invoices/:id/edit" element={
                           <ProtectedRoute>
                             <EditInvoicePage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/plan-selection" element={
+                          <ProtectedRoute>
+                            <PlanSelectionPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/settings" element={

@@ -98,6 +98,7 @@ export function OsteopathProfileForm({
         ape_code: data.ape_code,
         userId: user?.id || "",
         authId: user?.id || "",
+        plan: 'full' as const,
       };
 
       const updatedOsteopath = await api.updateOsteopath(osteopathId || currentOsteopath?.id, osteopathData);
@@ -129,6 +130,7 @@ export function OsteopathProfileForm({
         ape_code: data.ape_code,
         userId: user?.id || "",
         authId: user?.id || "",
+        plan: 'full' as const,
       };
 
       const newOsteopath = await api.createOsteopath(osteopathData);

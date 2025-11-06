@@ -27,6 +27,7 @@ export const osteopathService = {
         ape_code: '8690F',
         userId: '',
         authId: '',
+        plan: 'full', // Par défaut pour la compatibilité
         createdAt: '',
         updatedAt: '',
         stampUrl: null
