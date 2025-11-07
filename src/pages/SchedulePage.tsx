@@ -24,6 +24,7 @@ import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useDemo } from "@/contexts/DemoContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { PlanGuard } from "@/components/plans/PlanGuard";
+import { PinErrorHandler } from "@/components/storage/PinErrorHandler";
 
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -53,6 +54,7 @@ const SchedulePage = () => {
   const {
     data: cachedAppointments,
     loading: appointmentsLoading,
+    error: appointmentsError,
     invalidate: invalidateAppointments
   } = useOptimizedCache('appointments', () => {
     // Les services utilisent maintenant le routeur de stockage automatique
@@ -64,6 +66,7 @@ const SchedulePage = () => {
   const {
     data: cachedPatients,
     loading: patientsLoading,
+    error: patientsError,
     invalidate: invalidatePatients
   } = useOptimizedCache('patients', () => {
     // Les services utilisent maintenant le routeur de stockage automatique
@@ -214,7 +217,16 @@ const SchedulePage = () => {
   };
 
   // --- JSX Structure ---
-  return <PlanGuard feature="schedule"><Layout>
+  const scheduleError = appointmentsError || patientsError;
+  
+  const handlePinConfigured = () => {
+    invalidateAppointments();
+    invalidatePatients();
+  };
+
+  return <PlanGuard feature="schedule">
+    <PinErrorHandler error={scheduleError as Error | null} onPinConfigured={handlePinConfigured}>
+      <Layout>
 			{/* Bouton de retour */}
 			<div className="relative z-10">
 				<div className="flex items-center gap-2 mb-2">
@@ -521,7 +533,9 @@ const SchedulePage = () => {
 				</div>
 			</div>
 
-		</Layout></PlanGuard>;
+		</Layout>
+  </PinErrorHandler>
+  </PlanGuard>;
 };
 
 // DaySchedule Component avec Google Events

@@ -53,7 +53,16 @@ export function useOptimizedAppointments() {
     },
     enabled: isDemoMode || (!!user?.osteopathId && isAuthenticated),
     ...cacheConfig,
-    retry: metrics.isLowEndDevice ? 1 : 3,
+    retry: (failureCount, error) => {
+      // Ne pas retenter pour les erreurs PIN
+      if (error instanceof Error && (
+        error.message === 'PIN_SETUP_REQUIRED' || 
+        error.message === 'PIN_UNLOCK_REQUIRED'
+      )) {
+        return false;
+      }
+      return failureCount < (metrics.isLowEndDevice ? 1 : 3);
+    },
   });
 
   // Query pour les patients avec cache plus long
@@ -74,6 +83,16 @@ export function useOptimizedAppointments() {
     staleTime: 5 * 60 * 1000, // 5 minutes pour les patients
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      // Ne pas retenter pour les erreurs PIN
+      if (error instanceof Error && (
+        error.message === 'PIN_SETUP_REQUIRED' || 
+        error.message === 'PIN_UNLOCK_REQUIRED'
+      )) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 
   // Mise à jour optimiste des statuts avec invalidation globale

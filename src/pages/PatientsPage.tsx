@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Shield } from "lucide-react";
+import { TemporaryStoragePinSetup } from "@/components/storage/TemporaryStoragePinSetup";
+import { TemporaryStoragePinUnlock } from "@/components/storage/TemporaryStoragePinUnlock";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -36,6 +38,7 @@ const PatientsPage = () => {
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(
 		null
 	);
+	const [pinError, setPinError] = useState<'SETUP' | 'UNLOCK' | null>(null);
 
 	// Pagination - updated to 30 patients per page
 	const [currentPage, setCurrentPage] = useState(1);
@@ -67,14 +70,31 @@ const PatientsPage = () => {
 		queryFn: async () => {
 			if (!user?.osteopathId) return [];
 			console.log(`👥 Récupération patients en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
-			const result = await api.getPatients();
-			console.log(`✅ ${result.length} patients récupérés en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
-			return result;
+			try {
+				const result = await api.getPatients();
+				console.log(`✅ ${result.length} patients récupérés en mode ${isDemoMode ? 'DEMO' : 'CONNECTÉ'}`);
+				setPinError(null); // Réinitialiser l'erreur PIN si succès
+				return result;
+			} catch (err) {
+				// Détecter les erreurs PIN
+				if (err instanceof Error) {
+					if (err.message === 'PIN_SETUP_REQUIRED') {
+						setPinError('SETUP');
+						throw err;
+					}
+					if (err.message === 'PIN_UNLOCK_REQUIRED') {
+						setPinError('UNLOCK');
+						throw err;
+					}
+				}
+				throw err;
+			}
 		},
 		enabled: !!user?.osteopathId && isDemoMode !== null,
 		refetchOnWindowFocus: false,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 		gcTime: 1000 * 60 * 30, // 30 minutes
+		retry: false, // Ne pas retenter en cas d'erreur PIN
 	});
 
 	// Filtrer les patients par cabinet sélectionné
@@ -191,6 +211,41 @@ const PatientsPage = () => {
 			window.scrollTo(0, 0);
 		}
 	};
+
+	// Afficher le composant PIN approprié si nécessaire
+	if (pinError === 'SETUP') {
+		return (
+			<Layout>
+				<div className="min-h-screen flex items-center justify-center p-4">
+					<TemporaryStoragePinSetup onComplete={async (pin: string) => {
+						const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+						await encryptedWorkingStorage.configureWithPin(pin);
+						setPinError(null);
+						await refetch();
+					}} />
+				</div>
+			</Layout>
+		);
+	}
+
+	if (pinError === 'UNLOCK') {
+		return (
+			<Layout>
+				<div className="min-h-screen flex items-center justify-center p-4">
+					<TemporaryStoragePinUnlock 
+						onUnlock={async () => {
+							setPinError(null);
+							await refetch();
+						}}
+						onForgot={() => {
+							localStorage.removeItem('temp-storage-pin-hash');
+							window.location.reload();
+						}}
+					/>
+				</div>
+			</Layout>
+		);
+	}
 
 	return (
 		<Layout>
