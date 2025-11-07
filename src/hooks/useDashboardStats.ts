@@ -83,6 +83,7 @@ export function useDashboardStats(selectedCabinetId: number | null) {
     isLoadingRef.current = true;
     setLoading(true);
     setError(null);
+    setPinError(null); // ✅ Reset pinError au début
 
     try {
       // Chargement des données avec gestion d'erreur silencieuse
@@ -95,6 +96,7 @@ export function useDashboardStats(selectedCabinetId: number | null) {
       // ⚠️ VÉRIFIER LES ERREURS PIN EN PRIORITÉ (avant d'extraire les données)
       for (const result of [patientsData, appointmentsData, invoicesData]) {
         if (result.status === 'rejected' && result.reason instanceof Error) {
+          console.log('🔍 Erreur détectée:', result.reason.message);
           if (result.reason.message === 'PIN_SETUP_REQUIRED') {
             console.log('🔐 Configuration PIN requise');
             setPinError('SETUP');
@@ -117,13 +119,11 @@ export function useDashboardStats(selectedCabinetId: number | null) {
       const appointments = appointmentsData.status === 'fulfilled' ? appointmentsData.value : [];
       const invoices = invoicesData.status === 'fulfilled' ? invoicesData.value : [];
 
-      // Logs silencieux en cas d'échec (normal si HDS non configuré)
-      if (patientsData.status === 'rejected') {
-        console.debug('ℹ️ Patients non disponibles (stockage HDS peut-être non configuré)');
-      }
-      if (appointmentsData.status === 'rejected') {
-        console.debug('ℹ️ Rendez-vous non disponibles (stockage HDS peut-être non configuré)');
-      }
+      console.log('📊 Données chargées:', { 
+        patients: patients.length, 
+        appointments: appointments.length,
+        invoices: invoices.length 
+      });
 
       // Filtrage par cabinet si sélectionné
       let filteredPatients = patients;

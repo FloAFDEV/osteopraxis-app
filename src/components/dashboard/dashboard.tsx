@@ -24,9 +24,23 @@ export function Dashboard() {
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const [selectedCabinetName, setSelectedCabinetName] = useState<string | undefined>(undefined);
 	const [storageMode, setStorageMode] = useState<'demo' | 'connected' | 'iframe_preview' | null>(null);
+	const [loadingTimeout, setLoadingTimeout] = useState(false);
 	
 	// Hook unifié qui gère automatiquement démo vs connecté
 	const { dashboardData, allPatients, loading, error, pinError, reload } = useDashboardStats(selectedCabinetId);
+
+	// Protection contre chargement infini - après 5 secondes, on affiche quand même le contenu
+	useEffect(() => {
+		if (loading) {
+			const timer = setTimeout(() => {
+				console.warn('⚠️ Chargement trop long détecté - Affichage du contenu disponible');
+				setLoadingTimeout(true);
+			}, 5000);
+			return () => clearTimeout(timer);
+		} else {
+			setLoadingTimeout(false);
+		}
+	}, [loading]);
 
 	// Vérifier le mode de stockage pour afficher les avertissements appropriés
 	useEffect(() => {
@@ -105,6 +119,9 @@ export function Dashboard() {
 
 	// Afficher un message si aucune donnée et pas de cabinet
 	const hasNoData = dashboardData.totalPatients === 0 && allPatients.length === 0;
+	const showContent = !loading || loadingTimeout;
+
+	console.log('📊 Dashboard render state:', { loading, loadingTimeout, pinError, hasNoData, error });
 
 	return (
 		<div className="space-y-8 p-4 sm:p-6 lg:p-8">
@@ -112,10 +129,10 @@ export function Dashboard() {
 			<DashboardHeader />
 			
 		{/* Banner de statut de backup - uniquement si HDS configuré et données présentes */}
-		{!loading && !isDemoMode && !hasNoData && <BackupStatusBanner />}
+		{showContent && !isDemoMode && !hasNoData && <BackupStatusBanner />}
 			
 			{/* Skeleton loader pendant le chargement des données */}
-			{loading && (
+			{loading && !loadingTimeout && (
 				<div className="space-y-4 animate-pulse">
 					<div className="h-32 bg-muted rounded-lg" />
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -123,11 +140,12 @@ export function Dashboard() {
 						<div className="h-24 bg-muted rounded-lg" />
 						<div className="h-24 bg-muted rounded-lg" />
 					</div>
+					<p className="text-center text-muted-foreground">Chargement de vos données...</p>
 				</div>
 			)}
 
 		{/* Avertissement de stockage en mode connecté - uniquement si utilisateur actif */}
-		{!loading && !hasNoData && storageMode === 'connected' && (
+		{showContent && !hasNoData && storageMode === 'connected' && (
 				<Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
 					<AlertTriangle className="h-4 w-4 text-orange-600" />
 					<AlertDescription className="text-orange-800 dark:text-orange-200">
@@ -152,7 +170,7 @@ export function Dashboard() {
 			)}
 
 			{/* Main content with integrated cabinet selector */}
-			{!loading && (
+			{showContent && (
 				<>
 					<div className="animate-fade-in">
 						<DashboardStats 
