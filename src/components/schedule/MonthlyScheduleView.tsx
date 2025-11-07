@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,26 +38,51 @@ export function MonthlyScheduleView({
 }: MonthlyScheduleViewProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate);
 
-  const getPatientById = (patientId: number) => {
-    return patients.find((patient) => patient.id === patientId);
-  };
+  // Mémoriser la map des patients pour éviter les recherches répétées
+  const patientMap = useMemo(() => {
+    return new Map(patients.map(p => [p.id, p]));
+  }, [patients]);
 
-  const getDayAppointments = (date: Date) => {
-    return appointments
-      .filter((appointment) => {
-        const appointmentDate = parseISO(appointment.date);
-        return (
-          isSameDay(appointmentDate, date) &&
-          (appointment.status === "SCHEDULED" ||
-            appointment.status === "COMPLETED")
-        );
-      })
-      .sort((a, b) => {
+  const getPatientById = useCallback((patientId: number) => {
+    return patientMap.get(patientId);
+  }, [patientMap]);
+
+  // Prétraiter et grouper les rendez-vous par date pour éviter les filtres répétés
+  const appointmentsByDate = useMemo(() => {
+    const map = new Map<string, Appointment[]>();
+    
+    appointments.forEach((appointment) => {
+      if (appointment.status === "SCHEDULED" || appointment.status === "COMPLETED") {
+        try {
+          const appointmentDate = parseISO(appointment.date);
+          const dateKey = format(appointmentDate, "yyyy-MM-dd");
+          
+          if (!map.has(dateKey)) {
+            map.set(dateKey, []);
+          }
+          map.get(dateKey)!.push(appointment);
+        } catch (e) {
+          // Ignorer les dates invalides
+        }
+      }
+    });
+    
+    // Trier les rendez-vous pour chaque jour
+    map.forEach((dayAppointments, dateKey) => {
+      dayAppointments.sort((a, b) => {
         const timeA = parseISO(a.date);
         const timeB = parseISO(b.date);
         return timeA.getTime() - timeB.getTime();
       });
-  };
+    });
+    
+    return map;
+  }, [appointments]);
+
+  const getDayAppointments = useCallback((date: Date) => {
+    const dateKey = format(date, "yyyy-MM-dd");
+    return appointmentsByDate.get(dateKey) || [];
+  }, [appointmentsByDate]);
 
   const navigateToPreviousMonth = () => {
     const newMonth = subMonths(currentMonth, 1);
@@ -77,18 +102,22 @@ export function MonthlyScheduleView({
     onDateChange(today);
   };
 
-  // Calculer les jours à afficher (incluant les jours partiels des semaines précédente/suivante)
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+  // Mémoriser les jours du calendrier
+  const { calendarDays, weeks } = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
-  // Grouper par semaines
-  const weeks = [];
-  for (let i = 0; i < calendarDays.length; i += 7) {
-    weeks.push(calendarDays.slice(i, i + 7));
-  }
+    // Grouper par semaines
+    const weeksArr = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeksArr.push(days.slice(i, i + 7));
+    }
+
+    return { calendarDays: days, weeks: weeksArr };
+  }, [currentMonth]);
 
   const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 

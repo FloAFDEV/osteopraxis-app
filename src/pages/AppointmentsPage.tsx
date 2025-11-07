@@ -252,111 +252,55 @@ const AppointmentsPage = () => {
 					</Button>
 				</div>
 				<div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8">
-					{" "}
 					{/* Modern medical header */}
 					<AppointmentsHeader />
-					{/* Section Titre et Actions */}
-					<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-						<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800 dark:text-white">
-							<Calendar className="h-7 w-7 sm:h-8 sm:w-8 text-purple-600" />
-							Séances
-						</h1>
-						<div className="flex gap-2 sm:gap-4">
+					
+					{/* Section Titre et Actions - design moderne */}
+					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+						<div className="flex items-center gap-2">
+							<Button asChild size="default" className="shadow-sm">
+								<Link to="/appointments/new" className="flex items-center gap-2">
+									<Plus className="h-4 w-4" />
+									<span>Nouvelle séance</span>
+								</Link>
+							</Button>
 							<Button
 								variant="outline"
-								size="sm" // Smaller button on mobile
+								size="icon"
 								disabled={loading}
-								onClick={() =>
-									setRefreshKey((prev) => prev + 1)
-								} // Simplified refresh
-								className="flex items-center gap-2"
+								onClick={() => setRefreshKey((prev) => prev + 1)}
+								className="shadow-sm"
 							>
-								<RefreshCw
-									className={`h-4 w-4 ${
-										loading ? "animate-spin" : ""
-									}`}
-								/>
-								<span className="hidden sm:inline">
-									{loading ? "Chargement..." : "Actualiser"}
-								</span>{" "}
-								{/* Hide text on small screens */}
-								<span className="sm:hidden">
-									Actualiser
-								</span>{" "}
-								{/* Show text on smaller screens */}
-							</Button>
-							<Button asChild size="sm">
-								<Link
-									to="/appointments/new"
-									className="flex items-center gap-2"
-								>
-									<Plus className="h-4 w-4" />
-									<span className="hidden sm:inline">
-										Nouvelle séance
-									</span>{" "}
-									{/* Hide text on small screens */}
-									<span className="sm:hidden">
-										Nouveau
-									</span>{" "}
-									{/* Shorter text on small screens */}
-								</Link>
+								<RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
 							</Button>
 						</div>
 					</div>
 
-					{/* HDS notice */}
-					<div className="mb-4">
-						<Alert>
-							<AlertTitle className="flex items-center gap-2">
-								<Shield className="h-4 w-4" /> Données RDV sensibles stockées localement (HDS)
-							</AlertTitle>
-							<AlertDescription>
-								Les informations patients et de séance restent sur votre appareil. Partage ciblé à venir.
-							</AlertDescription>
-						</Alert>
-					</div>
-
-					{/* Section Recherche et Filtrage */}
-					<div className="flex flex-col md:flex-row gap-4 mb-6">
-						<div className="flex-grow relative">
+					{/* Barre de recherche et filtres - design épuré */}
+					<div className="mb-6 space-y-3">
+						<div className="relative">
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Rechercher patient, motif..."
-								className="pl-10 w-full" // Ensure full width
+								placeholder="Rechercher une séance..."
+								className="pl-10 h-11 shadow-sm"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 						</div>
-						<div className="w-full md:w-auto md:min-w-[200px] flex items-center gap-2">
-							{" "}
-							{/* Adjusted width and gap */}
+						
+						<div className="flex items-center gap-2">
 							<Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-							<Select
-								value={statusFilter}
-								onValueChange={setStatusFilter}
-							>
-								<SelectTrigger className="flex-grow">
-									<SelectValue placeholder="Filtrer par statut" />
+							<Select value={statusFilter} onValueChange={setStatusFilter}>
+								<SelectTrigger className="w-full sm:w-[200px] shadow-sm">
+									<SelectValue placeholder="Tous les statuts" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="all">
-										Tous les statuts
-									</SelectItem>
-									<SelectItem value="SCHEDULED">
-										Planifiées
-									</SelectItem>
-									<SelectItem value="COMPLETED">
-										Terminées
-									</SelectItem>
-									<SelectItem value="CANCELED">
-										Annulées
-									</SelectItem>
-									<SelectItem value="RESCHEDULED">
-										Reportées
-									</SelectItem>
-									<SelectItem value="NO_SHOW">
-										Non présentées
-									</SelectItem>
+									<SelectItem value="all">Tous les statuts</SelectItem>
+									<SelectItem value="SCHEDULED">Planifiées</SelectItem>
+									<SelectItem value="COMPLETED">Terminées</SelectItem>
+									<SelectItem value="CANCELED">Annulées</SelectItem>
+									<SelectItem value="RESCHEDULED">Reportées</SelectItem>
+									<SelectItem value="NO_SHOW">Non présentées</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>

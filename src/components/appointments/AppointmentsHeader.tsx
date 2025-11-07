@@ -3,18 +3,18 @@ import { HelpButton } from "@/components/ui/help-button";
 
 const AppointmentsHeader = () => {
 	return (
-		<div className="relative w-full rounded-2xl overflow-hidden shadow-none mb-8">
-			{/* Fond dégradé bleu -> indigo, avec support dark mode */}
+		<div className="relative w-full rounded-xl overflow-hidden shadow-sm border border-border mb-6">
+			{/* Fond subtil avec gradient discret */}
 			<div
-				className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50/20 to-indigo-200 dark:from-blue-900 dark:via-indigo-800/20 dark:to-indigo-950 opacity-95"
+				className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"
 				aria-hidden="true"
 			/>
 
-			{/* Contenu */}
-			<div className="relative flex z-10 flex-col sm:flex-row items-center gap-4 px-6 py-10 sm:py-14">
-				<div className="rounded-full bg-white/70 dark:bg-indigo-900/30 shadow-md p-4 flex items-center justify-center">
+			{/* Contenu simplifié */}
+			<div className="relative z-10 flex items-center gap-3 px-5 py-6">
+				<div className="rounded-lg bg-primary/10 p-3 flex items-center justify-center">
 					<svg
-						className="w-9 h-9 text-blue-600 dark:text-indigo-200"
+						className="w-6 h-6 text-primary"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -27,21 +27,18 @@ const AppointmentsHeader = () => {
 						/>
 					</svg>
 				</div>
-				<div className="text-center sm:text-left">
-					<div className="flex items-center gap-2 justify-center sm:justify-start mb-2">
-						<h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white tracking-tight">
-							Gestion des Séances
+				<div>
+					<div className="flex items-center gap-2 mb-1">
+						<h1 className="text-xl font-semibold text-foreground">
+							Mes Séances
 						</h1>
-						<div className="bg-white rounded-full p-1 shadow-sm">
-							<HelpButton
-								content="Ici vous pouvez voir toutes vos séances : passées, présentes et futures. Vous pouvez les organiser, les modifier et suivre leur statut."
-								className="text-blue-600 hover:text-blue-800"
-							/>
-						</div>
+						<HelpButton
+							content="Gérez toutes vos séances : passées, présentes et futures."
+							className="text-muted-foreground hover:text-foreground"
+						/>
 					</div>
-					<p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 font-medium max-w-2xl">
-						Organisez et suivez vos rendez-vous patients en toute
-						simplicité
+					<p className="text-sm text-muted-foreground">
+						Organisez et suivez vos rendez-vous
 					</p>
 				</div>
 			</div>
