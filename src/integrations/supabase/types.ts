@@ -2228,10 +2228,7 @@ export type Database = {
         }[]
       }
       get_current_osteopath_id_secure: { Args: never; Returns: number }
-      get_current_osteopath_plan: {
-        Args: never
-        Returns: Database["public"]["Enums"]["subscription_tier"]
-      }
+      get_current_osteopath_plan: { Args: never; Returns: string }
       get_osteopath_cabinets: {
         Args: { osteopath_auth_id: string }
         Returns: {

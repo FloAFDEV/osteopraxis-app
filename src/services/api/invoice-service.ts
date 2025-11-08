@@ -2,6 +2,7 @@ import { Invoice, PaymentStatus } from "@/types";
 import { delay } from "./config";
 import { storageRouter } from '../storage/storage-router';
 import { DEMO_OSTEOPATH_ID, DEMO_CABINET_ID } from '@/config/demo-constants';
+import { toast } from "sonner";
 
 export const invoiceService = {
   async getInvoices(): Promise<Invoice[]> {
@@ -84,7 +85,16 @@ export const invoiceService = {
 
       const adapter = await storageRouter.route<Invoice>('invoices');
       return await adapter.create(dataToCreate);
-    } catch (error) {
+    } catch (error: any) {
+      // 🔒 Gestion d'erreur RLS : Plan insuffisant
+      if (error?.message?.includes('PLAN_RESTRICTION')) {
+        toast.error("Plan insuffisant", {
+          description: "La création de factures nécessite le plan Full ou Pro. Passez à un plan supérieur dans vos paramètres.",
+          duration: 6000,
+        });
+        throw new Error('Plan restriction');
+      }
+      
       console.error('❌ Erreur création facture:', error);
       throw error;
     }

@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Quote, QuoteItem, CreateQuotePayload, QuoteStatus } from "@/types";
 import { exportSecurity } from "@/utils/export-utils";
+import { toast } from "sonner";
 
 // Détection du mode démo
 function isDemoMode(): boolean {
@@ -157,6 +158,17 @@ export const quoteService = {
 
 		if (quoteError) {
 			console.error('Error creating quote:', quoteError);
+			
+			// 🔒 Détecter erreur RLS liée au plan d'abonnement
+			if (quoteError.code === '42501' || quoteError.message?.toLowerCase().includes('row-level security') || 
+			    quoteError.message?.toLowerCase().includes('policy')) {
+				toast.error("Plan insuffisant", {
+					description: "La création de devis nécessite le plan Full ou Pro. Mettez à niveau votre abonnement dans les paramètres.",
+					duration: 6000,
+				});
+				throw new Error('PLAN_RESTRICTION: Votre plan actuel ne permet pas de créer des devis.');
+			}
+			
 			throw quoteError;
 		}
 
@@ -173,6 +185,16 @@ export const quoteService = {
 
 			if (itemsError) {
 				console.error('Error creating quote items:', itemsError);
+				
+				// 🔒 Détecter erreur RLS liée au plan d'abonnement pour les items
+				if (itemsError.code === '42501' || itemsError.message?.toLowerCase().includes('row-level security')) {
+					toast.error("Plan insuffisant", {
+						description: "La création d'items de devis nécessite le plan Full ou Pro.",
+						duration: 6000,
+					});
+					throw new Error('PLAN_RESTRICTION: Items de devis non autorisés pour votre plan.');
+				}
+				
 				throw itemsError;
 			}
 		}

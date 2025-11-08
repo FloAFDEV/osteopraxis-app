@@ -218,6 +218,13 @@ export const supabaseInvoiceService = {
 
       if (error) {
         console.error("[SUPABASE ERROR]", error.code, error.message);
+        
+        // 🔒 Détecter erreur RLS liée au plan d'abonnement
+        if (error.code === '42501' || error.message?.toLowerCase().includes('row-level security') || 
+            error.message?.toLowerCase().includes('policy')) {
+          throw new Error('PLAN_RESTRICTION: Votre plan actuel ne permet pas de créer des factures. Passez au plan Full ou Pro pour débloquer cette fonctionnalité.');
+        }
+        
         throw error;
       }
 
