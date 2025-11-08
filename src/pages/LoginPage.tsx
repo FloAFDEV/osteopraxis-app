@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, AlertTriangle } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useState } from "react";
@@ -34,6 +36,7 @@ type MagicLinkFormValues = z.infer<typeof magicLinkSchema>;
 
 const LoginPage = () => {
   const { login, loginWithMagicLink, isLoading } = useAuth();
+  const { isDemoMode } = useDemo();
   const [activeTab, setActiveTab] = useState("password");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -94,6 +97,17 @@ const LoginPage = () => {
                 Connectez-vous pour consulter vos dossiers.
               </p>
             </div>
+
+            {/* ⚠️ Alerte si utilisateur déjà en mode démo */}
+            {isDemoMode && (
+              <Alert variant="destructive" className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800 dark:text-amber-200">
+                  <strong>Vous êtes actuellement en mode démo</strong>
+                  <p className="mt-1 text-sm">En vous connectant avec un compte réel, vous perdrez l'accès aux données de démonstration.</p>
+                </AlertDescription>
+              </Alert>
+            )}
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-2 mb-6 bg-muted">

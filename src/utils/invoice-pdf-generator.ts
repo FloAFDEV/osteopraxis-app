@@ -48,6 +48,7 @@ export async function generateInvoicePDF(
     }
 
     // 🔒 SÉCURITÉ: Sécuriser le PDF avec filigrane approprié (démo/professionnel)
+    // Standard uniforme : text-7xl + opacity-40 pour tous les filigranes
     const pdfBytes = pdf.output('arraybuffer');
     const osteopathName = element.querySelector('[data-osteopath-name]')?.textContent || undefined;
     const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes), osteopathName);

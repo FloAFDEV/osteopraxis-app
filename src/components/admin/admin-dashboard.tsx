@@ -29,13 +29,16 @@ import { QuickActionsPanel } from "./QuickActionsPanel";
 import { SimpleAdminOverview } from "./simple-admin-overview";
 import { LocalStorageConfiguration } from "./local-storage-configuration";
 import { 
-  Users, Building, Calendar, RefreshCw, User, ShieldCheck, TestTube 
+  Users, Building, Calendar, RefreshCw, User, ShieldCheck, TestTube, AlertTriangle 
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDemo } from "@/contexts/DemoContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isDemoMode } = useDemo();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -74,6 +77,23 @@ export function AdminDashboard() {
     }
   }, [user]);
   
+  // 🔒 SÉCURITÉ : Bloquer l'accès en mode démo
+  if (isDemoMode) {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto p-6">
+          <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              <strong>Accès restreint en mode démo</strong>
+              <p className="mt-2">Les fonctionnalités d'administration ne sont pas disponibles en mode démonstration pour des raisons de sécurité.</p>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   if (!user || user.role !== "ADMIN") {
     return (
       <AdminLayout>
