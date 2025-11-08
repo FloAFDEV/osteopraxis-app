@@ -57,7 +57,6 @@ import ConfigurationPage from "@/pages/ConfigurationPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 import { HybridStorageProvider } from "@/contexts/HybridStorageContext";
-import { SessionModeProvider } from "@/contexts/SessionModeContext";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -79,11 +78,10 @@ function App() {
     <ErrorBoundary>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <SessionModeProvider>
-            <ThemeProvider>
-              <OptimizationProvider>
-                <PrivacyProvider>
-                  <DemoProvider>
+          <ThemeProvider>
+            <OptimizationProvider>
+              <PrivacyProvider>
+                <DemoProvider>
                     <Router>
                       <AuthProvider>
                         <HybridStorageProvider>
@@ -287,7 +285,6 @@ function App() {
               </PrivacyProvider>
             </OptimizationProvider>
           </ThemeProvider>
-          </SessionModeProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </ErrorBoundary>

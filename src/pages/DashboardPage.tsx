@@ -8,7 +8,7 @@ import { WelcomeMessage } from "@/components/welcome/WelcomeMessage";
 import { HDSStatusWidget } from "@/components/dashboard/HDSStatusWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useSessionMode } from "@/contexts/SessionModeContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { useCabinets } from "@/hooks/useCabinets";
 import { useHybridStorageContext } from "@/contexts/HybridStorageContext";
 
@@ -16,7 +16,7 @@ const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isConfigured, isLoading: storageLoading } = useHybridStorageContext();
-  const { isDemoMode } = useSessionMode();
+  const { isDemoMode } = useDemo();
 
   // 🔒 Le FailFastStorageGuard bloquera l'accès si HDS non configuré
   // Conformité HDS stricte : aucun accès aux données sans chiffrement local

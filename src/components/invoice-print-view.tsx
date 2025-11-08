@@ -81,7 +81,7 @@ const getPaymentStatusLabel = (status?: string) => {
 					
 					{/* Filigrane central */}
 					<div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
-						<div className="text-red-600 text-8xl font-bold opacity-30 rotate-[-45deg] select-none whitespace-nowrap">
+						<div className="text-red-600 text-7xl font-bold opacity-40 rotate-[-45deg] select-none whitespace-nowrap">
 							MODE DÉMO<br/>NON VALABLE
 						</div>
 					</div>

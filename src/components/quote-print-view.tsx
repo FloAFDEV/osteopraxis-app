@@ -45,7 +45,7 @@ export const QuotePrintView = forwardRef<HTMLDivElement, QuotePrintViewProps>(
             
             {/* Filigrane central */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-              <div className="transform -rotate-45 text-red-200 font-bold text-6xl opacity-50 select-none">
+              <div className="transform -rotate-45 text-red-200 font-bold text-7xl opacity-40 select-none">
                 MODE DÉMO
               </div>
             </div>

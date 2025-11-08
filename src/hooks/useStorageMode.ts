@@ -1,11 +1,11 @@
 /**
  * 🎯 Hook pour détecter le mode de stockage (démo/connecté)
- * Wrapper autour de SessionModeContext pour compatibilité
+ * Wrapper autour de DemoContext pour compatibilité
  */
 
-import { useSessionMode } from '@/contexts/SessionModeContext';
+import { useDemo } from '@/contexts/DemoContext';
 
 export function useStorageMode() {
-  const { isDemoMode, isLoading } = useSessionMode();
+  const { isDemoMode, isLoading } = useDemo();
   return { isDemoMode, isLoading };
 }
