@@ -78,15 +78,7 @@ export type Database = {
           user_id?: string | null
           window_start?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "api_rate_limits_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       Appointment: {
         Row: {
@@ -145,13 +137,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Appointment_deleted_by_fkey"
-            columns: ["deleted_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "Appointment_patientId_fkey"
             columns: ["patientId"]
             isOneToOne: false
@@ -204,15 +189,7 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "audit_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       business_metrics: {
         Row: {
@@ -837,13 +814,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Invoice_deleted_by_fkey"
-            columns: ["deleted_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "Invoice_osteopathId_fkey"
             columns: ["osteopathId"]
             isOneToOne: false
@@ -1396,13 +1366,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Patient_deleted_by_fkey"
-            columns: ["deleted_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "Patient_osteopathId_fkey"
             columns: ["osteopathId"]
             isOneToOne: false
@@ -1631,15 +1594,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "subscribers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       subscription_plans: {
         Row: {
@@ -1815,15 +1770,7 @@ export type Database = {
           period_start?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "usage_tracking_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       User: {
         Row: {
@@ -1876,13 +1823,6 @@ export type Database = {
             referencedRelation: "Osteopath"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "User_deleted_by_fkey"
-            columns: ["deleted_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       user_activity_logs: {
@@ -1913,15 +1853,7 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_activity_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -1945,34 +1877,11 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
-      user_roles_view: {
-        Row: {
-          email: string | null
-          role: Database["public"]["Enums"]["app_role"] | null
-          role_assigned_at: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       admin_access_with_audit: { Args: never; Returns: boolean }
@@ -2229,6 +2138,15 @@ export type Database = {
       }
       get_current_osteopath_id_secure: { Args: never; Returns: number }
       get_current_osteopath_plan: { Args: never; Returns: string }
+      get_current_user_roles: {
+        Args: never
+        Returns: {
+          email: string
+          role: Database["public"]["Enums"]["app_role"]
+          role_assigned_at: string
+          user_id: string
+        }[]
+      }
       get_osteopath_cabinets: {
         Args: { osteopath_auth_id: string }
         Returns: {
