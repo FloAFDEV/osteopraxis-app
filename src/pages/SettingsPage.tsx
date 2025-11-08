@@ -22,6 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
 import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog";
+import { BadgesSection } from "@/components/plans/BadgesSection";
 
 
 const SettingsPage = () => {
@@ -145,6 +146,11 @@ const SettingsPage = () => {
 							);
 						})}
 					</div>
+
+					{/* Section Badges de Progression - masquée en mode démo */}
+					{!isDemoMode && (
+						<BadgesSection />
+					)}
 
 					{/* Section Partage Sécurisé USB - masqué en mode démo */}
 					{!isDemoMode && (
