@@ -17,8 +17,7 @@ import { Crown, Lock, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Osteopath } from '@/types';
 import { SmartUpgradeBanner } from './SmartUpgradeBanner';
-import { useGamification } from '@/hooks/useGamification';
-import { GamificationBadge } from './GamificationBadge';
+import { useUsageMetrics } from '@/hooks/useUsageMetrics';
 
 interface PlanGuardProps {
   children: ReactNode;
@@ -53,7 +52,7 @@ export function PlanGuard({ children, feature }: PlanGuardProps) {
   const [osteopath, setOsteopath] = useState<Osteopath | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [attempts, setAttempts] = useState(0);
-  const { trackFeatureAttempt, badges } = useGamification();
+  const { trackFeatureAttempt } = useUsageMetrics();
 
   useEffect(() => {
     const loadOsteopath = async () => {
@@ -110,33 +109,9 @@ export function PlanGuard({ children, feature }: PlanGuardProps) {
       duration: 5000,
     });
 
-    // Badges récemment débloqués (dernières 24h)
-    const recentBadges = badges
-      .filter(b => b.unlocked && b.unlockedAt)
-      .filter(b => {
-        const unlockedDate = new Date(b.unlockedAt!);
-        const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        return unlockedDate > dayAgo;
-      })
-      .slice(0, 3);
-
     return (
       <div className="container mx-auto py-10 px-4">
         <SmartUpgradeBanner feature={feature} currentPlan={currentPlan as any} />
-
-        {/* Affichage des badges récents */}
-        {recentBadges.length > 0 && (
-          <div className="max-w-2xl mx-auto mt-6">
-            <h3 className="text-sm font-semibold mb-3 text-center text-muted-foreground">
-              🎉 Badges récemment débloqués
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              {recentBadges.map(badge => (
-                <GamificationBadge key={badge.id} badge={badge} size="sm" />
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Affichage visuel de verrouillage */}
         <div className="max-w-2xl mx-auto mt-8 p-8 border-2 border-dashed border-muted rounded-lg bg-muted/20 flex flex-col items-center justify-center text-center space-y-4">
