@@ -1,6 +1,5 @@
 import { forwardRef } from 'react';
 import { Quote, Patient, Osteopath, Cabinet } from '@/types';
-import { formatAmount } from "@/utils/formatters";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useDemo } from '@/contexts/DemoContext';
@@ -22,7 +21,17 @@ export const QuotePrintView = forwardRef<HTMLDivElement, QuotePrintViewProps>(
       return `${patient.firstName} ${patient.lastName}`;
     };
 
+    const formatAmount = (amount: number) => {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'EUR'
+      }).format(amount);
+    };
+
     const totalAmount = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    const quoteNumber = quote.id.toString().padStart(6, '0');
+    const quoteDate = quote.createdAt;
+    const quoteSubject = quote.title || quote.description;
 
     return (
       <div ref={ref} className="bg-white p-8 text-black relative">
@@ -68,9 +77,9 @@ export const QuotePrintView = forwardRef<HTMLDivElement, QuotePrintViewProps>(
 
           <div className="text-right">
             <h1 className="text-2xl font-bold text-primary mb-2">DEVIS</h1>
-            <p className="text-sm text-gray-600">N° {quote.quoteNumber}</p>
+            <p className="text-sm text-gray-600">N° {quoteNumber}</p>
             <p className="text-sm text-gray-600">
-              Date : {quote.date ? format(new Date(quote.date), 'dd MMMM yyyy', { locale: fr }) : 'N/A'}
+              Date : {quoteDate ? format(new Date(quoteDate), 'dd MMMM yyyy', { locale: fr }) : 'N/A'}
             </p>
             {quote.validUntil && (
               <p className="text-sm text-gray-600">
@@ -92,10 +101,10 @@ export const QuotePrintView = forwardRef<HTMLDivElement, QuotePrintViewProps>(
         </div>
 
         {/* Objet du devis */}
-        {quote.subject && (
+        {quoteSubject && (
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">OBJET</h3>
-            <p className="text-sm text-gray-800">{quote.subject}</p>
+            <p className="text-sm text-gray-800">{quoteSubject}</p>
           </div>
         )}
 

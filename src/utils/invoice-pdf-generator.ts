@@ -52,8 +52,8 @@ export async function generateInvoicePDF(
     const osteopathName = element.querySelector('[data-osteopath-name]')?.textContent || undefined;
     const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes), osteopathName);
 
-    // Télécharger le fichier sécurisé
-    const blob = new Blob([securedPdfBytes], { type: 'application/pdf' });
+    // Télécharger le fichier sécurisé (convertir en ArrayBuffer approprié)
+    const blob = new Blob([new Uint8Array(securedPdfBytes)], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
