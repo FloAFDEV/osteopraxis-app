@@ -55,6 +55,7 @@ import ConnectedStorageSettingsPage from "@/pages/ConnectedStorageSettingsPage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
 import TeamManagementPage from "@/pages/TeamManagementPage";
 import SecurityAuditPage from "@/pages/SecurityAuditPage";
+import UserJourneyVisualizationPage from "@/pages/UserJourneyVisualizationPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
@@ -292,6 +293,11 @@ function App() {
                         <Route path="/admin/security-audit" element={
                           <ProtectedRoute>
                             <SecurityAuditPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/admin/user-journey" element={
+                          <ProtectedRoute>
+                            <UserJourneyVisualizationPage />
                           </ProtectedRoute>
                         } />
                         
