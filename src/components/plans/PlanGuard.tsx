@@ -1,8 +1,8 @@
 /**
- * 🛡️ PlanGuard - Composant de protection d'accès selon le plan d'abonnement
+ * PlanGuard - Contrôle d'accès basé sur le plan d'abonnement
  * 
- * Bloque l'accès aux fonctionnalités selon le plan de l'ostéopathe:
- * - Light: patients uniquement
+ * Restreint l'accès aux fonctionnalités selon le plan:
+ * - Light: gestion des patients uniquement
  * - Full: patients + rendez-vous + facturation + planning
  * - Pro: Full + gestion d'équipe + analytics avancées
  */
@@ -75,13 +75,13 @@ export function PlanGuard({ children, feature }: PlanGuardProps) {
   }, [user]);
 
   useEffect(() => {
-    // Compter les tentatives d'accès pour afficher un message personnalisé
+    // Compter les tentatives d'accès pour analyse d'utilisation
     const key = `upgrade-attempts-${feature}`;
     const count = parseInt(localStorage.getItem(key) || '0');
     setAttempts(count + 1);
     localStorage.setItem(key, (count + 1).toString());
     
-    // Tracker dans le système de gamification
+    // Tracker dans les métriques d'utilisation
     trackFeatureAttempt(feature);
   }, [feature, trackFeatureAttempt]);
 
@@ -104,8 +104,8 @@ export function PlanGuard({ children, feature }: PlanGuardProps) {
     const pricing = suggestedPlan === 'Pro' ? '49€/mois' : '19€/mois';
 
     // Toast de blocage
-    toast.error(`Fonctionnalité réservée au plan ${suggestedPlan}`, {
-      description: `Passez au plan ${suggestedPlan} pour débloquer ${FEATURE_NAMES[feature]}`,
+    toast.error(`Accès réservé au plan ${suggestedPlan}`, {
+      description: `Cette fonctionnalité nécessite le plan ${suggestedPlan}`,
       duration: 5000,
     });
 
@@ -114,14 +114,14 @@ export function PlanGuard({ children, feature }: PlanGuardProps) {
         <SmartUpgradeBanner feature={feature} currentPlan={currentPlan as any} />
 
         {/* Affichage visuel de verrouillage */}
-        <div className="max-w-2xl mx-auto mt-8 p-8 border-2 border-dashed border-muted rounded-lg bg-muted/20 flex flex-col items-center justify-center text-center space-y-4">
+        <div className="max-w-2xl mx-auto mt-8 p-8 border-2 border-dashed rounded-lg bg-muted/20 flex flex-col items-center justify-center text-center space-y-4">
           <Lock className="h-16 w-16 text-muted-foreground opacity-50" />
-          <h3 className="text-lg font-semibold text-muted-foreground">
-            Contenu verrouillé
+          <h3 className="text-lg font-semibold text-foreground">
+            Fonctionnalité non disponible
           </h3>
           <p className="text-sm text-muted-foreground max-w-md">
-            Cette fonctionnalité est disponible dans le plan {suggestedPlan}. 
-            Mettez à niveau votre abonnement pour y accéder.
+            {FEATURE_NAMES[feature]} est disponible dans le plan {suggestedPlan}. 
+            Consultez nos offres pour accéder à cette fonctionnalité.
           </p>
         </div>
       </div>

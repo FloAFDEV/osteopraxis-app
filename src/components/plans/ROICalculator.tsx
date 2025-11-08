@@ -1,8 +1,8 @@
 /**
- * 💰 ROI Calculator - Simulateur de retour sur investissement
+ * Calculateur de retour sur investissement
  * 
- * Calcule les gains de productivité et économies potentielles
- * selon le nombre de patients et rendez-vous mensuels
+ * Simule les gains de productivité et l'optimisation financière
+ * selon les paramètres d'activité du cabinet
  */
 
 import { useState } from 'react';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Clock, Euro, Sparkles, Calculator } from 'lucide-react';
+import { TrendingUp, Clock, Euro, Calculator, BarChart3 } from 'lucide-react';
 
 export function ROICalculator() {
   const [patientsPerMonth, setPatientsPerMonth] = useState(50);
@@ -44,21 +44,21 @@ export function ROICalculator() {
   return (
     <div className="space-y-6">
       {/* Simulateur */}
-      <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50">
+      <Card className="border-2">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Calculator className="h-6 w-6 text-blue-600" />
-            Calculez vos gains de productivité
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Calculator className="h-5 w-5 text-primary" />
+            Simulateur de retour sur investissement
           </CardTitle>
           <CardDescription>
-            Ajustez les valeurs selon votre activité pour voir votre ROI
+            Ajustez les paramètres selon votre activité pour calculer les gains potentiels
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Inputs */}
           <div className="grid md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="patients">Patients / mois</Label>
+              <Label htmlFor="patients">Patients mensuels</Label>
               <Input
                 id="patients"
                 type="number"
@@ -69,7 +69,7 @@ export function ROICalculator() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="appointments">Rendez-vous / mois</Label>
+              <Label htmlFor="appointments">Consultations mensuelles</Label>
               <Input
                 id="appointments"
                 type="number"
@@ -80,7 +80,7 @@ export function ROICalculator() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Prix séance (€)</Label>
+              <Label htmlFor="price">Tarif consultation (€)</Label>
               <Input
                 id="price"
                 type="number"
@@ -93,35 +93,35 @@ export function ROICalculator() {
           </div>
 
           {/* Résultats globaux */}
-          <div className="p-4 bg-white rounded-lg border-2 border-blue-300 shadow-sm">
+          <div className="p-4 border rounded-lg bg-muted/30">
             <div className="grid md:grid-cols-3 gap-4 text-center">
               <div>
-                <div className="flex items-center justify-center gap-2 text-blue-600 mb-1">
-                  <Clock className="h-5 w-5" />
-                  <span className="text-sm font-medium">Temps économisé</span>
+                <div className="flex items-center justify-center gap-2 text-primary mb-2">
+                  <Clock className="h-4 w-4" />
+                  <span className="text-sm font-medium">Temps libéré</span>
                 </div>
-                <p className="text-2xl font-bold text-blue-900">
-                  {totalTimeGain.toFixed(1)}h
+                <p className="text-2xl font-bold text-foreground">
+                  {totalTimeGain.toFixed(1)} h
                 </p>
                 <p className="text-xs text-muted-foreground">par mois</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-2 text-green-600 mb-1">
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="text-sm font-medium">Séances supplémentaires</span>
+                <div className="flex items-center justify-center gap-2 text-primary mb-2">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-sm font-medium">Créneaux disponibles</span>
                 </div>
-                <p className="text-2xl font-bold text-green-900">
+                <p className="text-2xl font-bold text-foreground">
                   +{additionalSessions}
                 </p>
-                <p className="text-xs text-muted-foreground">rendez-vous possibles</p>
+                <p className="text-xs text-muted-foreground">consultations possibles</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-2 text-purple-600 mb-1">
-                  <Euro className="h-5 w-5" />
-                  <span className="text-sm font-medium">Revenus potentiels</span>
+                <div className="flex items-center justify-center gap-2 text-primary mb-2">
+                  <Euro className="h-4 w-4" />
+                  <span className="text-sm font-medium">Potentiel de revenus</span>
                 </div>
-                <p className="text-2xl font-bold text-purple-900">
-                  +{additionalRevenue}€
+                <p className="text-2xl font-bold text-foreground">
+                  +{additionalRevenue} €
                 </p>
                 <p className="text-xs text-muted-foreground">par mois</p>
               </div>
@@ -133,95 +133,111 @@ export function ROICalculator() {
       {/* Comparaison ROI par plan */}
       <div className="grid md:grid-cols-2 gap-4">
         {/* Plan Full */}
-        <Card className="border-2 border-amber-300 hover:shadow-lg transition-shadow">
-          <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50">
+        <Card className="border-2 hover:shadow-md transition-shadow">
+          <CardHeader className="bg-muted/30">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Plan Full</CardTitle>
-              <Badge className="bg-amber-500">19€/mois</Badge>
+              <Badge variant="secondary" className="text-sm font-semibold">
+                19€/mois
+              </Badge>
             </div>
+            <CardDescription>
+              Gestion complète du cabinet
+            </CardDescription>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Revenus supplémentaires</span>
-                <span className="font-semibold text-green-600">+{additionalRevenue}€</span>
+                <span className="text-muted-foreground">Revenus additionnels potentiels</span>
+                <span className="font-semibold text-foreground">+{additionalRevenue}€</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Coût de l'abonnement</span>
-                <span className="font-semibold text-red-600">-{fullPlanCost}€</span>
+                <span className="font-semibold text-muted-foreground">-{fullPlanCost}€</span>
               </div>
               <div className="h-px bg-border my-2" />
               <div className="flex justify-between">
-                <span className="font-bold">Gain net mensuel</span>
-                <span className="text-xl font-bold text-green-600">
+                <span className="font-bold text-foreground">Bénéfice net mensuel</span>
+                <span className="text-xl font-bold text-primary">
                   +{fullPlanROI}€
                 </span>
               </div>
             </div>
 
-            <div className="p-3 bg-green-100 border border-green-300 rounded-lg">
-              <p className="text-sm font-semibold text-green-900 flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                ROI: +{fullPlanROIPercent}% / mois
-              </p>
-              <p className="text-xs text-green-800 mt-1">
-                Rentable dès le 1er mois !
+            <div className="p-3 border rounded-lg bg-primary/5">
+              <div className="flex items-center gap-2 mb-1">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                <p className="text-sm font-semibold text-foreground">
+                  ROI : +{fullPlanROIPercent}% par mois
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Rentabilité dès le premier mois d'utilisation
               </p>
             </div>
           </CardContent>
         </Card>
 
         {/* Plan Pro */}
-        <Card className="border-2 border-purple-300 hover:shadow-lg transition-shadow">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+        <Card className="border-2 hover:shadow-md transition-shadow">
+          <CardHeader className="bg-muted/30">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Plan Pro</CardTitle>
-              <Badge className="bg-purple-600">49€/mois</Badge>
+              <Badge variant="secondary" className="text-sm font-semibold">
+                49€/mois
+              </Badge>
             </div>
+            <CardDescription>
+              Collaboration et analytics avancées
+            </CardDescription>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Revenus supplémentaires</span>
-                <span className="font-semibold text-green-600">+{proPlanAdditionalRevenue}€</span>
+                <span className="text-muted-foreground">Revenus additionnels potentiels</span>
+                <span className="font-semibold text-foreground">+{proPlanAdditionalRevenue}€</span>
               </div>
-              <div className="flex justify-between text-sm text-purple-600">
-                <span>Analytics & optimisations</span>
-                <span className="font-semibold">+30%</span>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Optimisation par analytics</span>
+                <span className="font-semibold text-primary">+30%</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Coût de l'abonnement</span>
-                <span className="font-semibold text-red-600">-{proPlanCost}€</span>
+                <span className="font-semibold text-muted-foreground">-{proPlanCost}€</span>
               </div>
               <div className="h-px bg-border my-2" />
               <div className="flex justify-between">
-                <span className="font-bold">Gain net mensuel</span>
-                <span className="text-xl font-bold text-purple-600">
+                <span className="font-bold text-foreground">Bénéfice net mensuel</span>
+                <span className="text-xl font-bold text-primary">
                   +{proPlanROI}€
                 </span>
               </div>
             </div>
 
-            <div className="p-3 bg-purple-100 border border-purple-300 rounded-lg">
-              <p className="text-sm font-semibold text-purple-900 flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                ROI: +{proPlanROIPercent}% / mois
-              </p>
-              <p className="text-xs text-purple-800 mt-1">
-                Inclut gestion d'équipe et analytics !
+            <div className="p-3 border rounded-lg bg-primary/5">
+              <div className="flex items-center gap-2 mb-1">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                <p className="text-sm font-semibold text-foreground">
+                  ROI : +{proPlanROIPercent}% par mois
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Inclut gestion d'équipe et pilotage par la donnée
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Note explicative */}
-      <Card className="bg-muted/50">
+      {/* Note méthodologique */}
+      <Card className="border bg-muted/20">
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground">
-            💡 <strong>Méthodologie :</strong> Ces estimations sont basées sur des gains de temps moyens constatés : 
-            6 min/patient pour la gestion, 5 min/RDV pour la planification, et 3 min/facture pour la facturation. 
-            Le plan Pro offre 30% de gains supplémentaires grâce aux analytics et optimisations avancées.
+            <strong>Méthodologie de calcul :</strong> Les gains de temps sont basés sur des moyennes observées : 
+            6 minutes économisées par patient pour la gestion administrative, 5 minutes par rendez-vous 
+            pour la planification, et 3 minutes par note d'honoraires pour la facturation. 
+            Le plan Pro intègre des optimisations supplémentaires (+30%) grâce aux analytics et 
+            aux fonctionnalités de pilotage avancées.
           </p>
         </CardContent>
       </Card>

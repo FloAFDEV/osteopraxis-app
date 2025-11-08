@@ -1,16 +1,17 @@
 /**
- * 🎯 SmartUpgradeBanner - Bannière d'upgrade intelligente
+ * Bannière d'upgrade professionnelle
  * 
- * Affiche une bannière personnalisée selon:
- * - Le nombre de tentatives d'accès à la fonctionnalité
+ * Affiche une recommandation de plan basée sur:
+ * - L'analyse d'utilisation
  * - Le plan actuel de l'utilisateur
- * - La fonctionnalité bloquée
+ * - Les besoins métier identifiés
  */
 
 import { useState, useEffect } from 'react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Crown, TrendingUp, Sparkles, Zap } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Info, Clock, Shield, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface SmartUpgradeBannerProps {
@@ -18,45 +19,58 @@ interface SmartUpgradeBannerProps {
   currentPlan?: 'light' | 'full' | 'pro';
 }
 
-const FEATURE_MESSAGES = {
+const FEATURE_METADATA = {
   appointments: {
     title: 'Gestion des rendez-vous',
-    benefit: 'Planifiez et gérez tous vos rendez-vous en un clic',
-    timeGain: '5h/semaine',
+    benefit: 'Optimisez la planification et réduisez les rendez-vous manqués',
+    timeGain: '5 heures par semaine',
+    compliance: 'Historique conforme aux exigences de traçabilité',
   },
   invoices: {
-    title: 'Facturation automatique',
-    benefit: 'Créez vos notes d\'honoraires en 30 secondes',
-    timeGain: '3h/semaine',
+    title: 'Facturation automatisée',
+    benefit: 'Génération instantanée de notes d\'honoraires conformes',
+    timeGain: '3 heures par semaine',
+    compliance: 'Conformité fiscale et traçabilité comptable garanties',
   },
   schedule: {
     title: 'Planning hebdomadaire',
-    benefit: 'Visualisez votre semaine et optimisez vos créneaux',
-    timeGain: '2h/semaine',
+    benefit: 'Vue d\'ensemble pour optimiser vos créneaux de consultation',
+    timeGain: '2 heures par semaine',
+    compliance: 'Synchronisation sécurisée de vos disponibilités',
   },
   team: {
     title: 'Gestion d\'équipe collaborative',
-    benefit: 'Coordonnez votre équipe et partagez les patients',
-    timeGain: '8h/semaine',
+    benefit: 'Coordination multi-praticiens et partage sécurisé des dossiers',
+    timeGain: '8 heures par semaine',
+    compliance: 'Gestion des droits d\'accès conforme au RGPD',
   },
   analytics: {
-    title: 'Analytics avancées',
-    benefit: 'Analysez votre activité et optimisez vos revenus',
-    timeGain: '4h/semaine',
+    title: 'Analyses décisionnelles',
+    benefit: 'Indicateurs de performance pour piloter votre activité',
+    timeGain: '4 heures par semaine',
+    compliance: 'Tableaux de bord conformes aux exigences professionnelles',
   },
 };
 
-const PLAN_PRICES = {
-  full: '19',
-  pro: '49',
+const PLAN_INFO = {
+  full: {
+    price: '19',
+    name: 'Full',
+    description: 'Gestion complète du cabinet',
+  },
+  pro: {
+    price: '49',
+    name: 'Pro',
+    description: 'Collaboration et analytics avancées',
+  },
 };
 
 export function SmartUpgradeBanner({ feature, currentPlan = 'light' }: SmartUpgradeBannerProps) {
   const navigate = useNavigate();
   const [attempts, setAttempts] = useState(0);
-  const featureInfo = FEATURE_MESSAGES[feature];
+  const featureInfo = FEATURE_METADATA[feature];
   const suggestedPlan = feature === 'team' || feature === 'analytics' ? 'pro' : 'full';
-  const price = PLAN_PRICES[suggestedPlan];
+  const planInfo = PLAN_INFO[suggestedPlan];
 
   useEffect(() => {
     const key = `upgrade-attempts-${feature}`;
@@ -64,83 +78,98 @@ export function SmartUpgradeBanner({ feature, currentPlan = 'light' }: SmartUpgr
     setAttempts(count);
   }, [feature]);
 
-  const urgencyLevel = attempts >= 5 ? 'high' : attempts >= 3 ? 'medium' : 'low';
+  const showUrgency = attempts >= 3;
 
   return (
-    <Alert 
-      className={`
-        border-2 max-w-2xl mx-auto my-6
-        ${urgencyLevel === 'high' ? 'border-orange-400 bg-gradient-to-r from-orange-50 to-red-50' : ''}
-        ${urgencyLevel === 'medium' ? 'border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50' : ''}
-        ${urgencyLevel === 'low' ? 'border-blue-300 bg-gradient-to-r from-blue-50 to-purple-50' : ''}
-      `}
-    >
-      <Crown className="h-6 w-6 text-amber-600" />
-      <AlertTitle className="text-xl font-bold mb-3">
-        {urgencyLevel === 'high' && <span className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-orange-600" />
-          Vous perdez du temps ! ({attempts} tentatives)
-        </span>}
-        {urgencyLevel === 'medium' && <span className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-amber-600" />
-          Débloquez {featureInfo.title}
-        </span>}
-        {urgencyLevel === 'low' && <span className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-blue-600" />
-          Découvrez {featureInfo.title}
-        </span>}
+    <Alert className="border-2 max-w-2xl mx-auto my-6 bg-card">
+      <Info className="h-5 w-5 text-primary" />
+      <AlertTitle className="text-lg font-semibold mb-3">
+        Fonctionnalité disponible en plan {planInfo.name}
       </AlertTitle>
       
       <AlertDescription className="space-y-4">
-        {urgencyLevel === 'high' && (
-          <div className="p-4 bg-orange-100 border-2 border-orange-400 rounded-lg">
-            <p className="font-bold text-orange-900 mb-2">
-              ⚡ Vous avez essayé {attempts} fois d'accéder à cette fonctionnalité !
+        <div className="space-y-3">
+          <div>
+            <h4 className="font-semibold text-foreground mb-1">
+              {featureInfo.title}
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              {featureInfo.benefit}
             </p>
-            <p className="text-sm text-orange-800">
-              En passant au plan {suggestedPlan.toUpperCase()}, vous économiseriez <strong>{featureInfo.timeGain}</strong> et <strong>€{parseInt(price) * 2}/mois</strong> en productivité !
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="flex items-start gap-2 p-3 border rounded-lg bg-muted/30">
+              <Clock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-foreground">Gain de productivité</p>
+                <p className="text-sm font-semibold text-primary">{featureInfo.timeGain}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 p-3 border rounded-lg bg-muted/30">
+              <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-foreground">Conformité</p>
+                <p className="text-xs text-muted-foreground">{featureInfo.compliance}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {showUrgency && (
+          <div className="p-4 border-2 border-primary/20 rounded-lg bg-primary/5">
+            <div className="flex items-start gap-2 mb-2">
+              <TrendingUp className="h-4 w-4 text-primary mt-0.5" />
+              <p className="text-sm font-semibold text-foreground">
+                Analyse d'utilisation
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Vous avez tenté d'accéder à cette fonctionnalité {attempts} fois. 
+              L'adoption du plan {planInfo.name} permettrait d'optimiser significativement 
+              la gestion quotidienne de votre cabinet.
             </p>
           </div>
         )}
 
-        <div className="space-y-2">
-          <p className="text-muted-foreground">
-            <strong className="text-foreground">{featureInfo.benefit}</strong>
-          </p>
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Temps économisé : <strong>{featureInfo.timeGain}</strong>
-          </p>
-        </div>
-
-        {attempts >= 3 && (
-          <div className="p-3 bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-300 rounded-lg">
-            <p className="text-sm font-semibold text-amber-900">
-              💡 Offre spéciale : Passez au plan {suggestedPlan.toUpperCase()} dès maintenant et bénéficiez de 30 jours d'essai gratuits !
-            </p>
+        <div className="pt-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Plan {planInfo.name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {planInfo.description}
+              </p>
+            </div>
+            <Badge variant="secondary" className="text-base font-bold">
+              {planInfo.price}€/mois
+            </Badge>
           </div>
-        )}
 
-        <div className="flex items-center gap-3 pt-2">
-          <Button 
-            onClick={() => navigate('/pricing')}
-            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 font-bold"
-            size="lg"
-          >
-            <Crown className="h-4 w-4 mr-2" />
-            Passer au plan {suggestedPlan.toUpperCase()} ({price}€/mois)
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-          >
-            Plus tard
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              onClick={() => navigate('/pricing')}
+              className="flex-1"
+              size="lg"
+            >
+              Comparer les plans
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(-1)}
+              className="flex-1"
+            >
+              Retour
+            </Button>
+          </div>
         </div>
 
-        <p className="text-xs text-muted-foreground pt-2">
-          ✨ Garantie satisfait ou remboursé 30 jours
-        </p>
+        <div className="pt-2 border-t">
+          <p className="text-xs text-muted-foreground">
+            Garantie de remboursement sous 30 jours • Sans engagement de durée
+          </p>
+        </div>
       </AlertDescription>
     </Alert>
   );
