@@ -610,6 +610,65 @@ export type Database = {
         }
         Relationships: []
       }
+      document_exports: {
+        Row: {
+          created_at: string
+          document_id: number | null
+          document_reference: string | null
+          export_type: string
+          exported_at: string
+          file_hash: string | null
+          file_size_bytes: number | null
+          id: string
+          ip_address: unknown
+          is_demo_export: boolean
+          metadata: Json | null
+          osteopath_id: number
+          recipient_info: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_id?: number | null
+          document_reference?: string | null
+          export_type: string
+          exported_at?: string
+          file_hash?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          ip_address?: unknown
+          is_demo_export?: boolean
+          metadata?: Json | null
+          osteopath_id: number
+          recipient_info?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_id?: number | null
+          document_reference?: string | null
+          export_type?: string
+          exported_at?: string
+          file_hash?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          ip_address?: unknown
+          is_demo_export?: boolean
+          metadata?: Json | null
+          osteopath_id?: number
+          recipient_info?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_exports_osteopath_id_fkey"
+            columns: ["osteopath_id"]
+            isOneToOne: false
+            referencedRelation: "Osteopath"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       google_calendar_events: {
         Row: {
           created_at: string
@@ -2183,6 +2242,20 @@ export type Database = {
           p_table_name: string
         }
         Returns: undefined
+      }
+      log_document_export: {
+        Args: {
+          p_document_id?: number
+          p_document_reference?: string
+          p_export_type: string
+          p_file_hash?: string
+          p_file_size_bytes?: number
+          p_is_demo_export?: boolean
+          p_metadata?: Json
+          p_osteopath_id: number
+          p_recipient_info?: Json
+        }
+        Returns: string
       }
       promote_user_to_admin: {
         Args: { target_user_id: string }

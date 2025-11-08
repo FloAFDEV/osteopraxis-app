@@ -8,24 +8,100 @@
  */
 
 import { IndexedDBSecureStorage } from '@/services/hds-secure-storage/indexeddb-secure-storage';
-import { generateSHA256 } from '@/utils/crypto';
+
+/**
+ * 🔐 Sécurité PIN améliorée avec PBKDF2
+ * 
+ * Remplace le hash SHA-256 simple par PBKDF2 + salt pour résister aux attaques rainbow table
+ */
+async function hashPinSecure(pin: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iterations = 100000; // Recommandation OWASP 2024
+  
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(pin),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    256
+  );
+  
+  // Format: salt:hash (hex)
+  const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return `${saltHex}:${hashHex}`;
+}
+
+/**
+ * Vérifie un PIN contre un hash PBKDF2
+ */
+async function verifyPinSecure(pin: string, storedHash: string): Promise<boolean> {
+  const [saltHex, expectedHashHex] = storedHash.split(':');
+  
+  if (!saltHex || !expectedHashHex) {
+    return false;
+  }
+  
+  const encoder = new TextEncoder();
+  const salt = new Uint8Array(saltHex.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
+  const iterations = 100000;
+  
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(pin),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    256
+  );
+  
+  const actualHashHex = Array.from(new Uint8Array(derivedBits))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  
+  return actualHashHex === expectedHashHex;
+}
 
 export class EncryptedWorkingStorage extends IndexedDBSecureStorage {
   private autoBackupInterval: number | null = null;
   private lastBackupTime: Date | null = null;
   
   async configureWithPin(pin: string): Promise<void> {
-    // Vérifier le hash du PIN
+    // Vérifier le hash du PIN avec PBKDF2
     const storedHash = localStorage.getItem('temp-storage-pin-hash');
-    const currentHash = await generateSHA256(pin);
     
-    if (storedHash && storedHash !== currentHash) {
-      throw new Error('Code PIN incorrect');
-    }
-    
-    // Si c'est la première fois, stocker le hash
-    if (!storedHash) {
-      localStorage.setItem('temp-storage-pin-hash', currentHash);
+    if (storedHash) {
+      const isValid = await verifyPinSecure(pin, storedHash);
+      if (!isValid) {
+        throw new Error('Code PIN incorrect');
+      }
+    } else {
+      // Si c'est la première fois, créer un hash sécurisé PBKDF2
+      const secureHash = await hashPinSecure(pin);
+      localStorage.setItem('temp-storage-pin-hash', secureHash);
     }
     
     // Configurer le stockage avec le PIN comme mot de passe
@@ -34,7 +110,7 @@ export class EncryptedWorkingStorage extends IndexedDBSecureStorage {
       entities: ['patients', 'appointments', 'invoices']
     });
     
-    console.log('✅ Stockage chiffré temporaire configuré avec PIN');
+    console.log('✅ Stockage chiffré temporaire configuré avec PIN PBKDF2 sécurisé');
   }
   
   async enableAutoBackup(intervalMinutes = 5): Promise<void> {

@@ -30,7 +30,14 @@ export const InvoiceDownloadWrapper = ({
           // Wait a bit for the DOM to be ready
           await new Promise(resolve => setTimeout(resolve, 300));
           
-          await generateInvoicePDF(downloadRef.current, filename);
+          // 🔐 PHASE 1.4: Passer invoice, patient, osteopathId pour signature digitale + audit
+          await generateInvoicePDF(
+            downloadRef.current, 
+            filename,
+            downloadInvoice,
+            downloadPatient || undefined,
+            downloadOsteopath?.id
+          );
           
           toast.success("Note d'honoraire téléchargée avec succès");
           onDownloadComplete();
@@ -43,7 +50,7 @@ export const InvoiceDownloadWrapper = ({
     };
 
     handleDownload();
-  }, [downloadInvoice, downloadPatient, onDownloadComplete]);
+  }, [downloadInvoice, downloadPatient, downloadOsteopath, onDownloadComplete]);
 
   if (!downloadInvoice) {
     return null;
