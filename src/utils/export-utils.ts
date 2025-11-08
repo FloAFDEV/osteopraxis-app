@@ -108,11 +108,23 @@ export async function addProfessionalWatermark(
  * @param isDemo Mode démonstration ou non
  * @returns Le workbook modifié
  */
+/**
+ * Calcule le hash SHA-256 d'un workbook Excel
+ * @param workbook Le workbook Excel
+ * @returns Hash SHA-256 en hexadécimal
+ */
+async function calculateExcelHash(workbook: ExcelJS.Workbook): Promise<string> {
+  const buffer = await workbook.xlsx.writeBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function addWatermarkExcel(
   workbook: ExcelJS.Workbook, 
   osteopathName?: string, 
   isDemo: boolean = false
-): Promise<ExcelJS.Workbook> {
+): Promise<{ workbook: ExcelJS.Workbook; fileHash: string }> {
   if (isDemo) {
     // Mode démo : ajouter des avertissements visibles
     workbook.eachSheet((worksheet) => {
@@ -197,7 +209,20 @@ export async function addWatermarkExcel(
     readmeSheet.getColumn('A').width = 60;
   }
   
-  return workbook;
+  // Calculer le hash SHA-256 du workbook AVANT de l'enregistrer
+  const fileHash = await calculateExcelHash(workbook);
+  
+  // Ajouter le hash dans une feuille metadata (pour vérification ultérieure)
+  const metadataSheet = workbook.addWorksheet('_Metadata');
+  metadataSheet.state = 'veryHidden'; // Masquer la feuille
+  metadataSheet.getCell('A1').value = 'SHA256_HASH';
+  metadataSheet.getCell('B1').value = fileHash;
+  metadataSheet.getCell('A2').value = 'GENERATED_AT';
+  metadataSheet.getCell('B2').value = new Date().toISOString();
+  metadataSheet.getCell('A3').value = 'GENERATED_BY';
+  metadataSheet.getCell('B3').value = osteopathName || 'Praticien';
+  
+  return { workbook, fileHash };
 }
 
 /**
@@ -264,9 +289,9 @@ export class ExportSecurityService {
    * Sécurise un Excel selon le mode détecté
    * @param workbook Le workbook original
    * @param osteopathName Nom de l'ostéopathe (optionnel)
-   * @returns Le workbook sécurisé avec filigrane approprié
+   * @returns Le workbook sécurisé avec filigrane approprié et son hash
    */
-  async secureExcel(workbook: ExcelJS.Workbook, osteopathName?: string): Promise<ExcelJS.Workbook> {
+  async secureExcel(workbook: ExcelJS.Workbook, osteopathName?: string): Promise<{ workbook: ExcelJS.Workbook; fileHash: string }> {
     const isDemo = await this.detectDemoMode();
     return await addWatermarkExcel(workbook, osteopathName, isDemo);
   }

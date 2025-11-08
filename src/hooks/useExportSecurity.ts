@@ -15,8 +15,9 @@ export function useExportSecurity() {
 
   /**
    * Sécurise un Excel (ajoute un filigrane professionnel ou démo selon le mode)
+   * @returns { workbook, fileHash } Le workbook sécurisé et son hash SHA-256
    */
-  const secureExcel = useCallback(async (workbook: ExcelJS.Workbook, osteopathName?: string): Promise<ExcelJS.Workbook> => {
+  const secureExcel = useCallback(async (workbook: ExcelJS.Workbook, osteopathName?: string): Promise<{ workbook: ExcelJS.Workbook; fileHash: string }> => {
     return await exportSecurity.secureExcel(workbook, osteopathName);
   }, []);
 

@@ -463,21 +463,46 @@ export function Layout({ children }: LayoutProps) {
 			</main>
 
 			<footer className="border-t py-6 bg-muted/30 print:hidden">
-				<div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-					<p>© 2025 PatientHub. Tous droits réservés.</p>
-					<div className="flex items-center gap-4">
-						<NavLink
-							to="/terms"
-							className="hover:text-blue-500 transition-colors"
-						>
-							Conditions d&apos;utilisation
-						</NavLink>
-						<NavLink
-							to="/privacy"
-							className="hover:text-purple-500 transition-colors"
-						>
-							Politique de confidentialité
-						</NavLink>
+				<div className="container space-y-4">
+					{/* Badges de conformité */}
+					<div className="flex flex-wrap items-center justify-center gap-3 pb-3 border-b border-border/50">
+						<div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md">
+							<Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
+							<span className="text-xs font-medium text-green-700 dark:text-green-300">
+								🔒 Conformité HDS
+							</span>
+						</div>
+						<div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
+							<Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+							<span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+								🛡️ RGPD - Chiffrement AES-256
+							</span>
+						</div>
+						<div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-md">
+							<Shield className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+							<span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+								📍 Données hébergées localement
+							</span>
+						</div>
+					</div>
+					
+					{/* Liens et copyright */}
+					<div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+						<p>© 2025 PatientHub. Tous droits réservés.</p>
+						<div className="flex items-center gap-4">
+							<NavLink
+								to="/terms"
+								className="hover:text-blue-500 transition-colors"
+							>
+								Conditions d&apos;utilisation
+							</NavLink>
+							<NavLink
+								to="/privacy"
+								className="hover:text-purple-500 transition-colors"
+							>
+								Politique de confidentialité
+							</NavLink>
+						</div>
 					</div>
 				</div>
 			</footer>

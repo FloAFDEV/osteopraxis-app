@@ -77,8 +77,11 @@ export async function generateAccountingExport(
     );
   }
 
-  // Sécuriser le workbook (ajouter des avertissements en mode démo)
-  const securedWorkbook = await exportSecurity.secureExcel(workbook);
+  // Sécuriser le workbook (ajouter des avertissements en mode démo + hash SHA-256)
+  const { workbook: securedWorkbook, fileHash } = await exportSecurity.secureExcel(workbook, osteoName);
+  
+  // TODO: Logger l'export dans document_exports avec fileHash
+  console.log('[AUDIT TRAIL] Excel export:', { period, osteoName, fileHash: fileHash.substring(0, 16) + '...' });
   
   const buffer = await securedWorkbook.xlsx.writeBuffer();
   return new Blob([buffer], {
