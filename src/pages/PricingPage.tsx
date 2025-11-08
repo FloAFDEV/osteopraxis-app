@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Zap, Star, TrendingUp, Database, Activity } from "lucide-react";
 import { toast } from "sonner";
+import { ROICalculator } from "@/components/plans/ROICalculator";
 
 const PricingPage = () => {
   const { user } = useAuth();
@@ -203,6 +204,17 @@ const PricingPage = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* ROI Calculator Section */}
+        <div className="max-w-5xl mx-auto my-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Calculez votre retour sur investissement</h2>
+            <p className="text-muted-foreground">
+              Découvrez combien vous pourriez économiser et gagner avec PatientHub
+            </p>
+          </div>
+          <ROICalculator />
         </div>
 
         {/* Performance Features */}

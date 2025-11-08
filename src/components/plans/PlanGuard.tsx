@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Crown, Lock, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Osteopath } from '@/types';
+import { SmartUpgradeBanner } from './SmartUpgradeBanner';
 
 interface PlanGuardProps {
   children: ReactNode;
@@ -105,52 +106,7 @@ export function PlanGuard({ children, feature }: PlanGuardProps) {
 
     return (
       <div className="container mx-auto py-10 px-4">
-        <Alert className="border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 max-w-2xl mx-auto">
-          <Crown className="h-6 w-6 text-amber-600" />
-          <AlertTitle className="text-xl font-bold mb-2">
-            Débloquez {FEATURE_NAMES[feature]} avec le plan {suggestedPlan}
-          </AlertTitle>
-          <AlertDescription className="space-y-4">
-            {attempts >= 3 && (
-              <div className="p-3 bg-amber-100 border border-amber-300 rounded-lg">
-                <p className="text-sm text-amber-900 font-semibold flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Vous avez essayé {attempts} fois - Passez au plan {suggestedPlan} pour gagner du temps !
-                </p>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <p className="text-muted-foreground">
-                Vous êtes actuellement sur le plan <strong className="text-foreground">{PLAN_NAMES[currentPlan]}</strong>.
-              </p>
-              <p className="text-muted-foreground">
-                Pour accéder à <strong className="text-foreground">{FEATURE_NAMES[feature]}</strong>, 
-                passez au plan <strong className="text-amber-700">{suggestedPlan}</strong>.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <Button 
-                onClick={() => navigate('/pricing')}
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-              >
-                <Crown className="h-4 w-4 mr-2" />
-                Voir les tarifs ({pricing})
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate(-1)}
-              >
-                Retour
-              </Button>
-            </div>
-
-            <div className="text-xs text-muted-foreground pt-2">
-              💡 Le plan {suggestedPlan} inclut également de nombreuses autres fonctionnalités premium
-            </div>
-          </AlertDescription>
-        </Alert>
+        <SmartUpgradeBanner feature={feature} currentPlan={currentPlan as any} />
 
         {/* Affichage visuel de verrouillage */}
         <div className="max-w-2xl mx-auto mt-8 p-8 border-2 border-dashed border-muted rounded-lg bg-muted/20 flex flex-col items-center justify-center text-center space-y-4">
