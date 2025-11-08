@@ -16,10 +16,15 @@ import {
 	Loader2,
 	MapPin,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { api } from "@/services/api";
 import { getCurrentOsteopathId } from "@/services/supabase-api/utils/getCurrentOsteopath";
+import { QuotePrintView } from "@/components/quote-print-view";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { exportSecurity } from "@/utils/export-utils";
+import { useDemo } from "@/contexts/DemoContext";
 
 interface QuoteSendModalProps {
 	quote: Quote | null;
@@ -38,7 +43,9 @@ export function QuoteSendModal({
 	const [osteopathInfo, setOsteopathInfo] = useState<any>(null);
 	const [cabinetInfo, setCabinetInfo] = useState<any>(null);
 	const [loadingInfo, setLoadingInfo] = useState(true);
-
+	const { isDemoMode } = useDemo();
+	const printRef = useRef<HTMLDivElement>(null);
+	
 	useEffect(() => {
 		const loadLegalInfo = async () => {
 			if (!quote) return;
@@ -77,305 +84,56 @@ export function QuoteSendModal({
 		}
 	}, [isOpen, quote]);
 
-	const generatePDF = () => {
-		if (!quote) return;
+	const generatePDF = async () => {
+		if (!quote || !printRef.current) return;
 
-		const printWindow = window.open("", "_blank");
-		if (!printWindow) {
-			toast.error("Impossible d'ouvrir la fenêtre d'impression");
-			return;
+		try {
+			// Générer le canvas depuis le HTML
+			const canvas = await html2canvas(printRef.current, {
+				scale: 2,
+				useCORS: true,
+				logging: false,
+			});
+
+			// Créer le PDF avec jsPDF
+			const imgWidth = 210; // A4 width in mm
+			const imgHeight = (canvas.height * imgWidth) / canvas.width;
+			
+			const pdf = new jsPDF('p', 'mm', 'a4');
+			const imgData = canvas.toDataURL('image/png');
+			pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+			
+			// Sécuriser le PDF avec exportSecurity
+			const pdfBytes = pdf.output('arraybuffer');
+			const osteopathName = osteopathInfo?.name;
+			const securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes), osteopathName);
+
+			// Télécharger le fichier sécurisé
+			const blob = new Blob([new Uint8Array(securedPdfBytes)], { type: 'application/pdf' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `Devis_${quote.id}_${format(new Date(), 'yyyyMMdd')}.pdf`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			throw error;
 		}
-
-		const html = `
-			<!DOCTYPE html>
-			<html>
-			<head>
-				<meta charset="utf-8">
-				<title>Devis ${quote.title}</title>
-				<style>
-					@page {
-						size: A4;
-						margin: 15mm;
-					}
-					
-					body {
-						font-family: Arial, sans-serif;
-						margin: 0 auto 2rem;
-						padding: 2rem;
-						line-height: 1.4;
-						font-size: 12px;
-						color: #333;
-						height: 100vh;
-						display: flex;
-						flex-direction: column;
-					}
-					
-					.header {
-						display: flex;
-						justify-content: space-between;
-						align-items: flex-start;
-						margin-bottom: 25px;
-						padding-bottom: 15px;
-						border-bottom: 2px solid #f59e0b;
-					}
-					
-					.company-info {
-						flex: 1;
-					}
-					
-					.company-info h1 {
-						color: #b45309;
-						margin: 0 0 8px 0;
-						font-size: 22px;
-						font-weight: bold;
-					}
-					
-					.logo-container {
-						margin: 8px 0;
-					}
-					
-					.logo-container img {
-						max-height: 40px;
-						max-width: 150px;
-						object-fit: contain;
-					}
-					
-					.quote-info {
-						text-align: right;
-						flex-shrink: 0;
-					}
-					
-					.quote-info h2 {
-						color: #b45309;
-						margin: 0 0 5px 0;
-						font-size: 18px;
-					}
-					
-					.patient-info {
-						background-color: #fef3c7;
-						padding: 12px;
-						border-left: 4px solid #f59e0b;
-						margin: 15px 0;
-					}
-					
-					.quote-details {
-						margin: 15px 0;
-					}
-					
-					.amount-section {
-						background-color: #f3f4f6;
-						padding: 15px;
-						border-radius: 8px;
-						margin: 15px 0;
-						text-align: center;
-					}
-					
-					.amount {
-						font-size: 20px;
-						font-weight: bold;
-						color: #b45309;
-					}
-					
-					.content-area {
-						flex: 1;
-						display: flex;
-						flex-direction: column;
-					}
-					
-					.footer-area {
-						margin-top: auto;
-						display: flex;
-						justify-content: space-between;
-						align-items: flex-end;
-						padding-top: 20px;
-						padding: 2rem;
-						border-top: 1px solid #d1d5db;
-					}
-					
-					.legal-mentions {
-						flex: 1;
-						font-size: 11px;
-						color: #6b7280;
-					}
-					
-					.signature-area {
-						text-align: center;
-						flex-shrink: 0;
-						margin-left: 20px;
-					}
-					
-					.signature-area img {
-						max-height: 80px;
-						max-width: 150px;
-						object-fit: contain;
-					}
-					
-					.description {
-						margin: 15px 0;
-						padding: 12px;
-						border: 1px solid #e5e7eb;
-						border-radius: 8px;
-						font-size: 11px;
-					}
-					
-					.compact-grid {
-						display: grid;
-						grid-template-columns: 1fr 1fr;
-						gap: 10px;
-						font-size: 11px;
-					}
-					
-					@media print {
-						body {
-							height: auto !important;
-						}
-						
-						.footer-area {
-							position: fixed;
-							bottom: 0;
-							left: 0;
-							right: 0;
-							background: white;
-						}
-					}
-				</style>
-			</head>
-			<body>
-				<div class="content-area">
-					<div class="header">
-						<div class="company-info">
-							<h1>${cabinetInfo?.name || "PatientHub"}</h1>
-							${
-								cabinetInfo?.logoUrl
-									? `
-								<div class="logo-container">
-									<img src="${cabinetInfo.logoUrl}" alt="Logo ${cabinetInfo.name}" onerror="this.style.display='none'" />
-								</div>
-							`
-									: ""
-							}
-							<p><strong>${
-								osteopathInfo?.professional_title ||
-								"Ostéopathe D.O."
-							}</strong></p>
-							<p style="margin: 3px 0;">${cabinetInfo?.address || ""}</p>
-							${
-								cabinetInfo?.phone
-									? `<p style="margin: 3px 0;">Tél: ${cabinetInfo.phone}</p>`
-									: ""
-							}
-							${
-								cabinetInfo?.email
-									? `<p style="margin: 3px 0;">Email: ${cabinetInfo.email}</p>`
-									: ""
-							}
-						</div>
-						<div class="quote-info">
-							<h2>DEVIS</h2>
-							<p><strong>N° ${quote.id.toString().padStart(4, "0")}</strong></p>
-							<p>Date: ${format(new Date(), "dd/MM/yyyy")}</p>
-							<p>Valide jusqu'au: ${format(new Date(quote.validUntil), "dd/MM/yyyy")}</p>
-						</div>
-					</div>
-
-					<div class="patient-info">
-						<h3 style="margin: 0 0 8px 0;">Client</h3>
-						<p style="margin: 0;"><strong>${
-							quote.Patient
-								? `${quote.Patient.firstName} ${quote.Patient.lastName}`
-								: "Non spécifié"
-						}</strong></p>
-					</div>
-
-					<div class="quote-details">
-						<div class="compact-grid">
-							<div><strong>Titre:</strong> ${quote.title}</div>
-							<div><strong>Montant:</strong> ${quote.amount.toFixed(2)} €</div>
-						</div>
-						
-						${
-							quote.description
-								? `
-						<div class="description">
-							<h4 style="margin: 0 0 8px 0;">Description:</h4>
-							<p style="margin: 0;">${quote.description}</p>
-						</div>
-						`
-								: ""
-						}
-
-						<div class="amount-section">
-							<p style="margin: 0 0 8px 0;">Montant total</p>
-							<div class="amount">${quote.amount.toFixed(2)} €</div>
-						</div>
-
-						${
-							quote.notes
-								? `
-						<div class="description">
-							<h4 style="margin: 0 0 8px 0;">Notes:</h4>
-							<p style="margin: 0;">${quote.notes}</p>
-						</div>
-						`
-								: ""
-						}
-					</div>
-				</div>
-
-				<div class="footer-area">
-					<div class="legal-mentions">
-						<h4 style="margin: 0 0 8px 0;">Mentions légales</h4>
-						${
-							osteopathInfo?.siret
-								? `<p style="margin: 2px 0;">SIRET: ${osteopathInfo.siret}</p>`
-								: ""
-						}
-						${
-							osteopathInfo?.rpps_number
-								? `<p style="margin: 2px 0;">RPPS: ${osteopathInfo.rpps_number}</p>`
-								: ""
-						}
-						<p style="margin: 5px 0;"><strong>TVA non applicable – article 261-4-1° du CGI</strong></p>
-						<p style="margin: 2px 0;">Devis valable jusqu'au ${format(
-							new Date(quote.validUntil),
-							"dd MMMM yyyy",
-							{ locale: fr }
-						)}</p>
-						<p style="margin: 5px 0 0 0;">En votre aimable règlement à réception. Merci de votre confiance.</p>
-					</div>
-					
-					${
-						osteopathInfo?.stampUrl
-							? `
-					<div class="signature-area">
-						<p style="margin: 0 0 5px 0; font-size: 10px;">${
-							osteopathInfo.professional_title ||
-							"Ostéopathe D.O."
-						}</p>
-						<img src="${
-							osteopathInfo.stampUrl
-						}" alt="Signature/Tampon professionnel" onerror="this.style.display='none'" />
-						<p style="margin: 5px 0 0 0; font-size: 10px; font-weight: bold;">${
-							osteopathInfo.name
-						}</p>
-					</div>
-					`
-							: ""
-					}
-				</div>
-			</body>
-			</html>
-		`;
-
-		printWindow.document.write(html);
-		printWindow.document.close();
-		printWindow.print();
 	};
 
 	const handleDownload = async () => {
 		try {
 			setLoading(true);
-			generatePDF();
+			
+			// Toast d'avertissement en mode démo
+			if (isDemoMode) {
+				toast.warning("Mode démo : le PDF contiendra un filigrane de démonstration");
+			}
+			
+			await generatePDF();
 			toast.success("PDF généré avec succès");
 			onSuccess();
 			onClose();
@@ -390,7 +148,20 @@ export function QuoteSendModal({
 	if (!quote) return null;
 
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
+		<>
+			{/* Composant caché pour générer le PDF */}
+			<div className="hidden">
+				<QuotePrintView
+					ref={printRef}
+					quote={quote}
+					patient={(quote.Patient as any) || null}
+					osteopath={osteopathInfo}
+					cabinet={cabinetInfo}
+					items={[]}
+				/>
+			</div>
+			
+			<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-gray-800">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
@@ -520,5 +291,6 @@ export function QuoteSendModal({
 				</div>
 			</DialogContent>
 		</Dialog>
+		</>
 	);
 }

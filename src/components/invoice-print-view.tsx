@@ -1,6 +1,7 @@
 import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useDemo } from "@/contexts/DemoContext";
 
 interface InvoicePrintViewProps {
 	invoice: Invoice;
@@ -15,6 +16,9 @@ export const InvoicePrintView = ({
 	osteopath,
 	cabinet,
 }: InvoicePrintViewProps) => {
+	// Détection du mode démo via contexte sécurisé
+	const { isDemoMode } = useDemo();
+	
 	const formatAmount = (amount: number) => {
 		return new Intl.NumberFormat("fr-FR", {
 			style: "currency",
@@ -67,17 +71,25 @@ const getPaymentStatusLabel = (status?: string) => {
 
 	return (
 		<div className="bg-white p-4 max-w-3xl mx-auto flex flex-col min-h-screen justify-between print:min-h-screen print:p-2 relative">
-			{/* Filigrane démo */}
-			{!patient?.email || (patient?.email && patient.email.includes('demo')) ? (
-				<div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-					<div className="transform -rotate-45 text-gray-200 font-bold text-6xl opacity-30 select-none">
-						MODE DÉMO
+			{/* Bandeau rouge + Watermark MODE DÉMO */}
+			{isDemoMode && (
+				<>
+					{/* Bandeau rouge en haut */}
+					<div className="absolute top-0 left-0 right-0 bg-red-600 text-white text-center py-3 font-bold text-lg z-50 print:block">
+						⚠️ DOCUMENT DE DÉMONSTRATION - NON VALABLE ⚠️
 					</div>
-				</div>
-			) : null}
+					
+					{/* Filigrane central */}
+					<div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+						<div className="text-red-600 text-8xl font-bold opacity-30 rotate-[-45deg] select-none whitespace-nowrap">
+							MODE DÉMO<br/>NON VALABLE
+						</div>
+					</div>
+				</>
+			)}
 			
 			{/* Partie haute */}
-			<div className="flex-1 relative z-20">
+			<div className="flex-1 relative z-20" style={{ marginTop: isDemoMode ? '3rem' : '0' }}>
 				{/* En-tête */}
 				<div className="flex justify-between items-start mb-16">
 					{/* Colonne gauche : titre + logo + infos */}

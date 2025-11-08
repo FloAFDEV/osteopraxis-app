@@ -78,7 +78,15 @@ export type Database = {
           user_id?: string | null
           window_start?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "api_rate_limits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       Appointment: {
         Row: {
@@ -137,6 +145,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "Appointment_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "Appointment_patientId_fkey"
             columns: ["patientId"]
             isOneToOne: false
@@ -189,7 +204,15 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       business_metrics: {
         Row: {
@@ -814,6 +837,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "Invoice_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "Invoice_osteopathId_fkey"
             columns: ["osteopathId"]
             isOneToOne: false
@@ -1366,6 +1396,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "Patient_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "Patient_osteopathId_fkey"
             columns: ["osteopathId"]
             isOneToOne: false
@@ -1594,7 +1631,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscribers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       subscription_plans: {
         Row: {
@@ -1770,7 +1815,15 @@ export type Database = {
           period_start?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "usage_tracking_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       User: {
         Row: {
@@ -1823,6 +1876,13 @@ export type Database = {
             referencedRelation: "Osteopath"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "User_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       user_activity_logs: {
@@ -1853,11 +1913,66 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {
-      [_ in never]: never
+      user_roles_view: {
+        Row: {
+          email: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          role_assigned_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_access_with_audit: { Args: never; Returns: boolean }
@@ -2132,9 +2247,17 @@ export type Database = {
           subscription_tier: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin:
         | { Args: never; Returns: boolean }
         | { Args: { uid: string }; Returns: boolean }
+      is_admin_secure: { Args: never; Returns: boolean }
       is_admin_user: { Args: { user_id: string }; Returns: boolean }
       log_audit_action: {
         Args: {
@@ -2145,6 +2268,10 @@ export type Database = {
           p_table_name: string
         }
         Returns: undefined
+      }
+      promote_user_to_admin: {
+        Args: { target_user_id: string }
+        Returns: boolean
       }
       record_metric: {
         Args: {
@@ -2183,6 +2310,7 @@ export type Database = {
       verify_admin_access: { Args: never; Returns: boolean }
     }
     Enums: {
+      app_role: "admin" | "osteopath" | "user"
       AppointmentStatus:
         | "SCHEDULED"
         | "COMPLETED"
@@ -2342,6 +2470,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "osteopath", "user"],
       AppointmentStatus: [
         "SCHEDULED",
         "COMPLETED",

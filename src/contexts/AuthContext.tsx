@@ -158,6 +158,19 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		try {
 			const { data: { session } } = await supabase.auth.getSession();
 			if (session?.user) {
+				// Fetch user role from user_roles table
+				const { data: userRolesData, error: roleError } = await supabase
+					.from('user_roles')
+					.select('role')
+					.eq('user_id', session.user.id)
+					.maybeSingle();
+
+				let userRole: 'ADMIN' | 'OSTEOPATH' = 'OSTEOPATH'; // Default role
+				if (userRolesData && !roleError) {
+					// Map app_role enum to uppercase string
+					userRole = userRolesData.role === 'admin' ? 'ADMIN' : 'OSTEOPATH';
+				}
+				
 				// Récupérer les données utilisateur complètes depuis la table User
 				let { data: userData, error } = await supabase
 					.from('User')
@@ -193,7 +206,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 						email: userData.email,
 						firstName: userData.first_name,
 						lastName: userData.last_name,
-						role: userData.role,
+						role: userRole, // Use role from user_roles table
 						osteopathId: userData.osteopathId,
 						created_at: userData.created_at,
 						updated_at: userData.updated_at,
@@ -276,10 +289,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 
 		try {
 			setLoading(true);
-			const { error } = await supabase
-				.from('User')
-				.update({ role: 'ADMIN' })
-				.eq('auth_id', userId);
+			
+			// Utiliser la fonction sécurisée de Supabase
+			const { data, error } = await supabase.rpc('promote_user_to_admin', {
+				target_user_id: userId
+			});
 
 			if (error) throw error;
 
@@ -316,6 +330,19 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 						if (!mounted || !session?.user) return;
 						(async () => {
 							try {
+								// Fetch user role from user_roles table
+								const { data: userRolesData, error: roleError } = await supabase
+									.from('user_roles')
+									.select('role')
+									.eq('user_id', session.user.id)
+									.maybeSingle();
+
+								let userRole: 'ADMIN' | 'OSTEOPATH' = 'OSTEOPATH'; // Default role
+								if (userRolesData && !roleError) {
+									// Map app_role enum to uppercase string
+									userRole = userRolesData.role === 'admin' ? 'ADMIN' : 'OSTEOPATH';
+								}
+								
 								let { data: userData, error } = await supabase
 									.from('User')
 									.select('*')
@@ -349,7 +376,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										email: userData.email,
 										firstName: userData.first_name,
 										lastName: userData.last_name,
-										role: userData.role,
+										role: userRole, // Use role from user_roles table
 										osteopathId: userData.osteopathId,
 										created_at: userData.created_at,
 										updated_at: userData.updated_at,
