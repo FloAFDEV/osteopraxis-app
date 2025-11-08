@@ -54,6 +54,7 @@ import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 import ConnectedStorageSettingsPage from "@/pages/ConnectedStorageSettingsPage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
 import TeamManagementPage from "@/pages/TeamManagementPage";
+import SecurityAuditPage from "@/pages/SecurityAuditPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
@@ -286,6 +287,11 @@ function App() {
                         <Route path="/admin/tech-debug" element={
                           <ProtectedRoute>
                             <AdminTechDebugPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/admin/security-audit" element={
+                          <ProtectedRoute>
+                            <SecurityAuditPage />
                           </ProtectedRoute>
                         } />
                         
