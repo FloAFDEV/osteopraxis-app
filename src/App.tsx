@@ -53,11 +53,13 @@ import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
 import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
 import ConnectedStorageSettingsPage from "@/pages/ConnectedStorageSettingsPage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
+import TeamManagementPage from "@/pages/TeamManagementPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 import { HybridStorageProvider } from "@/contexts/HybridStorageContext";
 import { useEffect } from "react";
+import { usePinTimeout } from "@/hooks/usePinTimeout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,6 +75,14 @@ const queryClient = new QueryClient({
  * Le système hds-secure-storage s'occupe automatiquement du stockage local sécurisé
  */
 
+// Composant interne pour gérer le timeout PIN
+function AppWithPinTimeout({ children }: { children: React.ReactNode }) {
+  // 🔐 PHASE 2.3: Activer timeout inactivité PIN 15 minutes
+  usePinTimeout();
+  
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -85,10 +95,11 @@ function App() {
                     <Router>
                       <AuthProvider>
                         <HybridStorageProvider>
-                        <SecurityHeaders />
-                        <SkipToContent />
-                      <div id="main-content" className="min-h-screen bg-background">
-                        <DemoDataManager />
+                          <AppWithPinTimeout>
+                            <SecurityHeaders />
+                            <SkipToContent />
+                            <div id="main-content" className="min-h-screen bg-background">
+                              <DemoDataManager />
                       
                       <Routes>
                         {/* Routes publiques */}
@@ -259,6 +270,13 @@ function App() {
                           </ProtectedRoute>
                         } />
                         
+                        {/* Route gestion d'équipe (Plan Pro) */}
+                        <Route path="/team" element={
+                          <ProtectedRoute>
+                            <TeamManagementPage />
+                          </ProtectedRoute>
+                        } />
+                        
                         {/* Routes admin */}
                         <Route path="/admin/dashboard" element={
                           <ProtectedRoute>
@@ -278,6 +296,7 @@ function App() {
                       <DemoSessionTimer />
                       <Toaster />
                      </div>
+                          </AppWithPinTimeout>
                        </HybridStorageProvider>
                    </AuthProvider>
                   </Router>

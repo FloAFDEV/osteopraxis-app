@@ -5,6 +5,7 @@ import { api } from "@/services/api";
 import { Appointment, Patient, Cabinet, Osteopath } from "@/types";
 import { Layout } from "@/components/ui/layout";
 import { InvoiceForm } from "@/components/InvoiceForm";
+import { PlanGuard } from "@/components/plans/PlanGuard";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -144,37 +145,39 @@ const NewInvoicePage = () => {
     );
   }
   return (
-    <Layout>
-      <div className="container mx-auto py-10">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour
-        </Button>
-        <h1 className="text-2xl font-bold mb-4">Nouvelle note d'honoraire</h1>
-        {/* Sélection patient si nécessaire */}
-        {needPatientSelection && (
-          <div className="mb-6 max-w-md">
-            <label className="block mb-2 font-semibold text-muted-foreground">
-              Sélectionner un patient
-            </label>
-            <PatientCombobox
-              patients={patientsList}
-              value={selectedPatientId}
-              onChange={handlePatientSelect}
+    <PlanGuard feature="invoices">
+      <Layout>
+        <div className="container mx-auto py-10">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour
+          </Button>
+          <h1 className="text-2xl font-bold mb-4">Nouvelle note d'honoraire</h1>
+          {/* Sélection patient si nécessaire */}
+          {needPatientSelection && (
+            <div className="mb-6 max-w-md">
+              <label className="block mb-2 font-semibold text-muted-foreground">
+                Sélectionner un patient
+              </label>
+              <PatientCombobox
+                patients={patientsList}
+                value={selectedPatientId}
+                onChange={handlePatientSelect}
+              />
+            </div>
+          )}
+          {/* Formulaire de facture que si patient choisi */}
+          {patientData && (
+            <InvoiceForm
+              patient={patientData}
+              osteopath={osteopath}
+              appointment={appointment}
+              onCreate={() => navigate("/invoices")}
             />
-          </div>
-        )}
-        {/* Formulaire de facture que si patient choisi */}
-        {patientData && (
-          <InvoiceForm
-            patient={patientData}
-            osteopath={osteopath}
-            appointment={appointment}
-            onCreate={() => navigate("/invoices")}
-          />
-        )}
-      </div>
-    </Layout>
+          )}
+        </div>
+      </Layout>
+    </PlanGuard>
   );
 };
 export default NewInvoicePage;
