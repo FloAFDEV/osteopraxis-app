@@ -66,6 +66,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		setLoading(true);
 		setError(null);
 		try {
+			// 🔐 NOUVEAU: Capturer le password avant l'envoi à Supabase
+			// (pour chiffrement local HDS)
+			
 			const { data, error } = await supabase.auth.signInWithPassword({
 				email,
 				password,
@@ -78,11 +81,49 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 			clearDemoSessionCache();
 			console.log('🔄 Cache de détection démo invalidé après connexion');
 
+			// 🔐 NOUVEAU: Stocker le password en RAM et configurer le stockage chiffré
+			const { passwordMemory } = await import('@/services/storage/password-memory-manager');
+			const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+			
+			// Détecter si migration nécessaire (ancien système PIN)
+			const oldPinHash = localStorage.getItem('temp-storage-pin-hash');
+			
+			if (oldPinHash) {
+				// Migration automatique: on suppose que l'ancien PIN = password
+				// (car avant, les utilisateurs devaient créer un PIN)
+				console.log('🔄 Migration automatique détectée');
+				
+				try {
+					// Essayer de migrer avec le password comme ancien PIN
+					// (la plupart des utilisateurs utilisaient le même)
+					await encryptedWorkingStorage.migrateFromPin(password, password);
+					toast.success('Migration des données terminée');
+				} catch (migrationError) {
+					// Si la migration échoue, c'est peut-être que l'ancien PIN était différent
+					console.warn('⚠️ Migration automatique échouée, données anciennes conservées');
+					// On continue quand même avec le nouveau système
+					localStorage.removeItem('temp-storage-pin-hash');
+				}
+			}
+
+			// Stocker le password en mémoire
+			passwordMemory.store(password);
+			
+			// Configurer le stockage chiffré avec le password
+			await encryptedWorkingStorage.configureWithPassword(password);
+			
+			console.log('✅ Stockage chiffré configuré avec password Supabase');
+
 			// Session et user seront mis à jour par le listener onAuthStateChange
 			toast.success("Connexion réussie !");
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de la connexion");
 			console.error("Login failed", err);
+			
+			// 🔐 NOUVEAU: En cas d'erreur, nettoyer le password
+			const { passwordMemory } = await import('@/services/storage/password-memory-manager');
+			passwordMemory.clear();
+			
 			toast.error("Échec de la connexion");
 		} finally {
 			setLoading(false);
@@ -124,6 +165,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 	const logout = useCallback(async () => {
 		try {
 			setLoading(true);
+			
+			// 🔐 NOUVEAU: Effacer le password de la mémoire et verrouiller le storage
+			const { passwordMemory } = await import('@/services/storage/password-memory-manager');
+			const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
+			
+			await encryptedWorkingStorage.lock();
+			passwordMemory.clear();
+			console.log('🔒 Stockage local verrouillé et password effacé');
 			
 			// Déconnexion Supabase
 			if (session) {

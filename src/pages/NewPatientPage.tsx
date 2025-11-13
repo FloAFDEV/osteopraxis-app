@@ -18,7 +18,6 @@ const NewPatientPage = () => {
 	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
 	const navigate = useNavigate();
 	const { user, isAuthenticated } = useAuth();
-	const { showPinSetupModal } = useHybridStorageContext();
 	const queryClient = useQueryClient();
 
 	// Récupérer le cabinet sélectionné depuis localStorage
@@ -174,18 +173,6 @@ const NewPatientPage = () => {
 			navigate(`/patients/${newPatient.id}`);
 		} catch (error) {
 			console.error("❌ Erreur complète dans handleAddPatient:", error);
-			
-			// 🔐 Intercepter la demande de PIN
-			if (error instanceof Error && error.message === 'PIN_SETUP_REQUIRED') {
-				toast.info("Configuration du stockage sécurisé requise pour sauvegarder");
-				showPinSetupModal();
-				return;
-			}
-			
-			if (error instanceof Error && error.message === 'PIN_UNLOCK_REQUIRED') {
-				toast.error("Veuillez déverrouiller votre stockage sécurisé");
-				return;
-			}
 			
 			if (
 				error instanceof Error &&

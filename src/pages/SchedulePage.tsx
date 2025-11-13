@@ -24,7 +24,6 @@ import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useDemo } from "@/contexts/DemoContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { PlanGuard } from "@/components/plans/PlanGuard";
-import { PinErrorHandler } from "@/components/storage/PinErrorHandler";
 
 const SchedulePage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -225,7 +224,6 @@ const SchedulePage = () => {
   };
 
   return <PlanGuard feature="schedule">
-    <PinErrorHandler error={scheduleError as Error | null} onPinConfigured={handlePinConfigured}>
       <Layout>
 			{/* Bouton de retour */}
 			<div className="relative z-10">
@@ -534,7 +532,6 @@ const SchedulePage = () => {
 			</div>
 
 		</Layout>
-  </PinErrorHandler>
   </PlanGuard>;
 };
 

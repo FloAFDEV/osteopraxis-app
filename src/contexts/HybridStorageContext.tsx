@@ -5,8 +5,6 @@ import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
 import { StorageUnlockPrompt } from '@/components/storage/StorageUnlockPrompt';
 import { StoragePasswordRecovery } from '@/components/storage/StoragePasswordRecovery';
 import { StorageWelcomeScreen } from '@/components/storage/StorageWelcomeScreen';
-import { TemporaryStoragePinSetup } from '@/components/storage/TemporaryStoragePinSetup';
-import { TemporaryStoragePinUnlock } from '@/components/storage/TemporaryStoragePinUnlock';
 import { useHybridStorage } from '@/hooks/useHybridStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -18,7 +16,6 @@ interface HybridStorageContextType {
   configureStorage: (config: any) => Promise<void>;
   unlockStorage: (credential: string) => Promise<boolean>;
   lockStorage: () => void;
-  showPinSetupModal: () => void;
 }
 
 const HybridStorageContext = createContext<HybridStorageContextType | undefined>(undefined);
@@ -40,8 +37,6 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
   const { user, loading: authLoading } = useAuth();
   const [showUnlock, setShowUnlock] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
-  const [showPinSetup, setShowPinSetup] = useState(false);
-  const [showPinUnlock, setShowPinUnlock] = useState(false);
   const [securityMethod, setSecurityMethod] = useState<'pin' | 'password'>('password');
   const navigate = useNavigate();
   
@@ -62,33 +57,18 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
           console.log('🔍 HybridStorageContext - Check storage:', { demoMode, userEmail: user?.email, skipped });
           
           if (demoMode) {
-            console.log('🎭 Mode démo détecté - Nettoyage PIN et pas de configuration nécessaire');
+            console.log('🎭 Mode démo détecté - Pas de configuration nécessaire');
             localStorage.removeItem('temp-storage-pin-hash');
             localStorage.removeItem('hds-storage-skip');
-            setShowPinSetup(false);
-            setShowPinUnlock(false);
             return;
           }
           
-          const pinHash = localStorage.getItem('temp-storage-pin-hash');
           const hdsConfigured = status.isConfigured;
           
-          // ✅ PIN demandé uniquement à la sauvegarde, pas au démarrage
-          console.log('✅ HDS non configuré - PIN sera demandé à la première sauvegarde si nécessaire');
+          // ✅ Stockage désormais configuré automatiquement au login via AuthContext
+          console.log('✅ Stockage configuré automatiquement au login avec password Supabase');
           
-          // Si PIN configuré mais pas déverrouillé
-          if (!hdsConfigured && pinHash && !skipped) {
-            const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
-            const isUnlocked = await encryptedWorkingStorage.isAvailable();
-            
-            if (!isUnlocked) {
-              console.log('🔓 Déverrouillage PIN requis');
-              setShowPinUnlock(true);
-              return;
-            }
-          }
-          
-          // Si HDS configuré mais verrouillé
+          // Si HDS configuré mais verrouillé (cas rare, ne devrait pas arriver car géré par login)
           if (hdsConfigured && !status.isUnlocked && !skipped) {
             const config = localStorage.getItem('hybrid-storage-config');
             if (config) {
@@ -247,45 +227,12 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     setShowRecovery(true);
   };
 
-  const handlePinSetup = async (pin: string) => {
-    try {
-      const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
-      await encryptedWorkingStorage.configureWithPin(pin);
-      setShowPinSetup(false);
-      toast.success('Stockage temporaire configuré. Vos données sont chiffrées.');
-      try { navigate('/dashboard'); } catch {}
-    } catch (error) {
-      console.error('Erreur configuration PIN:', error);
-      toast.error('Erreur lors de la configuration');
-    }
-  };
-
   const handleRecoveryComplete = async () => {
     setShowRecovery(false);
     await initialize();
     toast.success('Récupération terminée ! Accès aux données restauré.');
     try { navigate('/dashboard'); } catch {}
   };
-
-  // ⚡ Vérification finale anti-PIN en mode démo
-  if (showPinSetup) {
-    const isDemoEmail = user?.email === 'demo@patienthub.com' || user?.email?.startsWith('demo-');
-    if (isDemoEmail) {
-      console.log('🚫 Blocage affichage PIN pour utilisateur démo');
-      setShowPinSetup(false);
-      return <>{children}</>;
-    }
-    return <TemporaryStoragePinSetup onComplete={handlePinSetup} />;
-  }
-
-  if (showPinUnlock) {
-    return (
-      <TemporaryStoragePinUnlock
-        onUnlock={() => setShowPinUnlock(false)}
-        onForgot={handlePasswordForgotten}
-      />
-    );
-  }
 
   if (showUnlock) {
     return (
@@ -311,18 +258,13 @@ export const HybridStorageProvider: React.FC<HybridStorageProviderProps> = ({ ch
     );
   }
 
-  const showPinSetupModal = () => {
-    setShowPinSetup(true);
-  };
-
   const contextValue: HybridStorageContextType = {
     isConfigured: status?.isConfigured || false,
     isUnlocked: status?.isUnlocked || false,
     isLoading,
     configureStorage,
     unlockStorage,
-    lockStorage,
-    showPinSetupModal
+    lockStorage
   };
 
   return (

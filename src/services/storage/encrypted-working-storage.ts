@@ -89,28 +89,93 @@ export class EncryptedWorkingStorage extends IndexedDBSecureStorage {
   private autoBackupInterval: number | null = null;
   private lastBackupTime: Date | null = null;
   
-  async configureWithPin(pin: string): Promise<void> {
-    // Vérifier le hash du PIN avec PBKDF2
-    const storedHash = localStorage.getItem('temp-storage-pin-hash');
-    
-    if (storedHash) {
-      const isValid = await verifyPinSecure(pin, storedHash);
-      if (!isValid) {
-        throw new Error('Code PIN incorrect');
-      }
-    } else {
-      // Si c'est la première fois, créer un hash sécurisé PBKDF2
-      const secureHash = await hashPinSecure(pin);
-      localStorage.setItem('temp-storage-pin-hash', secureHash);
-    }
-    
-    // Configurer le stockage avec le PIN comme mot de passe
+  /**
+   * 🔐 Configuration avec le mot de passe Supabase
+   * 
+   * Utilise directement le mot de passe de connexion Supabase pour chiffrer
+   * les données HDS locales (IndexedDB).
+   */
+  async configureWithPassword(password: string): Promise<void> {
+    // Configurer le stockage avec le password Supabase
     await this.configure({
-      password: pin, // Le PIN est utilisé directement par PBKDF2
+      password: password,
       entities: ['patients', 'appointments', 'invoices']
     });
     
-    console.log('✅ Stockage chiffré temporaire configuré avec PIN PBKDF2 sécurisé');
+    console.log('✅ Stockage chiffré configuré avec mot de passe Supabase');
+  }
+
+  /**
+   * @deprecated Utiliser configureWithPassword à la place
+   * Conservé pour rétrocompatibilité pendant la migration
+   */
+  async configureWithPin(pin: string): Promise<void> {
+    // Rediriger vers la nouvelle méthode
+    await this.configureWithPassword(pin);
+  }
+
+  /**
+   * 🔄 Migration depuis l'ancien système PIN
+   * 
+   * Permet de migrer automatiquement les données chiffrées avec un PIN
+   * vers le nouveau système utilisant le password Supabase.
+   */
+  async migrateFromPin(oldPin: string, newPassword: string): Promise<void> {
+    const storedPinHash = localStorage.getItem('temp-storage-pin-hash');
+    
+    if (!storedPinHash) {
+      console.log('ℹ️ Pas de migration nécessaire: pas d\'ancien PIN détecté');
+      return;
+    }
+
+    console.log('🔄 Migration détectée: ancien système PIN → nouveau système password');
+
+    // 1. Vérifier que l'ancien PIN est correct
+    const isValidPin = await verifyPinSecure(oldPin, storedPinHash);
+    if (!isValidPin) {
+      throw new Error('Code PIN incorrect');
+    }
+
+    // 2. Déverrouiller avec l'ancien PIN pour lire les données
+    await this.configure({
+      password: oldPin,
+      entities: ['patients', 'appointments', 'invoices']
+    });
+
+    // 3. Exporter toutes les données
+    const allData: any = {};
+    for (const entityName of ['patients', 'appointments', 'invoices']) {
+      try {
+        allData[entityName] = await this.getAll(entityName);
+        console.log(`📦 ${allData[entityName].length} ${entityName} exportés`);
+      } catch (error) {
+        console.error(`❌ Erreur export ${entityName}:`, error);
+        allData[entityName] = [];
+      }
+    }
+
+    // 4. Nettoyer l'ancien stockage
+    await this.lock();
+
+    // 5. Reconfigurer avec le nouveau password
+    await this.configure({
+      password: newPassword,
+      entities: ['patients', 'appointments', 'invoices']
+    });
+
+    // 6. Réimporter toutes les données
+    for (const entityName of ['patients', 'appointments', 'invoices']) {
+      const records = allData[entityName] || [];
+      for (const record of records) {
+        await this.save(entityName, record);
+      }
+      console.log(`✅ ${records.length} ${entityName} importés avec nouveau password`);
+    }
+
+    // 7. Supprimer l'ancien hash PIN
+    localStorage.removeItem('temp-storage-pin-hash');
+    
+    console.log('✅ Migration terminée avec succès');
   }
   
   async enableAutoBackup(intervalMinutes = 5): Promise<void> {

@@ -61,7 +61,6 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 import { HybridStorageProvider } from "@/contexts/HybridStorageContext";
 import { useEffect } from "react";
-import { usePinTimeout } from "@/hooks/usePinTimeout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,10 +76,11 @@ const queryClient = new QueryClient({
  * Le système hds-secure-storage s'occupe automatiquement du stockage local sécurisé
  */
 
-// Composant interne pour gérer le timeout PIN
-function AppWithPinTimeout({ children }: { children: React.ReactNode }) {
-  // 🔐 PHASE 2.3: Activer timeout inactivité PIN 15 minutes
-  usePinTimeout();
+// Composant interne pour activer la vérification du verrouillage storage
+function AppWithStorageLockCheck({ children }: { children: React.ReactNode }) {
+  // 🔐 NOUVEAU: Vérifier le verrouillage storage (force logout si password perdu)
+  const { useStorageLockCheck } = require('@/hooks/useStorageLockCheck');
+  useStorageLockCheck();
   
   return <>{children}</>;
 }
@@ -97,7 +97,7 @@ function App() {
                     <Router>
                       <AuthProvider>
                         <HybridStorageProvider>
-                          <AppWithPinTimeout>
+                          <AppWithStorageLockCheck>
                             <SecurityHeaders />
                             <SkipToContent />
                             <div id="main-content" className="min-h-screen bg-background">
@@ -308,7 +308,7 @@ function App() {
                       <DemoSessionTimer />
                       <Toaster />
                      </div>
-                          </AppWithPinTimeout>
+                          </AppWithStorageLockCheck>
                        </HybridStorageProvider>
                    </AuthProvider>
                   </Router>

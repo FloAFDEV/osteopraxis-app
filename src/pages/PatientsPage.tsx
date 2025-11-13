@@ -11,8 +11,6 @@ import { toast } from "sonner";
 import { SmartSkeleton } from "@/components/ui/skeleton-loaders";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Shield } from "lucide-react";
-import { TemporaryStoragePinSetup } from "@/components/storage/TemporaryStoragePinSetup";
-import { TemporaryStoragePinUnlock } from "@/components/storage/TemporaryStoragePinUnlock";
 
 // Import refactored components
 import AlphabetFilter from "@/components/patients/AlphabetFilter";
@@ -211,41 +209,6 @@ const PatientsPage = () => {
 			window.scrollTo(0, 0);
 		}
 	};
-
-	// Afficher le composant PIN approprié si nécessaire
-	if (pinError === 'SETUP') {
-		return (
-			<Layout>
-				<div className="min-h-screen flex items-center justify-center p-4">
-					<TemporaryStoragePinSetup onComplete={async (pin: string) => {
-						const { encryptedWorkingStorage } = await import('@/services/storage/encrypted-working-storage');
-						await encryptedWorkingStorage.configureWithPin(pin);
-						setPinError(null);
-						await refetch();
-					}} />
-				</div>
-			</Layout>
-		);
-	}
-
-	if (pinError === 'UNLOCK') {
-		return (
-			<Layout>
-				<div className="min-h-screen flex items-center justify-center p-4">
-					<TemporaryStoragePinUnlock 
-						onUnlock={async () => {
-							setPinError(null);
-							await refetch();
-						}}
-						onForgot={() => {
-							localStorage.removeItem('temp-storage-pin-hash');
-							window.location.reload();
-						}}
-					/>
-				</div>
-			</Layout>
-		);
-	}
 
 	return (
 		<Layout>

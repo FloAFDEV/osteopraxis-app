@@ -47,7 +47,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOptimizedAppointments } from "@/hooks/useOptimizedAppointments";
 import { useVirtualization } from "@/hooks/usePerformanceOptimization";
 import { PlanGuard } from "@/components/plans/PlanGuard";
-import { PinErrorHandler } from "@/components/storage/PinErrorHandler";
 
 import AppointmentsHeader from "@/components/appointments/AppointmentsHeader";
 import AppointmentsEmptyState from "@/components/appointments/AppointmentsEmptyState";
@@ -238,10 +237,6 @@ const AppointmentsPage = () => {
 
 	return (
 		<PlanGuard feature="appointments">
-			<PinErrorHandler 
-				error={error as Error | null} 
-				onPinConfigured={refetchAppointments}
-			>
 			<Layout>
 			{/* ... keep existing code (header, search, filters) */}
 			<div className="relative z-10">
@@ -800,7 +795,6 @@ const AppointmentsPage = () => {
 				</DialogContent>
 			</Dialog>
 		</Layout>
-		</PinErrorHandler>
 		</PlanGuard>
 	);
 };
