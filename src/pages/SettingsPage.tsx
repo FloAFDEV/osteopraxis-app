@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { isDemoSession } from "@/utils/demo-detection";
 import { Layout } from "@/components/ui/layout";
 import {
@@ -20,9 +19,11 @@ import {
 	Shield,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { SecureExportDialog } from "@/components/secure-usb/SecureExportDialog";
-import { SecureImportDialog } from "@/components/secure-usb/SecureImportDialog";
 import { UsageMetricsSection } from "@/components/plans/UsageMetricsSection";
+
+// Lazy load USB dialogs to avoid crypto-js require() error at startup
+const SecureExportDialog = lazy(() => import("@/components/secure-usb/SecureExportDialog").then(m => ({ default: m.SecureExportDialog })));
+const SecureImportDialog = lazy(() => import("@/components/secure-usb/SecureImportDialog").then(m => ({ default: m.SecureImportDialog })));
 
 
 const SettingsPage = () => {
@@ -212,15 +213,17 @@ const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Dialogs */}
-      <SecureExportDialog 
-        open={showExportDialog} 
-        onOpenChange={setShowExportDialog} 
-      />
-      <SecureImportDialog 
-        open={showImportDialog} 
-        onOpenChange={setShowImportDialog} 
-      />
+      {/* Dialogs avec Suspense pour lazy loading */}
+      <Suspense fallback={null}>
+        <SecureExportDialog 
+          open={showExportDialog} 
+          onOpenChange={setShowExportDialog} 
+        />
+        <SecureImportDialog 
+          open={showImportDialog} 
+          onOpenChange={setShowImportDialog} 
+        />
+      </Suspense>
     </Layout>
   );
 };
