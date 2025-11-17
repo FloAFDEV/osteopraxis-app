@@ -18,9 +18,9 @@ export const DemoSessionTimer = () => {
       return;
     }
 
-    const updateSessionInfo = () => {
-      const session = DemoService.getCurrentDemoSession();
-      const isExpired = DemoService.isSessionExpired();
+    const updateSessionInfo = async () => {
+      const session = await DemoService.getCurrentDemoSession();
+      const isExpired = await DemoService.isSessionExpired();
       
       if (session) {
         setSessionInfo({

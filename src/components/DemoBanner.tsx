@@ -44,13 +44,13 @@ export const DemoBanner = () => {
         
         // Fallback vers ancienne méthode si pas de session locale
         if (user?.email && DemoService.isDemoUser(user.email)) {
-          const session = DemoService.getCurrentDemoSession();
+          const session = await DemoService.getCurrentDemoSession();
           if (session) {
             setIsTemporaryDemo(true);
             setRemainingTime(session.remainingTime);
             
-            const interval = setInterval(() => {
-              const currentSession = DemoService.getCurrentDemoSession();
+            const interval = setInterval(async () => {
+              const currentSession = await DemoService.getCurrentDemoSession();
               if (currentSession) {
                 setRemainingTime(currentSession.remainingTime);
               }
