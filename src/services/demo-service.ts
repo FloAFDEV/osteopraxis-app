@@ -74,9 +74,9 @@ export class DemoService {
   }
 
   // Vérifier si la session démo actuelle est expirée
-  static isSessionExpired(): boolean {
+  static async isSessionExpired(): Promise<boolean> {
     try {
-      const { demoLocalStorage } = require('./demo-local-storage');
+      const { demoLocalStorage } = await import('./demo-local-storage');
       return !demoLocalStorage.isSessionActive();
     } catch {
       return true;
@@ -84,9 +84,9 @@ export class DemoService {
   }
 
   // Obtenir les infos de la session démo actuelle
-  static getCurrentDemoSession(): { email: string; sessionId: string; expiresAt: string; remainingTime: number } | null {
+  static async getCurrentDemoSession(): Promise<{ email: string; sessionId: string; expiresAt: string; remainingTime: number } | null> {
     try {
-      const { demoLocalStorage } = require('./demo-local-storage');
+      const { demoLocalStorage } = await import('./demo-local-storage');
       const session = demoLocalStorage.getCurrentSession();
       
       if (!session) return null;
@@ -420,8 +420,8 @@ export class DemoService {
   }
 
   // Obtenir les informations de connexion démo de la session actuelle
-  static getDemoCredentials(): { email: string; password: string } | null {
-    const session = this.getCurrentDemoSession();
+  static async getDemoCredentials(): Promise<{ email: string; password: string } | null> {
+    const session = await this.getCurrentDemoSession();
     if (!session) return null;
     
     return {
