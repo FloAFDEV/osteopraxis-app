@@ -18,7 +18,6 @@ import { AdminLogsPanel } from "./admin-logs";
 import { SystemHealthPanel } from "./system-health";
 import { DetailedStatsPanel } from "./detailed-stats";
 import { DeletedRecordsManager } from "./deleted-records-manager";
-import { USBMonitoringDashboard } from "@/components/secure-usb/USBMonitoringDashboard";
 import { SubscriptionManagement } from "./subscription-management";
 import { UserDeletionMonitoring } from "./user-deletion-monitoring";
 import { BusinessAnalytics } from "./business-analytics";
@@ -232,11 +231,10 @@ export function AdminDashboard() {
                 <div className="bg-card rounded-lg border p-2">
                   <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Sécurité & Monitoring</div>
                   <div className="flex gap-1">
-                    <TabsList className="grid grid-cols-4 h-auto p-1 bg-muted/50">
+                    <TabsList className="grid grid-cols-3 h-auto p-1 bg-muted/50">
                       <TabsTrigger value="security" className="text-sm px-4 py-2">Sécurité</TabsTrigger>
                       <TabsTrigger value="monitoring" className="text-sm px-4 py-2">Monitoring</TabsTrigger>
                       <TabsTrigger value="logs" className="text-sm px-4 py-2">Logs</TabsTrigger>
-                      <TabsTrigger value="usb" className="text-sm px-4 py-2">USB</TabsTrigger>
                     </TabsList>
                   </div>
                 </div>
@@ -307,10 +305,6 @@ export function AdminDashboard() {
             
             <TabsContent value="deleted">
               <DeletedRecordsManager />
-            </TabsContent>
-            
-            <TabsContent value="usb">
-              <USBMonitoringDashboard />
             </TabsContent>
             
             <TabsContent value="logs">
