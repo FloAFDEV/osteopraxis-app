@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { isDemoSession } from "@/utils/demo-detection";
 import { Layout } from "@/components/ui/layout";
 import {
@@ -8,28 +8,20 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
 	Settings,
 	UserCog,
 	Users,
 	HelpCircle,
 	ChevronRight,
-	Upload,
 	Shield,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UsageMetricsSection } from "@/components/plans/UsageMetricsSection";
 
-// Lazy load USB dialogs to avoid crypto-js require() error at startup
-const SecureExportDialog = lazy(() => import("@/components/secure-usb/SecureExportDialog").then(m => ({ default: m.SecureExportDialog })));
-const SecureImportDialog = lazy(() => import("@/components/secure-usb/SecureImportDialog").then(m => ({ default: m.SecureImportDialog })));
-
 
 const SettingsPage = () => {
 	const navigate = useNavigate();
-	const [showExportDialog, setShowExportDialog] = useState(false);
-	const [showImportDialog, setShowImportDialog] = useState(false);
 	const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null);
 
 	// Déterminer le mode (démo ou connecté)
@@ -76,15 +68,6 @@ const SettingsPage = () => {
 				icon: Shield,
 				path: "/settings/storage",
 				color: "text-primary",
-			},
-			{
-				id: "import",
-				title: "Import de données",
-				description:
-					"Importez vos patients depuis Excel/CSV ou autres logiciels",
-				icon: Upload,
-				path: "/settings/import",
-				color: "text-green-500",
 			},
 			{
 				id: "collaborations",
@@ -153,43 +136,6 @@ const SettingsPage = () => {
 						<UsageMetricsSection />
 					)}
 
-					{/* Section Partage Sécurisé USB - masqué en mode démo */}
-					{!isDemoMode && (
-						<Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
-							<CardHeader>
-								<CardTitle className="text-green-800 dark:text-green-200 flex items-center gap-2">
-									🔒 Partage Sécurisé USB
-								</CardTitle>
-								<CardDescription className="text-green-700 dark:text-green-300">
-									Exportez et importez vos données en toute sécurité via clé USB chiffrée
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<Button 
-										variant="outline" 
-										className="flex items-center gap-2 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30"
-										onClick={() => setShowExportDialog(true)}
-									>
-										<Upload className="h-4 w-4" />
-										Export Sécurisé
-									</Button>
-									<Button 
-										variant="outline" 
-										className="flex items-center gap-2 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30"
-										onClick={() => setShowImportDialog(true)}
-									>
-										<Upload className="h-4 w-4" />
-										Import Sécurisé
-									</Button>
-								</div>
-								<p className="text-xs text-green-600 dark:text-green-400 mt-3">
-									Chiffrement AES-256 • Conformité RGPD • Format propriétaire .phub
-								</p>
-							</CardContent>
-						</Card>
-					)}
-
 					{/* Section d'information - masquée en mode démo */}
 					{!isDemoMode && (
 						<Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800">
@@ -212,18 +158,6 @@ const SettingsPage = () => {
 					)}
         </div>
       </div>
-
-      {/* Dialogs avec Suspense pour lazy loading */}
-      <Suspense fallback={null}>
-        <SecureExportDialog 
-          open={showExportDialog} 
-          onOpenChange={setShowExportDialog} 
-        />
-        <SecureImportDialog 
-          open={showImportDialog} 
-          onOpenChange={setShowImportDialog} 
-        />
-      </Suspense>
     </Layout>
   );
 };
