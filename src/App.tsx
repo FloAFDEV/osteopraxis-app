@@ -13,6 +13,7 @@ import { DemoDataManager } from "@/components/demo/DemoDataManager";
 import { DemoSessionTimer } from "@/components/demo/DemoSessionTimer";
 import { SkipToContent } from "@/components/accessibility/SkipToContent";
 import { SecurityHeaders } from "@/components/security/SecurityHeaders";
+import { useStorageLockCheck } from "@/hooks/useStorageLockCheck";
 import Home from "@/pages/Home";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -79,7 +80,6 @@ const queryClient = new QueryClient({
 // Composant interne pour activer la vérification du verrouillage storage
 function AppWithStorageLockCheck({ children }: { children: React.ReactNode }) {
   // 🔐 NOUVEAU: Vérifier le verrouillage storage (force logout si password perdu)
-  const { useStorageLockCheck } = require('@/hooks/useStorageLockCheck');
   useStorageLockCheck();
   
   return <>{children}</>;
