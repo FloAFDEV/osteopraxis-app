@@ -240,8 +240,7 @@ export function PatientForm({
 				data.email = `patient-${timestamp}-${randomId}@temp.local`;
 			}
 
-			console.log("Données patient avant création:", data);
-
+	
 			if (onSubmit) {
 				console.log("📤 Appel de onSubmit");
 				await onSubmit(data);

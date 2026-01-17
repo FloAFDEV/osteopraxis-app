@@ -253,8 +253,7 @@ export function AppointmentForm({
 				updatedAt: new Date().toISOString(),
 			};
 
-			console.log("Submitting appointment data:", appointmentData);
-
+	
 			await performUpdate(appointmentData);
 
 			// Émettre l'événement global pour informer les composants
@@ -262,8 +261,7 @@ export function AppointmentForm({
 				id: Date.now(), // ID temporaire pour l'événement
 				...appointmentData 
 			};
-			console.log('📋 AppointmentForm: Émission de l\'événement appointment-created', newAppointmentEvent);
-			window.dispatchEvent(new CustomEvent('appointment-created', { 
+				window.dispatchEvent(new CustomEvent('appointment-created', { 
 				detail: newAppointmentEvent
 			}));
 

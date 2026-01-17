@@ -21,7 +21,6 @@ export const supabaseInvoiceService = {
         return [];
       }
       const patientIds = patients.map(p => p.id);
-      console.log(`Filtrage des factures pour ${patientIds.length} patients de l'ostéopathe ${osteopathId}`);
 
       const { data, error } = await supabase
         .from("Invoice")
@@ -208,7 +207,6 @@ export const supabaseInvoiceService = {
         updatedAt: new Date().toISOString()
       };
 
-      console.log("Données à insérer en base:", dataForDb);
       
       const { data, error } = await supabase
         .from("Invoice")
@@ -289,7 +287,6 @@ export const supabaseInvoiceService = {
         (k) => updatePayload[k] === undefined && delete updatePayload[k]
       );
 
-      console.log("Payload de mise à jour de la facture:", updatePayload);
 
       // 5. Utiliser PUT au lieu de PATCH
       const res = await fetch(URL_ENDPOINT, {
@@ -312,7 +309,6 @@ export const supabaseInvoiceService = {
 
       // Traiter la réponse
       const data = await res.json();
-      console.log("Réponse de mise à jour de la facture:", data);
       
       if (Array.isArray(data) && data.length > 0) {
         return data[0] as Invoice;

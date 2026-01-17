@@ -31,8 +31,7 @@ export function UpcomingAppointmentsTab({
 
 	useEffect(() => {
 		const handleAppointmentCreated = (event: any) => {
-			console.log('📅 UpcomingAppointmentsTab: Événement appointment-created reçu', event.detail);
-			const newAppointment = event.detail;
+				const newAppointment = event.detail;
 			
 			// Ajouter immédiatement le nouvel appointment à la liste locale
 			if (newAppointment && newAppointment.patientId === patient.id) {
