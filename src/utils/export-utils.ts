@@ -247,22 +247,76 @@ export function generateQuoteNumber(isDemo: boolean): string {
 export class ExportSecurityService {
   private static instance: ExportSecurityService;
   private isDemo: boolean | null = null;
-  
+
   public static getInstance(): ExportSecurityService {
     if (!ExportSecurityService.instance) {
       ExportSecurityService.instance = new ExportSecurityService();
     }
     return ExportSecurityService.instance;
   }
-  
+
   /**
-   * Détecte automatiquement si on est en mode démo
+   * Détecte le mode démo basé sur le statut de l'ostéopathe dans la base de données
+   * @param osteopathId ID de l'ostéopathe (optionnel, sinon détecte depuis le contexte)
+   * @returns true si l'ostéopathe est en mode demo, false si actif
+   */
+  async detectDemoModeFromOsteopathStatus(osteopathId?: number): Promise<boolean> {
+    try {
+      // Si pas d'ID fourni, vérifier d'abord la session démo locale
+      if (!osteopathId) {
+        const isDemoLocal = await isDemoSession();
+        if (isDemoLocal) return true;
+      }
+
+      // Importer dynamiquement pour éviter les dépendances circulaires
+      const { supabase } = await import('@/lib/supabase');
+
+      let osteoId = osteopathId;
+
+      // Si pas d'ID fourni, récupérer depuis la session courante
+      if (!osteoId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return true; // Pas d'utilisateur = mode démo
+
+        const { data: userData } = await supabase
+          .from('User')
+          .select('osteopathId')
+          .eq('id', user.id)
+          .single();
+
+        if (!userData?.osteopathId) return true; // Pas d'ostéopathe lié = mode démo
+        osteoId = userData.osteopathId;
+      }
+
+      // Récupérer le statut de l'ostéopathe
+      const { data: osteopathData, error } = await supabase
+        .from('Osteopath')
+        .select('status')
+        .eq('id', osteoId)
+        .single();
+
+      if (error || !osteopathData) {
+        console.warn('Impossible de récupérer le statut ostéopathe, mode démo par défaut');
+        return true; // Par défaut, mode démo pour sécurité
+      }
+
+      // Mode démo si status = 'demo' ou 'blocked'
+      return osteopathData.status !== 'active';
+    } catch (error) {
+      console.error('Erreur détection mode démo:', error);
+      return true; // Par défaut, mode démo pour sécurité
+    }
+  }
+
+  /**
+   * Détecte automatiquement si on est en mode démo (méthode legacy)
+   * DEPRECATED: Utiliser detectDemoModeFromOsteopathStatus à la place
    */
   async detectDemoMode(): Promise<boolean> {
     if (this.isDemo !== null) {
       return this.isDemo;
     }
-    
+
     this.isDemo = await isDemoSession();
     return this.isDemo;
   }
@@ -275,12 +329,22 @@ export class ExportSecurityService {
   }
   
   /**
-   * Sécurise un PDF selon le mode détecté
+   * Sécurise un PDF selon le mode détecté (basé sur le statut ostéopathe)
    * @param pdfBytes Le PDF original
    * @param osteopathName Nom de l'ostéopathe (optionnel)
+   * @param osteopathId ID de l'ostéopathe (optionnel, sinon auto-détection)
    * @returns Le PDF sécurisé avec filigrane approprié
    */
-  async securePDF(pdfBytes: Uint8Array, osteopathName?: string): Promise<Uint8Array> {
+  async securePDF(pdfBytes: Uint8Array, osteopathName?: string, osteopathId?: number): Promise<Uint8Array> {
+    const isDemo = await this.detectDemoModeFromOsteopathStatus(osteopathId);
+    return await addProfessionalWatermark(pdfBytes, osteopathName, isDemo);
+  }
+
+  /**
+   * Sécurise un PDF selon le mode détecté (méthode legacy)
+   * DEPRECATED: Utiliser securePDF avec osteopathId à la place
+   */
+  async securePDFLegacy(pdfBytes: Uint8Array, osteopathName?: string): Promise<Uint8Array> {
     const isDemo = await this.detectDemoMode();
     return await addProfessionalWatermark(pdfBytes, osteopathName, isDemo);
   }

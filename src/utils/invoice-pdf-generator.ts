@@ -172,15 +172,15 @@ export async function generateInvoicePDF(
     // 🔒 SÉCURITÉ: Sécuriser le PDF avec filigrane approprié (démo/professionnel)
     const pdfBytes = pdf.output('arraybuffer');
     const osteopathName = element.querySelector('[data-osteopath-name]')?.textContent || undefined;
-    let securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes), osteopathName);
+    let securedPdfBytes = await exportSecurity.securePDF(new Uint8Array(pdfBytes), osteopathName, osteopathId);
 
     // 🔐 PHASE 1.4: Ajouter signature numérique + QR code
     const invoiceReference = invoice ? `INV-${invoice.id.toString().padStart(6, '0')}` : 'UNKNOWN';
     securedPdfBytes = await addDigitalSignature(securedPdfBytes, invoiceReference, osteopathName);
-    
+
     // 📝 Enregistrer dans audit trail
     const fileHash = await generatePdfHash(securedPdfBytes);
-    const isDemo = await exportSecurity.detectDemoMode();
+    const isDemo = await exportSecurity.detectDemoModeFromOsteopathStatus(osteopathId);
     
     if (invoice && osteopathId) {
       await logDocumentExport(

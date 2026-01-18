@@ -238,6 +238,8 @@ export interface Invoice {
 export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELED";
 export type PaymentStatus = "PAID" | "PENDING" | "CANCELED";
 
+export type OsteopathStatus = 'demo' | 'active' | 'blocked';
+
 export interface Osteopath {
 	id: number;
 	userId: string;
@@ -248,8 +250,23 @@ export interface Osteopath {
 	ape_code: string | null;
 	stampUrl?: string;
 	plan: 'light' | 'full' | 'pro';
+	status: OsteopathStatus;
+	demo_started_at: string;
+	activated_at: string | null;
+	blocked_at: string | null;
+	blocked_reason: string | null;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface OsteopathStatusHistory {
+	id: number;
+	osteopath_id: number;
+	old_status: OsteopathStatus | null;
+	new_status: OsteopathStatus;
+	changed_by: string | null;
+	reason: string | null;
+	created_at: string;
 }
 
 export interface AuthState {
@@ -362,6 +379,126 @@ export interface CreateQuotePayload {
 	status: QuoteStatus;
 	notes?: string | null;
 	items?: Omit<QuoteItem, 'id' | 'quoteId'>[];
+}
+
+// ===========================================================================
+// Types pour Compte-Rendu Ostéopathique (CR)
+// ===========================================================================
+
+export interface ConsultationReport {
+	id: number;
+	patientId: number;
+	appointmentId: number | null;
+	osteopathId: number;
+	date: string;
+
+	// Anamnèse de la séance
+	chiefComplaint: string; // Motif principal de consultation
+	historyOfPresentIllness: string | null; // Histoire de la maladie actuelle
+	painScale: number | null; // Échelle douleur 0-10
+
+	// Examen clinique
+	observation: string | null; // Observation statique/dynamique
+	palpation: string | null; // Palpation
+	mobility: string | null; // Tests de mobilité
+
+	// Tests et diagnostic
+	testsPerformed: string[] | null; // Tests effectués
+	diagnosis: string | null; // Diagnostic ostéopathique
+
+	// Traitement
+	techniquesUsed: string[] | null; // Techniques utilisées
+	treatmentNotes: string | null; // Notes détaillées du traitement
+	treatmentAreas: string[] | null; // Zones traitées (cervicales, dorsales, lombaires, etc.)
+
+	// Conclusion
+	outcome: string | null; // Résultat immédiat post-séance
+	recommendations: string | null; // Conseils au patient
+	nextAppointmentSuggested: string | null; // Date suggérée prochain RDV
+
+	// Métadonnées
+	createdAt: string;
+	updatedAt: string;
+
+	// Relations optionnelles
+	patient?: Patient;
+	appointment?: Appointment;
+}
+
+export interface CreateConsultationReportPayload {
+	patientId: number;
+	appointmentId?: number | null;
+	osteopathId: number;
+	date: string;
+	chiefComplaint: string;
+	historyOfPresentIllness?: string;
+	painScale?: number;
+	observation?: string;
+	palpation?: string;
+	mobility?: string;
+	testsPerformed?: string[];
+	diagnosis?: string;
+	techniquesUsed?: string[];
+	treatmentNotes?: string;
+	treatmentAreas?: string[];
+	outcome?: string;
+	recommendations?: string;
+	nextAppointmentSuggested?: string;
+}
+
+// Bibliothèque de techniques ostéopathiques pré-définies
+export const OSTEOPATHY_TECHNIQUES = [
+	'HVLA (High Velocity Low Amplitude)',
+	'Myotensif',
+	'Fonctionnel',
+	'Crânien',
+	'Viscéral',
+	'Structurel',
+	'Fascial',
+	'Strain/Counterstrain',
+	'Energy musculaire',
+	'Pompage',
+	'Stretching',
+	'Mobilisation articulaire',
+] as const;
+
+export const TREATMENT_AREAS = [
+	'Crâne',
+	'Cervicales',
+	'Dorsales',
+	'Lombaires',
+	'Sacrum/Coccyx',
+	'Côtes',
+	'Épaule',
+	'Coude',
+	'Poignet/Main',
+	'Hanche',
+	'Genou',
+	'Cheville/Pied',
+	'Viscères',
+	'ATM (mâchoire)',
+] as const;
+
+// ===========================================================================
+// Types pour Facturation en mode DEMO
+// ===========================================================================
+
+export type InvoiceMode = 'demo' | 'active';
+
+// Extension de l'interface Invoice existante pour ajouter le mode
+export interface InvoiceWithMode extends Invoice {
+	mode: InvoiceMode; // Mode de la facture
+	isDemoWatermarked: boolean; // PDF généré avec filigrane DEMO
+}
+
+export interface InvoicePDFOptions {
+	mode: InvoiceMode;
+	watermark?: {
+		enabled: boolean;
+		text: string;
+		opacity: number;
+	};
+	legalNotice?: string; // Mention légale (DEMO ou officielle)
 }
 
 // Export des types de relation patient pour faciliter l'import
