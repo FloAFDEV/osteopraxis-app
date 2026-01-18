@@ -1,4 +1,5 @@
 import React from "react";
+import { OsteopathStatusBadge } from "@/components/OsteopathStatusBadge";
 
 export const DashboardHeader: React.FC = () => {
 	return (
@@ -9,7 +10,7 @@ export const DashboardHeader: React.FC = () => {
 				className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
 				loading="lazy"
 			/>
-			<div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex items-center">
+			<div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex items-center justify-between">
 				<div className="px-6 md:px-10 max-w-2xl animate-fade-in animate-delay-100">
 					<h1 className="text-2xl md:text-3xl lg:text-4xl text-white font-bold mb-2">
 						Tableau de bord Ostéopathe
@@ -17,6 +18,11 @@ export const DashboardHeader: React.FC = () => {
 					<p className="text-white/90 text-sm md:text-base lg:text-lg max-w-md">
 						Gérez votre patientèle, vos rendez-vous et consultez vos statistiques d'activité.
 					</p>
+				</div>
+
+				{/* Osteopath Status Badge */}
+				<div className="px-6 md:px-10">
+					<OsteopathStatusBadge showLabel={true} />
 				</div>
 			</div>
 		</div>

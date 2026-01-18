@@ -96,24 +96,32 @@ const testimonials = [
 
 const faqs = [
 	{
-		question: "Comment commencer avec PatientHub ?",
-		answer: "Il suffit de créer votre compte gratuit, configurer votre profil d'ostéopathe et commencer à ajouter vos patients. Notre interface intuitive vous guide pas à pas.",
+		question: "Pourquoi 'Anti-Cloud' ? C'est quoi la différence ?",
+		answer: "Les solutions cloud classiques stockent VOS données de santé (patients, consultations, dossiers médicaux) sur LEURS serveurs. Cela implique des coûts d'hébergement HDS (10k€+/an), des risques de fuite, et une complexité RGPD énorme. RendezVous Zen stocke tout localement sur VOTRE ordinateur avec chiffrement AES-256-GCM. Résultat : sécurité maximale, conformité RGPD automatique, et aucun frais d'hébergement.",
 	},
 	{
-		question: "Mes données sont-elles sécurisées ?",
-		answer: "Oui ! Les données sensibles (patients, consultations) sont stockées localement sur votre ordinateur. Seules les données de configuration restent dans le cloud. Conformité RGPD maximale.",
+		question: "Mes données sont-elles vraiment en sécurité en local ?",
+		answer: "OUI ! Le stockage local chiffré est PLUS sûr que le cloud. Vos données ne transitent jamais sur internet, impossible de les hacker à distance. Nous utilisons AES-256-GCM (niveau militaire) + PBKDF2 150,000 itérations. Même si quelqu'un vole votre ordinateur, vos données restent illisibles sans votre mot de passe. Aucune fuite possible comme avec les clouds (piratages, erreurs de config, employés malveillants...).",
 	},
 	{
-		question: "Puis-je importer mes données existantes ?",
-		answer: "Oui, nous proposons des outils d'import pour migrer facilement vos données depuis d'autres logiciels ou fichiers Excel.",
+		question: "Et si je change d'ordinateur ou perds mes données ?",
+		answer: "Vous pouvez faire des sauvegardes chiffrées manuelles sur clé USB, disque externe, ou votre propre cloud personnel (Dropbox, Google Drive - mais VOS données restent chiffrées). L'export est simple (1 clic) et vous gardez 100% le contrôle. Contrairement au cloud où VOS données appartiennent au fournisseur.",
 	},
 	{
-		question: "Y a-t-il une période d'essai ?",
-		answer: "Oui, vous pouvez tester gratuitement toutes les fonctionnalités pendant 14 jours, sans engagement.",
+		question: "49€ une fois, c'est vraiment sans abonnement ?",
+		answer: "OUI. Vous payez 49€, vous utilisez RendezVous Zen À VIE. Aucun abonnement caché, aucune facturation mensuelle, aucune augmentation de prix. Les concurrents cloud vous facturent 30€/mois (360€/an) parce qu'ils doivent payer l'hébergement HDS. Nous, on stocke localement = aucun coût serveur = on peut proposer un prix unique. Sur 5 ans, vous économisez 1,751€.",
 	},
 	{
-		question: "Le support client est-il inclus ?",
-		answer: "Bien sûr ! Notre équipe de support francophone est disponible par email et chat pour vous accompagner.",
+		question: "C'est vraiment conforme RGPD sans effort ?",
+		answer: "OUI. Le RGPD impose de minimiser les données en cloud, sécuriser les transferts, gérer les consentements, nommer un DPO pour le HDS... Avec RendezVous Zen : données locales = pas de transfert = pas de DPO = pas de registre complexe. Vous êtes naturellement conforme car VOS données ne quittent JAMAIS votre ordinateur. C'est le niveau de conformité le plus élevé possible.",
+	},
+	{
+		question: "Puis-je essayer avant d'acheter ?",
+		answer: "OUI ! Deux options : (1) Démo gratuite illimitée pour tester l'interface et les fonctionnalités (les factures PDF portent un filigrane 'DEMO'). (2) Achetez pour 49€ avec garantie 30 jours satisfait ou remboursé - si vous n'êtes pas satisfait, on vous rembourse intégralement sous 48h, aucune question posée.",
+	},
+	{
+		question: "J'aurai quand même des mises à jour ?",
+		answer: "OUI ! Toutes les mises à jour sont incluses à vie dans votre achat de 49€. Nouvelles fonctionnalités, corrections de bugs, améliorations de sécurité - tout est gratuit. Pas de frais cachés, pas d'upgrade payant. Le seul coût : 49€ une fois.",
 	},
 ];
 
@@ -298,48 +306,84 @@ export default function LandingPage() {
 			</header>
 
 			{/* Hero Section */}
-			<section className="relative py-16 sm:py-20 lg:py-32 bg-gradient-to-br from-blue-100 to-white dark:from-slate-950 dark:to-slate-900">
+			<section className="relative py-16 sm:py-20 lg:py-32 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
 					<div className="max-w-5xl mx-auto text-center">
+						{/* Badge Anti-Cloud */}
 						<Badge
 							variant="outline"
-							className="mb-6 sm:mb-8 bg-white/60 border-blue-300 text-blue-800 dark:bg-slate-800/60 dark:border-blue-600 dark:text-blue-300 text-sm sm:text-base"
+							className="mb-4 sm:mb-6 bg-red-50 border-red-300 text-red-800 dark:bg-red-950/50 dark:border-red-600 dark:text-red-300 text-sm sm:text-base font-semibold px-4 py-2"
 						>
-							<Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-							Solution complète pour ostéopathes
+							<Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+							🚫 ANTI-CLOUD - VOS DONNÉES RESTENT CHEZ VOUS
 						</Badge>
 
+						{/* Titre principal */}
 						<h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 text-slate-900 dark:text-white leading-tight">
-							<span className="text-foreground">Patient</span>
-							<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-								Hub
+							<span className="text-foreground">RendezVous</span>
+							<span className="ml-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+								Zen
 							</span>
 						</h1>
 
+						{/* Pricing headline */}
+						<p className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-4 sm:mb-6">
+							49€ une seule fois. Pas d'abonnement. Jamais.
+						</p>
+
+						{/* Value proposition */}
 						<p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
-  Concentrez-vous sur vos patients, pas sur l’administratif. Gérez rendez-vous, dossiers, facturation et statistiques en toute simplicité, depuis une seule plateforme.
-</p>
+							Pendant que les concurrents vous facturent <span className="text-red-600 font-bold line-through">360€/an</span> en abonnement cloud,
+							vous payez <span className="text-green-600 font-bold">49€ à vie</span>.<br/>
+							Données 100% locales, aucun cloud HDS.
+						</p>
+
+						{/* Anti-cloud explanation box */}
+						<div className="bg-green-50 dark:bg-green-950/30 border-2 border-green-500/30 rounded-xl p-6 mb-8 max-w-3xl mx-auto">
+							<h3 className="font-bold text-lg mb-3 flex items-center justify-center gap-2">
+								<Database className="h-5 w-5 text-green-600" />
+								Pourquoi "Anti-Cloud" ?
+							</h3>
+							<ul className="text-left space-y-2 text-sm sm:text-base">
+								<li className="flex items-start gap-2">
+									<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+									<span>Vos données HDS ne quittent <strong>JAMAIS</strong> votre ordinateur</span>
+								</li>
+								<li className="flex items-start gap-2">
+									<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+									<span>Pas besoin d'hébergement HDS certifié (économie 10k€+/an)</span>
+								</li>
+								<li className="flex items-start gap-2">
+									<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+									<span>Conformité RGPD maximale sans effort</span>
+								</li>
+								<li className="flex items-start gap-2">
+									<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+									<span>Chiffrement AES-256-GCM local (niveau militaire)</span>
+								</li>
+							</ul>
+						</div>
 
 
 						<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
 							<Button
 								size="lg"
-								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
+								className="text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg"
 								asChild
 							>
 								<Link to="/register" className="flex items-center gap-2">
-									Créer mon compte
+									Acheter maintenant - 49€
 								</Link>
 							</Button>
 							<Button
-								variant="primary"
+								variant="outline"
 								size="lg"
-								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
+								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-2"
 								asChild
 							>
 								<Link to="/demo" className="flex items-center gap-2">
 									<Play className="h-4 w-4" />
-									Essayer la démo interactive
+									Essayer la démo gratuite
 								</Link>
 							</Button>
 						</div>
@@ -347,7 +391,7 @@ export default function LandingPage() {
 						<div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-500 dark:text-slate-400 px-4">
 							<span className="flex items-center gap-2">
 								<span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-								Démo interactive gratuite
+								Garantie 30 jours satisfait ou remboursé
 							</span>
 							<span className="flex items-center gap-2">
 								<span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
@@ -355,7 +399,7 @@ export default function LandingPage() {
 							</span>
 							<span className="flex items-center gap-2">
 								<span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
-								Support francophone
+								Support francophone inclus
 							</span>
 						</div>
 
@@ -603,160 +647,162 @@ export default function LandingPage() {
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="text-center mb-16">
 						<h2 className="text-3xl md:text-4xl font-bold mb-4">
-							Des tarifs transparents
+							Un prix unique. Pas d'abonnement.
 						</h2>
 						<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-							Choisissez l'offre qui correspond à vos besoins.
-							Évolutif selon votre croissance.
+							Pendant que les autres vous facturent chaque mois, vous payez <strong className="text-green-600">une seule fois</strong>.
 						</p>
 					</div>
 
-					<div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-						{/* Plan Light */}
-						<Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
-							<CardContent className="p-6">
-								<h3 className="text-2xl font-bold mb-2">
-									Light
-								</h3>
-								<p className="text-muted-foreground mb-4">
-									Pour découvrir
-								</p>
-								<div className="mb-6">
-									<span className="text-4xl font-bold">
-										0€
-									</span>
-									<span className="text-muted-foreground">
-										/mois
-									</span>
+					{/* Comparison Table */}
+					<div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+						{/* Concurrents (Cloud) */}
+						<Card className="relative border-red-200 dark:border-red-900/50">
+							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+								<Badge className="bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300">
+									Solutions Cloud Classiques
+								</Badge>
+							</div>
+							<CardContent className="p-8">
+								<div className="mb-6 text-center">
+									<div className="text-5xl font-bold text-red-600 mb-2 line-through">
+										360€
+									</div>
+									<div className="text-muted-foreground">par an</div>
+									<div className="text-sm text-red-600 mt-2 font-semibold">
+										= 1,800€ sur 5 ans
+									</div>
 								</div>
-								<ul className="space-y-3 mb-6">
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Gestion des patients</span>
+
+								<ul className="space-y-3">
+									<li className="flex items-start gap-2">
+										<X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+										<span className="text-sm">Vos données HDS dans leur cloud</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Stockage local sécurisé</span>
+									<li className="flex items-start gap-2">
+										<X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+										<span className="text-sm">Hébergement HDS certifié (facturé à vous)</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Dossiers médicaux</span>
+									<li className="flex items-start gap-2">
+										<X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+										<span className="text-sm">Abonnement mensuel/annuel obligatoire</span>
 									</li>
-									<li className="flex items-center gap-2 text-muted-foreground">
-										<X className="h-4 w-4" />
-										<span>Rendez-vous</span>
+									<li className="flex items-start gap-2">
+										<X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+										<span className="text-sm">Risque de fuite de données</span>
 									</li>
-									<li className="flex items-center gap-2 text-muted-foreground">
-										<X className="h-4 w-4" />
-										<span>Facturation</span>
+									<li className="flex items-start gap-2">
+										<X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+										<span className="text-sm">Complexité RGPD (DPO, registres...)</span>
+									</li>
+									<li className="flex items-start gap-2">
+										<X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+										<span className="text-sm">Dépendance totale au fournisseur</span>
 									</li>
 								</ul>
-								<Button className="w-full" asChild onClick={() => localStorage.setItem('selected-plan', 'light')}>
-									<Link to="/register?plan=light">Commencer gratuitement</Link>
-								</Button>
+
+								<div className="mt-6 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg text-center">
+									<p className="text-sm font-semibold text-red-800 dark:text-red-300">
+										Prix qui augmente chaque année
+									</p>
+								</div>
 							</CardContent>
 						</Card>
 
-						{/* Plan Full */}
-						<Card className="relative border-primary scale-105 shadow-lg shadow-primary/20">
+						{/* RendezVous Zen (Anti-Cloud) */}
+						<Card className="relative border-green-500 dark:border-green-700 scale-105 shadow-2xl shadow-green-500/20">
 							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-								<Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md">
-									Populaire
+								<Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg">
+									RendezVous Zen - Anti-Cloud
 								</Badge>
 							</div>
-							<CardContent className="p-6">
-								<h3 className="text-2xl font-bold mb-2">Full</h3>
-								<p className="text-muted-foreground mb-4">
-									Pour les praticiens
-								</p>
-								<div className="mb-6">
-									<span className="text-4xl font-bold">
-										9€
-									</span>
-									<span className="text-muted-foreground">
-										/mois
-									</span>
+							<CardContent className="p-8">
+								<div className="mb-6 text-center">
+									<div className="text-6xl font-bold text-green-600 mb-2">
+										49€
+									</div>
+									<div className="text-muted-foreground">une seule fois</div>
+									<div className="text-sm text-green-600 mt-2 font-semibold">
+										= 49€ pour toujours
+									</div>
+									<div className="mt-3 px-4 py-2 bg-green-50 dark:bg-green-950/30 rounded-full inline-block">
+										<p className="text-lg font-bold text-green-700 dark:text-green-400">
+											Économisez 1,751€ sur 5 ans
+										</p>
+									</div>
 								</div>
-								<ul className="space-y-3 mb-6">
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Tout du plan Light</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Gestion des rendez-vous</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Planning hebdomadaire</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Facturation complète</span>
-									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Export PDF & Excel</span>
-									</li>
-								</ul>
-								<Button className="w-full" asChild onClick={() => localStorage.setItem('selected-plan', 'full')}>
-									<Link to="/register?plan=full">Commencer l'essai</Link>
-								</Button>
-							</CardContent>
-						</Card>
 
-						{/* Plan Pro */}
-						<Card className="relative border-border/50 hover:border-primary/30 transition-all duration-300">
-							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-								<Badge
-									variant="secondary"
-									className="bg-accent/20 text-accent border-accent/30"
-								>
-									Équipe
-								</Badge>
-							</div>
-							<CardContent className="p-6">
-								<h3 className="text-2xl font-bold mb-2">
-									Pro
-								</h3>
-								<p className="text-muted-foreground mb-4">
-									Pour les cabinets
-								</p>
-								<div className="mb-6">
-									<span className="text-4xl font-bold">
-										16€
-									</span>
-									<span className="text-muted-foreground">
-										/mois
-									</span>
-								</div>
-								<ul className="space-y-3 mb-6">
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Tout du plan Full</span>
+								<ul className="space-y-3">
+									<li className="flex items-start gap-2">
+										<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+										<span className="text-sm font-medium">Vos données HDS 100% locales (jamais dans le cloud)</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Gestion d'équipe</span>
+									<li className="flex items-start gap-2">
+										<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+										<span className="text-sm font-medium">Chiffrement AES-256-GCM niveau militaire</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Multi-praticiens</span>
+									<li className="flex items-start gap-2">
+										<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+										<span className="text-sm font-medium">Aucun hébergement HDS à payer</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Statistiques avancées</span>
+									<li className="flex items-start gap-2">
+										<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+										<span className="text-sm font-medium">Conformité RGPD maximale par design</span>
 									</li>
-									<li className="flex items-center gap-2">
-										<Check className="h-4 w-4 text-primary" />
-										<span>Support prioritaire</span>
+									<li className="flex items-start gap-2">
+										<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+										<span className="text-sm font-medium">Toutes les fonctionnalités incluses</span>
+									</li>
+									<li className="flex items-start gap-2">
+										<Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+										<span className="text-sm font-medium">Indépendance totale - logiciel à vous</span>
 									</li>
 								</ul>
-								<Button className="w-full" asChild onClick={() => localStorage.setItem('selected-plan', 'pro')}>
-									<Link to="/register?plan=pro">Commencer l'essai</Link>
-								</Button>
+
+								<div className="mt-6 space-y-3">
+									<Button className="w-full bg-green-600 hover:bg-green-700 text-white text-lg py-6" asChild>
+										<Link to="/register">
+											<Shield className="mr-2 h-5 w-5" />
+											Acheter maintenant - 49€
+										</Link>
+									</Button>
+									<Button variant="outline" className="w-full" asChild>
+										<Link to="/demo">Essayer la démo gratuite</Link>
+									</Button>
+								</div>
 							</CardContent>
 						</Card>
+					</div>
+
+					{/* Garanties */}
+					<div className="max-w-3xl mx-auto">
+						<div className="bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-200 dark:border-blue-900 rounded-xl p-6">
+							<div className="flex items-start gap-4">
+								<Shield className="h-8 w-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+								<div>
+									<h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-2">
+										Garantie 30 jours satisfait ou remboursé
+									</h3>
+									<p className="text-sm text-blue-800 dark:text-blue-400 mb-3">
+										Testez RendezVous Zen pendant 30 jours. Si vous n'êtes pas satisfait, nous vous remboursons intégralement, sans question.
+									</p>
+									<ul className="space-y-1 text-sm text-blue-700 dark:text-blue-400">
+										<li className="flex items-center gap-2">
+											<Check className="h-4 w-4 text-blue-600" />
+											<span>Remboursement sous 48h</span>
+										</li>
+										<li className="flex items-center gap-2">
+											<Check className="h-4 w-4 text-blue-600" />
+											<span>Aucune justification demandée</span>
+										</li>
+										<li className="flex items-center gap-2">
+											<Check className="h-4 w-4 text-blue-600" />
+											<span>Vos données locales restent les vôtres</span>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>
@@ -825,7 +871,7 @@ export default function LandingPage() {
 							Questions fréquentes
 						</h2>
 						<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-							Tout ce que vous devez savoir sur PatientHub
+							Tout ce que vous devez savoir sur notre approche anti-cloud
 						</p>
 					</div>
 					<div className="max-w-3xl mx-auto">

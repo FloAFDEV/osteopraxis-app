@@ -20,6 +20,7 @@ import {
 	Filter,
 	Euro,
 } from "lucide-react";
+import { HeroStat, CompactStat } from "@/components/ui/hero-stat";
 import { BlurredNumber, BlurredAmount } from "@/components/ui/blurred-amount";
 import { PrivacyToggle } from "@/components/ui/privacy-toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -174,7 +175,7 @@ export function DashboardStats({
 			</div>
 
 			{/* Vue rapide - Indicateurs prioritaires */}
-			<div className="space-y-4">
+			<div className="space-y-6">
 				<div className="flex items-center justify-between">
 					<div>
 						<h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -195,85 +196,55 @@ export function DashboardStats({
 					</div>
 				)}
 
-				{/* Cartes prioritaires - Plus grandes */}
-				<div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-					<Card className="col-span-1 p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800/50">
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-							<div>
-								<CardTitle className="text-base font-medium text-green-700 dark:text-green-400">
-									Séances aujourd'hui
-								</CardTitle>
-								<p className="text-xs text-green-600 dark:text-green-500 mt-1">
-									{formattedToday}
-								</p>
-							</div>
-							<Calendar className="h-8 w-8 text-green-600 dark:text-green-400" />
-						</CardHeader>
-						<CardContent className="pt-2">
-							<div className="text-3xl font-bold text-green-800 dark:text-green-300">
-								{data.appointmentsToday}
-							</div>
-							<p className="text-sm text-green-600 dark:text-green-500 mt-2">
-								{nextAppointmentText}
-							</p>
-						</CardContent>
-					</Card>
+				{/* Hero Stat - Métrique principale XXL */}
+				<HeroStat
+					label="Total Patients"
+					value={data.totalPatients}
+					icon={Users}
+					trend={{
+						value: data.thirtyDayGrowthPercentage || 0,
+						label: "vs mois dernier",
+						isPositive: (data.thirtyDayGrowthPercentage || 0) >= 0,
+					}}
+					description={`${data.newPatientsThisMonth} nouveaux patients ce mois-ci`}
+				/>
 
-					<Card className="col-span-1 p-6 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border-indigo-200 dark:border-indigo-800/50">
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-							<div>
-								<CardTitle className="text-base font-medium text-indigo-700 dark:text-indigo-400">
-									Consultations ce mois
-								</CardTitle>
-								<p className="text-xs text-indigo-600 dark:text-indigo-500 mt-1">
-									{data.averageConsultationsPerDay} consultations/jour
-								</p>
-							</div>
-							<Stethoscope className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-						</CardHeader>
-						<CardContent className="pt-2">
-							<div className="text-3xl font-bold text-indigo-800 dark:text-indigo-300">
-								{data.consultationsThisMonth}
-							</div>
-							<p className="text-sm text-indigo-600 dark:text-indigo-500 mt-2">
-								{data.consultationsTrend > 0
-									? `+${data.consultationsTrend}% vs mois dernier`
-									: data.consultationsTrend < 0
-									? `${data.consultationsTrend}% vs mois dernier`
+				{/* Compact Stats - Métriques secondaires */}
+				<div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+					<CompactStat
+						label="Séances aujourd'hui"
+						value={data.appointmentsToday}
+						icon={Calendar}
+						change={nextAppointmentText}
+					/>
+
+					<CompactStat
+						label="Consultations ce mois"
+						value={data.consultationsThisMonth}
+						icon={Stethoscope}
+						change={
+							data.consultationsTrend > 0
+								? `+${data.consultationsTrend}% vs mois dernier`
+								: data.consultationsTrend < 0
+								? `${data.consultationsTrend}% vs mois dernier`
+								: "Stable vs mois dernier"
+						}
+					/>
+
+					<CompactStat
+						label="Revenus ce mois"
+						value={<BlurredAmount amount={data.revenueThisMonth} />}
+						icon={Euro}
+						change={
+							data.revenueTrend !== undefined
+								? data.revenueTrend > 0
+									? `+${data.revenueTrend}% vs mois dernier`
+									: data.revenueTrend < 0
+									? `${data.revenueTrend}% vs mois dernier`
 									: "Stable vs mois dernier"
-								}
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card className="col-span-1 p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-800/50">
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-							<div>
-								<CardTitle className="text-base font-medium text-emerald-700 dark:text-emerald-400">
-									Revenus ce mois
-								</CardTitle>
-								<p className="text-xs text-emerald-600 dark:text-emerald-500 mt-1">
-									Factures payées
-								</p>
-							</div>
-							<Euro className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
-						</CardHeader>
-						<CardContent className="pt-2">
-							<div className="text-3xl font-bold text-emerald-800 dark:text-emerald-300">
-								<BlurredAmount amount={data.revenueThisMonth} />
-							</div>
-							<p className="text-sm text-emerald-600 dark:text-emerald-500 mt-2">
-								{data.revenueTrend !== undefined
-									? data.revenueTrend > 0
-										? `+${data.revenueTrend}% vs mois dernier`
-										: data.revenueTrend < 0
-										? `${data.revenueTrend}% vs mois dernier`
-										: "Stable vs mois dernier"
-									: `${data.pendingInvoices} factures en attente`
-								}
-							</p>
-						</CardContent>
-					</Card>
+								: `${data.pendingInvoices} factures en attente`
+						}
+					/>
 				</div>
 			</div>
 
