@@ -97,7 +97,7 @@ const testimonials = [
 const faqs = [
 	{
 		question: "Pourquoi 'Anti-Cloud' ? C'est quoi la différence ?",
-		answer: "Les solutions cloud classiques stockent VOS données de santé (patients, consultations, dossiers médicaux) sur LEURS serveurs. Cela implique des coûts d'hébergement HDS (10k€+/an), des risques de fuite, et une complexité RGPD énorme. RendezVous Zen stocke tout localement sur VOTRE ordinateur avec chiffrement AES-256-GCM. Résultat : sécurité maximale, conformité RGPD automatique, et aucun frais d'hébergement.",
+		answer: "Les solutions cloud classiques stockent VOS données de santé (patients, consultations, dossiers médicaux) sur LEURS serveurs. Cela implique des coûts d'hébergement HDS (10k€+/an), des risques de fuite, et une complexité RGPD énorme. OstéoPraxis stocke tout localement sur VOTRE ordinateur avec chiffrement AES-256-GCM. Résultat : sécurité maximale, conformité RGPD automatique, et aucun frais d'hébergement.",
 	},
 	{
 		question: "Mes données sont-elles vraiment en sécurité en local ?",
@@ -109,11 +109,11 @@ const faqs = [
 	},
 	{
 		question: "49€ une fois, c'est vraiment sans abonnement ?",
-		answer: "OUI. Vous payez 49€, vous utilisez RendezVous Zen À VIE. Aucun abonnement caché, aucune facturation mensuelle, aucune augmentation de prix. Les concurrents cloud vous facturent 30€/mois (360€/an) parce qu'ils doivent payer l'hébergement HDS. Nous, on stocke localement = aucun coût serveur = on peut proposer un prix unique. Sur 5 ans, vous économisez 1,751€.",
+		answer: "OUI. Vous payez 49€, vous utilisez OstéoPraxis À VIE. Aucun abonnement caché, aucune facturation mensuelle, aucune augmentation de prix. Les concurrents cloud vous facturent 30€/mois (360€/an) parce qu'ils doivent payer l'hébergement HDS. Nous, on stocke localement = aucun coût serveur = on peut proposer un prix unique. Sur 5 ans, vous économisez 1,751€.",
 	},
 	{
 		question: "C'est vraiment conforme RGPD sans effort ?",
-		answer: "OUI. Le RGPD impose de minimiser les données en cloud, sécuriser les transferts, gérer les consentements, nommer un DPO pour le HDS... Avec RendezVous Zen : données locales = pas de transfert = pas de DPO = pas de registre complexe. Vous êtes naturellement conforme car VOS données ne quittent JAMAIS votre ordinateur. C'est le niveau de conformité le plus élevé possible.",
+		answer: "OUI. Le RGPD impose de minimiser les données en cloud, sécuriser les transferts, gérer les consentements, nommer un DPO pour le HDS... Avec OstéoPraxis : données locales = pas de transfert = pas de DPO = pas de registre complexe. Vous êtes naturellement conforme car VOS données ne quittent JAMAIS votre ordinateur. C'est le niveau de conformité le plus élevé possible.",
 	},
 	{
 		question: "Puis-je essayer avant d'acheter ?",
@@ -320,9 +320,9 @@ export default function LandingPage() {
 
 						{/* Titre principal */}
 						<h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 text-slate-900 dark:text-white leading-tight">
-							<span className="text-foreground">RendezVous</span>
-							<span className="ml-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-								Zen
+							<span className="text-foreground">Ostéo</span>
+							<span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+								Praxis
 							</span>
 						</h1>
 
@@ -467,7 +467,7 @@ export default function LandingPage() {
 							<div className="order-2 lg:order-1">
 								<img
 									src={calendarFeature}
-									alt="Interface de calendrier PatientHub"
+									alt="Interface de calendrier OstéoPraxis"
 									className="rounded-2xl shadow-2xl shadow-primary/20 w-full max-w-lg mx-auto"
 								/>
 							</div>
@@ -709,11 +709,11 @@ export default function LandingPage() {
 							</CardContent>
 						</Card>
 
-						{/* RendezVous Zen (Anti-Cloud) */}
+						{/* OstéoPraxis (Anti-Cloud) */}
 						<Card className="relative border-green-500 dark:border-green-700 scale-105 shadow-2xl shadow-green-500/20">
 							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
 								<Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg">
-									RendezVous Zen - Anti-Cloud
+									OstéoPraxis - Anti-Cloud
 								</Badge>
 							</div>
 							<CardContent className="p-8">
@@ -784,7 +784,7 @@ export default function LandingPage() {
 										Garantie 30 jours satisfait ou remboursé
 									</h3>
 									<p className="text-sm text-blue-800 dark:text-blue-400 mb-3">
-										Testez RendezVous Zen pendant 30 jours. Si vous n'êtes pas satisfait, nous vous remboursons intégralement, sans question.
+										Testez OstéoPraxis pendant 30 jours. Si vous n'êtes pas satisfait, nous vous remboursons intégralement, sans question.
 									</p>
 									<ul className="space-y-1 text-sm text-blue-700 dark:text-blue-400">
 										<li className="flex items-center gap-2">
@@ -918,7 +918,7 @@ export default function LandingPage() {
 					<p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
 						Découvrez{" "}
 						<span className="font-semibold text-blue-600 dark:text-blue-400">
-							PatientHub
+							OstéoPraxis
 						</span>{" "}
 						avec notre démo interactive, puis créez votre compte
 					</p>
@@ -1037,7 +1037,7 @@ export default function LandingPage() {
 						</div>
 					</div>
 					<div className="border-t border-border/40 mt-8 pt-8 text-center text-muted-foreground">
-						<p>&copy; 2024 PatientHub. Tous droits réservés.</p>
+						<p>&copy; 2024 OstéoPraxis. Tous droits réservés.</p>
 					</div>
 				</div>
 			</footer>

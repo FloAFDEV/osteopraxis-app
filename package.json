@@ -1,8 +1,9 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "osteopraxis",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Logiciel professionnel pour cabinets d'ostéopathie - Données 100% locales, conformité HDS/RGPD",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -1,4 +1,4 @@
-# RendezVous Zen - Logiciel de Gestion pour Ostéopathes
+# OstéoPraxis - Logiciel Professionnel pour Cabinets d'Ostéopathie
 
 Application de gestion de cabinet d'ostéopathie avec **architecture hybride sécurisée** :
 - 🔐 **Données sensibles** : 100% stockage local chiffré (aucun cloud)
@@ -34,7 +34,7 @@ Créer une solution de gestion qui **évite l'obligation d'hébergement HDS cert
 ```bash
 # Cloner le repository
 git clone <YOUR_GIT_URL>
-cd rendez-vous-zen-app
+cd osteopraxis-app
 
 # Installer les dépendances
 npm install
@@ -170,7 +170,7 @@ Ce projet est actuellement en développement privé.
 
 ## 📧 Contact
 
-Pour toute question : [contact@rendezvouszen.fr](mailto:contact@rendezvouszen.fr)
+Pour toute question : [contact@osteopraxis.fr](mailto:contact@osteopraxis.fr)
 
 ---
 
