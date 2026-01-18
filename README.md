@@ -1,73 +1,177 @@
-# Welcome to your Lovable project
+# RendezVous Zen - Logiciel de Gestion pour Ostéopathes
 
-## Project info
+Application de gestion de cabinet d'ostéopathie avec **architecture hybride sécurisée** :
+- 🔐 **Données sensibles** : 100% stockage local chiffré (aucun cloud)
+- ☁️ **Auth & profils** : Cloud Supabase (non-sensible)
 
-**URL**: https://lovable.dev/projects/1de35501-3825-49e0-ac07-d8219f962109
+## 🎯 Objectif
 
-## How can I edit this code?
+Créer une solution de gestion qui **évite l'obligation d'hébergement HDS certifié** en stockant toutes les données de santé exclusivement en local (navigateur).
 
-There are several ways of editing your application.
+## 🏗️ Architecture Hybride
 
-**Use Lovable**
+### Cloud (Supabase) - Données NON-HDS uniquement
+- ✅ Authentification (JWT, OAuth Google)
+- ✅ Profils ostéopathes
+- ✅ Cabinets (adresses, horaires)
+- ✅ Préférences utilisateur
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1de35501-3825-49e0-ac07-d8219f962109) and start prompting.
+### Local (OPFS chiffré AES-256-GCM) - Données HDS
+- 🔐 Patients (identité, anamnèse complète)
+- 🔐 Rendez-vous (motifs, notes séances)
+- 🔐 Consultations
+- 🔐 Factures
+- 🔐 Documents médicaux
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Démarrage rapide
 
-**Use your preferred IDE**
+### Prérequis
+- Node.js 18+ & npm
+- Navigateur moderne (Chrome, Firefox, Edge)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
+# Cloner le repository
 git clone <YOUR_GIT_URL>
+cd rendez-vous-zen-app
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Installer les dépendances
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Configurer les variables d'environnement
+cp .env.example .env
+# Éditer .env avec vos clés Supabase
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Lancer en développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Supabase Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Installer Supabase CLI
+npm install -g supabase
 
-**Use GitHub Codespaces**
+# Démarrer Supabase local
+supabase start
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Appliquer les migrations
+supabase db push
 
-## What technologies are used for this project?
+# Déployer les Edge Functions
+supabase functions deploy
+```
 
-This project is built with:
+## 🔐 Sécurité & Conformité
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Chiffrement
+- **Algorithm** : AES-256-GCM
+- **Key derivation** : PBKDF2 (150,000 iterations, SHA-256)
+- **Integrity** : HMAC-SHA256
+- **Storage** : OPFS (Origin Private File System) ou IndexedDB fallback
 
-## How can I deploy this project?
+### Conformité RGPD/HDS
+- ✅ Données de santé 100% locales (pas d'hébergement HDS requis)
+- ✅ Chiffrement bout-en-bout
+- ✅ Password en RAM uniquement (jamais persisté)
+- ✅ Export/suppression données utilisateur
+- ✅ Audit logs anonymisés
 
-Simply open [Lovable](https://lovable.dev/projects/1de35501-3825-49e0-ac07-d8219f962109) and click on Share -> Publish.
+## 📋 Fonctionnalités
 
-## Can I connect a custom domain to my Lovable project?
+### ✅ Actuellement disponibles
+- Gestion patients (anamnèse complète 50+ champs)
+- Calendrier rendez-vous (jour/semaine/mois)
+- Facturation automatique PDF
+- Multi-cabinets
+- Mode démo (30 min, données fictives)
+- Import/Export données
+- Dashboard statistiques
 
-Yes it is!
+### 🚧 En développement (Phase 2)
+- Comptes-rendus de séance structurés
+- Gestion fichiers (photos/PDF) chiffrés
+- Photo profil patient
+- Backup/Restauration manuel
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📁 Structure du projet
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```
+src/
+├── pages/              # Pages React (routes)
+├── components/         # Composants réutilisables
+│   ├── hds/           # Composants données sensibles
+│   ├── ui/            # UI générique (shadcn/ui)
+│   └── ...
+├── services/
+│   ├── hds-secure-storage/  # Stockage local chiffré
+│   ├── supabase-api/        # Services cloud (non-HDS)
+│   └── ...
+├── hooks/              # React hooks
+├── contexts/           # React contexts
+└── types/              # TypeScript types
+
+supabase/
+├── functions/          # Edge Functions (Deno)
+└── migrations/         # Migrations SQL
+```
+
+## 🧪 Tests
+
+```bash
+# Tests unitaires
+npm run test
+
+# Tests E2E
+npm run test:e2e
+
+# Audit sécurité
+npm run audit
+```
+
+## 🚢 Déploiement
+
+```bash
+# Build production
+npm run build
+
+# Preview build
+npm run preview
+
+# Déployer (Vercel/Netlify)
+npm run deploy
+```
+
+## 🔧 Technologies
+
+- **Frontend** : React 18 + TypeScript + Vite
+- **UI** : TailwindCSS + shadcn/ui (Radix UI)
+- **Backend** : Supabase (PostgreSQL + Edge Functions)
+- **Auth** : Supabase Auth (JWT, OAuth Google)
+- **Storage** : OPFS (File System Access API) + IndexedDB fallback
+- **Crypto** : Web Crypto API (AES-256-GCM)
+- **Forms** : React Hook Form + Zod
+- **State** : React Context + TanStack Query
+
+## 📊 Statut du projet
+
+**Version** : 1.0.0-beta
+**Statut** : Phase 1 (Validation & Sécurité) ✅
+**Prochaine** : Phase 2 (CR séances + Fichiers)
+
+## 📝 Licence
+
+Propriétaire - Tous droits réservés
+
+## 🤝 Contribuer
+
+Ce projet est actuellement en développement privé.
+
+## 📧 Contact
+
+Pour toute question : [contact@rendezvouszen.fr](mailto:contact@rendezvouszen.fr)
+
+---
+
+**⚠️ Note importante** : Ce projet vise explicitement à éviter l'obligation d'hébergement HDS certifié en stockant toutes les données de santé exclusivement en local. Toute modification de l'architecture doit maintenir cette séparation stricte cloud/local.
