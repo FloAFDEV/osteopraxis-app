@@ -135,7 +135,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		setError(null);
 		try {
 			const redirectUrl = `${window.location.origin}/`;
-			
+
 			const { error } = await supabase.auth.signUp({
 				email: userData.email,
 				password: userData.password,
@@ -151,8 +151,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 
 			if (error) throw error;
 
-			toast.success("Inscription réussie ! Vérifiez votre email pour confirmer votre compte.");
-			navigate("/login", { replace: true });
+			// ✅ Pas de navigation ici - RegisterPage gère la redirection vers /hds-setup
+			console.log('✅ Inscription réussie - User et Osteopath créés en mode DEMO');
 		} catch (err: any) {
 			setError(err.message || "Erreur lors de l'inscription");
 			console.error("Registration failed", err);
@@ -160,7 +160,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 		} finally {
 			setLoading(false);
 		}
-	}, [navigate]);
+	}, []);
 
 	const logout = useCallback(async () => {
 		try {

@@ -48,7 +48,7 @@ const RegisterPage = () => {
   const [searchParams] = useSearchParams();
   const initialInvitationCode = searchParams.get("invitation") || "";
   const selectedPlan = searchParams.get("plan") || "light"; // Récupérer le plan depuis l'URL
-  const returnTo = searchParams.get("returnTo") || "/profile/setup";
+  const returnTo = searchParams.get("returnTo") || "/hds-setup";
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState(4);
@@ -97,7 +97,7 @@ const RegisterPage = () => {
         if (counter <= 0) {
           clearInterval(countdownInterval);
           const targetUrl = validInvitation?.code
-            ? `/profile/setup?invitation=${validInvitation.code}&plan=${selectedPlan}`
+            ? `/hds-setup?invitation=${validInvitation.code}&plan=${selectedPlan}`
             : `${returnTo}?plan=${selectedPlan}`;
           navigate(targetUrl);
         }
@@ -155,7 +155,7 @@ const RegisterPage = () => {
               <button
                 onClick={() =>
                   navigate(validInvitation?.code
-                    ? `/profile/setup?invitation=${validInvitation.code}&plan=${selectedPlan}`
+                    ? `/hds-setup?invitation=${validInvitation.code}&plan=${selectedPlan}`
                     : `${returnTo}?plan=${selectedPlan}`)
                 }
                 className="text-primary hover:underline ml-1"
@@ -176,9 +176,9 @@ const RegisterPage = () => {
         <div className="mb-6 flex items-center justify-between gap-4">
           <BackButton to="/" />
           <h1 className="text-4xl font-extrabold tracking-tight flex-1 text-center">
-            <span className="text-foreground">Patient</span>
+            <span className="text-foreground">Ostéo</span>
             <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-              Hub
+              Praxis
             </span>
           </h1>
           <ThemeToggle />
@@ -191,7 +191,7 @@ const RegisterPage = () => {
                 Créez votre compte
               </h2>
               <p className="text-muted-foreground text-lg">
-                Rejoignez PatientHub pour gérer vos patients efficacement.
+                Rejoignez OstéoPraxis pour gérer votre cabinet en toute sécurité.
               </p>
               {selectedPlan && (
                 <div className="mt-4 inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2">
@@ -366,11 +366,11 @@ const RegisterPage = () => {
 
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
-            La plateforme conçue pour faciliter la gestion des données médicales.
+            Logiciel professionnel pour cabinets d'ostéopathie.
             <br />
-            Gérez vos rendez-vous et suivez efficacement vos patients.
+            Données 100% locales - Conformité HDS/RGPD garantie.
           </p>
-          <p className="mt-4">© 2024 PatientHub. Tous droits réservés.</p>
+          <p className="mt-4">© 2026 OstéoPraxis. Tous droits réservés.</p>
         </div>
       </div>
 
