@@ -1,154 +1,46 @@
-import { supabase } from '@/integrations/supabase/client';
-
 /**
- * Détermine si un utilisateur est un utilisateur démo
+ * Détection du mode démo (FRONT-ONLY - localStorage uniquement)
  */
-export function isDemoUser(user: any): boolean {
-  if (!user) return false;
 
-  // Un utilisateur avec le rôle ADMIN n'est jamais en mode démo
-  if (user.role === 'ADMIN' || user.user_metadata?.role === 'ADMIN') {
-    console.log('🔍 isDemoUser - ADMIN détecté, pas démo');
-    return false;
-  }
-
-  // Vérifier les indicateurs de démo
-  const email = user.email?.toLowerCase();
-  const demoIndicators = [
-    email?.includes('demo'),
-    email?.includes('test'),
-    user.id?.includes('demo'),
-    user.user_metadata?.demo === true,
-    user.user_metadata?.isDemoUser === true,
-  ];
-
-  const result = demoIndicators.some(indicator => indicator === true);
-  console.log('🔍 isDemoUser - Résultat:', result, {
-    email,
-    userId: user.id,
-    metadata: user.user_metadata
-  });
-
-  return result;
-}
-
-// ⚡ Cache pour éviter les appels répétitifs et les boucles infinies
+// Cache pour éviter les appels répétitifs
 let demoSessionCache: { result: boolean; timestamp: number } | null = null;
-const CACHE_DURATION = 60000; // 1 minute de cache pour éviter les appels répétés
+const CACHE_DURATION = 10000; // 10 secondes de cache
 
 /**
- * 🔐 Détection intelligente du mode de session avec priorité à l'authentification réelle
- * ⚡ OPTIMISÉ : Cache le résultat pour éviter les boucles infinies
+ * Détecte si une session démo est active (localStorage uniquement)
  */
 export const isDemoSession = async (): Promise<boolean> => {
-  // Vérifier le cache d'abord pour éviter les appels répétitifs
+  // Vérifier le cache d'abord
   const now = Date.now();
   if (demoSessionCache && (now - demoSessionCache.timestamp) < CACHE_DURATION) {
     return demoSessionCache.result;
   }
 
-  // ⏱️ TIMEOUT de sécurité : 3000ms max pour attendre la session Supabase
-  const timeoutPromise = new Promise<boolean>((resolve) => {
-    setTimeout(async () => {
-      console.warn('⏱️ Timeout détection mode démo (3000ms) - Vérification localStorage démo');
-      // ⚡ NOUVEAU : Vérifier localStorage démo en dernier recours
-      try {
-        const { demoLocalStorage } = await import('@/services/demo-local-storage');
-        const fallbackDemo = demoLocalStorage.isSessionActive();
-        console.log('🔄 Fallback timeout - Session locale démo:', fallbackDemo);
-        resolve(fallbackDemo);
-      } catch (error) {
-        console.error('❌ Erreur fallback timeout:', error);
-        resolve(false);
-      }
-    }, 3000);
-  });
+  try {
+    const demoSessionStr = localStorage.getItem('osteopraxis_demo_session');
 
-  const detectionPromise = (async () => {
-    try {
-    // 1️⃣ PRIORITÉ ABSOLUE: Vérifier d'abord l'authentification réelle
-    const { supabase } = await import('@/integrations/supabase/client');
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    console.log('🔍 DEBUG isDemoSession - Session:', {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      userEmail: session?.user?.email,
-      isDemoUser: session?.user ? isDemoUser(session.user) : null
-    });
-    
-    // Si utilisateur vraiment connecté avec un compte réel, jamais en mode démo
-    if (session?.user && !isDemoUser(session.user)) {
-      console.log('✅ Utilisateur réellement connecté détecté:', session.user.email);
-      
-      // Nettoyer toute session démo locale existante pour éviter les conflits
-      const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      if (demoLocalStorage.isSessionActive()) {
-        console.log('🧹 Nettoyage session démo locale (utilisateur réel connecté)');
-        demoLocalStorage.clearSession();
-      }
-      
+    if (!demoSessionStr) {
       const result = false;
-      // ⚡ IMPORTANT: Mettre à jour le cache pour éviter la détection démo résiduelle
       demoSessionCache = { result, timestamp: now };
       return result;
     }
-    
-    // 2️⃣ Ensuite vérifier la session locale démo
-    const { demoLocalStorage } = await import('@/services/demo-local-storage');
-    const hasLocalDemoSession = demoLocalStorage.isSessionActive();
-    
-    if (hasLocalDemoSession) {
-      // Log seulement si le cache était différent pour éviter le spam
-      if (!demoSessionCache || demoSessionCache.result !== true) {
-        console.log('🎭 Session démo locale active détectée - Isolation des données activée');
-      }
-      const result = true;
-      demoSessionCache = { result, timestamp: now };
-      return result;
-    }
-    
-    // 3️⃣ Vérifier si c'est un utilisateur démo dans Supabase
-    if (session?.user && isDemoUser(session.user)) {
-      // Log seulement si ce n'est pas déjà en cache
-      if (!demoSessionCache || demoSessionCache.result !== true) {
-        console.log('🎭 Utilisateur démo Supabase détecté - Mode démo actif');
-      }
-      
-      // Créer une session démo locale si elle n'existe pas déjà
-      if (!demoLocalStorage.isSessionActive()) {
-        demoLocalStorage.createSession();
-        demoLocalStorage.seedDemoData();
-        console.log('🎭 Session démo locale créée');
-      }
-      
-      const result = true;
-      demoSessionCache = { result, timestamp: now };
-      return result;
-    }
-    
-    // 4️⃣ Aucune session active - mode connecté par défaut
-    if (!demoSessionCache || demoSessionCache.result !== false) {
-      console.log('📱 Aucune session démo - Mode connecté');
-    }
+
+    const session = JSON.parse(demoSessionStr);
+    const isActive = session.expires_at && now < session.expires_at;
+
+    const result = !!isActive;
+    demoSessionCache = { result, timestamp: now };
+    return result;
+  } catch (error) {
+    console.error('Erreur lors de la détection de session démo:', error);
     const result = false;
     demoSessionCache = { result, timestamp: now };
     return result;
-    
-    } catch (error) {
-      console.error('Erreur lors de la détection de session démo:', error);
-      return false;
-    }
-  })();
-
-  // Prendre le premier qui répond (détection ou timeout)
-  const result = await Promise.race([detectionPromise, timeoutPromise]);
-  demoSessionCache = { result, timestamp: now };
-  return result;
+  }
 };
 
 /**
- * Force le vidage du cache - utile pour les tests ou changements d'état
+ * Force le vidage du cache
  */
 export const clearDemoSessionCache = (): void => {
   demoSessionCache = null;

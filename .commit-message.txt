@@ -1,0 +1,30 @@
+Rebrand: Migration complète PatientHub → OstéoPraxis
+
+🎯 Changements principaux:
+- Renommage de tous les textes UI (150+ occurrences)
+- Email démo: demo@patienthub.com → demo@osteopraxis.com
+- URLs QR codes factures: patienthub.com → osteopraxis.com
+- Noms de bases de données (IndexedDB, SQLite)
+- Formats fichiers export/import (.phds, .hdsbackup)
+- Clés localStorage et métadonnées PDF
+- Tests E2E et documentation complète
+
+📦 Nouvelles ressources:
+- Migration SQL: 20260118_create_demo_account.sql
+- Script: scripts/setup-demo.sh
+- Docs: CREDENTIALS_TEST.md, GUIDE_TEST_DEMO.md, MIGRATION_*.md
+
+🔧 Corrections techniques:
+- Fix supabase/config.toml (suppression edge_functions obsolète)
+- Mise à jour 7 fichiers TS + 2 migrations SQL pour email démo
+- Remplacement automatisé dans 80+ fichiers
+
+⚠️ Points d'attention:
+- Anciennes bases de données (PatientHub-*) coexistent (pas de migration destructive)
+- Compte démo à créer via: ./scripts/setup-demo.sh
+- Tests E2E à valider
+- Rétrocompatibilité import/export maintenue
+
+✅ Statut: Migration terminée - Tests requis avant production
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemoSession } from "@/hooks/useDemoSession";
 import {
 	BarChart3,
 	Calendar,
@@ -129,19 +130,21 @@ export default function LandingPage() {
 	const [openFaq, setOpenFaq] = useState<number | null>(null);
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const { user, loading } = useAuth();
+	const { startDemo } = useDemoSession();
 	const navigate = useNavigate();
 
 	// Redirection automatique vers le dashboard pour les utilisateurs connectés
 	useEffect(() => {
 		if (!loading && user) {
-			// Vérifier si c'est un utilisateur démo
-			const isDemoUser = user.email === 'demo@osteopraxis.com' || user.email?.startsWith('demo-');
-			if (!isDemoUser) {
-				// Utilisateur réel - rediriger vers le dashboard
-				navigate('/dashboard');
-			}
+			navigate('/dashboard');
 		}
 	}, [user, loading, navigate]);
+
+	// Handler pour démarrer la démo
+	const handleStartDemo = () => {
+		startDemo();
+		navigate('/dashboard');
+	};
 
 
 	// Ne pas afficher la landing page pendant le loading
@@ -205,11 +208,12 @@ export default function LandingPage() {
 						)}
 						<ThemeToggle />
 						<Button
-							asChild
 							size="sm"
-							className="whitespace-nowrap text-white"variant="primary"
+							className="whitespace-nowrap text-white"
+							variant="primary"
+							onClick={handleStartDemo}
 						>
-							<Link to="/demo">Essayer la démo</Link>
+							Essayer gratuitement
 						</Button>
 					</nav>
 
@@ -217,11 +221,12 @@ export default function LandingPage() {
 						<nav className="hidden md:flex lg:hidden items-center space-x-4">
 							<ThemeToggle />
 							<Button
-								asChild
 								size="sm"
-								className="whitespace-nowrap"variant="primary"
+								className="whitespace-nowrap"
+								variant="primary"
+								onClick={handleStartDemo}
 							>
-								<Link to="/demo">Essayer la démo</Link>
+								Essayer gratuitement
 							</Button>
 							<button
 								onClick={() =>
@@ -290,7 +295,7 @@ export default function LandingPage() {
 								<div className="pt-2 md:hidden">
 									<Button asChild className="w-full" variant="primary">
 										<Link
-											to="/demo"
+											to="/pricing"
 											onClick={() =>
 												setMobileMenuOpen(false)
 											}
@@ -379,14 +384,16 @@ export default function LandingPage() {
 								variant="outline"
 								size="lg"
 								className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-2"
-								asChild
+								onClick={handleStartDemo}
 							>
-								<Link to="/demo" className="flex items-center gap-2">
-									<Play className="h-4 w-4" />
-									Essayer la démo gratuite
-								</Link>
+								<Play className="h-4 w-4 mr-2" />
+								Essayer gratuitement
 							</Button>
 						</div>
+
+						<p className="text-sm text-gray-500 mb-6">
+							⚡ Accès immédiat • Aucune inscription • 30 minutes de test
+						</p>
 
 						<div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-500 dark:text-slate-400 px-4">
 							<span className="flex items-center gap-2">
@@ -767,7 +774,7 @@ export default function LandingPage() {
 										</Link>
 									</Button>
 									<Button variant="outline" className="w-full" asChild>
-										<Link to="/demo">Essayer la démo gratuite</Link>
+										<Link to="/pricing">Essayer gratuitement</Link>
 									</Button>
 								</div>
 							</CardContent>
@@ -936,7 +943,7 @@ export default function LandingPage() {
 							asChild
 							className="text-lg px-8"
 						>
-							<Link to="/demo" className="flex items-center gap-2">
+							<Link to="/pricing" className="flex items-center gap-2">
 								<Play className="h-4 w-4" />
 								Essayer la démo
 							</Link>
@@ -985,7 +992,7 @@ export default function LandingPage() {
 								</li>
 								<li>
 									<Link
-										to="/demo"
+										to="/pricing"
 										className="hover:text-foreground transition-colors"
 									>
 										Démo

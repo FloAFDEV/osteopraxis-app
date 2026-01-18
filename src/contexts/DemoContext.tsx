@@ -1,43 +1,48 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { isDemoSession } from '@/utils/demo-detection';
 
 interface DemoContextType {
-  isDemoMode: boolean | null; // null = en cours de détection
+  isDemoMode: boolean;
   isLoading: boolean;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
 export function DemoProvider({ children }: { children: React.ReactNode }) {
-  const [isDemoMode, setIsDemoMode] = useState<boolean | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     let mounted = true;
-    
-    const checkDemoMode = async () => {
+
+    const checkDemoMode = () => {
       try {
-        const demoDetected = await isDemoSession();
-        
+        // Détection simple via localStorage
+        const demoSession = localStorage.getItem('osteopraxis_demo_session');
+
+        if (!demoSession) {
+          if (mounted) {
+            setIsDemoMode(false);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        const session = JSON.parse(demoSession);
+        const now = Date.now();
+        const isActive = session.expires_at && now < session.expires_at;
+
         if (mounted) {
           const previousMode = isDemoMode;
-          setIsDemoMode(demoDetected);
-          
-          // 🚨 SÉCURITÉ CRITIQUE: Nettoyer le cache lors du changement de mode
-          if (previousMode !== null && previousMode !== demoDetected) {
-            console.log(`🧹 Changement de mode détecté: ${previousMode ? 'DEMO' : 'CONNECTÉ'} → ${demoDetected ? 'DEMO' : 'CONNECTÉ'} - Nettoyage du cache`);
-            queryClient.clear(); // Vider complètement le cache pour éviter les fuites de données
+          setIsDemoMode(isActive);
+
+          // Nettoyer le cache lors du changement de mode
+          if (previousMode !== null && previousMode !== isActive) {
+            console.log(`🧹 Changement de mode détecté: ${previousMode ? 'DEMO' : 'RÉEL'} → ${isActive ? 'DEMO' : 'RÉEL'}`);
+            queryClient.clear();
           }
-          
-          // 🧹 Invalider le cache cabinets lors du passage en mode démo
-          if (demoDetected && previousMode !== demoDetected) {
-            console.log('🧹 Passage en mode démo - Invalidation du cache cabinets');
-            const { cabinetCache } = await import('@/services/cache/cabinet-cache');
-            cabinetCache.invalidate();
-          }
-          
+
           setIsLoading(false);
         }
       } catch (error) {
@@ -48,12 +53,12 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         }
       }
     };
-    
+
     checkDemoMode();
-    
-    // Vérifier plus fréquemment les changements de mode pour une réactivité immédiate
-    const interval = setInterval(checkDemoMode, 1000);
-    
+
+    // Vérifier toutes les 10 secondes (réduit de 1s)
+    const interval = setInterval(checkDemoMode, 10000);
+
     return () => {
       mounted = false;
       clearInterval(interval);

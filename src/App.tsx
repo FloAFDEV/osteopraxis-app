@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { OptimizationProvider } from "@/contexts/OptimizationContext";
 import { PrivacyProvider } from "@/contexts/PrivacyContext";
 import { DemoProvider } from "@/contexts/DemoContext";
+import { DemoDataProvider } from "@/contexts/DemoDataContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { DemoDataManager } from "@/components/demo/DemoDataManager";
 import { DemoSessionTimer } from "@/components/demo/DemoSessionTimer";
 import { SkipToContent } from "@/components/accessibility/SkipToContent";
 import { SecurityHeaders } from "@/components/security/SecurityHeaders";
@@ -31,13 +31,14 @@ import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminOsteopathsPage from "@/pages/AdminOsteopathsPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
-import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
 import CollaborationsSettingsPage from "@/pages/CollaborationsSettingsPage";
 import HelpPage from "@/pages/HelpPage";
 import TipsPage from "@/pages/TipsPage";
 import NotFound from "@/pages/NotFound";
 import NewPatientPage from "@/pages/NewPatientPage";
 import PricingPage from "@/pages/PricingPage";
+import PaymentPage from "@/pages/PaymentPage";
+import RegisterPostPaymentPage from "@/pages/RegisterPostPaymentPage";
 import ContactPage from "@/pages/ContactPage";
 import PlanSelectionPage from "@/pages/PlanSelectionPage";
 import NewInvoicePage from "@/pages/NewInvoicePage";
@@ -95,6 +96,7 @@ function App() {
             <OptimizationProvider>
               <PrivacyProvider>
                 <DemoProvider>
+                  <DemoDataProvider>
                     <Router>
                       <AuthProvider>
                         <HybridStorageProvider>
@@ -102,19 +104,19 @@ function App() {
                             <SecurityHeaders />
                             <SkipToContent />
                             <div id="main-content" className="min-h-screen bg-background">
-                              <DemoDataManager />
                       
                       <Routes>
                         {/* Routes publiques */}
                         <Route path="/" element={<Home />} />
-                        <Route path="/demo" element={<InteractiveDemoPage />} />
                         <Route path="/pricing" element={<PricingPage />} />
+                        <Route path="/payment" element={<PaymentPage />} />
+                        <Route path="/register-post-payment" element={<RegisterPostPaymentPage />} />
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
                         <Route path="/privacy" element={<PrivacyPolicyPage />} />
                         <Route path="/cgu" element={<TermsOfServicePage />} />
                         <Route path="/terms" element={<TermsOfServicePage />} />
-                        
+
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
 
@@ -318,6 +320,7 @@ function App() {
                        </HybridStorageProvider>
                    </AuthProvider>
                   </Router>
+                  </DemoDataProvider>
                 </DemoProvider>
               </PrivacyProvider>
             </OptimizationProvider>

@@ -10,7 +10,6 @@ import { User } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAutoLogout } from "@/hooks/use-auto-logout";
-import { DEMO_OSTEOPATH_ID } from '@/config/demo-constants';
 import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 
 interface AuthContextProps {
@@ -264,34 +263,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 					setSession(session);
 					setIsAuthenticated(true);
 				} else {
-					// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
-					const isDemoUser = session.user.email === 'demo@osteopraxis.com' || 
-									  session.user.email?.startsWith('demo-') ||
-									  session.user.user_metadata?.is_demo === true ||
-									  session.user.user_metadata?.is_demo_user === true;
-
-					if (isDemoUser) {
-						// Mode démo - créer un utilisateur virtuel
-						const demoUser: User = {
-							id: session.user.id,
-						email: session.user.email || '',
-						firstName: 'Utilisateur',
-						lastName: 'Démo',
-						role: 'OSTEOPATH',
-						osteopathId: DEMO_OSTEOPATH_ID,
-						created_at: new Date().toISOString(),
-						updated_at: new Date().toISOString(),
-					};
-
-						setUser(demoUser);
-						setSession(session);
-						setIsAuthenticated(true);
-						console.log('🎭 Mode démo activé - utilisateur virtuel configuré');
-					} else {
-						setUser(null);
-						setSession(null);
-						setIsAuthenticated(false);
-					}
+					setUser(null);
+					setSession(null);
+					setIsAuthenticated(false);
 				}
 			} else {
 				setUser(null);
@@ -431,18 +405,18 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										updated_at: userData.updated_at,
 									};
 									setUser(userWithRole);
-									
+
 								// Navigation après connexion réussie
 								if (event === 'SIGNED_IN') {
 									// 🎯 ÉTAPE 3 : Détecter la première connexion et reset le skip
 									const isFirstConnection = !sessionStorage.getItem('user-connected-before');
-									
+
 									if (isFirstConnection) {
 										console.log('🎉 [AuthContext] Première connexion détectée - Reset configuration HDS');
 										sessionStorage.setItem('user-connected-before', 'true');
 										sessionStorage.removeItem('hybrid-storage-skip'); // Reset le skip pour forcer la config
 									}
-									
+
 									// Redirection uniquement lors d'une nouvelle connexion
 									if (userWithRole.role === "ADMIN") {
 										navigate("/admin/dashboard", { replace: true });
@@ -465,44 +439,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 										updated_at: new Date().toISOString(),
 									};
 									setUser(basicUser);
-									
+
 									// Navigation après connexion réussie
 									if (event === 'SIGNED_IN') {
 										navigate("/dashboard", { replace: true });
 										console.log("🔄 Redirection vers dashboard (utilisateur basique)");
 									}
 								} else {
-									// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
-									const isDemoUser = session.user.email === 'demo@osteopraxis.com' || 
-													  session.user.email?.startsWith('demo-') ||
-													  session.user.user_metadata?.is_demo === true ||
-													  session.user.user_metadata?.is_demo_user === true;
-
-									if (isDemoUser) {
-										// Mode démo - créer un utilisateur virtuel
-										const demoUser: User = {
-											id: session.user.id,
-										email: session.user.email || '',
-										firstName: 'Utilisateur',
-										lastName: 'Démo',
-										role: 'OSTEOPATH',
-										osteopathId: DEMO_OSTEOPATH_ID,
-										created_at: new Date().toISOString(),
-										updated_at: new Date().toISOString(),
-									};
-										setUser(demoUser);
-										setSession(session);
-										setIsAuthenticated(true);
-										
-										// Navigation immédiate vers dashboard pour les utilisateurs démo
-										console.log('🎭 Redirection utilisateur démo vers dashboard');
-										setTimeout(() => {
-											navigate("/dashboard", { replace: true });
-											toast.success("Connexion en mode démo réussie !");
-										}, 100);
-									} else {
-										setUser(null);
-									}
+									setUser(null);
 								}
 							} catch (error) {
 								console.error('Error fetching user data:', error);
