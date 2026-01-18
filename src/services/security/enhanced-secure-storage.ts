@@ -500,3 +500,6 @@ export class EnhancedSecureFileStorage {
     return result;
   }
 }
+
+// Export alias for compatibility
+export { EnhancedSecureFileStorage as EnhancedSecureStorage };

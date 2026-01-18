@@ -269,7 +269,7 @@ export class ExportSecurityService {
       }
 
       // Importer dynamiquement pour éviter les dépendances circulaires
-      const { supabase } = await import('@/lib/supabase');
+      const { supabase } = await import('@/integrations/supabase/client');
 
       let osteoId = osteopathId;
 

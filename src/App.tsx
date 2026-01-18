@@ -52,12 +52,12 @@ import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
 import NewCabinetPage from "@/pages/NewCabinetPage";
 import EditCabinetPage from "@/pages/EditCabinetPage";
 import CabinetInvitationsPage from "@/pages/CabinetInvitationsPage";
-import AdminTechDebugPage from "@/pages/AdminTechDebugPage";
+import AdminTechDebugPage from "@/__dev__/pages/AdminTechDebugPage";
 import ConnectedStorageSettingsPage from "@/pages/ConnectedStorageSettingsPage";
-import ConfigurationPage from "@/pages/ConfigurationPage";
+import ConfigurationPage from "@/__dev__/pages/ConfigurationPage";
 import TeamManagementPage from "@/pages/TeamManagementPage";
-import SecurityAuditPage from "@/pages/SecurityAuditPage";
-import UserJourneyVisualizationPage from "@/pages/UserJourneyVisualizationPage";
+import SecurityAuditPage from "@/__dev__/pages/SecurityAuditPage";
+import UserJourneyVisualizationPage from "@/__dev__/pages/UserJourneyVisualizationPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";

@@ -5,7 +5,7 @@
  * IMPORTANT: Seuls les ADMIN peuvent modifier les statuts
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Osteopath, OsteopathStatus, OsteopathStatusHistory } from '@/types';
 
 // ===========================================================================
