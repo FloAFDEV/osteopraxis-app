@@ -153,9 +153,9 @@ textarea:focus-visible {
 		--background: 240 17% 98%;
 		--foreground: 240 10% 8%;
 
-		/* Muted Colors */
+		/* Muted Colors - Amélioration contraste (45% → 35%) */
 		--muted: 240 8% 95%;
-		--muted-foreground: 240 6% 45%;
+		--muted-foreground: 240 6% 35%;
 
 		/* Popover Colors */
 		--popover: 240 17% 98%;
