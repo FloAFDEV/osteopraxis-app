@@ -28,6 +28,7 @@ import CabinetSettingsPage from "@/pages/CabinetSettingsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
 import SchedulePage from "@/pages/SchedulePage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import AdminOsteopathsPage from "@/pages/AdminOsteopathsPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import InteractiveDemoPage from "@/pages/InteractiveDemoPage";
@@ -237,6 +238,11 @@ function App() {
         <Route path="/admin/dashboard" element={
           <ProtectedRoute requireRole="ADMIN">
             <AdminDashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/osteopaths" element={
+          <ProtectedRoute requireRole="ADMIN">
+            <AdminOsteopathsPage />
           </ProtectedRoute>
         } />
                         {/* Retiré des paramètres pour les praticiens */}
