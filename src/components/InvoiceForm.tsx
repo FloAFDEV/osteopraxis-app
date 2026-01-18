@@ -133,8 +133,8 @@ export function InvoiceForm({
           ? "TVA non applicable - Article 261-4-1° du CGI"
           : data.tvaMotif || "",
       };
-      
-      console.log('🔍 Données facture avant envoi:', invoiceData);
+
+      console.log('🔍 Enregistrement facture - Mode:', isEditing ? 'édition' : 'création');
       if (isEditing && invoice) {
         await api.updateInvoice(invoice.id, invoiceData);
         toast.success("Note d'honoraires mise à jour !");

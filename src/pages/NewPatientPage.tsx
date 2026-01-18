@@ -38,7 +38,7 @@ const NewPatientPage = () => {
 	}
 
 	const handleAddPatient = async (patientData: any) => {
-		console.log("🚀 Début de handleAddPatient", patientData);
+		console.log("🚀 Début de handleAddPatient");
 		try {
 			setLoading(true);
 
@@ -80,7 +80,7 @@ const NewPatientPage = () => {
 					patientData.head_circumference
 				);
 
-			console.log("Données patient avant création:", patientData);
+			console.log("Préparation création patient - cabinetId:", patientData.cabinetId || selectedCabinetId);
 
 			// Utiliser l'ID de l'ostéopathe connecté et le cabinet sélectionné
 			const patientToCreate = {
@@ -140,13 +140,9 @@ const NewPatientPage = () => {
 				bmi: patientData.bmi || null,
 			} as Omit<Patient, "id" | "createdAt" | "updatedAt">;
 
-			console.log(
-				"Envoi du patient à l'API avec cabinetId:",
-				patientToCreate.cabinetId
-			);
-			console.log("📤 Appel api.createPatient avec:", patientToCreate);
+			console.log("📤 Appel api.createPatient avec cabinetId:", patientToCreate.cabinetId);
 			const newPatient = await api.createPatient(patientToCreate);
-			console.log("✅ Patient créé avec succès:", newPatient);
+			console.log("✅ Patient créé avec succès - ID:", newPatient.id);
 
 			// Vérifier que le patient a bien un ID valide
 			if (!newPatient?.id) {

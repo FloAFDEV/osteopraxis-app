@@ -43,8 +43,7 @@ const EditAppointmentPage = () => {
           api.getPatients()
         ]);
 
-        console.log(`EditAppointmentPage: Appointment data:`, appointmentData);
-        console.log(`EditAppointmentPage: Patients data:`, patientsData);
+        console.log(`EditAppointmentPage: Chargé RDV ID ${appointmentId} et ${patientsData.length} patients`);
 
         if (appointmentData) {
           setAppointment(appointmentData);

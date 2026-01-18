@@ -116,8 +116,8 @@ export function usePatientDetail(patientId: number) {
 
   // Optimistic update for new appointments
   const addAppointmentOptimistically = (newAppointment: Appointment) => {
-    console.log('🔄 usePatientDetail: Ajout optimistique du rendez-vous', newAppointment);
-    
+    console.log('🔄 usePatientDetail: Ajout optimistique du rendez-vous ID:', newAppointment.id);
+
     // ✅ RDV ajouté - mettre à jour immédiatement le cache
     queryClient.setQueryData(
       ['appointments', 'patient', patientId, `mode:${isDemoMode ? 'DEMO' : 'CONNECTED'}`],

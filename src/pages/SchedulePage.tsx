@@ -109,8 +109,7 @@ const SchedulePage = () => {
   const getPatientById = (patientId: number) => {
     const patient = patients.find(patient => patient.id === patientId);
     if (!patient) {
-      console.log(`Patient non trouvé pour ID ${patientId}. Patients disponibles:`, patients.length);
-      console.log('Premier patient exemple:', patients[0]);
+      console.warn(`Patient non trouvé pour ID ${patientId}. Total patients disponibles: ${patients.length}`);
     }
     return patient;
   };
