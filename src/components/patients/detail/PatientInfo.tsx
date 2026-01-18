@@ -1,5 +1,5 @@
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
@@ -17,6 +17,8 @@ import {
 import { InfoBubble } from "./InfoBubble";
 import { PatientRelationships } from "./PatientRelationships";
 import { usePatientRelationships } from "@/hooks/usePatientRelationships";
+import { useState, useEffect } from "react";
+import { hdsSecurePhotoService } from "@/services/hds-secure-storage/hds-secure-photo-service";
 
 interface PatientInfoProps {
 	patient: Patient;
@@ -24,6 +26,22 @@ interface PatientInfoProps {
 
 export function PatientInfo({ patient }: PatientInfoProps) {
 	const { relationships, loading: relationshipsLoading } = usePatientRelationships(patient.id);
+	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+	// Charger la photo patient depuis le stockage HDS sécurisé
+	useEffect(() => {
+		const loadPhoto = async () => {
+			try {
+				const photo = await hdsSecurePhotoService.getPatientPhoto(patient.id);
+				if (photo) {
+					setPhotoUrl(photo.photoData);
+				}
+			} catch (error) {
+				console.error('Erreur chargement photo patient:', error);
+			}
+		};
+		loadPhoto();
+	}, [patient.id]);
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 
@@ -61,6 +79,9 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				{/* En-tête patient */}
 				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
 					<Avatar className="h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 flex-shrink-0">
+						{photoUrl && (
+							<AvatarImage src={photoUrl} alt={`${patient.firstName} ${patient.lastName}`} />
+						)}
 						<AvatarFallback
 							className={`${getAvatarClasses(
 								patient.gender

@@ -336,11 +336,12 @@ export function PatientForm({
 							</div>
 
 							<TabsContent value="identity">
-								<UnifiedIdentityTab 
-									form={form} 
+								<UnifiedIdentityTab
+									form={form}
 									selectedCabinetId={selectedCabinetId}
 									childrenAgesInput={childrenAgesInput}
 									setChildrenAgesInput={setChildrenAgesInput}
+									patient={patient}
 								/>
 							</TabsContent>
 

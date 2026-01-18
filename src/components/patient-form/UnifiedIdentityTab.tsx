@@ -8,23 +8,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
 import { useState, useEffect } from "react";
-import { Cabinet } from "@/types";
+import { Cabinet, Patient } from "@/types";
 import { useCabinets } from "@/hooks/useCabinets";
 import { Separator } from "@/components/ui/separator";
 import { User, MapPin, Hospital, Users, Briefcase } from "lucide-react";
+import { PatientPhotoUpload } from "@/components/patients/PatientPhotoUpload";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 interface UnifiedIdentityTabProps {
     form: UseFormReturn<PatientFormValues>;
     selectedCabinetId?: number | null;
     childrenAgesInput: string;
     setChildrenAgesInput: (value: string) => void;
+    patient?: Patient | null;
 }
 
-export const UnifiedIdentityTab = ({ 
-    form, 
-    selectedCabinetId, 
-    childrenAgesInput, 
-    setChildrenAgesInput 
+export const UnifiedIdentityTab = ({
+    form,
+    selectedCabinetId,
+    childrenAgesInput,
+    setChildrenAgesInput,
+    patient
 }: UnifiedIdentityTabProps) => {
     const { data: availableCabinets = [], isLoading: cabinetsLoading } = useCabinets();
 
@@ -48,7 +53,22 @@ export const UnifiedIdentityTab = ({
                         <User className="h-5 w-5 text-primary" />
                         <CardTitle className="text-lg">Informations personnelles</CardTitle>
                     </div>
-                    
+
+                    {/* Photo patient */}
+                    {patient && patient.id ? (
+                        <PatientPhotoUpload
+                            patientId={patient.id}
+                            patientName={`${patient.firstName} ${patient.lastName}`}
+                        />
+                    ) : (
+                        <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
+                                <strong>Photo de profil</strong> - Vous pourrez ajouter une photo après la création du patient.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
