@@ -8,7 +8,7 @@
 
 DO $$
 DECLARE
-    v_admin_email text := 'VOTRE_EMAIL@exemple.com'; -- ⬅️ MODIFIEZ ICI
+    v_admin_email text := 'afdevflo@gmail.com'; -- ⬅️ Email du premier admin
     v_user_id uuid;
     v_admin_count integer;
 BEGIN
